@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Hub</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #1a1a1a;
+            color: #e6e6e6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px;
+        }
+        h1 { color: #58a6ff; }
+        .project-list {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+            max-width: 500px;
+        }
+        .project-card {
+            background: #2d2d2d;
+            margin: 10px 0;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .project-card:hover {
+            transform: translateX(10px);
+            border-color: #58a6ff;
+        }
+        a {
+            text-decoration: none;
+            color: #58a6ff;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: block;
+        }
+        .description {
+            font-size: 0.9rem;
+            color: #8b949e;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🚀 Project Dashboard</h1>
+
+    <ul class="project-list">
+      <li class="project-card">
+          <a href="Github Environment/Scrollytelling circle stack/index.html">A Scrollytelling Stack</a>
+          <div class="description">A list of circles that stack up</div>
+      </li>
+      <li class="project-card">
+          <a href="Github Environment/Scatter Plot/index.html">A Scatter Plot</a>
+          <div class="description">A information point for all Nicolas Cage movies</div>
+      </li>
+      <li class="project-card">
+          <a href="Github Environment/Hosur Data/index.html">Hosur EV</a>
+          <div class="description">Data Viz using actual Ken Data</div>
+      </li>
+      <li class="project-card">
+          <a href="Github Environment/Iframe Figma Test/index.html">Figma Iframe test</a>
+          <div class="description">Using button animations, changing between images</div>
+      </li>
+        <li class="project-card">
+            <a href="Github Environment/Testing_ApacheECharts/index.html">Scrollytelling with bar graphs</a>
+            <div class="description">Scrollama + Apache ECharts</div>
+        </li>
+
+        <li class="project-card">
+            <a href="Github Environment/Interactive Viz/index.html">Points across Axes</a>
+            <div class="description">Changing between Echarts using buttons</div>
+        </li>
+
+        <li class="project-card">
+            <a href="Github Environment/GeoMap in Bangalore/index.html">GeoMap in Bangalore</a>
+            <div class="description">Geospatial mapping project.</div>
+        </li>
+    </ul>
+
+</body>
+</html>

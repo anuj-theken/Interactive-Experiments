@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECharts Scroll Animation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main>
+        <section id="scrolly">
+            <div class="sticky-container">
+                <div id="chart-container" style="width: 100%; height: 100vh;"></div>
+            </div>
+
+            <article>
+    <div class="step" data-step="0"><p>Everything is in rows.</p></div>
+    <div class="step" data-step="1"><p>Row 1 stacks at the top!</p></div>
+    <div class="step" data-step="2"><p>Now Row 2 stacks below Row 1.</p></div>
+</article>
+        </section>
+        <div style="height: 50vh;"></div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://unpkg.com/scrollama"></script>
+    <script src="index.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bangalore Scrolly Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/scrollama"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+<div class="dashboard-wrapper">
+    <div class="header">
+        <h2>Food & Drinking</h2>
+        <p> A list of all the different places in Bangalore to enjoy a good time in various food establishments. Welcome to Bangalore. Scroll down to explore different vibes of the city, from quiet cafes to bustling pubs.</p>
+    </div>
+
+    <div class="content-area">
+        <div id="scroll-container" class="sidebar">
+            <div class="step" data-category="all">
+                <h3>Scroll down &#8609;</h3>
+                <p></p>
+            </div>
+            <div class="step" data-category="cafe">
+                <h3>The Cafe Culture</h3>
+                <p>Body text for your whole article or post. We’ll put in some lorem ipsum to show how a filled-out page might look:<br><br> Excepteur efficient emerging, minim veniam anim aute carefully curated Ginza conversation exquisite perfect nostrud nisi intricate Content. Qui  international first-class nulla ut. Punctual adipisicing, essential lovely queen tempor eiusmod irure. Exclusive izakaya charming Scandinavian impeccable aute quality of life soft power pariatur Melbourne occaecat discerning. Qui wardrobe aliquip, et Porter destination Toto remarkable officia Helsinki excepteur Basset hound. Zürich sleepy perfect consectetur.</p>
+            </div>
+            <div class="step" data-category="restaurant">
+                <h3>Iconic Eateries</h3>
+                <p>Body text for your whole article or post. We’ll put in some lorem ipsum to show how a filled-out page might look:<br><br> Excepteur efficient emerging, minim veniam anim aute carefully curated Ginza conversation exquisite perfect nostrud nisi intricate Content. Qui  international first-class nulla ut. Punctual adipisicing, essential lovely queen tempor eiusmod irure. Exclusive izakaya charming Scandinavian impeccable aute quality of life soft power pariatur Melbourne occaecat discerning. Qui wardrobe aliquip, et Porter destination Toto remarkable officia Helsinki excepteur Basset hound. Zürich sleepy perfect consectetur.</p>
+            </div>
+            <div class="step" data-category="bar_pub">
+                <h3>Pub Capital</h3>
+                <p>Ending the night at a microbrewery like Toit or a rooftop like Skyye is a quintessential Bangalore experience.</p>
+            </div>
+            <div style="height: 20vh;"></div>
+        </div>
+
+        <div id="map-sticky-wrapper">
+            <div id="map-container"></div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <h2>Thanks for checking!</h2>
+    <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse ultrices vitae lorem vel iaculis. Proin in interdum risus. Pellentesque ante dolor, dapibus sagittis ante in, condimentum rhoncus nulla. Quisque convallis purus sapien, a pulvinar ipsum accumsan at. Donec scelerisque, nibh sed dictum dictum, diam ante tincidunt orci, ullamcorper elementum eros magna vitae lacus. Maecenas a vulputate ligula. Donec auctor massa vitae nisl hendrerit venenatis. Etiam ut orci in libero laoreet pharetra. <br><br>Phasellus mollis turpis in viverra tempus. Aliquam augue urna, malesuada eu vulputate nec, pulvinar eu justo. Vivamus consectetur augue enim, quis fringilla mauris sollicitudin eu. Aliquam eu ullamcorper ante, vitae sodales libero. Fusce sodales mi nec eros euismod interdum. Proin nec feugiat urna. Nunc ultrices ligula lorem, quis posuere eros feugiat eget. Donec auctor, dui quis efficitur congue, risus neque dapibus urna, egestas interdum justo mi eu dui.</p>
+</div>
+
+
+
+<script src="index.js"></script>
+</body>
+</html>

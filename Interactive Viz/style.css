@@ -1,0 +1,42 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f9f9f9;
+    padding: 20px;
+}
+
+#chart-container {
+    width: 100%;
+    max-width: 800px;
+    height: 500px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.controls {
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 10px 25px;
+    margin: 0 5px;
+    cursor: pointer;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    background: white;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #f0f0f0;
+}
+
+.active {
+    background: #409eff;
+    color: white;
+    border-color: #409eff;
+}

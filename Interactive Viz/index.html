@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECharts Scatterplot</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+    <h2>Performance Metrics</h2>
+
+    <div class="controls">
+        <button id="btn-2024" class="active" onclick="updateChart('2024')">2024 Data</button>
+        <button id="btn-2025" onclick="updateChart('2025')">2025 Data</button>
+    </div>
+
+    <div id="chart-container"></div>
+
+    <script src="index.js"></script>
+</body>
+</html>

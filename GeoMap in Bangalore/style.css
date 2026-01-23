@@ -1,0 +1,95 @@
+body {
+    margin: 0;
+    font-family: 'Inter', Arial, sans-serif;
+    background: #fff;
+    color: #333;
+}
+
+.header {
+    padding: 40px;
+    max-width: 40%;
+    font-family: 'Inter', Arial, sans-serif;
+}
+.footer {
+    padding: 40px;
+    max-width: 40%;
+    font-family: 'Inter', Arial, sans-serif;
+}
+.header h2{
+
+  font-family: 'Inter', Arial, sans-serif;
+  /* font-size: 0.7rem; */
+}
+
+.header p{
+
+  font-family: 'Inter', Arial, sans-serif;
+  font-size: 0.9rem;
+}
+
+.footer p{
+  font-family: 'Inter', Arial, sans-serif;
+  line-height: 1.6;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.content-area {
+    display: flex;
+    position: relative;
+    font-family: 'Inter', Arial, sans-serif;
+}
+
+/* Scrollable Section */
+.sidebar {
+    width: 45%;
+    padding: 0 40px;
+}
+
+.step {
+    margin-bottom: 70vh;
+    opacity: 0.2;
+    transition: opacity 0.5s ease;
+}
+
+.step.is-active {
+    opacity: 1;
+}
+
+.step h3 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+}
+
+.step p {
+    line-height: 1.6;
+    color: #666;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+/* Sticky Map Container */
+#map-sticky-wrapper {
+    width: 55%;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    background: #f0f0f0;
+}
+
+#map-container {
+    width: 100%;
+    height: 100%;
+}
+
+/* Custom Popup Styling */
+.leaflet-popup-content-wrapper {
+    background: #2c3e50;
+    color: #fff;
+    border-radius: 4px;
+    padding: 5px;
+}
+
+.leaflet-popup-tip {
+    background: #2c3e50;
+}

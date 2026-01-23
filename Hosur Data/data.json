@@ -1,0 +1,28 @@
+{
+  "charts": [
+    {
+      "id": "chart-land",
+      "title": "Industrial land cost per acre (in Rs cr)",
+      "years": ["2021", "2023", "2025"],
+      "mins": [1, 2.3, 3.5],
+      "maxs": [2, 3, 5],
+      "labels": [["1", "2"], ["2.3", "3"], ["3.5", "5"]]
+    },
+    {
+      "id": "chart-lease",
+      "title": "Industrial lease rent per sq ft per month (in Rs)",
+      "years": ["2021", "2023", "2025"],
+      "mins": [25, 40, 55],
+      "maxs": [35, 48, 60],
+      "labels": [["25", "35"], ["40", "48"], ["55", "60"]]
+    },
+    {
+      "id": "chart-pay",
+      "title": "Average monthly pay for workers (in Rs)",
+      "years": ["2021", "2023", "2025"],
+      "mins": [7000, 10000, 13000],
+      "maxs": [9000, 11000, 15000],
+      "labels": [["7,000", "9,000"], ["10,000", "11,000"], ["13,000", "15,000"]]
+    }
+  ]
+}
