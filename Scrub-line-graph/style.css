@@ -1,0 +1,39 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #fafafa; /* Soft white */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #444;
+}
+
+#scrolly-container {
+    position: relative;
+}
+
+.sticky-chart-box {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-header {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+#main-chart {
+    width: 85%;
+    height: 60vh;
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.step {
+    height: 1000vh; /* Extremely long scroll for maximum granularity */
+}
