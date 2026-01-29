@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Circular Gallery</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        #interaction-container {
+            width: 600px;
+            height: 600px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            overflow: hidden;
+            position: relative; /* For z-indexing if needed */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="interaction-container"></div>
+
+    <script>
+        // --- 1. SETUP DATA ---
+        const itemCount = 50;
+        const data = [];
+        for (let i = 0; i < itemCount; i++) {
+            data.push({
+                id: i,
+                image: `https://picsum.photos/100/150?random=${i}`,
+                title: `Artwork #${i + 1}`,
+                info: `This is the detailed information regarding artwork number ${i + 1}. It fades in smoothly when clicked.`
+            });
+        }
+
+        const initialCenterText = "Whispers is a sequential art game.\n\nClick an image on the circle to view its details.";
+
+        // --- 2. ECHARTS CONFIGURATION ---
+        const chartDom = document.getElementById('interaction-container');
+        const myChart = echarts.init(chartDom);
+        let option;
+
+        const containerWidth = chartDom.clientWidth;
+        const containerHeight = chartDom.clientHeight;
+        const centerX = containerWidth / 2;
+        const centerY = containerHeight / 2;
+        const radius = containerWidth * 0.38;
+        const imgWidth = 30; // Slightly smaller to fit 50 items
+        const imgHeight = 45;
+
+        // --- 3. ANIMATION LOGIC ---
+
+        /**
+         * Fades out text, updates it, then fades it back in.
+         */
+        function updateCenterInfo(title, infoText) {
+            // 1. Fade Out
+            myChart.setOption({
+                graphic: {
+                    id: 'center-text-element',
+                    style: { opacity: 0 } // Transition handles the smooth fade
+                }
+            });
+
+            // 2. Wait for fade out, then swap text and Fade In
+            setTimeout(() => {
+                myChart.setOption({
+                    graphic: {
+                        id: 'center-text-element',
+                        style: {
+                            text: `{title|${title}}\n\n{info|${infoText}}`,
+                            opacity: 1
+                        }
+                    }
+                });
+            }, 300); // Wait 300ms (matches the transition duration defined below)
+        }
+
+        // --- 4. GENERATE GRAPHIC ELEMENTS ---
+        const graphicElements = [];
+
+        // A. Center Text Element
+        graphicElements.push({
+            type: 'text',
+            id: 'center-text-element',
+            left: 'center',
+            top: 'center',
+            // Enable CSS-like transition for opacity
+            transition: 'style.opacity',
+            style: {
+                text: `{info|${initialCenterText}}`,
+                textAlign: 'center',
+                width: radius * 1.3,
+                overflow: 'break',
+                opacity: 1, // Start visible
+                rich: {
+                    title: {
+                        fontSize: 20,
+                        fontWeight: 'bold',
+                        padding: [0, 0, 15, 0],
+                        fill: '#222'
+                    },
+                    info: {
+                        fontSize: 14,
+                        lineHeight: 22,
+                        fill: '#666'
+                    }
+                }
+            }
+        });
+
+        // B. Circular Images with Entrance Animation
+        data.forEach((item, index) => {
+            const angle = (index / data.length) * 2 * Math.PI;
+            const x = centerX + radius * Math.cos(angle) - (imgWidth / 2);
+            const y = centerY + radius * Math.sin(angle) - (imgHeight / 2);
+            const rotation = angle + Math.PI / 2;
+
+            graphicElements.push({
+                type: 'image',
+                id: `img-${item.id}`,
+                style: {
+                    image: item.image,
+                    width: imgWidth,
+                    height: imgHeight,
+                },
+                left: x,
+                top: y,
+                rotation: rotation,
+                origin: [imgWidth / 2, imgHeight / 2],
+                cursor: 'pointer',
+
+                // HOVER ANIMATIONS
+                transition: ['style.width', 'style.height', 'style.opacity'],
+                onmouseover: function() {
+                     this.animateTo({
+                        style: { width: imgWidth * 1.5, height: imgHeight * 1.5 },
+                        origin: [(imgWidth * 1.5)/2, (imgHeight * 1.5)/2],
+                        z: 100 // Bring to front
+                     }, { duration: 100 });
+                },
+                onmouseout: function() {
+                    this.animateTo({
+                        style: { width: imgWidth, height: imgHeight },
+                        origin: [imgWidth/2, imgHeight/2],
+                        z: 0
+                     }, { duration: 100 });
+                },
+                onclick: function () {
+                    updateCenterInfo(item.title, item.info);
+                },
+
+                // ENTRANCE ANIMATION (Keyframes)
+                keyframeAnimation: {
+                    duration: 600,
+                    // Stagger delay based on index for the "spiral" loading effect
+                    delay: index * 30,
+                    keyframes: [
+                        {
+                            percent: 0,
+                            style: { opacity: 0 },
+                            scaleX: 0,
+                            scaleY: 0
+                        },
+                        {
+                            percent: 1,
+                            style: { opacity: 1 },
+                            scaleX: 1,
+                            scaleY: 1,
+                            easing: 'cubicOut' // Smooth "pop" effect
+                        }
+                    ]
+                }
+            });
+        });
+
+        // --- 5. RENDER ---
+        option = {
+            graphic: graphicElements
+        };
+
+        option && myChart.setOption(option);
+
+        window.addEventListener('resize', myChart.resize);
+
+    </script>
+</body>
+</html>

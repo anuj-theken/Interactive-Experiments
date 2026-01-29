@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scrollama Mask Scrubber</title>
+<style>
+    /* --- Base Settings --- */
+    body, html {
+        margin: 0;
+        padding: 0;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        background-color: #f4f1ea; /* Matches the beige tone in your screenshot */
+        color: #1a1a1a;
+    }
+
+    /* --- Scrollytelling Layout --- */
+    #scrolly {
+        position: relative;
+        display: flex;
+        flex-direction: row-reverse; /* Text on right, Images on left/center */
+        justify-content: center;
+    }
+
+    /* --- Sticky Graphic Container --- */
+    #sticky-graphic {
+        position: sticky;
+        top: 0;
+        width: 50%;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    /* --- The Images --- */
+    .image-container {
+        position: relative;
+        width: 400px;  /* Fixed box size matching your screenshot reference */
+        height: 400px;
+    }
+
+    .scrolly-img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        /* Start fully hidden by clipping everything */
+        clip-path: inset(100% 0 0 0);
+        will-change: clip-path; /* Performance optimization */
+    }
+
+    /* The first image should be visible by default */
+    .scrolly-img:first-child {
+        clip-path: inset(0 0 0 0);
+        z-index: 1;
+    }
+
+    /* --- The Moving Separator Line --- */
+    /* This creates the visual "line" that drags down */
+    .separator-line {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: #000;
+        z-index: 100;
+        /* We will control 'top' with JS to match the mask */
+        top: 0;
+        transform: scaleX(0); /* Hidden by default until active */
+        transform-origin: left;
+        transition: transform 0.2s;
+    }
+
+    .separator-line.is-active {
+        transform: scaleX(1);
+    }
+
+    /* --- Scrolling Text Steps --- */
+    #steps {
+        width: 50%;
+        position: relative;
+        z-index: 10;
+    }
+
+    .step {
+        height: 100vh; /* Plenty of space to scroll through */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0 4rem;
+        box-sizing: border-box;
+        opacity: 0.3;
+        transition: opacity 0.5s;
+    }
+
+    .step.is-active {
+        opacity: 1;
+    }
+
+    .step h2 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        line-height: 1.1;
+    }
+
+    .step p {
+        font-size: 1rem;
+        color: #555;
+    }
+
+    /* --- Header/Footer for spacing --- */
+    header, footer {
+        height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Kultiveret Architecture</h1>
+</header>
+
+<main id="scrolly">
+
+    <figure id="sticky-graphic">
+        <div class="image-container">
+            <div class="separator-line" id="sep-line"></div>
+
+            <img class="scrolly-img" src="https://images.unsplash.com/photo-1511818966892-d7d671e672a2?q=80&w=800&auto=format&fit=crop" alt="Arne Jacobsen">
+
+            <img class="scrolly-img" src="https://images.unsplash.com/photo-1486325212027-8081e485255e?q=80&w=800&auto=format&fit=crop" alt="DAC">
+
+            <img class="scrolly-img" src="https://unsplash.com/photos/modern-skyscrapers-against-a-clear-blue-sky-EZ6ZSOf7PxA?q=80&w=800&auto=format&fit=crop" alt="Glyptotek">
+
+            <img class="scrolly-img" src="https://images.unsplash.com/photo-1470723710355-95304d8aece4?q=80&w=800&auto=format&fit=crop" alt="Modern CPH">
+        </div>
+    </figure>
+
+    <div id="steps">
+        <div class="step" data-index="0">
+            <h2>Arne Jacobsen: Shaping Danish Design</h2>
+            <p>Insightful Guided Tour • 2.5h</p>
+        </div>
+        <div class="step" data-index="1">
+            <h2>Danish Architecture Center</h2>
+            <p>Insightful Guided Tour • 2h</p>
+        </div>
+        <div class="step" data-index="2">
+            <h2>Art and Architecture at Glyptotek</h2>
+            <p>Insightful Guided Tour • 2.5h</p>
+        </div>
+        <div class="step" data-index="3">
+            <h2>Modern Copenhagen</h2>
+            <p>Insightful Guided Tour • 3h</p>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <p>End of Tours</p>
+</footer>
+
+<script src="https://unpkg.com/intersection-observer"></script>
+<script src="https://unpkg.com/scrollama"></script>
+
+<script>
+    const scroller = scrollama();
+    const images = document.querySelectorAll('.scrolly-img');
+    const separatorLine = document.getElementById('sep-line');
+
+    function handleStepProgress(response) {
+        const { index, progress } = response;
+        const currentImg = images[index];
+
+        // 1. Manage Text Opacity
+        document.querySelectorAll('.step').forEach((step, i) => {
+            if (i === index) step.classList.add('is-active');
+            else step.classList.remove('is-active');
+        });
+
+        // 2. Logic:
+        // We want the image associated with the current step to "wipe in"
+        // from top to bottom as we scroll through the step.
+
+        // However, usually Step 1 is already visible.
+        // So:
+        // - Step 0 (Arne Jacobsen): Image 0 is static visible.
+        // - Step 1 (DAC): Image 1 wipes OVER Image 0.
+        // - Step 2 (Glyptotek): Image 2 wipes OVER Image 1.
+
+        if (index === 0) {
+            // Reset for the first item
+            separatorLine.classList.remove('is-active');
+            // Ensure first image is fully visible
+            images[0].style.clipPath = `inset(0 0 0 0)`;
+            // Ensure others are hidden
+            for(let i=1; i<images.length; i++) images[i].style.clipPath = `inset(100% 0 0 0)`;
+            return;
+        }
+
+        // For steps 1, 2, 3... we animate the wipe.
+        separatorLine.classList.add('is-active');
+
+        // Calculate percentage: 0% visible -> 100% visible
+        // 'inset' syntax: inset(top right bottom left)
+        // We want to clip from the top down.
+        // At progress 0: inset(100% 0 0 0) -> fully clipped (hidden)
+        // At progress 1: inset(0% 0 0 0)   -> no clip (fully visible)
+
+        const clipVal = (1 - progress) * 100;
+
+        // Apply mask to current image
+        if (images[index]) {
+            images[index].style.clipPath = `inset(${clipVal}% 0 0 0)`;
+            images[index].style.zIndex = index + 5; // Ensure it's on top
+
+            // Move the black line to match the clip edge
+            separatorLine.style.top = `${clipVal}%`;
+        }
+
+        // Clean up previous images to ensure they stay visible underneath
+        // (so we don't see white space if we scrub back up slightly)
+        if (index > 0 && images[index - 1]) {
+            images[index - 1].style.clipPath = `inset(0 0 0 0)`;
+            images[index - 1].style.zIndex = index; // Lower z-index than current
+        }
+    }
+
+    function init() {
+        scroller
+            .setup({
+                step: '#steps .step',
+                offset: 0.8,    // Starts action when step enters bottom 20% of screen
+                progress: true, // This enables the "scrub" calculation
+                debug: false
+            })
+            .onStepProgress(handleStepProgress);
+    }
+
+    // Initialize
+    init();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Glow - Persistent</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #f8f8f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Times New Roman', serif;
+            cursor: crosshair;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .center-text {
+            color: rgba(0, 0, 0, 0.15);
+            font-size: 2.5rem;
+            letter-spacing: 0.1rem;
+            user-select: none;
+            z-index: 1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="center-text">by the air</div>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let idleTimer;
+        let isIdle = false;
+        let colorStep = 0;
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor(x, y, hue, isSticky = false) {
+                this.x = x;
+                this.y = y;
+                this.hue = hue;
+                this.size = 70;
+                this.isSticky = isSticky;
+                // Sticky particles are slightly more opaque to feel "planted"
+                this.alpha = isSticky ? 0.4 : 0.25;
+                this.decay = 0.003;
+            }
+
+            draw() {
+                ctx.beginPath();
+                let gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+                gradient.addColorStop(0, `hsla(${this.hue}, 80%, 70%, ${this.alpha})`);
+                gradient.addColorStop(1, `hsla(${this.hue}, 80%, 70%, 0)`);
+
+                ctx.fillStyle = gradient;
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            update(forceFade) {
+                // If sticky, we don't update alpha at all
+                if (this.isSticky) return;
+
+                if (forceFade) {
+                    this.alpha -= 0.01;
+                } else {
+                    this.alpha -= this.decay;
+                }
+            }
+        }
+
+        function createParticles(x, y, sticky = false) {
+            isIdle = false;
+            clearTimeout(idleTimer);
+
+            colorStep += 1;
+            // Smoothly oscillates through hues
+            const currentHue = Math.sin(colorStep * 0.05) * 50 + 10;
+
+            // Create a small cluster for a richer feel
+            const count = sticky ? 5 : 1;
+            for(let i = 0; i < count; i++) {
+                const offX = sticky ? (Math.random() - 0.5) * 20 : 0;
+                const offY = sticky ? (Math.random() - 0.5) * 20 : 0;
+                particles.push(new Particle(x + offX, y + offY, currentHue, sticky));
+            }
+
+            idleTimer = setTimeout(() => {
+                isIdle = true;
+            }, 5000);
+        }
+
+        window.addEventListener('mousemove', (e) => createParticles(e.clientX, e.clientY, false));
+
+        window.addEventListener('mousedown', (e) => {
+            createParticles(e.clientX, e.clientY, true);
+        });
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update(isIdle);
+                particles[i].draw();
+
+                if (particles[i].alpha <= 0) {
+                    particles.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

@@ -95,7 +95,7 @@ function renderCharts() {
                     silent: true,
                     itemStyle: { color: 'transparent' },
                     emphasis: { disabled: true }, // Offset bar never changes
-                    blur: { itemStyle: { color: 'transparent' } }, // Remains invisible on blur
+                    blur: { itemStyle: {  } }, // Remains invisible on blur
                     data: config.mins
                 },
                 {
@@ -112,10 +112,10 @@ function renderCharts() {
                     blur: {
                         itemStyle: {
                             color: 'rgba(255, 255, 255, 0)', // Hollow look
-                            borderType: 'dashed',
+                            // borderType: 'dashed',
                             borderWidth: 2,
                             borderColor: '#5D2FC1',
-                            opacity: 0.6
+                            opacity: 0.2//<== this where you change opacity
                         },
                         label: { show: false } // Hide labels of blurred bars
                     },
