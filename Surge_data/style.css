@@ -1,0 +1,49 @@
+@font-face { font-family: 'JazminAlt'; src: url('fonts/JazminAlt-Bold.otf'); }
+@font-face { font-family: 'GTAmerica-Standard'; src: url('fonts/GT-America-Standard-Thin.tff'); }
+
+* { box-sizing: border-box; }
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: #fff;
+    font-family: 'GTAmerica-Standard', sans-serif;
+}
+
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 20px;
+}
+
+#chart-container {
+    flex: 1; /* This takes up all available space between header and footer */
+    width: 100%;
+}
+
+.chart-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    /* border-top: 1px solid #000; */
+    font-size: 14px;
+    color: #333;
+}
+
+.ken-logo {
+    height: 20px; /* Adjust based on your image aspect ratio */
+    display: block;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 600px) {
+    .chart-footer {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+        font-size: 11px;
+    }
+}

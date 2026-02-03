@@ -3,106 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Hub</title>
+    <title>Asian Paints Data Viz</title>
     <style>
+        :root {
+            --bg-color: #f5f5f7;
+            --card-bg: #ffffff;
+            --text-main: #1d1d1f;
+            --text-sub: #86868b;
+            --accent: #0066cc;
+            --shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #1a1a1a;
-            color: #e6e6e6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 50px;
         }
-        h1 { color: #58a6ff; }
-        .project-list {
-            list-style: none;
-            padding: 0;
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 { font-weight: 600; font-size: 2.5rem; margin-bottom: 10px; }
+        p { color: var(--text-sub); }
+
+        /* Grid Layout */
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
             width: 100%;
-            max-width: 500px;
+            max-width: 1100px;
         }
-        .project-card {
-            background: #2d2d2d;
-            margin: 10px 0;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #444;
-            transition: transform 0.2s, border-color 0.2s;
-        }
-        .project-card:hover {
-            transform: translateX(10px);
-            border-color: #58a6ff;
-        }
-        a {
+
+        /* Card Styling */
+        .card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: var(--shadow);
             text-decoration: none;
-            color: #58a6ff;
-            font-size: 1.2rem;
-            font-weight: bold;
-            display: block;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
         }
-        .description {
-            font-size: 0.9rem;
-            color: #8b949e;
-            margin-top: 5px;
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 160px;
+            background-color: #eee;
+            background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0 0 8px 0;
+        }
+
+        .card-path {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            font-family: 'Courier New', Courier, monospace;
         }
     </style>
 </head>
 <body>
 
-    <h1>🚀 Project Dashboard</h1>
+    <header>
+        <h1>Asian Paints Dasta</h1>
+        <p>Visualization generated using Asian Paints Data</p>
+    </header>
 
-    <ul class="project-list">
-      <li class="project-card">
-          <a href="mask transition/index.html">Image change using masks</a>
-          <div class="description">Transition between images through masks</div>
-      </li>
-      <li class="project-card">
-          <a href="Wheel of Knowledge/index.html">Colour Wheel Info</a>
-          <div class="description">Select a colour, to more about it</div>
-      </li>
-        <li class="project-card">
-            <a href="follow mouse/index.html">Mouse Colours</a>
-            <div class="description">Hover to get colour, click to keep colour</div>
-        </li>
-        <li class="project-card">
-            <a href="Parallax/index.html">Parallax Simple</a>
-            <div class="description">Different objects with different parralax speed and rotation</div>
-        </li>
-      <li class="project-card">
-          <a href="Scrub-line-graph/index.html">Scrub Line Graph</a>
-          <div class="description">Animation of graph controlled by scroll</div>
-      </li>
-      <li class="project-card">
-          <a href="Scrollytelling circle stack/index.html">A Scrollytelling Stack</a>
-          <div class="description">A list of circles that stack up</div>
-      </li>
-      <li class="project-card">
-          <a href="Scatter Plot/index.html">A Scatter Plot</a>
-          <div class="description">A information point for all Nicolas Cage movies</div>
-      </li>
-      <li class="project-card">
-          <a href="Hosur Data/index.html">Hosur EV</a>
-          <div class="description">Data Viz using actual Ken Data</div>
-      </li>
-      <li class="project-card">
-          <a href="Iframe Figma Test/index.html">Figma Iframe test</a>
-          <div class="description">Using button animations, changing between images</div>
-      </li>
-        <li class="project-card">
-            <a href="Testing_ApacheECharts/index.html">Scrollytelling with bar graphs</a>
-            <div class="description">Scrollama + Apache ECharts</div>
-        </li>
+    <div class="project-grid" id="projectGrid">
+        </div>
 
-        <li class="project-card">
-            <a href="Interactive Viz/index.html">Points across Axes</a>
-            <div class="description">Changing between Echarts using buttons</div>
-        </li>
+    <script>
+        // --- MANUALLY ADD YOUR PROJECTS HERE ---
+        const projects = [
+            {
+                name: "Asian Paints Revenue Growth",
+                path: "Asian_Paint_Reveneue/index.html",
+                thumb: "asianpaintsrevenue.png"
+            },
+            {
+                name: "Asian Paints CFS",
+                path: "Asian_Paint_CFS/index.html",
+                thumb: "AP_CFS.png"
+            },
+            {
+                name: "Asian Paint Operating Margin",
+                path: "Asian_Paint_Operating Margin/index.html",
+                thumb: "stacked_bar.png"
+            }
+        ];
 
-        <li class="project-card">
-            <a href="GeoMap in Bangalore/index.html">GeoMap in Bangalore</a>
-            <div class="description">Geospatial mapping project.</div>
-        </li>
-    </ul>
+        const grid = document.getElementById('projectGrid');
 
+        projects.forEach(project => {
+            const card = document.createElement('a');
+            card.href = project.path;
+            card.className = 'card';
+
+            card.innerHTML = `
+                <div class="thumbnail" style="background-image: url('${project.thumb}')"></div>
+                <div class="card-content">
+                    <h3 class="card-title">${project.name}</h3>
+                    <div class="card-path">${project.path}</div>
+                </div>
+            `;
+
+            grid.appendChild(card);
+        });
+    </script>
 </body>
 </html>
