@@ -1,0 +1,70 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: ##fffced; /* Slightly darker background to make white boxes pop */
+    margin: 0;
+    padding: 40px 10px;
+}
+
+header h1 {
+    text-align: center;
+    color: #24292e;
+    margin-bottom: 40px;
+}
+
+/* Container that stacks the year-blocks vertically */
+.dashboard-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centering the blocks */
+    gap: 30px;
+}
+
+/* The "Hugging" Box */
+.year-block {
+    background: #ffffff;
+    padding: 20px 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    /* This makes the box hug the content rather than stretching */
+    width: fit-content;
+    border: 1px solid #e1e4e8;
+}
+
+.year-title {
+    text-align: center;
+    font-size: 1.4rem;
+    color: #444;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+/* Layout for the two charts inside the box */
+.charts-row {
+    display: flex;
+    flex-direction: row; /* Side by side by default */
+    gap: 20px;
+    justify-content: center;
+}
+
+.chart-container {
+    width: 380px; /* Slightly smaller to ensure they fit side-by-side easily */
+    height: 320px;
+}
+
+/* Mobile Version: Stack the charts vertically inside the box */
+@media (max-width: 850px) {
+    .year-block {
+        width: 90%; /* Box takes most of the screen on mobile */
+        padding: 20px;
+    }
+
+    .charts-row {
+        flex-direction: column; /* Stacks charts in a single column */
+        align-items: center;
+    }
+
+    .chart-container {
+        width: 100%;
+        max-width: 400px;
+    }
+}

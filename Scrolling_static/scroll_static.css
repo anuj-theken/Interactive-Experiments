@@ -1,0 +1,51 @@
+body {
+    margin: 0;
+    font-family: sans-serif;
+    background-color: #f9f9f9;
+}
+
+#scrolly {
+    position: relative;
+    display: flex;
+    background-color: #fff;
+    padding: 1rem;
+}
+
+article {
+    position: relative;
+    padding: 0 1rem;
+    width: 50%; /* Left side takes half */
+}
+
+.sticky-thing {
+    position: -webkit-sticky;
+    position: sticky;
+    width: 50%;
+    margin: 0;
+    height: 50vh; /* Adjust height as needed */
+    top: 25vh; /* Centers the sticky element vertically */
+    background-color: #333;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    transition: background-color 0.5s ease;
+}
+
+.step {
+    margin: 0 auto 2rem auto;
+    height: 90vh; /* Spacing out steps to ensure scroll depth */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-bottom: 1px solid #ccc;
+}
+
+.step:last-child {
+    border-bottom: none;
+}
+
+#outro {
+    height: 50vh;
+}

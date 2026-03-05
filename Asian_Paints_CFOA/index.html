@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Analysis Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Capital Flow Evolution</h1>
+    </header>
+
+    <main class="dashboard-wrapper">
+        <section class="year-block">
+            <div class="year-title">1996 - 2005</div>
+            <div class="charts-row">
+                <div class="chart-container" id="source1"></div>
+                <div class="chart-container" id="app1"></div>
+            </div>
+        </section>
+
+        <section class="year-block">
+            <div class="year-title">2006 - 2015</div>
+            <div class="charts-row">
+                <div class="chart-container" id="source2"></div>
+                <div class="chart-container" id="app2"></div>
+            </div>
+        </section>
+
+        <section class="year-block">
+            <div class="year-title">2016 - 2025</div>
+            <div class="charts-row">
+                <div class="chart-container" id="source3"></div>
+                <div class="chart-container" id="app3"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="pieChart.js"></script>
+</body>
+</html>

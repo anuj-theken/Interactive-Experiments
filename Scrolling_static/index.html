@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrollama Demo</title>
+    <link rel="stylesheet" href="scroll_static.css">
+</head>
+<body>
+    <main>
+        <section id="scrolly">
+            <article>
+                <div class="step" data-step="1">
+                    <h2>Step 1</h2>
+                    <p>As you scroll, the right side stays put.</p>
+                </div>
+                <div class="step" data-step="2">
+                    <h2>Step 2</h2>
+                    <p>The background color or text on the right can change based on this trigger.</p>
+                </div>
+                <div class="step" data-step="3">
+                    <h2>Step 3</h2>
+                    <p>Scrollama detects which 'step' is currently in the center of the viewport.</p>
+                </div>
+                <div class="step" data-step="4">
+                    <h2>Step 4</h2>
+                    <p>And just like that, you have a narrative flow!</p>
+                </div>
+            </article>
+
+            <div class="sticky-thing">
+                <p>Step 1</p>
+            </div>
+        </section>
+        <section id="outro"></section>
+    </main>
+
+    <script src="https://unpkg.com/scrollama"></script>
+    <script src="scrolling_static.js"></script>
+</body>
+</html>
