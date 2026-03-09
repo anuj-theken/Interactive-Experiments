@@ -52,7 +52,7 @@ const myChart = echarts.init(chartDom);
 
 const option = {
     silent: true,
-    grid: { left: 60, top: 0$ },
+    grid: { left: 60, top: 0 },
     xAxis: { type: 'value', show: false, min: 0, max: (data.length - 1) * 350 },
     yAxis: { type: 'value', show: false, min: 0, max: 100 },
     series: [{
