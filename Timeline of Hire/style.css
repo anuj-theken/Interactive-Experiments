@@ -1,0 +1,195 @@
+body {
+    font-family: 'Times New Roman', Times, serif;
+    background-color: #ffffff;
+    margin: 0;
+    padding: 40px;
+    color: #333;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    /* Create a relative positioning context for the absolute card */
+    position: relative;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 80px;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 500;
+    margin: 0;
+    text-align: center;
+}
+
+/* Legend Styling */
+.legend {
+    display: flex;
+    gap: 30px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    margin-top: 1em;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.square {
+    width: 20px;
+    height: 15px;
+    background: #e0e0e0;
+    border-radius: 2px;
+}
+
+.line {
+    width: 40px;
+    height: 5px;
+    background: #000;
+}
+
+/* Chart Container */
+#timeline-chart {
+    width: 100%;
+    height: 150px;
+}
+
+/* Dynamic Info Card Styling */
+.card {
+    /* Set positioning and initial hide */
+    position: absolute;
+    opacity: 0;
+    top: 55%; /* Position it below the timeline chart */
+
+    width: 220px;
+    background: #e0e0e0;
+    padding: 25px;
+    min-height: 180px;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
+    /* Transition for a smooth appearance */
+    transition: left 0.3s ease, opacity 0.3s ease;
+    z-index: 10;
+}
+
+/* Vertical Dotted Connection Line */
+.card::before {
+    content: '';
+    position: absolute;
+    top: -50px; /* Lengthen line up towards timeline */
+    left: 40%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 50px;
+    border-left: 1px dotted #ccc; /* Grey dotted line */
+}
+
+.card h2 {
+    font-size: 1.4rem;
+    margin-top: 0;
+    line-height: 1.1;
+    text-align: left;
+
+}
+
+.card h2 small {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.card p {
+    font-family: Arial, sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 0;
+    text-align: left;
+}
+
+.footer-hint {
+    text-align: right;
+    color: #bbb;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    margin-top: 150px; /* Add extra space now that card is absolute */
+}
+
+/* ... Keep existing styles from previous version ... */
+
+.container {
+    max-width: 1000px;
+    margin: 0 10px;
+    position: relative;
+}
+
+/* Mobile Specific Adjustments */
+/* ... Base desktop styles remain same ... */
+/* ... Base desktop styles remain same ... */
+
+@media (max-width: 768px) {
+    .container {
+        overflow: visible; /* Prevent date clipping */
+        text-align: center;
+    }
+
+    .card h2  {
+        font-size: 1.4rem;
+        padding-bottom: 1em;
+    }
+
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        align-items: center;
+
+    }
+
+    #timeline-chart {
+        height: 900px; /* Tall enough for all years */
+        width: 100%;
+        /* Ensure the canvas doesn't mask the labels */
+        padding-top: 2em;
+        overflow: visible;
+    }
+
+    .card {
+        position: fixed;
+        bottom: 10px;
+        left: 0 !important;
+        width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+        z-index: 1000;
+        display: none; /* Controlled by JS */
+        background: #e0e0e0;
+        padding: 30px;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        height: 100px;
+    }
+
+    /* Connection line for mobile */
+    .card::before {
+      visibility: hidden;
+
+        /* content: '';
+        position: absolute;
+        top: -40px;
+        left: 48%;
+        height: 20px;
+        border-left: 1px dotted #999; */
+    }
+
+    .footer-hint {
+        text-align: center;
+        color: #bbb;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        margin-top: 50px; /* Add extra space now that card is absolute */
+    }
+}

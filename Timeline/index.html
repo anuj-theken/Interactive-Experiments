@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asian Paints History</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+    <header class="timeline-header">
+        <h1>The Evolution of Asian Paints</h1>
+        <p>A journey of color and innovation since the 1930s.</p>
+        <div class="legend"><span class="dot"></span> Milestone Events</div>
+    </header>
+
+    <div class="desktop-only">
+        <div class="timeline-scroll-wrapper">
+            <div id="main"></div>
+        </div>
+    </div>
+
+    <div class="mobile-only">
+        <div class="vertical-timeline" id="mobile-list">
+            </div>
+    </div>
+
+    <script src="timeline.js"></script>
+</body>
+</html>

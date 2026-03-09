@@ -31,16 +31,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const sourceColors = ['#2f4554', '#61a0a8'];
     const appColors = ['#c23531', '#2f4554', '#d48265'];
-
+    
     // Data Mapping
     const charts = [
-        { id: 'source1', title: 'Sources of Capital', colors: sourceColors, data: [{value: 75, name: 'Cash flow'}, {value: 25, name: 'Other'}] },
+        { id: 'source1', title: 'Sources of Capital', colors: sourceColors, data: [{value: 75, name: 'Cash flow from operating activities'}, {value: 25, name: 'Other'}] },
         { id: 'app1',    title: 'Application of Capital', colors: appColors,    data: [{value: 31, name: 'Dividend'}, {value: 35, name: 'Net Capex'}, {value: 34, name: 'Other'}] },
 
-        { id: 'source2', title: 'Sources of Capital', colors: sourceColors, data: [{value: 94, name: 'Cash flow'}, {value: 6, name: 'Other'}] },
+        { id: 'source2', title: 'Sources of Capital', colors: sourceColors, data: [{value: 94, name: 'Cash flow from operating activities'}, {value: 6, name: 'Other'}] },
         { id: 'app2',    title: 'Application of Capital', colors: appColors,    data: [{value: 31, name: 'Dividend'}, {value: 35, name: 'Net Capex'}, {value: 34, name: 'Other'}] },
 
-        { id: 'source3', title: 'Sources of Capital', colors: sourceColors, data: [{value: 83, name: 'Cash flow'}, {value: 17, name: 'Other'}] },
+        { id: 'source3', title: 'Sources of Capital', colors: sourceColors, data: [{value: 83, name: 'Cash flow from operating activities'}, {value: 17, name: 'Other'}] },
         { id: 'app3',    title: 'Application of Capital', colors: appColors,    data: [{value: 46, name: 'Dividend'}, {value: 32, name: 'Net Capex'}, {value: 22, name: 'Other'}] }
     ];
 

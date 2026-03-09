@@ -1,0 +1,86 @@
+:root {
+    --ap-red: #e14a3a;
+    --text-grey: #666;
+    --light-grey: #999;
+}
+
+body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #fff; }
+
+.timeline-header { padding: 40px 60px 0 60px; }
+.timeline-header h1 { margin: 0; font-size: 28px; font-weight: 800; color: #222; letter-spacing: -0.5px; }
+.timeline-header p { color: var(--text-grey); font-size: 18px; margin: 10px 0; }
+.legend { font-size: 14px; color: var(--light-grey); display: flex; align-items: center; }
+.dot { display: inline-block; width: 12px; height: 12px; background: var(--ap-red); border-radius: 50%; margin-right: 8px; }
+
+/* --- Mobile Version (Line on Left, Text on Right) --- */
+.mobile-only { display: none; padding: 20px 40px; }
+/* --- Web Version --- */
+.desktop-only { display: block; }
+.timeline-scroll-wrapper { width: 100vw; overflow-x: auto; padding-top: 20px; }
+#main { margin-top: 0; width: 6000px; height: 350px; }
+
+
+/* Align scrollbar with timeline start/end */
+.timeline-scroll-wrapper {
+    width: 100vw;
+    overflow-x: auto;
+    padding-bottom: 50px;
+    box-sizing: border-box; /* Ensures padding doesn't add to width */
+}
+
+/* Slimmer scrollbar for a more professional look */
+.timeline-scroll-wrapper::-webkit-scrollbar {
+    height: 6px;
+}
+
+.timeline-scroll-wrapper::-webkit-scrollbar-thumb {
+    background-color: #e14a3a;
+    border-radius: 10px;
+}
+
+.timeline-scroll-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    margin: 0 60px; /* This keeps the slider track aligned with your text */
+}
+
+@media (max-width: 768px) {
+    .timeline-header { padding: 30px 25px; text-align: left; }
+    .desktop-only { display: none; }
+    .mobile-only { display: block; }
+
+    .vertical-timeline {
+        border-left: 2px solid var(--ap-red); /* The continuous line */
+        margin-left: 10px;
+        padding-left: 30px;
+        position: relative;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 50px;
+        text-align: left;
+    }
+
+    /* Red dots positioned on the continuous line */
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -38.5px; /* Aligns dot perfectly on the 2px border */
+        top: 5px;
+        width: 15px;
+        height: 15px;
+        background: var(--ap-red);
+        border: 3px solid #fff;
+        border-radius: 50%;
+    }
+
+    .m-date { color: var(--light-grey); font-weight: bold; font-size: 14px; }
+    .m-title { color: var(--ap-red); font-weight: bold; font-size: 20px; margin: 5px 0; }
+    .m-desc {
+        color: var(--text-grey);
+        font-size: 15px;
+        line-height: 1.5;
+        max-width: 280px; /* Forces wrap */
+        word-wrap: break-word;
+    }
+}
