@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Extended Scroll Particle Viz</title>
+    <style>
+        body { margin: 0; background: #ffffff; font-family: sans-serif; overflow-x: hidden; }
+        .sticky-container { position: sticky; top: 0; width: 100vw; height: 100vh; }
+        canvas { display: block; }
+        /* Increased scroll space */
+        .content { height: 1200vh; position: relative; z-index: 1; }
+    </style>
+</head>
+<body>
+
+    <div class="sticky-container">
+        <canvas id="vizCanvas"></canvas>
+    </div>
+    <div class="content"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script>
+        const canvas = document.getElementById('vizCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        const blueCount = 20;
+        const totalRedAvailable = 150;
+        const clusterRadius = 250;
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor(color, startVisible = false) {
+                this.color = color;
+                this.radius = Math.random() * 4 + 4;
+                this.opacity = startVisible ? 0.5 : 0;
+                this.isActive = startVisible; // Logic flag for fading
+
+                // Pre-spawn at random positions within the screen
+                this.x = canvas.width / 2 + (Math.random() - 0.5) * 200;
+                this.y = canvas.height / 2 + (Math.random() - 0.5) * 200;
+
+                this.vx = (Math.random() - 0.5) * 1.5;
+                this.vy = (Math.random() - 0.5) * 1.5;
+            }
+
+            // Smoothly fade in/out
+            fade(targetOpacity) {
+                gsap.to(this, {
+                    opacity: targetOpacity,
+                    duration: 0.3,
+                    ease: "power2.inOut"
+                });
+            }
+
+            update() {
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                const dx = this.x - centerX;
+                const dy = this.y - centerY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                // Constant movement jitter
+                this.vx += (Math.random() - 0.5) * 0.1;
+                this.vy += (Math.random() - 0.5) * 0.1;
+
+                // Pull back to center cluster
+                if (distance > clusterRadius) {
+                    const angle = Math.atan2(dy, dx);
+                    this.vx -= Math.cos(angle) * 0.15;
+                    this.vy -= Math.sin(angle) * 0.15;
+                }
+
+                // Maintain the slow 50% speed feel (0.3 limit)
+                const limit = 0.3;
+                const currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                if (currentSpeed > limit) {
+                    this.vx = (this.vx / currentSpeed) * limit;
+                    this.vy = (this.vy / currentSpeed) * limit;
+                }
+
+                this.x += this.vx;
+                this.y += this.vy;
+            }
+
+            draw() {
+                // Only draw if there is something to see
+                if (this.opacity <= 0) return;
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color.replace('ALPHA', this.opacity);
+                ctx.fill();
+            }
+        }
+
+        // 1. Create Blue Particles (Visible immediately)
+        for (let i = 0; i < blueCount; i++) {
+            particles.push(new Particle('rgba(74, 144, 226, ALPHA)', true));
+        }
+
+        // 2. Create Red Particles (Invisible but moving immediately)
+        let redParticles = [];
+        for (let i = 0; i < totalRedAvailable; i++) {
+            const p = new Particle('rgba(255, 71, 87, ALPHA)', false);
+            redParticles.push(p);
+            particles.push(p);
+        }
+
+        // Main Animation Ticker
+        gsap.ticker.add(() => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+        });
+
+        // Scroll Logic
+        ScrollTrigger.create({
+            trigger: ".content",
+            start: "top top",
+            end: "bottom bottom",
+            onUpdate: (self) => {
+                const p = self.progress;
+                let targetRedCount = 0;
+
+                if (p >= 0.95) targetRedCount = totalRedAvailable;
+                else if (p >= 0.75) targetRedCount = Math.floor(totalRedAvailable * 0.75);
+                else if (p >= 0.50) targetRedCount = Math.floor(totalRedAvailable * 0.50);
+                else if (p >= 0.25) targetRedCount = Math.floor(totalRedAvailable * 0.25);
+                else if (p >= 0.10) targetRedCount = Math.floor(totalRedAvailable * 0.10);
+
+                redParticles.forEach((rp, i) => {
+                    const shouldBeVisible = i < targetRedCount;
+                    if (shouldBeVisible && !rp.isActive) {
+                        rp.isActive = true;
+                        rp.fade(0.5);
+                    } else if (!shouldBeVisible && rp.isActive) {
+                        rp.isActive = false;
+                        rp.fade(0);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

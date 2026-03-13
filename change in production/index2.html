@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Paint Industry Ownership Shift</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        body { margin: 0; padding: 0; background-color: #1a1a1a; font-family: sans-serif; }
+        #chart-container { width: 100vw; height: 100vh; }
+        #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 20px; }
+    </style>
+</head>
+<body>
+    <div id="loading">Loading Map Data...</div>
+    <div id="chart-container"></div>
+
+    <script>
+        var chartDom = document.getElementById('chart-container');
+        var myChart = echarts.init(chartDom);
+        var loadingDiv = document.getElementById('loading');
+
+        fetch('https://fastly.jsdelivr.net/gh/apache/echarts@4.9.0/map/json/world.json')
+            .then(response => response.json())
+            .then(worldJson => {
+                loadingDiv.style.display = 'none';
+                echarts.registerMap('world', worldJson);
+
+                const coords = {
+                    'India': [78.9629, 20.5937],
+                    'UK': [-0.1278, 51.5074],
+                    'USA': [-95.7129, 37.0902],
+                    'Japan': [139.6917, 35.6895],
+                    'Germany': [10.4515, 51.1657],
+                    'Netherlands': [5.2913, 52.1326]
+                };
+
+                // 1942: UK dominates the lines (Thick line for 5 brands)
+                const data1942Lines = [
+                    { coords: [coords['UK'], coords['India']], name: 'UK Dominance (Berger, Shalimar, Dulux, Goodlass, J&N)', lineStyle: { width: 8, color: '#ff4444' } },
+                    { coords: [coords['USA'], coords['India']], name: 'USA (Sherwin, PPG presence)', lineStyle: { width: 2, color: '#ffaa00' } },
+                    { coords: [coords['Japan'], coords['India']], name: 'Japan (Nippon, Kansai early presence)', lineStyle: { width: 2, color: '#ffaa00' } },
+                    { coords: [coords['Germany'], coords['India']], name: 'Germany (Caparol)', lineStyle: { width: 1, color: '#ffaa00' } }
+                ];
+
+                // 2026: UK is gone. Netherlands enters. Japan strengthens.
+                const data2026Lines = [
+                    { coords: [coords['Netherlands'], coords['India']], name: 'Netherlands (AkzoNobel acquires Dulux)', lineStyle: { width: 3, color: '#44ccff' } },
+                    { coords: [coords['Japan'], coords['India']], name: 'Japan (Kansai Nerolac, Nippon)', lineStyle: { width: 4, color: '#44ccff' } },
+                    { coords: [coords['USA'], coords['India']], name: 'USA (Sherwin, PPG)', lineStyle: { width: 2, color: '#44ccff' } },
+                    { coords: [coords['Germany'], coords['India']], name: 'Germany (Caparol)', lineStyle: { width: 1, color: '#44ccff' } }
+                ];
+
+                // 2026: Massive domestic ownership pulse on India
+                const data2026Domestic = [
+                    { name: 'India Domestic Takeover\n(Asian Paints, Berger, Shalimar)', value: coords['India'] }
+                ];
+
+                const arrowEffect = { show: true, period: 4, trailLength: 0.2, symbol: 'arrow', symbolSize: 8 };
+
+                const option = {
+                    title: {
+                        text: 'Shift in Indian Paint Ownership (1942 vs 2026)',
+                        subtext: 'Click the legend below to toggle between eras. Notice the UK exit and Indian domestic boom.',
+                        left: 'center', top: 20, textStyle: { color: '#fff' }
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: function (params) {
+                            if (params.seriesType === 'lines') return params.data.name + ' ➔ India';
+                            if (params.seriesType === 'effectScatter') return params.data.name;
+                            return params.name;
+                        }
+                    },
+                    legend: {
+                        orient: 'horizontal', bottom: 30,
+                        data: ['1942: Foreign Dominance', '2026: Domestic Boom & Global Mix'],
+                        textStyle: { color: '#fff', fontSize: 16 },
+                        selectedMode: 'single'
+                    },
+                    geo: {
+                        map: 'world', roam: true, zoom: 1.8, center: [50, 30],
+                        itemStyle: { areaColor: '#323c48', borderColor: '#111' },
+                        emphasis: { itemStyle: { areaColor: '#2a333d' }, label: { show: false } },
+                        regions: [{ name: 'India', itemStyle: { areaColor: '#555' } }] // Base color, lit up by scatter later
+                    },
+                    series: [
+                        // --- 1942 SERIES ---
+                        {
+                            name: '1942: Foreign Dominance', type: 'lines', zlevel: 1,
+                            effect: arrowEffect,
+                            lineStyle: { curveness: 0.3, opacity: 0.7 },
+                            data: data1942Lines
+                        },
+                        // --- 2026 SERIES (Lines + Scatter) ---
+                        {
+                            name: '2026: Domestic Boom & Global Mix', type: 'lines', zlevel: 2,
+                            effect: arrowEffect,
+                            lineStyle: { curveness: 0.3, opacity: 0.7 },
+                            data: data2026Lines
+                        },
+                        {
+                            name: '2026: Domestic Boom & Global Mix', type: 'effectScatter', coordinateSystem: 'geo', zlevel: 3,
+                            rippleEffect: { brushType: 'stroke', scale: 8 }, // Massive pulsing ring
+                            label: { show: true, position: 'right', formatter: '{b}', color: '#fff', fontSize: 14, fontWeight: 'bold' },
+                            itemStyle: { color: '#00ff00', shadowBlur: 20, shadowColor: '#00ff00' }, // Bright green for domestic money
+                            data: data2026Domestic
+                        }
+                    ]
+                };
+
+                myChart.setOption(option);
+            })
+            .catch(error => console.error("Error loading map GeoJSON:", error));
+
+        window.addEventListener('resize', () => myChart.resize());
+    </script>
+</body>
+</html>

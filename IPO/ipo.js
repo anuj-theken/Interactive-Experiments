@@ -24,7 +24,7 @@ const option = {
     tooltip: {
         trigger: 'axis',
         confine: true,
-        backgroundColor: 'rgba(30, 30, 30, 0.95)',
+        backgroundColor: '#F9F3E6',
         textStyle: { fontSize: 12 },
         formatter: function (params) {
             let marker = eventData.find(e => e.coord[0] === params[0].name);
@@ -59,7 +59,7 @@ const option = {
     },
     yAxis: {
         type: 'value',
-        splitLine: { lineStyle: { color: '#222' } },
+        // splitLine: { lineStyle: { color: '#222' } },
         axisLabel: { fontSize: 10 }
     },
     series: [
@@ -68,8 +68,8 @@ const option = {
             type: 'line',
             data: asianPaintsData,
             smooth: true,
-            lineStyle: { color: '#ffcc00', width: 2.5 },
-            itemStyle: { color: '#ffcc00' },
+            lineStyle: { color: '#170D1D', width: 2.5 },
+            itemStyle: { color: '#170D1D' },
             markPoint: {
                 symbol: 'circle',
                 symbolSize: 12,
@@ -83,7 +83,7 @@ const option = {
             data: nifty50Data,
             smooth: true,
             symbol: 'none',
-            lineStyle: { type: 'dashed', color: '#e5e5e5', width: 1.5 }
+            lineStyle: { type: 'dashed', color: '#F9F3E6', width: 1.5 }
         }
     ]
 };

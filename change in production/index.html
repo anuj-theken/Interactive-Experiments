@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolution of the Indian Paint Industry</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e2f;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .map-card {
+            background-color: #2a2a3f;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+        .map-title {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #4facfe;
+            margin-bottom: 10px;
+        }
+        .chart {
+            width: 100%;
+            height: 450px;
+        }
+
+        /* Responsive fallback for smaller screens */
+        @media (max-width: 800px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Evolution of the Indian Paint Industry (1940s vs Present)</h1>
+
+    <div class="grid-container">
+
+        <div class="map-card">
+            <div class="map-title">2. Production Epicenter (Present)</div>
+            <div id="map2" class="chart"></div>
+        </div>
+<!-- 
+        <div class="map-card">
+            <div class="map-title">3. Ownership & Capital (1942)</div>
+            <div id="map3" class="chart"></div>
+        </div>
+
+        <div class="map-card">
+            <div class="map-title">4. Ownership & Capital (Present)</div>
+            <div id="map4" class="chart"></div>
+        </div> -->
+    </div>
+
+    <script>
+        // Coordinates for key cities
+        const coords = {
+            calcutta: [88.3639, 22.5726],
+            bombay: [72.8777, 19.0760]
+        };
+
+        // Fetch India GeoJSON data
+        // Fetch India GeoJSON data
+fetch('https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/india.geojson')
+            .then(response => response.json())
+            .then(indiaGeoJson => {
+
+                // Register the map with ECharts
+                echarts.registerMap('India', indiaGeoJson);
+
+                // Base Geo map configuration to keep styling consistent
+                const baseGeoConfig = {
+                    map: 'India',
+                    roam: false, // disable drag/zoom to keep maps static
+                    itemStyle: {
+                        areaColor: '#3b3b58',
+                        borderColor: '#66668c',
+                        borderWidth: 1
+                    },
+                    emphasis: {
+                        itemStyle: { areaColor: '#4facfe' }
+                    }
+                };
+
+                // Initialize the 4 charts
+                // const chart1 = echarts.init(document.getElementById('map1'));
+                const chart2 = echarts.init(document.getElementById('map2'));
+                // const chart3 = echarts.init(document.getElementById('map3'));
+                // const chart4 = echarts.init(document.getElementById('map4'));
+
+                // // --- MAP 1: 1942 Epicenter (Calcutta) ---
+                // chart1.setOption({
+                //     tooltip: { trigger: 'item' },
+                //     geo: baseGeoConfig,
+                //     series: [{
+                //         name: '1940s Epicenter',
+                //         type: 'effectScatter',
+                //         coordinateSystem: 'geo',
+                //         data: [{ name: 'Calcutta (Kolkata)', value: [...coords.calcutta, 100] }],
+                //         symbolSize: 25,
+                //         itemStyle: { color: '#ffeb3b', shadowBlur: 10, shadowColor: '#ffeb3b' },
+                //         tooltip: { formatter: '{b}: <br/>Primary hub for British paint production.' }
+                //     }]
+                // });
+
+                // --- MAP 2: Present Epicenter (Bombay) with shift arrow ---
+                // --- MAP 2: Present Epicenter (Bombay & Calcutta) ---
+    chart2.setOption({
+        tooltip: { trigger: 'item' },
+        geo: {
+            ...baseGeoConfig,
+            regions: [
+                { name: 'Maharashtra', itemStyle: { areaColor: '#2a2a50' } },
+                { name: 'West Bengal', itemStyle: { areaColor: '#2a2a50' } }
+            ]
+        },
+        series: [
+            {
+                name: 'Present Epicenters',
+                type: 'effectScatter',
+                coordinateSystem: 'geo',
+                // Added Calcutta, reduced symbolSize
+                data: [
+                    { name: 'Bombay (Mumbai)', value: [...coords.bombay, 100] },
+                    { name: 'Calcutta (Kolkata)', value: [...coords.calcutta, 100] }
+                ],
+                symbolSize: 15,
+                itemStyle: { color: '#00e5ff', shadowBlur: 10, shadowColor: '#00e5ff' },
+                tooltip: { formatter: '{b}: <br/>Key paint industry hub.' }
+            },
+            {
+                name: 'Shift Arrow',
+                type: 'lines',
+                coordinateSystem: 'geo',
+                zlevel: 2,
+                effect: { show: true, period: 4, trailLength: 0.2, symbol: 'arrow', symbolSize: 8 },
+                lineStyle: { color: '#ffeb3b', width: 2, opacity: 0.6, curveness: 0.2 },
+                data: [{
+                    fromName: 'Calcutta', toName: 'Bombay',
+                    coords: [coords.calcutta, coords.bombay]
+                }]
+            }
+        ]
+    });
+
+                // // --- MAP 3: 1942 Ownership (British Dominance) ---
+                // chart3.setOption({
+                //     tooltip: { trigger: 'item' },
+                //     geo: baseGeoConfig,
+                //     series: [{
+                //         name: 'British Owned',
+                //         type: 'scatter',
+                //         coordinateSystem: 'geo',
+                //         data: [
+                //             { name: 'Calcutta (Shalimar/Pinchin Johnson UK)', value: [...coords.calcutta, 1] },
+                //             { name: 'Bombay (Goodlass Wall UK)', value: [...coords.bombay, 1] }
+                //         ],
+                //         symbolSize: 18,
+                //         itemStyle: { color: '#ff4757' }, // Red for foreign ownership
+                //         label: { show: true, formatter: '{b}', position: 'right', color: '#fff', fontSize: 10 },
+                //         tooltip: { formatter: '{b}<br/>Foreign/British Capital' }
+                //     }]
+                // });
+                //
+                // // --- MAP 4: Present Ownership (Domestic Dominance) ---
+                // chart4.setOption({
+                //     tooltip: { trigger: 'item' },
+                //     geo: baseGeoConfig,
+                //     series: [{
+                //         name: 'Domestic Owned',
+                //         type: 'scatter',
+                //         coordinateSystem: 'geo',
+                //         data: [
+                //             { name: 'Mumbai (Asian Paints, Kansai Nerolac*)', value: [...coords.bombay, 1] },
+                //             { name: 'Kolkata (Shalimar Paints - Domestic)', value: [...coords.calcutta, 1] }
+                //         ],
+                //         symbolSize: 18,
+                //         itemStyle: { color: '#2ed573' }, // Green for domestic
+                //         label: { show: true, formatter: '{b}', position: 'right', color: '#fff', fontSize: 10 },
+                //         tooltip: { formatter: '{b}<br/>Run and Funded in India (*Nerolac has Japanese backing but acts as a domestic giant)' }
+                //     }]
+                // });
+
+                // Resize charts on window resize
+                window.addEventListener('resize', () => {
+                    chart1.resize(); chart2.resize(); chart3.resize(); chart4.resize();
+                });
+            });
+    </script>
+</body>
+</html>

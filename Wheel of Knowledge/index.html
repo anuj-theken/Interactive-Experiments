@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asian Paints ColourNext Wheel</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        /* Added transition for smooth color changes */
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #222;
+            transition: background-color 0.8s ease;
+        }
+        #interaction-container { width: 90vw; height: 90vw; max-width: 600px; max-height: 600px; }
+    </style>
+</head>
+<body>
+
+    <div id="interaction-container"></div>
+
+    <script>
+        const chartDom = document.getElementById('interaction-container');
+        const myChart = echarts.init(chartDom);
+        let currentRotation = 0;
+        let selectedIndex = -1;
+
+        const data = [
+            { year: 2015, name: "Coral Radiance", code: "#E8755A", desc: "Warm coral" },
+            { year: 2016, name: "Madder Red", code: "#8B2635", desc: "Deep red" },
+            { year: 2017, name: "Intense Ocean", code: "#2E5D6E", desc: "Deep teal blue" },
+            { year: 2018, name: "Passion Flower", code: "#C5914A", desc: "Warm amber-yellow" },
+            { year: 2019, name: "Awakening", code: "#5C3A5A", desc: "Deep plum" },
+            { year: 2020, name: "Curiosity", code: "#4A8FB5", desc: "Clear azure blue" },
+            { year: 2021, name: "Cherish", code: "#A8D4BE", desc: "Fresh mint green" },
+            { year: 2022, name: "Transcendent Pink", code: "#9B8A96", desc: "Grey-hued purple" },
+            { year: 2023, name: "Silver Escapade", code: "#C0C0B8", desc: "Soft pearly metallic" },
+            { year: 2024, name: "Dessert Love", code: "#C47A55", desc: "Earthy sun-baked red" },
+            { year: 2025, name: "Cardinal", code: "#82717C", desc: "Dusky lavender" },
+            { year: 2026, name: "Moonlit Silk", code: "#CBC891", desc: "Warm sage-green" }
+        ];
+
+        function renderChart(rotation = currentRotation, sIdx = selectedIndex) {
+            const size = chartDom.clientWidth;
+            const center = size / 2;
+            const radius = size * 0.35;
+
+            const dots = data.map((item, i) => {
+                const angle = (i / data.length) * 2 * Math.PI;
+                return {
+                    type: 'circle',
+                    shape: { r: size * 0.04 },
+                    position: [center + radius * Math.cos(angle), center + radius * Math.sin(angle)],
+                    style: { fill: item.code, stroke: '#fff', cursor: 'pointer' },
+                    onclick: () => {
+                        selectedIndex = i;
+                        currentRotation = -angle - Math.PI / 2;
+
+                        // Change body background to selected color
+                        document.body.style.backgroundColor = item.code;
+
+                        renderChart(currentRotation, i);
+                    }
+                };
+            });
+
+            myChart.setOption({
+                graphic: [
+                    {
+                        type: 'group',
+                        rotation: rotation,
+                        origin: [center, center],
+                        transition: ['rotation'],
+                        children: [
+                            {
+                                type: 'image',
+                                style: {
+                                    image: 'rotate_potato.png',
+                                    width: size*1.15, height: size*1.05,
+                                    x: -center*0.15, y: -center*0.05
+                                }
+                            },
+                            ...dots
+                        ]
+                    },
+                    {
+                        type: 'text',
+                        left: 'center', top: 'center',
+                        style: {
+                            text: sIdx === -1 ? "Select a Year" : `${data[sIdx].year}\n${data[sIdx].name}\n${data[sIdx].code}\n${data[sIdx].desc}`,
+                            fill: '#fff', textAlign: 'center', font: 'bold 16px sans-serif'
+                        }
+                    }
+                ]
+            });
+        }
+
+        window.addEventListener('resize', () => { myChart.resize(); renderChart(); });
+        renderChart();
+    </script>
+</body>
+</html>
