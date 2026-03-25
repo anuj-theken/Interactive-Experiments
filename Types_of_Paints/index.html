@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paint Type Interactive</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        :root {
+            --accent-orange: #e85d3f;
+            --dark-bg: #0c0c0e;
+            --text-gray: #4a4a4a;
+            --font-main: 'Times New Roman', serif;
+
+            /* --- DESKTOP SPACING --- */
+            --desktop-header-to-grid: 120px;
+            --desktop-row-gap: 40px;
+            --desktop-col-gap: 40px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: transparent;
+            font-family: var(--font-main);
+            color: #1a1a1a;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .paint-section {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: var(--desktop-header-to-grid);
+        }
+
+        h1 {
+            font-size: clamp(2.6rem, 4vw, 3.5rem);
+            font-weight: 400;
+            line-height: 1.1;
+            padding-left: 1.5em;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 40px;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 10px;
+            padding-right: 3em;
+        }
+
+        .toggle-btn {
+            padding: 10px 22px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 1.1rem;
+            border: none;
+            background: rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            box-shadow: 0 0px 10px rgba(0,0,0,0.35);
+
+        }
+
+        .toggle-btn.active { background: var(--dark-bg); color: white; }
+        .toggle-btn.active::after { content: '.'; color: var(--accent-orange); }
+
+        .hint { font-size: 0.8rem; color: var(--text-gray); margin-top: 8px; margin-right: 3em;}
+
+        .paint-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--desktop-row-gap) var(--desktop-col-gap);
+            flex-grow: 1;
+        }
+
+        .paint-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            text-align: center;
+        }
+
+        /* Desktop Layout Logic */
+        .row-0 .info-text { bottom: calc(100% + 20px); }
+        .row-1 .paint-name { order: 1; margin-top: 0; margin-bottom: 20px; }
+        .row-1 .swatch-container { order: 2; }
+        .row-1 .info-text { order: 3; position: relative; top: 20px; bottom: auto; }
+
+        .swatch-container {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            position: relative;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .info-text, .paint-name {
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .info-text {
+            position: absolute;
+            width: 180px;
+            font-family: 'Archivo';
+            font-size: 1rem;
+            color: #333;
+            pointer-events: none;
+        }
+
+        .paint-name {
+            font-size: 1.6rem;
+            color: var(--accent-orange);
+            margin-top: 25px;
+        }
+
+        /* REVEAL LOGIC */
+        .paint-card:hover .info-text, .paint-card:hover .paint-name,
+        .paint-card.active-tap .info-text, .paint-card.active-tap .paint-name,
+        .paint-card.active-default .info-text, .paint-card.active-default .paint-name {
+            opacity: 1;
+        }
+
+        /* --- MOBILE VERSION FIXED --- */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                margin-bottom: 60px;
+            }
+            h1{padding-left: 0;}
+            .toggle-group{padding-right: 0;}
+
+            .controls { margin-top: 50px; }
+
+            .paint-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 50px 20px;
+                align-items: start; /* Ensures rows align from the top */
+            }
+
+            .swatch-container { width: 120px; height: 120px; }
+
+            /* RESET ALL FLEX ORDERS FOR MOBILE CONSISTENCY */
+            .paint-card {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: flex-start !important;
+            }
+
+            .paint-name {
+                order: 1 !important;
+                margin: 0 0 15px 0 !important;
+                font-size: 1.3rem;
+                width: 100%;
+            }
+
+            .swatch-container {
+                order: 2 !important;
+                margin: 0 auto !important;
+            }
+
+            .info-text {
+                order: 3 !important;
+                position: relative !important;
+                top: 12px !important;
+                bottom: auto !important;
+                width: 100%;
+                left: 0 !important;
+                transform: none !important;
+            }
+
+            /* Specifically fix the "closer" look for the second row while keeping alignment */
+            .row-1 .paint-name {
+                margin-bottom: 8px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<section class="paint-section">
+    <header>
+        <h1>The many <br> types of paints</h1>
+        <div class="controls">
+            <div class="toggle-group">
+                <button class="toggle-btn active" id="btn-dec" onclick="switchTab('decorative')">Decorative</button>
+                <button class="toggle-btn" id="btn-ind" onclick="switchTab('industrial')">Industrial</button>
+            </div>
+            <span class="hint">Tap to change.</span>
+        </div>
+    </header>
+
+    <div id="paint-grid" class="paint-grid"></div>
+</section>
+
+<script>
+  const data = {
+      decorative: [
+          { name: "Emulsions", info: "Water-based, used for interiors and exteriors", img: "1.png" },
+          { name: "Distempers", info: "Traditional chalk-based finish for walls", img: "2.png" },
+          { name: "Enamels", info: "Hard, glossy finish for wood and metal", img: "3.png" },
+          { name: "Textured", info: "Provides physical depth to surfaces", img: "4.png" },
+          { name: "Metallic", info: "Reflective particles for premium look", img: "5.png" },
+          { name: "Velvet", info: "Soft touch luxury finish", img: "6.png" }
+      ],
+      industrial: [
+          { name: "Epoxy", info: "Highly durable chemical resistant coating", img: "7.png" },
+          { name: "Polyurethane", info: "UV resistant high-performance finish", img: "8.png" },
+          { name: "Anti-Corrosive", info: "Prevents oxidation on metal structures", img: "9.png" },
+          { name: "Heat Resistant", info: "Withstands temperatures up to 600°C", img: "10.png" },
+          { name: "Primers", info: "Essential base for industrial adhesion", img: "11.png" },
+          { name: "Marine", info: "Specialized for underwater environments", img: "12.png" }
+      ]
+  };
+
+    const grid = document.getElementById('paint-grid');
+
+    function renderItems(type) {
+        gsap.to(".paint-card", {
+            opacity: 0,
+            duration: 0.3,
+            onComplete: () => {
+                grid.innerHTML = '';
+                data[type].forEach((item, index) => {
+                    const isRowTwo = index >= 3;
+                    const rowClass = isRowTwo ? 'row-1' : 'row-0';
+                    const card = document.createElement('div');
+
+                    const activeClass = (index === 1) ? 'active-default' : '';
+                    card.className = `paint-card ${rowClass} ${activeClass}`;
+
+                    card.innerHTML = `
+                        <div class="info-text">${item.info}</div>
+                        <div class="swatch-container" style="background-image: url('${item.img}')"></div>
+                        <div class="paint-name">${item.name}</div>
+                    `;
+
+                    const swatch = card.querySelector('.swatch-container');
+
+                    const rotateImage = () => {
+                        const randomRot = (Math.random() * 30) - 15;
+                        gsap.to(swatch, { rotation: randomRot, duration: 0.5, ease: "back.out(1.7)" });
+                    };
+
+                    const resetImage = () => {
+                        gsap.to(swatch, { rotation: 0, duration: 0.4, ease: "power2.out" });
+                    };
+
+                    if(index === 1) {
+                        gsap.set(swatch, { rotation: (Math.random() * 30) - 15 });
+                    }
+
+                    card.addEventListener('mouseenter', rotateImage);
+                    card.addEventListener('mouseleave', () => {
+                        if(!card.classList.contains('active-tap') && !card.classList.contains('active-default')) {
+                            resetImage();
+                        }
+                    });
+
+                    card.addEventListener('click', () => {
+                        document.querySelectorAll('.paint-card').forEach(c => {
+                            if(c !== card) {
+                                c.classList.remove('active-tap', 'active-default');
+                                gsap.to(c.querySelector('.swatch-container'), { rotation: 0, duration: 0.4 });
+                            }
+                        });
+                        card.classList.add('active-tap');
+                        rotateImage();
+                    });
+
+                    grid.appendChild(card);
+                });
+                gsap.fromTo(".paint-card", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.08, ease: "power2.out" });
+            }
+        });
+    }
+
+    function switchTab(type) {
+        document.getElementById('btn-dec').classList.toggle('active', type === 'decorative');
+        document.getElementById('btn-ind').classList.toggle('active', type === 'industrial');
+        renderItems(type);
+    }
+
+    window.onload = () => renderItems('decorative');
+</script>
+</body>
+</html>

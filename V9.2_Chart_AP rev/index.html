@@ -1,14 +1,154 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paint Industry Revenue Theme River</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #F9F3E6; padding-top: 24px; }
+    #chart-container { width: 100vw; height: 100vh; }
+  </style>
 </head>
 <body>
-    <div id="chart-container"></div>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <script src="index.js"></script>
+  <div id="chart-container"></div>
+  <script>
+    const chartDom = document.getElementById('chart-container');
+    const myChart = echarts.init(chartDom, null, { backgroundColor: '#F9F3E6' });
+
+    const rawData = [
+      ["2014", 12220, "Asian Paints"], ["2015", 13615, "Asian Paints"], ["2016", 14271, "Asian Paints"],
+      ["2017", 15062, "Asian Paints"], ["2018", 16825, "Asian Paints"], ["2019", 19240, "Asian Paints"],
+      ["2020", 20211, "Asian Paints"], ["2021", 21713, "Asian Paints"], ["2022", 29101, "Asian Paints"],
+      ["2023", 34489, "Asian Paints"], ["2024", 35495, "Asian Paints"], ["2025", 33906, "Asian Paints"],
+
+      ["2014", 3732, "Berger Paints"], ["2015", 4170, "Berger Paints"], ["2016", 4223, "Berger Paints"],
+      ["2017", 4552, "Berger Paints"], ["2018", 5166, "Berger Paints"], ["2019", 6062, "Berger Paints"],
+      ["2020", 6366, "Berger Paints"], ["2021", 6818, "Berger Paints"], ["2022", 8762, "Berger Paints"],
+      ["2023", 10568, "Berger Paints"], ["2024", 11199, "Berger Paints"], ["2025", 11545, "Berger Paints"],
+
+      ["2014", 3120, "Kansai Nerolac"], ["2015", 3505, "Kansai Nerolac"], ["2016", 3767, "Kansai Nerolac"],
+      ["2017", 4053, "Kansai Nerolac"], ["2018", 4658, "Kansai Nerolac"], ["2019", 5424, "Kansai Nerolac"],
+      ["2020", 5280, "Kansai Nerolac"], ["2021", 5074, "Kansai Nerolac"], ["2022", 6369, "Kansai Nerolac"],
+      ["2023", 7543, "Kansai Nerolac"], ["2024", 7801, "Kansai Nerolac"], ["2025", 7823, "Kansai Nerolac"],
+
+      ["2014", 2332, "Akzo Nobel"], ["2015", 2442, "Akzo Nobel"], ["2016", 2640, "Akzo Nobel"],
+      ["2017", 2572, "Akzo Nobel"], ["2018", 2719, "Akzo Nobel"], ["2019", 2918, "Akzo Nobel"],
+      ["2020", 2662, "Akzo Nobel"], ["2021", 2421, "Akzo Nobel"], ["2022", 3149, "Akzo Nobel"],
+      ["2023", 3802, "Akzo Nobel"], ["2024", 3962, "Akzo Nobel"], ["2025", 4091, "Akzo Nobel"],
+
+      ["2014", 64, "Indigo Paints"], ["2015", 90, "Indigo Paints"], ["2016", 124, "Indigo Paints"],
+      ["2017", 289, "Indigo Paints"], ["2018", 411, "Indigo Paints"], ["2019", 536, "Indigo Paints"],
+      ["2020", 625, "Indigo Paints"], ["2021", 723, "Indigo Paints"], ["2022", 906, "Indigo Paints"],
+      ["2023", 1073, "Indigo Paints"], ["2024", 1255, "Indigo Paints"], ["2025", 1277, "Indigo Paints"],
+
+      ["2020", 206, "JSW Paints"], ["2021", 431, "JSW Paints"], ["2022", 1060, "JSW Paints"],
+      ["2023", 1594, "JSW Paints"], ["2024", 2097, "JSW Paints"], ["2025", 2155, "JSW Paints"],
+      ["2025", 2500, "Birla Opus"]
+    ];
+
+    // Brand palette — 7 streams, each needs a distinct colour
+    // Base: #E84C31 (red), #C1D1DF (steel blue), #8A7C92 (mauve), #170D1D (deep plum)
+    // Derived extras by lightening/darkening the base hues
+    const brandColors = [
+      '#C1D1DF', // Asian Paints  — steel blue
+      '#5F9EA0', // Berger        — muted teal
+      '#8A7C92', // Kansai Nerolac — mauve
+      '#A3341F', // Akzo Nobel    — deep red (dark variant of E84C31)
+      '#4A7A9B', // Indigo Paints — slate teal
+      '#5C5066', // JSW Paints    — deep mauve (darker 8A7C92)
+      '#E84C31', // Birla Opus    — brand orange
+    ];
+
+    const option = {
+      backgroundColor: '#F9F3E6',
+      color: brandColors,
+      title: {
+        text: 'Paint Industry Revenue Growth',
+        subtext: 'Hover over the chart to see details',
+        left: 'center',
+        top: '2%',
+        textStyle: {
+          color: '#170D1D',
+          fontWeight: 'bold',
+          fontSize: 30,
+          fontFamily: 'Reckless'
+        },
+        subtextStyle: {
+          color: '#8A7C92',
+          opacity: 0.8,
+          fontSize: 13,
+          fontStyle: 'italic'
+        }
+      },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: '#170D1D',
+        borderColor: '#8A7C92',
+        borderWidth: 1,
+        textStyle: { color: '#F9F3E6', fontFamily: 'sans-serif' },
+        axisPointer: {
+          type: 'line',
+          lineStyle: { color: '#8A7C92', width: 2, type: 'dashed' }
+        },
+        formatter: function (params) {
+          if (!params || params.length === 0) return '';
+          let listHtml = '';
+          params.forEach(item => {
+            const val = item.data[1];
+            const name = item.data[2];
+            const color = item.color;
+            listHtml += `
+              <div style="margin-top:5px;display:flex;align-items:center;gap:8px;">
+                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></span>
+                <span style="color:#C1D1DF;">${name}:</span>
+                <b style="color:#F9F3E6;">${name === "Birla Opus" ? "~" : ""}₹${val.toLocaleString()} Cr</b>
+              </div>`;
+          });
+          return `<div style="font-family:sans-serif;padding:6px 4px;">${listHtml}</div>`;
+        }
+      },
+      legend: {
+        top: '16%',
+        selectedMode: 'multiple',
+        itemGap: 20,
+        textStyle: {
+          fontWeight: 'bold',
+          color: '#170D1D'
+        },
+        inactiveColor: '#C1D1DF'
+      },
+      singleAxis: {
+        top: '24%',
+        bottom: '12%',
+        type: 'time',
+        min: '2016',
+        axisLine: { lineStyle: { color: '#8A7C92' } },
+        axisLabel: { color: '#170D1D', fontWeight: 'bold' },
+        axisPointer: {
+          show: true,
+          label: {
+            show: true,
+            backgroundColor: '#170D1D',
+            color: '#F9F3E6',
+            formatter: (p) => 'FY ' + new Date(p.value).getFullYear()
+          }
+        },
+        splitLine: { show: true, lineStyle: { type: 'dashed', color: '#8A7C92', opacity: 0.2 } }
+      },
+      series: [
+        {
+          type: 'themeRiver',
+          emphasis: {
+            itemStyle: { shadowBlur: 12, shadowColor: 'rgba(23,13,29,0.4)' }
+          },
+          data: rawData.filter(item => parseInt(item[0]) >= 2016),
+          label: { show: false }
+        }
+      ]
+    };
+
+    myChart.setOption(option);
+    window.addEventListener('resize', () => myChart.resize());
+  </script>
 </body>
 </html>

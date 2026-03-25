@@ -2,153 +2,251 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Extended Scroll Particle Viz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asian Paints Final Viz</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
     <style>
-        body { margin: 0; background: #ffffff; font-family: sans-serif; overflow-x: hidden; }
-        .sticky-container { position: sticky; top: 0; width: 100vw; height: 100vh; }
-        canvas { display: block; }
-        /* Increased scroll space */
-        .content { height: 1200vh; position: relative; z-index: 1; }
+        body, html { margin: 0; padding: 0; background: #fff; }
+
+        .ap-viz-main-wrapper {
+            position: relative;
+            width: 100%;
+            height: 850vh; /* Extra runway for the new boxes */
+            background: transparent;
+        }
+
+        .ap-sticky-box {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+        }
+
+        /* Particles on top of everything */
+        #ap-viz-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        /* Logo behind particles */
+        .ap-center-logo {
+            position: relative;
+            z-index: 2;
+            width: 140px;
+            height: auto;
+            pointer-events: none;
+        }
+
+        .ap-box {
+            position: absolute;
+            width: 240px;
+            padding: 15px 20px;
+            font-family: sans-serif;
+            font-size: 13px;
+            line-height: 1.4;
+            border-radius: 6px;
+            z-index: 10;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* DESKTOP POSITIONS */
+        .pos-1 { top: 10%; left: 5%; }
+        .pos-2 { top: 15%; right: 5%; }
+        .pos-3 { top: 40%; left: 2%; }
+        .pos-4 { top: 60%; right: 2%; }
+        .pos-5 { top: 40%; right: 5%; }
+        .pos-6 { bottom: 10%; right: 5%; }
+        .pos-7 { bottom: 10%; left: 5%; }
+        .pos-8 { bottom: 30%; left: 5%; }
+
+        .ap-box.light-blue { background-color: #d8e4f0; color: #222; }
+        .ap-box.dark-bg { background-color: #120d16; color: #ffffff; }
+        .ap-box .red-highlight { color: #ff4757; font-weight: bold; display: block; margin-bottom: 4px; }
+
+        @media (max-width: 768px) {
+    .ap-box {
+        width: 85% !important;
+        left: 50% !important;
+        right: auto !important;
+        /* Resets to prevent stretching */
+        top: auto !important;
+        bottom: auto !important;
+        transform: translateX(-50%) !important;
+        text-align: center;
+        font-size: 12px;
+        padding: 12px 15px;
+        height: auto !important; /* Forces box to hug the text */
+    }
+
+    /* Pair 1 Slots */
+    .ap-box[data-pair="1"][data-order="0"] { top: 8% !important; }
+    .ap-box[data-pair="1"][data-order="1"] { top: 20% !important; }
+
+    /* Pair 2 Slots */
+    .ap-box[data-pair="2"][data-order="0"] { top: 34% !important; }
+    .ap-box[data-pair="2"][data-order="1"] { top: 46% !important; }
+    .ap-box[data-pair="2"][data-order="2"] { top: 58% !important; } /* Fixes Pos-7 */
+
+    /* Pair 3 Slots */
+    .ap-box[data-pair="3"][data-order="0"] { top: 72% !important; }
+    .ap-box[data-pair="3"][data-order="1"] { top: 84% !important; }
+    .ap-box[data-pair="3"][data-order="2"] { top: 92% !important; } /* Fixes Pos-8 */
+
+    .ap-center-logo {
+        width: 100px;
+        opacity: 0.3;
+    }
+}
     </style>
 </head>
 <body>
 
-    <div class="sticky-container">
-        <canvas id="vizCanvas"></canvas>
+    <div class="ap-viz-main-wrapper">
+        <div class="ap-sticky-box">
+
+            <img src="AP.png" alt="Asian Paints" class="ap-center-logo">
+            <canvas id="ap-viz-canvas"></canvas>
+
+            <div class="ap-box light-blue pos-1" data-pair="1">
+                <span class="red-highlight">High end Brands,</span> Shalimar Paints, ICI, Jenson & Nicholson, British Paints
+            </div>
+            <div class="ap-box light-blue pos-2" data-pair="1">
+                <span class="red-highlight">Market Entry,</span> Global premium competition starts arriving.
+            </div>
+
+            <div class="ap-box dark-bg pos-3" data-pair="2">
+                <span class="red-highlight">Exclusive Distributors,</span> Proprietary retail network growth.
+            </div>
+            <div class="ap-box dark-bg pos-4" data-pair="2">
+                <span class="red-highlight">Supply Chain,</span> Optimized logistics for nationwide reach.
+            </div>
+            <div class="ap-box dark-bg pos-7" data-pair="2">
+                <span class="red-highlight">Households chose,</span> between cheap local paint and expensive foreign emulsions.
+            </div>
+
+            <div class="ap-box dark-bg pos-5" data-pair="3">
+                <span class="red-highlight">Household Choice,</span> Bridging the gap between local and global.
+            </div>
+            <div class="ap-box dark-bg pos-6" data-pair="3">
+                <span class="red-highlight">Brand Loyalty,</span> Asian Paints becomes a household name.
+            </div>
+            <div class="ap-box dark-bg pos-8" data-pair="3">
+                <span class="red-highlight">Market Shift,</span> Making quality paint accessible to all.
+            </div>
+
+        </div>
     </div>
-    <div class="content"></div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script>
-        const canvas = document.getElementById('vizCanvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
+        document.addEventListener("DOMContentLoaded", () => {
+            gsap.registerPlugin(ScrollTrigger);
+            const canvas = document.getElementById('ap-viz-canvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
 
-        const blueCount = 20;
-        const totalRedAvailable = 150;
-        const clusterRadius = 250;
-
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        class Particle {
-            constructor(color, startVisible = false) {
-                this.color = color;
-                this.radius = Math.random() * 4 + 4;
-                this.opacity = startVisible ? 0.5 : 0;
-                this.isActive = startVisible; // Logic flag for fading
-
-                // Pre-spawn at random positions within the screen
-                this.x = canvas.width / 2 + (Math.random() - 0.5) * 200;
-                this.y = canvas.height / 2 + (Math.random() - 0.5) * 200;
-
-                this.vx = (Math.random() - 0.5) * 1.5;
-                this.vy = (Math.random() - 0.5) * 1.5;
-            }
-
-            // Smoothly fade in/out
-            fade(targetOpacity) {
-                gsap.to(this, {
-                    opacity: targetOpacity,
-                    duration: 0.3,
-                    ease: "power2.inOut"
-                });
-            }
-
-            update() {
-                const centerX = canvas.width / 2;
-                const centerY = canvas.height / 2;
-                const dx = this.x - centerX;
-                const dy = this.y - centerY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                // Constant movement jitter
-                this.vx += (Math.random() - 0.5) * 0.1;
-                this.vy += (Math.random() - 0.5) * 0.1;
-
-                // Pull back to center cluster
-                if (distance > clusterRadius) {
-                    const angle = Math.atan2(dy, dx);
-                    this.vx -= Math.cos(angle) * 0.15;
-                    this.vy -= Math.sin(angle) * 0.15;
-                }
-
-                // Maintain the slow 50% speed feel (0.3 limit)
-                const limit = 0.3;
-                const currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-                if (currentSpeed > limit) {
-                    this.vx = (this.vx / currentSpeed) * limit;
-                    this.vy = (this.vy / currentSpeed) * limit;
-                }
-
-                this.x += this.vx;
-                this.y += this.vy;
-            }
-
-            draw() {
-                // Only draw if there is something to see
-                if (this.opacity <= 0) return;
-
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = this.color.replace('ALPHA', this.opacity);
-                ctx.fill();
-            }
-        }
-
-        // 1. Create Blue Particles (Visible immediately)
-        for (let i = 0; i < blueCount; i++) {
-            particles.push(new Particle('rgba(74, 144, 226, ALPHA)', true));
-        }
-
-        // 2. Create Red Particles (Invisible but moving immediately)
-        let redParticles = [];
-        for (let i = 0; i < totalRedAvailable; i++) {
-            const p = new Particle('rgba(255, 71, 87, ALPHA)', false);
-            redParticles.push(p);
-            particles.push(p);
-        }
-
-        // Main Animation Ticker
-        gsap.ticker.add(() => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
+            // Random Shuffle within Pairs
+            [1, 2, 3].forEach(num => {
+                const pair = Array.from(document.querySelectorAll(`[data-pair="${num}"]`));
+                pair.sort(() => Math.random() - 0.5);
+                pair.forEach((el, index) => { el.setAttribute('data-order', index); });
             });
-        });
 
-        // Scroll Logic
-        ScrollTrigger.create({
-            trigger: ".content",
-            start: "top top",
-            end: "bottom bottom",
-            onUpdate: (self) => {
-                const p = self.progress;
-                let targetRedCount = 0;
-
-                if (p >= 0.95) targetRedCount = totalRedAvailable;
-                else if (p >= 0.75) targetRedCount = Math.floor(totalRedAvailable * 0.75);
-                else if (p >= 0.50) targetRedCount = Math.floor(totalRedAvailable * 0.50);
-                else if (p >= 0.25) targetRedCount = Math.floor(totalRedAvailable * 0.25);
-                else if (p >= 0.10) targetRedCount = Math.floor(totalRedAvailable * 0.10);
-
-                redParticles.forEach((rp, i) => {
-                    const shouldBeVisible = i < targetRedCount;
-                    if (shouldBeVisible && !rp.isActive) {
-                        rp.isActive = true;
-                        rp.fade(0.5);
-                    } else if (!shouldBeVisible && rp.isActive) {
-                        rp.isActive = false;
-                        rp.fade(0);
-                    }
-                });
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
             }
+            window.addEventListener('resize', resize);
+            resize();
+
+            // Particle Class (standard logic)
+            class Particle {
+                constructor(color, startVisible = false) {
+                    this.color = color;
+                    this.radius = Math.random() * 3 + 2.5;
+                    this.opacity = startVisible ? 0.6 : 0;
+                    this.isActive = startVisible;
+                    this.x = canvas.width / 2 + (Math.random() - 0.5) * 400;
+                    this.y = canvas.height / 2 + (Math.random() - 0.5) * 400;
+                    this.vx = (Math.random() - 0.5) * 1.5;
+                    this.vy = (Math.random() - 0.5) * 1.5;
+                }
+                update() {
+                    const dx = this.x - canvas.width / 2;
+                    const dy = this.y - canvas.height / 2;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist > 250) { this.vx -= dx * 0.001; this.vy -= dy * 0.001; }
+                    this.vx += (Math.random() - 0.5) * 0.08;
+                    this.vy += (Math.random() - 0.5) * 0.08;
+                    this.x += this.vx * 0.6; this.y += this.vy * 0.6;
+                }
+                draw() {
+                    if (this.opacity <= 0) return;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color.replace('ALPHA', this.opacity);
+                    ctx.fill();
+                }
+            }
+
+            for(let i=0; i<20; i++) particles.push(new Particle('rgba(74, 144, 226, ALPHA)', true));
+            let redParticles = [];
+            for(let i=0; i<150; i++) {
+                let p = new Particle('rgba(255, 71, 87, ALPHA)', false);
+                redParticles.push(p); particles.push(p);
+            }
+
+            gsap.ticker.add(() => {
+                ctx.clearRect(0,0,canvas.width, canvas.height);
+                particles.forEach(p => { p.update(); p.draw(); });
+            });
+
+            ScrollTrigger.create({
+                trigger: ".ap-viz-main-wrapper",
+                start: "top top",
+                end: "bottom bottom",
+                onUpdate: (self) => {
+                    const prog = self.progress;
+
+                    const showBox = (pair, order, threshold) => {
+                        const el = document.querySelector(`[data-pair="${pair}"][data-order="${order}"]`);
+                        if (!el) return;
+                        if (prog > threshold) {
+                            gsap.to(el, { autoAlpha: 1, y: 0, duration: 0.6, overwrite: "auto" });
+                        } else {
+                            gsap.to(el, { autoAlpha: 0, y: 20, duration: 0.3, overwrite: "auto" });
+                        }
+                    };
+
+                    // Trigger sequence
+                    showBox(1, 0, 0.05); showBox(1, 1, 0.15);
+                    showBox(2, 0, 0.30); showBox(2, 1, 0.40); showBox(2, 2, 0.50);
+                    showBox(3, 0, 0.65); showBox(3, 1, 0.75); showBox(3, 2, 0.85);
+
+                    let redTarget = prog > 0.7 ? 150 : prog > 0.4 ? 100 : prog > 0.1 ? 50 : 0;
+                    redParticles.forEach((p, i) => {
+                        const shouldShow = i < redTarget;
+                        if(shouldShow && !p.isActive) { p.isActive = true; gsap.to(p, {opacity: 0.6}); }
+                        if(!shouldShow && p.isActive) { p.isActive = false; gsap.to(p, {opacity: 0}); }
+                    });
+                }
+            });
         });
     </script>
 </body>

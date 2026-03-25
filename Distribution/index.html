@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asian Paints - Manufacturing Footprint</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #fcf1eb;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        #container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+        }
+        /* Left Information Panel */
+        #info-panel {
+            flex: 0 0 35%;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .header-title {
+            color: #4a3461;
+            font-size: 1.6rem;
+            font-weight: bold;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        .description {
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 40px;
+        }
+        .stat-value {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #4a3461;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 1.2rem;
+            color: #333;
+        }
+        /* Right Map Panel */
+        #map-container {
+            flex: 1;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <div id="info-panel">
+            <div class="header-title">FROM MANUFACTURING<br>LOCATIONS TO<br>RETAIL OUTLETS</div>
+            <p class="description">
+                We place great emphasis on creating an inclusive ecosystem. We have the largest distribution and retail network in the Indian paints industry, and it is the backbone of our performance.
+            </p>
+            <div class="stat-value">169,000+</div>
+            <div class="stat-label">Retail touchpoints in India</div>
+        </div>
+
+        <div id="map-container"></div>
+    </div>
+
+    <script>
+        var chartDom = document.getElementById('map-container');
+        var myChart = echarts.init(chartDom);
+
+        // RAW URL for the full India map from Subhash9325
+        const GEO_URL = 'https://raw.githubusercontent.com/Subhash9325/GeoJson-Data-of-Indian-States/master/Indian_States';
+
+        const categories = {
+            'Decorative coatings': '#008db1',
+            'Chemicals': '#e8a84b',
+            'Industrial coatings': '#28a745',
+            'Kitchen business': '#a8b13d',
+            'Bath business': '#a6a6a6',
+            'Weatherseal*': '#aec7e8',
+            'Upcoming': '#c0392b'
+        };
+
+        const plantData = [
+            {name: '1', value: [76.58, 28.89], city: 'Rohtak, Haryana', cat: 'Decorative coatings', cap: '400,000 KL'},
+            {name: '2', value: [77.53, 28.45], city: 'Kasna, UP', cat: 'Decorative coatings', cap: '120,000 KL'},
+            {name: '3', value: [73.00, 21.62], city: 'Ankleshwar, Gujarat', cat: 'Decorative coatings', cap: '250,000 KL'},
+            {name: '4', value: [73.98, 18.04], city: 'Khandala, Maharashtra', cat: 'Decorative coatings', cap: '400,000 KL'},
+            {name: '5', value: [78.26, 17.52], city: 'Patancheru, Telangana', cat: 'Decorative coatings', cap: '80,000 KL'},
+            {name: '6', value: [83.21, 17.68], city: 'Visakhapatnam, AP', cat: 'Decorative coatings', cap: '300,000 KL'},
+            {name: '7', value: [76.63, 12.29], city: 'Mysuru, Karnataka', cat: 'Decorative coatings', cap: '600,000 KL'},
+            {name: '8', value: [79.95, 12.97], city: 'Sriperumbudur, TN', cat: 'Decorative coatings', cap: '140,000 KL'},
+            {name: '9', value: [79.76, 11.74], city: 'Cuddalore, TN', cat: 'Chemicals', cap: '8,760 MT'},
+            {name: '10', value: [72.84, 20.30], city: 'Sarigam, Gujarat', cat: 'Industrial coatings', cap: '14,400 MT'},
+            {name: '11', value: [73.07, 19.06], city: 'Taloja, Maharashtra', cat: 'Industrial coatings', cap: '21,000 KL'},
+            {name: '12', value: [73.85, 18.52], city: 'Pune, Maharashtra', cat: 'Kitchen business'},
+            {name: '13', value: [73.13, 19.65], city: 'Wada, Maharashtra', cat: 'Kitchen business'},
+            {name: '14', value: [73.13, 19.45], city: 'Wada, Maharashtra', cat: 'Bath business'},
+            {name: '15', value: [76.61, 28.18], city: 'Rewari, Haryana', cat: 'Weatherseal*'},
+            {name: '16', value: [77.79, 13.07], city: 'Hoskote, Karnataka', cat: 'Weatherseal*'},
+            {name: '17', value: [75.67, 22.61], city: 'Pithampur, MP', cat: 'Upcoming'},
+            {name: '18', value: [72.58, 21.71], city: 'Dahej, Gujarat', cat: 'Upcoming'}
+        ];
+
+        fetch(GEO_URL)
+            .then(res => res.json())
+            .then(geoJson => {
+                echarts.registerMap('India_Full', geoJson);
+
+                const series = Object.keys(categories).map(catName => ({
+                    name: catName,
+                    type: 'scatter',
+                    coordinateSystem: 'geo',
+                    data: plantData.filter(d => d.cat === catName),
+                    symbolSize: 18,
+                    itemStyle: { color: categories[catName] },
+                    label: {
+                        show: true,
+                        formatter: '{b}',
+                        color: '#fff',
+                        fontSize: 9,
+                        fontWeight: 'bold'
+                    }
+                }));
+
+                myChart.setOption({
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: p => `<b>${p.data.city}</b><br/>${p.data.cat}<br/>${p.data.cap || ''}`
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        bottom: '5%',
+                        right: '5%',
+                        itemGap: 10,
+                        textStyle: { fontSize: 11 }
+                    },
+                    geo: {
+                        map: 'India_Full',
+                        roam: true,
+                        zoom: 1.2,
+                        center: [82, 22],
+                        itemStyle: {
+                            areaColor: '#b49c8c',
+                            borderColor: '#ffffff',
+                            borderWidth: 1
+                        },
+                        emphasis: { itemStyle: { areaColor: '#a68b7a' } }
+                    },
+                    series: series
+                });
+            })
+            .catch(e => {
+                console.error(e);
+                document.getElementById('map-container').innerHTML = "Map load failed.";
+            });
+
+        window.addEventListener('resize', myChart.resize);
+    </script>
+</body>
+</html>

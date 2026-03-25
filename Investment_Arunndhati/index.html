@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Investor Portfolio v8.0</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        body { margin: 0; background: #070707; overflow: hidden; font-family: 'Courier New', monospace; }
+        #container { width: 100vw; height: 100vh; }
+        .custom-tooltip {
+            background: rgba(10, 10, 10, 0.95) !important;
+            border: 1px solid #ff4444 !important; /* Red border for the "Dormant" feel */
+            color: #eee !important;
+            padding: 12px !important;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.1);
+        }
+        .tooltip-header { color: #ff4444; border-bottom: 1px solid #333; margin-bottom: 8px; font-size: 11px; letter-spacing: 1px; }
+        .tooltip-row { display: flex; justify-content: space-between; gap: 30px; font-size: 12px; margin-bottom: 4px; }
+        .status-tag { position: absolute; bottom: 40px; right: 40px; color: #ff4444; font-size: 12px; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <div class="status-tag">SYSTEM_ALERT: INVESTOR_DORMANT_SINCE_2024</div>
+
+    <script>
+        const chartDom = document.getElementById('container');
+        const myChart = echarts.init(chartDom);
+
+        // --- EXTENDED DATA ---
+        const companies = [
+            { id: 'C1', name: 'PlonkedSpectral', val: '80%', x: 15, y: 85 },
+            { id: 'C2', name: 'ErkWerks', val: '45%', x: 22, y: 72 },
+            { id: 'C3', name: 'Oxin2lin', val: '92%', x: 12, y: 60 },
+            { id: 'C4', name: 'TipTopBD888', val: '55%', x: 28, y: 48 },
+            { id: 'C5', name: 'Varseop', val: '30%', x: 10, y: 36 },
+            { id: 'C6', name: 'Morro', val: '65%', x: 25, y: 24 },
+            { id: 'C7', name: 'SkyNet_v2', val: '12%', x: 14, y: 12 }
+        ];
+
+        const investmentYears = [
+            { year: '2021', total: 220, y: 80 },
+            { year: '2022', total: 340, y: 68 }, // Spacing 12 units (~10-15px)
+            { year: '2023', total: 190, y: 56 },
+            { year: '2024', total: 260, y: 44 },
+            { year: '2025', total: 0,   y: 32 }, // Dormant
+            { year: '2026', total: 0,   y: 20 }  // Dormant
+        ];
+
+        const transactions = [
+            { from: 'PlonkedSpectral', to: '2021', amount: '$1.2M', date: 'Mar 12', type: 'SEED' },
+            { from: 'ErkWerks', to: '2021', amount: '$0.8M', date: 'Aug 04', type: 'PRE-SEED' },
+            { from: 'Oxin2lin', to: '2022', amount: '$5.0M', date: 'Jan 20', type: 'SERIES A' },
+            { from: 'TipTopBD888', to: '2022', amount: '$2.2M', date: 'Nov 15', type: 'SEED' },
+            { from: 'Varseop', to: '2023', amount: '$0.9M', date: 'May 03', type: 'GRANTS' },
+            { from: 'Morro', to: '2023', amount: '$4.1M', date: 'Dec 12', type: 'SERIES B' },
+            { from: 'PlonkedSpectral', to: '2024', amount: '$2.0M', date: 'Feb 28', type: 'BRIDGE' },
+            { from: 'SkyNet_v2', to: '2024', amount: '$0.5M', date: 'Jun 19', type: 'PRE-SEED' }
+        ];
+
+        const nodes = [];
+        const links = [];
+
+        // 1. Company Nodes
+        companies.forEach(c => {
+            nodes.push({
+                name: c.name,
+                category: 'company',
+                value: [c.x, c.y],
+                symbol: 'rect',
+                symbolSize: [160, 22],
+                itemStyle: { color: 'rgba(255,255,255,0.03)', borderColor: '#444' },
+                label: { show: true, position: 'insideLeft', offset: [10, 0], formatter: `{b|${c.name}}`, rich: { b: { color: '#fff', fontSize: 11 } } }
+            });
+            nodes.push({
+                name: c.name + '_val',
+                value: [c.x + 13, c.y],
+                symbol: 'none',
+                label: { show: true, formatter: c.val, color: '#444', fontSize: 10 }
+            });
+        });
+
+        // 2. Year Nodes
+        const startX = 65;
+        investmentYears.forEach(y => {
+            const isDormant = y.total === 0;
+            nodes.push({
+                name: y.year,
+                category: 'year',
+                value: [startX, y.y],
+                symbol: 'rect',
+                symbolSize: [isDormant ? 15 : y.total, 22], // Small red block if 0
+                symbolOffset: [(isDormant ? 15 : y.total) / 2, 0],
+                itemStyle: { color: isDormant ? '#ff4444' : '#fff' },
+                label: {
+                    show: true, position: 'left', distance: 15,
+                    formatter: isDormant ? `[NULL] ${y.year}` : `${y.year}`,
+                    color: isDormant ? '#ff4444' : '#888',
+                    fontWeight: isDormant ? 'bold' : 'normal'
+                }
+            });
+        });
+
+        // 3. Wires
+        transactions.forEach(t => {
+            links.push({
+                source: t.from,
+                target: t.to,
+                data: t,
+                lineStyle: { color: '#333', width: 2, opacity: 0.5, curveness: 0 }
+            });
+        });
+
+        const option = {
+            backgroundColor: '#070707',
+            tooltip: {
+                trigger: 'item',
+                className: 'custom-tooltip',
+                formatter: (params) => {
+                    if (params.dataType === 'edge') {
+                        const d = params.data.data;
+                        return `<div class="tooltip-header">LOG: ${d.type}</div>` +
+                               `<div class="tooltip-row"><span>DATE:</span><span>${d.date}</span></div>` +
+                               `<div class="tooltip-row"><span>AMT:</span><span>${d.amount}</span></div>`;
+                    }
+                    if (params.data.category === 'year') {
+                        const yearTransactions = transactions.filter(t => t.to === params.name);
+                        if (yearTransactions.length === 0) return `<div class="tooltip-header">ERROR: NO_DATA</div>NO INVESTMENTS LOGGED`;
+                        let rows = yearTransactions.map(t => `<div class="tooltip-row"><span>${t.from}</span><span>${t.amount}</span></div>`).join('');
+                        return `<div class="tooltip-header">ALLOCATION_${params.name}</div>${rows}`;
+                    }
+                    if (params.data.category === 'company') {
+                        const compTransactions = transactions.filter(t => t.from === params.name);
+                        let rows = compTransactions.map(t => `<div class="tooltip-row"><span>${t.to}</span><span>${t.amount}</span></div>`).join('');
+                        return `<div class="tooltip-header">HISTORY: ${params.name}</div>${rows}`;
+                    }
+                }
+            },
+            xAxis: { show: false, min: 0, max: 100 },
+            yAxis: { show: false, min: 0, max: 100 },
+            series: [{
+                type: 'graph',
+                coordinateSystem: 'cartesian2d',
+                data: nodes,
+                links: links,
+                focusNodeAdjacency: true,
+                emphasis: {
+                    scale: false,
+                    lineStyle: { color: '#fff', width: 3, opacity: 1 }
+                }
+            }]
+        };
+
+        myChart.setOption(option);
+        window.addEventListener('resize', () => myChart.resize());
+    </script>
+</body>
+</html>

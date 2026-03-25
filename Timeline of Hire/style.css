@@ -1,9 +1,17 @@
 body {
-    font-family: 'Times New Roman', Times, serif;
-    background-color: #ffffff;
+    font-family: 'Reckless', Times, serif;
+    background-color: #170D1D;
     margin: 0;
     padding: 40px;
     color: #333;
+}
+.subtitle {
+  font-family: 'Reckless', Times, serif;
+  color: #F9F3E6;
+  font-weight: 'normal';
+  padding-top: 10px;
+  max-width: 70%;
+  font-size: 14px;
 }
 
 .container {
@@ -21,19 +29,21 @@ header {
 }
 
 h1 {
-    font-size: 2.5rem;
+    font-size: 1.6rem;
     font-weight: 500;
     margin: 0;
-    text-align: center;
+    text-align: left;
+    color: #F9F3E6;
 }
 
 /* Legend Styling */
 .legend {
     display: flex;
     gap: 30px;
-    font-family: Arial, sans-serif;
+    font-family: 'Archivo', sans-serif;
     font-size: 14px;
     margin-top: 1em;
+    color: #F9F3E6;
 }
 
 .legend-item {
@@ -45,14 +55,14 @@ h1 {
 .square {
     width: 20px;
     height: 15px;
-    background: #e0e0e0;
+    background: #E84C31;
     border-radius: 2px;
 }
 
 .line {
     width: 40px;
     height: 5px;
-    background: #000;
+    background: #C1D1DF;
 }
 
 /* Chart Container */
@@ -66,16 +76,16 @@ h1 {
     /* Set positioning and initial hide */
     position: absolute;
     opacity: 0;
-    top: 55%; /* Position it below the timeline chart */
+    top: 62%; /* Position it below the timeline chart */
 
     width: 220px;
-    background: #e0e0e0;
+    background: #F9F3E6;
     padding: 25px;
     min-height: 180px;
     box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
     /* Transition for a smooth appearance */
     transition: left 0.3s ease, opacity 0.3s ease;
-    z-index: 10;
+    z-index: 1;
 }
 
 /* Vertical Dotted Connection Line */
@@ -90,6 +100,7 @@ h1 {
     border-left: 1px dotted #ccc; /* Grey dotted line */
 }
 
+
 .card h2 {
     font-size: 1.4rem;
     margin-top: 0;
@@ -99,8 +110,8 @@ h1 {
 }
 
 .card h2 small {
-    font-size: 0.8rem;
-    color: #666;
+    font-size: 1.2rem;
+    color: #E84C31;
 }
 
 .card p {
@@ -132,6 +143,10 @@ h1 {
 /* ... Base desktop styles remain same ... */
 
 @media (max-width: 768px) {
+
+  body{
+    padding: 20px;
+  }
     .container {
         overflow: visible; /* Prevent date clipping */
         text-align: center;
@@ -140,6 +155,10 @@ h1 {
     .card h2  {
         font-size: 1.4rem;
         padding-bottom: 1em;
+    }
+    .subtitle{
+      text-align: left;
+      max-width: 100%;
     }
 
     header {
@@ -167,10 +186,10 @@ h1 {
         box-sizing: border-box;
         z-index: 1000;
         display: none; /* Controlled by JS */
-        background: #e0e0e0;
-        padding: 30px;
+        background: #F9F3E6;
+        padding: 20px;
         box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-        height: 100px;
+        height: 230px;
     }
 
     /* Connection line for mobile */
@@ -190,6 +209,6 @@ h1 {
         color: #bbb;
         font-family: Arial, sans-serif;
         font-size: 14px;
-        margin-top: 50px; /* Add extra space now that card is absolute */
+        margin-top: 20px; /* Add extra space now that card is absolute */
     }
 }

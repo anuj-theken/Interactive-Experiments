@@ -1,20 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asian Paints vs Nifty 50</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asian Paints Dashboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      background-color: #F9F3E6;
+      color: #170D1D;
+      font-family: 'Playfair Display', serif;
+      overflow-x: hidden;
+    }
+    .dashboard-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 10px 10px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    header {
+      width: 95%;
+      margin-bottom: 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .header-left { display: flex; flex-direction: column; }
+    h1 {
+      font-size: 48px;
+      letter-spacing: 0.5px;
+      margin: 0;
+      color: #170D1D;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+    .html-legend {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding-top: 8px;
+      flex-shrink: 0;
+    }
+    .html-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 16px;
+      color: #170D1D;
+      font-family: 'Playfair Display', serif;
+      white-space: nowrap;
+    }
+    .legend-line {
+      width: 24px;
+      height: 2px;
+      display: inline-block;
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .instruction {
+      font-size: 0.7rem;
+      color: #888;
+      margin-top: 4px;
+      text-transform: uppercase;
+      font-family: 'Playfair Display', serif;
+    }
+    #chart-container {
+      width: 100%;
+      height: 70vh;
+      min-height: 400px;
+    }
+    @media (max-width: 768px) {
+      h1 { font-size: 20px; }
+      #chart-container { height: 60vh; }
+      header { width: 100%; padding-left: 10px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="dashboard-wrapper">
-        <header>
-            <h1>ASIAN PAINTS IPO vs NIFTY 50</h1>
-            <p class="instruction">Hover over markers <span class="dot">●</span> or lines to see more details</p>
-        </header>
-        <div id="chart-container"></div>
+<div class="dashboard-wrapper">
+  <header>
+    <div class="header-left">
+      <h1>Asian Paints vs Nifty 50 </h1>
+      <p class="instruction">Hover over the chart to explore key milestones</p>
     </div>
-    <script src="ipo.js"></script>
+    <div class="html-legend">
+      <div class="html-legend-item">
+        <span class="legend-dot" style="background:#E84C31;"></span>
+        <span class="legend-line" style="background:#E84C31;"></span>
+        AP IPO
+      </div>
+      <div class="html-legend-item">
+        <span class="legend-line" style="background:#8A7C92; border-top: 2px dashed #8A7C92; height:0;"></span>
+        Nifty 50
+      </div>
+    </div>
+  </header>
+  <div id="chart-container"></div>
+</div>
+
+<script>
+  const chartDom = document.getElementById('chart-container');
+  const myChart = echarts.init(chartDom, 'light');
+
+  const years = ['Jan 1999','Aug 1999','Mar 2000','Sep 2000','Mar 2001','Oct 2001','May 2002','Nov 2002','Jun 2003','Jan 2004','Jul 2004','Feb 2005','Sep 2005','Mar 2006','Nov 2006','May 2007','Dec 2007','Jun 2008','Jan 2009','Jul 2009','Feb 2010','Sep 2010','Mar 2011','Oct 2011','May 2012','Dec 2012','Jun 2013','Jan 2014','Aug 2014','Feb 2015','Sep 2015','Apr 2016','Oct 2016','May 2017','Nov 2017','Jun 2018','Dec 2018','Jul 2019','Jan 2020','Aug 2020','Mar 2021','Sep 2021','Apr 2022','Oct 2022','May 2023','Nov 2023','Jun 2024','Jan 2025','Aug 2025','Feb 2026'];
+
+  const asianPaintsData = [100,112.29,142.00,138.80,137.71,147.90,180.64,184.43,214.98,282.07,268.86,303.79,414.14,543.86,582.66,687.04,837.46,973.15,740.99,1102.44,1564.90,2364.31,2129.04,2633.75,3050.42,3630.05,3902.78,4141.41,5256.73,6950.34,6869.95,7167.93,9709.60,9536.62,9760.94,10764.73,11498.32,11464.23,15040.40,15204.12,20093.43,29028.62,26988.64,26030.30,26356.06,26398.57,24554.29,19031.99,21285.35,20001.68];
+
+  const nifty50Data = [100,147.82,185.90,162.78,146.65,102.67,123.14,106.81,117.47,218.46,172.60,233.27,271.19,353.32,427.18,462.21,670.67,519.51,342.02,496.67,541.86,615.12,621.77,549.05,571.04,663.16,660.19,697.26,853.46,972.28,859.35,866.56,977.58,1042.36,1173.38,1200.74,1200.46,1325.90,1372.55,1258.87,1676.93,1983.66,1943.72,2028.40,2158.80,2614.52,2694.74,2757.67,2884.34,2884.34];
+
+  const eventData = [
+    { coord: ['Aug 1999', 112], value: '1', desc: '1997: Champaklal Choksey dies. The founding families split. The Choksey family sells nearly all of their shares for ₹128 crore — worth ₹20,000 crore by 2026.' },
+    { coord: ['Jan 2009', 740], value: '2', desc: '2009: Asian Paints appoints its first professional CEO from outside the founding families.' },
+    { coord: ['Dec 2012', 3630], value: '3', desc: '2012: Asian Paints\' revenue crosses ₹10,000 crore.' },
+    { coord: ['Nov 2023', 26398], value: '4', desc: '2023: Asian Paints\' revenue crosses ₹30,000 crore.' },
+    { coord: ['Jun 2024', 24554], value: '5', desc: '2024: Birla Opus enters the paint industry, intensifying competition.' }
+  ];
+
+  const option = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'axis',
+      confine: true,
+      backgroundColor: '#F9F3E6',
+      borderColor: '#ddd',
+      textStyle: { fontSize: 12, color: '#170D1D' },
+      formatter: function (params) {
+        let marker = eventData.find(e => e.coord[0] === params[0].name);
+        let res = `<div style="font-weight:bold; margin-bottom:4px; color:#170D1D;">${params[0].name}</div>`;
+        params.forEach(item => {
+          res += `${item.marker} <span style="color:#170D1D;">${item.seriesName}: ${item.value}</span><br/>`;
+        });
+        if (marker) {
+          res += `<div style="margin-top:8px; color:#d35400; white-space:normal; width:200px; line-height:1.4;">${marker.desc}</div>`;
+        }
+        return res;
+      }
+    },
+    legend: { show: false },
+    grid: {
+      top: '12%',
+      left: '3%',
+      right: '3%',
+      bottom: '8%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: years,
+      axisLabel: { fontSize: 10, interval: 'auto', color: '#170D1D' },
+      axisLine: { lineStyle: { color: '#170D1D' } },
+      axisTick: { lineStyle: { color: '#170D1D' } }
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: { fontSize: 10, color: '#170D1D' },
+      axisLine: { lineStyle: { color: '#170D1D' } },
+      axisTick: { lineStyle: { color: '#170D1D' } },
+      splitLine: { lineStyle: { color: 'rgba(23,13,29,0.1)' } }
+    },
+    series: [
+      {
+        name: 'AP IPO',
+        type: 'line',
+        data: asianPaintsData,
+        smooth: true,
+        lineStyle: { color: '#E84C31', width: 2.5 },
+        itemStyle: { color: '#E84C31' },
+        markPoint: {
+          symbol: 'circle',
+          symbolSize: 14,
+          data: eventData.map(e => ({
+            name: e.value,
+            coord: e.coord,
+            label: { show: true, formatter: e.value, color: '#fff', fontSize: 9, fontWeight: 'bold' }
+          })),
+          itemStyle: { color: '#170D1D' }
+        }
+      },
+      {
+        name: 'Nifty 50',
+        type: 'line',
+        data: nifty50Data,
+        smooth: true,
+        symbol: 'none',
+        lineStyle: { type: 'dashed', color: '#8A7C92', width: 1.5 }
+      }
+    ]
+  };
+
+  myChart.setOption(option);
+  window.addEventListener('resize', () => myChart.resize());
+</script>
 </body>
-</html> 
+</html>

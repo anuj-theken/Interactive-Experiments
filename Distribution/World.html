@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asian Paints - Global Footprint 2024-25</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        body { margin: 0; padding: 0; background-color: #fcf1eb; font-family: 'Arial', sans-serif; overflow: hidden; }
+        #container { display: flex; width: 100vw; height: 100vh; position: relative; }
+
+        /* Left Information Panel */
+        #info-panel {
+            flex: 0 0 32%;
+            padding: 50px 45px;
+            display: flex;
+            flex-direction: column;
+            background-color: #fcf1eb;
+            z-index: 10;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .main-title { color: #7b6a62; font-size: 1.4rem; font-weight: bold; margin-bottom: 25px; text-transform: uppercase; text-align: center; letter-spacing: 1px;}
+        .description { font-size: 0.9rem; color: #333; line-height: 1.6; margin-bottom: 30px; }
+        .section-header { color: #4a3461; font-size: 1rem; font-weight: bold; text-transform: uppercase; margin-bottom: 20px; }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
+        .stat-item { display: flex; flex-direction: column; }
+        .stat-value { font-size: 2rem; font-weight: bold; color: #4a3461; }
+        .stat-label { font-size: 0.75rem; color: #555; line-height: 1.3; margin-top: 5px; }
+
+        .revenue-total { margin-top: 10px; }
+        .revenue-value { font-size: 1.8rem; font-weight: bold; color: #4a3461; }
+
+        /* Map Area */
+        #map-wrapper { flex: 1; height: 100%; position: relative; background-color: #fcf1eb; }
+        #map-container { width: 100%; height: 100%; }
+
+        /* Floating Legend */
+        #map-legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(5px);
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border: 1px solid rgba(74, 52, 97, 0.1);
+            min-width: 200px;
+        }
+        .legend-item { display: flex; align-items: flex-start; gap: 8px; }
+        .color-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+        .reg-info { display: flex; flex-direction: column; }
+        .reg-name { font-weight: bold; color: #4a3461; font-size: 0.85rem; }
+        .reg-subs { font-size: 0.7rem; color: #666; margin-bottom: 2px; }
+        .reg-data { font-size: 0.9rem; color: #333; font-weight: bold; }
+        .reg-perc { font-size: 0.7rem; color: #777; font-style: italic; }
+
+        /* Footer Disclaimers */
+        .footer-disclaimer {
+            position: absolute;
+            bottom: 15px;
+            left: 45px;
+            right: 45px;
+            font-size: 0.65rem;
+            color: #888;
+            line-height: 1.4;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <div id="info-panel">
+            <div class="main-title">OUR GLOBAL FOOTPRINT</div>
+            <p class="description">
+                Asian Paints operates in 14 countries with 26 paint manufacturing facilities and services consumers in over 60 markets. From Nepal to Egypt and Fiji, our international business is built on strong local partnerships, market-specific innovations, and a consistent commitment to the Asian Paints quality and service.
+            </p>
+
+            <div class="section-header">ON THE WORLD STAGE</div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-value">13</span>
+                    <span class="stat-label">Countries in which we operate outside of India</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">15</span>
+                    <span class="stat-label">In-house paint manufacturing facilities outside India</span>
+                </div>
+            </div>
+
+            <div class="revenue-total">
+                <span class="revenue-value">₹ 3,066.4 Crores</span>
+                <p class="stat-label">International business revenue from the sale of products and services</p>
+            </div>
+        </div>
+
+        <div id="map-wrapper">
+            <div id="map-legend">
+                <div class="legend-item">
+                    <div class="color-dot" style="background: #2ecc71;"></div>
+                    <div class="reg-info">
+                        <span class="reg-name" style="color:#2ecc71">Africa</span>
+                        <span class="reg-subs">Egypt and Ethiopia</span>
+                        <span class="reg-data">₹ 560 Crores</span>
+                        <span class="reg-perc">18% of International business</span>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="color-dot" style="background: #9b59b6;"></div>
+                    <div class="reg-info">
+                        <span class="reg-name" style="color:#9b59b6">Middle East</span>
+                        <span class="reg-subs">Oman, Bahrain, UAE and Qatar</span>
+                        <span class="reg-data">₹ 1,147.3 Crores</span>
+                        <span class="reg-perc">37% of International business</span>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="color-dot" style="background: #e74c3c;"></div>
+                    <div class="reg-info">
+                        <span class="reg-name" style="color:#e74c3c">Asia</span>
+                        <span class="reg-subs">Bangladesh, Nepal, Sri Lanka and Indonesia*</span>
+                        <span class="reg-data">₹ 1,253.7 Crores</span>
+                        <span class="reg-perc">40% of International business</span>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="color-dot" style="background: #34495e;"></div>
+                    <div class="reg-info">
+                        <span class="reg-name" style="color:#34495e">South Pacific</span>
+                        <span class="reg-subs">Fiji, Solomon Islands, Samoa and Vanuatu</span>
+                        <span class="reg-data">₹ 158.6 Crores</span>
+                        <span class="reg-perc">5% of International business</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="map-container"></div>
+
+            <div class="footer-disclaimer">
+                Note: Region-wise break-up excludes inter-Company elimination<br>
+                *In March 2025, our Company has exited the Indonesia market through divestment.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var chartDom = document.getElementById('map-container');
+        var myChart = echarts.init(chartDom);
+        const WORLD_GEO_URL = 'https://raw.githubusercontent.com/apache/echarts/master/test/data/map/json/world.json';
+
+        // Coordinates based on actual international locations in the report
+        const countryData = [
+            // Africa (Green)
+            { name: 'Egypt', value: [31.23, 30.04], color: '#2ecc71' },
+            { name: 'Ethiopia', value: [38.74, 9.01], color: '#2ecc71' },
+            // Middle East (Purple)
+            { name: 'UAE', value: [55.27, 25.20], color: '#9b59b6' },
+            { name: 'Oman', value: [58.40, 23.58], color: '#9b59b6' },
+            { name: 'Bahrain', value: [50.58, 26.06], color: '#9b59b6' },
+            { name: 'Qatar', value: [51.53, 25.28], color: '#9b59b6' },
+            // Asia (Red - as per image dots)
+            { name: 'Bangladesh', value: [90.41, 23.81], color: '#e74c3c' },
+            { name: 'Nepal', value: [85.32, 27.71], color: '#e74c3c' },
+            { name: 'Sri Lanka', value: [79.86, 6.92], color: '#e74c3c' },
+            { name: 'Indonesia', value: [106.84, -6.20], color: '#e74c3c' },
+            // South Pacific (Dark Blue/Grey)
+            { name: 'Fiji', value: [178.44, -18.14], color: '#34495e' },
+            { name: 'Solomon Islands', value: [160.15, -9.44], color: '#34495e' },
+            { name: 'Samoa', value: [-172.10, -13.73], color: '#34495e' },
+            { name: 'Vanuatu', value: [168.32, -17.73], color: '#34495e' }
+        ];
+
+        fetch(WORLD_GEO_URL).then(res => res.json()).then(geoJson => {
+            echarts.registerMap('world', geoJson);
+
+            myChart.setOption({
+                tooltip: {
+                    trigger: 'item',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    formatter: '{b}'
+                },
+                geo: {
+                    map: 'world',
+                    roam: true,
+                    center: [90, 15],
+                    zoom: 1.4,
+                    itemStyle: {
+                        areaColor: '#d9cdc3',
+                        borderColor: '#fcf1eb',
+                        borderWidth: 1
+                    },
+                    emphasis: { itemStyle: { areaColor: '#c8b8ad' } }
+                },
+                series: [{
+                    type: 'scatter',
+                    coordinateSystem: 'geo',
+                    data: countryData,
+                    symbolSize: 10,
+                    itemStyle: {
+                        color: p => p.data.color,
+                        borderColor: '#fff',
+                        borderWidth: 1.5
+                    }
+                }]
+            });
+        });
+
+        window.addEventListener('resize', myChart.resize);
+    </script>
+</body>
+</html>

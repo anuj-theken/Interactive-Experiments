@@ -1,0 +1,103 @@
+/* Wrapper that creates the scroll depth */
+.ap-viz-wrapper {
+    position: relative;
+    width: 100%;
+    height: 600vh; /* Determines how long the scroll lasts */
+    background: transparent; /* Ensures website background shows through */
+}
+
+/* Sticky container that stays on screen during scroll */
+.ap-sticky-section {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background: transparent;
+}
+
+/* Canvas styling */
+#ap-viz-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none; /* Allows clicking through the canvas */
+}
+
+/* Center Logo (Image 2) */
+.ap-center-logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 250px; /* Adjust based on your logo size */
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Base styles for the info boxes */
+.ap-box {
+    position: absolute;
+    width: 280px;
+    padding: 16px 20px;
+    font-family: sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    z-index: 3;
+    opacity: 0; /* Hidden initially, controlled by GSAP */
+    visibility: hidden;
+    transform: translateY(20px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.ap-box.light-blue {
+    background-color: #cdd9e6;
+    color: #111;
+}
+
+.ap-box.dark-bg {
+    background-color: #1a111e;
+    color: #fff;
+}
+
+.ap-box .red-text {
+    color: #ff4757;
+    font-weight: bold;
+}
+
+/* Desktop Positioning */
+@media (min-width: 769px) {
+    .ap-box-tl { top: 15%; left: 10%; }
+    .ap-box-tr { top: 15%; right: 10%; }
+
+    .ap-box-ml { top: 45%; left: 5%; }
+    .ap-box-mr { top: 45%; right: 5%; }
+
+    .ap-box-bl { top: 75%; left: 10%; }
+    .ap-box-br { top: 75%; right: 10%; }
+}
+
+/* Mobile Layout (Reference Image 3 - Stacked layout) */
+@media (max-width: 768px) {
+    .ap-box {
+        width: 85%;
+        left: 50% !important;
+        transform: translateX(-50%) translateY(20px); /* Center align horizontally */
+        text-align: center;
+    }
+
+    .ap-box-tl { top: 5%; }
+    .ap-box-tr { top: 20%; }
+    .ap-box-ml { top: 35%; }
+    .ap-box-mr { top: 50%; }
+    .ap-box-bl { top: 65%; }
+    .ap-box-br { top: 80%; }
+
+    .ap-center-logo {
+        width: 180px;
+        opacity: 0.8; /* Slightly faded on mobile so text stands out more */
+    }
+}

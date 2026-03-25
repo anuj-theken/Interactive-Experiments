@@ -11,12 +11,11 @@ const asianPaintsData = [100, 112.29, 142.00, 138.80, 137.71, 147.90, 180.64, 18
 const nifty50Data = [100, 147.82, 185.90, 162.78, 146.65, 102.67, 123.14, 106.81, 117.47, 218.46, 172.60, 233.27, 271.19, 353.32, 427.18, 462.21, 670.67, 519.51, 342.02, 496.67, 541.86, 615.12, 621.77, 549.05, 571.04, 663.16, 660.19, 697.26, 853.46, 972.28, 859.35, 866.56, 977.58, 1042.36, 1173.38, 1200.74, 1200.46, 1325.90, 1372.55, 1258.87, 1676.93, 1983.66, 1943.72, 2028.40, 2158.80, 2614.52, 2694.74, 2757.67, 2884.34, 2884.34];
 
 const eventData = [
-    { coord: ['Jan 1999', 100], value: '1', desc: '1999: Lorem ipsum dolor sit amet.' },
-    { coord: ['Mar 2006', 64.61], value: '2', desc: '2006: Lorem ipsum dolor sit amet.' },
-    { coord: ['Mar 2011', 2129], value: '3', desc: '2011: Lorem ipsum dolor sit amet.' },
-    { coord: ['Jun 2018', 10764], value: '4', desc: '2018: Lorem ipsum dolor sit amet.' },
-    { coord: ['Apr 2022', 26988], value: '5', desc: '2022: Lorem ipsum dolor sit amet.' },
-    { coord: ['Jun 2024', 24554], value: '6', desc: '2024: Lorem ipsum dolor sit amet.' }
+    { coord: ['Aug 1999', 112], value: '1', desc: '1997: Champaklal Choksey dies. The founding families split. The Choksey family sells nearly all of their shares for ₹128 crore — worth ₹20,000 crore by 2026.' },
+    { coord: ['Jan 2009', 740], value: '2', desc: '2009: Asian Paints appoints its first professional CEO from outside the founding families.' },
+    { coord: ['Dec 2012', 3630], value: '3', desc: '2012: Asian Paints\' revenue crosses ₹10,000 crore.' },
+    { coord: ['Nov 2023', 26398], value: '4', desc: '2023: Asian Paints\' revenue crosses ₹30,000 crore.' },
+    { coord: ['Jun 2024', 24554], value: '5', desc: '2024: Birla Opus enters the paint industry, intensifying competition.' }
 ];
 
 const option = {
@@ -69,7 +68,7 @@ const option = {
             data: asianPaintsData,
             smooth: true,
             lineStyle: { color: '#170D1D', width: 2.5 },
-            itemStyle: { color: '#170D1D' },
+            itemStyle: { color: '#E84C31' },
             markPoint: {
                 symbol: 'circle',
                 symbolSize: 12,
@@ -83,7 +82,7 @@ const option = {
             data: nifty50Data,
             smooth: true,
             symbol: 'none',
-            lineStyle: { type: 'dashed', color: '#F9F3E6', width: 1.5 }
+            lineStyle: { type: 'dashed', color: '#8A7C92', width: 1.5 }
         }
     ]
 };

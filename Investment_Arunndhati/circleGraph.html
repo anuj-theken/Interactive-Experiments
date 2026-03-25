@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LightRock Investment</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #EDE8DC;
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+  }
+  .page {
+    width: 100%;
+    max-width: 640px;
+    background: #EDE8DC;
+    padding: clamp(16px, 4vw, 32px) clamp(12px, 4vw, 28px) 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .main-title {
+    font-family: 'Georgia', serif;
+    font-size: clamp(28px, 6vw, 42px);
+    font-weight: 900;
+    color: #1A1208;
+    line-height: 1.05;
+    letter-spacing: -1px;
+    margin-bottom: 4px;
+    text-align: center;
+  }
+  .subtitle {
+    font-size: clamp(14px, 2.2vw, 15px);
+    color: #6E6050;
+    margin-bottom: 16px;
+    text-align: center;
+    line-height: 1.5;
+  }
+  .legend-box {
+    border-top: 1.5px solid #C8BFAA;
+    border-bottom: 1.5px solid #C8BFAA;
+    padding: 10px 0;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .legend-row { display: flex; align-items: flex-start; gap: 0; }
+  .legend-key {
+    font-size: clamp(9px, 1.8vw, 9px);
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #6E6050;
+    letter-spacing: 0.08em;
+    width: clamp(64px, 13vw, 80px);
+    min-width: 56px;
+    flex-shrink: 0;
+    line-height: 1.4;
+    padding-top: 1px;
+  }
+  .legend-items { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+  .leg-item { display: flex; align-items: center; gap: 5px; font-size: clamp(11px, 2.2vw, 11px); color: #3A2E20; }
+  .dot-fill { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .dot-ghost { width: 10px; height: 10px; border-radius: 50%; background: #E4DDD0; border: 1.5px dashed #A89880; flex-shrink: 0; }
+  .dot-outline { width: 10px; height: 10px; border-radius: 50%; border: 2px solid; background: transparent; flex-shrink: 0; }
+  .size-dot { border-radius: 50%; border: 1.5px solid #A89880; background: transparent; display: inline-block; flex-shrink: 0; }
+  #viz-area { position: relative; width: 100%; flex-grow: 1; }
+  canvas { width: 100%; height: 100%; display: block; }
+  #tooltip {
+    position: fixed;
+    background: #FDFAF4;
+    border: 1px solid #D4C9B0;
+    color: #1A1208;
+    padding: 12px 14px;
+    border-radius: 3px;
+    pointer-events: none;
+    opacity: 0;
+    font-size: 14px;
+    z-index: 100;
+    min-width: 160px;
+    max-width: 220px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+    transition: opacity 0.1s;
+    line-height: 1.6;
+  }
+  #tooltip .tt-name { font-size: 15px; font-weight: 800; color: #1A1208; margin-bottom: 1px; }
+  #tooltip .tt-invested { color: #5A4A38; font-size: 14px; margin-bottom: 4px; }
+  #tooltip .tt-invested strong { font-weight: 800; color: #1A1208; }
+  #tooltip .tt-invested u { text-decoration: underline; color: #3A2E20; }
+  #tooltip .tt-invested em { font-style: italic; }
+  #tooltip .tt-val { font-size: 14px; color: #3A2E20; }
+  #tooltip .tt-status { font-size: 14px; }
+  #tooltip .tt-status.active   { color: #3A9A8D; }
+  #tooltip .tt-status.exit     { color: #B07060; }
+  #tooltip .tt-status.shutdown { color: #C8382A; }
+  #tooltip .tt-status.bankrupt { color: #C8382A; }
+  #tooltip .tt-status.downround{ color: #C07040; }
+  .footer {
+    border-top: 1.5px solid #C8BFAA;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0 16px 0;
+    margin-top: 4px;
+    gap: 8px;
+  }
+  .footer-logo {
+    width: 64px; height: 26px; background: #2A1F14; border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    color: #EDE8DC; font-size: 8px; font-weight: 800; letter-spacing: 0.1em; flex-shrink: 0;
+  }
+  .footer-center { font-size: clamp(10px, 2vw, 10px); color: #8A7A65; text-align: center; flex: 1; }
+  .footer-right { font-size: clamp(9px, 1.8vw, 9px); color: #8A7A65; text-align: right; max-width: 120px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="main-title">LightRock Investment</div>
+  <div class="subtitle">Lorem ipsum dolor sit amet, consectetur adipiscing elit.<br>Sed ac gravida nulla, ut malesuada purus.</div>
+
+  <div class="legend-box">
+    <div class="legend-row">
+      <div class="legend-key">Status</div>
+      <div class="legend-items">
+        <div class="leg-item"><div class="dot-fill" style="background:#5BBFB0"></div>Active</div>
+        <div class="leg-item"><div class="dot-fill" style="background:#D4A8A0"></div>Exit</div>
+        <div class="leg-item"><div class="dot-fill" style="background:#C8382A"></div>Shutdown</div>
+        <div class="leg-item"><div class="dot-fill" style="background:#D4946A"></div>Downround</div>
+
+      </div>
+    </div>
+    <div class="legend-row">
+      <div class="legend-key">Industry</div>
+      <div class="legend-items" id="ind-legend"></div>
+    </div>
+    <div class="legend-row">
+      <div class="legend-key" style="line-height:1.3">Scale<br>(Valuation)</div>
+      <div class="legend-items">
+        <div class="leg-item"><div class="size-dot" style="width:7px;height:7px;"></div>$50M</div>
+        <div class="leg-item"><div class="size-dot" style="width:13px;height:13px;"></div>$250M</div>
+        <div class="leg-item"><div class="size-dot" style="width:20px;height:20px;"></div>$500M+</div>
+        <div class="leg-item" style="color:#9A8E7A;font-style:italic;font-size:10px;">*area = valuation</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="viz-area"><canvas id="viz"></canvas></div>
+
+  <div class="footer">
+    <div class="footer-logo">⊟ THE KEN</div>
+    <div class="footer-center">Graphic by Anuj, 27 Mar '26</div>
+    <div class="footer-right">Sourc: will be added soon</div>
+  </div>
+</div>
+
+<div id="tooltip">
+  <div class="tt-name" id="tt-name"></div>
+  <div class="tt-invested" id="tt-invested"></div>
+  <div class="tt-val" id="tt-val"></div>
+  <div id="tt-status"></div>
+</div>
+
+<script>
+const canvas = document.getElementById('viz');
+const ctx = canvas.getContext('2d');
+const tt = document.getElementById('tooltip');
+
+const STATUS_COLORS = {
+  active:   '#5BBFB0',
+  exit:     '#D4A8A0',
+  shutdown: '#C8382A',
+  bankrupt: '#C8382A',
+  downround:'#D4946A'
+};
+const IND_COLORS = {
+  "Fintech":   "#2E5FA3",
+  "Agritech":  "#3A8C5C",
+  "Health":    "#A33A4A",
+  "Logistics": "#B07030",
+  "Edtech":    "#7A3A8C",
+  "Energy":    "#2A7A8A"
+};
+const STATUS_LABELS = {
+  active:   'Active', exit: 'Exit',
+  shutdown: 'Shutdown', bankrupt: 'Shutdown', downround: 'Downround'
+};
+
+const data = [
+  { co: "Aye Finance",      year: 2017, industry: "Fintech",   type: "active",    valuation: 250, invested: "—" },
+  { co: "Ummeed Housing",   year: 2018, industry: "Fintech",   type: "exit",      valuation: 180, invested: "—" },
+  { co: "arya.ag",          year: 2019, industry: "Agritech",  type: "active",    valuation: 310, invested: "—" },
+  { co: "EM3",              year: 2019, industry: "Agritech",  type: "shutdown",  valuation: 60,  invested: "—" },
+  { co: "Dunzo",            year: 2019, industry: "Logistics", type: "shutdown",  valuation: 400, invested: "—" },
+  { co: "Kauvery Hospital", year: 2019, industry: "Health",    type: "active",    valuation: 220, invested: "—" },
+  { co: "NeoGrowth",        year: 2019, industry: "Fintech",   type: "active",    valuation: 150, invested: "—" },
+  { co: "PharmEasy",        year: 2019, industry: "Health",    type: "downround", valuation: 550, invested: "—" },
+  { co: "Waycool",          year: 2019, industry: "Agritech",  type: "bankrupt",  valuation: 95,  invested: "—" },
+  { co: "Aknamed",          year: 2020, industry: "Health",    type: "active",    valuation: 110, invested: "—" },
+  { co: "Ampin Energy",     year: 2020, industry: "Energy",    type: "active",    valuation: 280, invested: "—" },
+  { co: "Porter",           year: 2020, industry: "Logistics", type: "active",    valuation: 350, invested: "—" },
+  { co: "Scaler",           year: 2021, industry: "Edtech",    type: "active",    valuation: 290, invested: "—" },
+  { co: "Axio",             year: 2021, industry: "Fintech",   type: "exit",      valuation: 210, invested: "—" },
+  { co: "Sukoon",           year: 2022, industry: "Fintech",   type: "active",    valuation: 190, invested: "—" },
+  { co: "SolarSquare",      year: 2024, industry: "Energy",    type: "active",    valuation: 120, invested: "—" },
+  { co: "ATEC Global",      year: 2025, industry: "Energy",    type: "active",    valuation: 80,  invested: "—" }
+];
+
+const allYears = [2017,2018,2019,2020,2021,2022,2023,2024,2025];
+let nodes = [], hoverId = null, activeTouch = null;
+
+function seededRand(seed) {
+  let s = seed;
+  return () => { s = (s * 16807 + 0) % 2147483647; return (s - 1) / 2147483646; };
+}
+
+function applyGrain(ctx, x, y, r, seed) {
+  const rng = seededRand(seed * 1337);
+  const dots = Math.floor(r * r * 1.1);
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.clip();
+  for (let i = 0; i < dots; i++) {
+    const angle = rng() * Math.PI * 2;
+    const dist  = Math.sqrt(rng()) * r * 0.97;
+    const gx = x + Math.cos(angle) * dist;
+    const gy = y + Math.sin(angle) * dist;
+    const alpha = 0.03 + rng() * 0.09;
+    ctx.beginPath();
+    ctx.arc(gx, gy, 0.65, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(0,0,0,${alpha})`;
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function buildIndLegend() {
+  const el = document.getElementById('ind-legend');
+  el.innerHTML = '';
+  Object.entries(IND_COLORS).forEach(([n, c]) => {
+    el.innerHTML += `<div class="leg-item"><div class="dot-outline" style="border-color:${c}"></div>${n}</div>`;
+  });
+}
+
+function getLayout() {
+  const dpr = window.devicePixelRatio || 1;
+  const area = document.getElementById('viz-area');
+  const w = area.offsetWidth;
+  // On mobile, rows need to be taller to accommodate many circles stacking
+  // Detect if 2019 circles would overflow horizontally
+  const isMobile = w < 420;
+  // rowH scales with width but has a min for readability
+  const rowH = isMobile ? Math.max(80, w * 0.21) : Math.max(90, w * 0.15);
+  const totalH = rowH * allYears.length;
+  return { w, rowH, totalH, isMobile };
+}
+
+function setCanvasSize() {
+  const dpr = window.devicePixelRatio || 1;
+  const { w, totalH } = getLayout();
+  canvas.width  = w * dpr;
+  canvas.height = totalH * dpr;
+  canvas.style.width  = w + 'px';
+  canvas.style.height = totalH + 'px';
+  document.getElementById('viz-area').style.height = totalH + 'px';
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(dpr, dpr);
+}
+
+function render() {
+  const dpr = window.devicePixelRatio || 1;
+  const { w, rowH, isMobile } = getLayout();
+  const h = rowH * allYears.length;
+  ctx.clearRect(0, 0, w, h);
+
+  // Label column width adapts
+  const labelW = isMobile ? 38 : 46;
+  const startX = labelW + 6;
+  const usableW = w - startX - 6;
+
+  const maxVal = Math.max(...data.map(d => d.valuation || 0));
+  // Max circle radius = 42% of rowH
+  const maxR = rowH * 0.47;
+  const baseSize = maxR / Math.sqrt(maxVal);
+
+  // Font size for year labels — min 14px
+  const yearFontSize = Math.max(14, Math.min(13, w * 0.030));
+
+  nodes = [];
+
+  allYears.forEach((year, i) => {
+    const cy = (i + 0.5) * rowH;
+
+    // Guide line
+    ctx.beginPath();
+    ctx.strokeStyle = "#D0C8B4";
+    ctx.lineWidth = 0.8;
+    ctx.setLineDash([]);
+    ctx.moveTo(startX - 4, cy);
+    ctx.lineTo(w - 6, cy);
+    ctx.stroke();
+
+    // Year label
+    ctx.fillStyle = "#6E6050";
+    ctx.font = `bold ${yearFontSize}px 'Inter', sans-serif`;
+    ctx.textAlign = "left";
+    ctx.fillText(year, 0, cy + 5);
+
+    const yearData = data.filter(d => d.year === year);
+
+    if (yearData.length === 0) {
+      // leave row empty — just the guide line and year label
+    } else {
+      // Compute radii first to check total width
+      const radii = yearData.map(co => co.valuation ? Math.sqrt(co.valuation) * baseSize : 12);
+      // Total width if circles were placed with 68% spacing
+      let totalNeeded = 0;
+      radii.forEach(r => { totalNeeded += r * 2 * 0.68; });
+      // Scale down if overflow
+      const scaleDown = totalNeeded > usableW ? usableW / totalNeeded : 1;
+
+      let curX = startX;
+      yearData.forEach((co, idx) => {
+        const r = radii[idx] * scaleDown;
+        const x = curX + r;
+        const isH = hoverId === `${year}-${idx}`;
+        const dr = isH ? r * 1.07 : r;
+        const seed = year * 100 + idx;
+
+        nodes.push({ x, y: cy, r: dr, co, id: `${year}-${idx}` });
+
+        ctx.beginPath();
+        ctx.arc(x, cy, dr, 0, Math.PI * 2);
+        ctx.fillStyle = STATUS_COLORS[co.type] || '#AAAAAA';
+        ctx.fill();
+
+        applyGrain(ctx, x, cy, dr, seed);
+
+        ctx.beginPath();
+        ctx.arc(x, cy, dr, 0, Math.PI * 2);
+        ctx.strokeStyle = IND_COLORS[co.industry] || '#333';
+        ctx.lineWidth = isH ? 2.5 : 1.5;
+        ctx.setLineDash([]);
+        ctx.stroke();
+
+        curX += r * 2 * 0.68;
+      });
+    }
+  });
+}
+
+function showTooltip(hit, clientX, clientY) {
+  tt.style.opacity = '1';
+  const ttW = 210, ttH = 110;
+  let tx = clientX + 16, ty = clientY + 16;
+  if (tx + ttW > window.innerWidth)  tx = clientX - ttW - 8;
+  if (ty + ttH > window.innerHeight) ty = clientY - ttH - 8;
+  if (tx < 4) tx = 4;
+  if (ty < 4) ty = 4;
+  tt.style.left = tx + 'px';
+  tt.style.top  = ty + 'px';
+
+  if (hit.empty) {
+    document.getElementById('tt-name').textContent = hit.year;
+    document.getElementById('tt-invested').innerHTML = 'No investments this year';
+    document.getElementById('tt-val').textContent = '';
+    document.getElementById('tt-status').textContent = '';
+  } else {
+    const co = hit.co;
+    document.getElementById('tt-name').textContent = co.co;
+    document.getElementById('tt-invested').innerHTML = co.valuation
+        ? `Invested in <em>${co.year}</em> ·`
+        : `Invested in <em>${co.year}</em>`;
+    document.getElementById('tt-val').innerHTML = co.valuation ? `Valuation: <strong>$${co.valuation}M</strong>` : '';
+    const statusEl = document.getElementById('tt-status');
+    statusEl.textContent = `Status: ${STATUS_LABELS[co.type] || co.type}`;
+    statusEl.className = `tt-status ${co.type}`;
+  }
+}
+
+function hitTest(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  const mx = clientX - rect.left;
+  const my = clientY - rect.top;
+  return [...nodes].reverse().find(n => Math.hypot(mx - n.x, my - n.y) < n.r);
+}
+
+// Mouse
+canvas.addEventListener('mousemove', e => {
+  const hit = hitTest(e.clientX, e.clientY);
+  if (hit) {
+    if (hoverId !== hit.id) { hoverId = hit.id; render(); }
+    showTooltip(hit, e.clientX, e.clientY);
+  } else {
+    if (hoverId !== null) { hoverId = null; render(); }
+    tt.style.opacity = '0';
+  }
+});
+canvas.addEventListener('mouseleave', () => {
+  hoverId = null; tt.style.opacity = '0'; render();
+});
+
+// Touch
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const hit = hitTest(touch.clientX, touch.clientY);
+  if (hit) {
+    activeTouch = hit.id;
+    hoverId = hit.id;
+    render();
+    showTooltip(hit, touch.clientX, touch.clientY);
+  }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const hit = hitTest(touch.clientX, touch.clientY);
+  if (hit) {
+    if (hoverId !== hit.id) { hoverId = hit.id; render(); }
+    showTooltip(hit, touch.clientX, touch.clientY);
+  } else {
+    if (hoverId !== null) { hoverId = null; render(); }
+    tt.style.opacity = '0';
+  }
+}, { passive: false });
+
+canvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  // keep tooltip visible briefly then fade
+  setTimeout(() => {
+    hoverId = null;
+    tt.style.opacity = '0';
+    render();
+  }, 1800);
+}, { passive: false });
+
+function init() {
+  buildIndLegend();
+  setCanvasSize();
+  render();
+}
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { setCanvasSize(); render(); }, 100);
+});
+
+init();
+</script>
+</body>
+</html>

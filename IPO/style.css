@@ -20,13 +20,16 @@ header {
     text-align: left;
     width: 95%;
     margin-bottom: 15px;
+
+    font-style: 'Reckless';
 }
 
 h1 {
     font-size: 1.1rem; /* Smaller for mobile */
     letter-spacing: 1px;
     margin: 0;
-    color: #efefef;
+    color: #170D1D;
+    font-style: 'Reckless';
 }
 
 .instruction {
@@ -34,6 +37,7 @@ h1 {
     color: #888;
     margin-top: 4px;
     text-transform: uppercase;
+    font-style: 'Reckless';
 }
 
 #chart-container {

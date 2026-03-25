@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asian Paints Scrollytelling</title>
+  <link rel="stylesheet" href="https://unpkg.com/lenis@1.1.18/dist/lenis.css">
+
+  <style>
+    @font-face {
+      font-family: 'Reckless';
+      src: local('serif');
+    }
+
+    html { scroll-behavior: initial; }
+    html.lenis,
+    html.lenis body {
+      height: auto !important;
+      overflow: visible !important;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f4f1ea;
+      font-family: 'Reckless', serif;
+      color: #1a1a1a;
+      overflow-x: hidden;
+    }
+
+    /* ─── SECTION ─── */
+    .paint-scrolly-section {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      background-color: #f4f1ea;
+      min-height: 300vh;
+    }
+
+    /* ─── LEFT / TEXT ─── */
+    .paint-scrolly__content {
+      width: 45%;
+      position: relative;
+      z-index: 100;
+    }
+
+    .paint-scrolly__header-container {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      padding-top: 10vh;
+      padding-left: 10%;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .paint-scrolly__header {
+      font-size: 2.8rem;
+      line-height: 1.1;
+      max-width: 560px;
+      width: 90%;
+      margin: 0;
+    }
+
+    .paint-scrolly__steps-wrapper {
+      position: relative;
+      margin-top: -60vh;
+    }
+
+    .paint-scrolly__step {
+      width: 100%;
+      height: 35vh;
+      display: flex;
+      align-items: center;
+      opacity: 0.2;
+      transition: opacity 0.4s ease;
+      box-sizing: border-box;
+    }
+
+    /* Alternating indentation from doc 2 */
+    .paint-scrolly__step[data-index="0"],
+    .paint-scrolly__step[data-index="2"],
+    .paint-scrolly__step[data-index="4"] {
+      padding-left: 10%;
+    }
+
+    .paint-scrolly__step[data-index="1"],
+    .paint-scrolly__step[data-index="3"],
+    .paint-scrolly__step[data-index="5"] {
+      padding-left: 23%;
+    }
+
+    /* Extra spacing from doc 1 */
+    .paint-scrolly__step[data-index="1"],
+    .paint-scrolly__step[data-index="3"] {
+      margin-bottom: 50vh;
+    }
+
+    .paint-scrolly__step.is-active {
+      opacity: 1;
+    }
+
+    .paint-scrolly__text {
+      font-size: 2.1rem;
+      line-height: 1.2;
+      margin: 0;
+      max-width: 450px;
+    }
+
+    /* ─── RIGHT / STICKY IMAGE ─── */
+    .paint-scrolly__sticky {
+      position: sticky;
+      top: 0;
+      width: 55%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+      z-index: 1;
+    }
+
+    .paint-scrolly__sticky.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .paint-scrolly__img-container {
+      position: relative;
+      width: 512px;
+      height: 384px;
+      max-width: 90%;
+      background: #e0ddd5;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .paint-scrolly__img {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      clip-path: inset(100% 0 0 0);
+      will-change: clip-path;
+      z-index: 1;
+    }
+
+    .paint-scrolly__img:first-child {
+      clip-path: inset(0 0 0 0);
+    }
+
+    .paint-scrolly__line {
+      position: absolute;
+      left: -10px;
+      width: calc(100% + 20px);
+      height: 2px;
+      background-color: #d35400;
+      z-index: 100;
+      top: 100%;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+
+    .highlight { color: #d35400; font-weight: bold; }
+
+    /* ─── MOBILE ─── */
+    @media (max-width: 768px) {
+      html, body {
+        overflow-x: hidden;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      .paint-scrolly-section {
+        display: block;
+        position: relative;
+        width: 100%;
+        min-height: unset;
+      }
+
+      /* Fixed background image layer */
+      .paint-scrolly__sticky {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1;
+        opacity: 1;
+        transform: none;
+        pointer-events: none;
+      }
+
+      .paint-scrolly__img-container {
+        width: 100vw;
+        height: auto;
+        aspect-ratio: 512 / 384;
+        box-shadow: none;
+      }
+
+      /* Text content scrolls above the fixed image */
+      .paint-scrolly__content {
+        width: 100%;
+        position: relative;
+        z-index: 10;
+      }
+
+      /* Header: fixed on mobile, always visible at top */
+      .paint-scrolly__header-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: auto;
+        margin: 0;
+        padding: 16px 20px;
+        box-sizing: border-box;
+        text-align: center;
+        background-color: #f4f1ea;
+        pointer-events: auto;
+        z-index: 20;
+      }
+
+      /* Push steps down so first step isn't hidden behind the fixed header */
+      .paint-scrolly__steps-wrapper {
+        padding-top: 120px;
+      }
+
+      .paint-scrolly__header {
+        font-size: 2.2rem;
+        line-height: 1.5;
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+      }
+
+      .paint-scrolly__steps-wrapper {
+        margin-top: 0;
+      }
+
+      /* Each step is full-screen height on mobile */
+      .paint-scrolly__step {
+        height: 100vh;
+        padding: 0 5% !important;
+        margin-bottom: 0 !important;
+        justify-content: center;
+        display: flex;
+        align-items: center;
+      }
+
+      .paint-scrolly__text {
+        width: 100vw;
+        max-width: 100%;
+        text-align: center;
+        font-size: 2rem;
+        padding: 40px 20px;
+        background-color: rgba(244, 241, 234, 0.95);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-radius: 0;
+        word-wrap: break-word;
+        box-sizing: border-box;
+        line-height: 1.7;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<section class="paint-scrolly-section" id="scrolly-trigger">
+
+  <!-- LEFT: Text -->
+  <div class="paint-scrolly__content">
+    <div class="paint-scrolly__header-container">
+      <h1 class="paint-scrolly__header">Asian Paints' early impact was to transition</h1>
+    </div>
+
+    <div class="paint-scrolly__steps-wrapper">
+      <div class="paint-scrolly__step" data-index="0">
+        <p class="paint-scrolly__text">the popular products used from <span class="highlight">chuna</span></p>
+      </div>
+      <div class="paint-scrolly__step" data-index="1">
+        <p class="paint-scrolly__text">to <span class="highlight">emulsions,</span> powders to cans</p>
+      </div>
+      <div class="paint-scrolly__step" data-index="2">
+        <p class="paint-scrolly__text">the epicentre of paint production from <span class="highlight">Calcutta</span></p>
+      </div>
+      <div class="paint-scrolly__step" data-index="3">
+        <p class="paint-scrolly__text">to <span class="highlight">Bombay</span></p>
+      </div>
+      <div class="paint-scrolly__step" data-index="4">
+        <p class="paint-scrolly__text">the ownership of India's paints industry from <span class="highlight">foreign brands</span></p>
+      </div>
+      <div class="paint-scrolly__step" data-index="5">
+        <p class="paint-scrolly__text">to a <span class="highlight">domestic enterprise</span></p>
+      </div>
+    </div>
+
+    <div style="height: 60vh;"></div>
+  </div>
+
+  <!-- RIGHT: Sticky Images -->
+  <div class="paint-scrolly__sticky" id="sticky-container">
+    <div class="paint-scrolly__img-container">
+      <div class="paint-scrolly__line" id="mask-line"></div>
+      <img class="paint-scrolly__img" src="1.png" alt="Transition 1">
+      <img class="paint-scrolly__img" src="2.png" alt="Transition 2">
+      <img class="paint-scrolly__img" src="3.png" alt="Transition 3">
+      <img class="paint-scrolly__img" src="4.png" alt="Transition 4">
+      <img class="paint-scrolly__img" src="5.png" alt="Transition 5">
+      <img class="paint-scrolly__img" src="6.png" alt="Transition 6">
+    </div>
+  </div>
+
+</section>
+
+<script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+<script src="https://unpkg.com/scrollama"></script>
+<script>
+  const isMobile = () => window.innerWidth <= 768;
+
+  // Lenis smooth scroll (desktop only)
+  let lenis;
+  function initLenis() {
+    if (!isMobile()) {
+      lenis = new Lenis({
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      });
+      function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+      requestAnimationFrame(raf);
+    }
+  }
+  initLenis();
+
+  // Intersection Observer: fade-in sticky container on desktop
+  const stickyContainer = document.getElementById('sticky-container');
+  const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+      stickyContainer.classList.add('is-visible');
+    }
+  }, { threshold: 0.1 });
+  observer.observe(document.getElementById('scrolly-trigger'));
+
+  // Scrollama
+  const scroller = scrollama();
+  const imgElems = document.querySelectorAll('.paint-scrolly__img');
+  const stepElems = document.querySelectorAll('.paint-scrolly__step');
+  const maskLine = document.getElementById('mask-line');
+
+  function handleStepProgress(response) {
+    const { index, progress } = response;
+
+    stepElems.forEach((el, i) => {
+      el.classList.toggle('is-active', i === index);
+    });
+
+    if (index > 0) {
+      let fastProgress = (progress - 0.1) / 0.8;
+      fastProgress = Math.max(0, Math.min(1, fastProgress));
+
+      const clipVal = (1 - fastProgress) * 100;
+
+      imgElems[index].style.clipPath = `inset(${clipVal}% 0 0 0)`;
+      imgElems[index].style.zIndex = 10 + index;
+
+      maskLine.style.top = `${clipVal}%`;
+      maskLine.style.zIndex = 20 + index;
+      maskLine.style.opacity = (fastProgress > 0 && fastProgress < 1) ? 1 : 0;
+
+      imgElems[index - 1].style.clipPath = `inset(0 0 0 0)`;
+    } else {
+      maskLine.style.opacity = 0;
+      imgElems[0].style.clipPath = `inset(0 0 0 0)`;
+      for (let i = 1; i < imgElems.length; i++) {
+        imgElems[i].style.clipPath = `inset(100% 0 0 0)`;
+      }
+    }
+  }
+
+  scroller
+    .setup({
+      step: '.paint-scrolly__step',
+      offset: 0.6,
+      progress: true
+    })
+    .onStepProgress(handleStepProgress);
+
+  window.addEventListener('resize', () => {
+    scroller.resize();
+    if (lenis) lenis.resize();
+  });
+</script>
+
+</body>
+</html>

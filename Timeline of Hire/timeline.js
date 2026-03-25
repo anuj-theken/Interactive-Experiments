@@ -1,9 +1,9 @@
 const founderData = [
-    { year: 1952, name: "Jairam Mangesh Nadkarni", desc: "Best polymer scientist of his time, joined as chief scientist and set up Asian Paints’ R&D lab" },
-    { year: 1958, name: "Dr. Madhukar", desc: "Executive assistant to Choksey, became an executive director, arguably the most senior position a non-family member could hold at the time" },
-    { year: 1959, name: "K. Rajagopalachari", desc: "Crucial go-between linking the founding families and senior professionals" },
-    { year: 1960, name: "CV Abraham", desc: "Spent 32 years with Asian Paints" },
-    { year: 1962, name: "Bipin Jhaveri", desc: "Choksey’s nephew, was both a chartered accountant and company secretary, became CFO" }
+    { year: 1952, name: "Jairam Mangesh Nadkarni", desc: "Best polymer scientist of his time, joined as chief scientist and set up Asian Paints' R&D lab" },
+    { year: 1958, name: "D. Madhukar", desc: "Executive assistant to Choksey, became an executive director, arguably the most senior position a non-family member could hold at the time" },
+    { year: 1959, name: "K. Rajagopalachari", desc: "Remained with the company until his death in 2005, was the crucial go-between linking the founding families and senior professionals" },
+    { year: 1960, name: "CV Abraham", desc: "Originally from Bangalore, spent 32 years with Asian Paints" },
+    { year: 1962, name: "Bipin Jhaveri", desc: "Choksey's nephew, was both a chartered accountant and company secretary, became CFO" }
 ];
 
 const chartDom = document.getElementById('timeline-chart');
@@ -12,7 +12,7 @@ const infoCard = document.getElementById('info-card');
 
 function render() {
     const isMobile = window.innerWidth <= 768;
-    const years = Array.from({ length: 15 }, (_, i) => 1950 + i);
+    const years = Array.from({ length: 16 }, (_, i) => 1950 + i );
 
     // --- SERIES SEPARATION ---
     let seriesData = [];
@@ -29,7 +29,7 @@ function render() {
             symbolSize: [20, '150%'],
             // Remove the vertical % offset to let it fill the bottom slot
             symbolOffset: [10, 0],
-            itemStyle: { color: '#f0f0f0' },
+            itemStyle: { color: '#F9F3E6' },
             silent: true,
             data: years.map(() => 1),
             z: 1
@@ -40,7 +40,7 @@ function render() {
             symbol: 'rect',
             symbolSize: [6, 55],
             symbolOffset: [-20, 0],
-            itemStyle: { color: '#000' },
+            itemStyle: { color: '#C1D1DF' },
             data: years.map(() => 1),
             z: 2
         },
@@ -51,9 +51,9 @@ function render() {
             symbolSize: [20, 20],
             symbolOffset: [10, 0], // Must match Grey Track horizontal offset
             itemStyle: {
-                color: '#d1d1d1',
-                shadowBlur: 0,
-                shadowColor: 'rgba(0,0,0,0)'
+                color: '#E84C31',
+                shadowBlur: 5,
+                shadowColor: 'rgba(232,76,49,1)'
             },
             z: 5,
             data: years.map((y) => {
@@ -69,28 +69,30 @@ function render() {
                 type: 'pictorialBar',
                 symbol: 'rect',
 
-                symbolSize: ['120%', 6],
-                symbolOffset: [0, -20],
-                itemStyle: { color: '#000', borderRadius: '4px' },
+                symbolSize: ['135%', 6],
+                symbolOffset: [0, -25],
+                itemStyle: { color: '#C1D1DF', borderRadius: '4px' },
                 data: years.map(() => 10)
             },
             {
                 type: 'bar',
-                itemStyle: { color: '#f0f0f0' },
-                barWidth: '100%',
+                itemStyle: { color: '#F9F3E6' },
+                barWidth: '102%',
+                barHeight: '85%',
                 silent: true,
-                data: years.map(() => 1.6)
+                data: years.map(() => 1.3)
             },
             {
                 type: 'scatter',
                 symbol: 'Rect', // Change from 'roundRect' to 'rect'
                 symbolSize: [25, 20],
+                symbolOffset: [0, -2.4],
                 itemStyle: {
-                    color: '#d1d1d1',
-                    shadowBlur: 3,
-                    shadowColor: 'rgba(0,0,0,0.1)',
+                    color: '#E84C31',
+                    shadowBlur: 15,
+                    shadowColor: 'rgba(232,76,49,1)',
                     // Control the exact radius here (e.g., 2px for a subtle curve)
-                    borderRadius: 20
+                    borderRadius: 20,
                 },
                 data: years.map((y, idx) => {
                     const f = founderData.find(d => d.year === y);
@@ -114,7 +116,11 @@ function render() {
                 show: true, // Explicitly show labels
                 margin: 30,
                 fontSize: 12,
-                color: '#333'
+                color: '#F9F3E6',
+                formatter: function (value) {
+            // Only return the label if the year is a multiple of 5
+            return value % 5 === 0 ? value : '';
+        }
 
             }
         },
@@ -123,11 +129,15 @@ function render() {
             type: 'category',
             data: years,
             inverse: true,
-
             boundaryGap: false,
             axisLine: { show: false },
             axisTick: { show: false },
-            axisLabel: { fontSize: 12, color: '#333', margin: 40, fontWeight: 'bold' }
+
+            axisLabel: { fontSize: 12, color: '#F9F3E6', margin: 40, fontWeight: 'bold',
+
+            formatter: function (value) {
+            // Only return the label if the year is a multiple of 5
+            return value % 5 === 0 ? value : ''; } }
         } : { show: false, min: 0, max: 5, inverse: true },
         series: seriesData
     };
@@ -140,7 +150,7 @@ function showFounder(params) {
     const info = params.data.founderInfo;
     const isMobile = window.innerWidth <= 768;
 
-    document.getElementById('founder-name').innerHTML = `${info.name} <small>. ${info.year}</small>`;
+    document.getElementById('founder-name').innerHTML = `<small>${info.year}</small><br>${info.name}`;
     document.getElementById('founder-desc').innerText = info.desc;
 
     infoCard.style.display = 'block';
