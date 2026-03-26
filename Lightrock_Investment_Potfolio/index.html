@@ -5,11 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>LightRock Investment</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<style>
+<style>@font-face { font-family: 'Jazmin Alt'; src: local('Georgia'); font-weight: bold; }
+  @font-face { font-family: 'GT America Bold'; src: local('Arial'); font-weight: bold; }
+  @font-face { font-family: 'GT America'; src: local('Arial'); font-weight: 300; }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: #EDE8DC;
-    font-family: 'Inter', sans-serif;
+    font-family: 'GT America', Arial, sans-serif;
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -24,9 +27,9 @@
     flex-direction: column;
   }
   .main-title {
-    font-family: 'Georgia', serif;
+    font-family: 'Jazmin Alt', Georgia, serif;
     font-size: clamp(28px, 6vw, 42px);
-    font-weight: 900;
+    font-weight: bold;
     color: #1A1208;
     line-height: 1.05;
     letter-spacing: -1px;
@@ -34,6 +37,7 @@
     text-align: center;
   }
   .subtitle {
+    font-family: 'GT America', Arial, sans-serif;
     font-size: clamp(14px, 2.2vw, 15px);
     color: #6E6050;
     margin-bottom: 16px;
@@ -51,8 +55,9 @@
   }
   .legend-row { display: flex; align-items: flex-start; gap: 0; }
   .legend-key {
+    font-family: 'GT America Bold', Arial, sans-serif;
     font-size: clamp(9px, 1.8vw, 9px);
-    font-weight: 800;
+    font-weight: bold;
     text-transform: uppercase;
     color: #6E6050;
     letter-spacing: 0.08em;
@@ -63,7 +68,7 @@
     padding-top: 1px;
   }
   .legend-items { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
-  .leg-item { display: flex; align-items: center; gap: 5px; font-size: clamp(11px, 2.2vw, 11px); color: #3A2E20; }
+  .leg-item { display: flex; align-items: center; gap: 5px; font-family: 'GT America', Arial, sans-serif; font-size: clamp(11px, 2.2vw, 11px); color: #3A2E20; }
   .dot-fill { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
   .dot-ghost { width: 10px; height: 10px; border-radius: 50%; background: #E4DDD0; border: 1.5px dashed #A89880; flex-shrink: 0; }
   .dot-outline { width: 10px; height: 10px; border-radius: 50%; border: 2px solid; background: transparent; flex-shrink: 0; }
@@ -79,6 +84,7 @@
     border-radius: 3px;
     pointer-events: none;
     opacity: 0;
+    font-family: 'GT America', Arial, sans-serif;
     font-size: 14px;
     z-index: 100;
     min-width: 160px;
@@ -87,13 +93,13 @@
     transition: opacity 0.1s;
     line-height: 1.6;
   }
-  #tooltip .tt-name { font-size: 15px; font-weight: 800; color: #1A1208; margin-bottom: 1px; }
-  #tooltip .tt-invested { color: #5A4A38; font-size: 14px; margin-bottom: 4px; }
-  #tooltip .tt-invested strong { font-weight: 800; color: #1A1208; }
+  #tooltip .tt-name { font-family: 'GT America Bold', Arial, sans-serif; font-size: 15px; font-weight: bold; color: #1A1208; margin-bottom: 1px; }
+  #tooltip .tt-invested { font-family: 'GT America', Arial, sans-serif; color: #5A4A38; font-size: 14px; margin-bottom: 4px; }
+  #tooltip .tt-invested strong { font-weight: bold; color: #1A1208; }
   #tooltip .tt-invested u { text-decoration: underline; color: #3A2E20; }
   #tooltip .tt-invested em { font-style: italic; }
-  #tooltip .tt-val { font-size: 14px; color: #3A2E20; }
-  #tooltip .tt-status { font-size: 14px; }
+  #tooltip .tt-val { font-family: 'GT America', Arial, sans-serif; font-size: 14px; color: #3A2E20; }
+  #tooltip .tt-status { font-family: 'GT America', Arial, sans-serif; font-size: 14px; }
   #tooltip .tt-status.active   { color: #3A9A8D; }
   #tooltip .tt-status.exit     { color: #B07060; }
   #tooltip .tt-status.shutdown { color: #C8382A; }
@@ -104,17 +110,17 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 0 16px 0;
+    padding: 18px 0 16px 0;
     margin-top: 4px;
     gap: 8px;
   }
   .footer-logo {
-    width: 64px; height: 26px; background: #2A1F14; border-radius: 2px;
+    height: 18px;
     display: flex; align-items: center; justify-content: center;
-    color: #EDE8DC; font-size: 8px; font-weight: 800; letter-spacing: 0.1em; flex-shrink: 0;
   }
-  .footer-center { font-size: clamp(10px, 2vw, 10px); color: #8A7A65; text-align: center; flex: 1; }
-  .footer-right { font-size: clamp(9px, 1.8vw, 9px); color: #8A7A65; text-align: right; max-width: 120px; flex-shrink: 0; }
+  .footer-center { font-family: 'GT America', Arial, sans-serif; font-size: 14px; color: #8A7A65; text-align: center; flex: 1; }
+  .footer-right { font-family: 'GT America', Arial, sans-serif; font-size: 14px; color: #8A7A65; text-align: right; max-width: 160px; flex-shrink: 0; }
+
 </style>
 </head>
 <body>
@@ -150,7 +156,7 @@
   <div id="viz-area"><canvas id="viz"></canvas></div>
 
   <div class="footer">
-    <div class="footer-logo">⊟ THE KEN</div>
+    <div><img src="logo.png" alt="The Ken" class="footer-logo"></div>
     <div class="footer-center">Graphic by Anuj, 27 Mar '26</div>
     <div class="footer-right">Sourc: will be added soon</div>
   </div>
@@ -290,7 +296,7 @@ function render() {
   const labelW = isMobile ? 38 : 46;
   const startX = labelW + 6;
   const usableW = w - startX - 6;
-  const GAP = -12; // negative = overlap
+  const GAP = -16; // negative = overlap
 
   const maxVal = Math.max(...data.map(d => typeof d.valuation === 'number' ? d.valuation : 0));
   const maxR = rowH * 0.47;
