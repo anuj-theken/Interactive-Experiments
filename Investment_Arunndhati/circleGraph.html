@@ -82,7 +82,7 @@
     font-size: 14px;
     z-index: 100;
     min-width: 160px;
-    max-width: 220px;
+    max-width: 250px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.10);
     transition: opacity 0.1s;
     line-height: 1.6;
@@ -130,7 +130,6 @@
         <div class="leg-item"><div class="dot-fill" style="background:#D4A8A0"></div>Exit</div>
         <div class="leg-item"><div class="dot-fill" style="background:#C8382A"></div>Shutdown</div>
         <div class="leg-item"><div class="dot-fill" style="background:#D4946A"></div>Downround</div>
-
       </div>
     </div>
     <div class="legend-row">
@@ -190,26 +189,41 @@ const STATUS_LABELS = {
 };
 
 const data = [
-  { co: "Aye Finance",      year: 2017, industry: "Fintech",   type: "active",    valuation: 250, invested: "—" },
-  { co: "Ummeed Housing",   year: 2018, industry: "Fintech",   type: "exit",      valuation: 180, invested: "—" },
-  { co: "arya.ag",          year: 2019, industry: "Agritech",  type: "active",    valuation: 310, invested: "—" },
-  { co: "EM3",              year: 2019, industry: "Agritech",  type: "shutdown",  valuation: 60,  invested: "—" },
-  { co: "Dunzo",            year: 2019, industry: "Logistics", type: "shutdown",  valuation: 400, invested: "—" },
-  { co: "Kauvery Hospital", year: 2019, industry: "Health",    type: "active",    valuation: 220, invested: "—" },
-  { co: "NeoGrowth",        year: 2019, industry: "Fintech",   type: "active",    valuation: 150, invested: "—" },
-  { co: "PharmEasy",        year: 2019, industry: "Health",    type: "downround", valuation: 550, invested: "—" },
-  { co: "Waycool",          year: 2019, industry: "Agritech",  type: "bankrupt",  valuation: 95,  invested: "—" },
-  { co: "Aknamed",          year: 2020, industry: "Health",    type: "active",    valuation: 110, invested: "—" },
-  { co: "Ampin Energy",     year: 2020, industry: "Energy",    type: "active",    valuation: 280, invested: "—" },
-  { co: "Porter",           year: 2020, industry: "Logistics", type: "active",    valuation: 350, invested: "—" },
-  { co: "Scaler",           year: 2021, industry: "Edtech",    type: "active",    valuation: 290, invested: "—" },
-  { co: "Axio",             year: 2021, industry: "Fintech",   type: "exit",      valuation: 210, invested: "—" },
-  { co: "Sukoon",           year: 2022, industry: "Fintech",   type: "active",    valuation: 190, invested: "—" },
-  { co: "SolarSquare",      year: 2024, industry: "Energy",    type: "active",    valuation: 120, invested: "—" },
-  { co: "ATEC Global",      year: 2025, industry: "Energy",    type: "active",    valuation: 80,  invested: "—" }
+  { co: "Aye Finance",          year: 2017, industry: "Fintech",   type: "exit", valuation: "—", invested: "-" },
+  { co: "Ummeed Housing Finance",year: 2018, industry: "Fintech",   type: "exit",         valuation: "—", invested: "—" },
+  { co: "arya.ag",              year: 2019, industry: "Agritech",  type: "active",       valuation: 40,  invested: 40 },
+  { co: "EM3",                  year: 2019, industry: "Agritech",  type: "shutdown",     valuation: "—", invested: "—" },
+  { co: "Dunzo",                year: 2019, industry: "Logistics", type: "shutdown",     valuation: "—", invested: "—" },
+  { co: "Kauvery",              year: 2019, industry: "Health",    type: "active",       valuation: "—", invested: "—" },
+  { co: "NeoGrowth",            year: 2019, industry: "Fintech",   type: "active",       valuation: "—", invested: "—" },
+  { co: "PharmEasy",            year: 2019, industry: "Health",    type: "downround",  valuation: 35, invested: 35 },
+  { co: "Waycool",              year: 2019, industry: "Agritech",  type: "shutdown",     valuation: 95,  invested: 95 },
+  { co: "Aknamed",              year: 2020, industry: "Health",    type: "exit",         valuation: "—", invested: "—" },
+  { co: "Ampin Energy",         year: 2020, industry: "Energy",    type: "active",    valuation: 32,  invested: 32 },
+  { co: "Vivriti",              year: 2020, industry: "Fintech",   type: "exit", valuation: "—", invested: "—" },
+  { co: "Porter",               year: 2020, industry: "Logistics", type: "active",       valuation: "—", invested: "—" },
+  { co: "Olyv",                 year: 2020, industry: "Fintech",   type: "active",       valuation: "—", invested: "—" },
+  { co: "Cuemath",              year: 2020, industry: "Edtech",    type: "active",       valuation: "—", invested: "—" },
+  { co: "Scaler",               year: 2021, industry: "Edtech",    type: "active",       valuation: "—", invested: "—" },
+  { co: "Shiprocket",           year: 2021, industry: "Logistics", type: "active",       valuation: 45,  invested: 45 },
+  { co: "Yubi",                 year: 2021, industry: "Fintech",   type: "active",       valuation: "—", invested: "—" },
+  { co: "MediBuddy",            year: 2021, industry: "Health",    type: "active",       valuation: "—", invested: "—" },
+  { co: "Navya",                year: 2021, industry: "Health",    type: "active",       valuation: "—", invested: "—" },
+  { co: "Eupheus",              year: 2021, industry: "Edtech",    type: "active",       valuation: "—", invested: "—" },
+  { co: "Axio",                 year: 2021, industry: "Fintech",   type: "exit",         valuation: "—", invested: "—" },
+  { co: "Bugworks",             year: 2021, industry: "Health",    type: "active",       valuation: "—", invested: "—" },
+  { co: "Chalo",                year: 2021, industry: "Logistics", type: "active",       valuation: "—", invested: "—" },
+  { co: "DeHaat",               year: 2021, industry: "Agritech",  type: "active",       valuation: 40,  invested: 40 },
+  { co: "Sukoon",               year: 2022, industry: "Health",    type: "active",       valuation: "—", invested: "—" },
+  { co: "edgegrid",             year: 2022, industry: "Energy",    type: "active",       valuation: "—", invested: "—" },
+  { co: "BeatO",                year: 2022, industry: "Health",    type: "active",       valuation: "—", invested: "—" },
+  { co: "Even",                 year: 2022, industry: "Health",    type: "active",       valuation: "—", invested: "—" },
+  { co: "Niyo",                 year: 2022, industry: "Fintech",   type: "active",       valuation: "—", invested: "—" },
+  { co: "SolarSquare",          year: 2024, industry: "Energy",    type: "active",       valuation: "—", invested: "—" },
+  { co: "ATEC Global",          year: 2025, industry: "Energy",    type: "active",       valuation: "—", invested: "—" },
 ];
 
-const allYears = [2017,2018,2019,2020,2021,2022,2023,2024,2025];
+const allYears = [2019, 2020, 2021, 2022, 2023, 2024, 2025];
 let nodes = [], hoverId = null, activeTouch = null;
 
 function seededRand(seed) {
@@ -247,16 +261,13 @@ function buildIndLegend() {
 }
 
 function getLayout() {
-  const dpr = window.devicePixelRatio || 1;
   const area = document.getElementById('viz-area');
   const w = area.offsetWidth;
-  // On mobile, rows need to be taller to accommodate many circles stacking
-  // Detect if 2019 circles would overflow horizontally
   const isMobile = w < 420;
-  // rowH scales with width but has a min for readability
   const rowH = isMobile ? Math.max(80, w * 0.21) : Math.max(90, w * 0.15);
-  const totalH = rowH * allYears.length;
-  return { w, rowH, totalH, isMobile };
+  const topPad = 20;
+  const totalH = rowH * allYears.length + topPad;
+  return { w, rowH, totalH, topPad, isMobile };
 }
 
 function setCanvasSize() {
@@ -272,28 +283,26 @@ function setCanvasSize() {
 }
 
 function render() {
-  const dpr = window.devicePixelRatio || 1;
-  const { w, rowH, isMobile } = getLayout();
+  const { w, rowH, isMobile, topPad } = getLayout();
   const h = rowH * allYears.length;
   ctx.clearRect(0, 0, w, h);
 
-  // Label column width adapts
   const labelW = isMobile ? 38 : 46;
   const startX = labelW + 6;
   const usableW = w - startX - 6;
+  const GAP = -8; // negative = overlap
 
-  const maxVal = Math.max(...data.map(d => d.valuation || 0));
-  // Max circle radius = 42% of rowH
+  const maxVal = Math.max(...data.map(d => typeof d.valuation === 'number' ? d.valuation : 0));
   const maxR = rowH * 0.47;
   const baseSize = maxR / Math.sqrt(maxVal);
+  const defaultR = rowH * 0.18;
 
-  // Font size for year labels — min 14px
   const yearFontSize = Math.max(14, Math.min(13, w * 0.030));
 
   nodes = [];
 
   allYears.forEach((year, i) => {
-    const cy = (i + 0.5) * rowH;
+    const cy = topPad + (i + 0.5) * rowH;
 
     // Guide line
     ctx.beginPath();
@@ -311,45 +320,49 @@ function render() {
     ctx.fillText(year, 0, cy + 5);
 
     const yearData = data.filter(d => d.year === year);
+    if (yearData.length === 0) return;
 
-    if (yearData.length === 0) {
-      // leave row empty — just the guide line and year label
-    } else {
-      // Compute radii first to check total width
-      const radii = yearData.map(co => co.valuation ? Math.sqrt(co.valuation) * baseSize : 12);
-      // Total width if circles were placed with 68% spacing
-      let totalNeeded = 0;
-      radii.forEach(r => { totalNeeded += r * 2 * 0.68; });
-      // Scale down if overflow
-      const scaleDown = totalNeeded > usableW ? usableW / totalNeeded : 1;
+    // Compute raw radii
+    const radii = yearData.map(co =>
+      typeof co.valuation === 'number' ? Math.sqrt(co.valuation) * baseSize : defaultR
+    );
 
-      let curX = startX;
-      yearData.forEach((co, idx) => {
-        const r = radii[idx] * scaleDown;
-        const x = curX + r;
-        const isH = hoverId === `${year}-${idx}`;
-        const dr = isH ? r * 1.07 : r;
-        const seed = year * 100 + idx;
+    // Total width needed: sum of diameters + gaps between them
+    const totalNeeded = radii.reduce((sum, r) => sum + r * 2, 0) + GAP * (yearData.length - 1);
 
-        nodes.push({ x, y: cy, r: dr, co, id: `${year}-${idx}` });
+    // Scale down uniformly if they don't fit
+    const scale = totalNeeded > usableW ? usableW / totalNeeded : 1;
+    const scaledRadii = radii.map(r => r * scale);
 
-        ctx.beginPath();
-        ctx.arc(x, cy, dr, 0, Math.PI * 2);
-        ctx.fillStyle = STATUS_COLORS[co.type] || '#AAAAAA';
-        ctx.fill();
+    const scaledGap = GAP * scale;
 
-        applyGrain(ctx, x, cy, dr, seed);
+    // Place circles left-aligned, packed tightly
+    let curX = startX;
+    yearData.forEach((co, idx) => {
+      const r = scaledRadii[idx];
+      const x = curX + r;
+      const isH = hoverId === `${year}-${idx}`;
+      const dr = isH ? r * 1.07 : r;
+      const seed = year * 100 + idx;
 
-        ctx.beginPath();
-        ctx.arc(x, cy, dr, 0, Math.PI * 2);
-        ctx.strokeStyle = IND_COLORS[co.industry] || '#333';
-        ctx.lineWidth = isH ? 2.5 : 1.5;
-        ctx.setLineDash([]);
-        ctx.stroke();
+      nodes.push({ x, y: cy, r: dr, co, id: `${year}-${idx}` });
 
-        curX += r * 2 * 0.68;
-      });
-    }
+      ctx.beginPath();
+      ctx.arc(x, cy, dr, 0, Math.PI * 2);
+      ctx.fillStyle = STATUS_COLORS[co.type] || '#AAAAAA';
+      ctx.fill();
+
+      applyGrain(ctx, x, cy, dr, seed);
+
+      ctx.beginPath();
+      ctx.arc(x, cy, dr, 0, Math.PI * 2);
+      ctx.strokeStyle = IND_COLORS[co.industry] || '#333';
+      ctx.lineWidth = isH ? 2.5 : 1.5;
+      ctx.setLineDash([]);
+      ctx.stroke();
+
+      curX += r * 2 + scaledGap;
+    });
   });
 }
 
@@ -372,13 +385,18 @@ function showTooltip(hit, clientX, clientY) {
   } else {
     const co = hit.co;
     document.getElementById('tt-name').textContent = co.co;
-    document.getElementById('tt-invested').innerHTML = co.valuation
-        ? `Invested in <em>${co.year}</em> ·`
-        : `Invested in <em>${co.year}</em>`;
-    document.getElementById('tt-val').innerHTML = co.valuation ? `Valuation: <strong>$${co.valuation}M</strong>` : '';
+    const investedStr = typeof co.invested === 'number'
+      ? `Invested <u>$${co.invested}M</u> in <em>${co.year}</em>`
+      : `Invested in <em>${co.year}</em>`;
+    document.getElementById('tt-invested').innerHTML = investedStr;
+    const valLabel = typeof co.valuation === 'number'
+      ? `Last known valuation: <strong>$${co.valuation}M</strong>${co.type === 'downround' ? ' <span style="color:#C07040;font-size:13px;">↓</span>' : ''}`
+      : `Last known valuation: <strong style="color:#9A8E7A;">N/A</strong>`;
+    document.getElementById('tt-val').innerHTML = valLabel;
     const statusEl = document.getElementById('tt-status');
-    statusEl.textContent = `Status: ${STATUS_LABELS[co.type] || co.type}`;
-    statusEl.className = `tt-status ${co.type}`;
+    const displayType = co.type === 'downround' ? 'active' : co.type;
+    statusEl.textContent = `Status: ${STATUS_LABELS[displayType] || displayType}`;
+    statusEl.className = `tt-status ${displayType}`;
   }
 }
 
@@ -432,7 +450,6 @@ canvas.addEventListener('touchmove', e => {
 
 canvas.addEventListener('touchend', e => {
   e.preventDefault();
-  // keep tooltip visible briefly then fade
   setTimeout(() => {
     hoverId = null;
     tt.style.opacity = '0';
