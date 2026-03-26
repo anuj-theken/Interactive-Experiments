@@ -290,7 +290,7 @@ function render() {
   const labelW = isMobile ? 38 : 46;
   const startX = labelW + 6;
   const usableW = w - startX - 6;
-  const GAP = -8; // negative = overlap
+  const GAP = -12; // negative = overlap
 
   const maxVal = Math.max(...data.map(d => typeof d.valuation === 'number' ? d.valuation : 0));
   const maxR = rowH * 0.47;
