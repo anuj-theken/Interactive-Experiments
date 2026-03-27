@@ -492,15 +492,15 @@ function showTooltip(hit, clientX, clientY) {
   }
 
   document.getElementById('tt-name').textContent = co.co;
-  setLine('tt-valuation', 'Latest valuation: ', co.latestValuation);
-  setLine('tt-funding', 'Total funding: ', co.totalFunding);
+  setLine('tt-valuation', 'Latest valuation: $', co.latestValuation);
+  setLine('tt-funding', 'Total funding: $', co.totalFunding);
 
   const invEl = document.getElementById('tt-invested');
   invEl.textContent = '';
   if (typeof co.lightrockInvestment === 'number') {
     invEl.style.display = '';
-    invEl.appendChild(document.createTextNode('Lightrock invested '));
-    const span = document.createElement('u');
+    invEl.appendChild(document.createTextNode('Lightrock invested $'));
+    const span = document.createElement('b');
     span.style.color = '#1A1208';
     span.textContent = `${Math.round(co.lightrockInvestment).toLocaleString()}M`;
     invEl.appendChild(span);
