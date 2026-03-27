@@ -12,17 +12,17 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  background: #EDE8DC;
+  /* background: #F7F2F2; */
   font-family: 'GT America', Arial, sans-serif;
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  padding: 0;
+  padding: 50px;
 }
 .page {
   width: 100%;
   max-width: 640px;
-  background: #EDE8DC;
+  background: #F7F2F2;
   padding: clamp(16px, 4vw, 32px) clamp(12px, 4vw, 28px) 0;
   display: flex;
   flex-direction: column;
@@ -40,14 +40,14 @@ body {
 .subtitle {
   font-family: 'GT America', Arial, sans-serif;
   font-size: clamp(14px, 2.2vw, 15px);
-  color: #6E6050;
+  color: #5C4A4A;
   margin-bottom: 16px;
   text-align: center;
   line-height: 1.5;
 }
 .legend-box {
-  border-top: 1.5px solid #C8BFAA;
-  border-bottom: 1.5px solid #C8BFAA;
+  border-top: 1.5px solid #DCCFCF;
+  border-bottom: 1.5px solid #DCCFCF;
   padding: 6px 0;
   margin-bottom: 6px;
   display: flex;
@@ -60,7 +60,7 @@ body {
   font-size: clamp(9px, 1.8vw, 9px);
   font-weight: bold;
   text-transform: uppercase;
-  color: #6E6050;
+  color: #5C4A4A;
   letter-spacing: 0.08em;
   width: clamp(64px, 13vw, 80px);
   min-width: 56px;
@@ -73,7 +73,7 @@ body {
   display: flex; align-items: center; gap: 5px;
   font-family: 'GT America', Arial, sans-serif;
   font-size: clamp(9px, 3.7vw, 14px);
-  color: #3A2E20;
+  color: #4A3535;
   cursor: pointer;
   padding: 3px 6px 3px 4px;
   border-radius: 3px;
@@ -81,16 +81,16 @@ body {
   transition: border-color 0.15s, opacity 0.15s;
   user-select: none;
 }
-.leg-item:hover { border-color: #C8BFAA; }
-.leg-item.active { border-color: #1A1208; background: rgba(26,18,8,0.06); }
+.leg-item:hover { border-color: #DCCFCF; }
+.leg-item.active { border-color: #2A1818; background: rgba(42,24,24,0.06); }
 .leg-item.dimmed { opacity: 0.35; }
 .dot-fill { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.size-dot { border-radius: 50%; border: 1.5px solid #A89880; background: transparent; display: inline-block; flex-shrink: 0; }
+.size-dot { border-radius: 50%; border: 1.5px solid #C4AAAA; background: transparent; display: inline-block; flex-shrink: 0; }
 .size-leg-item {
   display: flex; align-items: center; gap: 5px;
   font-family: 'GT America', Arial, sans-serif;
   font-size: clamp(9px, 3.7vw, 14px);
-  color: #3A2E20;
+  color: #4A3030;
   cursor: pointer;
   padding: 3px 6px 3px 4px;
   border-radius: 3px;
@@ -98,15 +98,15 @@ body {
   transition: border-color 0.15s, opacity 0.15s;
   user-select: none;
 }
-.size-leg-item:hover { border-color: #C8BFAA; }
-.size-leg-item.active { border-color: #1A1208; background: rgba(26,18,8,0.06); }
+.size-leg-item:hover { border-color: #DCCFCF; }
+.size-leg-item.active { border-color: #2A1818; background: rgba(42,24,24,0.06); }
 .size-leg-item.dimmed { opacity: 0.35; }
 #viz-area { position: relative; width: 100%; flex-grow: 1; }
 canvas { width: 100%; height: 100%; display: block; }
 #tooltip {
   position: fixed;
-  background: #FDFAF4;
-  border: 1px solid #D4C9B0;
+  background: #F7F2F2;
+  border: 1px solid #DCCFCF;
   color: #1A1208;
   padding: 12px 14px;
   border-radius: 3px;
@@ -126,20 +126,23 @@ canvas { width: 100%; height: 100%; display: block; }
   font-size: 22px;
   font-weight: bold;
   color: #1A1208;
-  margin-bottom: 3px;
+  margin-bottom: 10px;
 }
-#tooltip .tt-valuation { font-size: 13px; color: #3A2E20; margin-bottom: 8px; }
+#tooltip .tt-valuation { font-size: 13px; color: #3A2E20; margin-bottom: 0px; }
 #tooltip .tt-group {
-  border-top: 1px solid #E0D8C8;
-  padding-top: 8px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0px;
+}
+#tooltip .tt-invested {
+  margin-top: 6px;
+  border-top: 1px solid #E0D8C8;
+  padding-top: 6px;
 }
 #tooltip .tt-funding { font-size: 13px; color: #3A2E20; }
 #tooltip .tt-invested { font-size: 13px; color: #5A4A38; }
 .footer {
-  border-top: 1.5px solid #C8BFAA;
+  border-top: 1.5px solid #DCCFCF;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -148,8 +151,8 @@ canvas { width: 100%; height: 100%; display: block; }
   gap: 8px;
 }
 .footer-logo { height: 18px; display: flex; align-items: center; justify-content: center; }
-.footer-center { font-family: 'GT America', Arial, sans-serif; font-size: 14px; color: #8A7A65; text-align: center; flex: 1; }
-.footer-right { font-family: 'GT America', Arial, sans-serif; font-size: 14px; color: #8A7A65; text-align: right; max-width: 170px; flex-shrink: 0; }
+.footer-center { font-family: 'GT America', Arial, sans-serif; font-size: 14px; color: #B09090; text-align: center; flex: 1; }
+.footer-right { font-family: 'GT America', Arial, sans-serif; font-size: 14px; color: #B09090; text-align: right; max-width: 170px; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -171,8 +174,8 @@ canvas { width: 100%; height: 100%; display: block; }
       </div>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0 0 0;">
-      <div style="font-style:italic;font-size:12px;color:#9A8E7A;padding:0 10px 0 0;">$ inside bubble = Lightrock's investment amount</div>
-      <div style="font-style:italic;font-size:12px;color:#9A8E7A;">Click a legend item to filter · Click again to clear</div>
+      <div style="font-style:italic;font-size:12px;color:#5C4A4A;padding:0 10px 0 0;">$ inside bubble = Lightrock's investment amount</div>
+      <div style="font-style:italic;font-size:12px;color:#5C4A4A;">Click a legend item to filter · Click again to clear</div>
     </div>
   </div>
 
@@ -205,7 +208,8 @@ const IND_COLORS = {
   "Healthcare": "#D4A8A0",
   "Education":  "#3D3D3D",
   "Energy":     "#4A9E9A",
-  "Climate":    "#7A9E4A"
+  "Climate":    "#7A9E4A",
+  "Logistics":  "#A89880"
 };
 
 const data = [
@@ -230,7 +234,7 @@ const data = [
   { co: "Medibuddy",              year: 2021, industry: "Healthcare", lightrockInvestment: null,   latestValuation: 396.6,   totalFunding: 193.1  },
   { co: "Navya technology",       year: 2021, industry: "Healthcare", lightrockInvestment: null,   latestValuation: 222.0,   totalFunding: 38.5   },
   { co: "Eupheus learning",       year: 2021, industry: "Education",  lightrockInvestment: null,   latestValuation: 72.2,    totalFunding: 27.2   },
-  { co: "Axio global",            year: 2021, industry: "Finance",    lightrockInvestment: null,   latestValuation: null,    totalFunding: 30.0   },
+  { co: "Axio",                   year: 2021, industry: "Finance",    lightrockInvestment: null,   latestValuation: 200.0,   totalFunding: 800.0   },
   { co: "Bugworks research",      year: 2021, industry: "Healthcare", lightrockInvestment: null,   latestValuation: null,    totalFunding: 42.9   },
   { co: "Chalo",                  year: 2021, industry: "Logistics",  lightrockInvestment: null,   latestValuation: 290.0,   totalFunding: 117.4  },
   { co: "DeHaat",                 year: 2021, industry: "Agri",       lightrockInvestment: null,   latestValuation: 688.5,   totalFunding: 222.0  },
@@ -248,6 +252,10 @@ const allYears = [2019, 2020, 2021, 2022, 2023, 2024, 2025];
 let activeIndustry = null;
 let activeSizeFilter = null;
 let nodes = [], hoverId = null;
+
+function fmt(val) {
+  return typeof val === 'number' ? `$${Math.round(val)}M` : null;
+}
 
 function getSizeBucket(val) {
   if (val === null || val === undefined) return 'small';
@@ -377,14 +385,14 @@ function render() {
     const cy = topPad + (i + 0.5) * rowH;
 
     ctx.beginPath();
-    ctx.strokeStyle = "#D0C8B4";
+    ctx.strokeStyle = "#E0D4D4";
     ctx.lineWidth = 0.8;
     ctx.setLineDash([]);
     ctx.moveTo(startX - 4, cy);
     ctx.lineTo(w - 6, cy);
     ctx.stroke();
 
-    ctx.fillStyle = "#6E6050";
+    ctx.fillStyle = "#5C4A4A";
     ctx.font = `bold ${yearFontSize}px 'GT America', Arial, sans-serif`;
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
@@ -479,29 +487,25 @@ function showTooltip(hit, clientX, clientY) {
     const b = document.createElement('b');
     b.style.fontWeight = '700';
     b.style.color = typeof value === 'number' ? '#1A1208' : '#9A8E7A';
-    b.textContent = typeof value === 'number' ? `$${value}M` : 'N/A';
+    b.textContent = typeof value === 'number' ? `$${Math.round(value)}M` : 'N/A';
     el.appendChild(b);
   }
 
   document.getElementById('tt-name').textContent = co.co;
-  setLine('tt-valuation', 'Latest valuation(USD): ', co.latestValuation);
-  setLine('tt-funding', 'Total funding(USD): ', co.totalFunding);
+  setLine('tt-valuation', 'Latest valuation: ', co.latestValuation);
+  setLine('tt-funding', 'Total funding: ', co.totalFunding);
 
   const invEl = document.getElementById('tt-invested');
   invEl.textContent = '';
   if (typeof co.lightrockInvestment === 'number') {
+    invEl.style.display = '';
     invEl.appendChild(document.createTextNode('Lightrock invested '));
     const span = document.createElement('u');
     span.style.color = '#1A1208';
-    span.textContent = `$${co.lightrockInvestment}M`;
+    span.textContent = `$${Math.round(co.lightrockInvestment)}M`;
     invEl.appendChild(span);
-    const em = document.createElement('em');
-    em.textContent = ` in ${co.year}`;
-    invEl.appendChild(em);
   } else {
-    const em = document.createElement('em');
-    em.textContent = `Invested in ${co.year}`;
-    invEl.appendChild(em);
+    invEl.style.display = 'none';
   }
 }
 
