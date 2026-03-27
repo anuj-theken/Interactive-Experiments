@@ -52,9 +52,9 @@ body {
   margin-bottom: 6px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
-.legend-row { display: flex; align-items: flex-start; gap: 0; }
+.legend-row { display: flex; align-items: center; gap: 0; }
 .legend-key {
   font-family: 'GT America Bold', Arial, sans-serif;
   font-size: clamp(9px, 1.8vw, 9px);
@@ -72,7 +72,7 @@ body {
 .leg-item {
   display: flex; align-items: center; gap: 5px;
   font-family: 'GT America', Arial, sans-serif;
-  font-size: clamp(11px, 2.2vw, 11px);
+  font-size: clamp(9px, 3.7vw, 14px);
   color: #3A2E20;
   cursor: pointer;
   padding: 3px 6px 3px 4px;
@@ -89,7 +89,7 @@ body {
 .size-leg-item {
   display: flex; align-items: center; gap: 5px;
   font-family: 'GT America', Arial, sans-serif;
-  font-size: clamp(11px, 2.2vw, 11px);
+  font-size: clamp(9px, 3.7vw, 14px);
   color: #3A2E20;
   cursor: pointer;
   padding: 3px 6px 3px 4px;
@@ -154,7 +154,7 @@ canvas { width: 100%; height: 100%; display: block; }
 </head>
 <body>
 <div class="page">
-  <div class="main-title">The rise and retreat of Lightrock</div>
+  <div class="main-title">The rise and retreat</div>
   <div class="subtitle">Lightrock was active during the ZIRP era before going quiet</div>
 
   <div class="legend-box">
@@ -168,8 +168,11 @@ canvas { width: 100%; height: 100%; display: block; }
         <div class="size-leg-item" data-size="small"><div class="size-dot" style="width:7px;height:7px;"></div>&lt;$100M</div>
         <div class="size-leg-item" data-size="mid"><div class="size-dot" style="width:13px;height:13px;"></div>$100M–$500M</div>
         <div class="size-leg-item" data-size="large"><div class="size-dot" style="width:20px;height:20px;"></div>$500M+</div>
-        <div class="leg-item" style="color:#9A8E7A;font-style:italic;font-size:10px;cursor:default;border:none;padding:0;">Click a legend item to filter · Click again to clear</div>
       </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0 0 0;">
+      <div style="font-style:italic;font-size:12px;color:#9A8E7A;">$ inside bubble = Lightrock's investment amount</div>
+      <div style="font-style:italic;font-size:12px;color:#9A8E7A;">Click a legend item to filter · Click again to clear</div>
     </div>
   </div>
 
@@ -200,7 +203,6 @@ const IND_COLORS = {
   "Finance":    "#C8423A",
   "Agri":       "#4A7A5A",
   "Healthcare": "#D4A8A0",
-
   "Education":  "#3D3D3D",
   "Energy":     "#4A9E9A",
   "Climate":    "#7A9E4A"
@@ -243,9 +245,8 @@ const data = [
 
 const allYears = [2019, 2020, 2021, 2022, 2023, 2024, 2025];
 
-// Filter state
-let activeIndustry = null;  // null = all
-let activeSizeFilter = null; // null = all, 'small'|'mid'|'large'
+let activeIndustry = null;
+let activeSizeFilter = null;
 let nodes = [], hoverId = null;
 
 function getSizeBucket(val) {
@@ -288,13 +289,11 @@ function applyGrain(ctx, x, y, r, seed) {
 }
 
 function updateLegendStates() {
-  // Industry items
   document.querySelectorAll('#ind-legend .leg-item[data-ind]').forEach(el => {
     const ind = el.dataset.ind;
     el.classList.toggle('active', activeIndustry === ind);
     el.classList.toggle('dimmed', activeIndustry !== null && activeIndustry !== ind);
   });
-  // Size items
   document.querySelectorAll('#size-legend .size-leg-item').forEach(el => {
     const sz = el.dataset.size;
     el.classList.toggle('active', activeSizeFilter === sz);
@@ -333,11 +332,13 @@ function bindSizeLegend() {
 function getLayout() {
   const area = document.getElementById('viz-area');
   const w = area.offsetWidth;
-  const isMobile = w < 420;
-  const rowH = isMobile ? Math.max(80, w * 0.21) : Math.max(90, w * 0.15);
+  const mobile = w < 800;
+  const rowH = mobile
+    ? Math.max(72, Math.round(w * 0.22))
+    : Math.max(80, Math.round(w * 0.15));
   const topPad = 20;
   const totalH = rowH * allYears.length + topPad;
-  return { w, rowH, totalH, topPad, isMobile };
+  return { w, rowH, totalH, topPad, mobile };
 }
 
 function setCanvasSize() {
@@ -353,11 +354,12 @@ function setCanvasSize() {
 }
 
 function render() {
-  const { w, rowH, isMobile, topPad } = getLayout();
-  const h = rowH * allYears.length;
+  const { w, rowH, topPad } = getLayout();
+  const h = rowH * allYears.length + topPad;
   ctx.clearRect(0, 0, w, h);
 
-  const labelW = isMobile ? 38 : 46;
+  const yearFontSize = Math.max(14, Math.round(w * 0.030));
+  const labelW = Math.max(yearFontSize * 2.8, 46);
   const startX = labelW + 6;
   const usableW = w - startX - 6;
   const GAP = -4;
@@ -367,7 +369,6 @@ function render() {
   const baseSize = maxR / Math.sqrt(maxVal);
   const defaultR = rowH * 0.18 * 1.2 * 0.9;
 
-  const yearFontSize = Math.max(14, Math.min(13, w * 0.030));
   const hasAnyFilter = activeIndustry || activeSizeFilter;
 
   nodes = [];
@@ -384,9 +385,11 @@ function render() {
     ctx.stroke();
 
     ctx.fillStyle = "#6E6050";
-    ctx.font = `bold ${yearFontSize}px 'GT America', sans-serif`;
+    ctx.font = `bold ${yearFontSize}px 'GT America', Arial, sans-serif`;
     ctx.textAlign = "left";
-    ctx.fillText(year, 0, cy + 5);
+    ctx.textBaseline = "middle";
+    ctx.fillText(year, 0, cy);
+    ctx.textBaseline = "alphabetic";
 
     const yearData = data.filter(d => d.year === year);
     if (yearData.length === 0) return;
@@ -413,9 +416,7 @@ function render() {
       nodes.push({ x, y: cy, r: dr, co, id: `${year}-${idx}`, visible });
 
       ctx.save();
-      if (hasAnyFilter && !visible) {
-        ctx.globalAlpha = 0.12;
-      }
+      if (hasAnyFilter && !visible) ctx.globalAlpha = 0.12;
 
       ctx.beginPath();
       ctx.arc(x, cy, dr, 0, Math.PI * 2);
@@ -442,13 +443,15 @@ function render() {
 
       if (visible && typeof co.lightrockInvestment === 'number') {
         const label = `$${Math.round(co.lightrockInvestment)}M`;
-        const fontSize = 14 * 0.7;
-        ctx.font = ` ${fontSize}px 'GT America', sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'rgba(255,255,255,0.92)';
-        ctx.fillText(label, x, cy);
-        ctx.textBaseline = 'alphabetic';
+        ctx.font = `11px 'GT America', Arial, sans-serif`;
+        const tw = ctx.measureText(label).width;
+        if (tw < dr * 1.7) {
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = 'rgba(255,255,255,0.92)';
+          ctx.fillText(label, x, cy);
+          ctx.textBaseline = 'alphabetic';
+        }
       }
 
       ctx.restore();
