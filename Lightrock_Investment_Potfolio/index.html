@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>LightRock Investment</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<style>@font-face { font-family: 'Jazmin Alt'; src: local('Georgia'); font-weight: bold; }
-  @font-face { font-family: 'GT America Bold'; src: local('Arial'); font-weight: bold; }
-  @font-face { font-family: 'GT America'; src: local('Arial'); font-weight: 300; }
+<style>@font-face { font-family: 'Jazmin Alt'; src: local('JazminAlt-Bold.otf'); font-weight: bold; }
+  @font-face { font-family: 'GT America Bold'; src: local('GT-America-Standard-Black.ttf'); font-weight: bold; }
+  @font-face { font-family: 'GT America'; src: local('GT-America-Standard-Light.ttf'); font-weight: 300; }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -33,7 +33,7 @@
     color: #1A1208;
     line-height: 1.05;
     letter-spacing: -1px;
-    margin-bottom: 4px;
+    margin-bottom: 10px;
     text-align: center;
   }
   .subtitle {
@@ -70,8 +70,6 @@
   .legend-items { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
   .leg-item { display: flex; align-items: center; gap: 5px; font-family: 'GT America', Arial, sans-serif; font-size: clamp(11px, 2.2vw, 11px); color: #3A2E20; }
   .dot-fill { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .dot-ghost { width: 10px; height: 10px; border-radius: 50%; background: #E4DDD0; border: 1.5px dashed #A89880; flex-shrink: 0; }
-  .dot-outline { width: 10px; height: 10px; border-radius: 50%; border: 2px solid; background: transparent; flex-shrink: 0; }
   .size-dot { border-radius: 50%; border: 1.5px solid #A89880; background: transparent; display: inline-block; flex-shrink: 0; }
   #viz-area { position: relative; width: 100%; flex-grow: 1; }
   canvas { width: 100%; height: 100%; display: block; }
@@ -85,59 +83,66 @@
     pointer-events: none;
     opacity: 0;
     font-family: 'GT America', Arial, sans-serif;
-    font-size: 14px;
+    font-size: 13px;
     z-index: 100;
-    min-width: 160px;
+    min-width: 180px;
     max-width: 250px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.10);
     transition: opacity 0.1s;
     line-height: 1.6;
   }
-  #tooltip .tt-name { font-family: 'GT America Bold', Arial, sans-serif; font-size: 15px; font-weight: bold; color: #1A1208; margin-bottom: 1px; }
-  #tooltip .tt-invested { font-family: 'GT America', Arial, sans-serif; color: #5A4A38; font-size: 14px; margin-bottom: 4px; }
-  #tooltip .tt-invested strong { font-weight: bold; color: #1A1208; }
-  #tooltip .tt-invested u { text-decoration: underline; color: #3A2E20; }
-  #tooltip .tt-invested em { font-style: italic; }
-  #tooltip .tt-val { font-family: 'GT America', Arial, sans-serif; font-size: 14px; color: #3A2E20; }
-  #tooltip .tt-status { font-family: 'GT America', Arial, sans-serif; font-size: 14px; }
-  #tooltip .tt-status.active   { color: #3A9A8D; }
-  #tooltip .tt-status.exit     { color: #B07060; }
-  #tooltip .tt-status.shutdown { color: #C8382A; }
-  #tooltip .tt-status.bankrupt { color: #C8382A; }
-  #tooltip .tt-status.downround{ color: #C07040; }
+  #tooltip .tt-name {
+    font-family: 'GT America Bold', Arial, sans-serif;
+    font-size: 22px;
+    font-weight: bold;
+    color: #1A1208;
+    margin-bottom: 3px;
+  }
+  #tooltip .tt-valuation {
+    font-size: 13px;
+    color: #3A2E20;
+    margin-bottom: 8px;
+  }
+  .tt-bold {
+    font-weight: 900 !important;
+    font-family: Impact, Arial Black, Arial, sans-serif !important;
+    color: #1A1208 !important;
+  }
+  #tooltip .tt-group {
+    border-top: 1px solid #E0D8C8;
+    padding-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  #tooltip .tt-funding {
+    font-size: 13px;
+    color: #3A2E20;
+  }
+  #tooltip .tt-invested {
+    font-size: 13px;
+    color: #5A4A38;
+  }
   .footer {
     border-top: 1.5px solid #C8BFAA;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 18px 0 16px 0;
+    padding: 24px 0 16px 0;
     margin-top: 4px;
     gap: 8px;
   }
-  .footer-logo {
-    height: 18px;
-    display: flex; align-items: center; justify-content: center;
-  }
+  .footer-logo { height: 18px; display: flex; align-items: center; justify-content: center; }
   .footer-center { font-family: 'GT America', Arial, sans-serif; font-size: 14px; color: #8A7A65; text-align: center; flex: 1; }
-  .footer-right { font-family: 'GT America', Arial, sans-serif; font-size: 14px; color: #8A7A65; text-align: right; max-width: 160px; flex-shrink: 0; }
-
+  .footer-right { font-family: 'GT America', Arial, sans-serif; font-size: 14px; color: #8A7A65; text-align: right; max-width: 170px; flex-shrink: 0; }
 </style>
 </head>
 <body>
 <div class="page">
-  <div class="main-title">LightRock Investment</div>
-  <div class="subtitle">Lorem ipsum dolor sit amet, consectetur adipiscing elit.<br>Sed ac gravida nulla, ut malesuada purus.</div>
+  <div class="main-title">The rise and retreat of Lightrock</div>
+  <div class="subtitle">Lightrock was active during the ZIRP era before going quiet</div>
 
   <div class="legend-box">
-    <div class="legend-row">
-      <div class="legend-key">Status</div>
-      <div class="legend-items">
-        <div class="leg-item"><div class="dot-fill" style="background:#5BBFB0"></div>Active</div>
-        <div class="leg-item"><div class="dot-fill" style="background:#D4A8A0"></div>Exit</div>
-        <div class="leg-item"><div class="dot-fill" style="background:#C8382A"></div>Shutdown</div>
-        <div class="leg-item"><div class="dot-fill" style="background:#D4946A"></div>Downround</div>
-      </div>
-    </div>
     <div class="legend-row">
       <div class="legend-key">Industry</div>
       <div class="legend-items" id="ind-legend"></div>
@@ -157,16 +162,18 @@
 
   <div class="footer">
     <div><img src="logo.png" alt="The Ken" class="footer-logo"></div>
-    <div class="footer-center">Graphic by Anuj, 27 Mar '26</div>
-    <div class="footer-right">Sourc: will be added soon</div>
+    <div class="footer-center">Graphic by Anuj, 30 Mar '26</div>
+    <div class="footer-right">Source: The Ken research, Tracxn, Lightrock</div>
   </div>
 </div>
 
 <div id="tooltip">
   <div class="tt-name" id="tt-name"></div>
-  <div class="tt-invested" id="tt-invested"></div>
-  <div class="tt-val" id="tt-val"></div>
-  <div id="tt-status"></div>
+  <div class="tt-valuation" id="tt-valuation"></div>
+  <div class="tt-group">
+    <div class="tt-funding" id="tt-funding"></div>
+    <div class="tt-invested" id="tt-invested"></div>
+  </div>
 </div>
 
 <script>
@@ -174,59 +181,49 @@ const canvas = document.getElementById('viz');
 const ctx = canvas.getContext('2d');
 const tt = document.getElementById('tooltip');
 
-const STATUS_COLORS = {
-  active:   '#5BBFB0',
-  exit:     '#D4A8A0',
-  shutdown: '#C8382A',
-  bankrupt: '#C8382A',
-  downround:'#D4946A'
-};
 const IND_COLORS = {
-  "Fintech":   "#2E5FA3",
-  "Agritech":  "#3A8C5C",
-  "Health":    "#A33A4A",
-  "Logistics": "#B07030",
-  "Edtech":    "#7A3A8C",
-  "Energy":    "#2A7A8A"
-};
-const STATUS_LABELS = {
-  active:   'Active', exit: 'Exit',
-  shutdown: 'Shutdown', bankrupt: 'Shutdown', downround: 'Downround'
+  "Finance":    "#C8423A",
+  "Agri":       "#4A7A5A",
+  "Healthcare": "#D4A8A0",
+  "Logistics":  "#C8A882",
+  "Education":  "#3D3D3D",
+  "Energy":     "#4A9E9A",
+  "Climate":    "#7A9E4A"
 };
 
 const data = [
-  { co: "Aye Finance",          year: 2017, industry: "Fintech",   type: "exit", valuation: "—", invested: "-" },
-  { co: "Ummeed Housing Finance",year: 2018, industry: "Fintech",   type: "exit",         valuation: "—", invested: "—" },
-  { co: "arya.ag",              year: 2019, industry: "Agritech",  type: "active",       valuation: 40,  invested: 40 },
-  { co: "EM3",                  year: 2019, industry: "Agritech",  type: "shutdown",     valuation: "—", invested: "—" },
-  { co: "Dunzo",                year: 2019, industry: "Logistics", type: "shutdown",     valuation: "—", invested: "—" },
-  { co: "Kauvery",              year: 2019, industry: "Health",    type: "active",       valuation: "—", invested: "—" },
-  { co: "NeoGrowth",            year: 2019, industry: "Fintech",   type: "active",       valuation: "—", invested: "—" },
-  { co: "PharmEasy",            year: 2019, industry: "Health",    type: "downround",  valuation: 35, invested: 35 },
-  { co: "Waycool",              year: 2019, industry: "Agritech",  type: "shutdown",     valuation: 95,  invested: 95 },
-  { co: "Aknamed",              year: 2020, industry: "Health",    type: "exit",         valuation: "—", invested: "—" },
-  { co: "Ampin Energy",         year: 2020, industry: "Energy",    type: "active",    valuation: 32,  invested: 32 },
-  { co: "Vivriti",              year: 2020, industry: "Fintech",   type: "exit", valuation: "—", invested: "—" },
-  { co: "Porter",               year: 2020, industry: "Logistics", type: "active",       valuation: "—", invested: "—" },
-  { co: "Olyv",                 year: 2020, industry: "Fintech",   type: "active",       valuation: "—", invested: "—" },
-  { co: "Cuemath",              year: 2020, industry: "Edtech",    type: "active",       valuation: "—", invested: "—" },
-  { co: "Scaler",               year: 2021, industry: "Edtech",    type: "active",       valuation: "—", invested: "—" },
-  { co: "Shiprocket",           year: 2021, industry: "Logistics", type: "active",       valuation: 45,  invested: 45 },
-  { co: "Yubi",                 year: 2021, industry: "Fintech",   type: "active",       valuation: "—", invested: "—" },
-  { co: "MediBuddy",            year: 2021, industry: "Health",    type: "active",       valuation: "—", invested: "—" },
-  { co: "Navya",                year: 2021, industry: "Health",    type: "active",       valuation: "—", invested: "—" },
-  { co: "Eupheus",              year: 2021, industry: "Edtech",    type: "active",       valuation: "—", invested: "—" },
-  { co: "Axio",                 year: 2021, industry: "Fintech",   type: "exit",         valuation: "—", invested: "—" },
-  { co: "Bugworks",             year: 2021, industry: "Health",    type: "active",       valuation: "—", invested: "—" },
-  { co: "Chalo",                year: 2021, industry: "Logistics", type: "active",       valuation: "—", invested: "—" },
-  { co: "DeHaat",               year: 2021, industry: "Agritech",  type: "active",       valuation: 40,  invested: 40 },
-  { co: "Sukoon",               year: 2022, industry: "Health",    type: "active",       valuation: "—", invested: "—" },
-  { co: "edgegrid",             year: 2022, industry: "Energy",    type: "active",       valuation: "—", invested: "—" },
-  { co: "BeatO",                year: 2022, industry: "Health",    type: "active",       valuation: "—", invested: "—" },
-  { co: "Even",                 year: 2022, industry: "Health",    type: "active",       valuation: "—", invested: "—" },
-  { co: "Niyo",                 year: 2022, industry: "Fintech",   type: "active",       valuation: "—", invested: "—" },
-  { co: "SolarSquare",          year: 2024, industry: "Energy",    type: "active",       valuation: "—", invested: "—" },
-  { co: "ATEC Global",          year: 2025, industry: "Energy",    type: "active",       valuation: "—", invested: "—" },
+  { co: "Aye Finance",            year: 2017, industry: "Finance",    lightrockInvestment: null,   latestValuation: 404.5,   totalFunding: 164.4  },
+  { co: "Ummeed Housing Finance", year: 2018, industry: "Finance",    lightrockInvestment: null,   latestValuation: 281.9,   totalFunding: 150.0  },
+  { co: "Arya.ag",                year: 2019, industry: "Agri",       lightrockInvestment: null,   latestValuation: 309.7,   totalFunding: 168.4  },
+  { co: "Dunzo",                  year: 2019, industry: "Logistics",  lightrockInvestment: null,   latestValuation: 775.4,   totalFunding: 452.2  },
+  { co: "EM3 Agri Services",      year: 2019, industry: "Agri",       lightrockInvestment: null,   latestValuation: 36.8,    totalFunding: 23.5   },
+  { co: "Kauvery Hospitals",      year: 2019, industry: "Healthcare", lightrockInvestment: null,   latestValuation: null,    totalFunding: 10.0   },
+  { co: "PharmEasy",              year: 2019, industry: "Healthcare", lightrockInvestment: 688.4,  latestValuation: 456.0,   totalFunding: 50.0   },
+  { co: "NeoGrowth",              year: 2019, industry: "Finance",    lightrockInvestment: null,   latestValuation: 119.3,   totalFunding: 147.3  },
+  { co: "Waycool",                year: 2019, industry: "Agri",       lightrockInvestment: 388.2,  latestValuation: 745.1,   totalFunding: 95.0   },
+  { co: "Aknamed",                year: 2020, industry: "Healthcare", lightrockInvestment: null,   latestValuation: 42.0,    totalFunding: 21.8   },
+  { co: "Ampin Energy",           year: 2020, industry: "Energy",     lightrockInvestment: null,   latestValuation: 507.3,   totalFunding: 448.3  },
+  { co: "Vivriti Capital",        year: 2020, industry: "Finance",    lightrockInvestment: 205.2,  latestValuation: 1701.5,  totalFunding: 80.0   },
+  { co: "Porter",                 year: 2020, industry: "Logistics",  lightrockInvestment: 197.9,  latestValuation: 1152.8,  totalFunding: 25.0   },
+  { co: "Olyv",                   year: 2020, industry: "Finance",    lightrockInvestment: null,   latestValuation: 107.1,   totalFunding: 49.5   },
+  { co: "Cuemath",                year: 2020, industry: "Education",  lightrockInvestment: null,   latestValuation: 380.8,   totalFunding: 126.5  },
+  { co: "Scaler",                 year: 2021, industry: "Education",  lightrockInvestment: null,   latestValuation: 710.0,   totalFunding: 76.5   },
+  { co: "Shiprocket",             year: 2021, industry: "Logistics",  lightrockInvestment: 321.6,  latestValuation: 1151.8,  totalFunding: 45.0   },
+  { co: "Yubi",                   year: 2021, industry: "Finance",    lightrockInvestment: null,   latestValuation: 1199.3,  totalFunding: 240.9  },
+  { co: "MediBuddy",              year: 2021, industry: "Healthcare", lightrockInvestment: null,   latestValuation: 396.6,   totalFunding: 193.1  },
+  { co: "Navya Technology",       year: 2021, industry: "Healthcare", lightrockInvestment: null,   latestValuation: 222.0,   totalFunding: 38.5   },
+  { co: "Eupheus Learning",       year: 2021, industry: "Education",  lightrockInvestment: null,   latestValuation: 72.2,    totalFunding: 27.2   },
+  { co: "Axio Global",            year: 2021, industry: "Finance",    lightrockInvestment: null,   latestValuation: null,    totalFunding: 30.0   },
+  { co: "Bugworks Research",      year: 2021, industry: "Healthcare", lightrockInvestment: null,   latestValuation: null,    totalFunding: 42.9   },
+  { co: "Chalo",                  year: 2021, industry: "Logistics",  lightrockInvestment: null,   latestValuation: 290.0,   totalFunding: 117.4  },
+  { co: "DeHaat",                 year: 2021, industry: "Agri",       lightrockInvestment: null,   latestValuation: 688.5,   totalFunding: 222.0  },
+  { co: "Sukoon",                 year: 2022, industry: "Healthcare", lightrockInvestment: null,   latestValuation: 21.2,    totalFunding: 15.0   },
+  { co: "BeatO",                  year: 2022, industry: "Healthcare", lightrockInvestment: null,   latestValuation: 93.9,    totalFunding: 50.8   },
+  { co: "EdgeGrid",               year: 2022, industry: "Energy",     lightrockInvestment: null,   latestValuation: 16.7,    totalFunding: 6.0    },
+  { co: "Even",                   year: 2022, industry: "Healthcare", lightrockInvestment: null,   latestValuation: 152.8,   totalFunding: 72.5   },
+  { co: "Niyo",                   year: 2022, industry: "Finance",    lightrockInvestment: null,   latestValuation: 136.4,   totalFunding: 179.4  },
+  { co: "SolarSquare",            year: 2024, industry: "Energy",     lightrockInvestment: null,   latestValuation: 215.6,   totalFunding: 61.1   },
+  { co: "ATEC Global",            year: 2025, industry: "Climate",    lightrockInvestment: null,   latestValuation: null,    totalFunding: 20.8   },
 ];
 
 const allYears = [2019, 2020, 2021, 2022, 2023, 2024, 2025];
@@ -249,10 +246,10 @@ function applyGrain(ctx, x, y, r, seed) {
     const dist  = Math.sqrt(rng()) * r * 0.97;
     const gx = x + Math.cos(angle) * dist;
     const gy = y + Math.sin(angle) * dist;
-    const alpha = 0.03 + rng() * 0.09;
+    const alpha = 0.02 + rng() * 0.07;
     ctx.beginPath();
     ctx.arc(gx, gy, 0.65, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(0,0,0,${alpha})`;
+    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
     ctx.fill();
   }
   ctx.restore();
@@ -262,7 +259,7 @@ function buildIndLegend() {
   const el = document.getElementById('ind-legend');
   el.innerHTML = '';
   Object.entries(IND_COLORS).forEach(([n, c]) => {
-    el.innerHTML += `<div class="leg-item"><div class="dot-outline" style="border-color:${c}"></div>${n}</div>`;
+    el.innerHTML += `<div class="leg-item"><div class="dot-fill" style="background:${c}"></div>${n}</div>`;
   });
 }
 
@@ -296,12 +293,12 @@ function render() {
   const labelW = isMobile ? 38 : 46;
   const startX = labelW + 6;
   const usableW = w - startX - 6;
-  const GAP = -16; // negative = overlap
+  const GAP = -4;
 
-  const maxVal = Math.max(...data.map(d => typeof d.valuation === 'number' ? d.valuation : 0));
-  const maxR = rowH * 0.47;
+  const maxVal = Math.max(...data.map(d => typeof d.latestValuation === 'number' ? d.latestValuation : 0));
+  const maxR = rowH * 0.47 * 1.2 * 0.9;
   const baseSize = maxR / Math.sqrt(maxVal);
-  const defaultR = rowH * 0.18;
+  const defaultR = rowH * 0.18 * 1.2 * 0.9;
 
   const yearFontSize = Math.max(14, Math.min(13, w * 0.030));
 
@@ -310,7 +307,6 @@ function render() {
   allYears.forEach((year, i) => {
     const cy = topPad + (i + 0.5) * rowH;
 
-    // Guide line
     ctx.beginPath();
     ctx.strokeStyle = "#D0C8B4";
     ctx.lineWidth = 0.8;
@@ -319,7 +315,6 @@ function render() {
     ctx.lineTo(w - 6, cy);
     ctx.stroke();
 
-    // Year label
     ctx.fillStyle = "#6E6050";
     ctx.font = `bold ${yearFontSize}px 'Inter', sans-serif`;
     ctx.textAlign = "left";
@@ -328,21 +323,15 @@ function render() {
     const yearData = data.filter(d => d.year === year);
     if (yearData.length === 0) return;
 
-    // Compute raw radii
     const radii = yearData.map(co =>
-      typeof co.valuation === 'number' ? Math.sqrt(co.valuation) * baseSize : defaultR
+      typeof co.latestValuation === 'number' ? Math.sqrt(co.latestValuation) * baseSize : defaultR
     );
 
-    // Total width needed: sum of diameters + gaps between them
     const totalNeeded = radii.reduce((sum, r) => sum + r * 2, 0) + GAP * (yearData.length - 1);
-
-    // Scale down uniformly if they don't fit
     const scale = totalNeeded > usableW ? usableW / totalNeeded : 1;
     const scaledRadii = radii.map(r => r * scale);
-
     const scaledGap = GAP * scale;
 
-    // Place circles left-aligned, packed tightly
     let curX = startX;
     yearData.forEach((co, idx) => {
       const r = scaledRadii[idx];
@@ -350,22 +339,35 @@ function render() {
       const isH = hoverId === `${year}-${idx}`;
       const dr = isH ? r * 1.07 : r;
       const seed = year * 100 + idx;
+      const fillColor = IND_COLORS[co.industry] || '#A89880';
 
       nodes.push({ x, y: cy, r: dr, co, id: `${year}-${idx}` });
 
       ctx.beginPath();
       ctx.arc(x, cy, dr, 0, Math.PI * 2);
-      ctx.fillStyle = STATUS_COLORS[co.type] || '#AAAAAA';
+      ctx.fillStyle = fillColor;
       ctx.fill();
 
       applyGrain(ctx, x, cy, dr, seed);
 
-      ctx.beginPath();
-      ctx.arc(x, cy, dr, 0, Math.PI * 2);
-      ctx.strokeStyle = IND_COLORS[co.industry] || '#333';
-      ctx.lineWidth = isH ? 2.5 : 1.5;
-      ctx.setLineDash([]);
-      ctx.stroke();
+      if (isH) {
+        ctx.beginPath();
+        ctx.arc(x, cy, dr, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      if (typeof co.lightrockInvestment === 'number') {
+        const label = `$${Math.round(co.lightrockInvestment)}M`;
+        const fontSize = 14 * 0.7;
+        ctx.font = `bold ${fontSize}px 'Inter', sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'rgba(255,255,255,0.92)';
+        ctx.fillText(label, x, cy);
+        ctx.textBaseline = 'alphabetic';
+      }
 
       curX += r * 2 + scaledGap;
     });
@@ -374,7 +376,7 @@ function render() {
 
 function showTooltip(hit, clientX, clientY) {
   tt.style.opacity = '1';
-  const ttW = 210, ttH = 110;
+  const ttW = 230, ttH = 130;
   let tx = clientX + 16, ty = clientY + 16;
   if (tx + ttW > window.innerWidth)  tx = clientX - ttW - 8;
   if (ty + ttH > window.innerHeight) ty = clientY - ttH - 8;
@@ -382,27 +384,41 @@ function showTooltip(hit, clientX, clientY) {
   if (ty < 4) ty = 4;
   tt.style.left = tx + 'px';
   tt.style.top  = ty + 'px';
+  const co = hit.co;
 
-  if (hit.empty) {
-    document.getElementById('tt-name').textContent = hit.year;
-    document.getElementById('tt-invested').innerHTML = 'No investments this year';
-    document.getElementById('tt-val').textContent = '';
-    document.getElementById('tt-status').textContent = '';
+  function setLine(id, prefix, value, suffix) {
+    const el = document.getElementById(id);
+    el.textContent = '';
+    const pre = document.createTextNode(prefix);
+    const b = document.createElement('b');
+    b.style.fontWeight = '700';
+    b.style.color = typeof value === 'number' ? '#1A1208' : '#9A8E7A';
+    b.textContent = typeof value === 'number' ? `$${value}M` : 'N/A';
+    const suf = document.createTextNode(suffix || '');
+    el.appendChild(pre);
+    el.appendChild(b);
+    if (suffix) el.appendChild(suf);
+  }
+
+  document.getElementById('tt-name').textContent = co.co;
+  setLine('tt-valuation', 'Latest Valuation(USD): ', co.latestValuation);
+  setLine('tt-funding', 'Total Funding(USD): ', co.totalFunding);
+
+  const invEl = document.getElementById('tt-invested');
+  invEl.textContent = '';
+  if (typeof co.lightrockInvestment === 'number') {
+    invEl.appendChild(document.createTextNode('LightRock invested '));
+    const span = document.createElement('u');
+    span.style.color = '#1A1208';
+    span.textContent = `$${co.lightrockInvestment}M`;
+    invEl.appendChild(span);
+    const em = document.createElement('em');
+    em.textContent = ` in ${co.year}`;
+    invEl.appendChild(em);
   } else {
-    const co = hit.co;
-    document.getElementById('tt-name').textContent = co.co;
-    const investedStr = typeof co.invested === 'number'
-      ? `Invested <u>$${co.invested}M</u> in <em>${co.year}</em>`
-      : `Invested in <em>${co.year}</em>`;
-    document.getElementById('tt-invested').innerHTML = investedStr;
-    const valLabel = typeof co.valuation === 'number'
-      ? `Last known valuation: <strong>$${co.valuation}M</strong>${co.type === 'downround' ? ' <span style="color:#C07040;font-size:13px;">↓</span>' : ''}`
-      : `Last known valuation: <strong style="color:#9A8E7A;">N/A</strong>`;
-    document.getElementById('tt-val').innerHTML = valLabel;
-    const statusEl = document.getElementById('tt-status');
-    const displayType = co.type === 'downround' ? 'active' : co.type;
-    statusEl.textContent = `Status: ${STATUS_LABELS[displayType] || displayType}`;
-    statusEl.className = `tt-status ${displayType}`;
+    const em = document.createElement('em');
+    em.textContent = `Invested in ${co.year}`;
+    invEl.appendChild(em);
   }
 }
 
@@ -413,7 +429,6 @@ function hitTest(clientX, clientY) {
   return [...nodes].reverse().find(n => Math.hypot(mx - n.x, my - n.y) < n.r);
 }
 
-// Mouse
 canvas.addEventListener('mousemove', e => {
   const hit = hitTest(e.clientX, e.clientY);
   if (hit) {
@@ -428,7 +443,6 @@ canvas.addEventListener('mouseleave', () => {
   hoverId = null; tt.style.opacity = '0'; render();
 });
 
-// Touch
 canvas.addEventListener('touchstart', e => {
   e.preventDefault();
   const touch = e.touches[0];
@@ -456,11 +470,7 @@ canvas.addEventListener('touchmove', e => {
 
 canvas.addEventListener('touchend', e => {
   e.preventDefault();
-  setTimeout(() => {
-    hoverId = null;
-    tt.style.opacity = '0';
-    render();
-  }, 1800);
+  setTimeout(() => { hoverId = null; tt.style.opacity = '0'; render(); }, 1800);
 }, { passive: false });
 
 function init() {
