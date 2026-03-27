@@ -171,7 +171,7 @@ canvas { width: 100%; height: 100%; display: block; }
       </div>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0 0 0;">
-      <div style="font-style:italic;font-size:12px;color:#9A8E7A;">$ inside bubble = Lightrock's investment amount</div>
+      <div style="font-style:italic;font-size:12px;color:#9A8E7A;padding:0 10px 0 0;">$ inside bubble = Lightrock's investment amount</div>
       <div style="font-style:italic;font-size:12px;color:#9A8E7A;">Click a legend item to filter · Click again to clear</div>
     </div>
   </div>
@@ -484,13 +484,13 @@ function showTooltip(hit, clientX, clientY) {
   }
 
   document.getElementById('tt-name').textContent = co.co;
-  setLine('tt-valuation', 'Latest Valuation(USD): ', co.latestValuation);
-  setLine('tt-funding', 'Total Funding(USD): ', co.totalFunding);
+  setLine('tt-valuation', 'Latest valuation(USD): ', co.latestValuation);
+  setLine('tt-funding', 'Total funding(USD): ', co.totalFunding);
 
   const invEl = document.getElementById('tt-invested');
   invEl.textContent = '';
   if (typeof co.lightrockInvestment === 'number') {
-    invEl.appendChild(document.createTextNode('LightRock invested '));
+    invEl.appendChild(document.createTextNode('Lightrock invested '));
     const span = document.createElement('u');
     span.style.color = '#1A1208';
     span.textContent = `$${co.lightrockInvestment}M`;
