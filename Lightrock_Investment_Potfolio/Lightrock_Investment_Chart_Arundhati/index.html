@@ -253,8 +253,10 @@ let activeIndustry = null;
 let activeSizeFilter = null;
 let nodes = [], hoverId = null;
 
-function fmt(val) {
-  return typeof val === 'number' ? `$${Math.round(val)}M` : null;
+function fmtVal(val) {
+  if (typeof val !== 'number') return null;
+  if (val >= 1000) return `$${(val / 1000).toFixed(1)}B`;
+  return `$${Math.round(val)}M`;
 }
 
 function getSizeBucket(val) {
@@ -487,22 +489,22 @@ function showTooltip(hit, clientX, clientY) {
     const b = document.createElement('b');
     b.style.fontWeight = '700';
     b.style.color = typeof value === 'number' ? '#1A1208' : '#9A8E7A';
-    b.textContent = typeof value === 'number' ? `${Math.round(value).toLocaleString()}M` : 'N/A';
+    b.textContent = typeof value === 'number' ? fmtVal(value) : 'N/A';
     el.appendChild(b);
   }
 
   document.getElementById('tt-name').textContent = co.co;
-  setLine('tt-valuation', 'Latest valuation: $', co.latestValuation);
-  setLine('tt-funding', 'Total funding: $', co.totalFunding);
+  setLine('tt-valuation', 'Latest valuation: ', co.latestValuation);
+  setLine('tt-funding', 'Total funding: ', co.totalFunding);
 
   const invEl = document.getElementById('tt-invested');
   invEl.textContent = '';
   if (typeof co.lightrockInvestment === 'number') {
     invEl.style.display = '';
-    invEl.appendChild(document.createTextNode('Lightrock invested $'));
-    const span = document.createElement('b');
+    invEl.appendChild(document.createTextNode('Lightrock invested '));
+    const span = document.createElement('u');
     span.style.color = '#1A1208';
-    span.textContent = `${Math.round(co.lightrockInvestment).toLocaleString()}M`;
+    span.textContent = fmtVal(co.lightrockInvestment);
     invEl.appendChild(span);
   } else {
     invEl.style.display = 'none';
@@ -531,10 +533,10 @@ canvas.addEventListener('mouseleave', () => {
 });
 
 canvas.addEventListener('touchstart', e => {
-  e.preventDefault();
   const touch = e.touches[0];
   const hit = hitTest(touch.clientX, touch.clientY);
   if (hit) {
+    e.preventDefault();
     hoverId = hit.id;
     render();
     showTooltip(hit, touch.clientX, touch.clientY);
@@ -542,10 +544,10 @@ canvas.addEventListener('touchstart', e => {
 }, { passive: false });
 
 canvas.addEventListener('touchmove', e => {
-  e.preventDefault();
   const touch = e.touches[0];
   const hit = hitTest(touch.clientX, touch.clientY);
   if (hit) {
+    e.preventDefault();
     if (hoverId !== hit.id) { hoverId = hit.id; render(); }
     showTooltip(hit, touch.clientX, touch.clientY);
   } else {
