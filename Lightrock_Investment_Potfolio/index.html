@@ -5,136 +5,159 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>LightRock Investment</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<style>@font-face { font-family: 'Jazmin Alt'; src: local('JazminAlt-Bold.otf'); font-weight: bold; }
-  @font-face { font-family: 'GT America Bold'; src: local('GT-America-Standard-Black.ttf'); font-weight: bold; }
-  @font-face { font-family: 'GT America'; src: local('GT-America-Standard-Light.ttf'); font-weight: 300; }
+<style>
+@font-face { font-family: 'Jazmin Alt'; src: local('JazminAlt-Bold.otf'); font-weight: bold; }
+@font-face { font-family: 'GT America Bold'; src: local('GT-America-Standard-Black.ttf'); font-weight: bold; }
+@font-face { font-family: 'GT America'; src: local('GT-America-Standard-Light.ttf'); font-weight: 300; }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: #EDE8DC;
-    font-family: 'GT America', Arial, sans-serif;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    padding: 0;
-  }
-  .page {
-    width: 100%;
-    max-width: 640px;
-    background: #EDE8DC;
-    padding: clamp(16px, 4vw, 32px) clamp(12px, 4vw, 28px) 0;
-    display: flex;
-    flex-direction: column;
-  }
-  .main-title {
-    font-family: 'Jazmin Alt', Georgia, serif;
-    font-size: clamp(28px, 6vw, 42px);
-    font-weight: bold;
-    color: #1A1208;
-    line-height: 1.05;
-    letter-spacing: -1px;
-    margin-bottom: 10px;
-    text-align: center;
-  }
-  .subtitle {
-    font-family: 'GT America', Arial, sans-serif;
-    font-size: clamp(14px, 2.2vw, 15px);
-    color: #6E6050;
-    margin-bottom: 16px;
-    text-align: center;
-    line-height: 1.5;
-  }
-  .legend-box {
-    border-top: 1.5px solid #C8BFAA;
-    border-bottom: 1.5px solid #C8BFAA;
-    padding: 10px 0;
-    margin-bottom: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .legend-row { display: flex; align-items: flex-start; gap: 0; }
-  .legend-key {
-    font-family: 'GT America Bold', Arial, sans-serif;
-    font-size: clamp(9px, 1.8vw, 9px);
-    font-weight: bold;
-    text-transform: uppercase;
-    color: #6E6050;
-    letter-spacing: 0.08em;
-    width: clamp(64px, 13vw, 80px);
-    min-width: 56px;
-    flex-shrink: 0;
-    line-height: 1.4;
-    padding-top: 1px;
-  }
-  .legend-items { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
-  .leg-item { display: flex; align-items: center; gap: 5px; font-family: 'GT America', Arial, sans-serif; font-size: clamp(11px, 2.2vw, 11px); color: #3A2E20; }
-  .dot-fill { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .size-dot { border-radius: 50%; border: 1.5px solid #A89880; background: transparent; display: inline-block; flex-shrink: 0; }
-  #viz-area { position: relative; width: 100%; flex-grow: 1; }
-  canvas { width: 100%; height: 100%; display: block; }
-  #tooltip {
-    position: fixed;
-    background: #FDFAF4;
-    border: 1px solid #D4C9B0;
-    color: #1A1208;
-    padding: 12px 14px;
-    border-radius: 3px;
-    pointer-events: none;
-    opacity: 0;
-    font-family: 'GT America', Arial, sans-serif;
-    font-size: 13px;
-    z-index: 100;
-    min-width: 180px;
-    max-width: 250px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.10);
-    transition: opacity 0.1s;
-    line-height: 1.6;
-  }
-  #tooltip .tt-name {
-    font-family: 'GT America Bold', Arial, sans-serif;
-    font-size: 22px;
-    font-weight: bold;
-    color: #1A1208;
-    margin-bottom: 3px;
-  }
-  #tooltip .tt-valuation {
-    font-size: 13px;
-    color: #3A2E20;
-    margin-bottom: 8px;
-  }
-  .tt-bold {
-    font-weight: 900 !important;
-    font-family: Impact, Arial Black, Arial, sans-serif !important;
-    color: #1A1208 !important;
-  }
-  #tooltip .tt-group {
-    border-top: 1px solid #E0D8C8;
-    padding-top: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  #tooltip .tt-funding {
-    font-size: 13px;
-    color: #3A2E20;
-  }
-  #tooltip .tt-invested {
-    font-size: 13px;
-    color: #5A4A38;
-  }
-  .footer {
-    border-top: 1.5px solid #C8BFAA;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 24px 0 16px 0;
-    margin-top: 4px;
-    gap: 8px;
-  }
-  .footer-logo { height: 18px; display: flex; align-items: center; justify-content: center; }
-  .footer-center { font-family: 'GT America', Arial, sans-serif; font-size: 14px; color: #8A7A65; text-align: center; flex: 1; }
-  .footer-right { font-family: 'GT America', Arial, sans-serif; font-size: 14px; color: #8A7A65; text-align: right; max-width: 170px; flex-shrink: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #EDE8DC;
+  font-family: 'GT America', Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 0;
+}
+.page {
+  width: 100%;
+  max-width: 640px;
+  background: #EDE8DC;
+  padding: clamp(16px, 4vw, 32px) clamp(12px, 4vw, 28px) 0;
+  display: flex;
+  flex-direction: column;
+}
+.main-title {
+  font-family: 'Jazmin Alt', Georgia, serif;
+  font-size: clamp(28px, 6vw, 42px);
+  font-weight: bold;
+  color: #1A1208;
+  line-height: 1.05;
+  letter-spacing: -1px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.subtitle {
+  font-family: 'GT America', Arial, sans-serif;
+  font-size: clamp(14px, 2.2vw, 15px);
+  color: #6E6050;
+  margin-bottom: 16px;
+  text-align: center;
+  line-height: 1.5;
+}
+.legend-box {
+  border-top: 1.5px solid #C8BFAA;
+  border-bottom: 1.5px solid #C8BFAA;
+  padding: 6px 0;
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.legend-row { display: flex; align-items: flex-start; gap: 0; }
+.legend-key {
+  font-family: 'GT America Bold', Arial, sans-serif;
+  font-size: clamp(9px, 1.8vw, 9px);
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #6E6050;
+  letter-spacing: 0.08em;
+  width: clamp(64px, 13vw, 80px);
+  min-width: 56px;
+  flex-shrink: 0;
+  line-height: 1.4;
+  padding-top: 1px;
+}
+.legend-items { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.leg-item {
+  display: flex; align-items: center; gap: 5px;
+  font-family: 'GT America', Arial, sans-serif;
+  font-size: clamp(11px, 2.2vw, 11px);
+  color: #3A2E20;
+  cursor: pointer;
+  padding: 3px 6px 3px 4px;
+  border-radius: 3px;
+  border: 1.5px solid transparent;
+  transition: border-color 0.15s, opacity 0.15s;
+  user-select: none;
+}
+.leg-item:hover { border-color: #C8BFAA; }
+.leg-item.active { border-color: #1A1208; background: rgba(26,18,8,0.06); }
+.leg-item.dimmed { opacity: 0.35; }
+.dot-fill { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.size-dot { border-radius: 50%; border: 1.5px solid #A89880; background: transparent; display: inline-block; flex-shrink: 0; }
+.size-leg-item {
+  display: flex; align-items: center; gap: 5px;
+  font-family: 'GT America', Arial, sans-serif;
+  font-size: clamp(11px, 2.2vw, 11px);
+  color: #3A2E20;
+  cursor: pointer;
+  padding: 3px 6px 3px 4px;
+  border-radius: 3px;
+  border: 1.5px solid transparent;
+  transition: border-color 0.15s, opacity 0.15s;
+  user-select: none;
+}
+.size-leg-item:hover { border-color: #C8BFAA; }
+.size-leg-item.active { border-color: #1A1208; background: rgba(26,18,8,0.06); }
+.size-leg-item.dimmed { opacity: 0.35; }
+#viz-area { position: relative; width: 100%; flex-grow: 1; }
+canvas { width: 100%; height: 100%; display: block; }
+#tooltip {
+  position: fixed;
+  background: #FDFAF4;
+  border: 1px solid #D4C9B0;
+  color: #1A1208;
+  padding: 12px 14px;
+  border-radius: 3px;
+  pointer-events: none;
+  opacity: 0;
+  font-family: 'GT America', Arial, sans-serif;
+  font-size: 13px;
+  z-index: 100;
+  min-width: 180px;
+  max-width: 250px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  transition: opacity 0.1s;
+  line-height: 1.6;
+}
+#tooltip .tt-name {
+  font-family: 'GT America Bold', Arial, sans-serif;
+  font-size: 22px;
+  font-weight: bold;
+  color: #1A1208;
+  margin-bottom: 3px;
+}
+#tooltip .tt-valuation { font-size: 13px; color: #3A2E20; margin-bottom: 8px; }
+#tooltip .tt-group {
+  border-top: 1px solid #E0D8C8;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+#tooltip .tt-funding { font-size: 13px; color: #3A2E20; }
+#tooltip .tt-invested { font-size: 13px; color: #5A4A38; }
+.filter-hint {
+  font-size: 10px;
+  color: #A89880;
+  text-align: right;
+  margin-top: -4px;
+  margin-bottom: 4px;
+  font-style: italic;
+}
+.footer {
+  border-top: 1.5px solid #C8BFAA;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 0 16px 0;
+  margin-top: 4px;
+  gap: 8px;
+}
+.footer-logo { height: 18px; display: flex; align-items: center; justify-content: center; }
+.footer-center { font-family: 'GT America', Arial, sans-serif; font-size: 14px; color: #8A7A65; text-align: center; flex: 1; }
+.footer-right { font-family: 'GT America', Arial, sans-serif; font-size: 14px; color: #8A7A65; text-align: right; max-width: 170px; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -149,14 +172,15 @@
     </div>
     <div class="legend-row">
       <div class="legend-key" style="line-height:1.3">Scale<br>(Valuation)</div>
-      <div class="legend-items">
-        <div class="leg-item"><div class="size-dot" style="width:7px;height:7px;"></div>$50M</div>
-        <div class="leg-item"><div class="size-dot" style="width:13px;height:13px;"></div>$250M</div>
-        <div class="leg-item"><div class="size-dot" style="width:20px;height:20px;"></div>$500M+</div>
-        <div class="leg-item" style="color:#9A8E7A;font-style:italic;font-size:10px;">*area = valuation</div>
+      <div class="legend-items" id="size-legend">
+        <div class="size-leg-item" data-size="small"><div class="size-dot" style="width:7px;height:7px;"></div>&lt;$100M</div>
+        <div class="size-leg-item" data-size="mid"><div class="size-dot" style="width:13px;height:13px;"></div>$100M–$500M</div>
+        <div class="size-leg-item" data-size="large"><div class="size-dot" style="width:20px;height:20px;"></div>$500M+</div>
+        <div class="leg-item" style="color:#9A8E7A;font-style:italic;font-size:10px;cursor:default;border:none;padding:0;">*area = valuation</div>
       </div>
     </div>
   </div>
+  <div class="filter-hint" id="filter-hint" style="display:none">Click legend again to clear filter</div>
 
   <div id="viz-area"><canvas id="viz"></canvas></div>
 
@@ -185,7 +209,7 @@ const IND_COLORS = {
   "Finance":    "#C8423A",
   "Agri":       "#4A7A5A",
   "Healthcare": "#D4A8A0",
-  "Logistics":  "#C8A882",
+
   "Education":  "#3D3D3D",
   "Energy":     "#4A9E9A",
   "Climate":    "#7A9E4A"
@@ -227,7 +251,24 @@ const data = [
 ];
 
 const allYears = [2019, 2020, 2021, 2022, 2023, 2024, 2025];
-let nodes = [], hoverId = null, activeTouch = null;
+
+// Filter state
+let activeIndustry = null;  // null = all
+let activeSizeFilter = null; // null = all, 'small'|'mid'|'large'
+let nodes = [], hoverId = null;
+
+function getSizeBucket(val) {
+  if (val === null || val === undefined) return 'small';
+  if (val >= 500) return 'large';
+  if (val >= 100) return 'mid';
+  return 'small';
+}
+
+function isVisible(co) {
+  const indOk = !activeIndustry || co.industry === activeIndustry;
+  const sizeOk = !activeSizeFilter || getSizeBucket(co.latestValuation) === activeSizeFilter;
+  return indOk && sizeOk;
+}
 
 function seededRand(seed) {
   let s = seed;
@@ -255,11 +296,49 @@ function applyGrain(ctx, x, y, r, seed) {
   ctx.restore();
 }
 
+function updateLegendStates() {
+  // Industry items
+  document.querySelectorAll('#ind-legend .leg-item[data-ind]').forEach(el => {
+    const ind = el.dataset.ind;
+    el.classList.toggle('active', activeIndustry === ind);
+    el.classList.toggle('dimmed', activeIndustry !== null && activeIndustry !== ind);
+  });
+  // Size items
+  document.querySelectorAll('#size-legend .size-leg-item').forEach(el => {
+    const sz = el.dataset.size;
+    el.classList.toggle('active', activeSizeFilter === sz);
+    el.classList.toggle('dimmed', activeSizeFilter !== null && activeSizeFilter !== sz);
+  });
+  // Hint
+  const hint = document.getElementById('filter-hint');
+  hint.style.display = (activeIndustry || activeSizeFilter) ? '' : 'none';
+}
+
 function buildIndLegend() {
   const el = document.getElementById('ind-legend');
   el.innerHTML = '';
   Object.entries(IND_COLORS).forEach(([n, c]) => {
-    el.innerHTML += `<div class="leg-item"><div class="dot-fill" style="background:${c}"></div>${n}</div>`;
+    const div = document.createElement('div');
+    div.className = 'leg-item';
+    div.dataset.ind = n;
+    div.innerHTML = `<div class="dot-fill" style="background:${c}"></div>${n}`;
+    div.addEventListener('click', () => {
+      activeIndustry = (activeIndustry === n) ? null : n;
+      updateLegendStates();
+      render();
+    });
+    el.appendChild(div);
+  });
+}
+
+function bindSizeLegend() {
+  document.querySelectorAll('#size-legend .size-leg-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const sz = el.dataset.size;
+      activeSizeFilter = (activeSizeFilter === sz) ? null : sz;
+      updateLegendStates();
+      render();
+    });
   });
 }
 
@@ -301,6 +380,7 @@ function render() {
   const defaultR = rowH * 0.18 * 1.2 * 0.9;
 
   const yearFontSize = Math.max(14, Math.min(13, w * 0.030));
+  const hasAnyFilter = activeIndustry || activeSizeFilter;
 
   nodes = [];
 
@@ -336,19 +416,25 @@ function render() {
     yearData.forEach((co, idx) => {
       const r = scaledRadii[idx];
       const x = curX + r;
-      const isH = hoverId === `${year}-${idx}`;
+      const visible = isVisible(co);
+      const isH = hoverId === `${year}-${idx}` && visible;
       const dr = isH ? r * 1.07 : r;
       const seed = year * 100 + idx;
       const fillColor = IND_COLORS[co.industry] || '#A89880';
 
-      nodes.push({ x, y: cy, r: dr, co, id: `${year}-${idx}` });
+      nodes.push({ x, y: cy, r: dr, co, id: `${year}-${idx}`, visible });
+
+      ctx.save();
+      if (hasAnyFilter && !visible) {
+        ctx.globalAlpha = 0.12;
+      }
 
       ctx.beginPath();
       ctx.arc(x, cy, dr, 0, Math.PI * 2);
       ctx.fillStyle = fillColor;
       ctx.fill();
 
-      applyGrain(ctx, x, cy, dr, seed);
+      if (!hasAnyFilter || visible) applyGrain(ctx, x, cy, dr, seed);
 
       if (isH) {
         ctx.beginPath();
@@ -358,7 +444,15 @@ function render() {
         ctx.stroke();
       }
 
-      if (typeof co.lightrockInvestment === 'number') {
+      if (hasAnyFilter && visible) {
+        ctx.beginPath();
+        ctx.arc(x, cy, dr, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(26,18,8,0.75)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      if (visible && typeof co.lightrockInvestment === 'number') {
         const label = `$${Math.round(co.lightrockInvestment)}M`;
         const fontSize = 14 * 0.7;
         ctx.font = `bold ${fontSize}px 'Inter', sans-serif`;
@@ -369,6 +463,7 @@ function render() {
         ctx.textBaseline = 'alphabetic';
       }
 
+      ctx.restore();
       curX += r * 2 + scaledGap;
     });
   });
@@ -386,18 +481,15 @@ function showTooltip(hit, clientX, clientY) {
   tt.style.top  = ty + 'px';
   const co = hit.co;
 
-  function setLine(id, prefix, value, suffix) {
+  function setLine(id, prefix, value) {
     const el = document.getElementById(id);
     el.textContent = '';
-    const pre = document.createTextNode(prefix);
+    el.appendChild(document.createTextNode(prefix));
     const b = document.createElement('b');
     b.style.fontWeight = '700';
     b.style.color = typeof value === 'number' ? '#1A1208' : '#9A8E7A';
     b.textContent = typeof value === 'number' ? `$${value}M` : 'N/A';
-    const suf = document.createTextNode(suffix || '');
-    el.appendChild(pre);
     el.appendChild(b);
-    if (suffix) el.appendChild(suf);
   }
 
   document.getElementById('tt-name').textContent = co.co;
@@ -426,7 +518,8 @@ function hitTest(clientX, clientY) {
   const rect = canvas.getBoundingClientRect();
   const mx = clientX - rect.left;
   const my = clientY - rect.top;
-  return [...nodes].reverse().find(n => Math.hypot(mx - n.x, my - n.y) < n.r);
+  // Only hit visible nodes when filter is active
+  return [...nodes].reverse().find(n => n.visible && Math.hypot(mx - n.x, my - n.y) < n.r);
 }
 
 canvas.addEventListener('mousemove', e => {
@@ -448,7 +541,6 @@ canvas.addEventListener('touchstart', e => {
   const touch = e.touches[0];
   const hit = hitTest(touch.clientX, touch.clientY);
   if (hit) {
-    activeTouch = hit.id;
     hoverId = hit.id;
     render();
     showTooltip(hit, touch.clientX, touch.clientY);
@@ -475,6 +567,8 @@ canvas.addEventListener('touchend', e => {
 
 function init() {
   buildIndLegend();
+  bindSizeLegend();
+  updateLegendStates();
   setCanvasSize();
   render();
 }
