@@ -384,7 +384,7 @@ function render() {
     ctx.stroke();
 
     ctx.fillStyle = "#6E6050";
-    ctx.font = `bold ${yearFontSize}px 'Inter', sans-serif`;
+    ctx.font = `bold ${yearFontSize}px 'GT America', sans-serif`;
     ctx.textAlign = "left";
     ctx.fillText(year, 0, cy + 5);
 
@@ -443,7 +443,7 @@ function render() {
       if (visible && typeof co.lightrockInvestment === 'number') {
         const label = `$${Math.round(co.lightrockInvestment)}M`;
         const fontSize = 14 * 0.7;
-        ctx.font = ` ${fontSize}px 'Inter', sans-serif`;
+        ctx.font = ` ${fontSize}px 'GT America', sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = 'rgba(255,255,255,0.92)';
