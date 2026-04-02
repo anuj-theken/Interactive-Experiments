@@ -4,57 +4,138 @@
     <meta charset="UTF-8">
     <meta name="referrer" content="no-referrer">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smooth Migration Flow</title>
+    <title>Fast Bird Tracker</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #0b0e14; color: white; }
-        #header { background: #1b5e20; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; }
-        #map { height: calc(100vh - 70px); width: 100%; background: #0b0e14; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #05070a; color: white; overflow: hidden; }
+        #map { height: 100vh; width: 100%; background: #05070a; }
 
-        /* Smooth Fading for Heat Layers */
-        .leaflet-heatmap-layer {
-            transition: opacity 1.2s ease-in-out;
-        }
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9);
+                    display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        .menu-card { background: #1b5e20; padding: 40px; border-radius: 20px; text-align: center; width: 350px; border: 1px solid #2e7d32; }
 
-        .hud { position: absolute; top: 85px; left: 20px; z-index: 1000; background: rgba(0,0,0,0.85); padding: 15px; border-radius: 8px; border: 1px solid #444; min-width: 200px; }
-        .time-label { font-size: 1.4rem; font-weight: bold; color: #ffd54f; }
-        .bird-label { color: #aaa; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; margin-bottom: 5px; }
-        .status-msg { color: #ffd54f; font-weight: bold; }
+        select { padding: 15px; width: 100%; border-radius: 8px; border: none; font-size: 1.1rem; margin-top: 20px; cursor: pointer; font-weight: bold; }
+
+        .hud { position: absolute; top: 20px; left: 20px; z-index: 1000; background: rgba(0,0,0,0.85);
+                padding: 20px; border-radius: 12px; border: 1px solid #444; display: none; }
+        .date-val { font-size: 2.5rem; font-weight: 900; color: #00ffff; }
+        .bird-val { color: #4caf50; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 2px; font-weight: bold; }
+        .loader-bar { height: 4px; width: 100%; background: #222; margin-top: 10px; border-radius: 2px; overflow: hidden; }
+        .progress { height: 100%; width: 0%; background: #ffd54f; transition: width 0.3s; }
     </style>
 </head>
 <body>
 
-<div id="header">
-    <h2 style="margin:0">🌊 Avian Flow: 4-Month Animation</h2>
-    <span id="status" class="status-msg">Loading Multi-Month Data...</span>
+<div id="overlay">
+    <div class="menu-card">
+        <h2 style="margin:0">Select Species</h2>
+        <p style="color: #a5d6a7; font-size: 0.9rem;">Tracking top 10 Subcontinent birds</p>
+
+        <select id="bird-selector">
+            <option value="">-- Choose a Bird --</option>
+            <option value="houspa">House Sparrow</option>
+            <option value="houcro1">House Crow</option>
+            <option value="commyn1">Common Myna</option>
+            <option value="rossta2">Rosy Starling (Migrant)</option>
+            <option value="barswa">Barn Swallow (Migrant)</option>
+            <option value="piecuc1">Pied Cuckoo (Migrant)</option>
+            <option value="purhef1">Purple Sunbird</option>
+            <option value="blakit1">Black Kite</option>
+            <option value="indrob1">Indian Robin</option>
+            <option value="coobul2">Red-vented Bulbul</option>
+        </select>
+        <div id="setup-status" style="margin-top:15px; font-size:0.8rem; display:none;">
+            Downloading migration data...
+            <div class="loader-bar"><div id="progress-fill" class="progress"></div></div>
+        </div>
+    </div>
 </div>
 
 <div id="map"></div>
-
-<div class="hud" id="hud" style="display:none;">
-    <div class="bird-label" id="active-bird">Select a Species</div>
-    <div id="active-date" class="time-label">Waiting...</div>
+<div class="hud" id="hud">
+    <div class="bird-val" id="hud-name">---</div>
+    <div id="hud-date" class="date-val">---</div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
 
 <script>
-    const EBIRD_API_KEY = 'oke2vcf2flhc'; 
+    const EBIRD_API_KEY = 'oke2vcf2flhc';
     const REGIONS = ['IN', 'PK', 'BD', 'NP', 'LK', 'BT'];
-
-    // We'll fetch 4 snapshots (roughly 30 days apart)
     const TIME_STEPS = [120, 90, 60, 30, 1];
-    let birdDataStore = {}; // { BirdName: [Layer0, Layer1, Layer2, Layer3, Layer4] }
-    let dateLabels = [];
 
-    const map = L.map('map', { preferCanvas: true }).setView([22.0, 78.0], 5);
+    const map = L.map('map', { zoomControl: false }).setView([22.0, 78.0], 5);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB' }).addTo(map);
 
-    let layerControl = L.control.layers(null, null, { collapsed: false }).addTo(map);
-    let currentAnimationInterval = null;
-    let currentBird = null;
+    let snapshots = [];
+    let currentHeatLayer = null;
+
+    document.getElementById('bird-selector').onchange = async (e) => {
+        const code = e.target.value;
+        const name = e.target.options[e.target.selectedIndex].text;
+        if (!code) return;
+
+        document.getElementById('setup-status').style.display = 'block';
+        await startTracking(code, name);
+    };
+
+    async function startTracking(sppCode, comName) {
+        if (!EBIRD_API_KEY || EBIRD_API_KEY.includes('YOUR')) {
+            alert("Please set your API Key!"); return;
+        }
+
+        const totalSteps = TIME_STEPS.length;
+
+        for (let i = 0; i < totalSteps; i++) {
+            const days = TIME_STEPS[i];
+            const date = getEbirdDate(days);
+
+            // Update Progress Bar
+            document.getElementById('progress-fill').style.width = `${((i+1)/totalSteps)*100}%`;
+
+            // PARALLEL FETCHING: Request all regions at once for this date
+            const regionRequests = REGIONS.map(reg =>
+                fetch(`https://api.ebird.org/v2/data/obs/${reg}/historic/${date.path}?spp=${sppCode}`, {
+                    headers: { 'x-ebirdapitoken': EBIRD_API_KEY }
+                }).then(res => res.ok ? res.json() : [])
+            );
+
+            const regionResults = await Promise.all(regionRequests);
+            const points = regionResults.flat().map(o => [o.lat, o.lng, 1.0]);
+            snapshots.push({ label: date.label, points: points });
+        }
+
+        // UI Clean up
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('hud').style.display = 'block';
+        document.getElementById('hud-name').innerText = comName;
+        animateHeat();
+    }
+
+    function animateHeat() {
+        let step = 0;
+        setInterval(() => {
+            if (currentHeatLayer) map.removeLayer(currentHeatLayer);
+            const snap = snapshots[step];
+
+            currentHeatLayer = L.heatLayer(snap.points, {
+    radius: 40,         // Reduced from 60 to make the "centers" tighter
+    blur: 15,           // Sharper edges make the data look more defined
+    max: 0.05,          // LOWER max = HIGHER brightness for single points
+    minOpacity: 0.8,    // Higher base visibility so it's not "faint"
+    gradient: {
+        0.2: '#00ffff', // Cyan (outer edge)
+        0.5: '#ffff00', // Yellow (middle)
+        1.0: '#ff0000'  // Red (core/highest density)
+    }
+}).addTo(map);
+
+            document.getElementById('hud-date').innerText = snap.label;
+            step = (step + 1) % snapshots.length;
+        }, 1500);
+    }
 
     function getEbirdDate(daysAgo) {
         const d = new Date();
@@ -64,100 +145,6 @@
             label: d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
         };
     }
-
-    async function fetchSnapshot(daysAgo) {
-        const dateObj = getEbirdDate(daysAgo);
-        let results = [];
-        for (const reg of REGIONS) {
-            try {
-                const res = await fetch(`https://api.ebird.org/v2/data/obs/${reg}/historic/${dateObj.path}?rank=mrec`, {
-                    headers: { 'x-ebirdapitoken': EBIRD_API_KEY }
-                });
-                if (res.ok) results = results.concat(await res.json());
-            } catch (e) {}
-        }
-        return { label: dateObj.label, data: results };
-    }
-
-    async function init() {
-        if (!EBIRD_API_KEY || EBIRD_API_KEY.includes('YOUR')) return;
-
-        // 1. Fetch all time snapshots
-        let snapshots = [];
-        for (let days of TIME_STEPS) {
-            document.getElementById('status').innerText = `Fetching data from ${days} days ago...`;
-            const snap = await fetchSnapshot(days);
-            snapshots.push(snap);
-            dateLabels.push(snap.label);
-        }
-
-        // 2. Determine Top 5 birds across all snapshots
-        const freq = {};
-        snapshots.forEach(s => s.data.forEach(o => freq[o.comName] = (freq[o.comName] || 0) + 1));
-        const topFive = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0, 5).map(i => i[0]);
-
-        // 3. Create Heat Layers for each bird at each time step
-        topFive.forEach(name => {
-            birdDataStore[name] = snapshots.map((snap, idx) => {
-                const pts = snap.data.filter(o => o.comName === name).map(o => [o.lat, o.lng, 1.0]);
-
-                // Color shifts from Blue (past) to Red (present)
-                const grad = idx < 2 ? {0.4: 'blue', 1: 'cyan'} : {0.4: 'orange', 1: 'red'};
-
-                const layer = L.heatLayer(pts, { radius: 45, blur: 25, minOpacity: 0 });
-                layer._idx = idx; // Store index for animation logic
-                return layer;
-            });
-
-            // Add toggle to legend
-            const dummyToggle = L.layerGroup();
-            dummyToggle.on('add', () => startFadingAnimation(name));
-            dummyToggle.on('remove', () => stopAnimation());
-            layerControl.addOverlay(dummyToggle, `🐦 ${name}`);
-        });
-
-        document.getElementById('status').innerText = "Select a bird to see the flow";
-        document.getElementById('hud').style.display = 'block';
-    }
-
-    function startFadingAnimation(name) {
-        stopAnimation(); // Clean up previous
-        currentBird = name;
-        document.getElementById('active-bird').innerText = name;
-
-        let step = 0;
-        const layers = birdDataStore[name];
-
-        currentAnimationInterval = setInterval(() => {
-            // Remove previous layer
-            layers.forEach(l => map.removeLayer(l));
-
-            // Add current layer
-            const activeLayer = layers[step];
-            activeLayer.addTo(map);
-
-            // Apply Fade Effect (CSS transition)
-            const canvas = activeLayer._canvas;
-            if(canvas) {
-                canvas.style.opacity = 0;
-                setTimeout(() => canvas.style.opacity = 0.8, 50);
-            }
-
-            document.getElementById('active-date').innerText = dateLabels[step];
-
-            step = (step + 1) % layers.length;
-        }, 2000); // 2 seconds per stage
-    }
-
-    function stopAnimation() {
-        clearInterval(currentAnimationInterval);
-        if (currentBird && birdDataStore[currentBird]) {
-            birdDataStore[currentBird].forEach(l => map.removeLayer(l));
-        }
-        document.getElementById('active-date').innerText = "---";
-    }
-
-    window.onload = init;
 </script>
 </body>
 </html>
