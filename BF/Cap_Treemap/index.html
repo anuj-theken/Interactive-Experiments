@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#f8fafc; font-family:'Segoe UI',sans-serif; padding:20px; display:flex; flex-direction:column; align-items:center; }
+  .section, hr { width:100%; max-width:800px; }
+  h2 { color:#0f172a; text-align:center; font-size:19px; font-weight:700; margin-bottom:3px; }
+  .sub { color:#64748b; text-align:center; font-size:13px; margin-bottom:12px; }
+  .src { color:#94a3b8; text-align:center; font-size:11px; margin-top:8px; }
+  .src a { color:#6366f1; text-decoration:none; }
+  .src a:hover { text-decoration:underline; }
+  .section { margin-bottom:28px; }
+  hr { border:none; border-top:1px solid #e2e8f0; margin:8px 0 24px; }
+  canvas { display:block; width:100%; }
+  .tip {
+    position:fixed; pointer-events:none; display:none;
+    background:#ffffff; border:1px solid #e2e8f0; color:#0f172a;
+    font-size:13px; padding:8px 12px; border-radius:8px; line-height:1.5; z-index:99;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+</style>
+</head>
+<body>
+
+<div class="section">
+  <h2>Top 10 NBFCs by Market Capitalisation</h2>
+  <p class="sub">As of 2 April 2026 &nbsp;|&nbsp; Values in INR Crores</p>
+  <canvas id="c1"></canvas>
+  <p class="src">Source: <a href="https://www.tijorifinance.com/sector/nbfc#constituents-sectors" target="_blank">Tijori Finance — NBFC Sector</a></p>
+</div>
+
+<hr>
+
+<div class="section">
+  <h2>Top 10 NBFCs by AUM</h2>
+  <p class="sub">As of 31 March 2025 &nbsp;|&nbsp; Values in INR Crores</p>
+  <canvas id="c2"></canvas>
+  <p class="src">Source: <a href="https://bfsi.eletsonline.com/indias-top100-nbfcs-ranking-2025/" target="_blank">BFSI Eletsonline — India's Top 100 NBFCs Ranking 2025</a></p>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script>
+const COLORS = [
+  '#6366f1','#8b5cf6','#a78bfa','#3b82f6','#60a5fa',
+  '#0ea5e9','#06b6d4','#14b8a6','#10b981','#34d399'
+];
+
+const D1 = [
+  {n:'Bajaj Finance',        v:508501},
+  {n:'Shriram Finance',      v:169426},
+  {n:'Jio Financial',        v:153270},
+  {n:'Power Finance Corp',   v:131179},
+  {n:'Muthoot Finance',      v:130676},
+  {n:'Tata Capital',         v:129660},
+  {n:'Cholamandalam I&F',    v:116976},
+  {n:'REC Ltd',              v:84763},
+  {n:'Aditya Birla Capital', v:79309},
+  {n:'L&T Finance',          v:61232},
+];
+const D2 = [
+  {n:'Power Finance Corp',   v:1178087},
+  {n:'REC Ltd',              v:549786},
+  {n:'Tata Capital',         v:243896},
+  {n:'Shriram Finance',      v:243043},
+  {n:'Cholamandalam I&F',    v:199876},
+  {n:'Aditya Birla Capital', v:126350},
+  {n:'Muthoot Finance',      v:122000},
+  {n:'L&T Finance',          v:102314},
+  {n:'Bajaj Finance',        v:416661},
+  {n:'Jio Financial',        v:10053},
+];
+
+function fmt(v){ return Math.round(v).toLocaleString('en-IN'); }
+
+// Slice-and-dice treemap — guarantees all items are placed
+function sliceDice(items, x, y, w, h, depth) {
+  if (!items.length) return [];
+  if (items.length === 1) return [{...items[0], x, y, w, h}];
+
+  const total = items.reduce((s,i) => s + i.v, 0);
+  const horiz = depth % 2 === 0;
+  const rects = [];
+  let pos = horiz ? x : y;
+  const full = horiz ? w : h;
+
+  for (let i = 0; i < items.length; i++) {
+    const size = (items[i].v / total) * full;
+    if (horiz) rects.push({...items[i], x: pos, y, w: size, h});
+    else       rects.push({...items[i], x, y: pos, w, h: size});
+    pos += size;
+  }
+  return rects;
+}
+
+// Squarified treemap with fallback guarantee
+function squarify(items, x, y, w, h) {
+  if (!items.length) return [];
+  if (items.length === 1) return [{...items[0], x, y, w, h}];
+
+  const total = items.reduce((s,i) => s + i.v, 0);
+  const area  = w * h;
+  const rects = [];
+  let rem = [...items];
+  let cx = x, cy = y, cw = w, ch = h;
+
+  while (rem.length > 0) {
+    if (rem.length <= 2 || cw <= 0 || ch <= 0) {
+      // Place remaining with slice-and-dice to avoid zero-size boxes
+      sliceDice(rem, cx, cy, cw, ch, cw >= ch ? 0 : 1)
+        .forEach(r => rects.push(r));
+      break;
+    }
+
+    const horiz = cw >= ch;
+    const side  = horiz ? ch : cw;
+    let row = [], rowSum = 0, prevRatio = Infinity;
+
+    for (let i = 0; i < rem.length; i++) {
+      const next    = rem[i];
+      const newSum  = rowSum + next.v;
+      const rowArea = (newSum / total) * area;
+      const rowW    = rowArea / side;
+      let   worst   = 0;
+      for (const it of [...row, next]) {
+        const itH = ((it.v / total) * area) / rowW;
+        worst = Math.max(worst, Math.max(rowW / itH, itH / rowW));
+      }
+      if (row.length > 0 && worst > prevRatio) break;
+      prevRatio = worst;
+      row.push(next);
+      rowSum = newSum;
+    }
+
+    const rowArea = (rowSum / total) * area;
+    const rowW    = rowArea / side;
+    let   pos     = horiz ? cy : cx;
+
+    for (const it of row) {
+      const itArea = (it.v / total) * area;
+      const itLen  = itArea / rowW;
+      if (horiz) rects.push({...it, x: cx,  y: pos, w: rowW, h: itLen});
+      else       rects.push({...it, x: pos, y: cy,  w: itLen, h: rowW});
+      pos += itLen;
+    }
+
+    rem = rem.slice(row.length);
+    if (horiz) { cx += rowW; cw -= rowW; }
+    else       { cy += rowW; ch -= rowW; }
+  }
+  return rects;
+}
+
+function buildChart(canvasId, rawData) {
+  const canvas = document.getElementById(canvasId);
+  const DPR    = window.devicePixelRatio || 1;
+  const sorted = [...rawData].sort((a,b) => b.v - a.v);
+  // Assign colours by original sort order so colours are consistent
+  const colorMap = {};
+  sorted.forEach((d,i) => colorMap[d.n] = COLORS[i % COLORS.length]);
+
+  const GAP = 0;
+  let rects = [];
+
+  function resize() {
+    const W = canvas.parentElement.clientWidth;
+    const H = Math.round(W * 0.56);
+    canvas.width        = W * DPR;
+    canvas.height       = H * DPR;
+    canvas.style.height = H + 'px';
+    rects = squarify(sorted, GAP, GAP, W - GAP*2, H - GAP*2);
+    draw(W, H);
+  }
+
+  function draw(W, H) {
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    rects.forEach(r => {
+      if (r.w < 1 || r.h < 1) return;
+
+      const pad = GAP / 2;
+      const rx  = r.x + pad, ry = r.y + pad;
+      const rw  = r.w - pad*2, rh = r.h - pad*2;
+      if (rw < 2 || rh < 2) return;
+
+      // Box
+      const rad = 0;
+      ctx.fillStyle = colorMap[r.n];
+      ctx.beginPath();
+      ctx.roundRect(rx, ry, rw, rh, rad);
+      ctx.fill();
+
+      // Skip text if too small
+      if (rw < 36 || rh < 28) return;
+
+      const nameSz = Math.min(15, Math.max(10, rw / 8));
+      const valSz  = Math.min(13, Math.max(9,  rw / 9));
+      const gap    = 4;
+      const totalH = nameSz + gap + valSz;
+      const midX   = rx + rw / 2;
+      const midY   = ry + rh / 2;
+      const nameY  = midY - totalH/2 + nameSz/2;
+      const valY   = nameY + nameSz/2 + gap + valSz/2;
+      const maxW   = rw - 10;
+
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+
+      // Company name
+      ctx.font      = `bold ${nameSz}px 'Segoe UI',sans-serif`;
+      ctx.fillStyle = '#ffffff';
+      let name = r.n;
+      while (ctx.measureText(name).width > maxW && name.length > 4)
+        name = name.slice(0,-2) + '…';
+      ctx.fillText(name, midX, nameY);
+
+      // Value (only if enough height)
+      if (rh > 46) {
+        ctx.font      = `${valSz}px 'Segoe UI',sans-serif`;
+        ctx.fillStyle = 'rgba(255,255,255,0.88)';
+        let val = '₹' + fmt(r.v) + ' Cr';
+        while (ctx.measureText(val).width > maxW && val.length > 4)
+          val = val.slice(0,-2) + '…';
+        ctx.fillText(val, midX, valY);
+      }
+    });
+  }
+
+  // Tooltip
+  const tip = document.getElementById('tip');
+  canvas.addEventListener('mousemove', e => {
+    const b  = canvas.getBoundingClientRect();
+    const mx = (e.clientX - b.left);
+    const my = (e.clientY - b.top);
+    const hit = rects.find(r => mx>=r.x && mx<=r.x+r.w && my>=r.y && my<=r.y+r.h);
+    if (hit) {
+      tip.style.display = 'block';
+      tip.innerHTML = `<b>${hit.n}</b><br>₹${fmt(hit.v)} Cr`;
+      const tw = tip.offsetWidth, th = tip.offsetHeight;
+      const pad = 14;
+      let lx = e.clientX + pad;
+      let ly = e.clientY + pad;
+      if (lx + tw > window.innerWidth  - 8) lx = e.clientX - tw - pad;
+      if (ly + th > window.innerHeight - 8) ly = e.clientY - th - pad;
+      tip.style.left = lx + 'px';
+      tip.style.top  = ly + 'px';
+    } else {
+      tip.style.display = 'none';
+    }
+  });
+  canvas.addEventListener('mouseleave', () => tip.style.display = 'none');
+
+  resize();
+  window.addEventListener('resize', resize);
+}
+
+buildChart('c1', D1);
+buildChart('c2', D2);
+</script>
+</body>
+</html>

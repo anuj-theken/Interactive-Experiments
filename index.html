@@ -137,9 +137,9 @@
 
     <!-- Category Toggle -->
     <div class="tab-bar">
-        <button class="tab-btn" data-category="intermission-ep2">Intermission Ep. 2</button>
+        <button class="tab-btn active" data-category="intermission-ep2">Intermission Ep. 2</button>
         <button class="tab-btn" data-category="intermission-ep1">Intermission Ep. 1</button>
-        <button class="tab-btn active" data-category="editorial">Editorial</button>
+        <button class="tab-btn" data-category="editorial">Editorial</button>
     </div>
 
     <div class="project-grid" id="projectGrid">
@@ -151,7 +151,30 @@
         // category options: "editorial" | "intermission-ep1" | "intermission-ep2"
         const projects = [
 
-
+          {
+              name: "GrowthChart",
+              path: "BF/growth_chart/index.html",
+              thumb: "growth_BF.png",
+              category: "intermission-ep2"
+          },
+          {
+              name: "marketCap_Treemap",
+              path: "BF/Cap_Treemap/index.html",
+              thumb: "treemap.png",
+              category: "intermission-ep2"
+          },
+          {
+              name: "AUM_piechart",
+              path: "BF/AUM_piechart/index.html",
+              thumb: "piechart_AUM.png",
+              category: "intermission-ep2"
+          },
+          {
+              name: "Corporate_tree",
+              path: "BF/Coporate_Tree/index.html",
+              thumb: "corporate_tree.png",
+              category: "intermission-ep2"
+          },
             {
                 name: "Top 6 Families",
                 path: "Editorial/Top_6_families/index.html",
@@ -228,7 +251,7 @@
 
         const grid = document.getElementById('projectGrid');
         const emptyState = document.getElementById('emptyState');
-        let activeCategory = "editorial";
+        let activeCategory = "intermission-ep2";
 
         // Build all cards once
         projects.forEach(project => {

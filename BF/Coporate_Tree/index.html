@@ -1,0 +1,378 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans,system-ui,sans-serif);background:transparent;color:var(--color-text-primary);padding:20px 16px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;padding:0 4px}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text-secondary);font-weight:500}
+.swatch{width:10px;height:10px;border-radius:2px;flex-shrink:0;border:1px solid transparent}
+.swatch.c-promo{border-color:#AFA9EC}
+.swatch.c-hold {border-color:#85B7EB}
+.swatch.c-auto {border-color:#FAC775}
+.swatch.c-fin  {border-color:#5DCAA5}
+.swatch.c-finc {border-color:#97C459}
+.swatch.c-msl  {border-color:#AFA9EC}
+.swatch.c-elec {border-color:#EF9F27}
+.swatch.c-skb  {border-color:#F09595}
+.dashed-swatch{width:22px;height:0;border-bottom:2px dashed}
+
+.chart-outer{overflow-x:auto}
+.chart{min-width:960px;position:relative;padding:8px 0 16px}
+
+.tier{display:flex;justify-content:center;align-items:flex-start;gap:12px;position:relative;z-index:2}
+
+.node{display:flex;flex-direction:column;align-items:center}
+.box{padding:7px 12px;border-radius:8px;border:1px solid;text-align:center;font-size:12px;font-weight:500;line-height:1.3;white-space:nowrap;transition:transform .15s,box-shadow .15s;position:relative;cursor:default}
+.box:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.1);z-index:10}
+.box-sub{font-size:10px;font-weight:400;margin-top:2px;opacity:.75}
+.badge{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:500;padding:1px 7px;border-radius:10px;white-space:nowrap;letter-spacing:.2px}
+.owner{margin-top:4px;font-size:10px;color:var(--color-text-secondary);white-space:nowrap}
+
+/* color ramps — light mode */
+.c-promo{background:#EEEDFE;border-color:#AFA9EC;color:#26215C}
+.c-hold {background:#E6F1FB;border-color:#85B7EB;color:#042C53}
+.c-auto {background:#FAEEDA;border-color:#FAC775;color:#412402}
+.c-fin  {background:#E1F5EE;border-color:#5DCAA5;color:#04342C}
+.c-finc {background:#EAF3DE;border-color:#97C459;color:#173404}
+.c-ins  {background:#E1F5EE;border-color:#9FE1CB;color:#085041}
+.c-msl  {background:#EEEDFE;border-color:#AFA9EC;color:#26215C}
+.c-elec {background:#FAEEDA;border-color:#EF9F27;color:#412402}
+.c-min  {background:#FAEEDA;border-color:#FAC775;color:#633806}
+.c-skb  {background:#FCEBEB;border-color:#F09595;color:#501313}
+.c-skbs {background:#FCEBEB;border-color:#F7C1C1;color:#791F1F}
+
+/* badge colours */
+.bdg-blue{background:#185FA5;color:#fff}
+.bdg-ora{background:#BA7517;color:#fff}
+.bdg-grn{background:#3B6D11;color:#fff}
+.bdg-pur{background:#534AB7;color:#fff}
+.bdg-vio{background:#7F77DD;color:#fff}
+
+/* minority cluster */
+.m-group{border:1px solid #EF9F27;border-radius:8px;background:#FAEEDA;padding:10px 12px;position:relative}
+.m-label{position:absolute;top:-8px;left:10px;background:#FAEEDA;padding:0 6px;font-size:9px;font-weight:500;color:#633806;letter-spacing:.3px}
+.m-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.mpill{padding:5px 9px;border-radius:6px;border:1px solid #EF9F27;background:#fff;font-size:11px;font-weight:500;color:#633806;text-align:center;cursor:default}
+.mpill:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.mpill-sub{font-size:9px;color:#854F0B;margin-top:1px}
+
+/* SKB section */
+.skb-wrap{border:1.5px dashed #E24B4A;border-radius:10px;padding:14px 16px;background:var(--color-background-secondary,#fff8f8);position:relative}
+.skb-title{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--color-background-secondary,#fff8f8);padding:0 10px;font-size:10px;font-weight:500;color:#A32D2D;letter-spacing:.3px;white-space:nowrap}
+
+.svg-layer{position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:1}
+
+.split-divider{border-top:1.5px dashed #E24B4A;position:relative;margin:8px 0 28px}
+.split-label{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:transparent;padding:0 14px;font-size:10px;font-weight:500;color:#A32D2D;letter-spacing:.3px;white-space:nowrap;background:var(--color-background-primary,#f5f4f0)}
+
+.tooltip{position:fixed;background:var(--color-background-primary,#111);color:var(--color-text-primary,#fff);border:1px solid var(--color-border-primary);padding:8px 11px;border-radius:8px;font-size:11px;line-height:1.6;pointer-events:none;z-index:999;max-width:230px;display:none;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+
+@media(prefers-color-scheme:dark){
+.c-promo{background:#3C3489;border-color:#7F77DD;color:#EEEDFE}
+.c-hold {background:#0C447C;border-color:#378ADD;color:#E6F1FB}
+.c-auto {background:#633806;border-color:#EF9F27;color:#FAEEDA}
+.c-fin  {background:#085041;border-color:#1D9E75;color:#E1F5EE}
+.c-finc {background:#27500A;border-color:#639922;color:#EAF3DE}
+.c-ins  {background:#085041;border-color:#5DCAA5;color:#E1F5EE}
+.c-msl  {background:#3C3489;border-color:#AFA9EC;color:#EEEDFE}
+.c-elec {background:#633806;border-color:#BA7517;color:#FAEEDA}
+.c-min  {background:#412402;border-color:#EF9F27;color:#FAEEDA}
+.c-skb  {background:#791F1F;border-color:#E24B4A;color:#FCEBEB}
+.c-skbs {background:#501313;border-color:#F09595;color:#FCEBEB}
+.m-group{background:#412402;border-color:#EF9F27}
+.m-label{background:#412402;color:#FAC775}
+.mpill{background:#633806;color:#FAEEDA;border-color:#BA7517}
+.mpill-sub{color:#FAC775}
+}
+</style>
+
+<div class="legend">
+  <div class="leg"><div class="swatch c-promo"></div>Promoter</div>
+  <div class="leg"><div class="swatch c-hold"></div>Holdings</div>
+  <div class="leg"><div class="swatch c-auto"></div>Auto cluster</div>
+  <div class="leg"><div class="swatch c-fin"></div>Finserv cluster</div>
+  <div class="leg"><div class="swatch c-finc"></div>Finance cluster</div>
+  <div class="leg"><div class="swatch c-msl"></div>Maharashtra Scooters</div>
+  <div class="leg"><div class="swatch c-elec"></div>Electricals / minority</div>
+  <div class="leg"><div class="swatch c-skb"></div>SKB group</div>
+  <div class="leg"><div class="dashed-swatch" style="border-color:#888"></div>Demerged</div>
+  <div class="leg"><div class="dashed-swatch" style="border-color:#E24B4A"></div>Family split</div>
+</div>
+
+<div class="chart-outer">
+<div class="chart" id="chart">
+<svg class="svg-layer" id="svgl"></svg>
+
+<!-- T0 Promoter -->
+<div class="tier" style="margin-bottom:32px">
+  <div class="node" id="n0" data-tip="Jamnalal Sons Pvt. Ltd., Bachhraj & Company Pvt. Ltd., Kamalnayan Investment & Trading, Bajaj Sevashram, and other family vehicles — the ultimate unlisted promoters of the group.">
+    <div class="box c-promo" style="min-width:230px">
+      Bajaj promoter family entities
+      <div class="box-sub">Jamnalal Sons · Bachhraj & Co. · family trusts</div>
+    </div>
+    <div class="owner">Rahul Bajaj (founder, late) & family</div>
+  </div>
+</div>
+
+<!-- T1 BHIL -->
+<div class="tier" style="margin-bottom:32px">
+  <div class="node" id="n1" data-tip="Bajaj Holdings & Investment Ltd. (BHIL) — the original Bajaj Auto Ltd., renamed after the 2007 demerger spun out the auto and financial services businesses. Registered NBFC; apex listed holding company. Part of BSE 100 / Nifty 100.">
+    <div class="box c-hold" style="min-width:230px;position:relative">
+      <span class="badge bdg-blue">Renamed from old Bajaj Auto — 2007 demerger</span>
+      Bajaj Holdings & Investment Ltd.
+      <div class="box-sub">BHIL · Listed NBFC · Apex holding co.</div>
+    </div>
+    <div class="owner">Sanjiv Bajaj (Chairman)</div>
+  </div>
+</div>
+
+<!-- T2 Auto | Finserv | MSL -->
+<div class="tier" style="margin-bottom:32px;gap:16px">
+  <div class="node" id="n-auto" data-tip="Bajaj Auto Ltd. — created by the 2007 demerger. Makes Pulsar, Platina, CT, Avenger motorcycles, RE three-wheelers, and Chetak EV. Present in 70+ countries; world's 3rd-largest motorcycle maker.">
+    <div class="box c-auto" style="min-width:148px;position:relative">
+      <span class="badge bdg-ora">Demerged 2007</span>
+      Bajaj Auto Ltd.
+      <div class="box-sub">Motorcycles · 3-wheelers · EV</div>
+    </div>
+    <div class="owner">Rajiv Bajaj (MD & CEO)</div>
+  </div>
+  <div class="node" id="n-finserv" data-tip="Bajaj Finserv Ltd. — created by the 2007 demerger, receiving wind energy and financial services. Owns Bajaj Finance, insurance arms, housing finance, and the AMC. Part of BSE Sensex / Nifty 50.">
+    <div class="box c-fin" style="min-width:160px;position:relative">
+      <span class="badge bdg-grn">Demerged 2007</span>
+      Bajaj Finserv Ltd.
+      <div class="box-sub">Financial services holdco · Listed</div>
+    </div>
+    <div class="owner">Sanjiv Bajaj (Chairman)</div>
+  </div>
+  <div class="node" id="n-msl" data-tip="Maharashtra Scooters Ltd. (MSL) — BHIL acquired the 27% WMDC stake in June 2019, making MSL a 51% subsidiary. MSL holds cross-investments in BHIL, Bajaj Auto, Bajaj Finance, and Bajaj Finserv. Also manufactures dies and jigs for the auto industry.">
+    <div class="box c-msl" style="min-width:148px;position:relative">
+      <span class="badge bdg-vio">Subsidiary since 2019</span>
+      Maharashtra Scooters Ltd.
+      <div class="box-sub">Cross-holding vehicle · 51%</div>
+    </div>
+    <div class="owner">Bajaj family nominees</div>
+  </div>
+</div>
+
+<!-- T3 Auto BV | Electricals | Minority -->
+<div class="tier" style="margin-bottom:32px;gap:16px;align-items:flex-start">
+  <div class="node" id="n-auto-bv" data-tip="Bajaj Auto International Holdings BV — Netherlands subsidiary of Bajaj Auto. Holds overseas stakes including KTM AG (Austria) and PT Bajaj Auto Indonesia.">
+    <div class="box c-auto" style="min-width:144px;font-size:11px">
+      Bajaj Auto Intl. Holdings BV
+      <div class="box-sub">Netherlands · KTM stake</div>
+    </div>
+    <div class="owner">Rajiv Bajaj (MD)</div>
+  </div>
+  <div style="flex:1;min-width:16px"></div>
+  <div class="node" id="n-elec" data-tip="Bajaj Electricals Ltd. — consumer electricals (fans, heaters, appliances) and lighting. BHIL holds a minority stake. Shekhar Bajaj is Chairman; Anant Bajaj is MD.">
+    <div class="box c-elec" style="min-width:140px">
+      Bajaj Electricals Ltd.
+      <div class="box-sub">Appliances · Lighting · Listed</div>
+    </div>
+    <div class="owner">Shekhar Bajaj (Chairman) · Anant Bajaj (MD)</div>
+  </div>
+  <div class="node" id="n-minor">
+    <div class="m-group">
+      <div class="m-label">Other BHIL minority stakes</div>
+      <div class="m-row">
+        <div class="mpill" data-tip="Bajel Projects Ltd. — demerged from Bajaj Electricals; focused on EPC for power transmission and infrastructure. Listed on NSE/BSE.">
+          Bajel Projects Ltd.
+          <div class="mpill-sub">Power EPC · Listed</div>
+        </div>
+        <div class="mpill" data-tip="Mukand Ltd. — special, alloy and stainless steels. JV with Sumitomo Electric (Mukand Sumi Special Steel). BHIL holds a minority stake.">
+          Mukand Ltd.
+          <div class="mpill-sub">Alloy & special steel</div>
+        </div>
+        <div class="mpill" data-tip="Hercules Hoists Ltd. / Indef Manufacturing — chain hoists, wire rope hoists, pulley blocks. BHIL and MSL hold minority stakes.">
+          Hercules Hoists / Indef
+          <div class="mpill-sub">Materials handling</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- T4 Finserv children -->
+<div class="tier" style="margin-bottom:32px;gap:10px">
+  <div class="node" id="n-bfl" data-tip="Bajaj Finance Ltd. — India's largest NBFC. Consumer finance, SME loans, home loans, fixed deposits. 69M+ customers. Listed; part of BSE Sensex / Nifty 50.">
+    <div class="box c-finc" style="min-width:124px">
+      Bajaj Finance Ltd.
+      <div class="box-sub">India's largest NBFC</div>
+    </div>
+    <div class="owner">Rajeev Jain (MD & CEO)</div>
+  </div>
+  <div class="node" id="n-bgi" data-tip="Bajaj General Insurance — general insurance arm. Fully owned by the Bajaj Finserv group.">
+    <div class="box c-ins" style="min-width:130px">
+      Bajaj General Insurance
+      <div class="box-sub">General insurance</div>
+    </div>
+    <div class="owner">Sanjiv Bajaj (oversight)</div>
+  </div>
+  <div class="node" id="n-bli" data-tip="Bajaj Life Insurance — life insurance arm. Fully owned by the Bajaj Finserv group.">
+    <div class="box c-ins" style="min-width:124px">
+      Bajaj Life Insurance
+      <div class="box-sub">Life insurance</div>
+    </div>
+    <div class="owner">Sanjiv Bajaj (oversight)</div>
+  </div>
+  <div class="node" id="n-bfsd" data-tip="Bajaj Finserv Direct Ltd. — fintech marketplace for loans, cards, insurance, investments, payments. Majority owned by Bajaj Finserv.">
+    <div class="box c-fin" style="min-width:122px;font-size:11px">
+      Bajaj Finserv Direct
+      <div class="box-sub">Fintech marketplace</div>
+    </div>
+    <div class="owner">Sanjiv Bajaj (oversight)</div>
+  </div>
+  <div class="node" id="n-bfam" data-tip="Bajaj Finserv AMC — 100% subsidiary of Bajaj Finserv. Manages the Bajaj Finserv Mutual Fund.">
+    <div class="box c-fin" style="min-width:112px;font-size:11px">
+      Bajaj Finserv AMC
+      <div class="box-sub">Mutual fund · 100%</div>
+    </div>
+    <div class="owner">Sanjiv Bajaj (oversight)</div>
+  </div>
+</div>
+
+<!-- T5 Finance children -->
+<div class="tier" style="margin-bottom:36px;gap:10px">
+  <div style="min-width:170px"></div>
+  <div class="node" id="n-bhf" data-tip="Bajaj Housing Finance Ltd. — home loans and loan against property (LAP). Subsidiary of Bajaj Finance. Listed separately.">
+    <div class="box c-finc" style="min-width:132px;font-size:11px">
+      Bajaj Housing Finance
+      <div class="box-sub">Home loans · LAP · Listed</div>
+    </div>
+    <div class="owner">Rajeev Jain (oversight)</div>
+  </div>
+  <div class="node" id="n-bfsc" data-tip="Bajaj Financial Securities Ltd. — stockbroking and depository participant. Digital platform for retail and HNI clients. 100% subsidiary of Bajaj Finance.">
+    <div class="box c-finc" style="min-width:132px;font-size:11px">
+      Bajaj Financial Securities
+      <div class="box-sub">Broking · Demat · 100%</div>
+    </div>
+    <div class="owner">Rajeev Jain (oversight)</div>
+  </div>
+</div>
+
+<!-- Split divider -->
+<div class="split-divider">
+  <span class="split-label">Family split — Shishir Bajaj branch separated from Rahul Bajaj branch (~2001–2008)</span>
+</div>
+
+<!-- SKB Group -->
+<div class="tier">
+  <div class="skb-wrap">
+    <div class="skb-title">SKB Group — Shishir & Kushagra Bajaj · fully separate from the Rahul Bajaj branch</div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center">
+      <div class="node" id="n-bhs" data-tip="Bajaj Hindusthan Sugar Ltd. — Asia's largest sugar producer. 14 mills in Uttar Pradesh; also manufactures ethanol. Separated in the family split formalised ~2008.">
+        <div class="box c-skb" style="min-width:144px;position:relative">
+          <span class="badge bdg-pur">Family split ~2008</span>
+          Bajaj Hindusthan Sugar
+          <div class="box-sub">Asia's largest sugar co. · Listed</div>
+        </div>
+        <div class="owner">Kushagra Bajaj (Chairman)</div>
+      </div>
+      <div class="node" id="n-bcc" data-tip="Bajaj Consumer Care Ltd. — FMCG, primarily hair oils (Almond Drops). Demerged from Bajaj Sevashram in 2001. Separated in the family split.">
+        <div class="box c-skb" style="min-width:140px;position:relative">
+          <span class="badge bdg-pur">Family split ~2008</span>
+          Bajaj Consumer Care
+          <div class="box-sub">FMCG · Hair oils · Listed</div>
+        </div>
+        <div class="owner">Kushagra Bajaj (Chairman)</div>
+      </div>
+      <div class="node" id="n-be" data-tip="Bajaj Energy Private Ltd. — thermal power generation. Kushagra Bajaj has been Non-Executive Chairman since September 2018.">
+        <div class="box c-skbs" style="min-width:130px">
+          Bajaj Energy Pvt. Ltd.
+          <div class="box-sub">Thermal power generation</div>
+        </div>
+        <div class="owner">Kushagra Bajaj (Chairman)</div>
+      </div>
+      <div class="node" id="n-lp" data-tip="Lalitpur Power Generation Company Ltd. — 1,980 MW (3×660 MW) thermal power project in Lalitpur, Uttar Pradesh.">
+        <div class="box c-skbs" style="min-width:136px">
+          Lalitpur Power Generation
+          <div class="box-sub">1,980 MW thermal · UP</div>
+        </div>
+        <div class="owner">Kushagra Bajaj (Exec. Chairman)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<p style="font-size:10px;color:var(--color-text-tertiary);margin-top:12px;padding:0 4px">Hover any box for details. Dashed connectors indicate demerged entities. The SKB Group is fully separate legally and commercially from the BHIL cluster.</p>
+<div class="tooltip" id="tip"></div>
+
+<script>
+const tip = document.getElementById('tip');
+document.querySelectorAll('[data-tip]').forEach(el => {
+  el.addEventListener('mouseenter', () => { tip.textContent = el.dataset.tip; tip.style.display = 'block'; });
+  el.addEventListener('mousemove', e => { tip.style.left = (e.clientX+14)+'px'; tip.style.top = (e.clientY-8)+'px'; });
+  el.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+});
+
+function gb(id) {
+  const chart = document.getElementById('chart');
+  const cr = chart.getBoundingClientRect();
+  const el = document.getElementById(id);
+  if (!el) return null;
+  const b = (el.querySelector('.box') || el.querySelector('.m-group')).getBoundingClientRect();
+  return { x: b.left - cr.left + b.width/2, top: b.top - cr.top, bot: b.top - cr.top + b.height };
+}
+
+function draw() {
+  const svg = document.getElementById('svgl');
+  const chart = document.getElementById('chart');
+  svg.setAttribute('height', chart.scrollHeight);
+  svg.innerHTML = '';
+  const ns = 'http://www.w3.org/2000/svg';
+
+  function mkpath(d, col, dash, sw) {
+    const e = document.createElementNS(ns, 'path');
+    e.setAttribute('d', d); e.setAttribute('fill', 'none');
+    e.setAttribute('stroke', col || '#bbb'); e.setAttribute('stroke-width', sw || '1');
+    if (dash) e.setAttribute('stroke-dasharray', dash);
+    svg.appendChild(e);
+  }
+
+  const p = {};
+  ['n0','n1','n-auto','n-finserv','n-msl','n-elec','n-minor','n-auto-bv',
+   'n-bfl','n-bgi','n-bli','n-bfsd','n-bfam','n-bhf','n-bfsc'].forEach(id => { p[id] = gb(id); });
+
+  // Promoter → BHIL
+  if (p.n0 && p.n1) mkpath(`M${p.n0.x} ${p.n0.bot} L${p.n0.x} ${(p.n0.bot+p.n1.top)/2} L${p.n1.x} ${(p.n0.bot+p.n1.top)/2} L${p.n1.x} ${p.n1.top}`, '#AFA9EC');
+
+  const b1 = p.n1; if (!b1) return;
+
+  const y2 = b1.bot + 16;
+  // BHIL → Auto (dashed amber)
+  if (p['n-auto']) mkpath(`M${b1.x} ${b1.bot} L${b1.x} ${y2} L${p['n-auto'].x} ${y2} L${p['n-auto'].x} ${p['n-auto'].top}`, '#EF9F27', '5 3');
+  // BHIL → Finserv (dashed green)
+  if (p['n-finserv']) mkpath(`M${b1.x} ${b1.bot} L${b1.x} ${y2} L${p['n-finserv'].x} ${y2} L${p['n-finserv'].x} ${p['n-finserv'].top}`, '#1D9E75', '5 3');
+  // BHIL → MSL (solid purple)
+  if (p['n-msl']) mkpath(`M${b1.x} ${b1.bot} L${b1.x} ${y2} L${p['n-msl'].x} ${y2} L${p['n-msl'].x} ${p['n-msl'].top}`, '#7F77DD');
+
+  const y3 = Math.max(...['n-auto','n-finserv','n-msl'].map(k => p[k]?.bot||0)) + 16;
+  // Auto → Auto BV
+  if (p['n-auto'] && p['n-auto-bv']) mkpath(`M${p['n-auto'].x} ${p['n-auto'].bot} L${p['n-auto'].x} ${y3} L${p['n-auto-bv'].x} ${y3} L${p['n-auto-bv'].x} ${p['n-auto-bv'].top}`, '#EF9F27');
+  // BHIL → Electricals
+  if (p['n-elec']) mkpath(`M${b1.x} ${b1.bot} L${b1.x} ${y3} L${p['n-elec'].x} ${y3} L${p['n-elec'].x} ${p['n-elec'].top}`, '#BA7517');
+  // BHIL → minority (dashed amber)
+  if (p['n-minor']) mkpath(`M${b1.x} ${b1.bot} L${b1.x} ${y3} L${p['n-minor'].x} ${y3} L${p['n-minor'].x} ${p['n-minor'].top}`, '#BA7517', '4 3');
+
+  // Finserv → children
+  if (p['n-finserv']) {
+    const yf = p['n-finserv'].bot + 14;
+    ['n-bfl','n-bgi','n-bli','n-bfsd','n-bfam'].forEach(id => {
+      if (!p[id]) return;
+      mkpath(`M${p['n-finserv'].x} ${p['n-finserv'].bot} L${p['n-finserv'].x} ${yf} L${p[id].x} ${yf} L${p[id].x} ${p[id].top}`, id==='n-bfl'?'#639922':'#1D9E75');
+    });
+  }
+  // BFL → Finance children
+  if (p['n-bfl']) {
+    const ybfl = p['n-bfl'].bot + 12;
+    ['n-bhf','n-bfsc'].forEach(id => {
+      if (!p[id]) return;
+      mkpath(`M${p['n-bfl'].x} ${p['n-bfl'].bot} L${p['n-bfl'].x} ${ybfl} L${p[id].x} ${ybfl} L${p[id].x} ${p[id].top}`, '#639922');
+    });
+  }
+}
+
+setTimeout(draw, 200);
+window.addEventListener('resize', () => setTimeout(draw, 50));
+</script>

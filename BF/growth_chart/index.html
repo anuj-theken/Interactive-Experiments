@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+  <style>
+    body { margin: 0; padding: 32px; font-family: Arial, sans-serif; background: #fff; }
+    h3 { color: #c0392b; font-size: 14px; margin-bottom: 4px; }
+    h3 span { color: #2980b9; }
+    #chart { width: 100%; max-width: 800px; height: 420px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 16px; font-size: 12px; }
+    th, td { border: 1px solid #ccc; padding: 4px 8px; text-align: center; }
+    th { background: #222; color: #fff; text-align: left; }
+    th:first-child, td:first-child { text-align: left; }
+    .source { font-size: 11px; color: #888; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+<h3>Exhibit 8: 55%-60% of the total customer franchise constituted <span>cross-sell franchise</span></h3>
+
+<div id="chart"></div>
+<p class="source">Source: Company data, I-Sec research</p>
+
+<script>
+  const chart = echarts.init(document.getElementById('chart'));
+
+  const years = ['FY18','FY19','FY20','FY21','FY22','FY23','FY24','FY25','Q3FY26'];
+  const totalFranchise = [26, 34, 43, 49, 58, 69, 84, 102, 115];
+  const crossSell      = [15, 21, 24, 27, 33, 41, 51,  64,  72];
+  const crossPct       = [59, 60, 57, 55, 57, 59, 61,  63,  63];
+
+  const option = {
+    backgroundColor: '#fff',
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      formatter: params => {
+        let s = `<b>${params[0].axisValue}</b><br/>`;
+        params.forEach(p => {
+          const val = p.seriesIndex === 2 ? p.value + '%' : p.value + ' Mn';
+          s += `${p.marker} ${p.seriesName}: <b>${val}</b><br/>`;
+        });
+        return s;
+      }
+    },
+    legend: {
+      top: 8, left: 0,
+      itemWidth: 14, itemHeight: 14,
+      textStyle: { fontSize: 11 },
+      data: [
+        { name: 'Total customer franchise (Mn)', icon: 'rect' },
+        { name: 'Cross-sell customer (Mn)', icon: 'rect' },
+        { name: 'Cross sell franchise as % of total franchise (RHS)' }
+      ]
+    },
+    grid: { top: 70, bottom: 40, left: 50, right: 60 },
+    xAxis: {
+      type: 'category',
+      data: years,
+      axisLine: { lineStyle: { color: '#aaa' } },
+      axisTick: { show: false },
+      axisLabel: { fontSize: 11 }
+    },
+    yAxis: [
+      {
+        type: 'value',
+        name: '',
+        min: 0, max: 130,
+        interval: 20,
+        axisLabel: { fontSize: 11 },
+        splitLine: { lineStyle: { color: '#eee' } }
+      },
+      {
+        type: 'value',
+        min: 52, max: 64,
+        interval: 2,
+        axisLabel: { formatter: v => v + '%', fontSize: 11 },
+        splitLine: { show: false }
+      }
+    ],
+    series: [
+      {
+        name: 'Total customer franchise (Mn)',
+        type: 'bar',
+        yAxisIndex: 0,
+        barWidth: 28,
+        data: totalFranchise,
+        itemStyle: { color: '#E07B2A' },
+        label: {
+          show: true, position: 'top', fontSize: 10,
+          formatter: p => p.value
+        },
+        z: 2
+      },
+      {
+        name: 'Cross-sell customer (Mn)',
+        type: 'bar',
+        yAxisIndex: 0,
+        barWidth: 28,
+        barGap: '-100%',
+        data: crossSell,
+        itemStyle: { color: '#C8C87A' },
+        label: {
+          show: true, position: 'inside', fontSize: 10, color: '#555',
+          formatter: p => p.value
+        },
+        z: 3
+      },
+      {
+        name: 'Cross sell franchise as % of total franchise (RHS)',
+        type: 'line',
+        yAxisIndex: 1,
+        data: crossPct,
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 6,
+        lineStyle: { color: '#1a5fa8', width: 2.5 },
+        itemStyle: { color: '#1a5fa8' },
+        label: {
+          show: true, position: 'top', fontSize: 10,
+          color: '#1a5fa8',
+          formatter: p => p.value + '%'
+        }
+      }
+    ]
+  };
+
+  chart.setOption(option);
+  window.addEventListener('resize', () => chart.resize());
+</script>
+</body>
+</html>
