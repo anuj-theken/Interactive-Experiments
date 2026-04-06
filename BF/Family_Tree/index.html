@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bajaj Family Tree - Responsive</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f5f0e8; color: #2c2c2a; padding: 20px 10px; }
+  h1 { text-align: center; font-size: 1.6rem; margin-bottom: 4px; }
+  .subtitle { text-align: center; font-size: 13px; color: #666; margin-bottom: 30px; }
+
+  .tree { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 1200px; margin: 0 auto; }
+
+  /* Generation container */
+  .gen-row { width: 100%; display: flex; flex-direction: column; align-items: center; }
+  .members-row { display: flex; justify-content: center; gap: 40px; width: 100%; }
+
+  /* Card Styling */
+  .card {
+    border-radius: 10px; padding: 10px; width: 150px; text-align: center;
+    border: 1.5px solid transparent; background: white; z-index: 2;
+  }
+  .card .name { font-size: 13px; font-weight: 700; }
+  .card .role { font-size: 10px; opacity: 0.8; margin-top: 4px; }
+
+  /* Colors */
+  .amber { background: #fef3d0; border-color: #e6a817; }
+  .pink  { background: #fde8f0; border-color: #d4537e; }
+  .teal  { background: #d8f5ec; border-color: #1d9e75; }
+  .blue  { background: #ddeefb; border-color: #378add; }
+  .coral { background: #fce8df; border-color: #d85a30; }
+
+  /* CONNECTOR LOGIC */
+  .v-line { width: 2px; background: #c8c5b8; height: 20px; }
+  .h-line { height: 2px; background: #c8c5b8; }
+  .dashed { background: repeating-linear-gradient(to bottom, #c8a84b 0, #c8a84b 4px, transparent 4px, transparent 8px); }
+
+  /* The "Spread" Bar */
+  .connector-wrap { display: flex; flex-direction: column; align-items: center; width: 100%; }
+  .branch-bar { height: 2px; background: #c8c5b8; margin: 0 auto; }
+
+  /* Couple Connector */
+  .couple { display: flex; align-items: center; gap: 0; }
+  .marriage-line { width: 20px; height: 2px; background: #c8c5b8; }
+
+  /* MOBILE OVERRIDES */
+  @media (max-width: 768px) {
+    .members-row { flex-direction: column; align-items: center; gap: 15px; }
+    .couple { flex-direction: column; }
+    .marriage-line { width: 2px; height: 10px; }
+    .branch-bar { display: none; } /* Hide horizontal bars on mobile */
+    .card { width: 200px; }
+    .desktop-only { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="tree">
+  <h1>Bajaj Family Tree</h1>
+  <p class="subtitle">Generation-wise lineage & business leadership</p>
+
+  <div class="card amber">
+    <div class="name">Bachhraj Bajaj</div>
+    <div class="role">Patriarch</div>
+  </div>
+
+  <div class="v-line dashed" style="height:30px"></div>
+
+  <div class="couple">
+    <div class="card amber"><div class="name">Jamnalal Bajaj</div><div class="role">Founder</div></div>
+    <div class="marriage-line"></div>
+    <div class="card pink"><div class="name">Jankidevi Bajaj</div><div class="role">Social Reformer</div></div>
+  </div>
+
+  <div class="v-line"></div>
+
+  <div class="connector-wrap desktop-only">
+    <div class="branch-bar" style="width: 400px;"></div>
+    <div style="display: flex; justify-content: space-between; width: 400px;">
+      <div class="v-line"></div>
+      <div class="v-line"></div>
+    </div>
+  </div>
+
+  <div class="members-row">
+    <div class="gen-row">
+      <div class="couple">
+        <div class="card teal"><div class="name">Ramkrishna Bajaj</div><div class="role">Gen 3</div></div>
+        <div class="marriage-line"></div>
+        <div class="card pink"><div class="name">Savitriben</div></div>
+      </div>
+      <div class="v-line"></div>
+      <div class="connector-wrap desktop-only">
+        <div class="branch-bar" style="width: 300px;"></div>
+        <div style="display: flex; justify-content: space-between; width: 300px;">
+          <div class="v-line"></div>
+          <div class="v-line"></div>
+          <div class="v-line"></div>
+        </div>
+      </div>
+      <div class="members-row" style="gap:10px">
+        <div class="card blue"><div class="name">Shekhar Bajaj</div><div class="role">Electricals</div></div>
+        <div class="card blue"><div class="name">Madhur Bajaj</div><div class="role">Group VC</div></div>
+        <div class="card blue"><div class="name">Niraj Bajaj</div><div class="role">Chairman Auto</div></div>
+      </div>
+    </div>
+
+    <div class="gen-row">
+      <div class="couple">
+        <div class="card teal"><div class="name">Kamalnayan Bajaj</div><div class="role">Gen 3</div></div>
+        <div class="marriage-line"></div>
+        <div class="card pink"><div class="name">Rupaben</div></div>
+      </div>
+      <div class="v-line"></div>
+      <div class="connector-wrap desktop-only">
+        <div class="branch-bar" style="width: 200px;"></div>
+        <div style="display: flex; justify-content: space-between; width: 200px;">
+          <div class="v-line"></div>
+          <div class="v-line"></div>
+        </div>
+      </div>
+      <div class="members-row" style="gap:10px">
+        <div class="card coral"><div class="name">Rahul Bajaj</div><div class="role">Late Chairman</div></div>
+        <div class="card coral"><div class="name">Shishir Bajaj</div><div class="role">Mukand Group</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="v-line"></div>
+
+  <div class="gen-row">
+     <div class="connector-wrap desktop-only">
+        <div class="branch-bar" style="width: 400px;"></div>
+        <div style="display: flex; justify-content: space-between; width: 400px;">
+          <div class="v-line"></div>
+          <div class="v-line"></div>
+          <div class="v-line"></div>
+        </div>
+      </div>
+      <div class="members-row">
+        <div class="card coral"><div class="name">Rajiv Bajaj</div><div class="role">MD, Bajaj Auto</div></div>
+        <div class="card coral" style="border:2px solid #d85a30; transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            <div class="name">Sanjiv Bajaj</div>
+            <div class="role">CMD, Bajaj Finserv ★</div>
+        </div>
+        <div class="card pink"><div class="name">Sunaina Kejriwal</div><div class="role">Gen 5</div></div>
+      </div>
+  </div>
+
+</div>
+</body>
+</html>

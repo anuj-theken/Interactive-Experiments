@@ -27,11 +27,40 @@
 
         header {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 40px;
         }
 
         h1 { font-weight: 600; font-size: 2.5rem; margin-bottom: 10px; }
         p { color: var(--text-sub); }
+
+        /* Toggle / Tab Bar */
+        .tab-bar {
+            display: flex;
+            background: #e4e4e7;
+            border-radius: 14px;
+            padding: 5px;
+            gap: 4px;
+            margin-bottom: 40px;
+        }
+
+        .tab-btn {
+            border: none;
+            background: transparent;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-sub);
+            transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: #fff;
+            color: var(--text-main);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
 
         /* Grid Layout */
         .project-grid {
@@ -47,7 +76,7 @@
             background: var(--card-bg);
             border-radius: 18px;
             overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.2s ease;
             box-shadow: var(--shadow);
             text-decoration: none;
             color: inherit;
@@ -58,6 +87,10 @@
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .card.hidden {
+            display: none;
         }
 
         .thumbnail {
@@ -84,6 +117,15 @@
             color: var(--text-sub);
             font-family: 'Courier New', Courier, monospace;
         }
+
+        .empty-state {
+            display: none;
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--text-sub);
+            padding: 60px 20px;
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -93,68 +135,99 @@
         <p>Visualizations generated using Asian Paints Data</p>
     </header>
 
+    <!-- Category Toggle -->
+    <div class="tab-bar">
+        <button class="tab-btn" data-category="intermission-ep2">Intermission Ep. 2</button>
+        <button class="tab-btn" data-category="intermission-ep1">Intermission Ep. 1</button>
+        <button class="tab-btn active" data-category="editorial">Editorial</button>
+    </div>
+
     <div class="project-grid" id="projectGrid">
-        </div>
+        <p class="empty-state" id="emptyState">No visualizations in this category yet.</p>
+    </div>
 
     <script>
-        // --- MANUALLY ADD YOUR PROJECTS HERE ---
+        // --- ADD YOUR PROJECTS HERE ---
+        // category options: "editorial" | "intermission-ep1" | "intermission-ep2"
         const projects = [
-
+          {
+              name: "UnderseaCables",
+              path: "Editorial/UnderseaCables/index.html",
+              thumb: "undersea.png",
+              category: "editorial"
+          },
+          {
+              name: "Family Tree",
+              path: "BF/Family_Tree/index.html",
+              thumb: "bf_family.png",
+              category: "intermission-ep2"
+          },
             {
                 name: "Timeline",
-                path: "Lightrock_Investment_Potfolio/timeline.html",
-                thumb: "timeline_icon.png"
+                path: "Editorial/Lightrock_Investment_Potfolio/timeline.html",
+                thumb: "timeline_icon.png",
+                category: "editorial"
             },
             {
-                name: "Investment portfolio",
-                path: "Lightrock_Investment_Potfolio/Lightrock_Investment_Chart_Arundhati/index.html",
-                thumb: "beads.png"
+                name: "Investment Portfolio",
+                path: "Editorial/Lightrock_Investment_Potfolio/Lightrock_Investment_Chart_Arundhati/index.html",
+                thumb: "beads.png",
+                category: "editorial"
             },
             {
-                name: "Sides crushing",
-                path: "Crushing/index.html",
-                thumb: "crush.png"
+                name: "Sides Crushing",
+                path: "AP/Crushing/index.html",
+                thumb: "crush.png",
+                category: "intermission-ep1"
             },
             {
                 name: "ColorNext",
-                path: "Wheel of Knowledge/index.html",
-                thumb: "wheel.png"
+                path: "AP/Wheel of Knowledge/index.html",
+                thumb: "wheel.png",
+                category: "intermission-ep1"
             },
             {
                 name: "Timeline of Hires",
-                path: "Timeline of Hire/index.html",
-                thumb: "timelinehuire.png"
+                path: "AP/Timeline of Hire/index.html",
+                thumb: "timelinehuire.png",
+                category: "intermission-ep1"
             },
             {
                 name: "Final Timeline",
-                path: "Timeline/index.html",
-                thumb: "timetime.png"
+                path: "AP/Timeline/index.html",
+                thumb: "timetime.png",
+                category: "intermission-ep1"
             },
-
             {
-                name: "Asian Paints IPO vs NIfty50",
-                path: "IPO/index.html",
-                thumb: "ipo.png"
+                name: "Asian Paints IPO vs Nifty50",
+                path: "AP/IPO/index.html",
+                thumb: "ipo.png",
+                category: "intermission-ep1"
             },
             {
                 name: "Asian Paints CFOA",
-                path: "Asian_Paints_CFOA/index.html",
-                thumb: "piechart.png"
+                path: "AP/Asian_Paints_CFOA/index.html",
+                thumb: "piechart.png",
+                category: "intermission-ep1"
             },
             {
                 name: "Asian Paints Revenue Growth",
-                path: "V9.2_Chart_AP rev/index.html",
-                thumb: "asianpaintsrevenue.png"
+                path: "AP/V9.2_Chart_AP rev/index.html",
+                thumb: "asianpaintsrevenue.png",
+                category: "intermission-ep1"
             },
-
         ];
 
         const grid = document.getElementById('projectGrid');
+        const emptyState = document.getElementById('emptyState');
+        let activeCategory = "editorial";
 
+        // Build all cards once
         projects.forEach(project => {
             const card = document.createElement('a');
             card.href = project.path;
             card.className = 'card';
+            card.dataset.category = project.category;
 
             card.innerHTML = `
                 <div class="thumbnail" style="background-image: url('${project.thumb}')"></div>
@@ -166,6 +239,35 @@
 
             grid.appendChild(card);
         });
+
+        function filterCards(category) {
+            const cards = grid.querySelectorAll('.card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                if (card.dataset.category === category) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+
+        // Tab click handlers
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeCategory = btn.dataset.category;
+                filterCards(activeCategory);
+            });
+        });
+
+        // Init
+        filterCards(activeCategory);
     </script>
 </body>
 </html>

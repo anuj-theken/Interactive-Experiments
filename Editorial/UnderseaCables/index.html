@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Undersea Cable Network</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="all_cables.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html { height: 100%; background: #000b1a; font-family: sans-serif; overflow: hidden; color: #e0eaf8; }
+        #map { width: 100vw; height: 100vh; }
+        #panel {
+            position: absolute; top: 0; left: 0; height: 100%;
+            width: 300px; background: rgba(0,8,20,0.92);
+            border-right: 1px solid #1a3a5a;
+            display: flex; flex-direction: column;
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
+        #panel.collapsed { transform: translateX(-260px); }
+        #panel-header {
+            padding: 14px 16px 10px;
+            border-bottom: 1px solid #1a3a5a;
+            flex-shrink: 0;
+        }
+        #panel-header h2 { font-size: 15px; font-weight: 600; color: #4facfe; letter-spacing: 0.5px; }
+        #panel-header p { font-size: 12px; color: #5a7a9a; margin-top: 3px; }
+        #toggle-btn {
+            position: absolute; right: -36px; top: 14px;
+            width: 36px; height: 36px;
+            background: rgba(0,8,20,0.92); border: 1px solid #1a3a5a;
+            border-left: none; border-radius: 0 6px 6px 0;
+            color: #4facfe; cursor: pointer; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #search-wrap { padding: 10px 12px; flex-shrink: 0; border-bottom: 1px solid #1a3a5a; }
+        #search {
+            width: 100%; padding: 7px 10px; font-size: 13px;
+            background: #081a2e; border: 1px solid #1a3a5a;
+            border-radius: 6px; color: #e0eaf8; outline: none;
+        }
+        #search:focus { border-color: #4facfe; }
+        #mode-tabs { display: flex; flex-shrink: 0; border-bottom: 1px solid #1a3a5a; }
+        .tab {
+            flex: 1; padding: 8px 0; font-size: 12px; text-align: center;
+            cursor: pointer; color: #5a7a9a; border: none; background: none;
+            transition: color 0.2s;
+        }
+        .tab.active { color: #4facfe; border-bottom: 2px solid #4facfe; }
+        #list-wrap { flex: 1; overflow-y: auto; padding: 6px 0; }
+        #list-wrap::-webkit-scrollbar { width: 4px; }
+        #list-wrap::-webkit-scrollbar-track { background: transparent; }
+        #list-wrap::-webkit-scrollbar-thumb { background: #1a3a5a; border-radius: 2px; }
+        .list-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 7px 14px; cursor: pointer; font-size: 13px;
+            transition: background 0.15s;
+        }
+        .list-item:hover { background: #0a1e30; }
+        .list-item.selected { background: #0a2540; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .item-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .item-check { width: 14px; height: 14px; border: 1px solid #2a4a6a; border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+        .item-check.checked { background: #4facfe; border-color: #4facfe; color: #000; }
+        #footer { padding: 10px 12px; border-top: 1px solid #1a3a5a; flex-shrink: 0; display: flex; gap: 8px; }
+        .footer-btn {
+            flex: 1; padding: 7px; font-size: 12px; border-radius: 6px; cursor: pointer;
+            border: 1px solid #1a3a5a; background: #081a2e; color: #e0eaf8;
+            transition: background 0.15s;
+        }
+        .footer-btn:hover { background: #0a2540; }
+        .footer-btn.primary { background: #4facfe22; border-color: #4facfe55; color: #4facfe; }
+        .footer-btn.primary:hover { background: #4facfe33; }
+        #status {
+            position: absolute; bottom: 16px; right: 16px;
+            background: rgba(0,8,20,0.8); border: 1px solid #1a3a5a;
+            padding: 6px 12px; border-radius: 6px; font-size: 12px; color: #5a7a9a;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="panel">
+        <button id="toggle-btn" onclick="togglePanel()">‹</button>
+        <div id="panel-header">
+            <h2>Undersea Cable Network</h2>
+            <p id="status-text">Loading...</p>
+        </div>
+        <div id="search-wrap">
+            <input id="search" type="text" placeholder="Search cables or cities..." oninput="onSearch(this.value)" />
+        </div>
+        <div id="mode-tabs">
+            <button class="tab active" id="tab-cables" onclick="switchTab('cables')">Cables</button>
+            <button class="tab" id="tab-cities" onclick="switchTab('cities')">Cities</button>
+        </div>
+        <div id="list-wrap"></div>
+        <div id="footer">
+            <button class="footer-btn" onclick="selectAll()">Select all</button>
+            <button class="footer-btn" onclick="clearAll()">Clear</button>
+        </div>
+    </div>
+    <div id="status">Loading...</div>
+
+<script>
+const COLORS = [
+    '#ff6b6b','#ffa36b','#ffd36b','#a8e063','#4facfe',
+    '#a29bfe','#fd79a8','#00cec9','#fdcb6e','#e17055',
+    '#74b9ff','#55efc4','#b2bec3','#6c5ce7','#fab1a0'
+];
+
+const chart = echarts.init(document.getElementById('map'), 'dark');
+let allCables = [], allCities = [], cableColors = {};
+let selectedCables = new Set(), selectedCities = new Set();
+let currentTab = 'cables';
+let searchVal = '';
+let panelOpen = true;
+
+// cityCoordMap: name -> [lng, lat] extracted from line endpoints
+const cityCoordMap = new Map();
+
+async function init() {
+    const worldRes = await fetch('https://cdn.jsdelivr.net/npm/echarts@4.9.0/map/json/world.json');
+    echarts.registerMap('world', await worldRes.json());
+
+    const citySet = new Map();
+
+    allCables = (cableData || []).map((f, i) => {
+        const name = f.properties.name || 'Unnamed Cable';
+        const color = COLORS[i % COLORS.length];
+        cableColors[name] = color;
+
+        const lps = f.properties.landing_points || [];
+
+        // Collect coordinates from landing_points if available
+        lps.forEach(p => {
+            const cityName = typeof p === 'string' ? p : (p.name || '');
+            const coords = p.coordinates || p.coords || null;
+            if (cityName) {
+                if (!citySet.has(cityName)) citySet.set(cityName, coords);
+                // Store in coord map if we have coords
+                if (coords && !cityCoordMap.has(cityName)) {
+                    // coords may be [lng, lat] or [lat, lng] — store as-is, we'll validate below
+                    cityCoordMap.set(cityName, coords);
+                }
+            }
+        });
+
+        const geom = f.geometry;
+        const lines = geom.type === 'MultiLineString' ? geom.coordinates : [geom.coordinates];
+
+        // Extract line endpoints as candidate city coords
+        // Each line: array of [lng, lat] points. First and last point = landing points.
+        if (lines.length > 0 && lps.length > 0) {
+            lines.forEach((line, li) => {
+                if (!line || line.length < 2) return;
+                const endpoints = [line[0], line[line.length - 1]];
+                endpoints.forEach((pt, ei) => {
+                    // Match endpoint to landing point by index if possible
+                    const lpIdx = li * 2 + ei;
+                    const lp = lps[lpIdx] || lps[ei] || null;
+                    if (!lp) return;
+                    const lpName = typeof lp === 'string' ? lp : (lp.name || '');
+                    if (lpName && !cityCoordMap.has(lpName) && pt && pt.length >= 2) {
+                        const [x, y] = pt;
+                        // Validate: lng in [-180,180], lat in [-90,90]
+                        if (x >= -180 && x <= 180 && y >= -90 && y <= 90) {
+                            cityCoordMap.set(lpName, [x, y]);
+                        }
+                    }
+                });
+            });
+        }
+
+        return { name, color, lines, feature: f };
+    });
+
+    allCities = Array.from(citySet.entries()).map(([name, coords]) => {
+        // Prefer explicit coords; fall back to extracted endpoint coords
+        const resolved = (coords && isValidCoord(coords))
+            ? coords
+            : (cityCoordMap.get(name) || null);
+        return { name, coords: resolved };
+    });
+
+    selectedCables = new Set(allCables.map(c => c.name));
+    selectedCities = new Set(allCities.map(c => c.name));
+
+    renderList();
+    renderMap();
+
+    const withCoords = allCities.filter(c => c.coords).length;
+    document.getElementById('status-text').textContent =
+        `${allCables.length} cables · ${allCities.length} cities (${withCoords} mapped)`;
+    document.getElementById('status').textContent = `${allCables.length} cables loaded`;
+}
+
+function isValidCoord(c) {
+    return Array.isArray(c) && c.length >= 2
+        && c[0] >= -180 && c[0] <= 180
+        && c[1] >= -90  && c[1] <= 90;
+}
+
+function renderMap() {
+    const activeCables = allCables.filter(c => selectedCables.has(c.name));
+
+    const series = activeCables.map(c => ({
+        type: 'lines',
+        coordinateSystem: 'geo',
+        data: c.lines.map(line => ({ name: c.name, coords: line, value: c.name })),
+        polyline: true,
+        lineStyle: { color: c.color, width: 1, opacity: 0.45 },
+        emphasis: { lineStyle: { color: '#fff', width: 3, opacity: 1 } },
+        progressive: 100,
+        silent: false
+    }));
+
+    // Gather all landing-point names from active cables
+    const activeCityNames = new Set(
+        activeCables.flatMap(c => {
+            const lps = c.feature.properties.landing_points || [];
+            return lps.map(p => typeof p === 'string' ? p : (p.name || ''));
+        })
+    );
+
+    // --- Solid circle layer (always visible) ---
+    const cityCircles = allCities
+        .filter(c => activeCityNames.has(c.name) && c.coords && isValidCoord(c.coords))
+        .map(c => ({ name: c.name, value: [c.coords[0], c.coords[1]] }));
+
+    // Count cables per city for sizing
+    const cableCounts = new Map();
+    activeCables.forEach(c => {
+        const lps = c.feature.properties.landing_points || [];
+        lps.forEach(p => {
+            const n = typeof p === 'string' ? p : (p.name || '');
+            if (n) cableCounts.set(n, (cableCounts.get(n) || 0) + 1);
+        });
+    });
+
+    if (cityCircles.length) {
+        series.push({
+            name: 'city-dot',
+            type: 'scatter',
+            coordinateSystem: 'geo',
+            data: cityCircles.map(c => ({ ...c, symbolSize: 4 })),
+            symbol: 'circle',
+            itemStyle: { color: '#4facfe', borderWidth: 0 },
+            emphasis: {
+                itemStyle: { color: '#a0d8ff', borderWidth: 0 },
+                label: { show: false }
+            },
+            label: { show: false },
+            tooltip: { formatter: p => `<b style="color:#4facfe">${p.name}</b><br/><span style="color:#5a9aba">${cableCounts.get(p.name) || 1} cable(s)</span>` },
+            zlevel: 5
+        });
+    }
+
+    chart.setOption({
+        backgroundColor: '#000b1a',
+        tooltip: { trigger: 'item' },
+        geo: {
+            map: 'world', roam: true,
+            itemStyle: { areaColor: '#081a2e', borderColor: '#1a3a5a' },
+            emphasis: { itemStyle: { areaColor: '#0a2540' } }
+        },
+        series
+    }, true);
+
+    document.getElementById('status').textContent =
+        `${activeCables.length} cables · ${cityCircles.length} cities shown`;
+}
+
+function renderList() {
+    const wrap = document.getElementById('list-wrap');
+    const q = searchVal.toLowerCase();
+
+    if (currentTab === 'cables') {
+        const items = allCables.filter(c => c.name.toLowerCase().includes(q));
+        wrap.innerHTML = items.map(c => `
+            <div class="list-item ${selectedCables.has(c.name) ? 'selected' : ''}" onclick="toggleCable('${esc(c.name)}')">
+                <div class="dot" style="background:${c.color}"></div>
+                <span class="item-name" title="${esc(c.name)}">${c.name}</span>
+                <div class="item-check ${selectedCables.has(c.name) ? 'checked' : ''}">
+                    ${selectedCables.has(c.name) ? '✓' : ''}
+                </div>
+            </div>`).join('');
+    } else {
+        const items = allCities.filter(c => c.name.toLowerCase().includes(q));
+        wrap.innerHTML = items.map(c => `
+            <div class="list-item ${selectedCities.has(c.name) ? 'selected' : ''}" onclick="toggleCity('${esc(c.name)}')">
+                <div class="dot" style="background:${c.coords ? '#4facfe' : '#2a4a6a'}"></div>
+                <span class="item-name" title="${esc(c.name)}">${c.name}</span>
+                <div class="item-check ${selectedCities.has(c.name) ? 'checked' : ''}">
+                    ${selectedCities.has(c.name) ? '✓' : ''}
+                </div>
+            </div>`).join('');
+    }
+}
+
+function esc(s) { return s.replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
+function toggleCable(name) {
+    if (selectedCables.has(name)) selectedCables.delete(name);
+    else selectedCables.add(name);
+    renderList(); renderMap();
+}
+
+function toggleCity(name) {
+    if (selectedCities.has(name)) selectedCities.delete(name);
+    else selectedCities.add(name);
+    selectedCables.clear();
+    allCables.forEach(c => {
+        const lps = (c.feature.properties.landing_points || []).map(p => typeof p === 'string' ? p : (p.name || ''));
+        if (lps.some(l => selectedCities.has(l))) selectedCables.add(c.name);
+    });
+    renderList(); renderMap();
+}
+
+function selectAll() {
+    const q = searchVal.toLowerCase();
+    if (currentTab === 'cables') {
+        allCables.filter(c => c.name.toLowerCase().includes(q)).forEach(c => selectedCables.add(c.name));
+    } else {
+        allCities.filter(c => c.name.toLowerCase().includes(q)).forEach(c => selectedCities.add(c.name));
+        selectedCables.clear();
+        allCables.forEach(c => {
+            const lps = (c.feature.properties.landing_points || []).map(p => typeof p === 'string' ? p : (p.name || ''));
+            if (lps.some(l => selectedCities.has(l))) selectedCables.add(c.name);
+        });
+    }
+    renderList(); renderMap();
+}
+
+function clearAll() {
+    const q = searchVal.toLowerCase();
+    if (currentTab === 'cables') {
+        allCables.filter(c => c.name.toLowerCase().includes(q)).forEach(c => selectedCables.delete(c.name));
+    } else {
+        allCities.filter(c => c.name.toLowerCase().includes(q)).forEach(c => selectedCities.delete(c.name));
+        selectedCables.clear();
+        allCables.forEach(c => {
+            const lps = (c.feature.properties.landing_points || []).map(p => typeof p === 'string' ? p : (p.name || ''));
+            if (lps.some(l => selectedCities.has(l))) selectedCables.add(c.name);
+        });
+    }
+    renderList(); renderMap();
+}
+
+function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('tab-cables').className = 'tab' + (tab === 'cables' ? ' active' : '');
+    document.getElementById('tab-cities').className = 'tab' + (tab === 'cities' ? ' active' : '');
+    renderList();
+}
+
+function onSearch(v) { searchVal = v; renderList(); }
+
+function togglePanel() {
+    panelOpen = !panelOpen;
+    document.getElementById('panel').classList.toggle('collapsed', !panelOpen);
+    document.getElementById('toggle-btn').textContent = panelOpen ? '‹' : '›';
+}
+
+window.addEventListener('resize', () => chart.resize());
+init();
+</script>
+</body>
+</html>
