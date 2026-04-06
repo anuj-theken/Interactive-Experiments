@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Company Business Chart</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #f5f4ef; font-family: 'Segoe UI', sans-serif; padding: 20px; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+  #bubble-area { flex: 1; position: relative; overflow: hidden; min-height: 0; }
+  #bubble-canvas { width: 100%; height: 100%; }
+
+  #legend {
+    position: absolute; top: 8px; right: 8px;
+    display: flex; flex-direction: column; gap: 4px;
+    background: rgba(245,244,239,0.92); padding: 8px 10px; border-radius: 6px;
+  }
+  .legend-title { font-size: 10px; font-weight: 700; color: #444; margin-bottom: 2px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #555; cursor: pointer; user-select: none; border-radius: 3px; padding: 1px 3px; transition: opacity 0.15s; }
+  .legend-item:hover { background: rgba(0,0,0,0.06); }
+  .legend-item.off { opacity: 0.35; }
+  .legend-item.off .legend-dot { background: #bbb !important; }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  #cluster-labels { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+  .cluster-label { position: absolute; transform: translate(-50%, 0); font-size: 10px; font-weight: 700; color: #555; white-space: nowrap; opacity: 0; transition: opacity 0.3s; }
+  .cluster-label.visible { opacity: 1; }
+
+  #year-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 52px; font-weight: 800; color: rgba(0,0,0,0.05); pointer-events: none; transition: opacity 0.2s; opacity: 0; }
+  #year-label.visible { opacity: 1; }
+
+  #industry-tooltip {
+    position: absolute;
+    background: rgba(20,20,30,0.92);
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 13px;
+    font-size: 11px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 10;
+    min-width: 160px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  }
+  #industry-tooltip.visible { opacity: 1; }
+  .itt-header { font-size: 12px; font-weight: 700; margin-bottom: 7px; color: #f0c040; }
+  .itt-row { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+  .itt-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .itt-name { flex: 1; color: #ccc; }
+  .itt-val { font-weight: 700; color: #fff; }
+  .itt-bar-wrap { width: 48px; height: 4px; background: rgba(255,255,255,0.12); border-radius: 2px; }
+  .itt-bar-fill { height: 100%; border-radius: 2px; }
+
+  .charts-section { flex-shrink: 0; padding-top: 8px; border-top: 1px solid #ddd; }
+  .page-title { text-align: center; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 6px; }
+  .charts-row { display: flex; justify-content: center; overflow-x: auto; }
+
+  .chart-wrapper { display: flex; flex-direction: column; flex: 1; min-width: 100px; max-width: 160px; padding: 0 2px; }
+  .chart-header { text-align: left; width: 100%; padding: 0 4px 2px; }
+  .company-name { font-size: 11px; font-weight: 700; color: #222; }
+  .change { font-size: 10px; font-weight: 600; margin-top: 1px; }
+  .neg { color: #e05252; } .pos { color: #27ae60; }
+  .cur { color: #222; font-size: 11px; font-weight: 800; }
+
+  .chart-container { position: relative; width: 100%; }
+  .chart-div { width: 100%; height: 160px; }
+  .label-row { position: absolute; top: 14px; left: 0; right: 0; pointer-events: none; }
+  .bar-label { position: absolute; font-size: 9px; font-weight: 600; color: #333; text-align: center; transform: translateX(-50%); white-space: nowrap; opacity: 0; transition: opacity 0.15s; }
+  .bar-label.active { opacity: 1; }
+  .connector-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+  .connector-line { stroke-width: 1; stroke-dasharray: 3 3; opacity: 0; transition: opacity 0.15s; }
+  .connector-line.active { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div id="bubble-area">
+  <canvas id="bubble-canvas"></canvas>
+  <div id="year-label"></div>
+  <div id="industry-tooltip"></div>
+  <div id="cluster-labels"></div>
+  <div id="legend"><div class="legend-title">Industry</div></div>
+</div>
+
+<div class="charts-section">
+  <div class="page-title">Number of Businesses Owned (2019–2024)</div>
+  <div class="charts-row" id="chartsRow"></div>
+</div>
+
+<script>
+var years = [2019,2020,2021,2022,2023,2024];
+
+var industries = [
+  { name: 'Software & AI',   color: '#5b8dd9' },
+  { name: 'Hardware',        color: '#b07a5a' },
+  { name: 'Media & Content', color: '#c87a6e' },
+  { name: 'Cloud & Infra',   color: '#7ab58a' },
+  { name: 'E-Commerce',      color: '#c8a96e' },
+  { name: 'Health & Bio',    color: '#9b8fbf' },
+  { name: 'Finance & Pay',   color: '#6bbfbf' },
+  { name: 'Transport & EV',  color: '#d4a03a' }
+];
+
+// mix weights per company, per year (rows = years, stable proportions scaled to data count)
+var companies = [
+  { name:'Apple',     compColor:'#7aaecc', data:[42,38,35,29,24,18], mix:[0.10,0.35,0.20,0.12,0.05,0.08,0.07,0.03] },
+  { name:'Google',    compColor:'#c8a96e', data:[19,22,28,33,40,45], mix:[0.40,0.10,0.20,0.18,0.03,0.04,0.03,0.02] },
+  { name:'Amazon',    compColor:'#c87a6e', data:[37,33,28,22,18,14], mix:[0.15,0.05,0.15,0.30,0.25,0.05,0.03,0.02] },
+  { name:'Microsoft', compColor:'#7ab58a', data:[45,48,52,57,63,70], mix:[0.38,0.10,0.12,0.22,0.05,0.06,0.05,0.02] },
+  { name:'Meta',      compColor:'#9b8fbf', data:[14,18,25,35,48,58], mix:[0.30,0.10,0.35,0.10,0.03,0.05,0.04,0.03] },
+  { name:'Tesla',     compColor:'#b07a5a', data:[49,51,53,55,58,62], mix:[0.12,0.28,0.05,0.10,0.05,0.08,0.04,0.28] }
+];
+
+// Compute stacked counts: stackData[ci][yearIdx] = array of counts per industry
+function computeStacks(co) {
+  var result = [];
+  for (var yi = 0; yi < years.length; yi++) {
+    var total = co.data[yi];
+    var wsum = 0; for (var k=0;k<co.mix.length;k++) wsum+=co.mix[k];
+    var counts = []; var assigned = 0;
+    for (var k = 0; k < co.mix.length; k++) {
+      var c = k===co.mix.length-1 ? total-assigned : Math.round(co.mix[k]/wsum*total);
+      c = Math.max(0,c);
+      counts.push(c);
+      assigned += c;
+    }
+    result.push(counts);
+  }
+  return result;
+}
+var allStacks = [];
+for (var ci=0;ci<companies.length;ci++) allStacks.push(computeStacks(companies[ci]));
+
+// Legend
+var legendEl = document.getElementById('legend');
+var industryEnabled = [];
+for (var li = 0; li < industries.length; li++) {
+  industryEnabled.push(true);
+  (function(k) {
+    var item = document.createElement('div');
+    item.className = 'legend-item';
+    item.id = 'leg-' + k;
+    item.innerHTML = '<div class="legend-dot" style="background:' + industries[k].color + '"></div><span>' + industries[k].name + '</span>';
+    item.addEventListener('click', function() {
+      industryEnabled[k] = !industryEnabled[k];
+      item.classList.toggle('off', !industryEnabled[k]);
+      // re-sync current year to apply filter
+      if (lastYearIdx >= 0) triggerHover(lastYearIdx, true);
+    });
+    legendEl.appendChild(item);
+  })(li);
+}
+
+// Cluster labels
+var clusterLabelsEl = document.getElementById('cluster-labels');
+var clusterAnchors = [
+  {ax:0.13,ay:0.28},{ax:0.37,ay:0.15},{ax:0.68,ay:0.22},
+  {ax:0.20,ay:0.68},{ax:0.52,ay:0.70},{ax:0.80,ay:0.58}
+];
+for (var ci=0;ci<companies.length;ci++) {
+  var lbl = document.createElement('div');
+  lbl.className='cluster-label'; lbl.id='clabel-'+ci;
+  lbl.textContent=companies[ci].name;
+  clusterLabelsEl.appendChild(lbl);
+}
+
+// ── Canvas / Bubbles ──────────────────────────────────────────
+var canvas = document.getElementById('bubble-canvas');
+var ctx = canvas.getContext('2d');
+function resizeCanvas() { canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; updateClusterLabels(); }
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function updateClusterLabels() {
+  for (var ci=0;ci<companies.length;ci++) {
+    var a=clusterAnchors[ci];
+    var el=document.getElementById('clabel-'+ci);
+    el.style.left=(a.ax*100)+'%';
+    el.style.top=(a.ay*canvas.offsetHeight+34)+'px';
+  }
+}
+
+// Build fixed industry index list per company (max length)
+function buildIndustryList(co) {
+  var maxCount = Math.max.apply(null,co.data);
+  var wsum=0; for(var k=0;k<co.mix.length;k++) wsum+=co.mix[k];
+  var counts=[]; var sum=0;
+  for(var k=0;k<co.mix.length;k++){
+    var c=k===co.mix.length-1?maxCount-sum:Math.round(co.mix[k]/wsum*maxCount);
+    counts.push(Math.max(0,c)); sum+=counts[k];
+  }
+  var list=[];
+  for(var k=0;k<counts.length;k++) for(var j=0;j<counts[k];j++) list.push(k);
+  for(var i=list.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=list[i];list[i]=list[j];list[j]=t;}
+  return list;
+}
+var industryLists=[];
+for(var ci=0;ci<companies.length;ci++) industryLists.push(buildIndustryList(companies[ci]));
+
+var clusters=[];
+for(var ci=0;ci<companies.length;ci++) clusters.push([]);
+
+var MIN_R=4,MAX_R=9;
+function randR(){return MIN_R+Math.random()*(MAX_R-MIN_R);}
+
+function syncCluster(ci,count){
+  var cluster=clusters[ci];
+  var W=canvas.width,H=canvas.height;
+  var a=clusterAnchors[ci];
+  var ax=a.ax*W,ay=a.ay*H;
+  var iList=industryLists[ci];
+  if(count>cluster.length){
+    for(var k=cluster.length;k<count;k++){
+      var ang=Math.random()*Math.PI*2,dist=Math.random()*8;
+      cluster.push({x:ax+Math.cos(ang)*dist,y:ay+Math.sin(ang)*dist,vx:0,vy:0,r:randR(),alpha:0,ci:ci,industryIdx:iList[k]!==undefined?iList[k]:0,removing:false});
+    }
+  } else if(count<cluster.length){
+    var rem=0;
+    for(var k=cluster.length-1;k>=0&&rem<(cluster.length-count);k--)
+      if(!cluster[k].removing){cluster[k].removing=true;rem++;}
+  }
+}
+function syncAll(yi){for(var ci=0;ci<companies.length;ci++) syncCluster(ci,companies[ci].data[yi]);}
+
+function separate(b1,b2){
+  var dx=b2.x-b1.x,dy=b2.y-b1.y,dSq=dx*dx+dy*dy;
+  var mD=b1.r+b2.r+1.5;
+  if(dSq<mD*mD&&dSq>0.0001){var d=Math.sqrt(dSq),ov=(mD-d)/d;b1.x-=dx*ov*0.25;b1.y-=dy*ov*0.25;b2.x+=dx*ov*0.25;b2.y+=dy*ov*0.25;}
+}
+
+function tick(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  var W=canvas.width,H=canvas.height;
+  var all=[];
+  for(var ci=0;ci<companies.length;ci++) for(var k=0;k<clusters[ci].length;k++) all.push(clusters[ci][k]);
+
+  for(var i=0;i<all.length;i++){
+    var b=all[i];
+    var a=clusterAnchors[b.ci];
+    var ax=a.ax*W,ay=a.ay*H;
+    if(b.removing){b.alpha=Math.max(0,b.alpha-0.06);continue;}
+    if(b.alpha<1) b.alpha=Math.min(b.alpha+0.05,1);
+    var dx=ax-b.x,dy=ay-b.y,dist=Math.sqrt(dx*dx+dy*dy)||0.01;
+    var ps = dist > b.r * 1.5 ? 0.005 : 0.001;
+    b.vx += dx*ps; b.vy += dy*ps; b.vx *= 0.60; b.vy *= 0.60;b.x+=b.vx;b.y+=b.vy;
+    if(b.x-b.r<0){b.x=b.r;b.vx*=-0.3;} if(b.x+b.r>W){b.x=W-b.r;b.vx*=-0.3;}
+    if(b.y-b.r<0){b.y=b.r;b.vy*=-0.3;} if(b.y+b.r>H){b.y=H-b.r;b.vy*=-0.3;}
+  }
+  for(var i=0;i<all.length;i++) for(var j=i+1;j<all.length;j++) separate(all[i],all[j]);
+  for(var ci=0;ci<companies.length;ci++) clusters[ci]=clusters[ci].filter(function(b){return!(b.removing&&b.alpha<=0);});
+
+  for(var i=0;i<all.length;i++){
+    var b=all[i]; if(b.alpha<=0) continue;
+    if (!industryEnabled[b.industryIdx]) continue;
+    ctx.globalAlpha=b.alpha*0.85;
+    ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+    ctx.fillStyle=industries[b.industryIdx].color; ctx.fill();
+  }
+  ctx.globalAlpha=1;
+  requestAnimationFrame(tick);
+}
+tick();
+
+var indTooltip = document.getElementById('industry-tooltip');
+var hoveredCi = -1;
+
+canvas.addEventListener('mousemove', function(e) {
+  var rect = canvas.getBoundingClientRect();
+  var mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  var hit = -1;
+  // Find topmost bubble under cursor
+  for (var ci = 0; ci < clusters.length; ci++) {
+    for (var k = clusters[ci].length - 1; k >= 0; k--) {
+      var b = clusters[ci][k];
+      if (b.removing || b.alpha < 0.3) continue;
+      var dx = b.x - mx, dy = b.y - my;
+      if (dx*dx + dy*dy <= b.r*b.r) { hit = ci; break; }
+    }
+    if (hit >= 0) break;
+  }
+  if (hit >= 0) {
+    showIndTooltip(hit, e.clientX, e.clientY);
+  } else {
+    hideIndTooltip();
+  }
+});
+canvas.addEventListener('mouseleave', hideIndTooltip);
+
+function showIndTooltip(ci, clientX, clientY) {
+  if (hoveredCi === ci) {
+    positionTooltip(clientX, clientY);
+    return;
+  }
+  hoveredCi = ci;
+  var co = companies[ci];
+  var yi = lastYearIdx < 0 ? 0 : lastYearIdx;
+  var stacks = allStacks[ci][yi];
+  var total = co.data[yi];
+  var maxCount = Math.max.apply(null, stacks);
+
+  var html = '<div class="itt-header">' + co.name + ' — ' + years[yi] + '</div>';
+  for (var k = 0; k < industries.length; k++) {
+    if (stacks[k] === 0) continue;
+    var pct = Math.round(stacks[k] / total * 100);
+    var barW = maxCount > 0 ? Math.round(stacks[k] / maxCount * 48) : 0;
+    html += '<div class="itt-row">' +
+      '<div class="itt-dot" style="background:' + industries[k].color + '"></div>' +
+      '<span class="itt-name">' + industries[k].name + '</span>' +
+      '<div class="itt-bar-wrap"><div class="itt-bar-fill" style="width:' + barW + 'px;background:' + industries[k].color + '"></div></div>' +
+      '<span class="itt-val">' + stacks[k] + ' <span style="color:#888;font-weight:400">(' + pct + '%)</span></span>' +
+    '</div>';
+  }
+  indTooltip.innerHTML = html;
+  indTooltip.classList.add('visible');
+  positionTooltip(clientX, clientY);
+}
+
+function positionTooltip(clientX, clientY) {
+  var rect = canvas.getBoundingClientRect();
+  var x = clientX - rect.left + 14;
+  var y = clientY - rect.top - 10;
+  var tw = indTooltip.offsetWidth, th = indTooltip.offsetHeight;
+  if (x + tw > canvas.offsetWidth - 8) x = clientX - rect.left - tw - 14;
+  if (y + th > canvas.offsetHeight - 8) y = canvas.offsetHeight - th - 8;
+  indTooltip.style.left = x + 'px';
+  indTooltip.style.top = y + 'px';
+}
+
+function hideIndTooltip() {
+  hoveredCi = -1;
+  indTooltip.classList.remove('visible');
+}
+var maxVal=0;
+for(var ci=0;ci<companies.length;ci++) for(var vi=0;vi<companies[ci].data.length;vi++) if(companies[ci].data[vi]>maxVal) maxVal=companies[ci].data[vi];
+
+var chartsRow=document.getElementById('chartsRow');
+var charts=[];
+var hoverTimer=null,lastYearIdx=-1,chartsReady=0;
+
+for(var idx=0;idx<companies.length;idx++){
+  (function(i){
+    var co=companies[i];
+    var delta=co.data[co.data.length-1]-co.data[0];
+    var isPos=delta>=0;
+
+    var wrapper=document.createElement('div');
+    wrapper.className='chart-wrapper';
+
+    var labelSpans='';
+    for(var j=0;j<years.length;j++)
+      labelSpans+='<span class="bar-label" id="lbl-'+i+'-'+j+'">'+co.data[j]+'</span>';
+
+    wrapper.innerHTML=
+      '<div class="chart-header">'+
+        '<div class="company-name">'+co.name+'</div>'+
+        '<div class="change"><span class="'+(isPos?'pos':'neg')+'">'+(isPos?'+':'')+delta+'al</span> <span class="cur">'+co.data[co.data.length-1]+'</span><span style="color:#999;font-size:10px;">al</span></div>'+
+      '</div>'+
+      '<div class="chart-container">'+
+        '<div class="label-row">'+labelSpans+'</div>'+
+        '<svg class="connector-svg" id="connsvg-'+i+'"><g id="connlines-'+i+'"></g></svg>'+
+        '<div class="chart-div" id="chart-'+i+'"></div>'+
+      '</div>';
+    chartsRow.appendChild(wrapper);
+
+    var chart=echarts.init(document.getElementById('chart-'+i));
+    charts.push(chart);
+
+    chart.setOption(buildChartOption(i,-1));
+
+    chart.on('finished',function(){
+      for(var j=0;j<years.length;j++){
+        var px=chart.convertToPixel('grid',[j,0]);
+        var lbl=document.getElementById('lbl-'+i+'-'+j);
+        if(lbl) lbl.style.left=px[0]+'px';
+      }
+      chartsReady++;
+      if(chartsReady===companies.length){updateClusterLabels();triggerHover(0);}
+    });
+
+    chart.getZr().on('mousemove',function(params){
+      var pt=chart.convertFromPixel('grid',[params.offsetX,params.offsetY]);
+      var xIdx=Math.round(pt[0]);
+      if(xIdx>=0&&xIdx<years.length){clearTimeout(hoverTimer);triggerHover(xIdx);}
+    });
+    chart.getZr().on('mouseout',function(){
+      hoverTimer=setTimeout(function(){triggerHover(0);},80);
+    });
+  })(idx);
+}
+
+function buildChartOption(ci, activeIdx) {
+  var co = companies[ci];
+  // Build one series per industry
+  var series = [];
+  for (var k = 0; k < industries.length; k++) {
+    var seriesData = [];
+    for (var j = 0; j < years.length; j++) {
+      var count = allStacks[ci][j][k];
+      var isActive = (activeIdx < 0 || j === activeIdx);
+      seriesData.push({
+        value: count,
+        itemStyle: {
+          color: industries[k].color,
+          opacity: isActive ? 0.9 : 0.25,
+          borderRadius: k === industries.length-1 ? [2,2,0,0] : [0,0,0,0]
+        }
+      });
+    }
+    series.push({
+      type: 'bar', stack: 'total',
+      data: seriesData,
+      barCategoryGap: '22%',
+      label: { show: false },
+      emphasis: { disabled: true }
+    });
+  }
+  return {
+    grid: { top:16, bottom:24, left:8, right:8 },
+    xAxis: { type:'category', data:years, axisLine:{show:false}, axisTick:{show:false}, axisLabel:{fontSize:9,color:'#999',formatter:function(v){return String(v).slice(2);}} },
+    yAxis: { type:'value', show:false, max:maxVal+10 },
+    tooltip: { show:false },
+    series: series
+  };
+}
+
+function drawConnector(ci,barIdx){
+  var chart=charts[ci];
+  var co=companies[ci];
+  var g=document.getElementById('connlines-'+ci);
+  if(!g) return; g.innerHTML='';
+  var total=co.data[barIdx];
+  var barPx=chart.convertToPixel('grid',[barIdx,total]);
+  var line=document.createElementNS('http://www.w3.org/2000/svg','line');
+  line.setAttribute('x1',barPx[0]); line.setAttribute('y1',26);
+  line.setAttribute('x2',barPx[0]); line.setAttribute('y2',barPx[1]-2);
+  line.setAttribute('class','connector-line active');
+  line.style.stroke=co.compColor;
+  g.appendChild(line);
+}
+
+function triggerHover(xIdx, force) {
+  if(xIdx===lastYearIdx && !force) return;
+  lastYearIdx=xIdx;
+  document.getElementById('year-label').textContent=years[xIdx];
+  document.getElementById('year-label').classList.add('visible');
+  for(var ci=0;ci<companies.length;ci++) document.getElementById('clabel-'+ci).classList.add('visible');
+  syncAll(xIdx);
+  for(var i=0;i<companies.length;i++){
+    for(var j=0;j<years.length;j++){
+      var lbl=document.getElementById('lbl-'+i+'-'+j);
+      if(j===xIdx) lbl.classList.add('active'); else lbl.classList.remove('active');
+    }
+    drawConnector(i,xIdx);
+    charts[i].setOption(buildChartOption(i,xIdx));
+  }
+}
+
+window.addEventListener('resize',function(){
+  resizeCanvas();
+  for(var i=0;i<charts.length;i++) charts[i].resize();
+});
+</script>
+</body>
+</html>
