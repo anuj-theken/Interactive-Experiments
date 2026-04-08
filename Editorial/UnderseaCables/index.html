@@ -6,21 +6,21 @@
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <script src="all_cables.js"></script>
     <style>
-    @font-face {
-font-family: 'Jazmin Alt';
-src: url('JazminAlt-Bold.otf'); /* Added url() */
-font-weight: bold;
-}
-@font-face {
-font-family: 'GT America Bold';
-src: url('GT-America-Standard-Black.ttf'); /* Added url() */
-font-weight: 200;
-}
-@font-face {
-font-family: 'GT America';
-src: url('GT-America-Standard-Light.ttf'); /* Added url() */
-font-weight: 300;
-}
+        @font-face {
+            font-family: 'Jazmin Alt';
+            src: url('JazminAlt-Bold.otf');
+            font-weight: bold;
+        }
+        @font-face {
+            font-family: 'GT America Bold';
+            src: url('GT-America-Standard-Black.ttf');
+            font-weight: 200;
+        }
+        @font-face {
+            font-family: 'GT America';
+            src: url('GT-America-Standard-Light.ttf');
+            font-weight: 300;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body, html {
             height: 100%;
@@ -28,14 +28,14 @@ font-weight: 300;
             font-family: 'GT America', sans-serif;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            font-size: 14px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            font-size: max(14px, 1em);
         }
 
         #container {
             display: flex;
             flex-direction: column;
-            height: 100vh;
             width: 100%;
             padding: 20px 30px;
             min-width: 360px;
@@ -48,26 +48,23 @@ font-weight: 300;
         }
         #header-section h1 {
             font-family: 'Jazmin Alt', serif;
-            /* Significantly increased size to match "Small gap, big difference" */
             font-size: clamp(42px, 6vw, 64px);
             color: #000000;
             margin-bottom: 0px;
-            font-weight: 900; /* Extra bold for that newspaper-headline look */
+            font-weight: 900;
             letter-spacing: -0.5px;
         }
 
         #header-section .subheader {
-            font-family: 'GT America ', sans-serif;
-            font-weight: bold;
-            /* Increased size and line-height for readability */
+            font-family: 'GT America', sans-serif;
+            font-weight: 300;
             font-size: clamp(18px, 2vw, 24px);
             color: #333;
             margin-bottom: 25px;
-            max-width: 850px; /* Wider to allow the larger text to breathe */
+            max-width: 850px;
             margin-left: auto;
             margin-right: auto;
             line-height: 1.4;
-            font-weight: 300;
         }
 
         #mode-toggle {
@@ -78,7 +75,7 @@ font-weight: 300;
         }
         .toggle-btn {
             padding: 12px 24px;
-            font-family: 'GT America ', sans-serif;
+            font-family: 'GT America', sans-serif;
             font-size: 15px;
             cursor: pointer;
             border: 1px solid #2c3e50;
@@ -114,11 +111,11 @@ font-weight: 300;
         .circle { width: 16px; height: 16px; border-radius: 50%; }
 
         #map {
-            flex-grow: 1;
             width: 100%;
-            min-height: 300px;
-            margin: 10px 0;
+            aspect-ratio: 16 / 5.85;
+            margin: 20px 0;
             background: transparent;
+            flex-shrink: 0;
         }
 
         #footer {
@@ -129,7 +126,7 @@ font-weight: 300;
             padding: 15px 0;
             border-top: 1px solid #e0e0e0;
             font-family: 'GT America', sans-serif;
-            font-size: 14px !important;
+            font-size: 14px;
             color: #777;
             width: 100%;
             white-space: nowrap;
@@ -140,11 +137,25 @@ font-weight: 300;
         .footer-logo { height: 18px; width: auto; max-width: 130px; object-fit: contain; }
 
         @media (max-width: 800px) {
-            #container { padding: 15px 10px; }
-            #footer { padding: 15px 5px; overflow-x: auto; }
+            #container { padding: 15px 10px 5px 10px; }
+            #map { margin: 10px 0; }
+            #footer {
+                padding: 10px 5px;
+                flex-direction: row;
+                gap: 4px;
+                white-space: normal;
+                font-size: 14px !important;
+            }
+            .footer-left { justify-content: flex-start; }
+            .footer-center { text-align: center; }
+            .footer-right { justify-content: flex-end; text-align: right; font-size: 14px !important; }
             .footer-logo { height: 16px; }
             #mode-toggle { flex-direction: column; gap: 8px; }
-            .toggle-btn { width: 100%; padding: 10px; }
+            .toggle-btn { width: 100%; padding: 10px; font-size: 15px; }
+
+            #legend-custom, .instruction, .legend-item {
+                font-size: 14px !important;
+            }
         }
     </style>
 </head>
@@ -152,7 +163,7 @@ font-weight: 300;
 
 <div id="container">
     <div id="header-section">
-        <h1>Internet’s choke point</h1>
+        <h1>Internet's choke point</h1>
         <p class="subheader">Most of India's data flows through conflict zones. Vizag is the way out, eventually.</p>
 
         <div id="mode-toggle">
@@ -184,12 +195,21 @@ const chart = echarts.init(document.getElementById('map'));
 const riskBounds = { minLon: 53, maxLon: 61, minLat: 23, maxLat: 28 };
 let currentMode = 'today';
 
+// Minimum font size enforced throughout all ECharts labels/tooltips
+const MIN_FONT = 14;
+
 async function init() {
     try {
-        const worldRes = await fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json');
-        const worldJson = await worldRes.json();
-        echarts.registerMap('world', worldJson);
-        renderChart();
+      const worldRes = await fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json');
+      const worldJson = await worldRes.json();
+
+      const indiaRes = await fetch('https://raw.githubusercontent.com/india-in-data/india-states-2019/master/india_states.geojson');
+      const indiaJson = await indiaRes.json();
+
+      echarts.registerMap('world', worldJson);
+      echarts.registerMap('india', indiaJson);
+
+      renderChart();
     } catch (e) { console.error("Map failed to load", e); }
 }
 
@@ -204,6 +224,12 @@ function renderChart() {
     const width = window.innerWidth;
     const isMobile = width < 800;
 
+    const sharedCenter = [74, 18];
+    const sharedZoom = isMobile ? 5.0 : 7.2;
+
+    const indiaCenter = [74, 18];
+    const indiaZoom = isMobile ? 0.9 : 1.29;
+
     const cableSeries = (typeof cableData !== 'undefined' ? cableData : []).map(f => {
         const props = f.properties;
         const geom = f.geometry;
@@ -216,11 +242,12 @@ function renderChart() {
 
         let color = isAtRisk ? '#fcafaf' : '#bdc3c7';
         let opacity = isAtRisk ? 0.9 : 0.4;
-        if (currentMode === 'future') { color = '#bdc3c7'; opacity = 0.3; }
+        if (currentMode === 'future') { color = '#bdc3c7'; opacity = 0.2; }
 
         return {
             type: 'lines',
             coordinateSystem: 'geo',
+            geoIndex: 0,
             data: lines.map(line => ({ coords: line, name: props.name, properties: props })),
             polyline: true,
             lineStyle: { color: color, width: isAtRisk ? 2.5 : 1.5, opacity: opacity },
@@ -241,45 +268,54 @@ function renderChart() {
             textStyle: {
                 color: '#1a1a1a',
                 fontFamily: 'GT America',
-                fontSize: 14
+                fontSize: MIN_FONT  // was 14 — explicit constant now
             },
             formatter: (params) => {
-                // If hovering over Landing Stations or Annotations
                 if (params.seriesType === 'scatter' || params.seriesType === 'effectScatter') {
                     return params.name ? `<b style="font-family: 'GT America Bold';">${params.name}</b>` : null;
                 }
-
-                // If hovering over Cable Lines
                 const p = params.data.properties;
                 if (!p) return `<b style="font-family: 'GT America Bold';">${params.name || ''}</b>`;
-
                 return `
-    <div style="max-width: 280px; white-space: normal; font-family: 'GT America';">
-        <div style="font-family: 'GT America Bold'; font-weight: bold; font-size: 16px; margin-bottom: 4px; color: #1a1a1a;">${p.name}</div>
-
-        <div style="margin-bottom: 8px; font-size: 12px; color: #c9924e;  font-family: 'GT America'; font-weight: bold;">
-            <b style="font-family: 'GT America Bold'; font-weight: bold;">Launched:</b> ${p.rfs_year || 'N/A'} &bull; <b style="font-family: 'GT America Bold'; font-weight: bold;">Length:</b> ${p.length || 'Unknown'}
-        </div>
-        <div style="border-top: 1px solid #eee; padding-top: 8px; font-size: 12px; color: #555;">
-            <span style="font-family: 'GT America Bold'; font-weight: bold; color: #1a1a1a;">Owners:</span> ${p.owners || 'N/A'}
-        </div>
-    </div>
-`;
+                    <div style="max-width: 280px; white-space: normal; font-family: 'GT America'; font-size: ${MIN_FONT}px;">
+                        <div style="font-family: 'GT America Bold'; font-weight: bold; font-size: 16px; margin-bottom: 4px; color: #1a1a1a;">${p.name}</div>
+                        <div style="margin-bottom: 8px; font-size: ${MIN_FONT}px; color: #c9924e; font-family: 'GT America'; font-weight: bold;">
+                            <b style="font-family: 'GT America Bold'; font-weight: bold;">Launched:</b> ${p.rfs_year || 'N/A'} &bull; <b style="font-family: 'GT America Bold'; font-weight: bold;">Length:</b> ${p.length || 'Unknown'}
+                        </div>
+                        <div style="border-top: 1px solid #eee; padding-top: 8px; font-size: ${MIN_FONT}px; color: #555;">
+                            <span style="font-family: 'GT America Bold'; font-weight: bold; color: #1a1a1a;">Owners:</span> ${p.owners || 'N/A'}
+                        </div>
+                    </div>`;
             }
         },
-        geo: {
-            map: 'world',
-            center: [74, 18],
-            zoom: isMobile ? 5.0 : 7.2,
-            roam: false,
-            silent: true,
-            itemStyle: { areaColor: '#eee8e8', borderColor: '#dcdde1', borderWidth: 1 }
-        },
+        geo: [
+            {
+                map: 'world',
+                center: sharedCenter,
+                zoom: sharedZoom,
+                roam: false,
+                silent: true,
+                itemStyle: { areaColor: '#eee8e8', borderColor: '#dcdde1', borderWidth: 1 }
+            },
+            {
+                map: 'india',
+                center: indiaCenter,
+                zoom: indiaZoom,
+                roam: false,
+                silent: true,
+                itemStyle: {
+                    areaColor: '#eee8e8',
+                    borderColor: '#dcdde1',
+                    borderWidth: 0.8
+                }
+            }
+        ],
         series: [
             ...cableSeries,
             {
                 type: 'effectScatter',
                 coordinateSystem: 'geo',
+                geoIndex: 0,
                 silent: currentMode === 'future',
                 data: [{ value: [56.3, 26.6], name: 'Strait of Hormuz Risk Zone' }],
                 symbolSize: isMobile ? 80 : 120,
@@ -292,6 +328,7 @@ function renderChart() {
             {
                 type: 'scatter',
                 coordinateSystem: 'geo',
+                geoIndex: 0,
                 data: [
                     { name: 'Mumbai Landing Station', value: [72.84, 18.94] },
                     { name: 'Vizag Landing Station', value: [83.30, 17.69] },
@@ -304,13 +341,13 @@ function renderChart() {
                     show: currentMode === 'future',
                     position: 'bottom',
                     formatter: (p) => p.name.split(' ')[0],
-                    fontSize: 14,
-                    fontFamily: 'GT America Bold', color: '#2c3e50', offset: [0, 10]
+                    fontFamily: 'GT America Bold', color: '#2c3e50', offset: [isMobile? 10 : 0, isMobile? -2 : 10]
                 }
             },
             {
                 type: 'lines',
                 coordinateSystem: 'geo',
+                geoIndex: 0,
                 zlevel: 2,
                 effect: {
                     show: currentMode === 'future',
@@ -322,6 +359,7 @@ function renderChart() {
             {
                 type: 'scatter',
                 coordinateSystem: 'geo',
+                geoIndex: 0,
                 silent: true,
                 symbolSize: 0,
                 data: [
@@ -330,9 +368,9 @@ function renderChart() {
                         label: {
                             show: currentMode === 'today',
                             position: 'bottom',
-                            offset: isMobile ? [-0,35] : [0,25],
+                            offset: isMobile ? [-70, 35] : [0, 25],
                             formatter: 'Strait of Hormuz: Critical infrastructure\nunder threat due to conflict in Iran',
-                            fontSize: 14,
+                            fontSize: MIN_FONT,  // was 14 — explicit constant now
                             fontFamily: 'GT America',
                             color: '#1a1a1a',
                             padding: [10, 14],
@@ -343,13 +381,13 @@ function renderChart() {
                         }
                     },
                     {
-                        value: [72.84, 18],
+                        value: [77.84, 18],
                         label: {
                             show: true,
                             position: isMobile ? 'bottom' : 'top',
-                            offset: isMobile ? [10, -79] : [-40, -30],
-                            formatter: '60% of India’s traffic\npasses through here',
-                            fontSize: 14,
+                            offset: isMobile ? [0, -79] : [-40, -30],
+                            formatter: '60% of India\u2019s traffic\npasses through here',
+                            fontSize: MIN_FONT,  // was 14 — explicit constant now
                             fontFamily: 'GT America',
                             color: '#1a1a1a',
                             padding: [10, 14],
@@ -365,9 +403,9 @@ function renderChart() {
                             show: currentMode === 'future',
                             position: 'top',
                             distance: 20,
-                            offset: isMobile ? [30, 30] : [0, 0],
+                            offset: isMobile ? [130, 30] : [40, 10],
                             formatter: 'New Indian cable line construction\n(Meta/Vizag Expansion)',
-                            fontSize: 14,
+                            fontSize: MIN_FONT,  // was 14 — explicit constant now
                             fontFamily: 'GT America',
                             color: '#1a1a1a',
                             padding: [10, 14],
