@@ -17,7 +17,24 @@
     src: url('GT-America-Standard-Light.ttf');
     font-weight: 300;
 }
+
+@font-face {
+    font-family: 'GT America Bold';
+    src: url('GT-America-Standard-Black.ttf');
+    font-weight: 300;
+}
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+  z-index: 0;
+}
   body { background: #f7f2f2; font-family: 'GT America', 'Segoe UI', sans-serif; padding: 12px 20px 8px; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
 
@@ -45,8 +62,8 @@
 
           .interaction-note {
               font-family: 'GT America', 'Segoe UI', sans-serif;
-              font-size: 12px;
-              color: #bbb;
+              font-size: 14px;
+              color: #b3b3b3;
               margin-bottom: 10px;
               letter-spacing: 0.2px;
           }
@@ -90,13 +107,23 @@
           min-height: 300px;
           max-height: 45vh;
         }
+        #bubble-area::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+  z-index: 5;
+}
   #bubble-canvas { width: 100%; height: 100%; }
 
   #cluster-labels { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
   .cluster-label {
     position: absolute;
     transform: translate(-50%, -50%);
-    font-family: 'GT America', 'Segoe UI', sans-serif;
+    font-family: 'GT America Bold', 'Segoe UI', sans-serif;
     font-size: 11px; font-weight: 700; color: #444;
     white-space: nowrap; opacity: 0;
     transition: opacity 0.3s;
@@ -137,7 +164,7 @@
 }
 
 .page-title {
-  font-family: 'GT America', 'Segoe UI', sans-serif;
+  font-family: 'GT America Bold', 'Segoe UI', sans-serif;
   text-align: center;
   font-size: 16px;
   font-weight: 800;
@@ -227,14 +254,14 @@
   <div id="header-section">
     <h1>The Great Portfolio Pivot</h1>
     <p class="subheader">India's largest conglomerates are shedding their commodity-heavy pasts to race for tech-led, consumer-centric ecosystems.</p>
-    <div class="interaction-note">Hover over charts to change years • Hover over bubbles for details</div>
+    <div class="interaction-note"><i>Hover over the bar graph</i> to change years • <i>Hover over bubbles </i> to see the portfolio details.</div>
     <div id="legend-custom">
-      <div class="legend-item"><div class="circle-legend" style="background:#4A90E2"></div> Reliance</div>
-      <div class="legend-item"><div class="circle-legend" style="background:#D4AF37"></div> Adani</div>
-      <div class="legend-item"><div class="circle-legend" style="background:#E35D5D"></div> Tata</div>
-      <div class="legend-item"><div class="circle-legend" style="background:#50C878"></div> Aditya Birla</div>
-      <div class="legend-item"><div class="circle-legend" style="background:#8E44AD"></div> OP Jindal</div>
-      <div class="legend-item"><div class="circle-legend" style="background:#E67E22"></div> Bharti</div>
+      <div class="legend-item"><div class="circle-legend" style="background:#B5280F"></div> Reliance</div>
+      <div class="legend-item"><div class="circle-legend" style="background:#1A5276"></div> Adani</div>
+      <div class="legend-item"><div class="circle-legend" style="background:#E8943A"></div> Tata</div>
+      <div class="legend-item"><div class="circle-legend" style="background:#2D6A4F"></div> Aditya Birla</div>
+      <div class="legend-item"><div class="circle-legend" style="background:#6B3FA0"></div> OP Jindal</div>
+      <div class="legend-item"><div class="circle-legend" style="background:#7A9E9F"></div> Bharti</div>
     </div>
   </div>
 
@@ -263,37 +290,37 @@ var years = ['2000-01','2004-05','2009-10','2014-15','2019-20','2021-26'];
 
 var companies = [
   {
-    name: 'Reliance', compColor: '#4A90E2',
+    name: 'Reliance', compColor: '#B5280F',
     data: [17, 33, 55, 63, 63, 74],
     industries: 'Solar & wind energy, FMCG, OTT, network equipment, health, q-comm, data centres, defence, robotics, finserv, compressed biogas',
     networkEffect: 'Using old economy cash cows to fund dominance in new economy platforms, for powerful data and ecosystem moats'
   },
   {
-    name: 'Adani', compColor: '#D4AF37',
+    name: 'Adani', compColor: '#1A5276',
     data: [5, 12, 27, 32, 38, 48],
     industries: 'Airports, data centres, copper, green hydrogen/electrolysers, cement, media, digital, commercial coal mining, defence/aerospace, nuclear energy',
     networkEffect: 'Instead of entering adjacent sectors within existing industries, the group made large, discontinuous jumps into new industries'
   },
   {
-    name: 'Tata', compColor: '#E35D5D',
+    name: 'Tata', compColor: '#E8943A',
     data: [43, 50, 67, 70, 69, 75],
     industries: 'Electronics, semicon fab, OSAT, digital, battery, aviation',
     networkEffect: 'Most aggressive expansion in a decade. Vertically integrated in semicon & battery to also serve the group'
   },
   {
-    name: 'Aditya Birla', compColor: '#50C878',
+    name: 'Aditya Birla', compColor: '#2D6A4F',
     data: [44, 56, 68, 68, 65, 71],
     industries: 'Paints, B2B ecommerce, branded jewellery, D2C fashion, hospitality, sports',
     networkEffect: 'From commodities-heavy portfolio, it has pivoted toward premium consumer segments'
   },
   {
-    name: 'OP Jindal', compColor: '#8E44AD',
+    name: 'OP Jindal', compColor: '#6B3FA0',
     data: [9, 13, 30, 38, 37, 45],
     industries: 'EV/automotive, energy storage, defence, aerospace, digital commerce, paints, sports, real estate, copper (away from core ferrous metal)',
     networkEffect: 'Vertical integration to support EV, battery manufacturing & round-the-clock energy'
   },
   {
-    name: 'Bharti', compColor: '#E67E22',
+    name: 'Bharti', compColor: '#7A9E9F',
     data: [9, 10, 12, 13, 12, 18],
     industries: 'Satellite communication, data centres, finserv, CPaaS, consumer durables, F&B franchising',
     networkEffect: 'Large strategic bets via equity stakes (OneWeb, BT, Haier) rather than operational entry into manufacturing or infrastructure'
@@ -453,7 +480,7 @@ function drawScene() {
     var isHovered = (ci === hoveredCompany);
     ctx.beginPath();
     ctx.arc(ax, ay, bgR, 0, Math.PI*2);
-    ctx.strokeStyle = isHovered ? companies[ci].compColor + 'bb' : companies[ci].compColor + '44';
+    ctx.strokeStyle = isHovered ? companies[ci].compColor + 'bb' : companies[ci].compColor + '1a';
     ctx.lineWidth = isHovered ? 1.5 : 1;
     ctx.stroke();
     ctx.fillStyle = isHovered ? companies[ci].compColor + '1a' : companies[ci].compColor + '08';
@@ -546,7 +573,11 @@ companies.forEach(function(co, i) {
       var xIdx = Math.round(pt[0]);
       if (xIdx >= 0 && xIdx < years.length) {
         triggerHover(xIdx);
-        showNetworkAnnotation(compIdx);
+        if (xIdx === years.length - 1) {
+                showNetworkAnnotation(compIdx);
+            } else {
+                hideNetworkAnnotation();
+            }
       }
     });
     chartRef.getZr().on('mouseout', function() {
@@ -582,8 +613,8 @@ function buildChartOption(ci, activeIdx) {
           value: v,
           itemStyle: {
             color: co.compColor,
-            opacity: (activeIdx < 0 || j === activeIdx) ? 1 : 0.2,
-            borderRadius: [4, 4, 0, 0]
+            opacity: (activeIdx < 0 || j === activeIdx) ? 1 : 0.2
+            // borderRadius: [0, 0, 0, 0]
           }
         };
       }),
@@ -684,7 +715,7 @@ canvas.addEventListener('mousemove', function(e) {
       '<div class="btt-label">' + years[yi] + '</div>' +
       '<div class="btt-val">' + co.data[yi] + ' businesses</div>' +
       '<hr class="btt-divider">' +
-      '<div class="btt-label">New sectors entered (since 2000)</div>' +
+      '<div class="btt-label">New sectors entered (since 2020)</div>' +
       '<div class="btt-industries">' + co.industries + '</div>';
 
     // Smart tooltip positioning: avoid viewport clipping
