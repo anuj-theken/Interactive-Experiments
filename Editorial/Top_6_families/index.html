@@ -3,465 +3,728 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Company Business Chart</title>
+<title>India Conglomerate Portfolio Expansion</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #f5f4ef; font-family: 'Segoe UI', sans-serif; padding: 20px; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-  #bubble-area { flex: 1; position: relative; overflow: hidden; min-height: 0; }
+@font-face {
+    font-family: 'Jazmin Alt';
+    src: url('JazminAlt-Bold.otf');
+    font-weight: bold;
+}
+@font-face {
+    font-family: 'GT America';
+    src: url('GT-America-Standard-Light.ttf');
+    font-weight: 300;
+}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #f7f2f2; font-family: 'GT America', 'Segoe UI', sans-serif; padding: 12px 20px 8px; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+
+          #header-section {
+              text-align: center;
+              padding-bottom: 25px;
+              border-bottom: 1px solid #e0e0e0;
+          }
+          #header-section h1 {
+              font-family: 'Jazmin Alt', serif;
+              font-size: clamp(32px, 5vw, 54px);
+              color: #000;
+              margin-bottom: 8px;
+              font-weight: 900;
+              letter-spacing: -0.5px;
+          }
+          #header-section .subheader {
+              font-family: 'GT America', 'Segoe UI', sans-serif;
+              font-size: clamp(16px, 1.8vw, 20px);
+              color: #555;
+              max-width: 900px;
+              margin: 0 auto 20px;
+              line-height: 1.5;
+          }
+
+          .interaction-note {
+              font-family: 'GT America', 'Segoe UI', sans-serif;
+              font-size: 12px;
+              color: #bbb;
+              margin-bottom: 10px;
+              letter-spacing: 0.2px;
+          }
+
+          /* --- Legend Section --- */
+          #legend-custom {
+              display: flex;
+              flex-wrap: wrap;
+              justify-content: center;
+              gap: 15px 25px;
+              font-family: 'GT America', 'Segoe UI', sans-serif;
+              font-size: 13px;
+              margin-top: 15px;
+          }
+          .legend-item { display: flex; align-items: center; gap: 8px; }
+          .circle-legend { width: 12px; height: 12px; border-radius: 50%; }
+
+          #footer {
+              display: flex;
+              flex-direction: row;
+              justify-content: space-between;
+              align-items: center;
+              padding: 15px 0;
+              border-top: 1px solid #e0e0e0;
+              font-family: 'GT America', 'Segoe UI', sans-serif;
+              font-size: 14px;
+              color: #777;
+              width: 100%;
+              white-space: nowrap;
+          }
+          .footer-left { flex: 1; display: flex; align-items: center; justify-content: flex-start; }
+          .footer-center { flex: 1.5; text-align: center; }
+          .footer-right { flex: 1.5; display: flex; justify-content: flex-end; text-align: right; }
+          .footer-logo { height: 18px; width: auto; max-width: 130px; object-fit: contain; }
+
+
+          #bubble-area {
+          flex: 1 1 auto;
+          position: relative;
+          overflow: hidden;
+          min-height: 300px;
+          max-height: 45vh;
+        }
   #bubble-canvas { width: 100%; height: 100%; }
 
-  #legend {
-    position: absolute; top: 8px; right: 8px;
-    display: flex; flex-direction: column; gap: 4px;
-    background: rgba(245,244,239,0.92); padding: 8px 10px; border-radius: 6px;
-  }
-  .legend-title { font-size: 10px; font-weight: 700; color: #444; margin-bottom: 2px; }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #555; cursor: pointer; user-select: none; border-radius: 3px; padding: 1px 3px; transition: opacity 0.15s; }
-  .legend-item:hover { background: rgba(0,0,0,0.06); }
-  .legend-item.off { opacity: 0.35; }
-  .legend-item.off .legend-dot { background: #bbb !important; }
-  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-
   #cluster-labels { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-  .cluster-label { position: absolute; transform: translate(-50%, 0); font-size: 10px; font-weight: 700; color: #555; white-space: nowrap; opacity: 0; transition: opacity 0.3s; }
+  .cluster-label {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    font-family: 'GT America', 'Segoe UI', sans-serif;
+    font-size: 11px; font-weight: 700; color: #444;
+    white-space: nowrap; opacity: 0;
+    transition: opacity 0.3s;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    text-align: center;
+    pointer-events: none;
+  }
   .cluster-label.visible { opacity: 1; }
 
-  #year-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 52px; font-weight: 800; color: rgba(0,0,0,0.05); pointer-events: none; transition: opacity 0.2s; opacity: 0; }
-  #year-label.visible { opacity: 1; }
-
-  #industry-tooltip {
-    position: absolute;
-    background: rgba(20,20,30,0.92);
+  #bubble-tooltip {
+    position: fixed;
+    background: rgba(20,20,30,0.95);
     color: #fff;
-    border-radius: 8px;
-    padding: 10px 13px;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: 'GT America', 'Segoe UI', sans-serif;
     font-size: 11px;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.15s;
     z-index: 10;
-    min-width: 160px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    min-width: 200px;
+    max-width: 260px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
   }
-  #industry-tooltip.visible { opacity: 1; }
-  .itt-header { font-size: 12px; font-weight: 700; margin-bottom: 7px; color: #f0c040; }
-  .itt-row { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
-  .itt-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .itt-name { flex: 1; color: #ccc; }
-  .itt-val { font-weight: 700; color: #fff; }
-  .itt-bar-wrap { width: 48px; height: 4px; background: rgba(255,255,255,0.12); border-radius: 2px; }
-  .itt-bar-fill { height: 100%; border-radius: 2px; }
+  #bubble-tooltip.visible { opacity: 1; }
+  .btt-header { font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+  .btt-val { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .btt-label { font-size: 10px; color: #aaa; margin-bottom: 2px; }
+  .btt-industries { font-size: 10.5px; color: #ddd; line-height: 1.5; }
+  .btt-divider { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 7px 0; }
 
-  .charts-section { flex-shrink: 0; padding-top: 8px; border-top: 1px solid #ddd; }
-  .page-title { text-align: center; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 6px; }
-  .charts-row { display: flex; justify-content: center; overflow-x: auto; }
+  .charts-section {
+  flex-shrink: 0;
+  padding-top: 0px;
+  border-top: 1px solid #ddd;
+  background: #f7f2f2;
+}
 
-  .chart-wrapper { display: flex; flex-direction: column; flex: 1; min-width: 100px; max-width: 160px; padding: 0 2px; }
-  .chart-header { text-align: left; width: 100%; padding: 0 4px 2px; }
-  .company-name { font-size: 11px; font-weight: 700; color: #222; }
-  .change { font-size: 10px; font-weight: 600; margin-top: 1px; }
-  .neg { color: #e05252; } .pos { color: #27ae60; }
-  .cur { color: #222; font-size: 11px; font-weight: 800; }
+.page-title {
+  font-family: 'GT America', 'Segoe UI', sans-serif;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: #333;
+  margin-top: 20px;
+  margin-bottom: 40px;
+  letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;
+}
+
+  .charts-row { display: flex; justify-content: flex-start; overflow-x: auto; padding-bottom: 15px; gap: 20px; }
+
+.chart-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 0%;
+    min-width: 120px;
+    padding: 0 0px;
+}
+
+  .chart-header { text-align: left; width: 100%; padding: 0 4px 3px; }
+  .company-name { font-family: 'GT America', 'Segoe UI', sans-serif; font-size: 11px; font-weight: 700; color: #222; }
 
   .chart-container { position: relative; width: 100%; }
-  .chart-div { width: 100%; height: 160px; }
-  .label-row { position: absolute; top: 14px; left: 0; right: 0; pointer-events: none; }
-  .bar-label { position: absolute; font-size: 9px; font-weight: 600; color: #333; text-align: center; transform: translateX(-50%); white-space: nowrap; opacity: 0; transition: opacity 0.15s; }
+  .chart-div { width: 100%; height: 100px; }
+  .label-row { position: absolute; top: 10px; left: 0; right: 0; pointer-events: none; }
+  .bar-label { font-family: 'GT America', 'Segoe UI', sans-serif; position: absolute; font-size: 10px; font-weight: 700; color: #333; text-align: center; transform: translateX(-50%); white-space: nowrap; opacity: 0; transition: opacity 0.15s; }
   .bar-label.active { opacity: 1; }
   .connector-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-  .connector-line { stroke-width: 1; stroke-dasharray: 3 3; opacity: 0; transition: opacity 0.15s; }
+  .connector-line { stroke-width: 1; stroke-dasharray: 2 2; opacity: 0; transition: opacity 0.15s; }
   .connector-line.active { opacity: 1; }
+
+  #network-annotation {
+    position: absolute;
+    background: rgba(255,255,255,0.97);
+    border: 1.5px solid #ddd;
+    border-radius: 10px;
+    padding: 10px 13px;
+    font-family: 'GT America', 'Segoe UI', sans-serif;
+    font-size: 10.5px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 20;
+    max-width: 220px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    line-height: 1.5;
+    color: #333;
+  }
+  #network-annotation.visible { opacity: 1; }
+  #network-annotation .ann-header { font-size: 11px; font-weight: 700; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+  #network-annotation .ann-text { font-size: 10px; color: #555; line-height: 1.55; }
+
+@media (max-width: 800px) {
+    .charts-row {
+        flex-wrap: wrap;
+        justify-content: center;
+        overflow-x: hidden;
+        gap: 10px;
+    }
+    .chart-wrapper {
+        flex: 0 0 calc(33.33% - 20px);
+        min-width: 150px;
+    }
+    .charts-section {
+        max-height: none;
+        overflow-y: auto;
+    }
+    #footer {
+        padding: 10px 5px;
+        flex-direction: row;
+        gap: 4px;
+        white-space: normal;
+        font-size: 14px !important;
+    }
+    .footer-left { justify-content: flex-start; }
+    .footer-center { text-align: center; }
+    .footer-right { justify-content: flex-end; text-align: right; font-size: 14px !important; }
+    .footer-logo { height: 16px; }
+}
+
+
 </style>
 </head>
 <body>
 
+  <div id="header-section">
+    <h1>The Great Portfolio Pivot</h1>
+    <p class="subheader">India's largest conglomerates are shedding their commodity-heavy pasts to race for tech-led, consumer-centric ecosystems.</p>
+    <div class="interaction-note">Hover over charts to change years • Hover over bubbles for details</div>
+    <div id="legend-custom">
+      <div class="legend-item"><div class="circle-legend" style="background:#4A90E2"></div> Reliance</div>
+      <div class="legend-item"><div class="circle-legend" style="background:#D4AF37"></div> Adani</div>
+      <div class="legend-item"><div class="circle-legend" style="background:#E35D5D"></div> Tata</div>
+      <div class="legend-item"><div class="circle-legend" style="background:#50C878"></div> Aditya Birla</div>
+      <div class="legend-item"><div class="circle-legend" style="background:#8E44AD"></div> OP Jindal</div>
+      <div class="legend-item"><div class="circle-legend" style="background:#E67E22"></div> Bharti</div>
+    </div>
+  </div>
+
+
+
 <div id="bubble-area">
   <canvas id="bubble-canvas"></canvas>
-  <div id="year-label"></div>
-  <div id="industry-tooltip"></div>
+  <div id="bubble-tooltip"></div>
   <div id="cluster-labels"></div>
-  <div id="legend"><div class="legend-title">Industry</div></div>
+  <div id="network-annotation"></div>
 </div>
 
 <div class="charts-section">
-  <div class="page-title">Number of Businesses Owned (2019–2024)</div>
+  <div class="page-title" id="pageTitle">—</div>
   <div class="charts-row" id="chartsRow"></div>
 </div>
 
+<div id="footer">
+      <div class="footer-left"><img src="logo.png" class="footer-logo" alt="The Ken"></div>
+    <div class="footer-center">Graphic by Anuj, 15 Apr '26</div>
+    <div class="footer-right">Source: Annual Reports, Exchange Filings (2026)</div>
+</div>
+
 <script>
-var years = [2019,2020,2021,2022,2023,2024];
+var years = ['2000-01','2004-05','2009-10','2014-15','2019-20','2021-26'];
 
-var industries = [
-  { name: 'Software & AI',   color: '#5b8dd9' },
-  { name: 'Hardware',        color: '#b07a5a' },
-  { name: 'Media & Content', color: '#c87a6e' },
-  { name: 'Cloud & Infra',   color: '#7ab58a' },
-  { name: 'E-Commerce',      color: '#c8a96e' },
-  { name: 'Health & Bio',    color: '#9b8fbf' },
-  { name: 'Finance & Pay',   color: '#6bbfbf' },
-  { name: 'Transport & EV',  color: '#d4a03a' }
-];
-
-// mix weights per company, per year (rows = years, stable proportions scaled to data count)
 var companies = [
-  { name:'Apple',     compColor:'#7aaecc', data:[42,38,35,29,24,18], mix:[0.10,0.35,0.20,0.12,0.05,0.08,0.07,0.03] },
-  { name:'Google',    compColor:'#c8a96e', data:[19,22,28,33,40,45], mix:[0.40,0.10,0.20,0.18,0.03,0.04,0.03,0.02] },
-  { name:'Amazon',    compColor:'#c87a6e', data:[37,33,28,22,18,14], mix:[0.15,0.05,0.15,0.30,0.25,0.05,0.03,0.02] },
-  { name:'Microsoft', compColor:'#7ab58a', data:[45,48,52,57,63,70], mix:[0.38,0.10,0.12,0.22,0.05,0.06,0.05,0.02] },
-  { name:'Meta',      compColor:'#9b8fbf', data:[14,18,25,35,48,58], mix:[0.30,0.10,0.35,0.10,0.03,0.05,0.04,0.03] },
-  { name:'Tesla',     compColor:'#b07a5a', data:[49,51,53,55,58,62], mix:[0.12,0.28,0.05,0.10,0.05,0.08,0.04,0.28] }
-];
-
-// Compute stacked counts: stackData[ci][yearIdx] = array of counts per industry
-function computeStacks(co) {
-  var result = [];
-  for (var yi = 0; yi < years.length; yi++) {
-    var total = co.data[yi];
-    var wsum = 0; for (var k=0;k<co.mix.length;k++) wsum+=co.mix[k];
-    var counts = []; var assigned = 0;
-    for (var k = 0; k < co.mix.length; k++) {
-      var c = k===co.mix.length-1 ? total-assigned : Math.round(co.mix[k]/wsum*total);
-      c = Math.max(0,c);
-      counts.push(c);
-      assigned += c;
-    }
-    result.push(counts);
+  {
+    name: 'Reliance', compColor: '#4A90E2',
+    data: [17, 33, 55, 63, 63, 74],
+    industries: 'Solar & wind energy, FMCG, OTT, network equipment, health, q-comm, data centres, defence, robotics, finserv, compressed biogas',
+    networkEffect: 'Using old economy cash cows to fund dominance in new economy platforms, for powerful data and ecosystem moats'
+  },
+  {
+    name: 'Adani', compColor: '#D4AF37',
+    data: [5, 12, 27, 32, 38, 48],
+    industries: 'Airports, data centres, copper, green hydrogen/electrolysers, cement, media, digital, commercial coal mining, defence/aerospace, nuclear energy',
+    networkEffect: 'Instead of entering adjacent sectors within existing industries, the group made large, discontinuous jumps into new industries'
+  },
+  {
+    name: 'Tata', compColor: '#E35D5D',
+    data: [43, 50, 67, 70, 69, 75],
+    industries: 'Electronics, semicon fab, OSAT, digital, battery, aviation',
+    networkEffect: 'Most aggressive expansion in a decade. Vertically integrated in semicon & battery to also serve the group'
+  },
+  {
+    name: 'Aditya Birla', compColor: '#50C878',
+    data: [44, 56, 68, 68, 65, 71],
+    industries: 'Paints, B2B ecommerce, branded jewellery, D2C fashion, hospitality, sports',
+    networkEffect: 'From commodities-heavy portfolio, it has pivoted toward premium consumer segments'
+  },
+  {
+    name: 'OP Jindal', compColor: '#8E44AD',
+    data: [9, 13, 30, 38, 37, 45],
+    industries: 'EV/automotive, energy storage, defence, aerospace, digital commerce, paints, sports, real estate, copper (away from core ferrous metal)',
+    networkEffect: 'Vertical integration to support EV, battery manufacturing & round-the-clock energy'
+  },
+  {
+    name: 'Bharti', compColor: '#E67E22',
+    data: [9, 10, 12, 13, 12, 18],
+    industries: 'Satellite communication, data centres, finserv, CPaaS, consumer durables, F&B franchising',
+    networkEffect: 'Large strategic bets via equity stakes (OneWeb, BT, Haier) rather than operational entry into manufacturing or infrastructure'
   }
-  return result;
-}
-var allStacks = [];
-for (var ci=0;ci<companies.length;ci++) allStacks.push(computeStacks(companies[ci]));
-
-// Legend
-var legendEl = document.getElementById('legend');
-var industryEnabled = [];
-for (var li = 0; li < industries.length; li++) {
-  industryEnabled.push(true);
-  (function(k) {
-    var item = document.createElement('div');
-    item.className = 'legend-item';
-    item.id = 'leg-' + k;
-    item.innerHTML = '<div class="legend-dot" style="background:' + industries[k].color + '"></div><span>' + industries[k].name + '</span>';
-    item.addEventListener('click', function() {
-      industryEnabled[k] = !industryEnabled[k];
-      item.classList.toggle('off', !industryEnabled[k]);
-      // re-sync current year to apply filter
-      if (lastYearIdx >= 0) triggerHover(lastYearIdx, true);
-    });
-    legendEl.appendChild(item);
-  })(li);
-}
-
-// Cluster labels
-var clusterLabelsEl = document.getElementById('cluster-labels');
-var clusterAnchors = [
-  {ax:0.13,ay:0.28},{ax:0.37,ay:0.15},{ax:0.68,ay:0.22},
-  {ax:0.20,ay:0.68},{ax:0.52,ay:0.70},{ax:0.80,ay:0.58}
 ];
-for (var ci=0;ci<companies.length;ci++) {
-  var lbl = document.createElement('div');
-  lbl.className='cluster-label'; lbl.id='clabel-'+ci;
-  lbl.textContent=companies[ci].name;
-  clusterLabelsEl.appendChild(lbl);
+
+var BUBBLE_R = 3.5;
+var centerAnchor = {ax: 0.5, ay: 0.50};
+
+var ORBIT_RX_RATIO = 0.42;
+var ORBIT_RY_RATIO = 0.30;
+var clusterAnchors = [];
+
+function computeRadialAnchors(W, H) {
+  var cx = centerAnchor.ax * W, cy = centerAnchor.ay * H;
+  var rx = W * ORBIT_RX_RATIO;
+  var ry = H * ORBIT_RY_RATIO;
+  var anchors = [];
+  for (var i = 0; i < 6; i++) {
+    var angle = -Math.PI / 2 + (i * Math.PI * 2) / 6;
+    anchors.push({
+      ax: (cx + Math.cos(angle) * rx) / W,
+      ay: (cy + Math.sin(angle) * ry) / H
+    });
+  }
+  return anchors;
 }
 
-// ── Canvas / Bubbles ──────────────────────────────────────────
 var canvas = document.getElementById('bubble-canvas');
 var ctx = canvas.getContext('2d');
-function resizeCanvas() { canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; updateClusterLabels(); }
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
+var clusters = [];
+var charts = [];
+var lastYearIdx = -1;
+var hoveredCompany = -1;
+
+var maxPerCompany = companies.map(function(c) { return Math.max.apply(null, c.data); });
+
+function resizeCanvas() {
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+  clusterAnchors = computeRadialAnchors(canvas.width, canvas.height);
+  updateClusterLabels();
+}
 
 function updateClusterLabels() {
-  for (var ci=0;ci<companies.length;ci++) {
-    var a=clusterAnchors[ci];
-    var el=document.getElementById('clabel-'+ci);
-    el.style.left=(a.ax*100)+'%';
-    el.style.top=(a.ay*canvas.offsetHeight+34)+'px';
+  var W = canvas.width, H = canvas.height;
+  var scale = labelScale();
+  for (var ci = 0; ci < companies.length; ci++) {
+    var a = clusterAnchors[ci];
+    var el = document.getElementById('clabel-' + ci);
+    if (!el) continue;
+    var bgR = clusterBgR(ci, scale);
+    var cx = centerAnchor.ax * W, cy = centerAnchor.ay * H;
+    var ax = a.ax * W, ay = a.ay * H;
+    var dx = ax - cx, dy = ay - cy;
+    var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    var nx = dx / dist, ny = dy / dist;
+    var lx = ax + nx * (bgR + 14);
+    var ly = ay + ny * (bgR + 12);
+    el.style.left = lx + 'px';
+    el.style.top = ly + 'px';
+    el.style.fontSize = (11 * scale) + 'px';
   }
 }
 
-// Build fixed industry index list per company (max length)
-function buildIndustryList(co) {
-  var maxCount = Math.max.apply(null,co.data);
-  var wsum=0; for(var k=0;k<co.mix.length;k++) wsum+=co.mix[k];
-  var counts=[]; var sum=0;
-  for(var k=0;k<co.mix.length;k++){
-    var c=k===co.mix.length-1?maxCount-sum:Math.round(co.mix[k]/wsum*maxCount);
-    counts.push(Math.max(0,c)); sum+=counts[k];
-  }
-  var list=[];
-  for(var k=0;k<counts.length;k++) for(var j=0;j<counts[k];j++) list.push(k);
-  for(var i=list.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=list[i];list[i]=list[j];list[j]=t;}
-  return list;
+function labelScale() {
+  return Math.max(0.7, canvas.width / 1200);
 }
-var industryLists=[];
-for(var ci=0;ci<companies.length;ci++) industryLists.push(buildIndustryList(companies[ci]));
 
-var clusters=[];
-for(var ci=0;ci<companies.length;ci++) clusters.push([]);
+function clusterBgR(ci, scale) {
+  if (!scale) scale = labelScale();
+  return (Math.sqrt(maxPerCompany[ci]) * 6) * scale + (15 * scale);
+}
 
-var MIN_R=4,MAX_R=9;
-function randR(){return MIN_R+Math.random()*(MAX_R-MIN_R);}
-
-function syncCluster(ci,count){
-  var cluster=clusters[ci];
-  var W=canvas.width,H=canvas.height;
-  var a=clusterAnchors[ci];
-  var ax=a.ax*W,ay=a.ay*H;
-  var iList=industryLists[ci];
-  if(count>cluster.length){
-    for(var k=cluster.length;k<count;k++){
-      var ang=Math.random()*Math.PI*2,dist=Math.random()*8;
-      cluster.push({x:ax+Math.cos(ang)*dist,y:ay+Math.sin(ang)*dist,vx:0,vy:0,r:randR(),alpha:0,ci:ci,industryIdx:iList[k]!==undefined?iList[k]:0,removing:false});
+function initAllBubbles() {
+  clusters = [];
+  for (var ci = 0; ci < companies.length; ci++) {
+    var group = [];
+    var count = maxPerCompany[ci];
+    var W = canvas.width || 800, H = canvas.height || 600;
+    var cx = centerAnchor.ax * W, cy = centerAnchor.ay * H;
+    for (var k = 0; k < count; k++) {
+      var ang = Math.random() * Math.PI * 2;
+      var dist = Math.random() * 20;
+      group.push({
+        x: cx + Math.cos(ang) * dist,
+        y: cy + Math.sin(ang) * dist,
+        vx: 0, vy: 0,
+        r: BUBBLE_R, ci: ci, active: false
+      });
     }
-  } else if(count<cluster.length){
-    var rem=0;
-    for(var k=cluster.length-1;k>=0&&rem<(cluster.length-count);k--)
-      if(!cluster[k].removing){cluster[k].removing=true;rem++;}
+    clusters.push(group);
   }
 }
-function syncAll(yi){for(var ci=0;ci<companies.length;ci++) syncCluster(ci,companies[ci].data[yi]);}
 
-function separate(b1,b2){
-  var dx=b2.x-b1.x,dy=b2.y-b1.y,dSq=dx*dx+dy*dy;
-  var mD=b1.r+b2.r+1.5;
-  if(dSq<mD*mD&&dSq>0.0001){var d=Math.sqrt(dSq),ov=(mD-d)/d;b1.x-=dx*ov*0.25;b1.y-=dy*ov*0.25;b2.x+=dx*ov*0.25;b2.y+=dy*ov*0.25;}
+function setActive(yi) {
+  for (var ci = 0; ci < companies.length; ci++) {
+    var count = companies[ci].data[yi];
+    for (var k = 0; k < clusters[ci].length; k++) {
+      clusters[ci][k].active = (k < count);
+    }
+  }
 }
 
-function tick(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  var W=canvas.width,H=canvas.height;
-  var all=[];
-  for(var ci=0;ci<companies.length;ci++) for(var k=0;k<clusters[ci].length;k++) all.push(clusters[ci][k]);
-
-  for(var i=0;i<all.length;i++){
-    var b=all[i];
-    var a=clusterAnchors[b.ci];
-    var ax=a.ax*W,ay=a.ay*H;
-    if(b.removing){b.alpha=Math.max(0,b.alpha-0.06);continue;}
-    if(b.alpha<1) b.alpha=Math.min(b.alpha+0.05,1);
-    var dx=ax-b.x,dy=ay-b.y,dist=Math.sqrt(dx*dx+dy*dy)||0.01;
-    var ps = dist > b.r * 1.5 ? 0.005 : 0.001;
-    b.vx += dx*ps; b.vy += dy*ps; b.vx *= 0.60; b.vy *= 0.60;b.x+=b.vx;b.y+=b.vy;
-    if(b.x-b.r<0){b.x=b.r;b.vx*=-0.3;} if(b.x+b.r>W){b.x=W-b.r;b.vx*=-0.3;}
-    if(b.y-b.r<0){b.y=b.r;b.vy*=-0.3;} if(b.y+b.r>H){b.y=H-b.r;b.vy*=-0.3;}
+function separate(b1, b2) {
+  var dx = b2.x - b1.x, dy = b2.y - b1.y, dSq = dx*dx + dy*dy;
+  var mD = b1.r + b2.r + 1.2;
+  if (dSq < mD*mD && dSq > 0.0001) {
+    var d = Math.sqrt(dSq), ov = (mD - d) / d;
+    b1.x -= dx*ov*0.2; b1.y -= dy*ov*0.2;
+    b2.x += dx*ov*0.2; b2.y += dy*ov*0.2;
   }
-  for(var i=0;i<all.length;i++) for(var j=i+1;j<all.length;j++) separate(all[i],all[j]);
-  for(var ci=0;ci<companies.length;ci++) clusters[ci]=clusters[ci].filter(function(b){return!(b.removing&&b.alpha<=0);});
+}
 
-  for(var i=0;i<all.length;i++){
-    var b=all[i]; if(b.alpha<=0) continue;
-    if (!industryEnabled[b.industryIdx]) continue;
-    ctx.globalAlpha=b.alpha*0.85;
-    ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
-    ctx.fillStyle=industries[b.industryIdx].color; ctx.fill();
+function drawScene() {
+  var W = canvas.width, H = canvas.height;
+  var scale = labelScale();
+  var cx = centerAnchor.ax * W, cy = centerAnchor.ay * H;
+
+  var centralR = Math.min(W * ORBIT_RX_RATIO, H * ORBIT_RY_RATIO) * 0.28;
+  ctx.beginPath();
+  ctx.arc(cx, cy, centralR, 0, Math.PI*2);
+  ctx.strokeStyle = 'rgba(0,0,0,0.10)';
+  ctx.setLineDash([5, 5]);
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(0,0,0,0.03)';
+  ctx.fill();
+
+  var orbitRx = W * ORBIT_RX_RATIO, orbitRy = H * ORBIT_RY_RATIO;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, orbitRx, orbitRy, 0, 0, Math.PI*2);
+  ctx.strokeStyle = 'rgba(0,0,0,0.05)';
+  ctx.setLineDash([3, 7]);
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  for (var ci = 0; ci < companies.length; ci++) {
+    var a = clusterAnchors[ci];
+    var ax = a.ax * W, ay = a.ay * H;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(ax, ay);
+    ctx.strokeStyle = companies[ci].compColor + '22';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 5]);
+    ctx.stroke();
+    ctx.setLineDash([]);
   }
-  ctx.globalAlpha=1;
+
+  for (var ci = 0; ci < companies.length; ci++) {
+    var a = clusterAnchors[ci];
+    var ax = a.ax * W, ay = a.ay * H;
+    var bgR = clusterBgR(ci, scale);
+    var isHovered = (ci === hoveredCompany);
+    ctx.beginPath();
+    ctx.arc(ax, ay, bgR, 0, Math.PI*2);
+    ctx.strokeStyle = isHovered ? companies[ci].compColor + 'bb' : companies[ci].compColor + '44';
+    ctx.lineWidth = isHovered ? 1.5 : 1;
+    ctx.stroke();
+    ctx.fillStyle = isHovered ? companies[ci].compColor + '1a' : companies[ci].compColor + '08';
+    ctx.fill();
+  }
+}
+
+function tick() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawScene();
+
+  var all = [];
+  clusters.forEach(function(c) { c.forEach(function(b) { all.push(b); }); });
+
+  var cx = centerAnchor.ax * canvas.width, cy = centerAnchor.ay * canvas.height;
+
+  all.forEach(function(b) {
+    var targetX, targetY;
+    if (b.active) {
+      targetX = clusterAnchors[b.ci].ax * canvas.width;
+      targetY = clusterAnchors[b.ci].ay * canvas.height;
+    } else {
+      targetX = cx; targetY = cy;
+    }
+    var dx = targetX - b.x, dy = targetY - b.y;
+    var dist = Math.sqrt(dx*dx + dy*dy) || 0.01;
+    var strength = dist > 20 ? 0.008 : 0.003;
+    b.vx += dx * strength; b.vy += dy * strength;
+    b.vx *= 0.65; b.vy *= 0.65;
+    b.x += b.vx; b.y += b.vy;
+  });
+
+  for (var i = 0; i < all.length; i++)
+    for (var j = i+1; j < all.length; j++)
+      separate(all[i], all[j]);
+
+  all.forEach(function(b) {
+    var isHov = (b.ci === hoveredCompany);
+    ctx.globalAlpha = b.active ? (isHov ? 1 : 0.88) : 0.20;
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.r * (isHov && b.active ? 1.15 : 1), 0, Math.PI*2);
+    ctx.fillStyle = companies[b.ci].compColor;
+    ctx.fill();
+  });
+
+  ctx.globalAlpha = 1;
   requestAnimationFrame(tick);
 }
-tick();
 
-var indTooltip = document.getElementById('industry-tooltip');
-var hoveredCi = -1;
+var maxVal = Math.max.apply(null, companies.reduce(function(acc, c) { return acc.concat(c.data); }, []));
+var chartsRow = document.getElementById('chartsRow');
+var clusterLabelsEl = document.getElementById('cluster-labels');
+
+companies.forEach(function(co, i) {
+  var lbl = document.createElement('div');
+  lbl.className = 'cluster-label';
+  lbl.id = 'clabel-' + i;
+  lbl.textContent = co.name;
+  clusterLabelsEl.appendChild(lbl);
+
+  var wrapper = document.createElement('div');
+  wrapper.className = 'chart-wrapper';
+  var labelSpans = co.data.map(function(d, j) {
+    return '<span class="bar-label" id="lbl-' + i + '-' + j + '">' + d + '</span>';
+  }).join('');
+  wrapper.innerHTML =
+    '<div class="chart-header"><div class="company-name">' + co.name + '</div></div>' +
+    '<div class="chart-container">' +
+      '<div class="label-row">' + labelSpans + '</div>' +
+      '<svg class="connector-svg"><g id="connlines-' + i + '"></g></svg>' +
+      '<div class="chart-div" id="chart-' + i + '"></div>' +
+    '</div>';
+  chartsRow.appendChild(wrapper);
+
+  var chart = echarts.init(document.getElementById('chart-' + i));
+  charts.push(chart);
+  chart.setOption(buildChartOption(i, -1));
+
+  chart.on('finished', function() {
+    for (var j = 0; j < years.length; j++) {
+      var px = chart.convertToPixel('grid', [j, 0]);
+      var l = document.getElementById('lbl-' + i + '-' + j);
+      if (l) l.style.left = px[0] + 'px';
+    }
+  });
+
+  (function(chartRef, compIdx) {
+    chartRef.getZr().on('mousemove', function(p) {
+      var pt = chartRef.convertFromPixel('grid', [p.offsetX, p.offsetY]);
+      var xIdx = Math.round(pt[0]);
+      if (xIdx >= 0 && xIdx < years.length) {
+        triggerHover(xIdx);
+        showNetworkAnnotation(compIdx);
+      }
+    });
+    chartRef.getZr().on('mouseout', function() {
+      hideNetworkAnnotation();
+    });
+  })(chart, i);
+});
+
+function buildChartOption(ci, activeIdx) {
+  var co = companies[ci];
+  return {
+    grid: { top: 20, bottom: 30, left: 1, right: 1 },
+    xAxis: {
+      type: 'category',
+      data: years,
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: {
+        fontSize: 9,
+        color: '#888',
+        rotate: 0,
+        fontFamily: 'GT America, Segoe UI, sans-serif',
+        formatter: function(v) { return v.split('-')[0]; }
+      }
+    },
+    yAxis: { type: 'value', show: false, max: maxVal },
+    series: [{
+      type: 'bar',
+      barMaxWidth: 50,
+      barCategoryGap: '20%',
+      data: co.data.map(function(v, j) {
+        return {
+          value: v,
+          itemStyle: {
+            color: co.compColor,
+            opacity: (activeIdx < 0 || j === activeIdx) ? 1 : 0.2,
+            borderRadius: [4, 4, 0, 0]
+          }
+        };
+      }),
+    }]
+  };
+}
+
+function showNetworkAnnotation(ci) {
+  var co = companies[ci];
+  var annEl = document.getElementById('network-annotation');
+  var W = canvas.width, H = canvas.height;
+  var a = clusterAnchors[ci];
+  var ax = a.ax * W, ay = a.ay * H;
+
+  // Per-cluster manual offsets [x, y] relative to cluster center
+  var offsets = [
+    [ 40, -60],  // 0 Reliance   — top
+    [ -250, -120],  // 1 Adani      — top-right
+    [ -250,   30],  // 2 Tata       — bottom-right
+    [-260,  -60],  // 3 Aditya Birla — bottom
+    [30, 10], // 4 OP Jindal  — bottom-left
+    [10, -120], // 5 Bharti     — top-left
+  ];
+
+  var posX = ax + offsets[ci][0];
+  var posY = ay + offsets[ci][1];
+
+  annEl.style.left = posX + 'px';
+  annEl.style.top  = posY + 'px';
+  annEl.style.borderColor = co.compColor + '88';
+  annEl.innerHTML =
+    '<div class="ann-header" style="color:' + co.compColor + '">' + co.name + ' — expansion strategy</div>' +
+    '<div class="ann-text">' + co.networkEffect + '</div>';
+  annEl.classList.add('visible');
+}
+
+function hideNetworkAnnotation() {
+  document.getElementById('network-annotation').classList.remove('visible');
+}
+
+function triggerHover(xIdx) {
+  if (xIdx === lastYearIdx) return;
+  lastYearIdx = xIdx;
+  document.getElementById('pageTitle').textContent = years[xIdx];
+  setActive(xIdx);
+
+  companies.forEach(function(co, i) {
+    document.getElementById('clabel-' + i).classList.add('visible');
+    years.forEach(function(_, j) {
+      var lbl = document.getElementById('lbl-' + i + '-' + j);
+      if (lbl) lbl.classList.toggle('active', j === xIdx);
+    });
+    var g = document.getElementById('connlines-' + i);
+    g.innerHTML = '';
+    var barPx = charts[i].convertToPixel('grid', [xIdx, co.data[xIdx]]);
+    var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', barPx[0]); line.setAttribute('y1', 14);
+    line.setAttribute('x2', barPx[0]); line.setAttribute('y2', barPx[1] - 5);
+    line.setAttribute('class', 'connector-line active');
+    line.style.stroke = co.compColor;
+    g.appendChild(line);
+    charts[i].setOption(buildChartOption(i, xIdx));
+  });
+}
 
 canvas.addEventListener('mousemove', function(e) {
   var rect = canvas.getBoundingClientRect();
   var mx = e.clientX - rect.left, my = e.clientY - rect.top;
-  var hit = -1;
-  // Find topmost bubble under cursor
-  for (var ci = 0; ci < clusters.length; ci++) {
-    for (var k = clusters[ci].length - 1; k >= 0; k--) {
-      var b = clusters[ci][k];
-      if (b.removing || b.alpha < 0.3) continue;
+  var W = canvas.width, H = canvas.height;
+  var scale = labelScale();
+  var hitCompany = -1, hitCluster = -1;
+
+  clusters.forEach(function(group, ci) {
+    group.forEach(function(b) {
+      if (!b.active) return;
       var dx = b.x - mx, dy = b.y - my;
-      if (dx*dx + dy*dy <= b.r*b.r) { hit = ci; break; }
-    }
-    if (hit >= 0) break;
+      if (dx*dx + dy*dy <= b.r*b.r*4) hitCompany = ci;
+    });
+  });
+
+  for (var ci = 0; ci < companies.length; ci++) {
+    var a = clusterAnchors[ci];
+    var ax = a.ax * W, ay = a.ay * H;
+    var bgR = clusterBgR(ci, scale);
+    var dx = ax - mx, dy = ay - my;
+    if (dx*dx + dy*dy <= bgR*bgR) hitCluster = ci;
   }
+
+  var hit = hitCompany >= 0 ? hitCompany : hitCluster;
+  hoveredCompany = hit;
+
+  var tt = document.getElementById('bubble-tooltip');
   if (hit >= 0) {
-    showIndTooltip(hit, e.clientX, e.clientY);
+    var yi = lastYearIdx < 0 ? 0 : lastYearIdx;
+    var co = companies[hit];
+    tt.innerHTML =
+      '<div class="btt-header" style="color:' + co.compColor + '">' + co.name + '</div>' +
+      '<div class="btt-label">' + years[yi] + '</div>' +
+      '<div class="btt-val">' + co.data[yi] + ' businesses</div>' +
+      '<hr class="btt-divider">' +
+      '<div class="btt-label">New sectors entered (since 2000)</div>' +
+      '<div class="btt-industries">' + co.industries + '</div>';
+
+    // Smart tooltip positioning: avoid viewport clipping
+    var ttW = 270, ttH = tt.offsetHeight || 160;
+    var margin = 18;
+    var vpW = window.innerWidth, vpH = window.innerHeight;
+    var cx = e.clientX, cy = e.clientY;
+
+    var ttLeft = cx + margin;
+    var ttTop  = cy - margin;
+
+    // Flip left if too close to right edge
+    if (ttLeft + ttW > vpW - 8) ttLeft = cx - ttW - margin;
+    // Flip below if too close to top
+    if (ttTop < 8) ttTop = cy + margin;
+    // Push up if overflowing bottom
+    if (ttTop + ttH > vpH - 8) ttTop = vpH - ttH - 8;
+
+    tt.style.left = ttLeft + 'px';
+    tt.style.top  = ttTop  + 'px';
+    tt.classList.add('visible');
   } else {
-    hideIndTooltip();
+    tt.classList.remove('visible');
   }
 });
-canvas.addEventListener('mouseleave', hideIndTooltip);
 
-function showIndTooltip(ci, clientX, clientY) {
-  if (hoveredCi === ci) {
-    positionTooltip(clientX, clientY);
-    return;
-  }
-  hoveredCi = ci;
-  var co = companies[ci];
-  var yi = lastYearIdx < 0 ? 0 : lastYearIdx;
-  var stacks = allStacks[ci][yi];
-  var total = co.data[yi];
-  var maxCount = Math.max.apply(null, stacks);
+canvas.addEventListener('mouseleave', function() {
+  hoveredCompany = -1;
+  document.getElementById('bubble-tooltip').classList.remove('visible');
+});
 
-  var html = '<div class="itt-header">' + co.name + ' — ' + years[yi] + '</div>';
-  for (var k = 0; k < industries.length; k++) {
-    if (stacks[k] === 0) continue;
-    var pct = Math.round(stacks[k] / total * 100);
-    var barW = maxCount > 0 ? Math.round(stacks[k] / maxCount * 48) : 0;
-    html += '<div class="itt-row">' +
-      '<div class="itt-dot" style="background:' + industries[k].color + '"></div>' +
-      '<span class="itt-name">' + industries[k].name + '</span>' +
-      '<div class="itt-bar-wrap"><div class="itt-bar-fill" style="width:' + barW + 'px;background:' + industries[k].color + '"></div></div>' +
-      '<span class="itt-val">' + stacks[k] + ' <span style="color:#888;font-weight:400">(' + pct + '%)</span></span>' +
-    '</div>';
-  }
-  indTooltip.innerHTML = html;
-  indTooltip.classList.add('visible');
-  positionTooltip(clientX, clientY);
-}
-
-function positionTooltip(clientX, clientY) {
-  var rect = canvas.getBoundingClientRect();
-  var x = clientX - rect.left + 14;
-  var y = clientY - rect.top - 10;
-  var tw = indTooltip.offsetWidth, th = indTooltip.offsetHeight;
-  if (x + tw > canvas.offsetWidth - 8) x = clientX - rect.left - tw - 14;
-  if (y + th > canvas.offsetHeight - 8) y = canvas.offsetHeight - th - 8;
-  indTooltip.style.left = x + 'px';
-  indTooltip.style.top = y + 'px';
-}
-
-function hideIndTooltip() {
-  hoveredCi = -1;
-  indTooltip.classList.remove('visible');
-}
-var maxVal=0;
-for(var ci=0;ci<companies.length;ci++) for(var vi=0;vi<companies[ci].data.length;vi++) if(companies[ci].data[vi]>maxVal) maxVal=companies[ci].data[vi];
-
-var chartsRow=document.getElementById('chartsRow');
-var charts=[];
-var hoverTimer=null,lastYearIdx=-1,chartsReady=0;
-
-for(var idx=0;idx<companies.length;idx++){
-  (function(i){
-    var co=companies[i];
-    var delta=co.data[co.data.length-1]-co.data[0];
-    var isPos=delta>=0;
-
-    var wrapper=document.createElement('div');
-    wrapper.className='chart-wrapper';
-
-    var labelSpans='';
-    for(var j=0;j<years.length;j++)
-      labelSpans+='<span class="bar-label" id="lbl-'+i+'-'+j+'">'+co.data[j]+'</span>';
-
-    wrapper.innerHTML=
-      '<div class="chart-header">'+
-        '<div class="company-name">'+co.name+'</div>'+
-        '<div class="change"><span class="'+(isPos?'pos':'neg')+'">'+(isPos?'+':'')+delta+'al</span> <span class="cur">'+co.data[co.data.length-1]+'</span><span style="color:#999;font-size:10px;">al</span></div>'+
-      '</div>'+
-      '<div class="chart-container">'+
-        '<div class="label-row">'+labelSpans+'</div>'+
-        '<svg class="connector-svg" id="connsvg-'+i+'"><g id="connlines-'+i+'"></g></svg>'+
-        '<div class="chart-div" id="chart-'+i+'"></div>'+
-      '</div>';
-    chartsRow.appendChild(wrapper);
-
-    var chart=echarts.init(document.getElementById('chart-'+i));
-    charts.push(chart);
-
-    chart.setOption(buildChartOption(i,-1));
-
-    chart.on('finished',function(){
-      for(var j=0;j<years.length;j++){
-        var px=chart.convertToPixel('grid',[j,0]);
-        var lbl=document.getElementById('lbl-'+i+'-'+j);
-        if(lbl) lbl.style.left=px[0]+'px';
-      }
-      chartsReady++;
-      if(chartsReady===companies.length){updateClusterLabels();triggerHover(0);}
-    });
-
-    chart.getZr().on('mousemove',function(params){
-      var pt=chart.convertFromPixel('grid',[params.offsetX,params.offsetY]);
-      var xIdx=Math.round(pt[0]);
-      if(xIdx>=0&&xIdx<years.length){clearTimeout(hoverTimer);triggerHover(xIdx);}
-    });
-    chart.getZr().on('mouseout',function(){
-      hoverTimer=setTimeout(function(){triggerHover(0);},80);
-    });
-  })(idx);
-}
-
-function buildChartOption(ci, activeIdx) {
-  var co = companies[ci];
-  // Build one series per industry
-  var series = [];
-  for (var k = 0; k < industries.length; k++) {
-    var seriesData = [];
-    for (var j = 0; j < years.length; j++) {
-      var count = allStacks[ci][j][k];
-      var isActive = (activeIdx < 0 || j === activeIdx);
-      seriesData.push({
-        value: count,
-        itemStyle: {
-          color: industries[k].color,
-          opacity: isActive ? 0.9 : 0.25,
-          borderRadius: k === industries.length-1 ? [2,2,0,0] : [0,0,0,0]
-        }
-      });
-    }
-    series.push({
-      type: 'bar', stack: 'total',
-      data: seriesData,
-      barCategoryGap: '22%',
-      label: { show: false },
-      emphasis: { disabled: true }
-    });
-  }
-  return {
-    grid: { top:16, bottom:24, left:8, right:8 },
-    xAxis: { type:'category', data:years, axisLine:{show:false}, axisTick:{show:false}, axisLabel:{fontSize:9,color:'#999',formatter:function(v){return String(v).slice(2);}} },
-    yAxis: { type:'value', show:false, max:maxVal+10 },
-    tooltip: { show:false },
-    series: series
-  };
-}
-
-function drawConnector(ci,barIdx){
-  var chart=charts[ci];
-  var co=companies[ci];
-  var g=document.getElementById('connlines-'+ci);
-  if(!g) return; g.innerHTML='';
-  var total=co.data[barIdx];
-  var barPx=chart.convertToPixel('grid',[barIdx,total]);
-  var line=document.createElementNS('http://www.w3.org/2000/svg','line');
-  line.setAttribute('x1',barPx[0]); line.setAttribute('y1',26);
-  line.setAttribute('x2',barPx[0]); line.setAttribute('y2',barPx[1]-2);
-  line.setAttribute('class','connector-line active');
-  line.style.stroke=co.compColor;
-  g.appendChild(line);
-}
-
-function triggerHover(xIdx, force) {
-  if(xIdx===lastYearIdx && !force) return;
-  lastYearIdx=xIdx;
-  document.getElementById('year-label').textContent=years[xIdx];
-  document.getElementById('year-label').classList.add('visible');
-  for(var ci=0;ci<companies.length;ci++) document.getElementById('clabel-'+ci).classList.add('visible');
-  syncAll(xIdx);
-  for(var i=0;i<companies.length;i++){
-    for(var j=0;j<years.length;j++){
-      var lbl=document.getElementById('lbl-'+i+'-'+j);
-      if(j===xIdx) lbl.classList.add('active'); else lbl.classList.remove('active');
-    }
-    drawConnector(i,xIdx);
-    charts[i].setOption(buildChartOption(i,xIdx));
-  }
-}
-
-window.addEventListener('resize',function(){
+window.addEventListener('resize', function() {
   resizeCanvas();
-  for(var i=0;i<charts.length;i++) charts[i].resize();
+  charts.forEach(function(c) { c.resize(); });
 });
+
+resizeCanvas();
+initAllBubbles();
+tick();
+setTimeout(function() { triggerHover(0); }, 500);
 </script>
 </body>
 </html>
