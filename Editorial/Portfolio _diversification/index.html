@@ -106,7 +106,6 @@
           overflow: hidden;
           min-height: 300px;
           max-height: 45vh;
-          padding: 14px 0;
         }
         #bubble-area::after {
   content: '';
@@ -247,24 +246,6 @@
     .footer-logo { height: 16px; }
 }
 
-/* Mobile tooltip: centered, fixed at vertical midpoint of bubble area */
-@media (max-width: 500px) {
-  #bubble-tooltip {
-    left: 16px !important;
-    right: 16px !important;
-    width: auto !important;
-    min-width: unset !important;
-    max-width: unset !important;
-    /* top is set dynamically by JS */
-  }
-  #network-annotation {
-    position: fixed !important;
-    left: 16px !important;
-    right: 16px !important;
-    max-width: unset !important;
-    /* top is set dynamically by JS */
-  }
-}
 
 </style>
 </head>
@@ -633,6 +614,7 @@ function buildChartOption(ci, activeIdx) {
           itemStyle: {
             color: co.compColor,
             opacity: (activeIdx < 0 || j === activeIdx) ? 1 : 0.2
+            // borderRadius: [0, 0, 0, 0]
           }
         };
       }),
@@ -643,39 +625,29 @@ function buildChartOption(ci, activeIdx) {
 function showNetworkAnnotation(ci) {
   var co = companies[ci];
   var annEl = document.getElementById('network-annotation');
-  var isMobile = window.innerWidth <= 500;
+  var W = canvas.width, H = canvas.height;
+  var a = clusterAnchors[ci];
+  var ax = a.ax * W, ay = a.ay * H;
 
+  // Per-cluster manual offsets [x, y] relative to cluster center
+  var offsets = [
+    [ 40, -60],  // 0 Reliance   — top
+    [ -250, -120],  // 1 Adani      — top-right
+    [ -250,   30],  // 2 Tata       — bottom-right
+    [-260,  -60],  // 3 Aditya Birla — bottom
+    [30, 10], // 4 OP Jindal  — bottom-left
+    [10, -120], // 5 Bharti     — top-left
+  ];
+
+  var posX = ax + offsets[ci][0];
+  var posY = ay + offsets[ci][1];
+
+  annEl.style.left = posX + 'px';
+  annEl.style.top  = posY + 'px';
   annEl.style.borderColor = co.compColor + '88';
   annEl.innerHTML =
     '<div class="ann-header" style="color:' + co.compColor + '">' + co.name + ' — expansion strategy</div>' +
     '<div class="ann-text">' + co.networkEffect + '</div>';
-
-  if (isMobile) {
-    // Same centred logic as the bubble tooltip
-    var bubbleArea = document.getElementById('bubble-area');
-    var areaRect = bubbleArea.getBoundingClientRect();
-    var annH = annEl.offsetHeight || 100;
-    var areaCentreY = areaRect.top + areaRect.height / 2;
-    var annTop = areaCentreY - annH / 2;
-    annTop = Math.max(areaRect.top + 8, Math.min(annTop, areaRect.bottom - annH - 8));
-    annEl.style.top = annTop + 'px';
-    // left/right handled by CSS
-  } else {
-    var W = canvas.width, H = canvas.height;
-    var a = clusterAnchors[ci];
-    var ax = a.ax * W, ay = a.ay * H;
-    var offsets = [
-      [ 40, -60],
-      [ -250, -120],
-      [ -250,   30],
-      [-260,  -60],
-      [30, 10],
-      [10, -120],
-    ];
-    annEl.style.left = (ax + offsets[ci][0]) + 'px';
-    annEl.style.top  = (ay + offsets[ci][1]) + 'px';
-  }
-
   annEl.classList.add('visible');
 }
 
@@ -707,21 +679,32 @@ function triggerHover(xIdx) {
     charts[i].setOption(buildChartOption(i, xIdx));
   });
 }
-
 function getLighterShade(hex) {
     if (!hex) return '#ffffff';
+
+    // 1. Convert hex to RGB
     let r = parseInt(hex.slice(1, 3), 16);
     let g = parseInt(hex.slice(3, 5), 16);
     let b = parseInt(hex.slice(5, 7), 16);
+
+    // 2. Calculate perceived brightness (0-255)
     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+
+    // 3. If it's already bright enough, return the original hex
     if (brightness > 140) return hex;
+
+    // 4. If it's dark, mix it with white to "tint" it lighter
+    // Adjust the 0.5 factor to make it more or less "pastel"
     const factor = 0.6;
     r = Math.round(r + (255 - r) * factor);
     g = Math.round(g + (255 - g) * factor);
     b = Math.round(b + (255 - b) * factor);
+
+    // 5. Convert back to hex
     const toHex = (c) => c.toString(16).padStart(2, '0');
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
+
 
 canvas.addEventListener('mousemove', function(e) {
   var rect = canvas.getBoundingClientRect();
@@ -761,35 +744,24 @@ canvas.addEventListener('mousemove', function(e) {
       '<div class="btt-label">New sectors entered (since 2020)</div>' +
       '<div class="btt-industries">' + co.industries + '</div>';
 
-    var isMobile = window.innerWidth <= 500;
+    // Smart tooltip positioning: avoid viewport clipping
+    var ttW = 270, ttH = tt.offsetHeight || 160;
+    var margin = 18;
+    var vpW = window.innerWidth, vpH = window.innerHeight;
+    var cx = e.clientX, cy = e.clientY;
 
-    if (isMobile) {
-      // On mobile: pin to centre of the bubble-area, vertically centred
-      var bubbleArea = document.getElementById('bubble-area');
-      var areaRect = bubbleArea.getBoundingClientRect();
-      // Place tooltip centred horizontally (CSS handles left/right via !important)
-      // For vertical: aim for vertical centre of bubble-area
-      var ttH = tt.offsetHeight || 160;
-      var areaCentreY = areaRect.top + areaRect.height / 2;
-      var ttTop = areaCentreY - ttH / 2;
-      // Clamp so it never goes above viewport or below bubble-area bottom
-      ttTop = Math.max(areaRect.top + 8, Math.min(ttTop, areaRect.bottom - ttH - 8));
-      tt.style.top = ttTop + 'px';
-      // left/right are handled by CSS media query
-    } else {
-      // Desktop: smart positioning to avoid viewport clipping
-      var ttW = 270, ttH2 = tt.offsetHeight || 160;
-      var margin = 18;
-      var vpW = window.innerWidth, vpH = window.innerHeight;
-      var ttLeft = e.clientX + margin;
-      var ttTop2 = e.clientY - margin;
-      if (ttLeft + ttW > vpW - 8) ttLeft = e.clientX - ttW - margin;
-      if (ttTop2 < 8) ttTop2 = e.clientY + margin;
-      if (ttTop2 + ttH2 > vpH - 8) ttTop2 = vpH - ttH2 - 8;
-      tt.style.left = ttLeft + 'px';
-      tt.style.top  = ttTop2 + 'px';
-    }
+    var ttLeft = cx + margin;
+    var ttTop  = cy - margin;
 
+    // Flip left if too close to right edge
+    if (ttLeft + ttW > vpW - 8) ttLeft = cx - ttW - margin;
+    // Flip below if too close to top
+    if (ttTop < 8) ttTop = cy + margin;
+    // Push up if overflowing bottom
+    if (ttTop + ttH > vpH - 8) ttTop = vpH - ttH - 8;
+
+    tt.style.left = ttLeft + 'px';
+    tt.style.top  = ttTop  + 'px';
     tt.classList.add('visible');
   } else {
     tt.classList.remove('visible');
@@ -799,59 +771,6 @@ canvas.addEventListener('mousemove', function(e) {
 canvas.addEventListener('mouseleave', function() {
   hoveredCompany = -1;
   document.getElementById('bubble-tooltip').classList.remove('visible');
-});
-
-// Also handle touch events for mobile
-canvas.addEventListener('touchstart', function(e) {
-  e.preventDefault();
-  var touch = e.touches[0];
-  var rect = canvas.getBoundingClientRect();
-  var mx = touch.clientX - rect.left, my = touch.clientY - rect.top;
-  var W = canvas.width, H = canvas.height;
-  var scale = labelScale();
-  var hitCluster = -1;
-
-  for (var ci = 0; ci < companies.length; ci++) {
-    var a = clusterAnchors[ci];
-    var ax = a.ax * W, ay = a.ay * H;
-    var bgR = clusterBgR(ci, scale) * 1.5; // larger hit area for touch
-    var dx = ax - mx, dy = ay - my;
-    if (dx*dx + dy*dy <= bgR*bgR) hitCluster = ci;
-  }
-
-  hoveredCompany = hitCluster;
-
-  var tt = document.getElementById('bubble-tooltip');
-  if (hitCluster >= 0) {
-    var yi = lastYearIdx < 0 ? 0 : lastYearIdx;
-    var co = companies[hitCluster];
-    tt.innerHTML =
-      '<div class="btt-header" style="color:' + getLighterShade(co.compColor) + '">' + co.name + '</div>' +
-      '<div class="btt-label">' + years[yi] + '</div>' +
-      '<div class="btt-val">' + co.data[yi] + ' businesses</div>' +
-      '<hr class="btt-divider">' +
-      '<div class="btt-label">New sectors entered (since 2020)</div>' +
-      '<div class="btt-industries">' + co.industries + '</div>';
-
-    var bubbleArea = document.getElementById('bubble-area');
-    var areaRect = bubbleArea.getBoundingClientRect();
-    var ttH = tt.offsetHeight || 160;
-    var areaCentreY = areaRect.top + areaRect.height / 2;
-    var ttTop = areaCentreY - ttH / 2;
-    ttTop = Math.max(areaRect.top + 8, Math.min(ttTop, areaRect.bottom - ttH - 8));
-    tt.style.top = ttTop + 'px';
-
-    tt.classList.add('visible');
-  } else {
-    tt.classList.remove('visible');
-  }
-}, { passive: false });
-
-canvas.addEventListener('touchend', function() {
-  setTimeout(function() {
-    hoveredCompany = -1;
-    document.getElementById('bubble-tooltip').classList.remove('visible');
-  }, 1500);
 });
 
 window.addEventListener('resize', function() {
