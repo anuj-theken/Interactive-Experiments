@@ -2,11 +2,13 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
+  @import url('https://fonts.cdnfonts.com/css/reckless-neue');
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#f8fafc; font-family:'Segoe UI',sans-serif; padding:20px; display:flex; flex-direction:column; align-items:center; }
+  body { background:#FFFCF0; font-family:'Archivo',sans-serif; padding:20px; display:flex; flex-direction:column; align-items:center; }
   .section, hr { width:100%; max-width:800px; }
-  h2 { color:#0f172a; text-align:center; font-size:19px; font-weight:700; margin-bottom:3px; }
+  h2 { color:#0f172a; text-align:center; font-size:19px; font-weight:700; margin-bottom:3px; font-family:'Reckless Neue','Reckless',serif; }
   .sub { color:#64748b; text-align:center; font-size:13px; margin-bottom:12px; }
   .src { color:#94a3b8; text-align:center; font-size:11px; margin-top:8px; }
   .src a { color:#6366f1; text-decoration:none; }
@@ -16,8 +18,8 @@
   canvas { display:block; width:100%; }
   .tip {
     position:fixed; pointer-events:none; display:none;
-    background:#ffffff; border:1px solid #e2e8f0; color:#0f172a;
-    font-size:13px; padding:8px 12px; border-radius:8px; line-height:1.5; z-index:99;
+    background:#FFFCF0; border:1px solid #e2e8f0; color:#0f172a;
+    font-size:13px; padding:8px 12px; border-radius:0; line-height:1.5; z-index:99;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   }
 </style>
@@ -44,9 +46,22 @@
 
 <script>
 const COLORS = [
-  '#6366f1','#8b5cf6','#a78bfa','#3b82f6','#60a5fa',
-  '#0ea5e9','#06b6d4','#14b8a6','#10b981','#34d399'
+  '#0a1628','#0d3b6e','#0b5ea8','#0e86c8','#10a8c4',
+  '#10c4a8','#2dd4a0','#6ee4b0','#a8edcc','#c8f5e0'
 ];
+// Text color per tile: dark navy for the 4 lightest greens, white for the rest
+const TEXT_COLOR = {
+  '#10c4a8': '#022e22',
+  '#2dd4a0': '#043a2a',
+  '#6ee4b0': '#032e20',
+  '#a8edcc': '#021f15',
+  '#c8f5e0': '#011a10',
+};
+function textCol(hex)  { return TEXT_COLOR[hex] || '#ffffff'; }
+function textColV(hex) { return TEXT_COLOR[hex] ? 'rgba(2,30,16,0.75)' : 'rgba(255,255,255,0.82)'; }
+
+const FIXED_NAME_SZ = 12;
+const FIXED_VAL_SZ  = 11;
 
 const D1 = [
   {n:'Bajaj Finance',        v:508501},
@@ -75,17 +90,14 @@ const D2 = [
 
 function fmt(v){ return Math.round(v).toLocaleString('en-IN'); }
 
-// Slice-and-dice treemap — guarantees all items are placed
 function sliceDice(items, x, y, w, h, depth) {
   if (!items.length) return [];
   if (items.length === 1) return [{...items[0], x, y, w, h}];
-
   const total = items.reduce((s,i) => s + i.v, 0);
   const horiz = depth % 2 === 0;
   const rects = [];
   let pos = horiz ? x : y;
   const full = horiz ? w : h;
-
   for (let i = 0; i < items.length; i++) {
     const size = (items[i].v / total) * full;
     if (horiz) rects.push({...items[i], x: pos, y, w: size, h});
@@ -95,35 +107,28 @@ function sliceDice(items, x, y, w, h, depth) {
   return rects;
 }
 
-// Squarified treemap with fallback guarantee
 function squarify(items, x, y, w, h) {
   if (!items.length) return [];
   if (items.length === 1) return [{...items[0], x, y, w, h}];
-
   const total = items.reduce((s,i) => s + i.v, 0);
   const area  = w * h;
   const rects = [];
   let rem = [...items];
   let cx = x, cy = y, cw = w, ch = h;
-
   while (rem.length > 0) {
     if (rem.length <= 2 || cw <= 0 || ch <= 0) {
-      // Place remaining with slice-and-dice to avoid zero-size boxes
-      sliceDice(rem, cx, cy, cw, ch, cw >= ch ? 0 : 1)
-        .forEach(r => rects.push(r));
+      sliceDice(rem, cx, cy, cw, ch, cw >= ch ? 0 : 1).forEach(r => rects.push(r));
       break;
     }
-
     const horiz = cw >= ch;
     const side  = horiz ? ch : cw;
     let row = [], rowSum = 0, prevRatio = Infinity;
-
     for (let i = 0; i < rem.length; i++) {
-      const next    = rem[i];
-      const newSum  = rowSum + next.v;
-      const rowArea = (newSum / total) * area;
-      const rowW    = rowArea / side;
-      let   worst   = 0;
+      const next   = rem[i];
+      const newSum = rowSum + next.v;
+      const rowArea= (newSum / total) * area;
+      const rowW   = rowArea / side;
+      let worst    = 0;
       for (const it of [...row, next]) {
         const itH = ((it.v / total) * area) / rowW;
         worst = Math.max(worst, Math.max(rowW / itH, itH / rowW));
@@ -133,11 +138,9 @@ function squarify(items, x, y, w, h) {
       row.push(next);
       rowSum = newSum;
     }
-
     const rowArea = (rowSum / total) * area;
     const rowW    = rowArea / side;
-    let   pos     = horiz ? cy : cx;
-
+    let pos = horiz ? cy : cx;
     for (const it of row) {
       const itArea = (it.v / total) * area;
       const itLen  = itArea / rowW;
@@ -145,7 +148,6 @@ function squarify(items, x, y, w, h) {
       else       rects.push({...it, x: pos, y: cy,  w: itLen, h: rowW});
       pos += itLen;
     }
-
     rem = rem.slice(row.length);
     if (horiz) { cx += rowW; cw -= rowW; }
     else       { cy += rowW; ch -= rowW; }
@@ -153,16 +155,27 @@ function squarify(items, x, y, w, h) {
   return rects;
 }
 
+// Truncate text to fit maxW, always show at least first word + ellipsis
+function truncate(ctx, text, maxW) {
+  if (ctx.measureText(text).width <= maxW) return text;
+  let t = text;
+  while (t.length > 2 && ctx.measureText(t + '…').width > maxW)
+    t = t.slice(0, -1);
+  return t + '…';
+}
+
 function buildChart(canvasId, rawData) {
   const canvas = document.getElementById(canvasId);
   const DPR    = window.devicePixelRatio || 1;
   const sorted = [...rawData].sort((a,b) => b.v - a.v);
-  // Assign colours by original sort order so colours are consistent
   const colorMap = {};
   sorted.forEach((d,i) => colorMap[d.n] = COLORS[i % COLORS.length]);
 
   const GAP = 0;
   let rects = [];
+  let hoveredRect = null;
+  let dashOffset = 0;
+  let animFrame  = null;
 
   function resize() {
     const W = canvas.parentElement.clientWidth;
@@ -171,62 +184,84 @@ function buildChart(canvasId, rawData) {
     canvas.height       = H * DPR;
     canvas.style.height = H + 'px';
     rects = squarify(sorted, GAP, GAP, W - GAP*2, H - GAP*2);
-    draw(W, H);
+    draw();
   }
 
-  function draw(W, H) {
-    const ctx = canvas.getContext('2d');
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-
+  function drawTiles(ctx) {
     rects.forEach(r => {
       if (r.w < 1 || r.h < 1) return;
-
-      const pad = GAP / 2;
-      const rx  = r.x + pad, ry = r.y + pad;
-      const rw  = r.w - pad*2, rh = r.h - pad*2;
+      const rx = r.x, ry = r.y, rw = r.w, rh = r.h;
       if (rw < 2 || rh < 2) return;
 
-      // Box
-      const rad = 0;
       ctx.fillStyle = colorMap[r.n];
-      ctx.beginPath();
-      ctx.roundRect(rx, ry, rw, rh, rad);
-      ctx.fill();
+      ctx.fillRect(rx, ry, rw, rh);
 
-      // Skip text if too small
-      if (rw < 36 || rh < 28) return;
+      if (rw < 32 || rh < 22) return;
 
-      const nameSz = Math.min(15, Math.max(10, rw / 8));
-      const valSz  = Math.min(13, Math.max(9,  rw / 9));
-      const gap    = 4;
-      const totalH = nameSz + gap + valSz;
-      const midX   = rx + rw / 2;
-      const midY   = ry + rh / 2;
-      const nameY  = midY - totalH/2 + nameSz/2;
-      const valY   = nameY + nameSz/2 + gap + valSz/2;
-      const maxW   = rw - 10;
+      const gap  = 4;
+      const totalTextH = FIXED_NAME_SZ + gap + FIXED_VAL_SZ;
+      const midX = rx + rw / 2;
+      const midY = ry + rh / 2;
+      const nameY = midY - totalTextH/2 + FIXED_NAME_SZ/2;
+      const valY  = nameY + FIXED_NAME_SZ/2 + gap + FIXED_VAL_SZ/2;
+      const maxW  = rw - 12;
 
       ctx.textAlign    = 'center';
       ctx.textBaseline = 'middle';
 
-      // Company name
-      ctx.font      = `bold ${nameSz}px 'Segoe UI',sans-serif`;
-      ctx.fillStyle = '#ffffff';
-      let name = r.n;
-      while (ctx.measureText(name).width > maxW && name.length > 4)
-        name = name.slice(0,-2) + '…';
-      ctx.fillText(name, midX, nameY);
+      const col = colorMap[r.n];
 
-      // Value (only if enough height)
-      if (rh > 46) {
-        ctx.font      = `${valSz}px 'Segoe UI',sans-serif`;
-        ctx.fillStyle = 'rgba(255,255,255,0.88)';
-        let val = '₹' + fmt(r.v) + ' Cr';
-        while (ctx.measureText(val).width > maxW && val.length > 4)
-          val = val.slice(0,-2) + '…';
-        ctx.fillText(val, midX, valY);
+      // Name
+      ctx.font      = `bold ${FIXED_NAME_SZ}px 'Archivo',sans-serif`;
+      ctx.fillStyle = textCol(col);
+      ctx.fillText(truncate(ctx, r.n, maxW), midX, nameY);
+
+      // Value
+      if (rh > 40) {
+        ctx.font      = `${FIXED_VAL_SZ}px 'Archivo',sans-serif`;
+        ctx.fillStyle = textColV(col);
+        ctx.fillText(truncate(ctx, '₹' + fmt(r.v) + ' Cr', maxW), midX, valY);
       }
     });
+  }
+
+  function drawHoverOutline(ctx, r, offset) {
+    if (!r) return;
+    const rx = r.x + 1, ry = r.y + 1, rw = r.w - 2, rh = r.h - 2;
+    const perimeter = 2 * (rw + rh);
+    const dashLen = 10, gapLen = 6;
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+    ctx.lineWidth   = 2;
+    ctx.setLineDash([dashLen, gapLen]);
+    ctx.lineDashOffset = -offset;
+    ctx.strokeRect(rx, ry, rw, rh);
+    ctx.restore();
+  }
+
+  function draw() {
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.clearRect(0, 0, canvas.width / DPR, canvas.height / DPR);
+    drawTiles(ctx);
+    if (hoveredRect) drawHoverOutline(ctx, hoveredRect, dashOffset);
+  }
+
+  function startAnim() {
+    if (animFrame) return;
+    function loop() {
+      dashOffset = (dashOffset + 0.5) % 32;
+      draw();
+      animFrame = requestAnimationFrame(loop);
+    }
+    animFrame = requestAnimationFrame(loop);
+  }
+
+  function stopAnim() {
+    if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+    hoveredRect = null;
+    draw();
   }
 
   // Tooltip
@@ -237,6 +272,10 @@ function buildChart(canvasId, rawData) {
     const my = (e.clientY - b.top);
     const hit = rects.find(r => mx>=r.x && mx<=r.x+r.w && my>=r.y && my<=r.y+r.h);
     if (hit) {
+      if (hoveredRect !== hit) {
+        hoveredRect = hit;
+        if (!animFrame) startAnim();
+      }
       tip.style.display = 'block';
       tip.innerHTML = `<b>${hit.n}</b><br>₹${fmt(hit.v)} Cr`;
       const tw = tip.offsetWidth, th = tip.offsetHeight;
@@ -248,10 +287,14 @@ function buildChart(canvasId, rawData) {
       tip.style.left = lx + 'px';
       tip.style.top  = ly + 'px';
     } else {
+      stopAnim();
       tip.style.display = 'none';
     }
   });
-  canvas.addEventListener('mouseleave', () => tip.style.display = 'none');
+  canvas.addEventListener('mouseleave', () => {
+    stopAnim();
+    tip.style.display = 'none';
+  });
 
   resize();
   window.addEventListener('resize', resize);

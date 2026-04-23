@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual No-Cost EMI Simulator</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --bg: #f8fafc;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: #1e293b; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+
+        /* Interactive Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .product-card {
+            background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 15px;
+            text-align: center; cursor: pointer; transition: all 0.2s; position: relative;
+        }
+        .product-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .product-card.active { border-color: var(--primary); background: #eff6ff; ring: 2px solid var(--primary); }
+        .product-card span { display: block; font-size: 0.8rem; color: #64748b; margin-top: 5px; }
+
+        /* Main Display */
+        .dashboard { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .flex-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+
+        /* Stats Visuals */
+        .stat-box { flex: 1; min-width: 200px; padding: 20px; border-radius: 12px; margin: 10px; text-align: center; position: relative; }
+        .stat-box.customer { background: #f0fdf4; border: 1px solid #bbf7d0; }
+        .stat-box.retailer { background: #fef2f2; border: 1px solid #fecaca; }
+        .stat-val { font-size: 1.5rem; font-weight: 800; display: block; }
+
+        /* Hover Tooltip Labels */
+        .info-tag { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; font-weight: bold; }
+
+        /* The "Money Gap" Visual */
+        .gap-visual {
+            height: 12px; background: #e2e8f0; border-radius: 6px; margin: 20px 10px; overflow: hidden; display: flex;
+        }
+        .gap-fill-retailer { background: var(--success); height: 100%; transition: width 0.5s; }
+        .gap-fill-interest { background: var(--danger); height: 100%; transition: width 0.5s; }
+
+        .big-warning {
+            background: #7f1d1d; color: white; padding: 20px; border-radius: 12px; margin-top: 20px;
+            text-align: center; display: none; animation: shake 0.5s;
+        }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header style="text-align: center; margin-bottom: 40px;">
+        <h1>The "No-Cost" Illusion</h1>
+        <p>Select an appliance to see the hidden transaction mechanics.</p>
+    </header>
+
+    <div class="grid">
+        <div class="product-card active" onclick="selectItem(this, 30000, 'Smartphone')">
+            📱 <strong>Smartphone</strong>
+            <span>₹30,000</span>
+        </div>
+        <div class="product-card" onclick="selectItem(this, 60000, 'Laptop')">
+            💻 <strong>Laptop</strong>
+            <span>₹60,000</span>
+        </div>
+        <div class="product-card" onclick="selectItem(this, 45000, 'Smart TV')">
+            📺 <strong>Smart TV</strong>
+            <span>₹45,000</span>
+        </div>
+        <div class="product-card" onclick="selectItem(this, 20000, 'Fridge')">
+            🧊 <strong>Fridge</strong>
+            <span>₹20,000</span>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <div class="flex-row">
+            <div>
+                <label class="info-tag">Choose Tenure</label>
+                <select id="tenure" onchange="updateUI()" style="padding: 8px; border-radius: 6px; font-size: 1rem;">
+                    <option value="3">3 Months</option>
+                    <option value="6" selected>6 Months</option>
+                    <option value="12">12 Months</option>
+                </select>
+            </div>
+            <div style="text-align: right;">
+                <span class="info-tag">Processing Fee</span>
+                <div style="font-weight: bold; color: var(--danger);">₹400 (Upfront)</div>
+            </div>
+        </div>
+
+        <div class="flex-row">
+            <div class="stat-box customer" title="What you pay every month">
+                <span class="info-tag">Monthly Payment</span>
+                <span id="monthly-emi" class="stat-val">₹0</span>
+            </div>
+            <div class="stat-box retailer" title="What the retailer loses to the financier">
+                <span class="info-tag">Retailer's Loss</span>
+                <span id="retailer-loss" class="stat-val" style="color: var(--danger);">₹0</span>
+            </div>
+        </div>
+
+        <label class="info-tag" style="margin-left: 10px;">The Revenue Split</label>
+        <div class="gap-visual">
+            <div id="bar-retailer" class="gap-fill-retailer" style="width: 85%;"></div>
+            <div id="bar-interest" class="gap-fill-interest" style="width: 15%;"></div>
+        </div>
+
+        <div id="warning" class="big-warning">
+            ⚠️ <strong>REVEALED:</strong> The retailer is paying <span id="loss-amt"></span> to the financier just to make this sale possible.
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentPrice = 30000;
+
+    function selectItem(el, price, name) {
+        document.querySelectorAll('.product-card').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        currentPrice = price;
+        updateUI();
+    }
+
+    function updateUI() {
+        const tenure = parseInt(document.getElementById('tenure').value);
+        const annualRate = 0.16; // Standard financier interest rate
+
+        // Calculation
+        const totalInterest = Math.round(currentPrice * (annualRate / 12) * tenure);
+        const emi = Math.round(currentPrice / tenure);
+        const retailerRevenue = currentPrice - totalInterest;
+        const lossPercent = (totalInterest / currentPrice) * 100;
+
+        // UI Updates
+        document.getElementById('monthly-emi').innerText = "₹" + emi.toLocaleString();
+        document.getElementById('retailer-loss').innerText = "₹" + totalInterest.toLocaleString();
+        document.getElementById('loss-amt').innerText = "₹" + totalInterest.toLocaleString();
+
+        // Bars
+        document.getElementById('bar-retailer').style.width = (100 - lossPercent) + "%";
+        document.getElementById('bar-interest').style.width = lossPercent + "%";
+
+        // Show warning if loss is significant
+        const warning = document.getElementById('warning');
+        warning.style.display = totalInterest > 2000 ? "block" : "none";
+    }
+
+    updateUI();
+</script>
+
+</body>
+</html>
