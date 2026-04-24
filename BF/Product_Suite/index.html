@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bajaj Finance · Product Suite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap');
+
+  :root {
+    --ink:    #0B1220;
+    --navy:   #0A2A5E;
+    --blue:   #0A5FAE;
+    --sky:    #E6F0F9;
+    --ivory:  #FBF9F2;
+    --line:   rgba(11,18,32,0.09);
+    --line-s: rgba(11,18,32,0.18);
+    --fg:     #0B1220;
+    --fg-m:   rgba(11,18,32,0.62);
+    --fg-s:   rgba(11,18,32,0.42);
+    --fg-f:   rgba(11,18,32,0.26);
+    --sans:   'Outfit', sans-serif;
+    --serif:  'DM Serif Display', serif;
+    --mono:   'DM Mono', monospace;
+    --ease:   cubic-bezier(0.22,1,0.36,1);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--ivory);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 13px;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  .shell { display: flex; flex-direction: column; min-height: 100vh; max-width: 860px; margin: 0 auto; }
+
+  /* TOP STRIP */
+  .strip {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px; height: 52px;
+    border-bottom: 1px solid var(--line-s);
+    background: var(--ivory);
+    position: sticky; top: 0; z-index: 50;
+    gap: 16px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .mark {
+    width: 30px; height: 30px; background: var(--ink);
+    display: grid; place-items: center;
+    font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--ivory);
+  }
+  .wm  { font-weight: 700; font-size: 11.5px; letter-spacing: .13em; text-transform: uppercase; color: var(--ink); line-height: 1.1; }
+  .wm span { color: var(--blue); }
+  .wm-sub { font-size: 9px; font-weight: 600; letter-spacing: .10em; text-transform: uppercase; color: var(--fg-s); }
+  .meta {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    font-size: 10px; font-weight: 600; letter-spacing: .10em; text-transform: uppercase; color: var(--fg-m);
+  }
+  .meta .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--fg-f); flex-shrink: 0; }
+  .live-dot {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: #1CA45C; box-shadow: 0 0 0 3px rgba(28,164,92,0.18);
+    margin-right: 5px; vertical-align: middle;
+  }
+  .expand-btn {
+    border: 1px solid var(--line-s); background: transparent;
+    color: var(--ink); font-family: var(--sans); font-weight: 700;
+    font-size: 9.5px; letter-spacing: .11em; text-transform: uppercase;
+    padding: 6px 12px; cursor: pointer;
+    transition: background 140ms, color 140ms;
+    white-space: nowrap;
+  }
+  .expand-btn:hover { background: var(--ink); color: var(--ivory); }
+
+  /* CONTENT */
+  .content { flex: 1; padding: 14px 20px 28px; display: flex; flex-direction: column; gap: 8px; }
+
+  /* BAND */
+  .band { border: 1px solid var(--line-s); background: #fff; position: relative; overflow: hidden; }
+  .band::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--acc); }
+
+  /* BAND HEADER */
+  .band-head {
+    display: grid; grid-template-columns: 56px 1fr auto;
+    align-items: center; gap: 0;
+    padding: 15px 18px 15px 22px;
+    cursor: pointer; user-select: none;
+    transition: background 140ms;
+  }
+  .band-head:hover { background: var(--sky); }
+  .band.open .band-head { border-bottom: 1px solid var(--line); }
+
+  .band-short {
+    font-family: var(--serif); font-style: italic; font-size: 14px;
+    color: var(--acc); line-height: 1;
+  }
+  .band-name {
+    font-family: var(--serif); font-size: 22px; letter-spacing: -.02em;
+    color: var(--ink); line-height: 1.1;
+  }
+  .band-hint {
+    font-size: 9px; font-weight: 700; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--fg-s); margin-top: 4px;
+  }
+  .band-tog {
+    width: 32px; height: 32px; border: 1px solid var(--line-s);
+    display: grid; place-items: center;
+    font-size: 22px; font-weight: 300; line-height: 1;
+    color: var(--ink); cursor: pointer; flex-shrink: 0;
+    transition: background 140ms, border-color 140ms, color 140ms;
+  }
+  .band.open .band-tog { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
+  .band-tog .ico { display: block; transition: transform 260ms var(--ease); }
+  .band.open .band-tog .ico { transform: rotate(45deg); }
+
+  /* BAND BODY */
+  .band-body { display: none; padding: 14px 18px 18px 22px; }
+  .band.open .band-body { display: block; animation: bodyIn 220ms var(--ease) both; }
+  @keyframes bodyIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+
+  /* COLUMN GRID */
+  .cols { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  .cols-3  { grid-template-columns: repeat(3, minmax(0,1fr)); }
+  .cols-2x { grid-template-columns: 1.2fr 1fr; }
+  .cols-2  { grid-template-columns: repeat(2, minmax(0,1fr)); }
+
+  .col { background: #fff; padding: 12px 14px; min-width: 0; overflow: hidden; }
+  .col-swatch { height: 2px; background: var(--sw); margin: -12px -14px 10px; }
+  .col-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+    padding-bottom: 7px; margin-bottom: 8px; border-bottom: 1px solid var(--line);
+  }
+  .col-title {
+    font-weight: 700; font-size: 12.5px; color: var(--ink); line-height: 1.3;
+    min-width: 0;
+  }
+  .col-count {
+    font-family: var(--serif); font-size: 18px; letter-spacing: -.02em;
+    color: var(--acc); line-height: 1; flex-shrink: 0;
+  }
+
+  /* PRODUCT LIST */
+  .plist { list-style: none; }
+  .plist li {
+    display: grid; grid-template-columns: 20px 1fr; gap: 5px;
+    align-items: baseline; padding: 3.5px 2px;
+    font-size: 12px; line-height: 1.4; color: var(--fg);
+    cursor: default; min-width: 0;
+    transition: color 140ms, background 140ms;
+  }
+  .plist li:hover { color: var(--blue); background: linear-gradient(to right, var(--sky), transparent 75%); }
+  .plist .n { font-family: var(--mono); font-size: 8.5px; color: var(--fg-f); padding-top: 2px; flex-shrink: 0; }
+  .plist li:hover .n { color: var(--blue); }
+  .plist .t { font-weight: 500; min-width: 0; }
+
+  /* Wide col: 2-col list for 10+ products */
+  .col.wide .plist {
+    display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; align-content: start;
+  }
+  @media (max-width: 520px) {
+    .col.wide .plist { grid-template-columns: 1fr; }
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--line-s); padding: 11px 20px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+    font-size: 9.5px; font-weight: 600; letter-spacing: .10em; text-transform: uppercase; color: var(--fg-s);
+  }
+  .legend { display: flex; gap: 14px; align-items: center; }
+  .sw-item { display: flex; align-items: center; gap: 6px; }
+  .sw-box  { width: 10px; height: 10px; display: inline-block; flex-shrink: 0; }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .cols-3 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .band-head { padding: 13px 14px 13px 18px; }
+    .band-name { font-size: 18px; }
+  }
+  @media (max-width: 420px) {
+    .cols-3, .cols-2, .cols-2x { grid-template-columns: 1fr; }
+    .strip { flex-wrap: wrap; height: auto; padding: 10px 14px; }
+    .content { padding: 10px 14px 20px; }
+    .band-short { display: none; }
+    .band-head { grid-template-columns: 1fr auto; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="strip">
+    <div class="brand">
+      <div class="mark">B</div>
+      <div>
+        <div class="wm">Bajaj <span>Finance</span></div>
+        <div class="wm-sub">Product Suite</div>
+      </div>
+    </div>
+    <div class="meta">
+      <span><span class="live-dot"></span>FY26 · Live</span>
+      <span class="dot"></span>
+      <span>3 Entities</span>
+      <span class="dot"></span>
+      <span id="cat-count"></span>
+      <span class="dot"></span>
+      <span id="prod-count"></span>
+      <button class="expand-btn" id="expand-btn">Expand All</button>
+    </div>
+  </header>
+
+  <div class="content" id="content"></div>
+
+  <footer>
+    <div class="legend">
+      <span class="sw-item"><span class="sw-box" style="background:#0A2A5E"></span>BFL</span>
+      <span class="sw-item"><span class="sw-box" style="background:#0A5FAE"></span>BHFL</span>
+      <span class="sw-item"><span class="sw-box" style="background:#0B1220"></span>BFSL</span>
+    </div>
+    <div>Hover any product for its one-line description</div>
+    <div>Bajaj Finance Group · FY26</div>
+  </footer>
+</div>
+
+<script>
+const DATA = [
+  {
+    id:'bfl', short:'BFL', acc:'#0A2A5E', open:false, cols:'cols-3',
+    name:'Bajaj Finance Limited', note:'Parent NBFC-UL',
+    categories:[
+      { name:'Consumer', sw:'#0A5FAE', products:[
+        {n:'Consumer Durable Loans',      d:'No-cost EMI financing for appliances, TVs and large electronics at partner stores.'},
+        {n:'Digital Product Loans',       d:'EMI credit for phones, laptops and wearables — online and in-store.'},
+        {n:'Lifestyle Product Loans',     d:'Instant EMIs for furniture, fitness equipment and premium lifestyle goods.'},
+        {n:'Lifecare Financing',          d:'Elective medical procedures and healthcare bills spread over flexible tenures.'},
+        {n:'EMI Card',                    d:'Pre-approved Insta EMI card with a ready limit, usable across 1.5L+ stores.'},
+        {n:'Retail Spend Financing',      d:'Point-of-sale credit at select retail and e-commerce checkouts.'},
+        {n:'2W and 3W Financing',         d:'Two- and three-wheeler loans — BFL\'s founding lending line.'},
+        {n:'Personal Loan Cross-Sell',    d:'Pre-approved top-up offers for existing high-intent customers.'},
+        {n:'Salaried Personal Loans',     d:'Unsecured loans for salaried professionals up to ₹40 lakh.'},
+        {n:'E-Commerce Financing',        d:'Checkout EMIs on Amazon, Flipkart and 100+ online merchants.'},
+        {n:'Retailer Finance',            d:'Short-tenor working-capital credit for retail store partners.'},
+        {n:'Solar Financing',             d:'Rooftop-solar loans for homes and small businesses.'},
+      ]},
+      { name:'MSME', sw:'#0A2A5E', products:[
+        {n:'Unsecured Working Capital Loans',          d:'Collateral-free cash-flow credit, up to ₹80 lakh in 48 hours.'},
+        {n:'Loans to Self-Employed & Professionals',   d:'Tailored loans for doctors, CAs and consultants.'},
+        {n:'Business Loans Secured',                   d:'Higher-ticket business loans backed by collateral.'},
+        {n:'Used-Car Financing',                       d:'Loans against pre-owned vehicles for business use.'},
+        {n:'Medical Equipment',                        d:'Finance for diagnostic and clinical equipment purchases.'},
+        {n:'Loan Against Property',                    d:'Multi-purpose credit secured on residential or commercial property.'},
+        {n:'New Car Financing',                        d:'Retail car loans with up to 100% on-road funding.'},
+        {n:'Commercial Vehicle',                       d:'Loans for trucks, buses and last-mile commercial vehicles.'},
+        {n:'Auto Leasing',                             d:'Operating-lease solutions for corporate fleets.'},
+        {n:'Industrial Equipment Financing',           d:'Term loans for manufacturing and industrial plant.'},
+      ]},
+      { name:'Commercial', sw:'#0B1220', products:[
+        {n:'Loan Against Securities',     d:'Liquidity against listed shares, bonds and mutual-fund units.'},
+        {n:'IPO Financing',               d:'Short-tenor funding for HNI IPO applications.'},
+        {n:'Large Corporate Lending',     d:'Structured debt for top-tier corporate borrowers.'},
+        {n:'Mid-Corporate Lending',       d:'Term loans and working capital for mid-market companies.'},
+        {n:'Emerging Corporate Lending',  d:'Growth-stage credit for emerging businesses and new-economy firms.'},
+      ]},
+      { name:'Rural', sw:'#2A6B4D', products:[
+        {n:'Consumer Durable Loans',            d:'EMI finance for appliances and electronics in semi-urban India.'},
+        {n:'Digital Product Loans',             d:'Phone and laptop EMIs for rural and small-town buyers.'},
+        {n:'Lifestyle Product Loans',           d:'Lifestyle EMIs delivered through a rural dealer network.'},
+        {n:'Personal Loans Cross-Sell Salaried',d:'Top-up personal loans for existing rural salaried customers.'},
+        {n:'Personal Loans',                    d:'Unsecured personal loans sized for rural incomes.'},
+        {n:'Gold Loans',                        d:'Loans against gold jewellery with same-day disbursal.'},
+        {n:'Loans to Professionals',            d:'Credit for rural doctors, teachers and self-employed professionals.'},
+        {n:'Microfinance',                      d:'Small-ticket group loans for income-generating activities.'},
+        {n:'Tractor Finance',                   d:'Loans for new and used tractors and farm equipment.'},
+        {n:'Affordable Mortgage',               d:'Low-ticket home loans for first-time rural homeowners.'},
+      ]},
+      { name:'Deposits', sw:'#2B7BC4', products:[
+        {n:'Retail Term Deposits',   d:'Fixed deposits from ₹15,000 with monthly and cumulative options.'},
+        {n:'Corporate Term Deposits',d:'Treasury-grade deposits for companies and trusts.'},
+      ]},
+      { name:'Payments', sw:'#4A7FB5', products:[
+        {n:'Card Issuance',          d:'Card issuance and PPI programmes under Bajaj Pay.'},
+        {n:'PPI',                    d:'Prepaid payment instruments — Bajaj Pay Wallet and gift cards.'},
+        {n:'UPI',                    d:'Bajaj Pay UPI for instant peer-to-peer and merchant payments.'},
+        {n:'BBPS',                   d:'One-tap bill payments across utilities via the BBPS network.'},
+        {n:'FASTag',                 d:'Prepaid FASTag for automatic toll payments — 1M+ cards distributed.'},
+        {n:'Bajaj Prime Acquiring',  d:'Merchant acquiring for online and offline businesses.'},
+        {n:'Merchant QR',            d:'Dynamic QR acceptance for offline merchants.'},
+        {n:'EDC Machine',            d:'Card-accepting EDC terminals for retail checkouts.'},
+      ]},
+      { name:'Partnership & Services', sw:'#6A8FB5', products:[
+        {n:'Life Insurance Distribution',    d:'Term, ULIP and savings plans in partnership with Bajaj Allianz Life.'},
+        {n:'General Insurance Distribution', d:'Motor, home and travel policies via Bajaj Allianz General.'},
+        {n:'Health Insurance Distribution',  d:'Family and senior health cover with network-hospital support.'},
+        {n:'Pocket Insurance',               d:'Micro-cover for phones, appliances and lifestyle risks.'},
+        {n:'Financial Pulse Report',         d:'Subscription credit-health report for BFL customers.'},
+      ]},
+    ]
+  },
+  {
+    id:'bhfl', short:'BHFL', acc:'#0A5FAE', open:false, cols:'cols-2x',
+    name:'Bajaj Housing Finance Limited', note:'Listed HFC',
+    categories:[
+      { name:'Retail Mortgages', sw:'#0A5FAE', products:[
+        {n:'Salaried Home Loans',                    d:'Prime home loans for salaried professionals with flexible tenures.'},
+        {n:'Salaried Loan Against Property',         d:'LAP for salaried borrowers — large-ticket, long-tenor.'},
+        {n:'Near Prime & Affordable Housing Finance',d:'Home loans for first-time and near-prime buyers.'},
+        {n:'Loan Against Property',                  d:'Multi-purpose LAP against residential or commercial property.'},
+        {n:'Self Employed Home Loans',               d:'Home loans underwritten on self-employed cash flows.'},
+        {n:'Lease Rental Discounting',               d:'Credit against future lease rentals from commercial property.'},
+      ]},
+      { name:'Wholesale Mortgages', sw:'#0A2A5E', products:[
+        {n:'Developer Finance',                   d:'Construction finance to RERA-registered residential developers.'},
+        {n:'Commercial Construction Finance',     d:'Project loans for office, retail and mixed-use developments.'},
+        {n:'Corporate Lease Rental Discounting',  d:'LRD for institutional landlords and REIT-grade assets.'},
+      ]},
+    ]
+  },
+  {
+    id:'bfsl', short:'BFSL', acc:'#0B1220', open:false, cols:'cols-2',
+    name:'Bajaj Financial Securities Limited', note:'Broking subsidiary',
+    categories:[
+      { name:'Broking & Trading', sw:'#0B1220', products:[
+        {n:'Trading Account',          d:'Equity and derivatives trading via the Bajaj Broking platform.'},
+        {n:'Depository Services',      d:'CDSL demat accounts with e-DIS and paperless transfers.'},
+        {n:'Margin Trading Financing', d:'Leverage to hold positions beyond available margin.'},
+        {n:'HNI Broking',              d:'Dedicated dealing desk for high-net-worth clients.'},
+        {n:'Retail Broking',           d:'Flat-fee broking for retail investors across segments.'},
+        {n:'IPOs and OFS',             d:'Apply to primary issues and offer-for-sale windows.'},
+      ]},
+      { name:'Wealth & Advisory', sw:'#2B7BC4', products:[
+        {n:'Distribution of Mutual Funds',d:'Curated MF schemes with SIP, STP and goal-based planning.'},
+        {n:'Distribution of PMS',         d:'Access to SEBI-registered PMS strategies for ₹50L+ portfolios.'},
+        {n:'Proprietary Trading',         d:'In-house desk managing firm-capital market positions.'},
+        {n:'ESOP Financing',              d:'Funding to exercise employee stock options at vesting.'},
+      ]},
+    ]
+  },
+];
+
+/* ── Totals ── */
+const totalCats  = DATA.reduce((a,e)=>a+e.categories.length, 0);
+const totalProds = DATA.reduce((a,e)=>a+e.categories.reduce((b,c)=>b+c.products.length,0), 0);
+document.getElementById('cat-count').textContent  = totalCats + ' Categories';
+document.getElementById('prod-count').textContent = totalProds + ' Products';
+
+/* ── Render ── */
+const content = document.getElementById('content');
+
+DATA.forEach(entity => {
+  const band = document.createElement('div');
+  band.className = 'band' + (entity.open ? ' open' : '');
+  band.dataset.id = entity.id;
+  band.style.setProperty('--acc', entity.acc);
+
+  const catCount = entity.categories.length;
+
+  /* Header */
+  const head = document.createElement('div');
+  head.className = 'band-head';
+  head.innerHTML =
+    `<div class="band-short">${entity.short}</div>` +
+    `<div>` +
+      `<div class="band-name">${entity.name}</div>` +
+      `<div class="band-hint">Click to ${entity.open?'collapse':'expand'} · ${catCount} categor${catCount===1?'y':'ies'}</div>` +
+    `</div>` +
+    `<div class="band-tog"><span class="ico">+</span></div>`;
+
+  head.addEventListener('click', () => {
+    const isOpen = band.classList.toggle('open');
+    head.querySelector('.band-hint').textContent =
+      `Click to ${isOpen?'collapse':'expand'} · ${catCount} categor${catCount===1?'y':'ies'}`;
+  });
+
+  /* Body */
+  const body = document.createElement('div');
+  body.className = 'band-body';
+
+  const cols = document.createElement('div');
+  cols.className = 'cols ' + entity.cols;
+
+  entity.categories.forEach(cat => {
+    const wide = cat.products.length >= 10;
+    const col  = document.createElement('div');
+    col.className = 'col' + (wide ? ' wide' : '');
+    col.style.setProperty('--sw', cat.sw);
+
+    const items = cat.products.map((p,i) =>
+      `<li title="${p.d}">` +
+        `<span class="n">${String(i+1).padStart(2,'0')}</span>` +
+        `<span class="t">${p.n}</span>` +
+      `</li>`
+    ).join('');
+
+    col.innerHTML =
+      `<div class="col-swatch"></div>` +
+      `<div class="col-head">` +
+        `<div class="col-title">${cat.name}</div>` +
+        `<div class="col-count">${String(cat.products.length).padStart(2,'0')}</div>` +
+      `</div>` +
+      `<ul class="plist">${items}</ul>`;
+
+    cols.appendChild(col);
+  });
+
+  body.appendChild(cols);
+  band.appendChild(head);
+  band.appendChild(body);
+  content.appendChild(band);
+});
+
+/* ── Expand All ── */
+let allOpen = false;
+document.getElementById('expand-btn').addEventListener('click', function() {
+  allOpen = !allOpen;
+  this.textContent = allOpen ? 'Collapse All' : 'Expand All';
+  document.querySelectorAll('.band').forEach(band => {
+    band.classList.toggle('open', allOpen);
+    const entity = DATA.find(e => e.id === band.dataset.id);
+    if (!entity) return;
+    const n = entity.categories.length;
+    band.querySelector('.band-hint').textContent =
+      `Click to ${allOpen?'collapse':'expand'} · ${n} categor${n===1?'y':'ies'}`;
+  });
+});
+</script>
+</body>
+</html>
