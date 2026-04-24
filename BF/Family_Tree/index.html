@@ -2,108 +2,112 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Bajaj Dynasty: Fixed Lineage</title>
+    <title>Bajaj Dynasty - Final Version</title>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
-        body { background-color: #fcfaf7; margin: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #fcfaf7; margin: 0; font-family: sans-serif; overflow: hidden; }
         #main { width: 100vw; height: 100vh; }
-        .info { position: absolute; top: 20px; left: 20px; border-left: 4px solid #b08d57; padding-left: 15px; }
-        h1 { margin: 0; color: #2c3e50; font-size: 1.5rem; }
-        p { color: #666; margin: 5px 0; }
+        .header { position: absolute; top: 20px; left: 20px; z-index: 10; border-left: 4px solid #e6a817; padding-left: 15px; }
+        h1 { margin: 0; color: #2c3e50; font-size: 1.4rem; }
     </style>
 </head>
 <body>
 
-<div class="info">
+<div class="header">
     <h1>The Bajaj Dynasty</h1>
-    <p>Blue = Male Lineage | Pink = Spouses</p>
+    <p>Curved Text & Image Placeholders</p>
 </div>
-
 <div id="main"></div>
 
 <script type="text/javascript">
     var chartDom = document.getElementById('main');
     var myChart = echarts.init(chartDom);
 
-    // Data structured for a clean Tree View
-    const data = {
-        name: "Jamnalal & Janaki Devi",
+    // Using a reliable external URL for the placeholder icon
+    const imgPlaceholder = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+
+    const data = [{
+        name: 'Jamnalal &\nJanaki Devi',
+        itemStyle: { color: '#b08d57' },
         children: [
             {
-                name: "Kamalnayan & Savitri",
+                name: 'Ramkrishna',
+                itemStyle: { color: '#1d9e75' },
+                children: [
+                    { name: 'Shekhar', value: 1, itemStyle: { color: '#378add' } },
+                    { name: 'Madhur', value: 1, itemStyle: { color: '#378add' } },
+                    { name: 'Niraj', value: 1, itemStyle: { color: '#378add' } }
+                ]
+            },
+            {
+                name: 'Kamalnayan',
                 itemStyle: { color: '#d85a30' },
                 children: [
                     {
-                        name: "Rahul & Rupa",
-                        itemStyle: { color: '#f28e2b' },
+                        name: 'Rahul',
+                        itemStyle: { color: '#f39c12' },
                         children: [
-                            { name: "Rajiv & Sanjivani" },
-                            { name: "Sanjiv & Shefali" },
-                            { name: "Sunaina" }
+                            { name: 'Rajiv', value: 1, itemStyle: { color: '#e57373' } },
+                            { name: 'Sanjiv', value: 1, itemStyle: { color: '#e57373' } },
+                            { name: 'Sunaina', value: 1, itemStyle: { color: '#e57373' } }
                         ]
                     },
-                    { name: "Shishir & Minakshi" },
-                    { name: "Suman" }
-                ]
-            },
-            {
-                name: "Ramkrishna & Vimla",
-                itemStyle: { color: '#1d9e75' },
-                children: [
-                    { name: "Shekhar & Kiran" },
-                    { name: "Madhur & Kumud" },
-                    { name: "Niraj & Minal" }
+                    {
+                        name: 'Shishir',
+                        itemStyle: { color: '#f39c12' },
+                        children: [
+                            { name: 'Kushagra', value: 1, itemStyle: { color: '#ffbe76' } },
+                            { name: 'Apoorva', value: 1, itemStyle: { color: '#ffbe76' } }
+                        ]
+                    }
                 ]
             }
         ]
-    };
+    }];
 
-    myChart.setOption({
-        tooltip: { trigger: 'item', triggerOn: 'mousemove' },
-        series: [{
-            type: 'tree',
-            data: [data],
-            top: '10%',
-            left: '15%',
-            bottom: '10%',
-            right: '20%',
-            symbolSize: 10,
-            initialTreeDepth: 3,
+    var option = {
+        series: {
+            type: 'sunburst',
+            data: data,
+            radius: [0, '95%'],
+            sort: undefined,
+            levels: [
+                {},
+                { r0: '0%', r: '18%', label: { rotate: 0, fontSize: 12, color: '#333' } }, // Founders
+                { r0: '18%', r: '45%' }, // 2nd Gen
+                { r0: '45%', r: '72%' }, // 3rd Gen
+                { r0: '72%', r: '95%' }  // 4th Gen
+            ],
             label: {
-                position: 'left',
-                verticalAlign: 'middle',
-                align: 'right',
-                fontSize: 12,
-                backgroundColor: '#fff',
-                padding: [5, 10],
-                borderRadius: 4,
-                shadowColor: 'rgba(0,0,0,0.1)',
-                shadowBlur: 5,
-                // Custom formatting to show the "Half-tab" effect visually
-                formatter: function(params) {
-                    let parts = params.name.split(' & ');
-                    if (parts.length > 1) {
-                        return '{man|' + parts[0] + '}  {woman|' + parts[1] + '}';
-                    }
-                    return '{man|' + params.name + '}';
-                },
+                show: true,
+                // 'tangential' makes the text follow the curve of the circle
+                rotate: 'tangential',
+                formatter: '{img|}\n{name|{b}}',
                 rich: {
-                    man: { color: '#2980b9', fontWeight: 'bold' },
-                    woman: { color: '#e67e22', fontSize: 11 }
+                    img: {
+                        backgroundColor: { image: imgPlaceholder },
+                        height: 30,
+                        width: 30,
+                        borderRadius: 15,
+                        align: 'center'
+                    },
+                    name: {
+                        color: '#fff',
+                        fontSize: 11,
+                        align: 'center',
+                        padding: [5, 0, 0, 0]
+                    }
                 }
             },
-            leaves: {
-                label: { position: 'right', align: 'left' }
-            },
-            emphasis: { focus: 'descendant' },
-            expandAndCollapse: true,
-            animationDuration: 550,
-            animationDurationUpdate: 750
-        }]
-    });
+            itemStyle: {
+                borderWidth: 2,
+                borderColor: '#fff'
+            }
+        }
+    };
 
-    window.onresize = myChart.resize;
+    myChart.setOption(option);
+    window.addEventListener('resize', () => myChart.resize());
 </script>
-
 </body>
 </html>
