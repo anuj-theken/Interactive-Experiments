@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bajaj Auto vs Bajaj Hindustan Dashboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink:       #0D1117;
+      --navy:      #0F2A5C;
+      --blue:      #0057B8;
+      --sky:       #A8C8E8;
+      --sage:      #C2D9C2;
+      --silver:    #C0C4CC;
+      --cream:     #FAFAF2;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      background-color: var(--cream);
+      color: var(--ink);
+      font-family: 'Playfair Display', serif;
+      overflow-x: hidden;
+    }
+
+    .dashboard-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 24px 24px;
+      width: 100%;
+    }
+
+    header {
+      width: 95%;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-left { display: flex; flex-direction: column; }
+
+    h1 {
+      font-size: 44px;
+      letter-spacing: 0.3px;
+      margin: 0;
+      color: var(--ink);
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .instruction {
+      font-size: 0.68rem;
+      color: var(--silver);
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .html-legend {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding-top: 8px;
+      flex-shrink: 0;
+    }
+
+    .html-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .legend-line {
+      width: 24px;
+      height: 2px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .legend-dash {
+      width: 24px;
+      height: 0;
+      border-top: 2px dashed;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    #chart-container {
+      width: 100%;
+      height: 72vh;
+      min-height: 420px;
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 22px; }
+      #chart-container { height: 60vh; }
+      header { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<div class="dashboard-wrapper">
+  <header>
+    <div class="header-left">
+      <h1>Bajaj Auto vs Bajaj Hindustan</h1>
+      <p class="instruction">Hover over the chart to explore key milestones</p>
+    </div>
+    <div class="html-legend">
+      <div class="html-legend-item">
+        <span class="legend-line" style="background:#0057B8;"></span>
+        Bajaj Auto
+      </div>
+      <div class="html-legend-item">
+        <span class="legend-line" style="background:#0F2A5C;"></span>
+        Bajaj Hindustan
+      </div>
+      <div class="html-legend-item">
+        <span class="legend-dash" style="border-color:#C2D9C2;"></span>
+        Nifty 50
+      </div>
+    </div>
+  </header>
+  <div id="chart-container"></div>
+</div>
+
+<script>
+  const chartDom = document.getElementById('chart-container');
+  const myChart = echarts.init(chartDom, null, { renderer: 'canvas' });
+
+  const years = ['2007','2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+
+  const bajajAutoData = [100,40.25,148.17,211.26,271.52,343.72,322.42,405.54,397.10,480.44,565.85,433.15,539.21,679.23,604.42,647.42,1300.11,1500.24,1627.36];
+  // Corrected 2008 value from 271 to 30.3 for consistency
+  const bajajHindustanData = [100,30.34,106.55,43.16,18.26,12.32,6.45,10,8.84,7.58,7.52,4.23,3.34,3.46,8.84,7.87,16.32,14.59,18.65];
+  const nifty50Data = [100,55.96,95.03,107.17,101.20,117.47,118.53,171.46,147.22,166.64,214.65,210.82,232.84,265.40,337.52,343.79,422.89,457.59,492.86];
+
+  const eventData = [
+    { coord: ['2008', 40.25], value: '1', series: 0, desc: '2008: Global financial crisis. Bajaj Auto hit hard as markets crash ~60% from 2007 peaks.' },
+    { coord: ['2009', 106.55], value: '2', series: 1, desc: '2009: Post-crisis recovery begins. Bajaj Auto rebounds strongly while Bajaj Hindustan struggles with sugar sector headwinds.' },
+    { coord: ['2014', 405.54], value: '3', series: 0, desc: '2014: Modi government election. Market optimism fuels strong rally in Bajaj Auto.' },
+    { coord: ['2023', 1300.11], value: '4', series: 0, desc: '2023: Bajaj Auto surpasses 13× its 2007 value, driven by EV push and strong two-wheeler demand.' },
+    { coord: ['2013', 6.45], value: '5', series: 1, desc: '2013: Bajaj Hindustan at lowest — sugar sector under severe regulatory and margin pressure.' }
+  ];
+
+  const option = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'axis',
+      confine: true,
+      backgroundColor: '#FAFAF2',
+      borderColor: '#C0C4CC',
+      textStyle: { fontSize: 12, color: '#0D1117', fontFamily: "'Playfair Display', serif" },
+      formatter: function (params) {
+        const yearLabel = params[0].name;
+        const marker = eventData.find(e => e.coord[0] === yearLabel);
+        let res = `<div style="font-weight:700; margin-bottom:6px;">${yearLabel}</div>`;
+        params.forEach(item => {
+          res += `<div style="margin-bottom:3px;">${item.marker} ${item.seriesName}: <strong>${parseFloat(item.value).toFixed(1)}</strong></div>`;
+        });
+        if (marker) {
+          res += `<div style="margin-top:10px; color:#0057B8; white-space:normal; max-width:220px; line-height:1.5; font-size:11px; border-top:1px solid #C0C4CC; padding-top:8px;">${marker.desc}</div>`;
+        }
+        return res;
+      }
+    },
+    grid: { top: '12%', left: '3%', right: '3%', bottom: '8%', containLabel: true },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: years,
+      axisLabel: { color: '#0D1117', fontFamily: "'Playfair Display', serif" },
+      axisLine: { lineStyle: { color: '#C0C4CC' } }
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: { color: '#0D1117', fontFamily: "'Playfair Display', serif" },
+      splitLine: { lineStyle: { color: 'rgba(192,196,204,0.3)' } }
+    },
+    series: [
+      {
+        name: 'Bajaj Auto',
+        type: 'line',
+        data: bajajAutoData,
+        smooth: true,
+        lineStyle: { color: '#0057B8', width: 2.5 },
+        itemStyle: { color: '#0057B8' },
+        markPoint: {
+          symbol: 'circle', symbolSize: 16,
+          data: eventData.filter(e => e.series === 0).map(e => ({ name: e.value, coord: e.coord, label: { show: true, formatter: e.value, color: '#FFF', fontSize: 9, fontWeight: 'bold' } })),
+          itemStyle: { color: '#0D1117' }
+        }
+      },
+      {
+        name: 'Bajaj Hindustan',
+        type: 'line',
+        data: bajajHindustanData,
+        smooth: true,
+        lineStyle: { color: '#0F2A5C', width: 2.5 },
+        itemStyle: { color: '#0F2A5C' },
+        markPoint: {
+          symbol: 'circle', symbolSize: 16,
+          data: eventData.filter(e => e.series === 1).map(e => ({ name: e.value, coord: e.coord, label: { show: true, formatter: e.value, color: '#FFF', fontSize: 9, fontWeight: 'bold' } })),
+          itemStyle: { color: '#0D1117' }
+        }
+      },
+      {
+        name: 'Nifty 50',
+        type: 'line',
+        data: nifty50Data,
+        smooth: true,
+        symbol: 'none',
+        lineStyle: { type: 'dashed', color: '#C2D9C2', width: 2 }
+      }
+    ]
+  };
+
+  myChart.setOption(option);
+  window.addEventListener('resize', () => myChart.resize());
+</script>
+</body>
+</html>
