@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bajaj Finance Precise Scale</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        body { margin: 0; background-color: #0b0b0b; color: white; font-family: sans-serif; overflow-x: hidden; }
+
+        /* 1200vh makes every millimeter of scrolling count for less movement */
+        .scroll-height { height: 1200vh; }
+
+        .scene {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+        }
+
+        .circle-layer {
+            position: absolute;
+            width: 300px; height: 300px;
+            background-color: #00549d;
+            border-radius: 50%;
+            opacity: 1;
+            z-index: 1;
+            /* Force GPU acceleration for smoother scaling */
+            will-change: transform;
+        }
+
+        .text-container {
+            position: absolute;
+            z-index: 2;
+            width: 85%;
+            max-width: 850px;
+            text-align: center;
+            display: grid;
+            place-items: center;
+        }
+
+        .text-step {
+            grid-area: 1 / 1 / 2 / 2;
+            font-size: 2.2rem;
+            line-height: 1.4;
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scroll-height"></div>
+
+    <div class="scene">
+        <div class="circle-layer" id="bgCircle"></div>
+        <div class="text-container">
+            <div class="text-step" id="t1">Bajaj Finance’s AUM has gone from Rs 2,500 crore in 2008...</div>
+            <div class="text-step" id="t2">to Rs 5 lakh crore now. That’s 200X in 18 years. It has 115 million customers.</div>
+            <div class="text-step" id="t3">By 2030, it wants to take that figure to 200–220 million.</div>
+        </div>
+    </div>
+
+<script>
+    window.addEventListener('load', () => {
+        gsap.registerPlugin(ScrollTrigger);
+
+        const circle = document.querySelector('#bgCircle');
+
+        const master = gsap.timeline({
+            scrollTrigger: {
+                trigger: ".scroll-height",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 1.5,
+            }
+        });
+
+        // 1. THE CIRCLE GROWTH
+        // 'power4.in' is the key here.
+        // It stays small for a long time and only "accelerates" its size at the end.
+        master.to(circle, {
+            scale: 80,
+            duration: 40,
+            ease: "power4.in"
+        }, 0);
+
+        // 2. THE FADE OUT
+        // We push this to the very last segment of the timeline
+        master.to(circle, {
+            opacity: 0.05,
+            duration: 15,
+        }, 25);
+
+        // 3. TEXT OVERLAYS
+        // Evenly spaced out so you have time to read each one
+        gsap.set("#t1", { opacity: 1 }); // Start with first text visible
+
+        // Fade T1 out
+        master.to("#t1", { opacity: 0, duration: 2 }, 9);
+
+        // Fade T2 in and out
+        master.to("#t2", { opacity: 1, duration: 1 }, 12)
+              .to("#t2", { opacity: 0, duration: 1 }, 17);
+
+        // Fade T3 in
+        master.to("#t3", { opacity: 1, duration: 1 }, 19);
+    });
+</script>
+</body>
+</html>
