@@ -63,7 +63,6 @@ body {
   position: absolute;
   z-index: 2;
   border-radius: 3px;
-  cursor: pointer;
 }
 
 /* ─── SPREAD IMAGE ─── */
@@ -75,49 +74,11 @@ body {
   opacity: 0;
 }
 
-/* The actual img tag inside — hidden until uploaded */
 .spread-img img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.spread-img img.loaded { opacity: 1; }
-
-/* Upload placeholder shown before image is provided */
-.img-upload-placeholder {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background: #e0d8ce;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.img-upload-placeholder:hover { background: #d4ccc2; }
-.img-upload-placeholder svg { opacity: 0.35; }
-.img-upload-placeholder span {
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  opacity: 0.4;
-  font-weight: 500;
-}
-/* hide placeholder once image loaded */
-.spread-img.has-image .img-upload-placeholder { display: none; }
-
-/* hidden file input */
-.img-file-input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-  z-index: 2;
 }
 
 /* ─── SPREAD TITLE ─── */
@@ -151,45 +112,7 @@ body {
   line-height: 1;
 }
 
-/* scroll hint */
-#scroll-hint {
-  position: fixed;
-  bottom: 2.2rem; left: 50%;
-  transform: translateX(-50%);
-  display: flex; flex-direction: column; align-items: center; gap: 0.45rem;
-  z-index: 30; pointer-events: none;
-}
-#scroll-hint span { font-size: 0.58rem; letter-spacing: 0.28em; text-transform: uppercase; color: #9b8f82; }
-#scroll-hint .line { width: 1px; height: 30px; background: var(--accent); animation: breathe 1.7s ease-in-out infinite; }
 @keyframes breathe { 0%,100%{opacity:.15;transform:scaleY(.45)} 50%{opacity:1;transform:scaleY(1)} }
-
-/* progress */
-#progress {
-  position: fixed; right: 1.8rem; top: 50%;
-  transform: translateY(-50%);
-  display: flex; flex-direction: column; gap: 0.55rem; z-index: 30;
-}
-.pdot { width: 4px; height: 4px; border-radius: 50%; background: #9b8f82; opacity: 0.3; transition: all 0.35s; }
-.pdot.on { background: var(--accent); opacity: 1; height: 16px; border-radius: 3px; }
-
-/* upload panel — visible before scroll starts */
-#upload-panel {
-  position: fixed;
-  top: 1.5rem; left: 50%;
-  transform: translateX(-50%);
-  z-index: 20;
-  background: rgba(242,237,230,0.92);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(24,20,16,0.1);
-  border-radius: 6px;
-  padding: 0.6rem 1rem;
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #9b8f82;
-  pointer-events: none;
-  white-space: nowrap;
-}
 </style>
 </head>
 <body>
@@ -207,12 +130,7 @@ body {
     style="width:14vw;height:19vh;top:8vh;left:3vw;background:#b8ccd8;"></div>
 
   <div class="spread-img" data-cat="1" style="width:16vw;height:22vh;top:5vh;left:2vw;">
-    <div class="img-upload-placeholder">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#181410" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-      <span>Consumer</span>
-    </div>
-    <img src="" alt="Consumer" data-img="1" />
-    <input type="file" class="img-file-input" accept="image/*" data-target="1" />
+    <img src="default.png" alt="Consumer" />
   </div>
 
   <div class="spread-title" data-cat="1" style="top:29vh;left:2vw;">
@@ -232,12 +150,7 @@ body {
     style="width:14vw;height:19vh;top:8vh;right:3vw;background:#c9d4bc;"></div>
 
   <div class="spread-img" data-cat="2" style="width:16vw;height:22vh;top:5vh;right:2vw;">
-    <div class="img-upload-placeholder">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#181410" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-      <span>Commercial</span>
-    </div>
-    <img src="" alt="Commercial" data-img="2" />
-    <input type="file" class="img-file-input" accept="image/*" data-target="2" />
+    <img src="default.png" alt="Commercial" />
   </div>
 
   <div class="spread-title" data-cat="2" style="top:29vh;right:2vw;text-align:right;">
@@ -255,12 +168,7 @@ body {
     style="width:14vw;height:19vh;bottom:27vh;left:3vw;background:#d4bec5;"></div>
 
   <div class="spread-img" data-cat="3" style="width:16vw;height:22vh;bottom:24vh;left:2vw;">
-    <div class="img-upload-placeholder">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#181410" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-      <span>Mortgages</span>
-    </div>
-    <img src="" alt="Mortgages" data-img="3" />
-    <input type="file" class="img-file-input" accept="image/*" data-target="3" />
+    <img src="default.png" alt="Mortgages" />
   </div>
 
   <div class="spread-title" data-cat="3" style="bottom:48vh;left:2vw;">
@@ -277,12 +185,7 @@ body {
     style="width:14vw;height:19vh;bottom:27vh;right:3vw;background:#c2c5d4;"></div>
 
   <div class="spread-img" data-cat="4" style="width:16vw;height:22vh;bottom:24vh;right:2vw;">
-    <div class="img-upload-placeholder">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#181410" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-      <span>SME Lending</span>
-    </div>
-    <img src="" alt="SME Lending" data-img="4" />
-    <input type="file" class="img-file-input" accept="image/*" data-target="4" />
+    <img src="default.png" alt="SME Lending" />
   </div>
 
   <div class="spread-title" data-cat="4" style="bottom:48vh;right:2vw;text-align:right;">
@@ -299,12 +202,7 @@ body {
     style="width:16vw;height:14vh;bottom:4vh;left:42vw;background:#d4ccb8;"></div>
 
   <div class="spread-img" data-cat="5" style="width:18vw;height:18vh;bottom:2vh;left:41vw;">
-    <div class="img-upload-placeholder">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#181410" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-      <span>Payments</span>
-    </div>
-    <img src="" alt="Payments" data-img="5" />
-    <input type="file" class="img-file-input" accept="image/*" data-target="5" />
+    <img src="default.png" alt="Payments" />
   </div>
 
   <div class="spread-title" data-cat="5" style="bottom:22vh;left:42vw;">
@@ -322,12 +220,7 @@ body {
     style="width:13vw;height:14vh;top:6vh;left:44vw;background:#bdd4cf;"></div>
 
   <div class="spread-img" data-cat="6" style="width:15vw;height:19vh;top:4vh;left:43vw;">
-    <div class="img-upload-placeholder">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#181410" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-      <span>Rural</span>
-    </div>
-    <img src="" alt="Rural Lending" data-img="6" />
-    <input type="file" class="img-file-input" accept="image/*" data-target="6" />
+    <img src="default.png" alt="Rural Lending" />
   </div>
 
   <div class="spread-title" data-cat="6" style="top:25vh;left:43vw;">
@@ -342,70 +235,14 @@ body {
 </div>
 </div>
 
-<div id="upload-panel">Click any box to upload an image</div>
 
-<div id="scroll-hint">
-  <span>Scroll</span>
-  <div class="line"></div>
-</div>
-
-<div id="progress">
-  <div class="pdot on"  data-i="0"></div>
-  <div class="pdot" data-i="1"></div>
-  <div class="pdot" data-i="2"></div>
-  <div class="pdot" data-i="3"></div>
-  <div class="pdot" data-i="4"></div>
-  <div class="pdot" data-i="5"></div>
-  <div class="pdot" data-i="6"></div>
-</div>
 
 <script>
 gsap.registerPlugin(ScrollTrigger);
 
-// ── Image upload handling ──
-document.querySelectorAll('.img-file-input').forEach(input => {
-  input.addEventListener('change', function() {
-    const cat = this.dataset.target;
-    const file = this.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const imgEl = document.querySelector(`.spread-img[data-cat="${cat}"] img`);
-      const wrapper = document.querySelector(`.spread-img[data-cat="${cat}"]`);
-      const box = document.querySelector(`.box-placeholder[data-cat="${cat}"]`);
-      imgEl.src = e.target.result;
-      imgEl.onload = () => {
-        imgEl.classList.add('loaded');
-        wrapper.classList.add('has-image');
-        // also update the inactive box to show a dim version of the image
-        box.style.backgroundImage = `url(${e.target.result})`;
-        box.style.backgroundSize = 'cover';
-        box.style.backgroundPosition = 'center';
-        box.style.filter = 'saturate(0.4) brightness(0.9)';
-      };
-    };
-    reader.readAsDataURL(file);
-  });
-});
-
-// clicking box triggers its file input
-document.querySelectorAll('.box-placeholder').forEach(box => {
-  box.addEventListener('click', () => {
-    const cat = box.dataset.cat;
-    document.querySelector(`.img-file-input[data-target="${cat}"]`).click();
-  });
-});
-
-// hide upload hint after first scroll
-window.addEventListener('scroll', () => {
-  document.getElementById('upload-panel').style.opacity = '0';
-}, { once: true });
-
 // ── GSAP scroll logic ──
 const TOTAL = 6;
 const wrapper = document.getElementById('scene-wrapper');
-const scrollHint = document.getElementById('scroll-hint');
-const dots = document.querySelectorAll('.pdot');
 let lastActive = -1;
 
 function els(cat) {
@@ -452,10 +289,6 @@ function toPast(cat) {
   gsap.to([...e.items], { opacity: 0,    duration: 0.3 });
 }
 
-function updateDots(active) {
-  dots.forEach((d, i) => d.classList.toggle('on', i === active + 1));
-}
-
 ScrollTrigger.create({
   trigger: wrapper,
   start: 'top top',
@@ -473,8 +306,6 @@ ScrollTrigger.create({
       else if (idx === newActive) toActive(i);
       else                        toInactive(i);
     }
-    updateDots(newActive);
-    gsap.to(scrollHint, { opacity: p > 0.04 ? 0 : 1, duration: 0.4 });
   }
 });
 

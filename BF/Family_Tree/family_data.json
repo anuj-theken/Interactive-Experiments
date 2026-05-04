@@ -1,0 +1,27 @@
+const members = {
+    'Bachhraj Bajaj\n(Patriarch)': {
+        children: 'Jamnalal Bajaj', date: 'c. 1890',
+        img1: 'Bachhraj Bajaj.jpg'
+    },
+    'Jamnalal &\nJanaki Devi': {
+        parents: 'Bachhraj Bajaj', children: 'Kamalnayan, Ramkrishna', date: 'c. 1920',
+        img1: 'Jamnalal Bajaj.jpg',
+        img2: 'Janakidevi Bajaj.jpg'
+    },
+    'Ramkrishna &\nSavitriben': {
+        parents: 'Jamnalal & Janaki Devi', siblings: 'Kamalnayan', children: 'Shekhar, Madhur, Niraj', date: 'c. 1950',
+        img1: 'Ramakrishna Bajaj.jpg',
+    },
+    'Kamalnayan &\nRupaben': {
+        parents: 'Jamnalal & Janaki Devi', siblings: 'Ramkrishna', children: 'Rahul, Shishir', date: 'c. 1945',
+        img1: 'Kamalnayan Bajaj portrait.jpg',
+    },
+    'Shekhar Bajaj': { parents: 'Ramkrishna & Savitriben', siblings: 'Madhur, Niraj', date: 'c. 1975', img1: 'Shekhar Bajaj.jpg' },
+    'Madhur Bajaj': { parents: 'Ramkrishna & Savitriben', siblings: 'Shekhar, Niraj', date: 'c. 1978', img1: 'Madhur Bajaj.jpg' },
+    'Niraj Bajaj': { parents: 'Ramkrishna & Savitriben', siblings: 'Shekhar, Madhur', date: 'c. 1980', img1: 'niraj-bajaj.png' },
+    'Rahul Bajaj\n(Late Chairman)': { parents: 'Kamalnayan & Rupaben', siblings: 'Shishir', children: 'Rajiv, Sanjiv, Sunaina', date: 'c. 1983', img1: 'Rahul Bajaj.jpg' },
+    'Shishir Bajaj': { parents: 'Kamalnayan & Rupaben', siblings: 'Rahul', date: 'c. 1985', img1: 'Shishir Bajaj.jpg' },
+    'Rajiv Bajaj': { parents: 'Rahul Bajaj', siblings: 'Sanjiv, Sunaina', date: 'c. 2005', img1: 'Rajiv Bajaj.jpg' },
+    'Sanjiv Bajaj': { parents: 'Rahul Bajaj', siblings: 'Rajiv, Sunaina', date: 'c. 2008', img1: 'Sanjiv Bajaj.jpg' },
+    'Sunaina Kejriwal': { parents: 'Rahul Bajaj', siblings: 'Rajiv, Sanjiv', date: 'c. 2010', img1: 'https://via.placeholder.com/300x400/e5e0d5/777?text=Sunaina' }
+};

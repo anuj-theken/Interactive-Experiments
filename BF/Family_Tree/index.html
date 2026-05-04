@@ -2,112 +2,277 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Bajaj Dynasty - Final Version</title>
+    <title>Bajaj Family Tree</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
-        body { background-color: #fcfaf7; margin: 0; font-family: sans-serif; overflow: hidden; }
-        #main { width: 100vw; height: 100vh; }
-        .header { position: absolute; top: 20px; left: 20px; z-index: 10; border-left: 4px solid #e6a817; padding-left: 15px; }
-        h1 { margin: 0; color: #2c3e50; font-size: 1.4rem; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #f0ebe0;
+            --text-dark: #1c1c1c;
+            --text-mid:  #555;
+            --border:    rgba(0,0,0,0.07);
+            --img-bg:    #e5e0d5;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: 'DM Sans', sans-serif;
+            display: grid;
+            min-height: 100vh;
+            grid-template-columns: 1fr;
+            grid-template-areas: "header" "viz" "details";
+            align-content: start;
+        }
+
+        @media (min-width: 801px) {
+            body {
+                grid-template-columns: 44% 1fr;
+                grid-template-rows: auto 1fr;
+                grid-template-areas: "header viz" "details viz";
+                height: 100vh;
+                overflow: hidden;
+            }
+            #panel-header, #panel-details { border-right: 1px solid var(--border); }
+        }
+
+        #panel-header { grid-area: header; padding: 40px 40px 10px 40px; }
+        #viz { grid-area: viz; width: 100%; height: 450px; min-height: 350px; }
+
+        /* Using flex-grow and flex-direction to push footer to bottom */
+        #panel-details {
+            grid-area: details;
+            padding: 0 40px 40px 40px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        @media (min-width: 801px) {
+            #viz { height: 100%; }
+            #panel-header { padding: 48px 52px 48px 52px; }
+            #panel-details { padding: 0 52px 44px 52px; }
+        }
+
+        .panel-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            line-height: 1.0;
+            color: var(--text-dark);
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+        }
+
+        .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.65rem; color: var(--text-mid);  letter-spacing: 0.5px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        #active-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            color: var(--text-dark);
+            margin-bottom: 14px;
+            min-height: 2.2rem;
+        }
+
+        #img-container {
+            display: flex; gap: 10px; width: 100%; height: 280px; margin-bottom: 20px; flex-shrink: 0;
+        }
+
+        .img-slot {
+            flex: 1; height: 100%; background: var(--img-bg); border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .member-img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+        .info-rows { display: flex; flex-direction: column; gap: 8px; min-height: 100px; }
+        .info-row {
+            display: flex; align-items: baseline; font-size: 0.85rem;
+            border-bottom: 1px solid rgba(0,0,0,0.03); padding-bottom: 4px;
+        }
+
+        .lbl { font-weight: 500; margin-right: 6px;  font-size: 0.75rem; color: var(--text-dark); }
+        .val { font-weight: 400;  }
+
+        .date-right { margin-left: auto; color: var(--text-mid); font-size: 0.75rem; font-style: italic; }
+
+        /* Footer styling */
+        .panel-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            font-size: 0.7rem;
+            color: var(--text-mid);
+
+            letter-spacing: 0.05rem;
+            opacity: 0.7;
+        }
+
+        #chart { width: 100%; height: 100%; }
+        .hidden { visibility: hidden; pointer-events: none; }
+        .nodisp { display: none; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>The Bajaj Dynasty</h1>
-    <p>Curved Text & Image Placeholders</p>
-</div>
-<div id="main"></div>
+    <div id="panel-header">
+        <div class="panel-title">Bajaj Family Tree</div>
+        <div class="legend">
+            <div class="legend-item"><span class="dot" style="background:#b08d57"></span> 1st Generation</div>
+            <div class="legend-item"><span class="dot" style="background:#c5a367"></span> 2nd Generation</div>
+            <div class="legend-item"><span class="dot" style="background:#4a7c5f"></span> 3rd Generation</div>
+            <div class="legend-item"><span class="dot" style="background:#c45e45"></span> 4th Generation</div>
+            <div class="legend-item"><span class="dot" style="background:#e8a98c"></span> 5th Generation</div>
+        </div>
+    </div>
 
-<script type="text/javascript">
-    var chartDom = document.getElementById('main');
-    var myChart = echarts.init(chartDom);
+    <div id="viz"><div id="chart"></div></div>
 
-    // Using a reliable external URL for the placeholder icon
-    const imgPlaceholder = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+    <div id="panel-details">
+        <div id="active-name">Hover over the tree</div>
 
-    const data = [{
-        name: 'Jamnalal &\nJanaki Devi',
-        itemStyle: { color: '#b08d57' },
+        <div id="img-container">
+            <div class="img-slot" id="slot-1"><img id="img1" class="member-img" src="" alt=""></div>
+            <div class="img-slot nodisp" id="slot-2"><img id="img2" class="member-img" src="" alt=""></div>
+        </div>
+
+        <div class="info-rows" id="info-container">
+            <div class="info-row hidden" id="row-children">
+                <span class="lbl">Children</span>
+                <span class="val" id="val-children"></span>
+                <!-- <span class="date-right hidden" id="date-val"></span> -->
+            </div>
+            <div class="info-row hidden" id="row-siblings">
+                <span class="lbl">Siblings</span>
+                <span class="val" id="val-siblings"></span>
+            </div>
+            <div class="info-row hidden" id="row-parents">
+                <span class="lbl">Parents</span>
+                <span class="val" id="val-parents"></span>
+            </div>
+        </div>
+
+        <div class="panel-footer">
+            Hover over the circle to discover the Bajaj legacy.
+        </div>
+    </div>
+
+<script>
+const P = { g1: '#b08d57', g2: '#c5a367', g3d: '#4a7c5f', g3l: '#76a88d', g4d: '#c45e45', g4l: '#d4826a', g5: '#e8a98c' };
+
+const members = {
+    'Bachhraj Bajaj\n(Patriarch)': {
+        color: P.g1, children: 'Jamnalal Bajaj', date: 'c. 1890',
+        img1: 'Bachhraj Bajaj.jpg'
+    },
+    'Jamnalal &\nJanaki Devi': {
+        color: P.g2, parents: 'Bachhraj Bajaj', children: 'Kamalnayan, Ramkrishna', date: 'c. 1920',
+        img1: 'Jamnalal Bajaj.jpg',
+        img2: 'Janakidevi Bajaj.jpg'
+    },
+    'Ramkrishna &\nSavitriben': {
+        color: P.g3d, parents: 'Jamnalal & Janaki Devi', siblings: 'Kamalnayan', children: 'Shekhar, Madhur, Niraj', date: 'c. 1950',
+        img1: 'Ramakrishna Bajaj.jpg',
+    },
+    'Kamalnayan &\nRupaben': {
+        color: P.g4d, parents: 'Jamnalal & Janaki Devi', siblings: 'Ramkrishna', children: 'Rahul, Shishir', date: 'c. 1945',
+        img1: 'Kamalnayan Bajaj portrait.jpg',
+    },
+    'Shekhar Bajaj': { color: P.g3l, parents: 'Ramkrishna & Savitriben', siblings: 'Madhur, Niraj', date: 'c. 1975', img1: 'Shekhar Bajaj.jpg' },
+    'Madhur Bajaj': { color: P.g3l, parents: 'Ramkrishna & Savitriben', siblings: 'Shekhar, Niraj', date: 'c. 1978', img1: 'Madhur Bajaj.jpg' },
+    'Niraj Bajaj': { color: P.g3l, parents: 'Ramkrishna & Savitriben', siblings: 'Shekhar, Madhur', date: 'c. 1980', img1: 'niraj-bajaj.png' },
+    'Rahul Bajaj\n(Late Chairman)': { color: P.g4l, parents: 'Kamalnayan & Rupaben', siblings: 'Shishir', children: 'Rajiv, Sanjiv, Sunaina', date: 'c. 1983', img1: 'Rahul Bajaj.jpg' },
+    'Shishir Bajaj': { color: P.g4l, parents: 'Kamalnayan & Rupaben', siblings: 'Rahul', date: 'c. 1985', img1: 'Shishir Bajaj.jpg' },
+    'Rajiv Bajaj': { color: P.g5, parents: 'Rahul Bajaj', siblings: 'Sanjiv, Sunaina', date: 'c. 2005', img1: 'Rajiv Bajaj.jpg' },
+    'Sanjiv Bajaj': { color: P.g5, parents: 'Rahul Bajaj', siblings: 'Rajiv, Sanjiv', date: 'c. 2008', img1: 'Sanjiv Bajaj.jpg' },
+    'Sunaina Kejriwal': { color: P.g5, parents: 'Rahul Bajaj', siblings: 'Rajiv, Sanjiv', date: 'c. 2010', img1: 'Sunaina_Kejriwal.jpg' }
+};
+
+
+const treeData = [{
+    name: 'Bachhraj Bajaj\n(Patriarch)', itemStyle: { color: P.g1 },
+    children: [{
+        name: 'Jamnalal &\nJanaki Devi', itemStyle: { color: P.g2 },
         children: [
-            {
-                name: 'Ramkrishna',
-                itemStyle: { color: '#1d9e75' },
-                children: [
-                    { name: 'Shekhar', value: 1, itemStyle: { color: '#378add' } },
-                    { name: 'Madhur', value: 1, itemStyle: { color: '#378add' } },
-                    { name: 'Niraj', value: 1, itemStyle: { color: '#378add' } }
-                ]
-            },
-            {
-                name: 'Kamalnayan',
-                itemStyle: { color: '#d85a30' },
-                children: [
-                    {
-                        name: 'Rahul',
-                        itemStyle: { color: '#f39c12' },
-                        children: [
-                            { name: 'Rajiv', value: 1, itemStyle: { color: '#e57373' } },
-                            { name: 'Sanjiv', value: 1, itemStyle: { color: '#e57373' } },
-                            { name: 'Sunaina', value: 1, itemStyle: { color: '#e57373' } }
-                        ]
-                    },
-                    {
-                        name: 'Shishir',
-                        itemStyle: { color: '#f39c12' },
-                        children: [
-                            { name: 'Kushagra', value: 1, itemStyle: { color: '#ffbe76' } },
-                            { name: 'Apoorva', value: 1, itemStyle: { color: '#ffbe76' } }
-                        ]
-                    }
-                ]
-            }
+            { name: 'Ramkrishna &\nSavitriben', itemStyle: { color: P.g3d }, children: [
+                { name: 'Shekhar Bajaj', value: 1, itemStyle: { color: P.g3l } },
+                { name: 'Madhur Bajaj', value: 1, itemStyle: { color: P.g3l } },
+                { name: 'Niraj Bajaj', value: 1, itemStyle: { color: P.g3l } }
+            ]},
+            { name: 'Kamalnayan &\nRupaben', itemStyle: { color: P.g4d }, children: [
+                { name: 'Rahul Bajaj\n(Late Chairman)', itemStyle: { color: P.g4l }, children: [
+                    { name: 'Rajiv Bajaj', value: 1, itemStyle: { color: P.g5 } },
+                    { name: 'Sanjiv Bajaj', value: 1, itemStyle: { color: P.g5 } },
+                    { name: 'Sunaina Kejriwal', value: 1, itemStyle: { color: P.g5 } }
+                ]},
+                { name: 'Shishir Bajaj', value: 1, itemStyle: { color: P.g4l } }
+            ]}
         ]
-    }];
+    }]
+}];
 
-    var option = {
-        series: {
-            type: 'sunburst',
-            data: data,
-            radius: [0, '95%'],
-            sort: undefined,
-            levels: [
-                {},
-                { r0: '0%', r: '18%', label: { rotate: 0, fontSize: 12, color: '#333' } }, // Founders
-                { r0: '18%', r: '45%' }, // 2nd Gen
-                { r0: '45%', r: '72%' }, // 3rd Gen
-                { r0: '72%', r: '95%' }  // 4th Gen
-            ],
-            label: {
-                show: true,
-                // 'tangential' makes the text follow the curve of the circle
-                rotate: 'tangential',
-                formatter: '{img|}\n{name|{b}}',
-                rich: {
-                    img: {
-                        backgroundColor: { image: imgPlaceholder },
-                        height: 30,
-                        width: 30,
-                        borderRadius: 15,
-                        align: 'center'
-                    },
-                    name: {
-                        color: '#fff',
-                        fontSize: 11,
-                        align: 'center',
-                        padding: [5, 0, 0, 0]
-                    }
-                }
-            },
-            itemStyle: {
-                borderWidth: 2,
-                borderColor: '#fff'
+const chart = echarts.init(document.getElementById('chart'));
+chart.setOption({
+    series: {
+        type: 'sunburst',
+        data: treeData,
+        radius: ['0%', '95%'],
+        emphasis: { focus: 'ancestor' },
+        nodeClick: false,
+        levels: [{}, { r0: '0%', r: '20%' }, { r0: '20%', r: '40%' }, { r0: '40%', r: '60%' }, { r0: '60%', r: '80%' }, { r0: '80%', r: '95%' }],
+        label: { rotate: 'tangential', fontSize: 9, fontFamily: 'DM Sans', color: '#2a2a2a' },
+        itemStyle: { borderWidth: 2, borderColor: '#f0ebe0' }
+    }
+});
+
+const nameEl = document.getElementById('active-name'),
+      img1 = document.getElementById('img1'),
+      img2 = document.getElementById('img2'),
+      slot2 = document.getElementById('slot-2');
+
+const rows = { children: document.getElementById('row-children'), siblings: document.getElementById('row-siblings'), parents: document.getElementById('row-parents') };
+const vals = { children: document.getElementById('val-children'), siblings: document.getElementById('val-siblings'), parents: document.getElementById('val-parents'), date: document.getElementById('date-val') };
+
+function updateUI(name) {
+    const info = members[name];
+    if (!info) return;
+
+    const activeColor = info.color || '#1c1c1c';
+
+    nameEl.textContent = name.replace(/\n/g, ' ');
+
+    img1.src = info.img1;
+    if (info.img2) {
+        img2.src = info.img2;
+        slot2.classList.remove('nodisp');
+    } else {
+        slot2.classList.add('nodisp');
+    }
+
+    Object.keys(rows).forEach(key => {
+        const row = rows[key];
+        const valSpan = vals[key];
+
+        if (info[key]) {
+            valSpan.textContent = info[key];
+            row.classList.remove('hidden');
+            valSpan.style.color = activeColor;
+
+            if (key === 'children') {
+                vals.date.textContent = info.date || '';
+                vals.date.classList.toggle('hidden', !info.date);
             }
+        } else {
+            row.classList.add('hidden');
         }
-    };
+    });
+}
 
-    myChart.setOption(option);
-    window.addEventListener('resize', () => myChart.resize());
+chart.on('mouseover', (p) => updateUI(p.name));
+window.addEventListener("resize", () => chart.resize());
+setTimeout(() => updateUI('Bachhraj Bajaj\n(Patriarch)'), 300);
 </script>
 </body>
 </html>

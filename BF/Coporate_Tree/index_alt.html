@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bajaj Group Blueprint | Mobile Optimized</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        :root {
+            --bg-paper: #fdfaf5;
+            --navy: #1a1f4d;
+            --c-holdings: #1a1f4d;
+            --c-auto: #556b2f;
+            --c-finserv: #006d5b;
+            --c-finance: #2e7d32;
+            --c-msl: #6a1b9a;
+            --c-minority: #795548;
+            --c-skb: #800000;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg-paper); color: var(--navy); overflow-x: hidden; }
+
+        /* --- UI Overlays --- */
+        .header-overlay {
+            position: fixed; top: 40px; left: 40px; z-index: 50; max-width: 300px;
+        }
+        .header-overlay h1 { font-size: 24px; letter-spacing: -0.5px; border-bottom: 3px solid var(--navy); padding-bottom: 10px; margin-bottom: 10px; }
+        .header-overlay p { font-size: 13px; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; }
+
+        .legend-overlay {
+            position: fixed; top: 40px; right: 40px; z-index: 50; padding: 15px;
+            backdrop-filter: blur(10px); border-radius: 4px;
+            display: grid; grid-template-columns: repeat(3, auto); gap: 10px 25px;
+        }
+
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 11px; white-space: nowrap; }
+        .legend-color { width: 12px; height: 12px; border-radius: 2px; }
+
+        /* --- Main Canvas --- */
+        .viz-viewport {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1; background: var(--bg-paper); overflow: hidden;
+        }
+
+        .chart-container {
+            position: relative; display: flex; flex-direction: column; align-items: center;
+            transform: scale(0.5); transform-origin: center center; width: 3400px;
+        }
+
+        .row { display: flex; justify-content: center; gap: 90px; width: 100%; margin-bottom: 70px; position: relative; z-index: 2; }
+
+        .node { display: flex; flex-direction: column; align-items: center; opacity: 1; transition: all 0.4s ease; }
+        .node.dimmed { opacity: 0.1; transform: scale(0.95); }
+        .node.active { opacity: 1; transform: scale(1.03); }
+
+        .box {
+            background: #fff; border-radius: 2px; padding: 22px; width: 300px;
+            text-align: center; border: 4px solid var(--navy);
+            box-shadow: 6px 6px 0px rgba(0,0,0,0.05);
+        }
+
+        .box strong { display: block; font-size: 16px; margin-bottom: 8px; text-transform: uppercase; }
+        .role { font-size: 16px; font-weight: 400; text-transform: none; color: #333; line-height: 1.2; }
+
+        .holdings { border-color: var(--c-holdings); }
+        .auto { border-color: var(--c-auto); }
+        .finserv { border-color: var(--c-finserv); }
+        .finance { border-color: var(--c-finance); }
+        .msl { border-color: var(--c-msl); }
+        .minority { border-color: var(--c-minority); }
+        .skb { border-color: var(--c-skb); }
+
+        .skb-group-border {
+            position: absolute; border: 5px dashed var(--c-skb); padding: 50px;
+            border-radius: 25px; top: -30px; left: -30px; right: -30px; bottom: -30px;
+            pointer-events: none; z-index: -1; opacity: 1; transition: opacity 0.4s ease;
+        }
+        .skb-group-border.dimmed { opacity: 0.05; }
+
+        .svg-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
+        path { fill: none; stroke: var(--navy); stroke-width: 5; opacity: 1; transition: all 0.4s ease; }
+        path.demerger { stroke-dasharray: 12, 6; }
+        path.dimmed { opacity: 0.2; stroke: #ccc; stroke-width: 3; }
+
+        /* --- Scroll Narrative --- */
+        .scroll-content { width: 100vw; position: relative; z-index: 100; pointer-events: none; padding-left: 6vw; }
+        .step { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; max-width: 450px; }
+        .step:first-child { margin-top: 100vh; }
+        .step:last-child { margin-bottom: 50vh; }
+
+        .step-card {
+            background: rgba(253, 250, 245, 0.98); padding: 30px; border: 2px solid var(--navy);
+            border-radius: 4px; backdrop-filter: blur(15px); pointer-events: auto; box-shadow: 20px 0 60px rgba(0,0,0,0.12);
+        }
+
+        .step-img {
+            width: 100%; height: auto; max-height: 220px; object-fit: contain;
+            border: 1px solid rgba(0,0,0,0.1); margin-bottom: 20px; display: block;
+        }
+        .step-img[src=""], .step-img[src="#"] { display: none; }
+
+        .step-text { font-size: 1.4rem; font-weight: 500; line-height: 1.3; color: var(--navy); }
+        .step-text strong { display: block; margin-bottom: 8px; font-size: 1.1rem; color: #666; text-transform: uppercase; }
+
+        /* --- MOBILE BREAKPOINT --- */
+        @media (max-width: 800px) {
+            .header-overlay { top: 20px; left: 20px; max-width: 220px; }
+            .header-overlay h1 { font-size: 18px; }
+
+            .legend-overlay {
+                top: auto; bottom: 20px; right: 20px; left: 20px;
+                grid-template-columns: repeat(2, 1fr); gap: 8px;
+                background: rgba(253, 250, 245, 0.9); border: 1px solid rgba(26, 31, 77, 0.2);
+            }
+
+            .chart-container {
+                transform: scale(0.25); /* Significant scale down for mobile */
+                width: 3400px;
+                transform-origin: center center;
+            }
+            .box strong
+            {
+              font-size: 24px;
+            }
+            .role
+            {
+              font-size: 20px;
+            }
+
+            .scroll-content { padding-left: 5vw; padding-right: 5vw; }
+            .step { max-width: 100%; }
+            .step-card { padding: 20px; }
+            .step-text { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-overlay">
+    <h1>BAJAJ GROUP</h1>
+    <p>Corporate Evolution & Strategic Hierarchy</p>
+</div>
+
+<div class="legend-overlay">
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-holdings)"></div> Holdings</div>
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-auto)"></div> Auto & Mfg</div>
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-finserv)"></div> Financial Services</div>
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-skb)"></div> SKB Group</div>
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-minority)"></div> Diversified</div>
+</div>
+
+<div class="viz-viewport">
+    <div class="chart-container" id="master-chart">
+        <svg class="svg-canvas" id="svg-layer"></svg>
+
+        <div class="row">
+            <div class="node" id="n-promoters"><div class="box holdings"><strong>Promoter Family Entities</strong><div class="role">Rahul Bajaj Branch</div></div></div>
+        </div>
+
+        <div class="row">
+            <div class="node" id="n-bhil"><div class="box holdings"><strong>Bajaj Holdings (BHIL)</strong><div class="role">Sanjiv Bajaj</div></div></div>
+        </div>
+
+        <div class="row">
+            <div class="node" id="n-auto"><div class="box auto"><strong>Bajaj Auto Ltd</strong><div class="role">Rajiv Bajaj</div></div></div>
+            <div class="node" id="n-finserv"><div class="box finserv"><strong>Bajaj Finserv Ltd</strong><div class="role">Sanjiv Bajaj</div></div></div>
+            <div class="node" id="n-msl"><div class="box msl"><strong>Maharashtra Scooters</strong><div class="role">Corporate Nominees</div></div></div>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="node" id="n-elec"><div class="box minority"><strong>Bajaj Electricals</strong><div class="role">Shekhar Bajaj</div></div></div>
+                <div class="node" id="n-mukand"><div class="box minority"><strong>Mukand Ltd</strong><div class="role">Niraj Bajaj</div></div></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="node" id="n-auto-bv"><div class="box auto"><strong>Auto Intl BV</strong><div class="role">Rajiv Bajaj</div></div></div>
+            <div class="node" id="n-finance"><div class="box finance"><strong>Bajaj Finance Ltd</strong><div class="role">Rajeev Jain</div></div></div>
+            <div style="display: flex; gap: 30px;">
+                <div class="node" id="n-finserv-ins"><div class="box finserv"><strong>Insurance Verticals</strong><div class="role">Sanjiv Bajaj</div></div></div>
+                <div class="node" id="n-finserv-amc"><div class="box finserv"><strong>Finserv AMC</strong><div class="role">Sanjiv Bajaj</div></div></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="node" id="n-bajel"><div class="box minority"><strong>Bajel Projects</strong><div class="role">Shekhar Bajaj</div></div></div>
+                <div class="node" id="n-indef"><div class="box minority"><strong>Hercules Hoists</strong><div class="role">Diversified</div></div></div>
+            </div>
+        </div>
+
+        <div class="row" style="align-items: flex-start;">
+            <div style="display: flex; gap: 30px;">
+                <div class="node" id="n-housing"><div class="box finance"><strong>Housing Finance</strong><div class="role">Rajeev Jain</div></div></div>
+                <div class="node" id="n-securities"><div class="box finance"><strong>Securities</strong><div class="role">Rajeev Jain</div></div></div>
+            </div>
+
+            <div style="position: relative; margin-left: 120px;">
+                <div class="skb-group-border" id="skb-border"></div>
+                <div class="node" id="n-skb-main"><div class="box skb"><strong>SKB Group</strong><div class="role">Kushagra Bajaj</div></div></div>
+                <div class="row" style="margin-top: 60px; gap: 30px;">
+                    <div class="node" id="n-sugar"><div class="box skb"><strong>Hindusthan Sugar</strong><div class="role">Kushagra Bajaj</div></div></div>
+                    <div class="node" id="n-consumer"><div class="box skb"><strong>Consumer Care</strong><div class="role">Kushagra Bajaj</div></div></div>
+                    <div class="node" id="n-energy"><div class="box skb"><strong>Bajaj Energy</strong><div class="role">Kushagra Bajaj</div></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="scroll-content">
+    <div class="step" data-target="all">
+        <div class="step-card">
+            <img src="#" class="step-img" alt="Overview">
+            <div class="step-text">Bajaj Group’s organisation tree in 2007</div>
+        </div>
+    </div>
+
+    <div class="step" data-target="#n-skb-main">
+        <div class="step-card">
+            <img src="Kushagra Bajaj.jpg" class="step-img" alt="Family Split">
+            <div class="step-text"><strong>Kushagra Bajaj</strong> gained control of Asia’s largest sugar company…</div>
+        </div>
+    </div>
+
+    <div class="step" data-target="#n-skb-main, #n-sugar">
+        <div class="step-card">
+            <img src="sugar.png" class="step-img" alt="Sugar Industry">
+            <div class="step-text">… secured a slice of the FMCG industry…</div>
+        </div>
+    </div>
+
+    <div class="step" data-target="#n-skb-main, #n-consumer">
+        <div class="step-card">
+            <img src="energy.png" class="step-img" alt="Consumer Care">
+            <div class="step-text">… helmed one of India’s largest private-sector thermal generation companies…</div>
+        </div>
+    </div>
+
+    <div class="step" data-target="#n-skb-main, #n-energy">
+        <div class="step-card">
+            <img src="power.png" class="step-img" alt="Energy">
+            <div class="step-text">… and controlled critical energy infrastructure.</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    function connect() {
+        const svg = document.getElementById('svg-layer');
+        const chart = document.getElementById('master-chart');
+        const containerRect = chart.getBoundingClientRect();
+
+        // Robust way to get the scale regardless of mobile/desktop
+        const style = window.getComputedStyle(chart);
+        const matrix = new DOMMatrixReadOnly(style.transform);
+        const scale = matrix.a;
+
+        svg.setAttribute('viewBox', `0 0 ${chart.offsetWidth} ${chart.offsetHeight}`);
+        svg.innerHTML = '';
+
+        function getPt(id) {
+            const el = document.querySelector(id + ' > .box');
+            if(!el) return null;
+            const r = el.getBoundingClientRect();
+            // We subtract the bounding box of the scaled container and divide by scale
+            // to get coordinates in the 3400px wide space
+            return {
+                x: (r.left - containerRect.left) / scale + (r.width / scale) / 2,
+                yT: (r.top - containerRect.top) / scale,
+                yB: (r.top - containerRect.top + r.height) / scale
+            };
+        }
+
+        function draw(from, to, isDemerger = false) {
+            const p1 = getPt(from); const p2 = getPt(to);
+            if(!p1 || !p2) return;
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            if(isDemerger) path.classList.add('demerger');
+            const midY = p1.yB + 35;
+            path.setAttribute('d', `M ${p1.x} ${p1.yB} L ${p1.x} ${midY} L ${p2.x} ${midY} L ${p2.x} ${p2.yT}`);
+            path.setAttribute('data-from', from);
+            path.setAttribute('data-to', to);
+            svg.appendChild(path);
+        }
+
+        draw('#n-promoters', '#n-bhil');
+        draw('#n-bhil', '#n-auto', true);
+        draw('#n-bhil', '#n-finserv', true);
+        draw('#n-bhil', '#n-msl');
+        draw('#n-bhil', '#n-elec');
+        draw('#n-bhil', '#n-mukand');
+        draw('#n-auto', '#n-auto-bv');
+        draw('#n-finserv', '#n-finance');
+        draw('#n-finserv', '#n-finserv-ins');
+        draw('#n-finserv', '#n-finserv-amc');
+        draw('#n-finance', '#n-housing');
+        draw('#n-finance', '#n-securities');
+        draw('#n-elec', '#n-bajel');
+        draw('#n-elec', '#n-indef');
+        draw('#n-skb-main', '#n-sugar');
+        draw('#n-skb-main', '#n-consumer');
+        draw('#n-skb-main', '#n-energy');
+    }
+
+    // Load handling
+    window.addEventListener('load', () => {
+        setTimeout(connect, 600);
+    });
+
+    // Refresh connections on resize to handle scale changes
+    window.addEventListener('resize', connect);
+
+    document.querySelectorAll('.step').forEach(step => {
+        const targets = step.dataset.target;
+        ScrollTrigger.create({
+            trigger: step, start: "top center", end: "bottom center",
+            onToggle: self => {
+                const allNodes = document.querySelectorAll('.node');
+                const allPaths = document.querySelectorAll('path');
+                const border = document.getElementById('skb-border');
+
+                if (self.isActive) {
+                    if (targets === 'all') {
+                        allNodes.forEach(n => { n.classList.remove('dimmed'); n.classList.add('active'); });
+                        allPaths.forEach(p => p.classList.remove('dimmed'));
+                        border.classList.remove('dimmed');
+                    } else {
+                        const ids = targets.split(',').map(s => s.trim());
+                        allNodes.forEach(n => {
+                            if (ids.includes('#' + n.id)) {
+                                n.classList.remove('dimmed'); n.classList.add('active');
+                            } else {
+                                n.classList.add('dimmed'); n.classList.remove('active');
+                            }
+                        });
+                        allPaths.forEach(p => {
+                            const from = p.getAttribute('data-from');
+                            const to = p.getAttribute('data-to');
+                            if (ids.includes(to) && ids.includes(from)) {
+                                p.classList.remove('dimmed');
+                            } else {
+                                p.classList.add('dimmed');
+                            }
+                        });
+                        if (targets.includes('skb') || targets.includes('sugar') || targets.includes('consumer') || targets.includes('energy')) {
+                            border.classList.remove('dimmed');
+                        } else {
+                            border.classList.add('dimmed');
+                        }
+                    }
+                } else if (self.direction === -1 && (!self.previous() || self.previous().isActive === false)) {
+                    allNodes.forEach(n => { n.classList.remove('dimmed'); n.classList.add('active'); });
+                    allPaths.forEach(p => p.classList.remove('dimmed'));
+                    border.classList.remove('dimmed');
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>
