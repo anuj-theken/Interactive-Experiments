@@ -3,153 +3,496 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bajaj Group Blueprint | Mobile Optimized</title>
+    <title>The Bajaj Blueprint — The Ken</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <style>
+        /* ───────── Fonts ───────── */
+        @font-face { font-family: 'Reckless'; src: url('fonts/Reckless-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+        @font-face { font-family: 'Reckless'; src: url('fonts/Reckless-MediumItalic.woff2') format('woff2'); font-weight: 500; font-style: italic; font-display: swap; }
+        @font-face { font-family: 'Reckless'; src: url('fonts/Reckless-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+        @font-face { font-family: 'Reckless'; src: url('fonts/Reckless-BoldItalic.woff2') format('woff2'); font-weight: 700; font-style: italic; font-display: swap; }
+        @font-face { font-family: 'Ivar Text'; src: url('fonts/IvarText-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+        @font-face { font-family: 'Ivar Text'; src: url('fonts/IvarText-Italic.woff2') format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
+        @font-face { font-family: 'Ivar Text'; src: url('fonts/IvarText-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+        @font-face { font-family: 'Ivar Text'; src: url('fonts/IvarText-SemiBold.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+        @font-face { font-family: 'Archivo'; src: url('fonts/Archivo-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+        @font-face { font-family: 'Archivo'; src: url('fonts/Archivo-Medium.ttf') format('truetype'); font-weight: 500; font-style: normal; font-display: swap; }
+        @font-face { font-family: 'Archivo'; src: url('fonts/Archivo-SemiBold.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
+        @font-face { font-family: 'Archivo'; src: url('fonts/Archivo-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+
         :root {
-            --bg-paper: #fdfaf5;
-            --navy: #1a1f4d;
-            --c-holdings: #1a1f4d;
-            --c-auto: #556b2f;
-            --c-finserv: #006d5b;
-            --c-finance: #2e7d32;
-            --c-msl: #6a1b9a;
-            --c-minority: #795548;
-            --c-skb: #800000;
+            /* The Ken core */
+            --bg-paper: #F7F2F2;
+            --bg-elevated: #FFFFFF;
+            --ink: #321F1F;
+            --ink-80: rgba(50,31,31,0.72);
+            --ink-50: rgba(50,31,31,0.48);
+            --ink-30: rgba(50,31,31,0.24);
+            --ink-20: rgba(50,31,31,0.16);
+            --ink-10: rgba(50,31,31,0.10);
+            --ink-5:  rgba(50,31,31,0.06);
+            --hairline: #EEE7E7;
+            --red: #FF3333;
+
+            /* Used as legacy alias so any inline 'navy' references still resolve to ink */
+            --navy: var(--ink);
+
+            /* Category colours — recoded into The Ken's editorial accent palette */
+            --c-holdings: #321F1F;   /* ink — the parent / family */
+            --c-auto:     #083321;   /* forest — Auto & Mfg */
+            --c-finserv:  #0A1E42;   /* ink-blue — Financial Services */
+            --c-finance:  #44214B;   /* aubergine — Finance sub-tree */
+            --c-msl:      #CB9200;   /* gold — Maharashtra Scooters */
+            --c-minority: #9A8989;   /* warm stone — diversified */
+            --c-skb:      #FF3333;   /* signature red — SKB Group */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg-paper); color: var(--navy); overflow-x: hidden; }
 
-        /* --- UI Overlays --- */
-        .header-overlay {
-            position: fixed; top: 40px; left: 40px; z-index: 50; max-width: 300px;
+        body {
+            font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-paper);
+            color: var(--ink);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        .header-overlay h1 { font-size: 24px; letter-spacing: -0.5px; border-bottom: 3px solid var(--navy); padding-bottom: 10px; margin-bottom: 10px; }
-        .header-overlay p { font-size: 13px; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Subtle editorial paper texture: a single faint baseline grid, very low contrast */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image:
+              linear-gradient(to right, rgba(50,31,31,0.025) 1px, transparent 1px);
+            background-size: 120px 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ───────── UI Overlays ───────── */
+        .header-overlay {
+            position: absolute; top: 32px; left: 32px; z-index: 50;
+            max-width: 360px;
+            display: flex; flex-direction: column; gap: 14px;
+        }
+
+        .masthead-row {
+            display: flex; align-items: center; gap: 10px;
+            font-family: 'Archivo', sans-serif;
+            font-size: 11px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.12em;
+            color: var(--ink-80);
+        }
+        .masthead-k {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 22px; height: 22px;
+            background: var(--red); color: #fff;
+            font-family: 'Reckless', serif; font-weight: 700; font-style: italic;
+            font-size: 16px; line-height: 1;
+            padding-bottom: 2px;
+        }
+        .masthead-row .dot { color: var(--ink-30); }
+        .masthead-row .section { color: var(--red); }
+
+        .header-overlay h1 {
+            font-family: 'Reckless', 'Fraunces', Georgia, serif;
+            font-weight: 700; font-style: italic;
+            font-size: 38px; line-height: 1.02;
+            letter-spacing: -0.03em;
+            color: var(--ink);
+        }
+        .header-overlay .dek {
+            font-family: 'Ivar Text', 'Source Serif 4', Georgia, serif;
+            font-size: 14px; line-height: 1.45;
+            color: var(--ink-80);
+            font-style: italic;
+            border-top: 1px solid var(--hairline);
+            padding-top: 10px;
+        }
+        .header-overlay .byline {
+            font-family: 'Archivo', sans-serif;
+            font-size: 10px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--ink-50);
+        }
 
         .legend-overlay {
-            position: fixed; top: 40px; right: 40px; z-index: 50; padding: 15px;
-            backdrop-filter: blur(10px); border-radius: 4px;
-            display: grid; grid-template-columns: repeat(3, auto); gap: 10px 25px;
+            position: fixed; top: 24px; right: 24px; z-index: 50;
+            padding: 8px 11px;
+            background: rgba(247, 242, 242, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--hairline);
+            border-radius: 2px;
+            display: flex; flex-direction: column; gap: 6px;
+            min-width: 0;
+        }
+        .legend-overlay .legend-title {
+            font-family: 'Archivo', sans-serif;
+            font-size: 14px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.14em;
+            color: var(--ink-50);
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--hairline);
+        }
+        .legend-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px;
+        }
+        .legend-item {
+            display: flex; align-items: center; gap: 6px;
+            font-family: 'Archivo', sans-serif;
+            font-size: 11px; font-weight: 500;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            color: var(--ink-80);
+            white-space: nowrap;
+        }
+        .legend-color {
+            width: 7px; height: 7px;
+            flex-shrink: 0;
         }
 
-        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 11px; white-space: nowrap; }
-        .legend-color { width: 12px; height: 12px; border-radius: 2px; }
-
-        /* --- Main Canvas --- */
+        /* ───────── Main Canvas ───────── */
         .viz-viewport {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             display: flex; align-items: center; justify-content: center;
-            z-index: 1; background: var(--bg-paper); overflow: hidden;
+            z-index: 1;
+            background: var(--bg-paper);
+            overflow: hidden;
         }
 
         .chart-container {
-            position: relative; display: flex; flex-direction: column; align-items: center;
-            transform: scale(0.5); transform-origin: center center; width: 3400px;
+            position: relative;
+            display: flex; flex-direction: column; align-items: center;
+            transform: scale(0.5);
+            transform-origin: center center;
+            width: 3400px;
         }
 
-        .row { display: flex; justify-content: center; gap: 90px; width: 100%; margin-bottom: 70px; position: relative; z-index: 2; }
+        .row {
+            display: flex; justify-content: center; gap: 90px;
+            width: 100%; margin-bottom: 70px;
+            position: relative; z-index: 2;
+        }
 
-        .node { display: flex; flex-direction: column; align-items: center; opacity: 1; transition: all 0.4s ease; }
-        .node.dimmed { opacity: 0.1; transform: scale(0.95); }
-        .node.active { opacity: 1; transform: scale(1.03); }
+        .node {
+            display: flex; flex-direction: column; align-items: center;
+            opacity: 1;
+            transition: opacity 0.4s cubic-bezier(0.2,0.8,0.2,1),
+                        transform 0.4s cubic-bezier(0.2,0.8,0.2,1);
+        }
+        .node.dimmed { opacity: 0.18; transform: scale(0.97); }
+        .node.active { opacity: 1; transform: scale(1.02); }
 
+        /* Editorial card: flat, hairline, sharp corners, accent rule on top */
         .box {
-            background: #fff; border-radius: 2px; padding: 22px; width: 300px;
-            text-align: center; border: 4px solid var(--navy);
-            box-shadow: 6px 6px 0px rgba(0,0,0,0.05);
+            position: relative;
+            background: var(--bg-elevated);
+            padding: 28px 24px 24px;
+            width: 320px;
+            text-align: left;
+            border: 1px solid var(--hairline);
+            border-radius: 2px;
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+        /* The accent stripe — replaces the loud 4px ring */
+        .box::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 4px;
+            background: var(--accent, var(--ink));
+        }
+        /* "Section tag" eyebrow inside each card */
+        .box::after {
+            content: attr(data-eyebrow);
+            display: block;
+            position: absolute; top: 10px; right: 14px;
+            font-family: 'Archivo', sans-serif;
+            font-size: 14px; font-weight: 700;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--accent, var(--ink-50));
+            opacity: 0.85;
         }
 
-        .box strong { display: block; font-size: 16px; margin-bottom: 8px; text-transform: uppercase; }
-        .role { font-size: 16px; font-weight: 400; text-transform: none; color: #333; line-height: 1.2; }
+        .box strong {
+            display: block;
+            font-family: 'Reckless', 'Fraunces', Georgia, serif;
+            font-weight: 700;
+            font-size: 22px;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            text-transform: none;
+            color: var(--ink);
+            margin-bottom: 12px;
+        }
+        .role {
+            font-family: 'Reckless', 'Fraunces', Georgia, serif;
+            font-weight: 400;
+            font-size: 18px;
+            line-height: 1.2;
+            letter-spacing: -0.01em;
+            color: var(--ink-80);
+            text-transform: none;
+            padding-top: 10px;
+            border-top: 1px solid var(--hairline);
+        }
 
-        .holdings { border-color: var(--c-holdings); }
-        .auto { border-color: var(--c-auto); }
-        .finserv { border-color: var(--c-finserv); }
-        .finance { border-color: var(--c-finance); }
-        .msl { border-color: var(--c-msl); }
-        .minority { border-color: var(--c-minority); }
-        .skb { border-color: var(--c-skb); }
+        /* Category colour bindings */
+        .holdings { --accent: var(--c-holdings); }
+        .auto     { --accent: var(--c-auto); }
+        .finserv  { --accent: var(--c-finserv); }
+        .finance  { --accent: var(--c-finance); }
+        .msl      { --accent: var(--c-msl); }
+        .minority { --accent: var(--c-minority); }
+        .skb      { --accent: var(--c-skb); }
 
+        /* SKB grouping — replaces dashed playground border with editorial frame */
         .skb-group-border {
-            position: absolute; border: 5px dashed var(--c-skb); padding: 50px;
-            border-radius: 25px; top: -30px; left: -30px; right: -30px; bottom: -30px;
-            pointer-events: none; z-index: -1; opacity: 1; transition: opacity 0.4s ease;
+            position: absolute;
+            top: -34px; left: -34px; right: -34px; bottom: -34px;
+            border: 1px solid var(--c-skb);
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 1;
+            transition: opacity 0.4s ease;
+            background:
+              repeating-linear-gradient(135deg,
+                transparent 0 8px,
+                rgba(255,51,51,0.035) 8px 9px);
         }
-        .skb-group-border.dimmed { opacity: 0.05; }
+        .skb-group-border::before {
+            content: 'The SKB Group';
+            position: absolute;
+            top: -10px; left: 24px;
+            background: var(--bg-paper);
+            padding: 0 10px;
+            font-family: 'Archivo', sans-serif;
+            font-size: 14px; font-weight: 700;
+            letter-spacing: 0.16em; text-transform: uppercase;
+            color: var(--c-skb);
+        }
+        .skb-group-border::after {
+            content: 'Kushagra Bajaj branch';
+            position: absolute;
+            bottom: -8px; right: 24px;
+            background: var(--bg-paper);
+            padding: 0 10px;
+            font-family: 'Reckless', serif;
+            font-style: italic;
+            font-size: 14px; font-weight: 500;
+            letter-spacing: -0.01em;
+            color: var(--c-skb);
+        }
+        .skb-group-border.dimmed { opacity: 0.08; }
 
-        .svg-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
-        path { fill: none; stroke: var(--navy); stroke-width: 5; opacity: 1; transition: all 0.4s ease; }
-        path.demerger { stroke-dasharray: 12, 6; }
-        path.dimmed { opacity: 0.2; stroke: #ccc; stroke-width: 3; }
+        /* SVG connectors — thinner, ink-coloured, editorial */
+        .svg-canvas {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: visible;
+        }
+        path {
+            fill: none;
+            stroke: var(--ink-50);
+            stroke-width: 1.5;
+            stroke-linecap: square;
+            stroke-linejoin: miter;
+            opacity: 1;
+            transition: opacity 0.4s ease, stroke 0.4s ease, stroke-width 0.4s ease;
+        }
+        path.demerger {
+            stroke-dasharray: 6, 6;
+            stroke: var(--ink-80);
+        }
+        path.dimmed { opacity: 0.18; stroke: var(--ink-20); stroke-width: 1; }
 
-        /* --- Scroll Narrative --- */
-        .scroll-content { width: 100vw; position: relative; z-index: 100; pointer-events: none; padding-left: 6vw; }
-        .step { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; max-width: 450px; }
+        /* ───────── Scroll Narrative ───────── */
+        .scroll-content {
+            width: 100vw;
+            position: relative;
+            z-index: 100;
+            pointer-events: none;
+            padding-left: 6vw;
+        }
+        .step {
+            min-height: 100vh;
+            display: flex; flex-direction: column; justify-content: center;
+            max-width: 460px;
+        }
         .step:first-child { margin-top: 100vh; }
         .step:last-child { margin-bottom: 50vh; }
 
+        /* Editorial pull-card — feels like a printed sidebar */
         .step-card {
-            background: rgba(253, 250, 245, 0.98); padding: 30px; border: 2px solid var(--navy);
-            border-radius: 4px; backdrop-filter: blur(15px); pointer-events: auto; box-shadow: 20px 0 60px rgba(0,0,0,0.12);
+            background: var(--bg-elevated);
+            padding: 0;
+            border: 1px solid var(--hairline);
+            border-radius: 2px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            pointer-events: auto;
+            box-shadow: 0 2px 8px rgba(50,31,31,0.06),
+                        0 24px 60px rgba(50,31,31,0.10);
+            overflow: hidden;
         }
-
+        .step-card-inner {
+            padding: 28px 30px 30px;
+        }
         .step-img {
-            width: 100%; height: auto; max-height: 220px; object-fit: contain;
-            border: 1px solid rgba(0,0,0,0.1); margin-bottom: 20px; display: block;
+            width: 100%; height: auto;
+            max-height: 240px; object-fit: cover;
+            display: block;
+            border-bottom: 1px solid var(--hairline);
+            filter: contrast(1.02) saturate(0.95);
         }
         .step-img[src=""], .step-img[src="#"] { display: none; }
+        /* Hide broken images cleanly so missing user assets don't show a broken icon */
+        .step-img { min-height: 0; }
 
-        .step-text { font-size: 1.4rem; font-weight: 500; line-height: 1.3; color: var(--navy); }
-        .step-text strong { display: block; margin-bottom: 8px; font-size: 1.1rem; color: #666; text-transform: uppercase; }
+        .step-eyebrow {
+            font-family: 'Archivo', sans-serif;
+            font-size: 14px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.16em;
+            color: var(--red);
+            margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .step-eyebrow .num {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 26px; height: 26px;
+            border: 1px solid var(--red);
+            color: var(--red);
+            font-family: 'Archivo', sans-serif;
+            font-size: 14px; font-weight: 700;
+            padding: 0 6px;
+            border-radius: 999px;
+        }
+        .step-eyebrow .rule {
+            flex: 1; height: 1px; background: var(--ink-20);
+        }
 
-        /* --- MOBILE BREAKPOINT --- */
+        .step-text {
+            font-family: 'Reckless', 'Fraunces', Georgia, serif;
+            font-size: 1.55rem;
+            font-weight: 500;
+            font-style: italic;
+            line-height: 1.25;
+            letter-spacing: -0.02em;
+            color: var(--ink);
+        }
+        .step-text strong {
+            font-family: 'Archivo', sans-serif;
+            font-style: normal;
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--ink-50);
+        }
+        .step-footer {
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px solid var(--hairline);
+            font-family: 'Archivo', sans-serif;
+            font-size: 14px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.12em;
+            color: var(--ink-50);
+            display: flex; justify-content: space-between;
+        }
+        .step-footer .scroll-cue::after {
+            content: ' ↓';
+            color: var(--red);
+        }
+
+        /* Scroll progress — tiny vertical rule on the left */
+        .scroll-rail {
+            position: fixed;
+            left: 28px; top: 50%;
+            transform: translateY(-50%);
+            width: 1px; height: 240px;
+            background: var(--ink-10);
+            z-index: 60;
+        }
+        .scroll-rail::after {
+            content: '';
+            position: absolute;
+            left: -1.5px; top: 0;
+            width: 4px; height: 28px;
+            background: var(--red);
+            transition: top 0.2s ease;
+        }
+
+        /* Footer note — editorial signature */
+        .editor-note {
+            position: fixed; bottom: 18px; left: 24px;
+            z-index: 50;
+            font-family: 'Archivo', sans-serif;
+            font-size: 11px; font-weight: 500;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--ink-50);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .editor-note .red-rule {
+            display: inline-block; width: 18px; height: 1px;
+            background: var(--red);
+        }
+
+        /* ───────── MOBILE BREAKPOINT (unchanged scaling logic) ───────── */
         @media (max-width: 800px) {
-            .header-overlay { top: 20px; left: 20px; max-width: 220px; }
-            .header-overlay h1 { font-size: 18px; }
+            .header-overlay { top: 16px; left: 16px; max-width: 240px; gap: 8px; }
+            .header-overlay h1 { font-size: 26px; }
 
             .legend-overlay {
-                top: auto; bottom: 20px; right: 20px; left: 20px;
-                grid-template-columns: repeat(2, 1fr); gap: 8px;
-                background: rgba(253, 250, 245, 0.9); border: 1px solid rgba(26, 31, 77, 0.2);
+                top: auto; bottom: 16px; right: 16px; left: 16px;
+                padding: 12px 14px;
+                background: rgba(247, 242, 242, 0.94);
             }
+            .legend-grid { grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+            .legend-item { font-size: 14px; }
+
+            .scroll-rail { display: none; }
+            .editor-note { display: none; }
 
             .chart-container {
-                transform: scale(0.25); /* Significant scale down for mobile */
+                transform: scale(0.25) translateY(-12vh);
                 width: 3400px;
                 transform-origin: center center;
             }
-            .box strong
-            {
-              font-size: 24px;
-            }
-            .role
-            {
-              font-size: 20px;
-            }
+            /* Bumped sizes inside cards so they read at 0.25 scale */
+            .box strong { font-size: 30px; }
+            .role { font-size: 30px; }
+            .box::after { display: none; }
+            /* Larger SKB frame labels at 0.25 scale */
+            .skb-group-border::before { font-size: 32px; padding: 0 16px; top: -18px; left: 32px; }
+            .skb-group-border::after  { font-size: 36px; padding: 0 16px; bottom: -16px; right: 32px; }
 
             .scroll-content { padding-left: 5vw; padding-right: 5vw; }
             .step { max-width: 100%; }
-            .step-card { padding: 20px; }
-            .step-text { font-size: 1.1rem; }
+            .step-card-inner { padding: 22px 22px 24px; }
+            .step-text { font-size: 1.2rem; }
         }
     </style>
 </head>
 <body>
 
 <div class="header-overlay">
-    <h1>BAJAJ GROUP</h1>
-    <p>Corporate Evolution & Strategic Hierarchy</p>
+    <h1>The Bajaj Blueprint</h1>
 </div>
 
 <div class="legend-overlay">
-    <div class="legend-item"><div class="legend-color" style="background: var(--c-holdings)"></div> Holdings</div>
-    <div class="legend-item"><div class="legend-color" style="background: var(--c-auto)"></div> Auto & Mfg</div>
-    <div class="legend-item"><div class="legend-color" style="background: var(--c-finserv)"></div> Financial Services</div>
-    <div class="legend-item"><div class="legend-color" style="background: var(--c-skb)"></div> SKB Group</div>
-    <div class="legend-item"><div class="legend-color" style="background: var(--c-minority)"></div> Diversified</div>
+    <div class="legend-grid">
+        <div class="legend-item"><div class="legend-color" style="background: var(--c-holdings)"></div> Holdings</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--c-auto)"></div> Auto &amp; Mfg</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--c-finserv)"></div> Financial Svcs</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--c-finance)"></div> Finance arm</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--c-skb)"></div> SKB Group</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--c-minority)"></div> Diversified</div>
+    </div>
 </div>
 
 <div class="viz-viewport">
@@ -157,88 +500,99 @@
         <svg class="svg-canvas" id="svg-layer"></svg>
 
         <div class="row">
-            <div class="node" id="n-promoters"><div class="box holdings"><strong>Promoter Family Entities</strong><div class="role">Rahul Bajaj Branch</div></div></div>
+            <div class="node" id="n-promoters"><div class="box holdings" data-eyebrow="Family"><strong>Promoter Family Entities</strong><div class="role">Rahul Bajaj branch</div></div></div>
         </div>
 
         <div class="row">
-            <div class="node" id="n-bhil"><div class="box holdings"><strong>Bajaj Holdings (BHIL)</strong><div class="role">Sanjiv Bajaj</div></div></div>
+            <div class="node" id="n-bhil"><div class="box holdings" data-eyebrow="Holding Co."><strong>Bajaj Holdings (BHIL)</strong><div class="role">Sanjiv Bajaj</div></div></div>
         </div>
 
         <div class="row">
-            <div class="node" id="n-auto"><div class="box auto"><strong>Bajaj Auto Ltd</strong><div class="role">Rajiv Bajaj</div></div></div>
-            <div class="node" id="n-finserv"><div class="box finserv"><strong>Bajaj Finserv Ltd</strong><div class="role">Sanjiv Bajaj</div></div></div>
-            <div class="node" id="n-msl"><div class="box msl"><strong>Maharashtra Scooters</strong><div class="role">Corporate Nominees</div></div></div>
+            <div class="node" id="n-auto"><div class="box auto" data-eyebrow="Listed · Auto"><strong>Bajaj Auto Ltd</strong><div class="role">Rajiv Bajaj</div></div></div>
+            <div class="node" id="n-finserv"><div class="box finserv" data-eyebrow="Listed · Finserv"><strong>Bajaj Finserv Ltd</strong><div class="role">Sanjiv Bajaj</div></div></div>
+            <div class="node" id="n-msl"><div class="box msl" data-eyebrow="Listed"><strong>Maharashtra Scooters</strong><div class="role">Corporate nominees</div></div></div>
             <div style="display: flex; flex-direction: column; gap: 15px;">
-                <div class="node" id="n-elec"><div class="box minority"><strong>Bajaj Electricals</strong><div class="role">Shekhar Bajaj</div></div></div>
-                <div class="node" id="n-mukand"><div class="box minority"><strong>Mukand Ltd</strong><div class="role">Niraj Bajaj</div></div></div>
+                <div class="node" id="n-elec"><div class="box minority" data-eyebrow="Listed"><strong>Bajaj Electricals</strong><div class="role">Shekhar Bajaj</div></div></div>
+                <div class="node" id="n-mukand"><div class="box minority" data-eyebrow="Listed"><strong>Mukand Ltd</strong><div class="role">Niraj Bajaj</div></div></div>
             </div>
         </div>
 
         <div class="row">
-            <div class="node" id="n-auto-bv"><div class="box auto"><strong>Auto Intl BV</strong><div class="role">Rajiv Bajaj</div></div></div>
-            <div class="node" id="n-finance"><div class="box finance"><strong>Bajaj Finance Ltd</strong><div class="role">Rajeev Jain</div></div></div>
+            <div class="node" id="n-auto-bv"><div class="box auto" data-eyebrow="Subsidiary"><strong>Auto Intl BV</strong><div class="role">Rajiv Bajaj</div></div></div>
+            <div class="node" id="n-finance"><div class="box finance" data-eyebrow="Listed · Finance"><strong>Bajaj Finance Ltd</strong><div class="role">Rajeev Jain</div></div></div>
             <div style="display: flex; gap: 30px;">
-                <div class="node" id="n-finserv-ins"><div class="box finserv"><strong>Insurance Verticals</strong><div class="role">Sanjiv Bajaj</div></div></div>
-                <div class="node" id="n-finserv-amc"><div class="box finserv"><strong>Finserv AMC</strong><div class="role">Sanjiv Bajaj</div></div></div>
+                <div class="node" id="n-finserv-ins"><div class="box finserv" data-eyebrow="Subsidiary"><strong>Insurance Verticals</strong><div class="role">Sanjiv Bajaj</div></div></div>
+                <div class="node" id="n-finserv-amc"><div class="box finserv" data-eyebrow="Subsidiary"><strong>Finserv AMC</strong><div class="role">Sanjiv Bajaj</div></div></div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 15px;">
-                <div class="node" id="n-bajel"><div class="box minority"><strong>Bajel Projects</strong><div class="role">Shekhar Bajaj</div></div></div>
-                <div class="node" id="n-indef"><div class="box minority"><strong>Hercules Hoists</strong><div class="role">Diversified</div></div></div>
+                <div class="node" id="n-bajel"><div class="box minority" data-eyebrow="Listed · Demerger"><strong>Bajel Projects</strong><div class="role">Shekhar Bajaj</div></div></div>
+                <div class="node" id="n-indef"><div class="box minority" data-eyebrow="Listed"><strong>Hercules Hoists</strong><div class="role">Diversified</div></div></div>
             </div>
         </div>
 
         <div class="row" style="align-items: flex-start;">
             <div style="display: flex; gap: 30px;">
-                <div class="node" id="n-housing"><div class="box finance"><strong>Housing Finance</strong><div class="role">Rajeev Jain</div></div></div>
-                <div class="node" id="n-securities"><div class="box finance"><strong>Securities</strong><div class="role">Rajeev Jain</div></div></div>
+                <div class="node" id="n-housing"><div class="box finance" data-eyebrow="Subsidiary"><strong>Housing Finance</strong><div class="role">Rajeev Jain</div></div></div>
+                <div class="node" id="n-securities"><div class="box finance" data-eyebrow="Subsidiary"><strong>Securities</strong><div class="role">Rajeev Jain</div></div></div>
             </div>
 
             <div style="position: relative; margin-left: 120px;">
                 <div class="skb-group-border" id="skb-border"></div>
-                <div class="node" id="n-skb-main"><div class="box skb"><strong>SKB Group</strong><div class="role">Kushagra Bajaj</div></div></div>
+                <div class="node" id="n-skb-main"><div class="box skb" data-eyebrow="Family Branch"><strong>SKB Group</strong><div class="role">Kushagra Bajaj</div></div></div>
                 <div class="row" style="margin-top: 60px; gap: 30px;">
-                    <div class="node" id="n-sugar"><div class="box skb"><strong>Hindusthan Sugar</strong><div class="role">Kushagra Bajaj</div></div></div>
-                    <div class="node" id="n-consumer"><div class="box skb"><strong>Consumer Care</strong><div class="role">Kushagra Bajaj</div></div></div>
-                    <div class="node" id="n-energy"><div class="box skb"><strong>Bajaj Energy</strong><div class="role">Kushagra Bajaj</div></div></div>
+                    <div class="node" id="n-sugar"><div class="box skb" data-eyebrow="Sugar"><strong>Hindusthan Sugar</strong><div class="role">Kushagra Bajaj</div></div></div>
+                    <div class="node" id="n-consumer"><div class="box skb" data-eyebrow="FMCG"><strong>Consumer Care</strong><div class="role">Kushagra Bajaj</div></div></div>
+                    <div class="node" id="n-energy"><div class="box skb" data-eyebrow="Power"><strong>Bajaj Energy</strong><div class="role">Kushagra Bajaj</div></div></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<div class="editor-note"><span class="red-rule"></span> Scroll to explore</div>
+
 <div class="scroll-content">
     <div class="step" data-target="all">
         <div class="step-card">
-            <img src="#" class="step-img" alt="Overview">
-            <div class="step-text">Bajaj Group’s organisation tree in 2007</div>
+            <div class="step-card-inner">
+                <div class="step-text">The Bajaj Group’s organisation tree, as it stood in <em>2007</em> — before the demergers reshaped everything.</div>
+            </div>
         </div>
     </div>
 
     <div class="step" data-target="#n-skb-main">
         <div class="step-card">
-            <img src="Kushagra Bajaj.jpg" class="step-img" alt="Family Split">
-            <div class="step-text"><strong>Kushagra Bajaj</strong> gained control of Asia’s largest sugar company…</div>
+            <img src="Kushagra Bajaj.png" class="step-img" alt="Family Split">
+            <div class="step-card-inner">
+                <div class="step-text"><em>Kushagra Bajaj</em> gained control of Asia’s largest sugar company…</div>
+            </div>
         </div>
     </div>
 
     <div class="step" data-target="#n-skb-main, #n-sugar">
         <div class="step-card">
             <img src="sugar.png" class="step-img" alt="Sugar Industry">
-            <div class="step-text">… secured a slice of the FMCG industry…</div>
+            <div class="step-card-inner">
+                <div class="step-text">… secured a slice of the <em>FMCG</em> industry…</div>
+            </div>
         </div>
     </div>
 
     <div class="step" data-target="#n-skb-main, #n-consumer">
         <div class="step-card">
             <img src="energy.png" class="step-img" alt="Consumer Care">
-            <div class="step-text">… helmed one of India’s largest private-sector thermal generation companies…</div>
+            <div class="step-card-inner">
+                <div class="step-text">… helmed one of India’s largest private-sector <em>thermal generation</em> companies…</div>
+            </div>
         </div>
     </div>
 
     <div class="step" data-target="#n-skb-main, #n-energy">
         <div class="step-card">
             <img src="power.png" class="step-img" alt="Energy">
-            <div class="step-text">… and controlled critical energy infrastructure.</div>
+            <div class="step-card-inner">
+                <div class="step-text">… and controlled <em>critical energy infrastructure</em>.</div>
+            </div>
         </div>
     </div>
 </div>
@@ -310,6 +664,12 @@
 
     // Refresh connections on resize to handle scale changes
     window.addEventListener('resize', connect);
+
+    // Gracefully hide broken/missing step images so the editorial card stays clean
+    document.querySelectorAll('.step-img').forEach(img => {
+        img.addEventListener('error', () => { img.style.display = 'none'; });
+        if (!img.getAttribute('src') || img.getAttribute('src') === '#') img.style.display = 'none';
+    });
 
     document.querySelectorAll('.step').forEach(step => {
         const targets = step.dataset.target;
