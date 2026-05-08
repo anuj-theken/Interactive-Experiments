@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Prototype Stack</title>
+
+    <link rel="stylesheet" href="styles/corpo.css">
+    <link rel="stylesheet" href="styles/timeline.css">
+    <link rel="stylesheet" href="styles/growth.css">
+    <link rel="stylesheet" href="styles/product.css">
+    <link rel="stylesheet" href="styles/stocks.css">
+    <link rel="stylesheet" href="styles/family-branch.css">
+
+    <!-- GSAP must load before corpo.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: transparent;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        .stack-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 50px;
+            padding: 60px 20px;
+        }
+        .proto-card {
+            width: 100%;
+            /* background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px); */
+            /* border: 1px solid rgba(255, 255, 255, 0.1); */
+            border-radius: 20px;
+            /* padding: 20px; */
+            /* box-sizing: border-box; */
+            transition: transform 0.3s ease;
+        }
+        .proto-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .proto-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            padding-left: 5px;
+        }
+        .proto-window {
+            width: 100%;
+            height: 500px;
+            border-radius: 12px;
+            border: none;
+            background: transparent;
+            display: block;
+        }
+        .family-view {
+            width: 100%;
+            height: 730px;
+            border-radius: 16px;
+            border-width: 0px;
+        }
+
+        .zero-cost {
+            width: 100%;
+            height: 730px;
+            border: none;
+        }
+        iframe{
+          border: none;
+        }
+        .corporate {
+            width: 100%;
+            height: 5000px;
+            border-radius: 16px;
+            border-width: 0px;
+        }
+        .market-cap {
+            width: 100%;
+            height: 800px;
+        }
+        @media (max-width: 800px) {
+
+          .family-view {
+              width: 100%;
+              height:1100px;
+              border-radius: 16px;
+              border-width: 0px;
+          }
+          .corporate {
+              width: 100%;
+              height: 5000px;
+              border-radius: 16px;
+              border-width: 0px;
+          }
+          .market-cap {
+              width: 100%;
+              height: 1700px;
+          }
+          .zero-cost {
+              width: 100%;
+              height: 1200px;
+          }
+        }
+    </style>
+</head>
+<body>
+
+
+//Corporate-tree
+    <!-- ── Bajaj Blueprint Section ── -->
+    <section id="bajaj-blueprint" class="gsap-section">
+
+
+
+        <div class="legend-overlay">
+            <div class="legend-grid">
+                <div class="legend-item"><div class="legend-color" style="background: var(--c-holdings)"></div> Holdings</div>
+                <div class="legend-item"><div class="legend-color" style="background: var(--c-auto)"></div> Auto &amp; Mfg</div>
+                <div class="legend-item"><div class="legend-color" style="background: var(--c-finserv)"></div> Financial Svcs</div>
+                <div class="legend-item"><div class="legend-color" style="background: var(--c-finance)"></div> Finance arm</div>
+                <div class="legend-item"><div class="legend-color" style="background: var(--c-skb)"></div> SKB Group</div>
+                <div class="legend-item"><div class="legend-color" style="background: var(--c-minority)"></div> Diversified</div>
+            </div>
+        </div>
+
+        <div class="sticky-chart">
+            <div class="chart-container" id="master-chart">
+                <svg class="svg-canvas" id="svg-layer"></svg>
+
+                <div class="row">
+                    <div class="node" id="n-promoters"><div class="box holdings" data-eyebrow="Family"><strong>Promoter Family Entities</strong><div class="role">Rahul Bajaj branch</div></div></div>
+                </div>
+
+                <div class="row">
+                    <div class="node" id="n-bhil"><div class="box holdings" data-eyebrow="Holding Co."><strong>Bajaj Holdings (BHIL)</strong><div class="role">Sanjiv Bajaj</div></div></div>
+                </div>
+
+                <div class="row">
+                    <div class="node" id="n-auto"><div class="box auto" data-eyebrow="Listed · Auto"><strong>Bajaj Auto Ltd</strong><div class="role">Rajiv Bajaj</div></div></div>
+                    <div class="node" id="n-finserv"><div class="box finserv" data-eyebrow="Listed · Finserv"><strong>Bajaj Finserv Ltd</strong><div class="role">Sanjiv Bajaj</div></div></div>
+                    <div class="node" id="n-msl"><div class="box msl" data-eyebrow="Listed"><strong>Maharashtra Scooters</strong><div class="role">Corporate nominees</div></div></div>
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div class="node" id="n-elec"><div class="box minority" data-eyebrow="Listed"><strong>Bajaj Electricals</strong><div class="role">Shekhar Bajaj</div></div></div>
+                        <div class="node" id="n-mukand"><div class="box minority" data-eyebrow="Listed"><strong>Mukand Ltd</strong><div class="role">Niraj Bajaj</div></div></div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="node" id="n-auto-bv"><div class="box auto" data-eyebrow="Subsidiary"><strong>Auto Intl BV</strong><div class="role">Rajiv Bajaj</div></div></div>
+                    <div class="node" id="n-finance"><div class="box finance" data-eyebrow="Listed · Finance"><strong>Bajaj Finance Ltd</strong><div class="role">Rajeev Jain</div></div></div>
+                    <div style="display: flex; gap: 30px;">
+                        <div class="node" id="n-finserv-ins"><div class="box finserv" data-eyebrow="Subsidiary"><strong>Insurance Verticals</strong><div class="role">Sanjiv Bajaj</div></div></div>
+                        <div class="node" id="n-finserv-amc"><div class="box finserv" data-eyebrow="Subsidiary"><strong>Finserv AMC</strong><div class="role">Sanjiv Bajaj</div></div></div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div class="node" id="n-bajel"><div class="box minority" data-eyebrow="Listed · Demerger"><strong>Bajel Projects</strong><div class="role">Shekhar Bajaj</div></div></div>
+                        <div class="node" id="n-indef"><div class="box minority" data-eyebrow="Listed"><strong>Hercules Hoists</strong><div class="role">Diversified</div></div></div>
+                    </div>
+                </div>
+
+                <div class="row" style="align-items: flex-start;">
+                    <div style="display: flex; gap: 30px;">
+                        <div class="node" id="n-housing"><div class="box finance" data-eyebrow="Subsidiary"><strong>Housing Finance</strong><div class="role">Rajeev Jain</div></div></div>
+                        <div class="node" id="n-securities"><div class="box finance" data-eyebrow="Subsidiary"><strong>Securities</strong><div class="role">Rajeev Jain</div></div></div>
+                    </div>
+
+                    <div style="position: relative; margin-left: 120px;">
+                        <div class="skb-group-border" id="skb-border"></div>
+                        <div class="node" id="n-skb-main"><div class="box skb" data-eyebrow="Family Branch"><strong>SKB Group</strong><div class="role">Kushagra Bajaj</div></div></div>
+                        <div class="row" style="margin-top: 60px; gap: 30px;">
+                            <div class="node" id="n-sugar"><div class="box skb" data-eyebrow="Sugar"><strong>Hindusthan Sugar</strong><div class="role">Kushagra Bajaj</div></div></div>
+                            <div class="node" id="n-consumer"><div class="box skb" data-eyebrow="FMCG"><strong>Consumer Care</strong><div class="role">Kushagra Bajaj</div></div></div>
+                            <div class="node" id="n-energy"><div class="box skb" data-eyebrow="Power"><strong>Bajaj Energy</strong><div class="role">Kushagra Bajaj</div></div></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- class must be scroll-narrative to match corpo.js -->
+        <div class="scroll-narrative">
+          <div class="step" data-target="all" class="header-overlay">
+              <h1 class="step-text header">The Bajaj Blueprint</h1>
+          </div>
+
+            <div class="step" data-target="all">
+                <div class="step-card">
+                    <div class="step-card-inner">
+                        <div class="step-text">The Bajaj Group's organisation tree, as it stood in <em>2007</em> — before the demergers reshaped everything.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step" data-target="#n-skb-main">
+                <div class="step-card">
+                    <img src="imgs/corpo/Kushagra Bajaj.png" class="step-img" alt="Family Split">
+                    <div class="step-card-inner">
+                        <div class="step-text"><em>Kushagra Bajaj</em> gained control of Asia's largest sugar company…</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step" data-target="#n-skb-main, #n-sugar">
+                <div class="step-card">
+                    <img src="imgs/corpo/sugar.png" class="step-img" alt="Sugar Industry">
+                    <div class="step-card-inner">
+                        <div class="step-text">… secured a slice of the <em>FMCG</em> industry…</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step" data-target="#n-skb-main, #n-consumer">
+                <div class="step-card">
+                    <img src="imgs/corpo/energy.png" class="step-img" alt="Consumer Care">
+                    <div class="step-card-inner">
+                        <div class="step-text">… helmed one of India's largest private-sector <em>thermal generation</em> companies…</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step" data-target="#n-skb-main, #n-energy">
+                <div class="step-card">
+                    <img src="imgs/corpo/power.png" class="step-img" alt="Energy">
+                    <div class="step-card-inner">
+                        <div class="step-text">… and controlled <em>critical energy infrastructure</em>.</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="editor-note"><span class="red-rule"></span> Scroll to explore</div>
+
+    </section>
+    <!-- corpo.js loads last, after GSAP is already in the page -->
+    <script src="scripts/corpo.js"></script>
+
+//Family Tree
+    <!-- ── Other prototype cards below ── -->
+    <div class="stack-container">
+        <div class="proto-card">
+            <div class="proto-label">01 // GSAP Interaction</div>
+            <iframe class="family-view" src="Family_tree/index.html"></iframe>
+        </div>
+    </div>
+
+
+//No Cost EMI
+    <div class="stack-container">
+        <div class="proto-card">
+            <div class="proto-label">01 // GSAP Interaction</div>
+            <iframe class="zero-cost" src="no_costEMI/index_alt.html"></iframe>
+        </div>
+    </div>
+
+
+//market cap
+      <div class="stack-container">
+          <div class="proto-card">
+              <div class="proto-label">01 // GSAP Interaction</div>
+              <iframe class="market-cap" src="Cap_Treemap/index.html"></iframe>
+          </div>
+      </div>
+
+
+//family tree scrolly
+<div id="bajaj-scrolly-root">
+    <div class="scrolly-container">
+        <div id="panel-left">
+            <div class="header-section">
+                <div class="panel-title">Bajaj Family Tree</div>
+                <div class="legend">
+                    <div class="legend-item"><span class="dot" style="background:#b08d57"></span> G1</div>
+                    <div class="legend-item"><span class="dot" style="background:#c5a367"></span> G2</div>
+                    <div class="legend-item"><span class="dot" style="background:#4a7c5f"></span> G3</div>
+                    <div class="legend-item"><span class="dot" style="background:#c45e45"></span> G4</div>
+                    <div class="legend-item"><span class="dot" style="background:#e8a98c"></span> G5</div>
+                </div>
+            </div>
+
+            <div class="scroll-text-block" id="trigger-allies">
+                <p class="narrative" id="text-allies">
+                    In any case, alliances were formed: <strong>Rahul, Shekhar, Madhur, and Niraj</strong> on one side;
+                </p>
+            </div>
+
+            <div class="scroll-text-block" id="trigger-shishir">
+                <p class="narrative" id="text-shishir">
+                    ... <strong>Shishir and Kushagra</strong> on the other.
+                </p>
+            </div>
+
+            <div style="height: 40vh;"></div>
+        </div>
+
+        <div id="viz-container">
+            <div id="bajaj-chart"></div>
+        </div>
+    </div>
+</div>
+
+      <script src="scripts/family-branch.js"></script>
+
+//timeline
+    <section class="bajaj-timeline">
+  <header class="timeline-header">
+    <div class="timeline-header-left">
+      <h1>The Legacy of Bajaj Group</h1>
+      <p>From industrial roots to a global financial powerhouse.</p>
+    </div>
+    <div class="legend"><span class="dot"></span> Milestone Events</div>
+  </header>
+
+  <div class="desktop-only">
+    <div class="timeline-scroll-wrapper">
+      <div id="main"></div>
+    </div>
+  </div>
+
+  <div class="mobile-only">
+    <div class="vertical-timeline" id="mobile-list"></div>
+  </div>
+</section>
+  <script src="scripts/timeline.js"></script>
+
+//growth
+
+<div id="bajaj-section-container">
+    <div class="visual-viewport">
+        <div class="circle-layer" id="bgCircle"></div>
+        <div class="text-container">
+            <div class="text-step" id="t1">Bajaj Finance’s AUM has gone from Rs 2,500 crore in 2008...</div>
+            <div class="text-step" id="t2">to Rs 5 lakh crore now. That’s 200X in 18 years. It has 115 million customers.</div>
+            <div class="text-step" id="t3">By 2030, it wants to take that figure to 200–220 million.</div>
+        </div>
+    </div>
+</div>
+  <script src="scripts/growth.js"></script>
+
+
+
+//product
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<div id="finance-section">
+  <div id="scene-wrapper">
+    <div id="scene">
+      <div id="center-header">
+
+        <h1>The company also issued loans to companies of <br><em>all sizes, for different purposes</em></h1>
+      </div>
+
+      <div class="box-placeholder" data-cat="1" style="width:14vw;height:19vh;top:8vh;left:3vw;background:#b8ccd8;"></div>
+      <div class="spread-img" data-cat="1" style="width:16vw;height:22vh;top:5vh;left:2vw;">
+        <img src="imgs/product/consumer.jpg" alt="Consumer" />
+      </div>
+      <div class="spread-title" data-cat="1" style="top:29vh;left:2vw;">
+        <h2>Consumer</h2>
+      </div>
+      <div class="scatter-item" data-cat="1" style="top:7vh; left:20vw;">Consumer Durable Loans</div>
+      <div class="scatter-item" data-cat="1" style="top:13vh; left:22vw;">Personal Loan Cross-sell</div>
+      <div class="scatter-item" data-cat="1" style="top:19vh; left:20vw;">Lifecare Financing</div>
+      <div class="scatter-item" data-cat="1" style="top:25vh; left:23vw;">Retailer Finance</div>
+      <div class="scatter-item" data-cat="1" style="top:31vh; left:21vw;">Lifestyle Product Loans</div>
+
+      <div class="box-placeholder" data-cat="2" style="width:14vw;height:19vh;top:8vh;right:3vw;background:#c9d4bc;"></div>
+      <div class="spread-img" data-cat="2" style="width:16vw;height:22vh;top:5vh;right:2vw;">
+        <img src="imgs/product/commercial.jpg" alt="Commercial" />
+      </div>
+      <div class="spread-title" data-cat="2" style="top:29vh;right:2vw;text-align:right;">
+        <h2>Commercial</h2>
+      </div>
+      <div class="scatter-item" data-cat="2" style="top:7vh; right:20vw;">B2B Financing</div>
+      <div class="scatter-item" data-cat="2" style="top:13vh; right:22vw;">Vendor Finance</div>
+      <div class="scatter-item" data-cat="2" style="top:19vh; right:20vw;">Supply Chain Lending</div>
+      <div class="scatter-item" data-cat="2" style="top:25vh; right:23vw;">Retailer Finance</div>
+      <div class="scatter-item" data-cat="2" style="top:31vh; right:21vw;">E-Commerce Financing</div>
+
+      <div class="box-placeholder" data-cat="3" style="width:14vw;height:19vh;bottom:27vh;left:3vw;background:#d4bec5;"></div>
+      <div class="spread-img" data-cat="3" style="width:16vw;height:22vh;bottom:24vh;left:2vw;">
+        <img src="imgs/product/Mortgages.jpg" alt="Mortgages" />
+      </div>
+      <div class="spread-title" data-cat="3" style="bottom:48vh;left:2vw;">
+        <h2>Mortgages</h2>
+      </div>
+      <div class="scatter-item" data-cat="3" style="bottom:43vh; left:20vw;">Home Loans</div>
+      <div class="scatter-item" data-cat="3" style="bottom:37vh; left:22vw;">Loan Against Property</div>
+      <div class="scatter-item" data-cat="3" style="bottom:31vh; left:20vw;">Construction Finance</div>
+      <div class="scatter-item" data-cat="3" style="bottom:25vh; left:23vw;">Lease Rental Discounting</div>
+
+      <div class="box-placeholder" data-cat="4" style="width:14vw;height:19vh;bottom:27vh;right:3vw;background:#c2c5d4;"></div>
+      <div class="spread-img" data-cat="4" style="width:16vw;height:22vh;bottom:24vh;right:2vw;">
+        <img src="imgs/product/sme lending.jpg" alt="SME Lending" />
+      </div>
+      <div class="spread-title" data-cat="4" style="bottom:48vh;right:2vw;text-align:right;">
+        <h2>SME Lending</h2>
+      </div>
+      <div class="scatter-item" data-cat="4" style="bottom:43vh; right:20vw;">Business Loans</div>
+      <div class="scatter-item" data-cat="4" style="bottom:37vh; right:22vw;">Working Capital Finance</div>
+      <div class="scatter-item" data-cat="4" style="bottom:31vh; right:20vw;">Machinery Loans</div>
+      <div class="scatter-item" data-cat="4" style="bottom:25vh; right:23vw;">Professional Loans</div>
+
+      <div class="box-placeholder" data-cat="5" style="width:16vw;height:14vh;bottom:4vh;left:42vw;background:#d4ccb8;"></div>
+      <div class="spread-img" data-cat="5" style="width:18vw;height:18vh;bottom:2vh;left:41vw;">
+        <img src="imgs/product/payments.jpg" alt="Payments" />
+      </div>
+      <div class="spread-title" data-cat="5" style="bottom:22vh;left:38vw;">
+        <h2>Payments &amp; Deposits</h2>
+      </div>
+      <div class="scatter-item" data-cat="5" style="bottom:4vh; left:28vw;">Fixed Deposits</div>
+      <div class="scatter-item" data-cat="5" style="bottom:10vh; left:26vw;">Bajaj Pay Wallet</div>
+      <div class="scatter-item" data-cat="5" style="bottom:17vh; right:24vw;">Insurance Distribution</div>
+      <div class="scatter-item" data-cat="5" style="bottom:10vh; right:22vw;">Mutual Fund Distribution</div>
+      <div class="scatter-item" data-cat="5" style="bottom:17vh; left:28vw;">Digital Payments</div>
+
+      <div class="box-placeholder" data-cat="6" style="width:13vw;height:14vh;top:6vh;left:44vw;background:#bdd4cf;"></div>
+      <div class="spread-img" data-cat="6" style="width:15vw;height:19vh;top:4vh;left:43vw;">
+        <img src="imgs/product/rural lending.jpg" alt="Rural Lending" />
+      </div>
+      <div class="spread-title" data-cat="6" style="top:25vh;left:43vw;">
+        <h2>Rural Lending</h2>
+      </div>
+      <div class="scatter-item" data-cat="6" style="top:17vh; left:29vw;">Gold Loans</div>
+      <div class="scatter-item" data-cat="6" style="top:9vh; left:30vw;">Farmer Finance</div>
+      <div class="scatter-item" data-cat="6" style="top:17vh; right:26vw;">Two-Wheeler Loans</div>
+      <div class="scatter-item" data-cat="6" style="top:9vh; right:28vw;">Kisan Credit Cards</div>
+    </div>
+  </div>
+</div>
+  <script src="scripts/product.js"></script>
+
+//stocks
+
+<section class="scroll-wrapper">
+  <div class="sticky-content bajaj-comparison-container">
+    <div class="layout">
+      <div class="left-panel">
+        <div class="site-header">
+          <h1>Bajaj Auto<br>vs Bajaj Hindustan</h1>
+        </div>
+
+        <div class="stock-value-legend">
+          <div class="legend-item-stock"><span class="legend-line" style="background:#0057B8;"></span>Bajaj Auto</div>
+          <div class="legend-item-stock"><span class="legend-line" style="background:#0F2A5C;"></span>Bajaj Hindustan</div>
+          <div class="legend-item-stock"><span class="legend-dash" style="border-color:#C2D9C2;"></span>Nifty 50</div>
+        </div>
+        <div class="divider"></div>
+        <div class="text-area" id="text-area">
+  <div class="text-block" id="text-0">
+    <p class="year-label">2003</p>
+    <h3>The Agreement</h3>
+    <p>The fight drags on. The family members came to an agreement in 2003 with Sharad Pawar and S Gurumurthy as mediators, and decided to buy each other’s stakes in companies. But a stock market rally leads to the value of Bajaj Auto and Bajaj Hindusthan to rise, and the agreement stalls.</p>
+  </div>
+  <div class="text-block" id="text-1">
+    <p class="year-label">2007</p>
+    <h3>Bajaj Auto & Finserv</h3>
+    <p>Acquired a 14.5% stake in KTM Power Sports AG, which gave Bajaj entry into the global premium motorcycle segment. Demerger of Bajaj Auto and Bajaj Finserv Ltd. Bajaj Hindustan undertook aggressive greenfield capacity expansion making it India's largest ethanol producer by 2007.</p>
+  </div>
+  <div class="text-block" id="text-2">
+    <p class="year-label">2019 - 2020</p>
+    <h3>Chetak EV</h3>
+    <p>Re-entry into scooters with the Chetak EV (unveiled electric Chetak in October 2019 and launched it commercially in January 2020).</p>
+  </div>
+  <div class="text-block" id="text-3">
+    <p class="year-label">2021</p>
+    <h3>Market Cap Milestone</h3>
+    <p>Became the first two-wheeler company in the world to cross Rs 1 lakh crore market capitalization.</p>
+  </div>
+  <div class="text-block" id="text-4">
+    <p class="year-label">2022 - 2023</p>
+    <h3>Debt & Restructuring</h3>
+    <p>SBI filed an NCLT petition in 2022, which was withdrawn in 2023 following a debt-restructuring scheme (insolvency proceedings and debt restructuring).</p>
+  </div>
+</div>
+      </div>
+      <div class="right-panel">
+        <div id="chart-container"></div>
+      </div>
+    </div>
+  </div>
+</section>
+  <script src="scripts/stocks.js"></script>
+
+</body>
+</html>

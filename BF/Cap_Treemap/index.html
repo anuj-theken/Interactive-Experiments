@@ -2,133 +2,209 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.cdnfonts.com/css/reckless-neue');
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#FFFCF0; font-family:'Archivo',sans-serif; padding:20px; display:flex; flex-direction:column; align-items:center; }
-  .section, hr { width:100%; max-width:800px; }
-  h2 { color:#0f172a; text-align:center; font-size:19px; font-weight:700; margin-bottom:3px; font-family:'Reckless Neue','Reckless',serif; }
-  .sub { color:#64748b; text-align:center; font-size:13px; margin-bottom:12px; }
-  .src { color:#94a3b8; text-align:center; font-size:11px; margin-top:8px; }
+
+  body {
+    background:transparent;
+    font-family: 'Archivo', sans-serif;
+    padding:40px 20px;
+    display:flex;
+    justify-content:center;
+    min-height: 100vh;
+  }
+
+  .dashboard-wrapper {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .charts-row {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    width: 100%;
+  }
+
+  @media (max-width: 800px) {
+    .charts-row {
+      flex-direction: column;
+    }
+  }
+
+  .section {
+    flex: 1;
+    min-width: 0;
+  }
+
+  h2 {
+    color:#ffffff;
+    text-align:center;
+    font-size:28px; /* Slightly reduced header */
+    font-weight:700;
+    margin-bottom:8px;
+    letter-spacing: -0.5px;
+  }
+
+  .sub {
+    color:#94a3b8;
+    text-align:center;
+    font-size:13px; /* Reduced to 13px */
+    margin-bottom:24px;
+  }
+
+  .src {
+    color:#475569;
+    text-align:center;
+    font-size:13px; /* Reduced to 13px */
+    margin-top:20px;
+  }
+
   .src a { color:#6366f1; text-decoration:none; }
-  .src a:hover { text-decoration:underline; }
-  .section { margin-bottom:28px; }
-  hr { border:none; border-top:1px solid #e2e8f0; margin:8px 0 24px; }
-  canvas { display:block; width:100%; }
-  .tip {
-    position:fixed; pointer-events:none; display:none;
-    background:#FFFCF0; border:1px solid #e2e8f0; color:#0f172a;
-    font-size:13px; padding:8px 12px; border-radius:0; line-height:1.5; z-index:99;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+
+  .canvas-container {
+    position: relative;
+    width: 100%;
+  }
+
+  .canvas-border-box {
+    position: relative;
+    padding: 2px;
+    background: transparent;
+  }
+
+  .canvas-border-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image:
+        linear-gradient(to right, #e2e8f0 75%, rgba(255,255,255,0) 0%),
+        linear-gradient(to right, #e2e8f0 75%, rgba(255,255,255,0) 0%),
+        linear-gradient(to bottom, #e2e8f0 75%, rgba(255,255,255,0) 0%),
+        linear-gradient(to bottom, #e2e8f0 75%, rgba(255,255,255,0) 0%);
+    background-position: left top, left bottom, left top, right top;
+    background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+    background-size: 64px 2px, 64px 2px, 2px 64px, 2px 64px;
+    transition: opacity 0.4s ease;
+    opacity: 1;
+    z-index: 0;
+  }
+
+  .canvas-border-box.fade-border::before {
+    opacity: 0;
+  }
+
+  canvas {
+    display:block;
+    width:100%;
+    cursor: crosshair;
+    position: relative;
+    z-index: 1;
+  }
+
+  #tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: rgba(10, 22, 40, 0.98);
+    color: white;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-family: 'Archivo', sans-serif;
+    box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: none;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    min-width: 220px;
+  }
+
+  .tt-name {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .tt-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tt-val, .tt-share {
+    font-size: 18px; /* Reduced from 22px */
+    font-weight: 600;
+    display: block;
+  }
+
+  .tt-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #94a3b8;
+    letter-spacing: 0.8px;
+    margin-bottom: 2px;
+    display: block;
   }
 </style>
 </head>
 <body>
 
-<div class="section">
-  <h2>Top 10 NBFCs by Market Capitalisation</h2>
-  <p class="sub">As of 2 April 2026 &nbsp;|&nbsp; Values in INR Crores</p>
-  <canvas id="c1"></canvas>
-  <p class="src">Source: <a href="https://www.tijorifinance.com/sector/nbfc#constituents-sectors" target="_blank">Tijori Finance — NBFC Sector</a></p>
+<div id="tooltip"></div>
+
+<div class="dashboard-wrapper">
+  <div class="charts-row">
+    <div class="section">
+      <h2>Top 10 NBFCs by Market Cap</h2>
+      <p class="sub">As of 2 April 2026 | INR Crores</p>
+      <div class="canvas-container">
+        <div class="canvas-border-box"><canvas id="c1"></canvas></div>
+      </div>
+      <p class="src">Source: <a href="https://www.tijorifinance.com/sector/nbfc" target="_blank">Tijori Finance</a></p>
+    </div>
+
+    <div class="section">
+      <h2>Top 10 NBFCs by AUM</h2>
+      <p class="sub">As of 31 March 2025 | INR Crores</p>
+      <div class="canvas-container">
+        <div class="canvas-border-box"><canvas id="c2"></canvas></div>
+      </div>
+      <p class="src">Source: <a href="https://bfsi.eletsonline.com/indias-top100-nbfcs-ranking-2025/" target="_blank">BFSI Eletsonline</a></p>
+    </div>
+  </div>
 </div>
-
-<hr>
-
-<div class="section">
-  <h2>Top 10 NBFCs by AUM</h2>
-  <p class="sub">As of 31 March 2025 &nbsp;|&nbsp; Values in INR Crores</p>
-  <canvas id="c2"></canvas>
-  <p class="src">Source: <a href="https://bfsi.eletsonline.com/indias-top100-nbfcs-ranking-2025/" target="_blank">BFSI Eletsonline — India's Top 100 NBFCs Ranking 2025</a></p>
-</div>
-
-<div class="tip" id="tip"></div>
 
 <script>
-const COLORS = [
-  '#0a1628','#0d3b6e','#0b5ea8','#0e86c8','#10a8c4',
-  '#10c4a8','#2dd4a0','#6ee4b0','#a8edcc','#c8f5e0'
-];
-// Text color per tile: dark navy for the 4 lightest greens, white for the rest
-const TEXT_COLOR = {
-  '#10c4a8': '#022e22',
-  '#2dd4a0': '#043a2a',
-  '#6ee4b0': '#032e20',
-  '#a8edcc': '#021f15',
-  '#c8f5e0': '#011a10',
-};
-function textCol(hex)  { return TEXT_COLOR[hex] || '#ffffff'; }
-function textColV(hex) { return TEXT_COLOR[hex] ? 'rgba(2,30,16,0.75)' : 'rgba(255,255,255,0.82)'; }
+const tooltip = document.getElementById('tooltip');
 
-const FIXED_NAME_SZ = 12;
-const FIXED_VAL_SZ  = 11;
+const COLORS = ['#0f172a','#1e293b','#0b5ea8','#0e86c8','#10a8c4','#10c4a8','#2dd4a0','#6ee4b0','#a8edcc','#c8f5e0'];
+const TEXT_COLOR_MAP = { '#10c4a8': '#022e22', '#2dd4a0': '#043a2a', '#6ee4b0': '#032e20', '#a8edcc': '#021f15', '#c8f5e0': '#011a10' };
+const BRIGHT_COLORS = ['#38bdf8', '#818cf8'];
 
-const D1 = [
-  {n:'Bajaj Finance',        v:508501},
-  {n:'Shriram Finance',      v:169426},
-  {n:'Jio Financial',        v:153270},
-  {n:'Power Finance Corp',   v:131179},
-  {n:'Muthoot Finance',      v:130676},
-  {n:'Tata Capital',         v:129660},
-  {n:'Cholamandalam I&F',    v:116976},
-  {n:'REC Ltd',              v:84763},
-  {n:'Aditya Birla Capital', v:79309},
-  {n:'L&T Finance',          v:61232},
-];
-const D2 = [
-  {n:'Power Finance Corp',   v:1178087},
-  {n:'REC Ltd',              v:549786},
-  {n:'Tata Capital',         v:243896},
-  {n:'Shriram Finance',      v:243043},
-  {n:'Cholamandalam I&F',    v:199876},
-  {n:'Aditya Birla Capital', v:126350},
-  {n:'Muthoot Finance',      v:122000},
-  {n:'L&T Finance',          v:102314},
-  {n:'Bajaj Finance',        v:416661},
-  {n:'Jio Financial',        v:10053},
-];
+function textCol(hex)  { return TEXT_COLOR_MAP[hex] || '#ffffff'; }
+function textColV(hex) { return TEXT_COLOR_MAP[hex] ? 'rgba(2,30,16,0.65)' : 'rgba(255,255,255,0.75)'; }
+
+const D1 = [{n:'Bajaj Finance', v:508501}, {n:'Shriram Finance', v:169426}, {n:'Jio Financial', v:153270}, {n:'Power Finance Corp', v:131179}, {n:'Muthoot Finance', v:130676}, {n:'Tata Capital', v:129660}, {n:'Cholamandalam I&F', v:116976}, {n:'REC Ltd', v:84763}, {n:'Aditya Birla Capital', v:79309}, {n:'L&T Finance', v:61232}];
+const D2 = [{n:'Power Finance Corp', v:1178087}, {n:'REC Ltd', v:549786}, {n:'Tata Capital', v:243896}, {n:'Shriram Finance', v:243043}, {n:'Cholamandalam I&F', v:199876}, {n:'Aditya Birla Capital', v:126350}, {n:'Muthoot Finance', v:122000}, {n:'L&T Finance', v:102314}, {n:'Bajaj Finance', v:416661}, {n:'Jio Financial', v:10053}];
 
 function fmt(v){ return Math.round(v).toLocaleString('en-IN'); }
 
-function sliceDice(items, x, y, w, h, depth) {
-  if (!items.length) return [];
-  if (items.length === 1) return [{...items[0], x, y, w, h}];
-  const total = items.reduce((s,i) => s + i.v, 0);
-  const horiz = depth % 2 === 0;
-  const rects = [];
-  let pos = horiz ? x : y;
-  const full = horiz ? w : h;
-  for (let i = 0; i < items.length; i++) {
-    const size = (items[i].v / total) * full;
-    if (horiz) rects.push({...items[i], x: pos, y, w: size, h});
-    else       rects.push({...items[i], x, y: pos, w, h: size});
-    pos += size;
-  }
-  return rects;
-}
-
 function squarify(items, x, y, w, h) {
   if (!items.length) return [];
-  if (items.length === 1) return [{...items[0], x, y, w, h}];
   const total = items.reduce((s,i) => s + i.v, 0);
-  const area  = w * h;
+  const area = w * h;
   const rects = [];
-  let rem = [...items];
-  let cx = x, cy = y, cw = w, ch = h;
+  let rem = [...items], cx = x, cy = y, cw = w, ch = h;
+
   while (rem.length > 0) {
-    if (rem.length <= 2 || cw <= 0 || ch <= 0) {
-      sliceDice(rem, cx, cy, cw, ch, cw >= ch ? 0 : 1).forEach(r => rects.push(r));
-      break;
-    }
     const horiz = cw >= ch;
-    const side  = horiz ? ch : cw;
+    const side = horiz ? ch : cw;
     let row = [], rowSum = 0, prevRatio = Infinity;
     for (let i = 0; i < rem.length; i++) {
-      const next   = rem[i];
+      const next = rem[i];
       const newSum = rowSum + next.v;
-      const rowArea= (newSum / total) * area;
-      const rowW   = rowArea / side;
-      let worst    = 0;
+      const rowW = ((newSum / total) * area) / side;
+      let worst = 0;
       for (const it of [...row, next]) {
         const itH = ((it.v / total) * area) / rowW;
         worst = Math.max(worst, Math.max(rowW / itH, itH / rowW));
@@ -138,120 +214,94 @@ function squarify(items, x, y, w, h) {
       row.push(next);
       rowSum = newSum;
     }
-    const rowArea = (rowSum / total) * area;
-    const rowW    = rowArea / side;
+    const rowW = ((rowSum / total) * area) / side;
     let pos = horiz ? cy : cx;
     for (const it of row) {
       const itArea = (it.v / total) * area;
-      const itLen  = itArea / rowW;
-      if (horiz) rects.push({...it, x: cx,  y: pos, w: rowW, h: itLen});
-      else       rects.push({...it, x: pos, y: cy,  w: itLen, h: rowW});
+      const itLen = itArea / rowW;
+      if (horiz) rects.push({...it, x: cx, y: pos, w: rowW, h: itLen});
+      else rects.push({...it, x: pos, y: cy, w: itLen, h: rowW});
       pos += itLen;
     }
     rem = rem.slice(row.length);
-    if (horiz) { cx += rowW; cw -= rowW; }
-    else       { cy += rowW; ch -= rowW; }
+    if (horiz) { cx += rowW; cw -= rowW; } else { cy += rowW; ch -= rowW; }
   }
   return rects;
 }
 
-// Truncate text to fit maxW, always show at least first word + ellipsis
 function truncate(ctx, text, maxW) {
+  ctx.font = "bold 12px 'Archivo'"; // Enforced smaller font for measurement
   if (ctx.measureText(text).width <= maxW) return text;
   let t = text;
-  while (t.length > 2 && ctx.measureText(t + '…').width > maxW)
-    t = t.slice(0, -1);
+  while (t.length > 1 && ctx.measureText(t + '…').width > maxW) t = t.slice(0, -1);
   return t + '…';
 }
 
 function buildChart(canvasId, rawData) {
   const canvas = document.getElementById(canvasId);
-  const DPR    = window.devicePixelRatio || 1;
+  const parentBox = canvas.parentElement;
+  const ctx = canvas.getContext('2d');
+  const DPR = window.devicePixelRatio || 1;
   const sorted = [...rawData].sort((a,b) => b.v - a.v);
-  const colorMap = {};
-  sorted.forEach((d,i) => colorMap[d.n] = COLORS[i % COLORS.length]);
+  const totalVal = sorted.reduce((s, i) => s + i.v, 0);
 
-  const GAP = 0;
   let rects = [];
   let hoveredRect = null;
   let dashOffset = 0;
-  let animFrame  = null;
+  let animFrame = null;
 
-  function resize() {
+  function draw() {
     const W = canvas.parentElement.clientWidth;
-    const H = Math.round(W * 0.56);
-    canvas.width        = W * DPR;
-    canvas.height       = H * DPR;
+    const H = 440; // Reduced height by 20%
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
     canvas.style.height = H + 'px';
-    rects = squarify(sorted, GAP, GAP, W - GAP*2, H - GAP*2);
-    draw();
-  }
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
-  function drawTiles(ctx) {
-    rects.forEach(r => {
-      if (r.w < 1 || r.h < 1) return;
-      const rx = r.x, ry = r.y, rw = r.w, rh = r.h;
-      if (rw < 2 || rh < 2) return;
+    rects = squarify(sorted, 0, 0, W, H);
 
-      ctx.fillStyle = colorMap[r.n];
-      ctx.fillRect(rx, ry, rw, rh);
+    rects.forEach((r, i) => {
+      const col = COLORS[i % COLORS.length];
+      r.col = col;
+      r.rank = i;
+      ctx.fillStyle = col;
+      ctx.fillRect(r.x, r.y, r.w, r.h);
 
-      if (rw < 32 || rh < 22) return;
+      if (r.w > 40 && r.h > 40) {
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const maxW = r.w - 8;
 
-      const gap  = 4;
-      const totalTextH = FIXED_NAME_SZ + gap + FIXED_VAL_SZ;
-      const midX = rx + rw / 2;
-      const midY = ry + rh / 2;
-      const nameY = midY - totalTextH/2 + FIXED_NAME_SZ/2;
-      const valY  = nameY + FIXED_NAME_SZ/2 + gap + FIXED_VAL_SZ/2;
-      const maxW  = rw - 12;
+        ctx.font = "bold 12px 'Archivo'";
+        ctx.fillStyle = textCol(col);
+        ctx.fillText(truncate(ctx, r.n, maxW), r.x + r.w/2, r.y + r.h/2 - 9);
 
-      ctx.textAlign    = 'center';
-      ctx.textBaseline = 'middle';
-
-      const col = colorMap[r.n];
-
-      // Name
-      ctx.font      = `bold ${FIXED_NAME_SZ}px 'Archivo',sans-serif`;
-      ctx.fillStyle = textCol(col);
-      ctx.fillText(truncate(ctx, r.n, maxW), midX, nameY);
-
-      // Value
-      if (rh > 40) {
-        ctx.font      = `${FIXED_VAL_SZ}px 'Archivo',sans-serif`;
+        ctx.font = "400 11px 'Archivo'";
         ctx.fillStyle = textColV(col);
-        ctx.fillText(truncate(ctx, '₹' + fmt(r.v) + ' Cr', maxW), midX, valY);
+        ctx.fillText('₹' + fmt(r.v) + ' Cr', r.x + r.w/2, r.y + r.h/2 + 9);
       }
     });
+
+    if (hoveredRect) {
+      drawHoverOutline(ctx, hoveredRect, dashOffset);
+    }
   }
 
   function drawHoverOutline(ctx, r, offset) {
-    if (!r) return;
     const rx = r.x + 1, ry = r.y + 1, rw = r.w - 2, rh = r.h - 2;
-    const perimeter = 2 * (rw + rh);
-    const dashLen = 10, gapLen = 6;
-
     ctx.save();
-    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
-    ctx.lineWidth   = 2;
-    ctx.setLineDash([dashLen, gapLen]);
+    ctx.strokeStyle = 'rgba(255,255,255,1)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([48, 16]);
     ctx.lineDashOffset = -offset;
     ctx.strokeRect(rx, ry, rw, rh);
     ctx.restore();
   }
 
-  function draw() {
-    const ctx = canvas.getContext('2d');
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    ctx.clearRect(0, 0, canvas.width / DPR, canvas.height / DPR);
-    drawTiles(ctx);
-    if (hoveredRect) drawHoverOutline(ctx, hoveredRect, dashOffset);
-  }
-
   function startAnim() {
     if (animFrame) return;
     function loop() {
-      dashOffset = (dashOffset + 0.5) % 32;
+      dashOffset = (dashOffset + 1.2) % 64;
       draw();
       animFrame = requestAnimationFrame(loop);
     }
@@ -261,43 +311,52 @@ function buildChart(canvasId, rawData) {
   function stopAnim() {
     if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
     hoveredRect = null;
+    parentBox.classList.remove('fade-border');
+    tooltip.style.display = 'none';
     draw();
   }
 
-  // Tooltip
-  const tip = document.getElementById('tip');
   canvas.addEventListener('mousemove', e => {
-    const b  = canvas.getBoundingClientRect();
+    const b = canvas.getBoundingClientRect();
     const mx = (e.clientX - b.left);
     const my = (e.clientY - b.top);
-    const hit = rects.find(r => mx>=r.x && mx<=r.x+r.w && my>=r.y && my<=r.y+r.h);
+    const hit = rects.find(r => mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h);
+
     if (hit) {
+      parentBox.classList.add('fade-border');
+      const share = ((hit.v / totalVal) * 100).toFixed(1);
+      const headerColor = hit.rank < 2 ? BRIGHT_COLORS[hit.rank] : hit.col;
+
+      tooltip.innerHTML = `
+        <span class="tt-name" style="color: ${headerColor}">${hit.n}</span>
+        <div class="tt-row">
+            <div><span class="tt-label">Market Value</span><span class="tt-val">₹${fmt(hit.v)} Cr</span></div>
+            <div><span class="tt-label">Share of Total</span><span class="tt-share">${share}%</span></div>
+        </div>
+      `;
+      tooltip.style.display = 'block';
+
+      let tx = e.clientX + 20;
+      let ty = e.clientY + 20;
+      if (tx + 260 > window.innerWidth) tx = e.clientX - 270;
+      if (ty + 180 > window.innerHeight) ty = e.clientY - 190;
+
+      tooltip.style.left = tx + 'px';
+      tooltip.style.top = ty + 'px';
+
       if (hoveredRect !== hit) {
         hoveredRect = hit;
-        if (!animFrame) startAnim();
+        startAnim();
       }
-      tip.style.display = 'block';
-      tip.innerHTML = `<b>${hit.n}</b><br>₹${fmt(hit.v)} Cr`;
-      const tw = tip.offsetWidth, th = tip.offsetHeight;
-      const pad = 14;
-      let lx = e.clientX + pad;
-      let ly = e.clientY + pad;
-      if (lx + tw > window.innerWidth  - 8) lx = e.clientX - tw - pad;
-      if (ly + th > window.innerHeight - 8) ly = e.clientY - th - pad;
-      tip.style.left = lx + 'px';
-      tip.style.top  = ly + 'px';
     } else {
+      parentBox.classList.remove('fade-border');
       stopAnim();
-      tip.style.display = 'none';
     }
   });
-  canvas.addEventListener('mouseleave', () => {
-    stopAnim();
-    tip.style.display = 'none';
-  });
 
-  resize();
-  window.addEventListener('resize', resize);
+  canvas.addEventListener('mouseleave', stopAnim);
+  window.addEventListener('resize', draw);
+  document.fonts.ready.then(draw);
 }
 
 buildChart('c1', D1);

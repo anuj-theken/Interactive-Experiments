@@ -1,0 +1,92 @@
+#bajaj-scrolly-root {
+    --bg-scrolly: #fcfaf7;
+    --text-dark: #1c1c1c;
+    --text-mid: #555;
+    --border: rgba(0,0,0,0.07);
+    background: var(--bg-scrolly);
+}
+
+#bajaj-scrolly-root .scrolly-container {
+    display: grid;
+    grid-template-columns: 44% 1fr;
+    min-height: 100vh;
+    position: relative;
+}
+
+#bajaj-scrolly-root #panel-left {
+    padding: 0 52px;
+    border-right: 1px solid var(--border);
+}
+
+#bajaj-scrolly-root .header-section {
+    padding-top: 48px;
+    margin-bottom: 60px;
+}
+
+#bajaj-scrolly-root .panel-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    line-height: 1.0;
+    letter-spacing: -1px;
+    margin-bottom: 24px;
+}
+
+#bajaj-scrolly-root .scroll-text-block {
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#bajaj-scrolly-root .narrative {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    line-height: 1.4;
+    color: #ccc;
+    transition: color 0.8s ease;
+}
+
+#bajaj-scrolly-root .narrative.active {
+    color: var(--text-dark);
+}
+
+#bajaj-scrolly-root .narrative.active strong {
+    color: #c45e45;
+}
+
+#bajaj-scrolly-root #viz-container {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#bajaj-scrolly-root #bajaj-chart {
+    width: 100%;
+    height: 90%;
+}
+
+#bajaj-scrolly-root .legend {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+#bajaj-scrolly-root .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    color: var(--text-mid);
+    text-transform: uppercase;
+}
+
+#bajaj-scrolly-root .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}

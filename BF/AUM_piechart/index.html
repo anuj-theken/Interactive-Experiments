@@ -1,228 +1,188 @@
-<style>
-  .pie-wrap { display:flex; flex-direction:column; align-items:center; }
-  .pie-title { font-size:14px; font-weight:500; color:var(--color-text-primary); margin-bottom:8px; text-align:center; transition:opacity 0.4s; }
-  .legend-wrap { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
-  .leg-item { display:flex; align-items:center; gap:4px; font-size:11px; color:var(--color-text-secondary); }
-  .leg-swatch { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
-  .tooltip {
-    position:absolute; pointer-events:none; background:rgba(30,24,50,0.88);
-    color:#fff; border-radius:8px; padding:6px 11px; font-size:12px;
-    white-space:nowrap; opacity:0; transition:opacity 0.15s;
-    box-shadow:0 4px 16px rgba(0,0,0,0.18); z-index:10;
-  }
-  #btn-compare {
-    display:flex; align-items:center; gap:6px;
-    margin:0 auto 1.2rem;
-    padding:7px 18px; border-radius:20px; border:1.5px solid #7C6FF7;
-    background:transparent; color:#7C6FF7; font-size:13px; font-weight:500;
-    cursor:pointer; transition:background 0.2s, color 0.2s;
-  }
-  #btn-compare:hover { background:#7C6FF7; color:#fff; }
-  .pip { width:8px; height:8px; border-radius:50%; display:inline-block; }
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #0b0e14;
+            --card-bg: #0d1117;
+            --text-main: #f0f6fc;
+            --text-dim: #8b949e;
+            --border-color: #30363d;
+        }
 
-<div style="padding:1.5rem 0; position:relative;">
-  <div id="legend-shared" class="legend-wrap" style="margin-bottom:1.2rem;"></div>
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        }
 
-  <button id="btn-compare">
-    <span class="pip" style="background:#7C6FF7;opacity:0.5;"></span>
-    <span class="pip" style="background:#7C6FF7; margin-left:-5px;"></span>
-    Overlay to compare
-  </button>
+        /* The Main Container with Dotted Border */
+        .dashboard-container {
+            background-color: var(--card-bg);
+            border: 2px dotted #444c56;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+        }
 
-  <div id="chart-area" style="display:grid; grid-template-columns:1fr 1fr; gap:24px; transition:all 0.5s;">
-    <div class="pie-wrap" id="wrap2018">
-      <div class="pie-title" id="title2018">2018</div>
-      <div style="position:relative;">
-        <canvas id="c2018" width="280" height="280" style="display:block;cursor:default;"></canvas>
-        <div class="tooltip" id="tip2018"></div>
-      </div>
+        /* Legend Styling */
+        .legend-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .leg-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-dim);
+            white-space: nowrap;
+        }
+
+        .leg-swatch {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+
+        /* Responsive Grid: 1 column on mobile, 2 on web */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* Mobile default */
+            gap: 40px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-grid {
+                grid-template-columns: 1fr 1fr; /* Web version */
+            }
+        }
+
+        .chart-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <div id="legend-shared" class="legend-wrap"></div>
+
+        <div class="chart-grid">
+            <div class="chart-wrapper">
+                <div class="chart-title">2018 MARKET SHARE</div>
+                <canvas id="canvas2018" width="350" height="350"></canvas>
+            </div>
+            <div class="chart-wrapper">
+                <div class="chart-title">2025 PROJECTED</div>
+                <canvas id="canvas2025" width="350" height="350"></canvas>
+            </div>
+        </div>
     </div>
-    <div class="pie-wrap" id="wrap2025">
-      <div class="pie-title" id="title2025">2025</div>
-      <div style="position:relative;">
-        <canvas id="c2025" width="280" height="280" style="display:block;cursor:default;"></canvas>
-        <div class="tooltip" id="tip2025"></div>
-      </div>
-    </div>
-  </div>
 
-  <div id="overlay-area" style="display:none; justify-content:center; align-items:center; flex-direction:column;">
-    <div style="display:flex; gap:16px; margin-bottom:10px; justify-content:center;">
-      <span class="leg-item"><span class="leg-swatch" style="background:rgba(124,111,247,0.85); border-radius:50%;"></span><span style="font-size:12px; color:var(--color-text-secondary);">2018 (outer)</span></span>
-      <span class="leg-item"><span class="leg-swatch" style="background:rgba(77,200,196,0.85); border-radius:50%;"></span><span style="font-size:12px; color:var(--color-text-secondary);">2025 (inner)</span></span>
-    </div>
-    <div style="position:relative; width:300px; height:300px;">
-      <canvas id="cOverlay" width="300" height="300" style="display:block;cursor:default;"></canvas>
-      <div class="tooltip" id="tipOverlay"></div>
-    </div>
-  </div>
-</div>
+    <script>
+        const LABELS = [
+            'Mortgages', 'Consumer lending', 'MSME lending',
+            'Commercial lending', 'Loan against securities', 'Rural lending',
+            'Captive 2W/3W finance', 'Open market 2W/3W finance', 'Others'
+        ];
 
-<script>
-const LABELS = ['Mortgages','Consumer lending','MSME lending','Commercial lending',
-  'Loan against securities','Rural lending','Captive 2W/3W finance',
-  'Open market 2W/3W finance','Others'];
-const COLORS = ['#7C6FF7','#4DC8C4','#F7A44D','#F06B6B','#5BB8F5',
-  '#A8D96C','#F76FAD','#FFD166','#9B8EBB'];
-const D2018 = [29,19,14,11,5,8,3,2,9];
-const D2025 = [31,21,12,7,7,6,3,2,11];
+        const COLORS = [
+            '#7C6FF7', '#4DC8C4', '#F7A44D', '#F06B6B', '#5BB8F5',
+            '#A8D96C', '#F76FAD', '#FFD166', '#9B8EBB'
+        ];
 
-document.getElementById('legend-shared').innerHTML = LABELS.map((l,i)=>
-  `<span class="leg-item"><span class="leg-swatch" style="background:${COLORS[i]}"></span>${l}</span>`
-).join('');
+        const DATA_2018 = [29, 19, 14, 11, 5, 8, 3, 2, 9];
+        const DATA_2025 = [31, 21, 12, 7, 7, 6, 3, 2, 11];
 
-function hexToRgba(hex, a) {
-  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
-  return `rgba(${r},${g},${b},${a})`;
-}
+        // 1. Generate Legend
+        const legendContainer = document.getElementById('legend-shared');
+        legendContainer.innerHTML = LABELS.map((label, i) => `
+            <div class="leg-item">
+                <div class="leg-swatch" style="background: ${COLORS[i]}"></div>
+                ${label}
+            </div>
+        `).join('');
 
-function buildSlices(data) {
-  const total = data.reduce((a,b)=>a+b,0);
-  let ang = -Math.PI/2, slices=[];
-  data.forEach((v,i)=>{ const sw=(v/total)*Math.PI*2; slices.push({start:ang,end:ang+sw,i,val:v,prog:0}); ang+=sw; });
-  return slices;
-}
+        // 2. Chart Drawing Function
+        function drawPie(canvasId, data) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(centerX, centerY) - 10;
 
-function makePie(canvasId, tipId, data) {
-  const canvas=document.getElementById(canvasId), tip=document.getElementById(tipId);
-  const ctx=canvas.getContext('2d');
-  const W=canvas.width, H=canvas.height, cx=W/2, cy=H/2, R=W/2-22;
-  const LIFT=16, SPEED=0.13;
-  let slices=buildSlices(data), hoveredIdx=-1, rafId=null;
+            let startAngle = -Math.PI / 2;
+            const total = data.reduce((a, b) => a + b, 0);
 
-  function draw() {
-    ctx.clearRect(0,0,W,H);
-    ctx.save(); ctx.shadowColor='rgba(60,40,100,0.15)'; ctx.shadowBlur=16; ctx.shadowOffsetY=5;
-    slices.forEach(s=>{
-      const mid=(s.start+s.end)/2, ox=Math.cos(mid)*LIFT*s.prog, oy=Math.sin(mid)*LIFT*s.prog;
-      ctx.beginPath(); ctx.moveTo(cx+ox,cy+oy); ctx.arc(cx+ox,cy+oy,R,s.start,s.end);
-      ctx.closePath(); ctx.fillStyle=COLORS[s.i]; ctx.fill();
-      ctx.strokeStyle='rgba(255,255,255,0.75)'; ctx.lineWidth=2; ctx.stroke();
-    });
-    ctx.restore();
-    slices.forEach(s=>{
-      const mid=(s.start+s.end)/2, ox=Math.cos(mid)*LIFT*s.prog, oy=Math.sin(mid)*LIFT*s.prog;
-      if((s.end-s.start)>0.18){
-        ctx.save(); ctx.fillStyle='#fff'; ctx.font='500 12px sans-serif';
-        ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.shadowColor='rgba(0,0,0,0.25)'; ctx.shadowBlur=3;
-        ctx.fillText(s.val+'%', cx+Math.cos(mid)*R*0.65+ox, cy+Math.sin(mid)*R*0.65+oy);
-        ctx.restore();
-      }
-    });
-  }
+            data.forEach((value, i) => {
+                const sliceAngle = (value / total) * 2 * Math.PI;
 
-  function animate() {
-    let dirty=false;
-    slices.forEach(s=>{ const t=s.i===hoveredIdx?1:0, d=t-s.prog; if(Math.abs(d)>0.005){s.prog+=d*SPEED;dirty=true;}else s.prog=t; });
-    draw();
-    rafId = dirty ? requestAnimationFrame(animate) : null;
-  }
-  function startAnim(){ if(!rafId) rafId=requestAnimationFrame(animate); }
+                // Draw Slice
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+                ctx.closePath();
 
-  function getSlice(mx,my){
-    const dx=mx-cx, dy=my-cy, dist=Math.sqrt(dx*dx+dy*dy);
-    if(dist>R+LIFT||dist<4) return -1;
-    let a=Math.atan2(dy,dx); if(a<-Math.PI/2) a+=Math.PI*2;
-    for(let s of slices){ let st=s.start,en=s.end; if(st<-Math.PI/2){st+=Math.PI*2;en+=Math.PI*2;} if(a>=st&&a<=en)return s.i; }
-    return -1;
-  }
+                ctx.fillStyle = COLORS[i];
+                ctx.fill();
 
-  canvas.addEventListener('mousemove',e=>{
-    const rect=canvas.getBoundingClientRect(), sx=canvas.width/rect.width, sy=canvas.height/rect.height;
-    const mx=(e.clientX-rect.left)*sx, my=(e.clientY-rect.top)*sy, idx=getSlice(mx,my);
-    if(idx!==hoveredIdx){hoveredIdx=idx;startAnim();}
-    if(idx>=0){tip.style.opacity='1';tip.style.left=(e.clientX-rect.left+12)+'px';tip.style.top=(e.clientY-rect.top-28)+'px';tip.textContent=LABELS[idx]+': '+data[idx]+'%';}
-    else tip.style.opacity='0';
-  });
-  canvas.addEventListener('mouseleave',()=>{hoveredIdx=-1;startAnim();tip.style.opacity='0';});
-  draw();
-}
+                // Slice Border
+                ctx.strokeStyle = '#0d1117';
+                ctx.lineWidth = 2;
+                ctx.stroke();
 
-function makeOverlay(canvasId, tipId) {
-  const canvas=document.getElementById(canvasId), tip=document.getElementById(tipId);
-  const ctx=canvas.getContext('2d');
-  const W=canvas.width, H=canvas.height, cx=W/2, cy=H/2;
-  const Ro=W/2-10, Ri=W/2-10;
-  const slicesOuter=buildSlices(D2018), slicesInner=buildSlices(D2025);
-  const outerR=Ro, innerR=Math.round(Ro*0.58);
-  let hoveredIdx=-1;
+                // Add Percentage Text
+                if (value > 3) {
+                    const middleAngle = startAngle + sliceAngle / 2;
+                    const textX = centerX + Math.cos(middleAngle) * (radius * 0.7);
+                    const textY = centerY + Math.sin(middleAngle) * (radius * 0.7);
 
-  function drawRing(slices, r1, r2, alpha, highlight) {
-    slices.forEach(s=>{
-      const isHov = s.i===hoveredIdx;
-      const mid=(s.start+s.end)/2;
-      const or = isHov ? r1+8 : r1;
-      ctx.beginPath();
-      ctx.moveTo(cx+Math.cos(s.start)*r2, cy+Math.sin(s.start)*r2);
-      ctx.arc(cx,cy,or,s.start,s.end);
-      ctx.arc(cx,cy,r2,s.end,s.start,true);
-      ctx.closePath();
-      ctx.fillStyle=hexToRgba(COLORS[s.i], isHov?Math.min(alpha+0.15,1):alpha);
-      ctx.fill();
-      ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=1.5; ctx.stroke();
-      if((s.end-s.start)>0.2){
-        const lr=(or+r2)/2, lx=cx+Math.cos(mid)*lr, ly=cy+Math.sin(mid)*lr;
-        ctx.save(); ctx.fillStyle='#fff'; ctx.font='500 11px sans-serif';
-        ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.shadowColor='rgba(0,0,0,0.3)'; ctx.shadowBlur=3;
-        ctx.fillText(s.val+'%',lx,ly); ctx.restore();
-      }
-    });
-  }
+                    ctx.fillStyle = "white";
+                    ctx.font = "bold 14px sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.shadowColor = "rgba(0,0,0,0.5)";
+                    ctx.shadowBlur = 4;
+                    ctx.fillText(value + "%", textX, textY);
+                    ctx.shadowBlur = 0; // Reset shadow
+                }
 
-  function draw() {
-    ctx.clearRect(0,0,W,H);
-    ctx.save(); ctx.shadowColor='rgba(40,30,80,0.12)'; ctx.shadowBlur=14; ctx.shadowOffsetY=4;
-    drawRing(slicesOuter, outerR, innerR+2, 0.78);
-    ctx.restore();
-    drawRing(slicesInner, innerR, 18, 0.92);
-  }
+                startAngle += sliceAngle;
+            });
+        }
 
-  function getIdx(mx,my){
-    const dx=mx-cx, dy=my-cy, dist=Math.sqrt(dx*dx+dy*dy);
-    let a=Math.atan2(dy,dx); if(a<-Math.PI/2) a+=Math.PI*2;
-    function findInRing(slices){ for(let s of slices){let st=s.start,en=s.end;if(st<-Math.PI/2){st+=Math.PI*2;en+=Math.PI*2;}if(a>=st&&a<=en)return s.i;} return -1; }
-    if(dist<=innerR) return {ring:'2025', idx:findInRing(slicesInner)};
-    if(dist<=outerR+8) return {ring:'2018', idx:findInRing(slicesOuter)};
-    return {ring:null,idx:-1};
-  }
-
-  canvas.addEventListener('mousemove',e=>{
-    const rect=canvas.getBoundingClientRect(), sx=canvas.width/rect.width, sy=canvas.height/rect.height;
-    const mx=(e.clientX-rect.left)*sx, my=(e.clientY-rect.top)*sy;
-    const {ring,idx}=getIdx(mx,my);
-    if(idx!==hoveredIdx){hoveredIdx=idx;draw();}
-    if(idx>=0&&ring){
-      const val=ring==='2018'?D2018[idx]:D2025[idx];
-      tip.style.opacity='1';tip.style.left=(e.clientX-rect.left+12)+'px';tip.style.top=(e.clientY-rect.top-28)+'px';
-      tip.textContent=LABELS[idx]+' ('+ring+'): '+val+'%';
-    } else tip.style.opacity='0';
-  });
-  canvas.addEventListener('mouseleave',()=>{hoveredIdx=-1;draw();tip.style.opacity='0';});
-  draw();
-}
-
-makePie('c2018','tip2018',D2018);
-makePie('c2025','tip2025',D2025);
-
-let overlayBuilt=false, overlayMode=false;
-const btn=document.getElementById('btn-compare');
-const chartArea=document.getElementById('chart-area');
-const overlayArea=document.getElementById('overlay-area');
-
-btn.addEventListener('click',()=>{
-  overlayMode=!overlayMode;
-  if(overlayMode){
-    chartArea.style.display='none';
-    overlayArea.style.display='flex';
-    btn.innerHTML=`<span class="pip" style="background:#7C6FF7;"></span> Back to side by side`;
-    if(!overlayBuilt){makeOverlay('cOverlay','tipOverlay');overlayBuilt=true;}
-  } else {
-    chartArea.style.display='grid';
-    overlayArea.style.display='none';
-    btn.innerHTML=`<span class="pip" style="background:#7C6FF7;opacity:0.5;"></span><span class="pip" style="background:#7C6FF7; margin-left:-5px;"></span> Overlay to compare`;
-  }
-});
-</script>
+        // Initialize
+        drawPie('canvas2018', DATA_2018);
+        drawPie('canvas2025', DATA_2025);
+    </script>
+</body>
+</html>

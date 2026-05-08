@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bajaj Family: Cinematic Transitions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #fcfaf7;
+            --text-dark: #1c1c1c;
+            --text-mid: #555;
+            --border: rgba(0,0,0,0.07);
+        }
+        body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--text-dark); overflow-x: hidden; }
+        .container { display: grid; grid-template-columns: 44% 1fr; min-height: 100vh; }
+        #panel-left { padding: 0 52px; border-right: 1px solid var(--border); }
+        .header-section { padding-top: 48px; margin-bottom: 60px; }
+        .panel-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            line-height: 1.0;
+            letter-spacing: -1px;
+            margin-bottom: 24px;
+        }
+        .scroll-text-block {
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .narrative {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            line-height: 1.4;
+            color: #ccc;
+            transition: color 0.8s ease;
+        }
+        .narrative strong { color: inherit; transition: all 0.8s; }
+        .narrative.active { color: var(--text-dark); }
+        .narrative.active strong { color: #c45e45; }
+
+        #viz-container { position: sticky; top: 0; height: 100vh; width: 100%; display: flex; align-items: center; justify-content: center; }
+        #chart { width: 100%; height: 90%; }
+
+        .legend { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--text-mid); text-transform: uppercase; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="panel-left">
+        <div class="header-section">
+            <div class="panel-title">Bajaj Family Tree</div>
+            <div class="legend">
+                <div class="legend-item"><span class="dot" style="background:#b08d57"></span> G1</div>
+                <div class="legend-item"><span class="dot" style="background:#c5a367"></span> G2</div>
+                <div class="legend-item"><span class="dot" style="background:#4a7c5f"></span> G3</div>
+                <div class="legend-item"><span class="dot" style="background:#c45e45"></span> G4</div>
+                <div class="legend-item"><span class="dot" style="background:#e8a98c"></span> G5</div>
+            </div>
+        </div>
+
+        <div class="scroll-text-block" id="trigger-allies">
+            <p class="narrative" id="text-allies">
+                In any case, alliances were formed: <strong>Rahul, Shekhar, Madhur, and Niraj</strong> on one side;
+            </p>
+        </div>
+
+        <div class="scroll-text-block" id="trigger-shishir">
+            <p class="narrative" id="text-shishir">
+                ... <strong>Shishir and Kushagra</strong> on the other.
+            </p>
+        </div>
+
+        <div style="height: 40vh;"></div>
+    </div>
+
+    <div id="viz-container">
+        <div id="chart"></div>
+    </div>
+</div>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+const P = { g1: '#b08d57', g2: '#c5a367', g3d: '#4a7c5f', g3l: '#76a88d', g4d: '#c45e45', g4l: '#d4826a', g5: '#e8a98c' };
+
+// Added "id" to every node to ensure smooth ECharts transitions (morphing)
+const rawData = [{
+    id: 'g1',
+    name: 'Bachhraj Bajaj\n(Patriarch)',
+    itemStyle: { color: P.g1 },
+    children: [{
+        id: 'g2',
+        name: 'Jamnalal &\nJanaki Devi',
+        itemStyle: { color: P.g2 },
+        children: [
+            {
+                id: 'g3_ram',
+                name: 'Ramkrishna &\nSavitriben',
+                itemStyle: { color: P.g3d },
+                children: [
+                    { id: 'shekhar', name: 'Shekhar Bajaj', value: 20, itemStyle: { color: P.g3l } },
+                    { id: 'madhur', name: 'Madhur Bajaj', value: 20, itemStyle: { color: P.g3l } },
+                    { id: 'niraj', name: 'Niraj Bajaj', value: 20, itemStyle: { color: P.g3l } }
+                ]
+            },
+            {
+                id: 'g3_kamal',
+                name: 'Kamalnayan &\nRupaben',
+                itemStyle: { color: P.g4d },
+                children: [
+                    {
+                        id: 'rahul',
+                        name: 'Rahul Bajaj\n(Late Chairman)',
+                        itemStyle: { color: P.g4l },
+                        children: [
+                            { id: 'rajiv', name: 'Rajiv Bajaj', value: 15, itemStyle: { color: P.g5 } },
+                            { id: 'sanjiv', name: 'Sanjiv Bajaj', value: 15, itemStyle: { color: P.g5 } },
+                            { id: 'sunaina', name: 'Sunaina Kejriwal', value: 15, itemStyle: { color: P.g5 } }
+                        ]
+                    },
+                    {
+                        id: 'shishir',
+                        name: 'Shishir Bajaj',
+                        itemStyle: { color: P.g4l },
+                        children: [
+                            { id: 'kushagra', name: 'Kushagra Bajaj', value: 15, itemStyle: { color: P.g5 } }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }]
+}];
+
+const chart = echarts.init(document.getElementById('chart'));
+
+function renderChart(data) {
+    chart.setOption({
+        animationDuration: 1500,
+        animationDurationUpdate: 1200,
+        animationEasingUpdate: 'cubicInOut',
+        series: [{
+            type: 'sunburst',
+            id: 'main-series',
+            data: data,
+            radius: ['0%', '90%'],
+            nodeClick: false,
+            sort: null,
+            startAngle: 90,
+            levels: [
+                {},
+                { r0: '0%', r: '15%' },
+                { r0: '15%', r: '30%' },
+                { r0: '30%', r: '50%' },
+                { r0: '50%', r: '75%' },
+                { r0: '75%', r: '92%' }
+            ],
+            label: { rotate: 'tangential', fontSize: 10, fontFamily: 'DM Sans', color: '#2a2a2a' },
+            itemStyle: { borderWidth: 2, borderColor: '#fff' }
+        }]
+    }, {
+        replaceMerge: ['series'] // This is the secret for non-choppy updates
+    });
+}
+
+function applyOpacity(nodes, targetIds) {
+    return nodes.map(node => {
+        const newNode = { ...node };
+        // If targetIds is empty, show all. Otherwise check if this node OR any of its children are in the highlight list
+        const isHighlighted = targetIds.length === 0 || targetIds.includes(node.id);
+
+        const opacity = isHighlighted ? 1 : 0.15;
+
+        newNode.itemStyle = { ...node.itemStyle, opacity: opacity };
+        newNode.label = { ...node.label, opacity: opacity };
+
+        if (node.children) {
+            newNode.children = applyOpacity(node.children, targetIds);
+        }
+        return newNode;
+    });
+}
+
+// Initial render
+renderChart(rawData);
+
+// ScrollTriggers with Highlight IDs
+const groupA = ['shekhar', 'madhur', 'niraj', 'rahul',  ];
+const groupB = ['shishir', 'kushagra', ];
+
+ScrollTrigger.create({
+    trigger: "#trigger-allies",
+    start: "top 50%",
+    end: "bottom 50%",
+    onEnter: () => {
+        renderChart(applyOpacity(rawData, groupA));
+        document.getElementById('text-allies').classList.add('active');
+    },
+    onLeaveBack: () => {
+        renderChart(rawData);
+        document.getElementById('text-allies').classList.remove('active');
+    }
+});
+
+ScrollTrigger.create({
+    trigger: "#trigger-shishir",
+    start: "top 50%",
+    end: "bottom 50%",
+    onEnter: () => {
+        renderChart(applyOpacity(rawData, groupB));
+        document.getElementById('text-shishir').classList.add('active');
+    },
+    onLeaveBack: () => {
+        renderChart(applyOpacity(rawData, groupA));
+        document.getElementById('text-shishir').classList.remove('active');
+    }
+});
+
+window.addEventListener("resize", () => chart.resize());
+</script>
+</body>
+</html>

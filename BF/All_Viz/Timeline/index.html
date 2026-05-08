@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bajaj Group History</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        :root {
+            --brand-blue: #0F5FBF;
+            --bg-cream: #F5F2E8;
+            --text-grey: #666;
+            --light-grey: #999;
+        }
+        body { margin: 0; font-family: 'Reckless', Helvetica, Arial, sans-serif; background: var(--bg-cream); }
+
+        .timeline-header {
+            padding: 40px 60px 0 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .timeline-header-left {
+            display: flex;
+            flex-direction: column;
+        }
+        .timeline-header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 800;
+            color: #222;
+            letter-spacing: -0.5px;
+            font-family: 'Reckless';
+        }
+        .timeline-header p {
+            color: var(--text-grey);
+            font-size: 18px;
+            margin: 10px 0 0 0;
+            font-family: 'Reckless';
+        }
+        .legend {
+            font-size: 14px;
+            color: var(--light-grey);
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        .dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: var(--brand-blue);
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .desktop-only { display: block; }
+        .mobile-only { display: none; padding: 20px 40px; }
+
+        .timeline-scroll-wrapper {
+            width: 100vw;
+            overflow-x: auto;
+            padding-top: 20px;
+            box-sizing: border-box;
+        }
+
+        #main {
+            margin-top: 0;
+            /* Reduced width to match the tighter spacing */
+            width: 5500px;
+            height: 450px;
+        }
+
+        .timeline-scroll-wrapper::-webkit-scrollbar { height: 6px; }
+        .timeline-scroll-wrapper::-webkit-scrollbar-thumb {
+            background-color: var(--brand-blue);
+            border-radius: 10px;
+        }
+        .timeline-scroll-wrapper::-webkit-scrollbar-track {
+            background: #d9e4f1;
+            margin: 0 60px;
+        }
+
+        @media (max-width: 768px) {
+            .timeline-header {
+                padding: 40px 45px 20px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .legend {
+                position: fixed;
+                top: 135px;
+                right: 20px;
+                background: rgba(245, 242, 232, 0.9);
+                padding: 8px 12px;
+                border-radius: 20px;
+                z-index: 1000;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                backdrop-filter: blur(4px);
+            }
+            .desktop-only { display: none; }
+            .mobile-only { display: block; }
+            .vertical-timeline {
+                border-left: 2px solid var(--brand-blue);
+                margin-left: 10px;
+                padding-left: 30px;
+                position: relative;
+            }
+            .timeline-item {
+                position: relative;
+                margin-bottom: 40px;
+                text-align: left;
+            }
+            .timeline-item::before {
+                content: '';
+                position: absolute;
+                left: -41px;
+                top: 5px;
+                width: 15px;
+                height: 15px;
+                background: var(--brand-blue);
+                border: 3px solid var(--bg-cream);
+                border-radius: 50%;
+            }
+            .m-date { color: var(--light-grey); font-weight: bold; font-size: 14px; font-family: 'Reckless'; }
+            .m-title { color: var(--brand-blue); font-weight: bold; font-size: 20px; margin: 8px 0; font-family: 'Reckless'; }
+            .m-desc {
+                color: var(--text-grey);
+                font-size: 15px;
+                line-height: 1.6;
+                max-width: 280px;
+                font-family: 'Archivo';
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="timeline-header">
+        <div class="timeline-header-left">
+            <h1>The Legacy of Bajaj Group</h1>
+            <p>From industrial roots to a global financial powerhouse.</p>
+        </div>
+        <div class="legend"><span class="dot"></span> Milestone Events</div>
+    </header>
+
+    <div class="desktop-only">
+        <div class="timeline-scroll-wrapper">
+            <div id="main"></div>
+        </div>
+    </div>
+
+    <div class="mobile-only">
+        <div class="vertical-timeline" id="mobile-list"></div>
+    </div>
+
+    <script>
+        const data = [
+            { date: '1905', title: 'Industrial Roots', desc: 'Bachhraj Bajaj establishes a cotton ginning factory in Wardha, Maharashtra.' },
+            { date: '1906', title: 'Bachhraj Passes Away', desc: 'Jamnalal Bajaj inherits his adopted grandfather Bachraj’s business empire at the age of 17.' },
+            { date: '1915', title: 'Bombay Expansion', desc: 'Jamnalal Bajaj opens an office in Bombay and registers the business as Bachhraj Jamnalal.' },
+            { date: '1926', title: 'Day One', desc: 'Jamnalal formally establishes the Bajaj Group.' },
+            { date: '1945', title: 'Bachhraj Trading Pvt. Ltd.', desc: 'Incorporated as a trading entity.' },
+            { date: '1960', title: 'IPO', desc: 'Bachhraj Trading Pvt. Ltd. is rechristened Bajaj Auto and becomes a public company.' },
+            { date: '1987', title: 'Captive Financing', desc: 'Bajaj Auto Finance Ltd. is incorporated and offers credit primarily to Bajaj’s customers.' },
+            { date: '2001', title: 'Insurance JVs', desc: 'Bajaj Allianz Life Insurance and Bajaj Allianz General Insurance are announced.' },
+            { date: '2007', title: 'Financial Focus', desc: 'Bajaj Finserv Ltd. forms in April via a demerger from Bajaj Auto Limited.' },
+            { date: '2009', title: 'Family Schism', desc: 'Shishir and Kushagra separate from the Group, taking the sugar, power, and consumer care businesses.' },
+            { date: '2015', title: 'No Cost EMI Marketplace', desc: 'Bajaj Mall launches.' },
+            { date: '2018', title: 'Competing with Policybazaar', desc: 'Bajaj Markets launches.' },
+            { date: '2018', title: 'Business Empire', desc: 'Bajaj Group becomes the fourth largest Indian business group by market capitalisation.' },
+            { date: '2019', title: 'Easy Trading', desc: 'Bajaj Broking launches.' },
+            { date: '2020', title: 'Death of a Mentor', desc: 'Nanoo Pamnani passes away.' },
+            { date: '2022', title: 'End of an Era', desc: 'Rahul Bajaj passes away.' },
+            { date: '2024', title: 'Another IPO', desc: 'Bajaj Housing Finance goes public on 16 September.' },
+            { date: '2025', title: 'Musical Chairs', desc: 'Rajeev Jain is succeeded by Anup Saha as MD, but Saha steps down and Jain returns.' },
+            { date: '2026', title: 'Upward and Onward', desc: 'Bajaj Finance’s assets under management crosses Rs 5 lakh crore in FY26.' }
+        ];
+
+        function forceWordWrap(text, maxCharsPerLine) {
+            const words = text.split(' ');
+            let lines = [];
+            let currentLine = '';
+            words.forEach(word => {
+                if (currentLine.length + word.length > maxCharsPerLine) {
+                    lines.push(currentLine.trim());
+                    currentLine = word + ' ';
+                } else {
+                    currentLine += word + ' ';
+                }
+            });
+            lines.push(currentLine.trim());
+            return lines.join('\n');
+        }
+
+        const mobileList = document.getElementById('mobile-list');
+        data.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'timeline-item';
+            div.innerHTML = `<div class="m-date">${item.date}</div><div class="m-title">${item.title}</div><div class="m-desc">${item.desc}</div>`;
+            mobileList.appendChild(div);
+        });
+
+        const chartDom = document.getElementById('main');
+        const myChart = echarts.init(chartDom);
+
+        const horizontalSpacing = 280; // Reduced from 380 for tighter layout
+
+        const option = {
+            silent: true,
+            grid: { left: 60, right: 60, top: 0, bottom: 0 },
+            xAxis: { type: 'value', show: false, min: 0, max: (data.length - 1) * horizontalSpacing },
+            yAxis: { type: 'value', show: false, min: 0, max: 100 },
+            series: [{
+                type: 'line',
+                data: data.map((_, i) => [i * horizontalSpacing, 75]),
+                lineStyle: { color: '#0F5FBF', width: 4 },
+                symbol: 'circle',
+                symbolSize: 18,
+                itemStyle: { color: '#0F5FBF', borderWidth: 4, borderColor: '#F5F2E8' },
+                label: {
+                    show: true,
+                    position: 'bottom',
+                    offset: [-9, 10],
+                    align: 'left',
+                    formatter: (p) => {
+                        const item = data[p.dataIndex];
+                        const wrappedDesc = forceWordWrap(item.desc, 32); // Slightly narrower wrap for tighter spacing
+                        return `{d|${item.date}}\n{t|${item.title}}\n{desc|${wrappedDesc}}`;
+                    },
+                    rich: {
+                        d: { color: '#999', fontWeight: 'bold', fontSize: 14, align: 'left', padding: [0,0,8,0], fontFamily: 'Reckless' },
+                        t: { color: '#0F5FBF', fontWeight: 'bold', fontSize: 18, align: 'left', padding: [0,0,12,0], fontFamily: 'Reckless' },
+                        desc: { color: '#666', fontSize: 14, lineHeight: 22, align: 'left', fontFamily: 'Archivo' }
+                    }
+                }
+            }]
+        };
+        myChart.setOption(option);
+    </script>
+</body>
+</html>

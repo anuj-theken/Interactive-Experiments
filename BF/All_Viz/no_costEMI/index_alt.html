@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retailer hidden cost dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --midnight: #0D1117;
+    --deep-navy: #1A3A6B;
+    --royal-blue: #0F5FBF;
+    --powder-blue: #C2D9F5;
+    --sage-green: #C4DDC4;
+    --silver-grey: #B8C4CC;
+    --ivory: #F5F2E8;
+    --ivory-dim: #ECE7D4;
+
+    --font-sans: 'Archivo', system-ui, sans-serif;
+    --font-serif: 'Fraunces', Georgia, serif;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 14px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-family: var(--font-sans);
+    color: var(--midnight);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+  .page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+
+  .dashboard {
+    width: 100%;
+    max-width: 980px;
+    background: #FFFFFF;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(13,17,23,0.06);
+    box-shadow: 0 12px 40px rgba(13,17,23,0.06), 0 2px 8px rgba(13,17,23,0.04);
+    overflow: hidden;
+  }
+
+  .header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid rgba(13,17,23,0.06);
+    background: linear-gradient(180deg, #FFFFFF 0%, var(--ivory) 100%);
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--royal-blue);
+    margin: 0 0 8px;
+  }
+
+  .title {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 26px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
+    color: var(--midnight);
+  }
+
+  .title em {
+    font-style: italic;
+    color: var(--deep-navy);
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: rgba(13,17,23,0.6);
+    margin: 0;
+    max-width: 60ch;
+    line-height: 1.5;
+  }
+
+  .body { padding: 24px 32px 28px; }
+
+  .metric-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .metric {
+    background: var(--ivory);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    border: 1px solid transparent;
+    transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+    position: relative;
+  }
+
+  .metric.clickable {
+    cursor: pointer;
+    background: #FFFFFF;
+    border-color: rgba(13,17,23,0.1);
+    box-shadow: 0 1px 0 rgba(13,17,23,0.04), 0 4px 12px rgba(13,17,23,0.1), 0 12px 24px rgba(13,17,23,0.06);
+  }
+  .metric.clickable::after {
+    content: "→";
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 13px;
+    color: rgba(13,17,23,0.35);
+    transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.22s;
+  }
+  .metric.clickable:hover {
+    background: #FFFFFF;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(13,17,23,0.08), 0 8px 20px rgba(13,17,23,0.08);
+  }
+  .metric.clickable:hover::after { transform: translateX(2px); color: rgba(13,17,23,0.6); }
+  .metric.clickable:active { transform: translateY(0); }
+
+  .metric-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(13,17,23,0.55);
+    margin: 0 0 6px;
+  }
+
+  .metric-value {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: var(--midnight);
+    line-height: 1.1;
+  }
+
+  .metric-sub {
+    font-size: 10px;
+    color: rgba(13,17,23,0.5);
+    margin: 6px 0 0;
+    font-weight: 500;
+  }
+
+  .metric.active-phone {
+    background: var(--powder-blue);
+    border-color: var(--royal-blue);
+    box-shadow: 0 2px 4px rgba(15,95,191,0.15), 0 8px 20px rgba(15,95,191,0.12);
+    transform: translateY(-1px);
+  }
+  .metric.active-phone::after { color: var(--royal-blue); }
+  .metric.active-phone .metric-value { color: var(--deep-navy); }
+  .metric.active-phone .metric-label { color: var(--deep-navy); }
+
+  .metric.active-laptop {
+    background: var(--sage-green);
+    border-color: #6B8E6B;
+    box-shadow: 0 2px 4px rgba(107,142,107,0.18), 0 8px 20px rgba(107,142,107,0.15);
+    transform: translateY(-1px);
+  }
+  .metric.active-laptop::after { color: #4A6B4A; }
+  .metric.active-laptop .metric-value { color: #2F4D2F; }
+  .metric.active-laptop .metric-label { color: #2F4D2F; }
+
+  .inactive-metric { opacity: 0.85; }
+  .inactive-metric .metric-sub { color: rgba(13,17,23,0.4); }
+
+  .metric-static {
+    background: var(--midnight);
+  }
+  .metric-static .metric-label { color: rgba(245,242,232,0.6); }
+  .metric-static .metric-value { color: var(--ivory); }
+  .metric-static .metric-sub { color: rgba(245,242,232,0.5); }
+
+  .metric-loss {
+    background: #FFFFFF;
+    border: 1px solid rgba(13,17,23,0.12);
+  }
+  .metric-loss.has-value { border-color: var(--royal-blue); background: var(--powder-blue); }
+  .metric-loss.has-value.laptop { border-color: #6B8E6B; background: var(--sage-green); }
+
+  .chart-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .chart-card {
+    background: #FFFFFF;
+    border: 1px solid rgba(13,17,23,0.06);
+    border-radius: var(--radius-md);
+    padding: 18px 18px 14px;
+  }
+
+  .chart-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    gap: 8px;
+  }
+
+  .chart-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--midnight);
+    margin: 0;
+  }
+
+  .chart-hint {
+    font-size: 10px;
+    color: rgba(13,17,23,0.45);
+    font-weight: 500;
+  }
+
+  .legend {
+    display: flex;
+    gap: 14px;
+    font-size: 11px;
+    color: rgba(13,17,23,0.7);
+    margin-bottom: 8px;
+    font-weight: 500;
+    flex-wrap: wrap;
+  }
+
+  .leg-sq {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+    margin-right: 5px;
+    vertical-align: -1px;
+  }
+
+  .canvas-wrap {
+    position: relative;
+    width: 100%;
+    height: 220px;
+  }
+
+  .footer-note {
+    margin-top: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 10px;
+    color: rgba(13,17,23,0.45);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  .footer-note .dot {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--silver-grey);
+    margin: 0 6px;
+    vertical-align: 2px;
+  }
+
+  /* Mobile / narrow — single column charts, tighter chrome */
+  @media (max-width: 800px) {
+    .page { padding: 16px 10px; }
+    .header { padding: 22px 20px 16px; }
+    .body { padding: 18px 18px 22px; }
+    .title { font-size: 22px; }
+    .metric-row { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+    .metric { padding: 12px 12px; }
+    .metric-value { font-size: 18px; }
+    .chart-section { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .chart-card { padding: 14px 14px 10px; }
+    .canvas-wrap { height: 220px; }
+    .legend { gap: 10px; font-size: 10px; }
+    .footer-note { flex-direction: column; align-items: flex-start; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <main class="dashboard" role="main">
+    <header class="header">
+      <p class="eyebrow">No-cost EMI · The hidden math</p>
+      <h1 class="title">Who really pays for <em>zero-interest</em> EMIs</h1>
+      <p class="subtitle">Banks don't lend for free. When a customer takes a "no-cost" EMI, the retailer absorbs the bank's interest as a subvention — quietly, and at scale.</p>
+    </header>
+
+    <div class="body">
+      <h2 class="sr-only">Retailer hidden cost dashboard</h2>
+
+      <div class="metric-row">
+        <div class="metric clickable active-phone" id="cardPhone" onclick="setActive('phone')">
+          <p class="metric-label">Smartphone</p>
+          <p class="metric-value">₹80,000</p>
+          <p class="metric-sub">Tap to focus</p>
+        </div>
+        <div class="metric clickable inactive-metric" id="cardLaptop" onclick="setActive('laptop')">
+          <p class="metric-label">Laptop</p>
+          <p class="metric-value">₹45,000</p>
+          <p class="metric-sub">Tap to focus</p>
+        </div>
+        <div class="metric metric-static">
+          <p class="metric-label">Subvention rate</p>
+          <p class="metric-value">16% p.a.</p>
+          <p class="metric-sub">Retailer pays bank</p>
+        </div>
+        <div class="metric metric-loss" id="lossCard">
+          <p class="metric-label" id="lossLabel">Retailer loss</p>
+          <p class="metric-value" id="lossValue">—</p>
+          <p class="metric-sub" id="lossSub">Hover chart to explore</p>
+        </div>
+      </div>
+
+      <div class="chart-section">
+        <div class="chart-card">
+          <div class="chart-head">
+            <p class="chart-title">Retailer cost as tenure grows</p>
+            <span class="chart-hint">₹ to bank</span>
+          </div>
+          <div class="legend">
+            <span id="lineLegPhone"><span class="leg-sq" style="background:#0F5FBF;"></span>Smartphone</span>
+            <span id="lineLegLaptop"><span class="leg-sq" style="background:#1A3A6B;"></span>Laptop</span>
+          </div>
+          <div class="canvas-wrap">
+            <canvas id="lineChart" role="img" aria-label="Line chart of retailer cost vs tenure">Retailer cost rises with tenure.</canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-head">
+            <p class="chart-title">Price breakdown</p>
+            <span class="chart-hint">Hover tenure</span>
+          </div>
+          <div class="legend">
+            <span id="legPaid"><span class="leg-sq" style="background:#0F5FBF;"></span>Paid to bank</span>
+            <span id="legNet"><span class="leg-sq" style="background:#C2D9F5;"></span>Net to retailer</span>
+          </div>
+          <div class="canvas-wrap">
+            <canvas id="barChart" role="img" aria-label="Stacked bar chart of retailer absorbed vs received">Bank-paid portion grows with tenure.</canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        <span>Tap a product card to focus<span class="dot"></span>Hover chart to explore tenure</span>
+        <span>Source: Illustrative · 16% p.a. subvention</span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const tenures = [3, 6, 9, 12, 18, 24];
+const p1 = 80000, p2 = 45000, rate = 0.16;
+
+const cost1 = tenures.map(t => Math.round(p1 * (rate/12) * t));
+const cost2 = tenures.map(t => Math.round(p2 * (rate/12) * t));
+const net1  = tenures.map(t => p1 - Math.round(p1 * (rate/12) * t));
+const net2  = tenures.map(t => p2 - Math.round(p2 * (rate/12) * t));
+
+const fmtINR = v => '₹' + Math.round(v).toLocaleString('en-IN');
+const fmtPct = (c, p) => ((c/p)*100).toFixed(1) + '%';
+
+const palette = {
+  phone: {
+    line: '#0F5FBF', lineFade: 'rgba(15,95,191,0.22)',
+    paid: '#0F5FBF', net: '#C2D9F5',
+    paidFade: 'rgba(15,95,191,0.22)', netFade: 'rgba(194,217,245,0.35)',
+    legPaid: '#0F5FBF', legNet: '#C2D9F5'
+  },
+  laptop: {
+    line: '#1A3A6B', lineFade: 'rgba(26,58,107,0.22)',
+    paid: '#1A3A6B', net: '#C4DDC4',
+    paidFade: 'rgba(26,58,107,0.22)', netFade: 'rgba(196,221,196,0.35)',
+    legPaid: '#1A3A6B', legNet: '#C4DDC4'
+  }
+};
+
+let activeProduct = 'phone';
+let activeIdx = null;
+
+function setActive(product) {
+  activeProduct = product;
+  activeIdx = null;
+  const isPhone = product === 'phone';
+  const price = isPhone ? p1 : p2;
+  const costs = isPhone ? cost1 : cost2;
+  const nets  = isPhone ? net1 : net2;
+  const c     = palette[product];
+
+  document.getElementById('cardPhone').className  = 'metric clickable' + (isPhone ? ' active-phone' : ' inactive-metric');
+  document.getElementById('cardLaptop').className = 'metric clickable' + (!isPhone ? ' active-laptop' : ' inactive-metric');
+
+  const lossCard = document.getElementById('lossCard');
+  lossCard.className = 'metric metric-loss';
+  document.getElementById('lossLabel').textContent = 'Retailer loss';
+  document.getElementById('lossValue').textContent = '—';
+  document.getElementById('lossSub').textContent   = 'Hover chart to explore';
+
+  lineChart.data.datasets[0].borderColor          = isPhone ? palette.phone.line : palette.phone.lineFade;
+  lineChart.data.datasets[0].pointBackgroundColor = isPhone ? palette.phone.line : palette.phone.lineFade;
+  lineChart.data.datasets[0].borderWidth          = isPhone ? 2.5 : 1.5;
+  lineChart.data.datasets[1].borderColor          = !isPhone ? palette.laptop.line : palette.laptop.lineFade;
+  lineChart.data.datasets[1].pointBackgroundColor = !isPhone ? palette.laptop.line : palette.laptop.lineFade;
+  lineChart.data.datasets[1].borderWidth          = !isPhone ? 2.5 : 1.5;
+
+  barChart.data.datasets[0].data = costs;
+  barChart.data.datasets[1].data = nets;
+  barChart.data.datasets[0].backgroundColor = tenures.map(() => c.paid);
+  barChart.data.datasets[1].backgroundColor = tenures.map(() => c.net);
+  barChart.options.scales.y.max = price;
+
+  document.getElementById('legPaid').innerHTML = `<span class="leg-sq" style="background:${c.legPaid};"></span>Paid to bank`;
+  document.getElementById('legNet').innerHTML  = `<span class="leg-sq" style="background:${c.legNet};"></span>Net to retailer`;
+
+  lineChart.update();
+  barChart.update();
+}
+
+function highlightIndex(idx) {
+  if (idx === activeIdx) return;
+  activeIdx = idx;
+
+  const isPhone = activeProduct === 'phone';
+  const price = isPhone ? p1 : p2;
+  const costs = isPhone ? cost1 : cost2;
+  const c     = palette[activeProduct];
+  const activeDS   = isPhone ? 0 : 1;
+  const inactiveDS = isPhone ? 1 : 0;
+
+  const lossCard = document.getElementById('lossCard');
+  if (idx === null) {
+    lossCard.className = 'metric metric-loss';
+    document.getElementById('lossLabel').textContent = 'Retailer loss';
+    document.getElementById('lossValue').textContent = '—';
+    document.getElementById('lossSub').textContent   = 'Hover chart to explore';
+  } else {
+    lossCard.className = 'metric metric-loss has-value' + (isPhone ? '' : ' laptop');
+    document.getElementById('lossLabel').textContent = `Loss @ ${tenures[idx]} months`;
+    document.getElementById('lossValue').textContent = fmtINR(costs[idx]);
+    document.getElementById('lossSub').textContent   = fmtPct(costs[idx], price) + ' of price';
+  }
+
+  lineChart.data.datasets[activeDS].pointRadius   = tenures.map((_,i) => i===idx ? 8 : 3.5);
+  lineChart.data.datasets[inactiveDS].pointRadius = 3;
+  barChart.data.datasets[0].backgroundColor = tenures.map((_,i) => i===idx ? c.paid : c.paidFade);
+  barChart.data.datasets[1].backgroundColor = tenures.map((_,i) => i===idx ? c.net  : c.netFade);
+
+  lineChart.update('none');
+  barChart.update('none');
+}
+
+function resetHighlight() {
+  if (activeIdx === null) return;
+  activeIdx = null;
+  const c = palette[activeProduct];
+  const lossCard = document.getElementById('lossCard');
+  lossCard.className = 'metric metric-loss';
+  document.getElementById('lossLabel').textContent = 'Retailer loss';
+  document.getElementById('lossValue').textContent = '—';
+  document.getElementById('lossSub').textContent   = 'Hover chart to explore';
+  lineChart.data.datasets[0].pointRadius = 3.5;
+  lineChart.data.datasets[1].pointRadius = 3.5;
+  barChart.data.datasets[0].backgroundColor = tenures.map(() => c.paid);
+  barChart.data.datasets[1].backgroundColor = tenures.map(() => c.net);
+  lineChart.update('none');
+  barChart.update('none');
+}
+
+const sharedPlugin = {
+  id: 'syncHighlight',
+  afterEvent(chart, args) {
+    const e = args.event;
+    if (e.type === 'mousemove') {
+      const pts = chart.getElementsAtEventForMode(e.native, 'index', { intersect: false }, true);
+      if (pts.length) highlightIndex(pts[0].index);
+      else resetHighlight();
+    }
+    if (e.type === 'mouseout') resetHighlight();
+  }
+};
+Chart.register(sharedPlugin);
+
+const tickStyle = { color: 'rgba(13,17,23,0.55)', font: { size: 10, family: 'Archivo' } };
+const gridStyle = { color: 'rgba(13,17,23,0.06)', drawTicks: false };
+
+const lineChart = new Chart(document.getElementById('lineChart'), {
+  type: 'line',
+  data: {
+    labels: tenures.map(t => t + ' mo'),
+    datasets: [
+      { label: 'Smartphone', data: cost1, borderColor: palette.phone.line, borderWidth: 2.5, pointRadius: 3.5, pointBackgroundColor: palette.phone.line, pointBorderColor: '#fff', pointBorderWidth: 1.5, tension: 0.35, fill: false },
+      { label: 'Laptop',     data: cost2, borderColor: palette.laptop.lineFade, borderWidth: 1.5, pointRadius: 3.5, pointBackgroundColor: palette.laptop.lineFade, pointBorderColor: '#fff', pointBorderWidth: 1.5, tension: 0.35, fill: false, borderDash: [5,3] }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    layout: { padding: { top: 6, right: 4 } },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        mode: 'index', intersect: false,
+        backgroundColor: '#0D1117',
+        titleColor: '#F5F2E8',
+        bodyColor: '#F5F2E8',
+        borderColor: 'rgba(245,242,232,0.1)',
+        borderWidth: 1,
+        padding: 10,
+        cornerRadius: 6,
+        titleFont: { family: 'Archivo', weight: '600', size: 11 },
+        bodyFont: { family: 'Archivo', size: 11 },
+        filter: item => (activeProduct === 'phone' && item.datasetIndex === 0) || (activeProduct === 'laptop' && item.datasetIndex === 1),
+        callbacks: {
+          title: p => p[0].label + ' tenure',
+          label: ctx => {
+            const price = ctx.datasetIndex === 0 ? p1 : p2;
+            return `${ctx.dataset.label}: ${fmtINR(ctx.parsed.y)} (${fmtPct(ctx.parsed.y, price)})`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: { ticks: { ...tickStyle, autoSkip: false }, grid: { ...gridStyle, drawOnChartArea: false }, border: { color: 'rgba(13,17,23,0.1)' } },
+      y: { ticks: { ...tickStyle, callback: v => '₹' + (v/1000).toFixed(0) + 'k' }, grid: gridStyle, border: { display: false } }
+    }
+  }
+});
+
+const barChart = new Chart(document.getElementById('barChart'), {
+  type: 'bar',
+  data: {
+    labels: tenures.map(t => t + ' mo'),
+    datasets: [
+      { label: 'Paid to bank',    data: cost1, backgroundColor: tenures.map(() => palette.phone.paid), borderRadius: 3, stack: 's', borderSkipped: false },
+      { label: 'Net to retailer', data: net1,  backgroundColor: tenures.map(() => palette.phone.net),  borderRadius: 3, stack: 's', borderSkipped: false }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    layout: { padding: { top: 6, right: 4 } },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        mode: 'index', intersect: false,
+        backgroundColor: '#0D1117',
+        titleColor: '#F5F2E8',
+        bodyColor: '#F5F2E8',
+        borderColor: 'rgba(245,242,232,0.1)',
+        borderWidth: 1,
+        padding: 10,
+        cornerRadius: 6,
+        titleFont: { family: 'Archivo', weight: '600', size: 11 },
+        bodyFont: { family: 'Archivo', size: 11 },
+        callbacks: {
+          title: p => `${activeProduct === 'phone' ? 'Smartphone' : 'Laptop'} · ${p[0].label}`,
+          label: ctx => {
+            const price = activeProduct === 'phone' ? p1 : p2;
+            if (ctx.datasetIndex === 0) return `Paid to bank: ${fmtINR(ctx.parsed.y)} (${fmtPct(ctx.parsed.y, price)})`;
+            return `Retailer keeps: ${fmtINR(ctx.parsed.y)} (${fmtPct(ctx.parsed.y, price)})`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: { ticks: { ...tickStyle, autoSkip: false }, grid: { ...gridStyle, drawOnChartArea: false }, border: { color: 'rgba(13,17,23,0.1)' }, stacked: true },
+      y: { ticks: { ...tickStyle, callback: v => '₹' + (v/1000).toFixed(0) + 'k' }, grid: gridStyle, border: { display: false }, stacked: true, max: p1 }
+    }
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,106 @@
+#finance-section {
+  --bg: #f2ede6;
+  --ink: #181410;
+  --accent: #c8956c;
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+#scene-wrapper {
+  position: relative;
+  height: 700vh;
+}
+
+#scene {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#center-header {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 6;
+  pointer-events: none;
+  width: 90%; /* Slight padding for mobile screens */
+}
+
+#center-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(0.4rem, 2vw, 2.8rem); /* Slightly smaller clamp for longer text */
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+#center-header h1 em { font-style: italic; color: var(--accent); }
+
+.box-placeholder, .spread-img, .spread-title, .scatter-item {
+  position: absolute;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.box-placeholder { z-index: 2; border-radius: 3px; }
+.spread-img { z-index: 3; border-radius: 4px; overflow: hidden; opacity: 0; pointer-events: none; }
+.spread-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.spread-title { z-index: 4; opacity: 0; pointer-events: none; }
+.spread-title h2 { font-family: 'Playfair Display', serif; font-size: clamp(1.4rem, 2.2vw, 2.4rem); font-weight: 700; }
+.scatter-item { z-index: 4; opacity: 0; pointer-events: none; font-size: 14px; white-space: nowrap; }
+
+/* --- Mobile Fixes --- */
+/* --- Mobile Fixes --- */
+@media (max-width: 800px) {
+  #center-header {
+    top: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    padding: 30px 15px; /* Reduced padding slightly to save vertical space */
+    width: 100%;
+    box-sizing: border-box;
+    display: block !important;
+  }
+
+  #center-header h1 {
+    font-size: clamp(1.2rem, 3.8vw, 2.5rem); /* Optimized for mobile readability */
+  }
+
+  /* Force headers and lists to be full width and centered */
+  .spread-title, .scatter-item {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    text-align: center !important;
+    margin: 0 auto;
+  }
+
+  /* LARGER IMAGES: 86% of viewport width */
+  .box-placeholder, .spread-img {
+    width: 86vw !important;
+    height: 30vh !important; /* Increased height for impact */
+    left: 7vw !important;  /* (100 - 86) / 2 = 7 for perfect centering */
+    right: auto !important;
+    top: 22vh !important;   /* Moved up slightly to fit everything better */
+    border-radius: 8px;    /* Softer corners for the larger look */
+  }
+
+  /* Align Title directly under the larger image */
+  .spread-title {
+    top: 54vh !important;
+    display: block !important;
+  }
+
+  /* Align List under the title */
+  .scatter-item {
+    top: 60vh !important;
+  }
+}

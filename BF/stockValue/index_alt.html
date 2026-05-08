@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bajaj Auto vs Bajaj Hindustan</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink:    #0D1117;
+      --navy:   #0F2A5C;
+      --blue:   #0057B8;
+      --silver: #C0C4CC;
+      --cream:  #FAFAF2;
+      --panel:  560px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: var(--cream); color: var(--ink); font-family: 'EB Garamond', serif; overflow-x: hidden; }
+
+    .layout { display: flex; height: 100vh; }
+
+    .left-panel {
+      width: var(--panel); flex-shrink: 0; position: sticky; top: 0;
+      height: 100vh; display: flex; flex-direction: column;
+      padding: 48px 40px 40px; overflow: hidden;
+    }
+
+    .site-header h1 {
+      font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 700;
+      line-height: 1.15; color: var(--ink); margin-bottom: 30px;
+    }
+
+
+
+    .legend { display: flex; flex-direction: column; gap: 10px; margin-bottom: 80px; }
+    .legend-item { display: flex; align-items: center; gap: 10px; font-size: 14px; font-family: 'Playfair Display', serif; color: var(--ink); }
+    .legend-line { width: 28px; height: 2px; display: inline-block; flex-shrink: 0; }
+    .legend-dash { width: 28px; height: 0; border-top: 2px dashed; display: inline-block; flex-shrink: 0; }
+
+    .text-area { flex: 1; position: relative; overflow: hidden; display: flex; align-items: center; }
+
+    .text-block {
+      position: absolute; top: 0; left: 0; right: 0;
+      pointer-events: none;
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .text-block p { font-size: 18px; line-height: 1.75; color: var(--ink); margin-bottom: 14px; }
+    .text-block .year-label { font-family: 'Playfair Display', serif; font-size: 16px; letter-spacing: 2px; text-transform: uppercase; color: var(--silver); margin-bottom: 4px; }
+    .text-block h3 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 10px; color: var(--navy); }
+    .text-block ul { list-style: none; padding: 0; }
+    .text-block ul li { font-size: 18.2px; line-height: 1.7; color: #333; padding-left: 16px; position: relative; margin-bottom: 6px; }
+    .text-block ul li::before { content: '—'; position: absolute; left: 0; color: var(--silver); }
+
+    .right-panel {
+      flex: 1; position: sticky; top: 0; height: 100vh;
+      display: flex; flex-direction: column; padding: 48px 40px 32px 32px;
+    }
+    #chart-container { width: 100%; flex: 1; }
+
+    @media (max-width: 800px) {
+      .layout { flex-direction: column; height: auto; min-height: 100vh; }
+
+      .left-panel {
+        width: 100%; height: auto; position: relative;
+        padding: 32px 24px 28px; overflow: visible;
+        align-items: center; text-align: center;
+      }
+
+      .site-header { text-align: center; }
+      .site-header h1 { font-size: 30px; }
+      .divider { margin: 20px auto; }
+
+      .legend {
+        flex-direction: row; flex-wrap: wrap;
+        justify-content: center; gap: 16px; margin-bottom: 16px;
+      }
+
+      .text-area {
+        width: 100%; height: 160px; flex: none;
+        overflow: hidden; padding-top: 20px;
+        position: relative; text-align: left;
+        margin-bottom: 30px;
+        margin-top: 30px;
+      }
+
+      .right-panel {
+        flex: none; width: 100%; height: 55vw;
+        min-height: 280px; max-height: 420px;
+        position: relative; padding: 16px 16px 16px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <div class="left-panel">
+    <div class="site-header">
+      <h1>Bajaj Auto<br>vs Bajaj Hindustan</h1>
+    </div>
+    <div class="divider"></div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-line" style="background:#0057B8;"></span>Bajaj Auto</div>
+      <div class="legend-item"><span class="legend-line" style="background:#0F2A5C;"></span>Bajaj Hindustan</div>
+      <div class="legend-item"><span class="legend-dash" style="border-color:#C2D9C2;"></span>Nifty 50</div>
+    </div>
+    <div class="text-area" id="text-area">
+  <div class="text-block" id="text-0">
+    <p class="year-label">2007</p>
+    <h3>The Split</h3>
+    <p>The fight drags on. Family members agreed in 2003 to settle, but a stock market rally led to a surge in value, causing the agreement to stall as the stakes became too valuable to trade.</p>
+  </div>
+  <div class="text-block" id="text-1">
+    <p class="year-label">2008</p>
+    <h3>Global Financial Crisis</h3>
+    <p>Bajaj Auto is hit hard as markets crash. While both companies suffer, Bajaj Auto's core manufacturing fundamentals remain intact despite the 60% market dip.</p>
+  </div>
+  <div class="text-block" id="text-2">
+    <p class="year-label">2009</p>
+    <h3>The Recovery</h3>
+    <p>Bajaj Auto rebounds strongly on two-wheeler demand. Meanwhile, Bajaj Hindustan begins to struggle with sugar sector headwinds and regulatory pressure.</p>
+  </div>
+  <div class="text-block" id="text-3">
+    <p class="year-label">2013</p>
+    <h3>The Nadir</h3>
+    <p>Bajaj Hindustan hits its lowest point—just 6.8% of its 2007 value. The sugar sector faces severe margin pressure, marking a stark contrast to Auto's climb.</p>
+  </div>
+  <div class="text-block" id="text-4">
+    <p class="year-label">2014</p>
+    <h3>The Modi Wave</h3>
+    <p>Market optimism ignites. Bajaj Auto rallies sharply on rural demand and exports, while Bajaj Hindustan remains mired in debt and structural issues.</p>
+  </div>
+  <div class="text-block" id="text-5">
+    <p class="year-label">2023 - 2025</p>
+    <h3>The Great Divergence</h3>
+    <p>Bajaj Auto surpasses 13x its 2007 value. Bajaj Hindustan remains near zero—a cautionary tale of two different fates within the same family empire.</p>
+  </div>
+</div>
+  </div>
+
+  <div class="right-panel">
+    <div id="chart-container"></div>
+  </div>
+</div>
+
+<script>
+  const years = ['2007','2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  const bajajAutoData      = [100,41.97,157.93,228.98,302.82,394.56,379.13,487.24,486.57,603.02,724.60,566.08,720.46,948.29,873.04,970.28,2008.05,2335.98,2598.13];
+  const bajajHindustanData = [100,30.43,108.48,44.15,18.87,12.87,6.77,10.49,9.28,7.95,7.87,4.43,3.50,3.63,9.28,8.26,17.13,15.31,9.07];
+  const nifty50Data        = [100,55.96,95.03,107.17,101.20,117.47,118.53,171.46,147.22,166.64,214.65,210.82,232.84,265.40,337.52,343.79,422.89,457.59,492.86];
+
+  const steps = [
+    { revealIdx: 1,  markers: [] },
+    { revealIdx: 2,  markers: ['2008_auto','2008_hind'] },
+    { revealIdx: 3,  markers: ['2009_hind'] },
+    { revealIdx: 7,  markers: ['2013_hind'] },
+    { revealIdx: 8,  markers: ['2014_auto'] },
+    { revealIdx: 19, markers: ['2023_auto'] },
+  ];
+
+  const markerDefs = [
+    { id:'2008_auto', year:'2008', series:0, num:'1', y:bajajAutoData[1] },
+    { id:'2009_hind', year:'2009', series:1, num:'2', y:bajajHindustanData[2] },
+    { id:'2013_hind', year:'2013', series:1, num:'4', y:bajajHindustanData[6] },
+    { id:'2014_auto', year:'2014', series:0, num:'3', y:bajajAutoData[7] },
+    { id:'2023_auto', year:'2023', series:0, num:'5', y:bajajAutoData[16] },
+  ];
+
+  const blocks = Array.from(document.querySelectorAll('.text-block'));
+  let currentStep = 0;
+  let isTransitioning = false; // Prevents "choppy" multiple triggers
+
+  function setBlockStyle(el, visible, dy) {
+    el.style.opacity = visible ? '1' : '0';
+    el.style.transform = 'translateY(' + dy + 'px)';
+    el.style.pointerEvents = visible ? 'auto' : 'none';
+  }
+
+  // Init text positions
+  blocks.forEach((el, i) => {
+    el.style.transition = 'none';
+    setBlockStyle(el, i === 0, i === 0 ? 0 : 10);
+  });
+
+  requestAnimationFrame(() => {
+    blocks.forEach(el => {
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    });
+  });
+
+  const chartDom = document.getElementById('chart-container');
+  const myChart = echarts.init(chartDom);
+
+  function buildMarkPoints(activeIds) {
+    const autoMarks = [], hindMarks = [];
+    markerDefs.forEach(m => {
+      if (activeIds.includes(m.id)) {
+        autoMarks.push({
+          name: m.id, coord: [m.year, m.y], symbol: 'circle', symbolSize: 20,
+          itemStyle: { color: '#0D1117', borderColor: '#FAFAF2', borderWidth: 2 },
+          label: { show: true, formatter: m.num, color: '#FAFAF2', fontSize: 10, fontWeight: 'bold' }
+        });
+      }
+    });
+    return { autoMarks, hindMarks: [] }; // Simplified for example
+  }
+
+  function updateChart(stepIdx) {
+  const step = steps[stepIdx];
+  const revealCount = step.revealIdx;
+  const lastIndex = revealCount - 1;
+
+  // Helper to create a marker that matches the line color exactly
+  const createMarker = (val, color) => ({
+    symbol: 'circle',
+    symbolSize: 10,
+    itemStyle: {
+      color: color,
+      borderWidth: 0 // Removed the white border
+    },
+    label: { show: false },
+    data: [{ coord: [years[lastIndex], val] }]
+  });
+
+  myChart.setOption({
+    animationDurationUpdate: 1200,
+    animationEasingUpdate: 'cubicInOut',
+    series: [
+      {
+        data: bajajAutoData.slice(0, revealCount),
+        markPoint: createMarker(bajajAutoData[lastIndex], '#0057B8')
+      },
+      {
+        data: bajajHindustanData.slice(0, revealCount),
+        markPoint: createMarker(bajajHindustanData[lastIndex], '#0F2A5C')
+      },
+      {
+        data: nifty50Data.slice(0, revealCount)
+      }
+    ]
+  });
+}
+
+// Initial Option Setup
+myChart.setOption({
+  backgroundColor: 'transparent',
+  tooltip: {
+    trigger: 'axis',
+    backgroundColor: 'rgba(250, 250, 242, 0.95)', // Matches your --cream
+    borderColor: '#0D1117',
+    borderWidth: 1,
+    textStyle: { color: '#0D1117', fontFamily: 'EB Garamond', fontSize: 14 },
+    axisPointer: {
+      type: 'line',
+      lineStyle: { color: '#C0C4CC', width: 1, type: 'dashed' }
+    },
+    formatter: function(params) {
+      let res = `<strong>Year: ${params[0].name}</strong><br/>`;
+      params.forEach(p => {
+        res += `${p.marker} ${p.seriesName}: <strong>${p.value}</strong><br/>`;
+      });
+      return res;
+    }
+  },
+  grid: { top:'8%', left:'4%', right:'4%', bottom:'8%', containLabel:true },
+  xAxis: {
+    type:'category',
+    boundaryGap:false,
+    data: years,
+    axisLabel: { color:'#0D1117', fontFamily:"EB Garamond" },
+    axisLine: { lineStyle: { color: '#C0C4CC' } }
+  },
+  yAxis: {
+    type:'value',
+    min: 0,
+    max: 2700,
+    splitLine: { lineStyle: { color: '#EAEAEA' } }
+  },
+  series: [
+    { name:'Bajaj Auto', type:'line', smooth:0.3, lineStyle:{color:'#0057B8',width:3}, symbol:'none', data: [100] },
+    { name:'Bajaj Hindustan', type:'line', smooth:0.3, lineStyle:{color:'#0F2A5C',width:2.5}, symbol:'none', data: [100] },
+    { name:'Nifty 50', type:'line', smooth:0.3, lineStyle:{type:'dashed',color:'#C2D9C2',width:1.8}, symbol:'none', data: [100] }
+  ]
+});
+
+  function goToStep(n) {
+    if (n < 0 || n >= steps.length || n === currentStep || isTransitioning) return;
+
+    isTransitioning = true;
+    const prev = currentStep;
+    currentStep = n;
+
+    // 1. Animate Text
+    setBlockStyle(blocks[prev], false, -15);
+    setTimeout(() => {
+      setBlockStyle(blocks[currentStep], true, 0);
+    }, 400);
+
+    // 2. Animate Chart
+    updateChart(currentStep);
+
+    // 3. Heavy Scroll Cooldown (1.5 seconds)
+    // This makes the user wait for the animation to finish before they can scroll again
+    setTimeout(() => {
+      isTransitioning = false;
+    }, 1500);
+  }
+
+  // --- Wheel Handling with "Slowness" ---
+  let scrollAccumulator = 0;
+  window.addEventListener('wheel', e => {
+    e.preventDefault();
+    if (isTransitioning) return;
+
+    scrollAccumulator += e.deltaY;
+
+    // Increased threshold: User must scroll "harder" or more to trigger a change
+    if (Math.abs(scrollAccumulator) > 100) {
+      const dir = scrollAccumulator > 0 ? 1 : -1;
+      goToStep(currentStep + dir);
+      scrollAccumulator = 0; // Reset
+    }
+  }, { passive: false });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') goToStep(currentStep + 1);
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') goToStep(currentStep - 1);
+  });
+
+  window.addEventListener('resize', () => myChart.resize());
+</script>
+</body>
+</html>

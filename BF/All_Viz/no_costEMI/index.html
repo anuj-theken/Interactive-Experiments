@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No-Cost EMI Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --ink:        #0d1b2a;
+            --navy:       #1a3353;
+            --primary:    #1a6abf;
+            --primary-dark: #155799;
+            --light-blue: #c8dff0;
+            --sage:       #c8dde0;
+            --silver:     #b8c4cc;
+            --offwhite:   #fafaf5;
+            --danger:     #c0392b;
+            --success:    #2e7d5e;
+            --bg:         var(--offwhite);
+            --card-bg:    #ffffff;
+            --text:       var(--ink);
+            --muted:      #4a5f72;
+            --border:     var(--light-blue);
+            --blue-panel: var(--navy);
+            --radius-pill: 999px;
+            --radius-card: 20px;
+            --radius-input: 50px;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+        }
+
+        /* Background subtle grid */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: radial-gradient(circle at 20% 20%, rgba(26,106,191,0.07) 0%, transparent 60%),
+                              radial-gradient(circle at 80% 80%, rgba(200,221,224,0.18) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .wrapper {
+            width: 100%;
+            max-width: 820px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 6px;
+            letter-spacing: -0.03em;
+        }
+
+        .subtitle {
+            font-size: 0.92rem;
+            color: var(--muted);
+            margin-bottom: 28px;
+            font-weight: 500;
+        }
+
+        /* Product pills row */
+        .product-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .product-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 18px;
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--muted);
+            transition: all 0.18s ease;
+            white-space: nowrap;
+        }
+
+        .product-pill:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26,106,191,0.12);
+        }
+
+        .product-pill.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 16px rgba(26,106,191,0.3);
+        }
+
+        .product-pill .price-tag {
+            font-size: 0.75rem;
+            font-weight: 500;
+            opacity: 0.75;
+        }
+
+        /* Main card — horizontal split */
+        .main-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-card);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+            display: flex;
+            overflow: hidden;
+            min-height: 340px;
+        }
+
+        /* Left: inputs */
+        .left-panel {
+            flex: 1;
+            padding: 36px 32px;
+        }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 24px;
+            margin-bottom: 28px;
+        }
+
+        .field-group { display: flex; flex-direction: column; gap: 8px; }
+        .field-group.full { grid-column: 1 / -1; }
+
+        .field-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .input-pill {
+            padding: 12px 20px;
+            border: 2px solid var(--light-blue);
+            border-radius: var(--radius-input);
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+            background: var(--offwhite);
+            outline: none;
+            transition: border-color 0.18s;
+            width: 100%;
+            -webkit-appearance: none;
+        }
+
+        .input-pill:focus { border-color: var(--primary); background: white; }
+
+        /* Slider row */
+        .slider-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .slider-value {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: var(--light-blue);
+            padding: 3px 12px;
+            border-radius: var(--radius-pill);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            outline: none;
+            cursor: pointer;
+            background: linear-gradient(to right, var(--primary) var(--fill, 35%), var(--light-blue) var(--fill, 35%));
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 2px 8px rgba(26,106,191,0.4);
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        /* Fee badge */
+        .fee-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--danger);
+            background: #fdf0ef;
+            border: 1px solid #f5c6c2;
+            border-radius: var(--radius-pill);
+            padding: 5px 14px;
+            margin-top: 18px;
+        }
+
+        /* Right: blue results panel */
+        .right-panel {
+            width: 260px;
+            flex-shrink: 0;
+            background: var(--blue-panel);
+            border-radius: 0 var(--radius-card) var(--radius-card) 0;
+            padding: 36px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Subtle circles in bg */
+        .right-panel::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+        }
+
+        .right-panel::after {
+            content: '';
+            position: absolute;
+            bottom: -40px; left: -40px;
+            width: 150px; height: 150px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.04);
+        }
+
+        .result-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.65);
+            margin-bottom: 4px;
+        }
+
+        .result-primary {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.03em;
+            line-height: 1;
+            margin-bottom: 28px;
+        }
+
+        .result-divider {
+            width: 100%;
+            height: 1px;
+            background: rgba(255,255,255,0.15);
+            margin: 4px 0 20px;
+        }
+
+        .result-row {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .result-item { display: flex; flex-direction: column; gap: 2px; }
+
+        .result-item-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .result-item-val {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.02em;
+        }
+
+        .result-item-val.danger { color: #fca5a5; }
+        .result-item-val.success { color: #86efac; }
+
+        /* Revenue bar inside panel */
+        .rev-bar-wrap {
+            margin-top: auto;
+            padding-top: 24px;
+        }
+
+        .rev-bar-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.55);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            margin-bottom: 8px;
+        }
+
+        .rev-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.15);
+            overflow: hidden;
+            display: flex;
+        }
+
+        .rev-bar-retailer {
+            height: 100%;
+            background: var(--sage);
+            border-radius: 4px 0 0 4px;
+            transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        .rev-bar-interest {
+            height: 100%;
+            background: #f5c6c2;
+            border-radius: 0 4px 4px 0;
+            transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        .rev-legend {
+            display: flex;
+            gap: 14px;
+            margin-top: 8px;
+        }
+
+        .legend-dot {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        .legend-item {
+            font-size: 0.68rem;
+            color: rgba(255,255,255,0.55);
+            font-weight: 600;
+        }
+
+        @media (max-width: 620px) {
+            .main-card { flex-direction: column; }
+            .right-panel { width: 100%; border-radius: 0 0 var(--radius-card) var(--radius-card); }
+            .field-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <h1>The "No-Cost" Illusion</h1>
+    <p class="subtitle">Select a product and configure your EMI to reveal hidden transaction mechanics.</p>
+
+    <!-- Product pills -->
+    <div class="product-row">
+        <button class="product-pill active" onclick="selectItem(this, 30000, 'Smartphone')">
+            📱 Smartphone <span class="price-tag">₹30,000</span>
+        </button>
+        <button class="product-pill" onclick="selectItem(this, 60000, 'Laptop')">
+            💻 Laptop <span class="price-tag">₹60,000</span>
+        </button>
+        <button class="product-pill" onclick="selectItem(this, 45000, 'Smart TV')">
+            📺 Smart TV <span class="price-tag">₹45,000</span>
+        </button>
+        <button class="product-pill" onclick="selectItem(this, 20000, 'Fridge')">
+            🧊 Fridge <span class="price-tag">₹20,000</span>
+        </button>
+    </div>
+
+    <!-- Main card -->
+    <div class="main-card">
+
+        <!-- Left inputs -->
+        <div class="left-panel">
+            <div class="field-grid">
+                <div class="field-group">
+                    <label class="field-label">Product Price*</label>
+                    <input class="input-pill" id="price-display" type="text" readonly>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Annual Rate*</label>
+                    <input class="input-pill" id="rate-display" type="text" value="16%" readonly>
+                </div>
+
+                <div class="field-group full">
+                    <div class="slider-row">
+                        <label class="field-label">Interest Rate*</label>
+                        <span class="slider-value" id="rate-val">16%</span>
+                    </div>
+                    <input type="range" id="rate-slider" min="8" max="30" value="16"
+                           oninput="updateRate(this)" style="--fill: 53%;">
+                </div>
+
+                <div class="field-group full">
+                    <div class="slider-row">
+                        <label class="field-label">Loan Time*</label>
+                        <span class="slider-value" id="tenure-val">6 months</span>
+                    </div>
+                    <input type="range" id="tenure-slider" min="3" max="24" step="3" value="6"
+                           oninput="updateTenure(this)" style="--fill: 13%;">
+                </div>
+            </div>
+
+            <span class="fee-badge">⚠ ₹400 processing fee applies upfront</span>
+        </div>
+
+        <!-- Right results panel -->
+        <div class="right-panel">
+            <div class="result-label">Monthly Payment</div>
+            <div class="result-primary" id="monthly-emi">₹5,000</div>
+
+            <div class="result-divider"></div>
+
+            <div class="result-row">
+                <div class="result-item">
+                    <span class="result-item-label">Retailer Receives</span>
+                    <span class="result-item-val success" id="retailer-net">₹29,200</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-item-label">Retailer's Loss</span>
+                    <span class="result-item-val danger" id="retailer-loss">₹800</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-item-label">Effective Cost %</span>
+                    <span class="result-item-val danger" id="effective-rate">2.7%</span>
+                </div>
+            </div>
+
+            <div class="rev-bar-wrap">
+                <div class="rev-bar-label">Revenue Split</div>
+                <div class="rev-bar">
+                    <div class="rev-bar-retailer" id="bar-retailer" style="width:85%;"></div>
+                    <div class="rev-bar-interest" id="bar-interest" style="width:15%;"></div>
+                </div>
+                <div class="rev-legend">
+                    <span class="legend-item"><span class="legend-dot" style="background:#c8dde0;"></span>Retailer</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:#f5c6c2;"></span>Financier</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Explanations Section -->
+    <div class="explainer-section">
+
+        <!-- Card 1 -->
+        <div class="explainer-card">
+            <div class="explainer-header">
+                <span class="explainer-icon">📊</span>
+                <div>
+                    <div class="card-tag tag-amber">Data Accuracy</div>
+                    <h3>Is this actual Bajaj Finance data?</h3>
+                </div>
+            </div>
+            <div class="explainer-body">
+                <p><span class="hl hl-yellow">Partially accurate</span> — it's a realistic approximation, not an official published rate. The interest on no-cost EMI is subsidised by the merchant via a <span class="hl hl-blue">"subvention" discount</span> that Bajaj charges retailers. The actual rate varies by product category, brand, and tenure and is a <span class="hl hl-red">private B2B arrangement</span> — never publicly disclosed.</p>
+                <div class="fact-row">
+                    <div class="fact-chip"><span class="fact-chip-label">Rate used</span><span class="fact-chip-val">16% p.a.</span></div>
+                    <div class="fact-chip"><span class="fact-chip-label">Bajaj's actual range</span><span class="fact-chip-val">10.97% – 16%</span></div>
+                    <div class="fact-chip"><span class="fact-chip-label">Processing fee (real)</span><span class="fact-chip-val">~1.5% + GST</span></div>
+                </div>
+                <div class="callout callout-amber">⚠ The ₹400 fee in this simulator is a flat stand-in. Real Bajaj schemes charge a <strong>percentage-based processing fee</strong>, not a fixed amount. Always ask for the full amortisation schedule at checkout.</div>
+            </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="explainer-card">
+            <div class="explainer-header">
+                <span class="explainer-icon">🧮</span>
+                <div>
+                    <div class="card-tag tag-blue">Calculation Method</div>
+                    <h3>Formula used in this calculator</h3>
+                </div>
+            </div>
+            <div class="explainer-body">
+                <p>This tool uses a <span class="hl hl-blue">flat / simple interest model</span> for clarity. It's easier to understand but slightly overstates the actual cost compared to the bank method.</p>
+                <div class="formula-block">
+                    <div class="formula-row"><span class="formula-label">Total Interest</span><span class="formula-eq">= Principal × (Annual Rate ÷ 12) × Tenure</span></div>
+                    <div class="formula-row"><span class="formula-label">Monthly EMI</span><span class="formula-eq">= Principal ÷ Tenure</span></div>
+                    <div class="formula-row"><span class="formula-label">Retailer's Loss</span><span class="formula-eq">= Total Interest (paid as subvention)</span></div>
+                </div>
+                <div class="callout callout-blue">🏦 Banks use a <strong>reducing-balance formula</strong>: <code>EMI = P × r(1+r)ⁿ ÷ ((1+r)ⁿ−1)</code>. The flat model makes the <span class="hl hl-red">retailer's loss appear ~20–30% larger</span> than it truly is.</div>
+            </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="explainer-card">
+            <div class="explainer-header">
+                <span class="explainer-icon">💡</span>
+                <div>
+                    <div class="card-tag tag-green">Key Concept</div>
+                    <h3>What is Effective Cost %?</h3>
+                </div>
+            </div>
+            <div class="explainer-body">
+                <p><span class="hl hl-blue">Effective Cost %</span> is the <span class="hl hl-yellow">total subvention as a share of the product price</span> — how much of the selling price the retailer surrenders to Bajaj to fund your "free" EMI.</p>
+                <div class="formula-block">
+                    <div class="formula-row"><span class="formula-label">Effective Cost %</span><span class="formula-eq">= (Total Interest ÷ Principal) × 100</span></div>
+                </div>
+                <div class="fact-row">
+                    <div class="fact-chip"><span class="fact-chip-label">This metric</span><span class="fact-chip-val">Subvention %</span></div>
+                    <div class="fact-chip"><span class="fact-chip-label">16% flat → real APR</span><span class="fact-chip-val fact-chip-red">~28–30% APR</span></div>
+                </div>
+                <div class="callout callout-red">❗ This is <strong>not the same as APR</strong>. A <strong>16% flat rate over 12 months ≈ 28–30% APR</strong> on a reducing-balance basis — nearly double what it sounds like.</div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    let currentPrice = 30000;
+    let currentRate = 16;
+    let currentTenure = 6;
+
+    function selectItem(el, price) {
+        document.querySelectorAll('.product-pill').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        currentPrice = price;
+        updateUI();
+    }
+
+    function updateRate(slider) {
+        currentRate = parseInt(slider.value);
+        const pct = ((currentRate - 8) / (30 - 8)) * 100;
+        slider.style.setProperty('--fill', pct + '%');
+        document.getElementById('rate-val').textContent = currentRate + '%';
+        document.getElementById('rate-display').value = currentRate + '%';
+        updateUI();
+    }
+
+    function updateTenure(slider) {
+        currentTenure = parseInt(slider.value);
+        const pct = ((currentTenure - 3) / (24 - 3)) * 100;
+        slider.style.setProperty('--fill', pct + '%');
+        const label = currentTenure === 1 ? '1 month' : currentTenure + ' months';
+        document.getElementById('tenure-val').textContent = label;
+        updateUI();
+    }
+
+    function updateUI() {
+        const annualRate = currentRate / 100;
+        const totalInterest = Math.round(currentPrice * (annualRate / 12) * currentTenure);
+        const emi = Math.round(currentPrice / currentTenure);
+        const retailerNet = currentPrice - totalInterest;
+        const lossPercent = (totalInterest / currentPrice) * 100;
+        const effectivePct = ((totalInterest / currentPrice) * 100).toFixed(1);
+
+        document.getElementById('price-display').value = '₹' + currentPrice.toLocaleString('en-IN');
+        document.getElementById('monthly-emi').textContent = '₹' + emi.toLocaleString('en-IN');
+        document.getElementById('retailer-net').textContent = '₹' + retailerNet.toLocaleString('en-IN');
+        document.getElementById('retailer-loss').textContent = '₹' + totalInterest.toLocaleString('en-IN');
+        document.getElementById('effective-rate').textContent = effectivePct + '%';
+
+        document.getElementById('bar-retailer').style.width = (100 - lossPercent) + '%';
+        document.getElementById('bar-interest').style.width = lossPercent + '%';
+    }
+
+    // Init
+    document.getElementById('price-display').value = '₹' + currentPrice.toLocaleString('en-IN');
+    document.getElementById('rate-display').value = '16%';
+    updateUI();
+</script>
+
+<style>
+    .explainer-section {
+        margin-top: 28px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+
+    .explainer-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 22px 22px 20px;
+        box-shadow: 0 2px 12px rgba(13,27,42,0.06);
+        border: 1px solid var(--light-blue);
+        transition: box-shadow 0.18s, transform 0.18s;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .explainer-card:hover {
+        box-shadow: 0 6px 24px rgba(26,106,191,0.12);
+        transform: translateY(-2px);
+    }
+
+    .explainer-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .explainer-icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        background: var(--light-blue);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+    }
+
+    .card-tag {
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 3px 9px;
+        border-radius: 999px;
+        display: inline-block;
+        margin-bottom: 5px;
+    }
+
+    .tag-amber  { background: #fef3c7; color: #92400e; }
+    .tag-blue   { background: var(--light-blue); color: var(--navy); }
+    .tag-green  { background: var(--sage); color: #1a4a38; }
+
+    .explainer-header h3 {
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: var(--navy);
+        letter-spacing: -0.01em;
+        line-height: 1.3;
+        margin: 0;
+    }
+
+    .explainer-body {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .explainer-body p {
+        font-size: 0.845rem;
+        color: var(--muted);
+        line-height: 1.7;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    /* Highlight chips inline in text */
+    .hl {
+        display: inline;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-weight: 700;
+    }
+    .hl-yellow { background: #fef3c7; color: #92400e; }
+    .hl-blue   { background: var(--light-blue); color: var(--navy); }
+    .hl-red    { background: #fee2e2; color: #991b1b; }
+    .hl-green  { background: var(--sage); color: #1a4a38; }
+
+    /* Fact chips row */
+    .fact-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .fact-chip {
+        background: var(--offwhite);
+        border: 1px solid var(--light-blue);
+        border-radius: 10px;
+        padding: 7px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        flex: 1;
+        min-width: 100px;
+    }
+
+    .fact-chip-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--silver);
+    }
+
+    .fact-chip-val {
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: var(--navy);
+    }
+
+    .fact-chip-val.fact-chip-red { color: #b91c1c; }
+
+    /* Callout boxes */
+    .callout {
+        border-radius: 10px;
+        padding: 11px 14px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        line-height: 1.6;
+    }
+
+    .callout strong { font-weight: 800; }
+
+    .callout-amber { background: #fffbeb; border-left: 3px solid #f59e0b; color: #78350f; }
+    .callout-blue  { background: #eff6ff; border-left: 3px solid var(--primary); color: #1e3a5f; }
+    .callout-red   { background: #fff1f2; border-left: 3px solid #f43f5e; color: #881337; }
+
+    .callout code {
+        background: rgba(255,255,255,0.6);
+        border: 1px solid rgba(0,0,0,0.08);
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.77rem;
+        font-weight: 700;
+        display: inline-block;
+        margin: 4px 0;
+    }
+
+    /* Formula block */
+    .formula-block {
+        background: var(--offwhite);
+        border: 1px solid var(--light-blue);
+        border-radius: 10px;
+        padding: 11px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .formula-row {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .formula-label {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: var(--navy);
+        min-width: 120px;
+        letter-spacing: 0.01em;
+    }
+
+    .formula-eq {
+        font-size: 0.78rem;
+        font-family: 'Courier New', monospace;
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    @media (max-width: 820px) {
+        .explainer-section { grid-template-columns: 1fr; }
+    }
+</style>
+
+</body>
+</html>
