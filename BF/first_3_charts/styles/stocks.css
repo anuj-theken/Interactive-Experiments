@@ -1,0 +1,202 @@
+:root {
+  --ink: #0D1117;
+  --navy: #0F2A5C;
+  --blue: #0057B8;
+  --silver: #C0C4CC;
+  --cream: #FAFAF2;
+}
+
+/* Sticky Scroll Wrapper */
+.scroll-wrapper {
+  height: 600vh;
+  position: relative;
+  background: var(--cream);
+}
+
+.sticky-content {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Proportional Scaling Layout */
+.bajaj-comparison-container .layout {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+.left-panel {
+  flex: 0 0 40%;
+  display: flex;
+  flex-direction: column;
+  padding: 60px 5%;
+  background: var(--cream);
+  z-index: 2;
+  box-sizing: border-box;
+  /* Ensures everything in the panel starts from the left */
+  align-items: flex-start;
+  text-align: left;
+}
+
+.right-panel {
+  flex: 0 0 60%;
+  height: 100vh;
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+#chart-container {
+  width: 100%;
+  height: 80%;
+    margin-top: 24vh;
+
+}
+
+/* Typography */
+.site-header {
+  width: 100%;
+  text-align: left;
+}
+
+.site-header h1 {
+  font-family: 'Reckless', serif;
+  font-size: clamp(24px, 4vw, 38px);
+  margin-bottom: 20px;
+  color: var(--ink);
+  line-height: 1.1;
+}
+
+.divider {
+  width: 50px;
+  height: 1px;
+  background: var(--silver);
+  margin-bottom: 30px;
+}
+
+.stock-value-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 40px;
+  width: 100%;
+}
+
+.legend-item-stock {
+  display: flex;
+  color: #000;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-family: 'Reckless', serif;
+  justify-content: flex-start;
+}
+
+.legend-line { width: 25px; height: 2px; flex-shrink: 0; }
+.legend-dash { width: 25px; border-top: 2px dashed; flex-shrink: 0; }
+
+/* Text Area Alignment */
+.text-area {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  text-align: left;
+}
+
+.text-block {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+  text-align: left;
+}
+
+.text-block.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.year-label {
+  color: #b4b4b4 !important;
+  font-family: 'Reckless', serif;
+  line-height: 1;
+  display: block;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 14px;
+}
+
+.text-block h3 {
+  font-family: 'Reckless', serif;
+  font-size: 22px;
+  color: var(--navy);
+  margin: 0 0 10px 0;
+  text-align: left;
+}
+
+.text-block p {
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--ink);
+  margin: 0;
+  text-align: left;
+  max-width: 100%;
+}
+
+/* --- MOBILE STYLES --- */
+@media (max-width: 800px) {
+  .bajaj-comparison-container .layout {
+    flex-direction: column;
+  }
+
+  .left-panel {
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto; /* Changed to auto to fit content */
+    min-height: 40vh;
+    padding: 40px 8%;
+    /* Force left alignment on mobile too */
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .right-panel {
+    flex: 0 0 auto;
+    width: 100%;
+    height: 50vh;
+    padding: 20px;
+  }
+
+  .stock-value-legend {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start; /* Keep legend left-aligned on mobile */
+    margin-bottom: 30px;
+  }
+
+  .text-block p {
+    font-size: 17px;
+    width: 100%; /* Use full width of the padded container */
+  }
+}
+@media (min-width: 376px) and @media (max-width: 769px){
+  .text-block p {
+    font-size: 20px;
+    width: 100%; /* Use full width of the padded container */
+  }
+
+}
+@media (max-width: 375px) {
+  .text-block p {
+    font-size: 14px;
+  }
+}

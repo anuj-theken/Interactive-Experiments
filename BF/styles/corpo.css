@@ -1,381 +1,140 @@
-
-    /* ───────── Fonts ───────── */
-    @font-face { font-family: 'Reckless'; src: url('fonts/Reckless-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
-    @font-face { font-family: 'Reckless'; src: url('fonts/Reckless-MediumItalic.woff2') format('woff2'); font-weight: 500; font-style: italic; font-display: swap; }
-    @font-face { font-family: 'Reckless'; src: url('fonts/Reckless-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
-    @font-face { font-family: 'Reckless'; src: url('fonts/Reckless-BoldItalic.woff2') format('woff2'); font-weight: 700; font-style: italic; font-display: swap; }
-    @font-face { font-family: 'Ivar Text'; src: url('fonts/IvarText-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
-    @font-face { font-family: 'Ivar Text'; src: url('fonts/IvarText-Italic.woff2') format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
-    @font-face { font-family: 'Ivar Text'; src: url('fonts/IvarText-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
-    @font-face { font-family: 'Ivar Text'; src: url('fonts/IvarText-SemiBold.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
-    @font-face { font-family: 'Archivo'; src: url('fonts/Archivo-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
-    @font-face { font-family: 'Archivo'; src: url('fonts/Archivo-Medium.ttf') format('truetype'); font-weight: 500; font-style: normal; font-display: swap; }
-    @font-face { font-family: 'Archivo'; src: url('fonts/Archivo-SemiBold.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
-    @font-face { font-family: 'Archivo'; src: url('fonts/Archivo-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
-
-    :root {
-        --bg-paper: #F7F2F2;
-        --bg-elevated: #FFFFFF;
-        --ink: #321F1F;
-        --ink-80: rgba(50,31,31,0.72);
-        --ink-50: rgba(50,31,31,0.48);
-        --ink-30: rgba(50,31,31,0.24);
-        --ink-20: rgba(50,31,31,0.16);
-        --ink-10: rgba(50,31,31,0.10);
-        --ink-5:  rgba(50,31,31,0.06);
-        --hairline: #EEE7E7;
-        --red: #FF3333;
-        --navy: var(--ink);
-        --c-holdings: #321F1F;
-        --c-auto:     #083321;
-        --c-finserv:  #0A1E42;
-        --c-finance:  #44214B;
-        --c-msl:      #CB9200;
-        --c-minority: #9A8989;
-        --c-skb:      #0F5FBF;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-        font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: var(--bg-paper);
-        color: var(--ink);
-        overflow-x: clip;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }
-
-    /* Subtle editorial paper texture */
-    body::before {
-        content: '';
-        position: fixed; inset: 0;
-        background-image: linear-gradient(to right, rgba(50,31,31,0.025) 1px, transparent 1px);
-        background-size: 120px 100%;
-        pointer-events: none;
-        z-index: 0;
-    }
-
-    /* ───────── Header ───────── */
-    .header-overlay {
-    position: sticky;
-    top: 32px;
-    left: 32px;
-    z-index: 50;
-    max-width: 360px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    pointer-events: none;
-    align-self: flex-start;  /* add this */
+:root {
+  --ink: #1a1a1a;
+  --header-blue: #0f2a5c;
+  --muted-grey: #b4b4b4;
+  --cream-bg: #f9f9f5;
+  --line-blue: #2a4b8d;
 }
-    .masthead-row {
-        display: flex; align-items: center; gap: 10px;
-        font-family: 'Archivo', sans-serif;
-        font-size: 11px; font-weight: 600;
-        text-transform: uppercase; letter-spacing: 0.12em;
-        color: var(--ink-80);
-    }
-    .masthead-k {
-        display: inline-flex; align-items: center; justify-content: center;
-        width: 22px; height: 22px;
-        background: var(--red); color: #fff;
-        font-family: 'Reckless', serif; font-weight: 700; font-style: italic;
-        font-size: 16px; line-height: 1; padding-bottom: 2px;
-    }
-    .masthead-row .dot { color: var(--ink-30); }
-    .masthead-row .section { color: var(--red); }
-    .header-overlay h1 {
-        font-family: 'Reckless', 'Fraunces', Georgia, serif;
-        font-weight: 700; font-style: italic;
-        font-size: 38px; line-height: 1.02;
-        letter-spacing: -0.03em; color: var(--ink);
-    }
-    .header-overlay .dek {
-        font-family: 'Ivar Text', 'Source Serif 4', Georgia, serif;
-        font-size: 14px; line-height: 1.45;
-        color: var(--ink-80); font-style: italic;
-        border-top: 1px solid var(--hairline); padding-top: 10px;
-    }
-    .header-overlay .byline {
-        font-family: 'Archivo', sans-serif;
-        font-size: 10px; font-weight: 600;
-        text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-50);
-    }
 
-    /* ───────── Legend ───────── */
-    .legend-overlay {
-        position: fixed; top: 24px; right: 24px; z-index: 50;
-        padding: 8px 11px;
-        background: rgba(247, 242, 242, 0.92);
-        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-        border: 1px solid var(--hairline); border-radius: 2px;
-        display: flex; flex-direction: column; gap: 6px; min-width: 0;
-    }
-    .legend-overlay .legend-title {
-        font-family: 'Archivo', sans-serif;
-        font-size: 14px; font-weight: 700;
-        text-transform: uppercase; letter-spacing: 0.14em;
-        color: var(--ink-50);
-        padding-bottom: 8px; border-bottom: 1px solid var(--hairline);
-    }
-    .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; }
-    .legend-item {
-        display: flex; align-items: center; gap: 6px;
-        font-family: 'Archivo', sans-serif;
-        font-size: 11px; font-weight: 500;
-        text-transform: uppercase; letter-spacing: 0.04em;
-        color: var(--ink-80); white-space: nowrap;
-    }
-    .legend-color { width: 7px; height: 7px; flex-shrink: 0; }
+/* Container Logic */
+.scroll-wrapper-stocks {
+  height: 600vh;
+  position: relative;
+  background-color: var(--cream-bg);
+}
 
-    /* ───────── Viz Canvas (sticky) ───────── */
-    /* The chart lives inside a sticky container so it pins while the
-       narrative scrolls past it — no position:fixed needed. */
-       .gsap-section {
-       position: relative;
-       overflow: visible;   /* never clip sticky children */
-   }
+.sticky-content-stocks {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--cream-bg);
+}
 
-   .sticky-chart {
-       position: sticky;
-       top: 0;
-       width: 100vw;
-       height: 100vh;
-       overflow: hidden;
-       display: flex;
-       align-items: center;
-       justify-content: center;
-       background: var(--bg-paper);
-       z-index: 1;
-   }
+.layout-stocks {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
 
-   .scroll-narrative {
-       position: relative;
-       z-index: 10;
-       pointer-events: none;
-       /* pulls up to overlap the sticky chart visually while scrolling */
-       margin-top: -140vh;
-   }
+/* Left Panel - Narrative */
+.left-panel-stocks {
+  flex: 0 0 40%;
+  padding: 60px 5%;
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+  box-sizing: border-box;
+}
 
-    .chart-container {
-        position: relative;
-        display: flex; flex-direction: column; align-items: center;
-        transform: scale(0.42);
-        transform-origin: center center;
-        width: 3400px;
-    }
+.site-header-stocks h1 {
+  font-family: 'Reckless', serif;
+  font-size: clamp(28px, 4vw, 38px);
+  color: var(--ink);
+  line-height: 1.1;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
 
-    .row {
-        display: flex; justify-content: center; gap: 90px;
-        width: 100%; margin-bottom: 70px;
-        position: relative; z-index: 2;
-    }
-    .node {
-        display: flex; flex-direction: column; align-items: center;
-        opacity: 1;
-        transition: opacity 0.4s cubic-bezier(0.2,0.8,0.2,1),
-                    transform 0.4s cubic-bezier(0.2,0.8,0.2,1);
-    }
-    .node.dimmed { opacity: 0.18; transform: scale(0.97); }
-    .node.active { opacity: 1; transform: scale(1.02); }
+/* Legend - Mobile Friendly side-by-side */
+.stock-value-legend-stocks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 40px;
+}
 
-    .box {
-        position: relative;
-        background: var(--bg-elevated);
-        padding: 28px 24px 24px; width: 320px;
-        text-align: left;
-        border: 1px solid var(--hairline); border-radius: 2px;
-        transition: border-color 0.4s ease, box-shadow 0.4s ease;
-    }
-    .box::before {
-        content: '';
-        position: absolute; top: 0; left: 0; right: 0; height: 4px;
-        background: var(--accent, var(--ink));
-    }
-    .box::after {
-        content: attr(data-eyebrow);
-        display: block;
-        position: absolute; top: 10px; right: 14px;
-        font-family: 'Archivo', sans-serif;
-        font-size: 14px; font-weight: 700;
-        letter-spacing: 0.14em; text-transform: uppercase;
-        color: var(--accent, var(--ink-50)); opacity: 0.85;
-    }
-    .box strong {
-        display: block;
-        font-family: 'Reckless', 'Fraunces', Georgia, serif;
-        font-weight: 700; font-size: 22px;
-        line-height: 1.15; letter-spacing: -0.02em;
-        text-transform: none; color: var(--ink); margin-bottom: 12px;
-    }
-    .role {
-        font-family: 'Reckless', 'Fraunces', Georgia, serif;
-        font-weight: 400; font-size: 18px;
-        line-height: 1.2; letter-spacing: -0.01em;
-        color: var(--ink-80); text-transform: none;
-        padding-top: 10px; border-top: 1px solid var(--hairline);
-    }
+.legend-item-stock-stocks {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ink);
+  font-family: 'Reckless', serif;
+}
 
-    .holdings { --accent: var(--c-holdings); }
-    .auto     { --accent: var(--c-auto); }
-    .finserv  { --accent: var(--c-finserv); }
-    .finance  { --accent: var(--c-finance); }
-    .msl      { --accent: var(--c-msl); }
-    .minority { --accent: var(--c-minority); }
-    .skb      { --accent: var(--c-skb); }
+.legend-line-stocks { width: 25px; height: 2px; flex-shrink: 0; }
+.legend-dash-stocks { width: 25px; border-top: 2px dashed; flex-shrink: 0; }
 
-    .skb-group-border {
-        position: absolute;
-        top: -34px; left: -34px; right: -34px; bottom: -34px;
-        border: 1px solid var(--c-skb); border-radius: 2px;
-        pointer-events: none; z-index: -1; opacity: 1;
-        transition: opacity 0.4s ease;
-        background: repeating-linear-gradient(135deg, transparent 0 8px, rgba(255,51,51,0.035) 8px 9px);
-    }
-    .skb-group-border::before {
-        content: 'The SKB Group';
-        position: absolute; top: -10px; left: 24px;
-        background: var(--bg-paper); padding: 0 10px;
-        font-family: 'Archivo', sans-serif;
-        font-size: 14px; font-weight: 700;
-        letter-spacing: 0.16em; text-transform: uppercase; color: var(--c-skb);
-    }
-    .skb-group-border::after {
-        content: 'Kushagra Bajaj branch';
-        position: absolute; bottom: -8px; right: 24px;
-        background: var(--bg-paper); padding: 0 10px;
-        font-family: 'Reckless', serif; font-style: italic;
-        font-size: 14px; font-weight: 500;
-        letter-spacing: -0.01em; color: var(--c-skb);
-    }
-    .skb-group-border.dimmed { opacity: 0.08; }
+/* Text Blocks Animation */
+.text-area-stocks {
+  position: relative;
+  flex: 1;
+}
 
-    .svg-canvas {
-        position: absolute; top: 0; left: 0;
-        width: 100%; height: 100%;
-        pointer-events: none; z-index: 1; overflow: visible;
-    }
-    path {
-        fill: none; stroke: var(--ink-50);
-        stroke-width: 1.5; stroke-linecap: square; stroke-linejoin: miter;
-        opacity: 1; transition: opacity 0.4s ease, stroke 0.4s ease, stroke-width 0.4s ease;
-    }
-    path.demerger { stroke-dasharray: 6, 6; stroke: var(--ink-80); }
-    path.dimmed { opacity: 0.18; stroke: var(--ink-20); stroke-width: 1; }
+.text-block-stocks {
+  position: absolute;
+  top: 0;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s ease-out;
+  pointer-events: none;
+}
 
-    /* ───────── Scroll Narrative ───────── */
-    /* Narrative panels scroll over the sticky chart */
-    .scroll-narrative {
-        /* tall enough to give each step 100vh of scroll travel,
-           plus the initial full-viewport reveal */
-        /* position: relative;
-        z-index: 10;
-        pointer-events: none; */
-        /* push down so the first sticky frame shows before any card appears */
-        /* padding-top: 100vh; */
-    }
+.text-block-stocks.active-stocks {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
 
-    .step {
-        min-height: 100vh;
-        display: flex; flex-direction: column; justify-content: center;
-        padding-left: 6vw;
-        max-width: 520px;
-    }
-    .step:last-child { padding-bottom: 50vh; }
+.year-label-stocks {
+  color: var(--muted-grey) !important;
+  font-size: 16px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
-    .step-card {
-        background: var(--bg-elevated);
-        border: 1px solid var(--hairline); border-radius: 2px;
-        pointer-events: auto;
-        box-shadow: 0 2px 8px rgba(50,31,31,0.06), 0 24px 60px rgba(50,31,31,0.10);
-        overflow: hidden;
-    }
-    .step-card-inner { padding: 28px 30px 30px; }
-    .step-img {
-        width: 100%; height: auto; max-height: 240px; object-fit: cover;
-        display: block; border-bottom: 1px solid var(--hairline);
-        filter: contrast(1.02) saturate(0.95); min-height: 0;
-    }
-    .step-img[src=""], .step-img[src="#"] { display: none; }
+.text-block-stocks h3 {
+  color: var(--header-blue);
+  font-size: 26px;
+  margin: 0 0 12px 0;
+  font-family: 'Reckless', serif;
+}
 
-    .step-eyebrow {
-        font-family: 'Archivo', sans-serif;
-        font-size: 14px; font-weight: 700;
-        text-transform: uppercase; letter-spacing: 0.16em; color: var(--red);
-        margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
-    }
-    .step-eyebrow .num {
-        display: inline-flex; align-items: center; justify-content: center;
-        min-width: 26px; height: 26px; border: 1px solid var(--red);
-        color: var(--red); font-family: 'Archivo', sans-serif;
-        font-size: 14px; font-weight: 700; padding: 0 6px; border-radius: 999px;
-    }
-    .step-eyebrow .rule { flex: 1; height: 1px; background: var(--ink-20); }
-    .step-text {
-        font-family: 'Reckless', 'Fraunces', Georgia, serif;
-        font-size: 1.55rem; font-weight: 500; font-style: italic;
-        line-height: 1.25; letter-spacing: -0.02em; color: var(--ink);
-    }
-    .step-text .header {
-      font-family: 'Reckless', 'Fraunces', Georgia, serif;
-      font-size: 2.2rem; font-weight: 500;
-    }
-    .step-text strong {
-        font-family: 'Archivo', sans-serif; font-style: normal;
-        display: block; margin-bottom: 10px; font-size: 0.7rem; font-weight: 700;
-        letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-50);
-    }
-    .step-footer {
-        margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--hairline);
-        font-family: 'Archivo', sans-serif; font-size: 14px; font-weight: 600;
-        text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-50);
-        display: flex; justify-content: space-between;
-    }
-    .step-footer .scroll-cue::after { content: ' ↓'; color: var(--red); }
+.text-block-stocks p {
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1.5;
+}
 
-    /* Scroll rail */
-    .scroll-rail {
-        position: fixed; left: 28px; top: 50%;
-        transform: translateY(-50%); width: 1px; height: 240px;
-        background: var(--ink-10); z-index: 60;
-    }
-    .scroll-rail::after {
-        content: ''; position: absolute; left: -1.5px; top: 0;
-        width: 4px; height: 28px; background: var(--red); transition: top 0.2s ease;
-    }
+/* Right Panel - Graph */
+.right-panel-stocks {
+  flex: 0 0 60%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
 
-    /* Editor note */
-    .editor-note {
-        position: fixed; bottom: 18px; left: 24px; z-index: 50;
-        font-family: 'Archivo', sans-serif; font-size: 11px; font-weight: 500;
-        letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-50);
-        display: flex; align-items: center; gap: 8px;
-    }
-    .editor-note .red-rule { display: inline-block; width: 18px; height: 1px; background: var(--red); }
+#chart-container-stocks {
+  width: 100%;
+  height: 80%;
+  position: relative;
+}
 
-    /* ───────── Mobile ───────── */
-    @media (max-width: 800px) {
-        .header-overlay { top: 16px; left: 16px; max-width: 240px; gap: 8px; }
-        .header-overlay h1 { font-size: 26px; }
-        .legend-overlay {
-            top: auto; bottom: 16px; right: 16px; left: 16px; padding: 12px 14px;
-            background: rgba(247,242,242,0.94);
-        }
-        .legend-grid { grid-template-columns: 1fr 1fr; gap: 6px 10px; }
-        .legend-item { font-size: 14px; }
-        .scroll-rail { display: none; }
-        .editor-note { display: none; }
-        .chart-container {
-            transform: scale(0.25) translateY(-12vh);
-            width: 3400px; transform-origin: center center;
-        }
-        .box strong { font-size: 30px; }
-        .role { font-size: 30px; }
-        .box::after { display: none; }
-        .skb-group-border::before { font-size: 32px; padding: 0 16px; top: -18px; left: 32px; }
-        .skb-group-border::after  { font-size: 36px; padding: 0 16px; bottom: -16px; right: 32px; }
-        .step { max-width: 100%; padding-left: 5vw; padding-right: 5vw; }
-        .step-card-inner { padding: 22px 22px 24px; }
-        .step-text { font-size: 1.2rem; }
-    }
+/* Chart Highlight Classes */
+.dimmed-stocks { opacity: 0.1; transition: opacity 0.4s; }
+.active-node-stocks { opacity: 1; transform: scale(1.1); }
+
+/* Mobile View */
+@media (max-width: 800px) {
+  .layout-stocks { flex-direction: column; }
+  .left-panel-stocks { flex: 0 0 auto; width: 100%; padding: 40px 20px; }
+  .right-panel-stocks { flex: 0 0 auto; height: 50vh; width: 100%; }
+}
+
+@media (min-width: 768px) and (max-width: 890px) {
+
+}

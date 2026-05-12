@@ -1,0 +1,162 @@
+/* ───────── Bajaj Family Tree Scrolly Visualization ───────── */
+/* Original implementation from All_Viz_Full/styles/family-branch.css */
+
+/* Fix overflow on ancestors that breaks position: sticky */
+.ep2-chapter:has(#bajaj-scrolly-root),
+.ch2-rebuild:has(#bajaj-scrolly-root),
+.ep2-inner:has(#bajaj-scrolly-root) {
+    overflow: visible !important;
+}
+
+#bajaj-scrolly-root {
+    --bg-scrolly: transparent;
+    --text-dark: #1c1c1c;
+    --text-mid: #555;
+    --border: rgba(0,0,0,0.07);
+    background: var(--bg-scrolly);
+
+}
+
+#bajaj-scrolly-root .scrolly-container {
+    display: grid;
+    grid-template-columns: 44% 1fr;
+    min-height: 100vh;
+    position: relative;
+}
+
+#bajaj-scrolly-root #panel-left {
+    padding: 0 52px;
+    border-right: 1px solid var(--border);
+}
+
+#bajaj-scrolly-root .header-section {
+    padding-top: 48px;
+    margin-bottom: 60px;
+}
+
+#bajaj-scrolly-root .panel-title {
+    font-family: 'Reckless', serif;
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    line-height: 1.0;
+    letter-spacing: -1px;
+    margin-bottom: 24px;
+}
+
+#bajaj-scrolly-root .scroll-text-block {
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#bajaj-scrolly-root .narrative {
+    font-family: 'Reckless', serif;
+    font-size: 1.8rem;
+    line-height: 1.4;
+    color: #ccc;
+    transition: color 0.8s ease;
+}
+
+#bajaj-scrolly-root .narrative.active {
+    color: var(--text-dark);
+}
+
+#bajaj-scrolly-root .narrative.active strong {
+    color: #c45e45;
+}
+
+#bajaj-scrolly-root #viz-container {
+    position: sticky;
+    top: 0;
+    height: 122vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#bajaj-scrolly-root #bajaj-chart {
+    width: 100%;
+    height: 90%;
+}
+
+#bajaj-scrolly-root .legend {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+#bajaj-scrolly-root .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    color: var(--text-mid);
+    text-transform: uppercase;
+}
+
+#bajaj-scrolly-root .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+@media (max-width: 800px) {
+    /* 1. Force the parent to be a single-cell stack */
+    #bajaj-scrolly-root .scrolly-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-areas: "stack"; /* Define a single named area */
+        position: relative;
+    }
+
+    /* 2. Place the chart in the stack and make it sticky */
+    #bajaj-scrolly-root #viz-container {
+        grid-area: stack; /* Occupy the same space as the text */
+        position: fixed;
+        top: 0;
+        height: 65vh;
+        z-index: 1; /* Sit behind the text */
+          opacity: 0.25;
+        pointer-events: none; /* Crucial: allows scrolling through the chart */
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* 3. Place the text in the same stack */
+    #bajaj-scrolly-root #panel-left {
+        grid-area: stack; /* Occupy the same space as the chart */
+        position: relative;
+        z-index: 2; /* Sit on top of the chart */
+        padding: 0 24px;
+        border-right: none;
+        background: transparent; /* Ensure we can see through to the chart */
+    }
+
+    /* 4. Ensure each text block is tall enough to create a scroll effect */
+    #bajaj-scrolly-root .scroll-text-block {
+        height: 85vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* 5. Improve readability of text over the chart */
+    #bajaj-scrolly-root .narrative {
+        background: #dae9d9;
+        backdrop-filter: blur(4px);
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        color: #1a1a1a;
+    font-size: 1.2rem;
+    }
+
+    #bajaj-scrolly-root #bajaj-chart {
+        width: 100%;
+        height: 70%; /* Keep the sunburst centered and readable */
+    }
+}

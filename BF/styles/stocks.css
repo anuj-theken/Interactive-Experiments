@@ -14,7 +14,7 @@
 }
 
 .sticky-content {
-  position: sticky;
+  position: fixed;
   top: 0;
   height: 100vh;
   width: 100%;
@@ -150,7 +150,7 @@
 }
 
 /* --- MOBILE STYLES --- */
-@media (max-width: 900px) {
+@media (max-width: 500px) {
   .bajaj-comparison-container .layout {
     flex-direction: column;
   }
@@ -160,7 +160,7 @@
     width: 100%;
     height: auto; /* Changed to auto to fit content */
     min-height: 40vh;
-    padding: 40px 8%;
+    padding: 120px 8%;
     /* Force left alignment on mobile too */
     text-align: left;
     align-items: flex-start;
@@ -170,7 +170,7 @@
     flex: 0 0 auto;
     width: 100%;
     height: 50vh;
-    padding: 20px;
+    padding-top: 70px;
   }
 
   .stock-value-legend {

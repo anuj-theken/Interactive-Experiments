@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="styles/product.css">
     <link rel="stylesheet" href="styles/stocks.css">
     <link rel="stylesheet" href="styles/family-branch.css">
+    <link rel="stylesheet" href="styles/collage.css">
 
     <!-- GSAP must load before corpo.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -250,7 +251,7 @@
     <div class="stack-container">
         <div class="proto-card">
             <div class="proto-label">01 // GSAP Interaction</div>
-            <iframe class="family-view" src="Family_Tree/index.html"></iframe>
+            <iframe class="family-view" src="Family_tree/index.html"></iframe>
         </div>
     </div>
 
@@ -274,37 +275,37 @@
 
 
 //family tree scrolly
-<div id="bajaj-scrolly-root-FT">
-    <div class="scrolly-container-FT">
-
-        <div id="panel-left-FT">
-            <div class="header-section-FT">
-                <h1 class="panel-title-FT">The Split</h1>
+<div id="bajaj-scrolly-root">
+    <div class="scrolly-container">
+        <div id="panel-left">
+            <div class="header-section">
+                <div class="panel-title">Bajaj Family Tree</div>
+                <div class="legend">
+                    <div class="legend-item"><span class="dot" style="background:#b08d57"></span> G1</div>
+                    <div class="legend-item"><span class="dot" style="background:#c5a367"></span> G2</div>
+                    <div class="legend-item"><span class="dot" style="background:#4a7c5f"></span> G3</div>
+                    <div class="legend-item"><span class="dot" style="background:#c45e45"></span> G4</div>
+                    <div class="legend-item"><span class="dot" style="background:#e8a98c"></span> G5</div>
+                </div>
             </div>
 
-            <div class="scroll-text-block-FT" id="trigger-base-FT">
-                <p class="narrative-FT active" id="text-base-FT">
-                    In any case, alliances were formed,
+            <div class="scroll-text-block" id="trigger-allies">
+                <p class="narrative" id="text-allies">
+                    In any case, alliances were formed: <strong>Rahul, Shekhar, Madhur, and Niraj</strong> on one side;
                 </p>
             </div>
 
-            <div class="scroll-text-block-FT" id="trigger-allies-FT">
-                <p class="narrative-FT" id="text-allies-FT">
-                    <span class="red"> Rahul,</span><span class ="green" >Shekhar, Madhur, and Niraj </span>on one side...
+            <div class="scroll-text-block" id="trigger-shishir">
+                <p class="narrative" id="text-shishir">
+                    ... <strong>Shishir and Kushagra</strong> on the other.
                 </p>
             </div>
 
-            <div class="scroll-text-block-FT" id="trigger-shishir-FT">
-                <p class="narrative-FT" id="text-shishir-FT">
-<span class="red">Shishir and Kushagra </span>on the other.
-                </p>
-            </div>
-
-            <div style="height: 10vh;"></div>
+            <div style="height: 40vh;"></div>
         </div>
 
-        <div id="viz-container-FT">
-            <div id="bajaj-chart-FT"></div>
+        <div id="viz-container">
+            <div id="bajaj-chart"></div>
         </div>
     </div>
 </div>
@@ -312,26 +313,24 @@
       <script src="scripts/family-branch.js"></script>
 
 //timeline
-    <section class="bajaj-timeline">
-  <header class="timeline-header">
-    <div class="timeline-header-left">
-      <h1>The Legacy of Bajaj Group</h1>
-      <p>From industrial roots to a global financial powerhouse.</p>
+<section class="bajaj-timeline-btl">
+<header class="timeline-header-btl">
+    <div class="timeline-header-left-btl">
+        <h1 class="timeline-title-btl">The Legacy of Bajaj Group</h1>
+        <p class="timeline-subtitle-btl">From industrial roots to a global financial powerhouse.</p>
     </div>
-    <div class="legend"><span class="dot"></span> Milestone Events</div>
-  </header>
+</header>
 
-  <div class="desktop-only">
-    <div class="timeline-scroll-wrapper">
-      <div id="main"></div>
+<div class="desktop-only-btl">
+    <div class="timeline-scroll-wrapper-btl">
+        <div id="main-btl"></div>
     </div>
-  </div>
+</div>
 
-  <div class="mobile-only">
-    <div class="vertical-timeline" id="mobile-list"></div>
-  </div>
+<div class="mobile-only-btl">
+    <div class="vertical-timeline-btl" id="mobile-list-btl"></div>
+</div>
 </section>
-  <script src="scripts/timeline.js"></script>
 
 //growth
 
@@ -377,7 +376,7 @@
 
       <div class="box-placeholder" data-cat="2" style="width:14vw;height:19vh;top:8vh;right:3vw;background:#c9d4bc;"></div>
       <div class="spread-img" data-cat="2" style="width:16vw;height:22vh;top:5vh;right:2vw;">
-        <img src="imgs/product/Commercial.jpg" alt="Commercial" />
+        <img src="imgs/product/commercial.jpg" alt="Commercial" />
       </div>
       <div class="spread-title" data-cat="2" style="top:29vh;right:2vw;text-align:right;">
         <h2>Commercial</h2>
@@ -402,7 +401,7 @@
 
       <div class="box-placeholder" data-cat="4" style="width:14vw;height:19vh;bottom:27vh;right:3vw;background:#c2c5d4;"></div>
       <div class="spread-img" data-cat="4" style="width:16vw;height:22vh;bottom:24vh;right:2vw;">
-        <img src="imgs/product/SME lending.jpg" alt="SME Lending" />
+        <img src="imgs/product/sme lending.jpg" alt="SME Lending" />
       </div>
       <div class="spread-title" data-cat="4" style="bottom:48vh;right:2vw;text-align:right;">
         <h2>SME Lending</h2>
@@ -414,7 +413,7 @@
 
       <div class="box-placeholder" data-cat="5" style="width:16vw;height:14vh;bottom:4vh;left:42vw;background:#d4ccb8;"></div>
       <div class="spread-img" data-cat="5" style="width:18vw;height:18vh;bottom:2vh;left:41vw;">
-        <img src="imgs/product/Payments.jpg" alt="Payments" />
+        <img src="imgs/product/payments.jpg" alt="Payments" />
       </div>
       <div class="spread-title" data-cat="5" style="bottom:22vh;left:38vw;">
         <h2>Payments &amp; Deposits</h2>
@@ -427,7 +426,7 @@
 
       <div class="box-placeholder" data-cat="6" style="width:13vw;height:14vh;top:6vh;left:44vw;background:#bdd4cf;"></div>
       <div class="spread-img" data-cat="6" style="width:15vw;height:19vh;top:4vh;left:43vw;">
-        <img src="imgs/product/Rural Lending.jpg" alt="Rural Lending" />
+        <img src="imgs/product/rural lending.jpg" alt="Rural Lending" />
       </div>
       <div class="spread-title" data-cat="6" style="top:25vh;left:43vw;">
         <h2>Rural Lending</h2>
@@ -492,6 +491,47 @@
   </div>
 </section>
   <script src="scripts/stocks.js"></script>
+
+//2.3collage
+
+
+
+<div class="scrolly-container-collage">
+    <div id="main-stage-collage">
+
+        <div class="container-collage">
+            <div class="text-wrap-collage">
+                <div class="step-text-collage" id="text1-collage">Yamaha worked with Escorts.</div>
+                <div class="step-text-collage" id="text2-collage">Honda with Firodia for scooters and... </div>
+                <div class="step-text-collage" id="text3-collage">with Hero MotoCorp for motorcycles.</div>
+                <div class="step-text-collage" id="text4-collage">Suzuki with TVS and Maruti.</div>
+                <div class="step-text-collage" id="text5-collage">Kawasaki with Bajaj in a technical partnership.</div>
+                <div class="step-text-collage" id="text6-collage">Indians who wanted personal transportation now had more options, but two-wheelers were still a luxury.</div>
+            </div>
+        </div>
+
+        <div class="visual-stage-collage">
+            <div id="visual-anchor-collage">
+                <div id="circle-collage" class="asset-collage"></div>
+                <img src="imgs/road.png" id="road-collage" class="asset-collage">
+
+                <img src="imgs/bike1.png" id="bike1-collage" class="asset-collage bike-collage">
+                <img src="imgs/bike2.png" id="bike2-collage" class="asset-collage bike-collage">
+                <img src="imgs/bike31.png" id="bike3-collage" class="asset-collage bike-collage">
+                <img src="imgs/bike32.png" id="bike4-collage" class="asset-collage bike-collage">
+                <img src="imgs/bike4.png" id="bike5-collage" class="asset-collage bike-collage">
+
+                <img src="imgs/signal.png" id="signal-collage" class="asset-collage">
+                <img src="imgs/person1.png" id="bike6-collage" class="asset-collage bike-collage">
+                <img src="imgs/person2.png" id="bike7-collage" class="asset-collage bike-collage">
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="scripts/collage.js"></script>
+
+
 
 </body>
 </html>

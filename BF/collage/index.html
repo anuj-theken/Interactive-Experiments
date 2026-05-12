@@ -7,13 +7,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
     <style>
         body, html {
             margin: 0;
             padding: 0;
             background-color: #1a1c2c;
             color: white;
-            font-family: Arial, sans-serif;
+            /* If Reckless isn't local, it defaults to Serif (Instrument Serif) */
+            font-family: 'Reckless', 'Instrument Serif', serif;
             overflow-x: hidden;
         }
 
@@ -32,51 +35,131 @@
         .text-wrap {
             position: absolute;
             top: 15%;
-            left: 10%;
-            width: 40%;
-            z-index: 100; /* Ensure text is always on top */
+            left: 11%;
+            width: 51%;
+            z-index: 100;
         }
 
         .step-text {
             position: absolute;
             top: 0;
             left: 0;
-            font-size: 2.5rem;
+            font-size: 1.5rem;
+            font-family: 'Reckless';
             opacity: 0;
-            line-height: 1.2;
-            transition: opacity 0.3s ease;
+            line-height: 1.1;
+            /* Starts 50px up to drop down */
+            transform: translateY(-50px);
         }
 
-        /* Default visible state for first text */
-        #text1 { opacity: 1; }
-
+        /* NEW: This container holds all visuals to scale them together */
         .visual-stage {
             position: relative;
             width: 100%;
             height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* This is the master "frame". Adjust the width to scale the whole scene */
+        #visual-anchor {
+            position: relative;
+            width: 60vw;
+            height: 40vw;
+            max-width: 900px;
+            max-height: 600px;
+            left: 10%; /* Pushes visuals to the right to clear text */
         }
 
         .asset {
             position: absolute;
             opacity: 0;
-            max-width: 70%;
-            max-height: 70%;
             object-fit: contain;
             pointer-events: none;
         }
 
-        /* Default visible state for first assets */
-        #road, #circle, #bike1 { opacity: 1; }
+        /* All positions are now relative to the #visual-anchor */
+        #circle {
+            z-index: 1;
+            width: 62%;
+            height: 91%;
+            background: radial-gradient(circle, #c5d6c4 0%, #a3b8a2 100%);
+            border-radius: 50%;
+            top: 50%;
+            left: 65%;
+            transform: translate(-50%, -50%);
+            opacity: 1;
+        }
 
-        /* Positioning - Adjust these based on your PNG crops */
-        #circle { z-index: 1; width: 350px; height: 350px; background: #c5d6c4; border-radius: 50%; top: 20%; left: 45%; }
-        #road { z-index: 2; bottom: 15%; left: 35%; width: 600px; }
-        #signal { z-index: 5; right: 10%; top: 10%; width: 120px; }
+        #road {
+            z-index: 2;
+            bottom: -52%;
+            left: 43%;
+            width: 151%; /* Spans the full width of the anchor */
+            transform: translateX(-50%);
+            opacity: 1;
+        }
 
-        .bike { z-index: 10; bottom: 20%; left: 45%; width: 450px; }
+        .bike {
+            z-index: 10;
+            /* bottom: -22%;
+            left: 60%;
+            width: 104%; */
+            transform: translateX(-50%);
+        }
+
+        #signal {
+            z-index: 5;
+            right: -26%;
+            top: -23%;
+            width: 56%;
+        }
+
+        /* Set First Frame State */
+        #text1 {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #bike1 { opacity: 1;
+          bottom: -22%;
+          left: 60%;
+          width: 104%;
+         }
+        #bike2{
+          bottom: -16%;
+    left: 44%;
+    width: 83%;
+        }
+        #bike3{
+          top: 28%;
+left: 49%;
+width: 82%;
+        }
+        #bike4{
+          top: 15%;
+    left: 4%;
+    width: 48%;
+        }
+        #bike5{
+          top: 27%;
+    left: 58%;
+    width: 90%;
+        }
+        #bike6{
+          width: 100%;
+    top: 6%;
+    left: 83%;
+        }
+        #bike7{
+          width: 77%;
+    top: 53%;
+    left: -24%;
+        }
+
 
         .scroll-spacer {
-            height: 700vh; /* Length of the scroll experience */
+            height: 800vh;
             position: relative;
             z-index: 1;
         }
@@ -87,24 +170,28 @@
     <div id="main-stage">
         <div class="text-wrap">
             <div class="step-text" id="text1">Yamaha worked with Escorts.</div>
-            <div class="step-text" id="text2">Honda with Firodia for scooters...</div>
-            <div class="step-text" id="text3">...and with Hero MotoCorp for motorcycles.</div>
+            <div class="step-text" id="text2">Honda with Firodia for scooters and... </div>
+            <div class="step-text" id="text3">with Hero MotoCorp for motorcycles.</div>
             <div class="step-text" id="text4">Suzuki with TVS and Maruti.</div>
             <div class="step-text" id="text5">Kawasaki with Bajaj in a technical partnership.</div>
             <div class="step-text" id="text6">Indians who wanted personal transportation now had more options, but two-wheelers were still a luxury.</div>
         </div>
 
         <div class="visual-stage">
-            <div class="asset" id="circle"></div>
-            <img src="1_road.png" id="road" class="asset">
-            <img src="traffic_signal.png" id="signal" class="asset">
+            <div id="visual-anchor">
+                <div id="circle" class="asset"></div>
+                <img src="img/road.png" id="road" class="asset">
 
-            <img src="1_yamaha.png" id="bike1" class="asset bike">
-            <img src="2_honda_scooter.png" id="bike2" class="asset bike">
-            <img src="3_hero_honda.png" id="bike3" class="asset bike">
-            <img src="4_suzuki.png" id="bike4" class="asset bike">
-            <img src="5_kawasaki.png" id="bike5" class="asset bike">
-            <img src="6_helmets.png" id="bike6" class="asset bike">
+                <img src="img/bike1.png" id="bike1" class="asset bike">
+                <img src="img/bike2.png" id="bike2" class="asset bike">
+                <img src="img/bike31.png" id="bike3" class="asset bike">
+                <img src="img/bike32.png" id="bike4" class="asset bike">
+                <img src="img/bike4.png" id="bike5" class="asset bike">
+
+                <img src="img/signal.png" id="signal" class="asset">
+                <img src="img/person1.png" id="bike6" class="asset bike">
+                <img src="img/person2.png" id="bike7" class="asset bike">
+            </div>
         </div>
     </div>
 
@@ -122,35 +209,27 @@
             }
         });
 
-        // FRAME 1 is already visible via CSS.
-        // Our first action is to fade out Text1 and Bike1 while bringing in Frame 2.
-
+        // Animation logic: Text drops DOWN (y: 50) and New text arrives at 0
         mainTl
-            // Exit Frame 1, Enter Frame 2
-            .to(["#text1", "#bike1"], { opacity: 0, duration: 1 })
-            .to(["#text2", "#signal", "#bike2"], { opacity: 1, duration: 1 }, "<")
-            .to({}, {duration: 0.5}) // Pause
+            .to(["#text1", "#bike1"], { opacity: 0, y: 50, duration: 1 })
+            .to(["#text2", "#bike2", "#signal"], { opacity: 1, y: 0, duration: 1 }, "<")
+            .to({}, {duration: 0.5})
 
-            // Exit Frame 2, Enter Frame 3
-            .to(["#text2", "#bike2"], { opacity: 0, duration: 1 })
-            .to(["#text3", "#bike3"], { opacity: 1, duration: 1 }, "<")
-            .to({}, {duration: 0.5}) // Pause
+            .to(["#text2", "#bike2"], { opacity: 0, y: 50, duration: 1 })
+            .to(["#text3", "#bike3", "#bike4"], { opacity: 1, y: 0, duration: 1 }, "<")
+            .to({}, {duration: 0.5})
 
-            // Exit Frame 3, Enter Frame 4
-            .to(["#text3", "#bike3"], { opacity: 0, duration: 1 })
-            .to(["#text4", "#bike4"], { opacity: 1, duration: 1 }, "<")
-            .to({}, {duration: 0.5}) // Pause
+            .to(["#text3", "#bike3", "#bike4"], { opacity: 0, y: 50, duration: 1 })
+            .to(["#text4", "#bike5"], { opacity: 1, y: 0, duration: 1 }, "<")
+            .to({}, {duration: 0.5})
 
-            // Exit Frame 4, Enter Frame 5
-            .to(["#text4", "#bike4"], { opacity: 0, duration: 1 })
-            .to(["#text5", "#bike5"], { opacity: 1, duration: 1 }, "<")
-            .to({}, {duration: 0.5}) // Pause
+            // .to(["#text4", "#bike4"], { opacity: 0, y: 50, duration: 1 })
+            // .to(["#text5", "#bike5"], { opacity: 1, y: 0, duration: 1 }, "<")
+            // .to({}, {duration: 0.5})
 
-            // Exit Frame 5, Enter Final Frame
-            .to(["#text5", "#bike5"], { opacity: 0, duration: 1 })
-            .to(["#text6", "#bike6"], { opacity: 1, duration: 1 }, "<")
-            .to({}, {duration: 1}); // Hold final state
-
+            .to(["#text4", "#bike5"], { opacity: 0, y: 50, duration: 1 })
+            .to(["#text6", "#bike6", "#bike7", "#bike8"], { opacity: 1, y: 0, duration: 1 }, "<")
+            .to({}, {duration: 1});
     </script>
 </body>
 </html>

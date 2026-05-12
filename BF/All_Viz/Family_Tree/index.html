@@ -27,7 +27,7 @@
         }
 
         /* --- DESKTOP GRID --- */
-        @media (min-width: 801px) {
+        @media (max-width: 800px) {
             body {
                 grid-template-columns: 42% 1fr;
                 grid-template-rows: auto 1fr;
@@ -44,7 +44,7 @@
                 justify-content: center;
             }
 
-            #panel-header { padding: 56px 52px 10px 52px; }
+            #panel-header { padding: 56px 52px 0 52px; }
             #panel-details { padding: 0 52px 0 52px; }
 
             #active-name {
@@ -56,6 +56,7 @@
                 margin-bottom: 15px;
             }
             #img-container { margin-bottom: 20px; height: 240px; }
+
         }
 
         #panel-header {
@@ -130,8 +131,9 @@
 
         /* --- MOBILE REFINEMENTS --- */
         @media (max-width: 800px) {
-            #viz { margin-bottom: 35px; height: 450px; }
+            #viz {  height: 450px; }
             #date-val { display: none !important; }
+
 
             .mobile-flex-wrapper {
                 display: flex;
@@ -160,8 +162,8 @@
                 display: block;
             }
 
-            .info-rows { min-height: 70px; }
-            .info-row { font-size: 0.75rem; height: 20px; }
+            .info-rows { min-height: 70px;  max-width: 173px;}
+            .info-row {}
             #info-text { font-size: 0.78rem; height: 110px; margin-top: 8px; padding-top: 8px; }
             .hidden { display: none; }
         }
@@ -212,7 +214,7 @@
             </div>
         </div>
 
-        <div class="panel-footer">Interactive Bajaj Legacy Visualizer</div>
+        <div class="panel-footer">Hover on the Circle to know about Bajaj.</div>
     </div>
 
 <script>
@@ -245,7 +247,7 @@ const members = {
     'Rajiv Bajaj': { color: P.g5, parents: 'Rahul Bajaj', siblings: 'Sanjiv, Sunaina', date: 'Generation 5', img1: 'Rajiv Bajaj.jpg' },
     'Sanjiv Bajaj': { color: P.g5, parents: 'Rahul Bajaj', siblings: 'Rajiv, Sunaina', date: 'Generation 5', img1: 'Sanjiv Bajaj.jpg' },
     'Sunaina Kejriwal': { color: P.g5, parents: 'Rahul Bajaj', siblings: 'Rajiv, Sanjiv', date: 'Generation 5', img1: 'Sunaina_Kejriwal.jpg' },
-    'Kushagra Bajaj': { color: P.g5, parents: 'Shishir Bajaj', date: 'Generation 5', img1: 'kushagra-bajaj.jpg' }
+    'Kushagra Bajaj': { color: P.g5, parents: 'Shishir Bajaj', date: 'Generation 5', img1: '../imgs/corpo/Kushagra Bajaj.png' }
 };
 
 const treeData = [{

@@ -2,18 +2,23 @@ gsap.registerPlugin(ScrollTrigger);
 
 // ── Layout: set section + narrative height so sticky has room to pin ──────
 function setLayout() {
-    const section   = document.querySelector('.gsap-section');
-    const steps     = document.querySelectorAll('.step');
-    const vh        = window.innerHeight;
-
-    // Section must be tall enough for sticky to have scroll room
-    const totalHeight = vh * (steps.length + 1);
-    section.style.minHeight = totalHeight + 'px';
-
-    // The narrative sits below the sticky chart and provides scroll travel
-    const narrative = document.querySelector('.scroll-narrative');
-    if (narrative) narrative.style.minHeight = (vh * steps.length) + 'px';
-
+  //
+  // const chart     = document.getElementById('master-chart');
+  //   const container = document.querySelector('.sticky-chart');
+  //
+  //   const naturalWidth = chart.scrollWidth;
+  //   const availWidth   = container.clientWidth;
+  //
+  //   if (window.innerWidth < 800 && naturalWidth > availWidth) {
+  //     const scale = availWidth / naturalWidth;
+  //     chart.style.transform       = `scale(${scale})`;
+  //     chart.style.transformOrigin = 'top center';
+  //     // Collapse the dead whitespace transform leaves behind
+  //     chart.style.marginBottom = `-${chart.scrollHeight * (1 - scale)}px`;
+  //   } else {
+  //     chart.style.transform    = '';
+  //     chart.style.marginBottom = '';
+  //   }
     ScrollTrigger.refresh();
 }
 
@@ -22,7 +27,7 @@ function connect() {
     const svg   = document.getElementById('svg-layer');
     const chart = document.getElementById('master-chart');
     const cRect = chart.getBoundingClientRect();
-    const scale = new DOMMatrixReadOnly(window.getComputedStyle(chart).transform).a;
+  const scale = cRect.width / chart.offsetWidth;
 
     svg.setAttribute('viewBox', `0 0 ${chart.offsetWidth} ${chart.offsetHeight}`);
     svg.innerHTML = '';
@@ -43,7 +48,7 @@ function connect() {
         if (!p1 || !p2) return;
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         if (isDemerger) path.classList.add('demerger');
-        const midY = p1.yB + 35;
+        const midY = p1.yB + 25;
         path.setAttribute('d', `M ${p1.x} ${p1.yB} L ${p1.x} ${midY} L ${p2.x} ${midY} L ${p2.x} ${p2.yT}`);
         path.setAttribute('data-from', from);
         path.setAttribute('data-to', to);
@@ -110,7 +115,7 @@ window.addEventListener('load', () => {
     const header = document.querySelector('.header-overlay');
     const legend = document.querySelector('.legend-overlay');
     const editorNote = document.querySelector('.editor-note');
-    const section = document.querySelector('.gsap-section');
+    const section = document.querySelector('.chart-container');
 
     ScrollTrigger.create({
         trigger: section,
@@ -160,6 +165,30 @@ window.addEventListener('load', () => {
             }
         });
     });
+
+    // --- Mobile Fixed Logic ---
+if (window.innerWidth <= 800) {
+    const vizContainer = document.querySelector('.sticky-chart');
+    const mainSection = document.querySelector('.gsap-section'); // Or your specific wrapper
+
+    ScrollTrigger.create({
+        trigger: mainSection,
+        start: 'top 40%', // When the top of the section enters the bottom of the viewport
+        end: 'bottom 90%',   // When the bottom of the section leaves the top of the viewport
+        onEnter: () => {
+            gsap.to(vizContainer, { opacity: 1, duration: 0.4, autoAlpha: 1 });
+        },
+        onLeave: () => {
+            gsap.to(vizContainer, { opacity: 0, duration: 0.4, autoAlpha: 0 });
+        },
+        onEnterBack: () => {
+            gsap.to(vizContainer, { opacity: 1, duration: 0.4, autoAlpha: 1 });
+        },
+        onLeaveBack: () => {
+            gsap.to(vizContainer, { opacity: 0, duration: 0.4, autoAlpha: 0 });
+        }
+    });
+}
 });
 
 window.addEventListener('resize', () => { setLayout(); connect(); });

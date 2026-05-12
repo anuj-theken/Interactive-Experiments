@@ -205,13 +205,13 @@
     .box strong {
         display: block;
         font-family: 'Reckless', 'Fraunces', Georgia, serif;
-        font-weight: 700; font-size: 22px;
+        font-weight: 700; font-size: 24px;
         line-height: 1.15; letter-spacing: -0.02em;
         text-transform: none; color: var(--ink); margin-bottom: 12px;
     }
     .role {
         font-family: 'Reckless', 'Fraunces', Georgia, serif;
-        font-weight: 400; font-size: 18px;
+        font-weight: 400; font-size: 24px;
         line-height: 1.2; letter-spacing: -0.01em;
         color: var(--ink-80); text-transform: none;
         padding-top: 10px; border-top: 1px solid var(--hairline);
@@ -370,8 +370,8 @@
             transform: scale(0.25) translateY(-12vh);
             width: 3400px; transform-origin: center center;
         }
-        .box strong { font-size: 30px; }
-        .role { font-size: 30px; }
+        .box strong { font-size: 40px; }
+        .role { font-size: 34px; }
         .box::after { display: none; }
         .skb-group-border::before { font-size: 32px; padding: 0 16px; top: -18px; left: 32px; }
         .skb-group-border::after  { font-size: 36px; padding: 0 16px; bottom: -16px; right: 32px; }

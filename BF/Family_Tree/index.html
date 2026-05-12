@@ -44,7 +44,7 @@
                 justify-content: center;
             }
 
-            #panel-header { padding: 56px 52px 10px 52px; }
+            #panel-header { padding: 56px 52px 0 52px; }
             #panel-details { padding: 0 52px 0 52px; }
 
             #active-name {
@@ -130,7 +130,7 @@
 
         /* --- MOBILE REFINEMENTS --- */
         @media (max-width: 800px) {
-            #viz { margin-bottom: 35px; height: 450px; }
+            #viz {  height: 450px; }
             #date-val { display: none !important; }
 
             .mobile-flex-wrapper {
@@ -161,7 +161,7 @@
             }
 
             .info-rows { min-height: 70px; }
-            .info-row { font-size: 0.75rem; height: 20px; }
+            .info-row { max-width: 173px; font-size: 0.75rem; height: 20px; }
             #info-text { font-size: 0.78rem; height: 110px; margin-top: 8px; padding-top: 8px; }
             .hidden { display: none; }
         }
@@ -212,7 +212,7 @@
             </div>
         </div>
 
-        <div class="panel-footer">Interactive Bajaj Legacy Visualizer</div>
+        <div class="panel-footer">Hover on the Circle</div>
     </div>
 
 <script>
@@ -279,12 +279,37 @@ chart.setOption({
     series: {
         type: 'sunburst',
         data: treeData,
-        radius: ['0%', '160%'], // Reduced from 190% to 160% (~15% reduction in size)
+        radius: ['0%', '160%'],
         emphasis: { focus: 'ancestor' },
         nodeClick: false,
-        levels: [{}, { r0: '0%', r: '18%' }, { r0: '18%', r: '36%' }, { r0: '36%', r: '54%' }, { r0: '54%', r: '75%' }, { r0: '75%', r: '95%' }],
-        label: { rotate: 'tangential', fontSize: 9.5, fontFamily: 'DM Sans', color: '#2a2a2a' },
-        itemStyle: { borderWidth: 2, borderColor: '#f0ebe0' }
+        // Refined levels for better spacing
+        levels: [
+            {},
+            { r0: '0%', r: '18%' },
+            { r0: '18%', r: '36%' },
+            { r0: '36%', r: '54%' },
+            { r0: '54%', r: '75%' },
+            { r0: '75%', r: '95%' }
+        ],
+        label: {
+            rotate: 'tangential',
+            fontSize: 10,
+            fontFamily: 'DM Sans',
+            // 'inherit' uses the node color, but for contrast
+            // you can use a callback or a fixed light color:
+            color: '#fff',
+            textShadowColor: 'rgba(0,0,0,0.3)',
+            textShadowBlur: 2,
+            // Centering and Long Word Handling
+            align: 'center',
+            overflow: 'break', // Breaks long names into multiple lines
+            width: 60,         // Limits width to force the break
+            minAngle: 10       // Hides labels on tiny slices to prevent clutter
+        },
+        itemStyle: {
+            borderWidth: 2,
+            borderColor: '#f0ebe0'
+        }
     }
 });
 

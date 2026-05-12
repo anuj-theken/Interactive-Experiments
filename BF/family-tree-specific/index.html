@@ -16,9 +16,14 @@
             --border: rgba(0,0,0,0.07);
         }
         body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--text-dark); overflow-x: hidden; }
+
+        /* Desktop Layout */
         .container { display: grid; grid-template-columns: 44% 1fr; min-height: 100vh; }
-        #panel-left { padding: 0 52px; border-right: 1px solid var(--border); }
+
+        #panel-left { padding: 0 52px; border-right: 1px solid var(--border); position: relative; z-index: 2; }
+
         .header-section { padding-top: 48px; margin-bottom: 60px; }
+
         .panel-title {
             font-family: 'Cormorant Garamond', serif;
             font-size: clamp(2.2rem, 5vw, 3.2rem);
@@ -26,29 +31,75 @@
             letter-spacing: -1px;
             margin-bottom: 24px;
         }
+
         .scroll-text-block {
             height: 80vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
+
         .narrative {
             font-family: 'Cormorant Garamond', serif;
             font-size: 1.8rem;
             line-height: 1.4;
             color: #ccc;
             transition: color 0.8s ease;
+            padding: 20px;
+            border-radius: 12px;
         }
+
         .narrative strong { color: inherit; transition: all 0.8s; }
         .narrative.active { color: var(--text-dark); }
         .narrative.active strong { color: #c45e45; }
 
-        #viz-container { position: sticky; top: 0; height: 100vh; width: 100%; display: flex; align-items: center; justify-content: center; }
+        #viz-container { position: sticky; top: 0; height: 100vh; width: 100%; display: flex; align-items: center; justify-content: center; z-index: 1; }
         #chart { width: 100%; height: 90%; }
 
         .legend { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
         .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--text-mid); text-transform: uppercase; }
         .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        /* --- MOBILE RESPONSIVE OVERLAP --- */
+        @media (max-width: 800px) {
+            .container { display: block; } /* Remove grid */
+
+            #viz-container {
+                position: sticky; /* Stick viz to background */
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                opacity: 0.4; /* Fade slightly so text pops */
+            }
+
+            #panel-left {
+                width: 100%;
+                padding: 0 24px;
+                border-right: none;
+                background: transparent;
+            }
+
+            .header-section {
+                background: var(--bg); /* Keep title readable */
+                position: relative;
+                z-index: 10;
+                padding-bottom: 20px;
+            }
+
+            .narrative {
+                /* Add glass effect to text blocks so they overlap clearly */
+                background: rgba(252, 250, 247, 0.85);
+                backdrop-filter: blur(8px);
+                box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                text-align: center;
+            }
+
+            .scroll-text-block {
+                height: 100vh; /* Full screen scroll for mobile */
+            }
+        }
     </style>
 </head>
 <body>
@@ -57,13 +108,7 @@
     <div id="panel-left">
         <div class="header-section">
             <div class="panel-title">Bajaj Family Tree</div>
-            <div class="legend">
-                <div class="legend-item"><span class="dot" style="background:#b08d57"></span> G1</div>
-                <div class="legend-item"><span class="dot" style="background:#c5a367"></span> G2</div>
-                <div class="legend-item"><span class="dot" style="background:#4a7c5f"></span> G3</div>
-                <div class="legend-item"><span class="dot" style="background:#c45e45"></span> G4</div>
-                <div class="legend-item"><span class="dot" style="background:#e8a98c"></span> G5</div>
-            </div>
+
         </div>
 
         <div class="scroll-text-block" id="trigger-allies">
@@ -91,7 +136,6 @@ gsap.registerPlugin(ScrollTrigger);
 
 const P = { g1: '#b08d57', g2: '#c5a367', g3d: '#4a7c5f', g3l: '#76a88d', g4d: '#c45e45', g4l: '#d4826a', g5: '#e8a98c' };
 
-// Added "id" to every node to ensure smooth ECharts transitions (morphing)
 const rawData = [{
     id: 'g1',
     name: 'Bachhraj Bajaj\n(Patriarch)',
@@ -167,21 +211,17 @@ function renderChart(data) {
             itemStyle: { borderWidth: 2, borderColor: '#fff' }
         }]
     }, {
-        replaceMerge: ['series'] // This is the secret for non-choppy updates
+        replaceMerge: ['series']
     });
 }
 
 function applyOpacity(nodes, targetIds) {
     return nodes.map(node => {
         const newNode = { ...node };
-        // If targetIds is empty, show all. Otherwise check if this node OR any of its children are in the highlight list
         const isHighlighted = targetIds.length === 0 || targetIds.includes(node.id);
-
         const opacity = isHighlighted ? 1 : 0.15;
-
         newNode.itemStyle = { ...node.itemStyle, opacity: opacity };
         newNode.label = { ...node.label, opacity: opacity };
-
         if (node.children) {
             newNode.children = applyOpacity(node.children, targetIds);
         }
@@ -189,12 +229,10 @@ function applyOpacity(nodes, targetIds) {
     });
 }
 
-// Initial render
 renderChart(rawData);
 
-// ScrollTriggers with Highlight IDs
-const groupA = ['shekhar', 'madhur', 'niraj', 'rahul',  ];
-const groupB = ['shishir', 'kushagra', ];
+const groupA = ['shekhar', 'madhur', 'niraj', 'rahul'];
+const groupB = ['shishir', 'kushagra'];
 
 ScrollTrigger.create({
     trigger: "#trigger-allies",

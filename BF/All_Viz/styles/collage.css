@@ -1,0 +1,137 @@
+
+@font-face { font-family: 'Reckless'; src: url('fonts/Reckless-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Reckless'; src: url('fonts/Reckless-MediumItalic.woff2') format('woff2'); font-weight: 500; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Reckless'; src: url('fonts/Reckless-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Reckless'; src: url('fonts/Reckless-BoldItalic.woff2') format('woff2'); font-weight: 700; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Ivar Text'; src: url('fonts/IvarText-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Ivar Text'; src: url('fonts/IvarText-Italic.woff2') format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Ivar Text'; src: url('fonts/IvarText-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Ivar Text'; src: url('fonts/IvarText-SemiBold.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Archivo'; src: url('fonts/Archivo-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Archivo'; src: url('fonts/Archivo-Medium.ttf') format('truetype'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Archivo'; src: url('fonts/Archivo-SemiBold.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Archivo'; src: url('fonts/Archivo-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+
+body, html {
+    margin: 0;
+    padding: 0;
+    background-color: #1a1c2c;
+    color: white;
+    font-family: 'Reckless', 'Instrument Serif', serif;
+}
+
+/* This container defines the total scroll distance */
+.scrolly-container-collage {
+    position: relative;
+    background-color: #1a1c2c;
+    height: 600vh; /* Control how long the scroll takes here */
+    width: 100%;
+}
+
+/* This is the element that gets "pinned" */
+#main-stage-collage {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.container-collage {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.text-wrap-collage {
+    position: absolute;
+    top: 15%;
+    left: 11%;
+    width: 51%;
+    font-family: 'Reckless';
+}
+
+.step-text-collage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 1.8rem;
+    opacity: 0;
+    line-height: 1.2;
+    transform: translateY(-50px);
+}
+
+.visual-stage-collage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#visual-anchor-collage {
+    position: relative;
+    width: 60vw;
+    height: 40vw;
+    max-width: 900px;
+    max-height: 600px;
+    left: 10%;
+}
+
+.asset-collage {
+    position: absolute;
+    opacity: 0;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+#circle-collage {
+    z-index: 1;
+    width: 62%;
+    height: 91%;
+    background: radial-gradient(circle, #c5d6c4 0%, #a3b8a2 100%);
+    border-radius: 50%;
+    top: 50%;
+    left: 65%;
+    transform: translate(-50%, -50%);
+    opacity: 1;
+}
+
+#road-collage {
+    z-index: 2;
+    bottom: -52%;
+    left: 43%;
+    width: 151%;
+    transform: translateX(-50%);
+    opacity: 1;
+}
+
+.bike-collage {
+    z-index: 10;
+    transform: translateX(-50%);
+}
+
+#signal-collage {
+    z-index: 5;
+    right: -26%;
+    top: -23%;
+    width: 56%;
+}
+
+/* Starting States */
+#text1-collage { opacity: 1; transform: translateY(0); }
+#bike1-collage { opacity: 1; bottom: -22%; left: 60%; width: 104%; }
+
+/* Asset Positioning */
+#bike2-collage { bottom: -16%; left: 44%; width: 83%; }
+#bike3-collage { top: 28%; left: 49%; width: 82%; }
+#bike4-collage { top: 15%; left: 4%; width: 48%; }
+#bike5-collage { top: 27%; left: 58%; width: 90%; }
+#bike6-collage { width: 100%; top: 6%; left: 83%; }
+#bike7-collage { width: 77%; top: 53%; left: -24%; }

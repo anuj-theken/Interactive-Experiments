@@ -1,0 +1,90 @@
+/* Namespace: -btl */
+:root {
+    --brand-blue-btl: #0F5FBF;
+    --bg-cream-btl: #F5F2E8;
+    --text-grey-btl: #666;
+    --light-grey-btl: #999;
+}
+
+.bajaj-timeline-btl {
+    width: 100%;
+    padding: 60px 0;
+    background-color: var(--bg-cream-btl);
+    overflow: hidden;
+}
+
+.timeline-header-btl {
+    padding: 0 60px 40px 60px;
+}
+
+.timeline-title-btl {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 800;
+    color: #222 !important; /* Overriding potential global styles */
+    font-family: 'Reckless', serif;
+}
+
+.timeline-subtitle-btl {
+    color: var(--text-grey-btl) !important;
+    font-size: 18px;
+    margin: 10px 0 0 0;
+}
+
+/* Desktop Scroll Logic */
+.timeline-scroll-wrapper-btl {
+    width: 100%;
+    overflow-x: auto;
+    padding-top: 20px;
+    cursor: grab;
+}
+
+.timeline-scroll-wrapper-btl::-webkit-scrollbar { height: 6px; }
+.timeline-scroll-wrapper-btl::-webkit-scrollbar-thumb {
+    background-color: var(--brand-blue-btl);
+    border-radius: 10px;
+}
+
+#main-btl {
+    width: 5500px; /* Essential for the ECharts horizontal length */
+    height: 500px;
+    background: transparent;
+}
+
+/* Toggle Views */
+.desktop-only-btl { display: block; }
+.mobile-only-btl { display: none; }
+
+/* Mobile Timeline Style */
+@media (max-width: 768px) {
+    .desktop-only-btl { display: none !important; }
+    .mobile-only-btl { display: block !important; padding: 20px 40px; }
+
+    .vertical-timeline-btl {
+        border-left: 2px solid var(--brand-blue-btl);
+        margin-left: 10px;
+        padding-left: 30px;
+        position: relative;
+    }
+
+    .timeline-item-btl {
+        position: relative;
+        margin-bottom: 40px;
+    }
+
+    .timeline-item-btl::before {
+        content: '';
+        position: absolute;
+        left: -41px;
+        top: 5px;
+        width: 15px;
+        height: 15px;
+        background: var(--brand-blue-btl);
+        border: 3px solid var(--bg-cream-btl);
+        border-radius: 50%;
+    }
+
+    .m-date-btl { color: var(--light-grey-btl); font-weight: bold; font-size: 14px; }
+    .m-title-btl { color: var(--brand-blue-btl); font-weight: bold; font-size: 20px; margin: 8px 0; }
+    .m-desc-btl { color: var(--text-grey-btl); font-size: 15px; line-height: 1.6; }
+}

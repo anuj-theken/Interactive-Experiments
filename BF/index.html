@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="styles/product.css">
     <link rel="stylesheet" href="styles/stocks.css">
     <link rel="stylesheet" href="styles/family-branch.css">
+    <link rel="stylesheet" href="styles/collage.css">
 
     <!-- GSAP must load before corpo.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -90,10 +91,12 @@
         @media (max-width: 800px) {
 
           .family-view {
-              width: 100%;
-              height:1100px;
-              border-radius: 16px;
-              border-width: 0px;
+            width: 122%;
+            margin-left: -48px;
+            height: 990px;
+            border-radius: 16px;
+            border-width: 0px;
+            overflow-x: hidden;
           }
           .corporate {
               width: 100%;
@@ -118,130 +121,129 @@
 //Corporate-tree
     <!-- ── Bajaj Blueprint Section ── -->
     <section id="bajaj-blueprint" class="gsap-section">
-
-
-
-        <div class="legend-overlay">
-            <div class="legend-grid">
-                <div class="legend-item"><div class="legend-color" style="background: var(--c-holdings)"></div> Holdings</div>
-                <div class="legend-item"><div class="legend-color" style="background: var(--c-auto)"></div> Auto &amp; Mfg</div>
-                <div class="legend-item"><div class="legend-color" style="background: var(--c-finserv)"></div> Financial Svcs</div>
-                <div class="legend-item"><div class="legend-color" style="background: var(--c-finance)"></div> Finance arm</div>
-                <div class="legend-item"><div class="legend-color" style="background: var(--c-skb)"></div> SKB Group</div>
-                <div class="legend-item"><div class="legend-color" style="background: var(--c-minority)"></div> Diversified</div>
-            </div>
+        <!-- <div class="legend-overlay">
+        <div class="legend-grid">
+          <div class="legend-item"><div class="legend-color" style="background: var(--c-holdings)"></div> Promoter / Holdings</div>
+          <div class="legend-item"><div class="legend-color" style="background: var(--c-auto)"></div> Auto & Mfg</div>
+          <div class="legend-item"><div class="legend-color" style="background: var(--c-finserv)"></div> Financial Services</div>
+          <div class="legend-item"><div class="legend-color" style="background: var(--c-finance)"></div> Finance Arm</div>
+          <div class="legend-item"><div class="legend-color" style="background: var(--c-msl)"></div> Maharashtra Scooters</div>
+          <div class="legend-item"><div class="legend-color" style="background: var(--c-minority)"></div> Minority / Diversified</div>
+          <div class="legend-item"><div class="legend-color" style="background: var(--c-skb)"></div> SKB Group</div>
         </div>
+      </div> -->
+
 
         <div class="sticky-chart">
-            <div class="chart-container" id="master-chart">
-                <svg class="svg-canvas" id="svg-layer"></svg>
+          <div class="chart-container-corpo" id="master-chart">
+            <svg class="svg-canvas" id="svg-layer"></svg>
 
-                <div class="row">
-                    <div class="node" id="n-promoters"><div class="box holdings" data-eyebrow="Family"><strong>Promoter Family Entities</strong><div class="role">Rahul Bajaj branch</div></div></div>
-                </div>
-
-                <div class="row">
-                    <div class="node" id="n-bhil"><div class="box holdings" data-eyebrow="Holding Co."><strong>Bajaj Holdings (BHIL)</strong><div class="role">Sanjiv Bajaj</div></div></div>
-                </div>
-
-                <div class="row">
-                    <div class="node" id="n-auto"><div class="box auto" data-eyebrow="Listed · Auto"><strong>Bajaj Auto Ltd</strong><div class="role">Rajiv Bajaj</div></div></div>
-                    <div class="node" id="n-finserv"><div class="box finserv" data-eyebrow="Listed · Finserv"><strong>Bajaj Finserv Ltd</strong><div class="role">Sanjiv Bajaj</div></div></div>
-                    <div class="node" id="n-msl"><div class="box msl" data-eyebrow="Listed"><strong>Maharashtra Scooters</strong><div class="role">Corporate nominees</div></div></div>
-                    <div style="display: flex; flex-direction: column; gap: 15px;">
-                        <div class="node" id="n-elec"><div class="box minority" data-eyebrow="Listed"><strong>Bajaj Electricals</strong><div class="role">Shekhar Bajaj</div></div></div>
-                        <div class="node" id="n-mukand"><div class="box minority" data-eyebrow="Listed"><strong>Mukand Ltd</strong><div class="role">Niraj Bajaj</div></div></div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="node" id="n-auto-bv"><div class="box auto" data-eyebrow="Subsidiary"><strong>Auto Intl BV</strong><div class="role">Rajiv Bajaj</div></div></div>
-                    <div class="node" id="n-finance"><div class="box finance" data-eyebrow="Listed · Finance"><strong>Bajaj Finance Ltd</strong><div class="role">Rajeev Jain</div></div></div>
-                    <div style="display: flex; gap: 30px;">
-                        <div class="node" id="n-finserv-ins"><div class="box finserv" data-eyebrow="Subsidiary"><strong>Insurance Verticals</strong><div class="role">Sanjiv Bajaj</div></div></div>
-                        <div class="node" id="n-finserv-amc"><div class="box finserv" data-eyebrow="Subsidiary"><strong>Finserv AMC</strong><div class="role">Sanjiv Bajaj</div></div></div>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 15px;">
-                        <div class="node" id="n-bajel"><div class="box minority" data-eyebrow="Listed · Demerger"><strong>Bajel Projects</strong><div class="role">Shekhar Bajaj</div></div></div>
-                        <div class="node" id="n-indef"><div class="box minority" data-eyebrow="Listed"><strong>Hercules Hoists</strong><div class="role">Diversified</div></div></div>
-                    </div>
-                </div>
-
-                <div class="row" style="align-items: flex-start;">
-                    <div style="display: flex; gap: 30px;">
-                        <div class="node" id="n-housing"><div class="box finance" data-eyebrow="Subsidiary"><strong>Housing Finance</strong><div class="role">Rajeev Jain</div></div></div>
-                        <div class="node" id="n-securities"><div class="box finance" data-eyebrow="Subsidiary"><strong>Securities</strong><div class="role">Rajeev Jain</div></div></div>
-                    </div>
-
-                    <div style="position: relative; margin-left: 120px;">
-                        <div class="skb-group-border" id="skb-border"></div>
-                        <div class="node" id="n-skb-main"><div class="box skb" data-eyebrow="Family Branch"><strong>SKB Group</strong><div class="role">Kushagra Bajaj</div></div></div>
-                        <div class="row" style="margin-top: 60px; gap: 30px;">
-                            <div class="node" id="n-sugar"><div class="box skb" data-eyebrow="Sugar"><strong>Hindusthan Sugar</strong><div class="role">Kushagra Bajaj</div></div></div>
-                            <div class="node" id="n-consumer"><div class="box skb" data-eyebrow="FMCG"><strong>Consumer Care</strong><div class="role">Kushagra Bajaj</div></div></div>
-                            <div class="node" id="n-energy"><div class="box skb" data-eyebrow="Power"><strong>Bajaj Energy</strong><div class="role">Kushagra Bajaj</div></div></div>
-                        </div>
-                    </div>
-                </div>
-
+            <div class="row">
+              <div class="node" id="n-promoters"><div class="box holdings" data-eyebrow="Family"><strong>Promoter Family Entities</strong><div class="role">Rahul Bajaj branch</div></div></div>
             </div>
+
+            <div class="row">
+              <div class="node" id="n-bhil"><div class="box holdings" data-eyebrow="Holding Co."><strong>Bajaj Holdings (BHIL)</strong><div class="role">Sanjiv Bajaj</div></div></div>
+            </div>
+
+            <div class="row">
+              <div class="node" id="n-auto"><div class="box auto" data-eyebrow="Listed · Auto"><strong>Bajaj Auto Ltd</strong><div class="role">Rajiv Bajaj</div></div></div>
+              <div class="node" id="n-finserv"><div class="box finserv" data-eyebrow="Listed · Finserv"><strong>Bajaj Finserv Ltd</strong><div class="role">Sanjiv Bajaj</div></div></div>
+              <div class="node" id="n-msl"><div class="box msl" data-eyebrow="Listed"><strong>Maharashtra Scooters</strong><div class="role">Corporate nominees</div></div></div>
+              <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="node" id="n-elec"><div class="box minority" data-eyebrow="Listed"><strong>Bajaj Electricals</strong><div class="role">Shekhar Bajaj</div></div></div>
+                <div class="node" id="n-mukand"><div class="box minority" data-eyebrow="Listed"><strong>Mukand Ltd</strong><div class="role">Niraj Bajaj</div></div></div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="node" id="n-auto-bv"><div class="box auto" data-eyebrow="Subsidiary"><strong>Auto Intl BV</strong><div class="role">Rajiv Bajaj</div></div></div>
+              <div class="node" id="n-finance"><div class="box finance" data-eyebrow="Listed · Finance"><strong>Bajaj Finance Ltd</strong><div class="role">Rajeev Jain</div></div></div>
+              <div style="display: flex; gap: 30px;">
+                <div class="node" id="n-finserv-ins"><div class="box finserv" data-eyebrow="Subsidiary"><strong>Insurance Verticals</strong><div class="role">Sanjiv Bajaj</div></div></div>
+                <div class="node" id="n-finserv-amc"><div class="box finserv" data-eyebrow="Subsidiary"><strong>Finserv AMC</strong><div class="role">Sanjiv Bajaj</div></div></div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="node" id="n-bajel"><div class="box minority" data-eyebrow="Listed · Demerger"><strong>Bajel Projects</strong><div class="role">Shekhar Bajaj</div></div></div>
+                <div class="node" id="n-indef"><div class="box minority" data-eyebrow="Listed"><strong>Hercules Hoists</strong><div class="role">Diversified</div></div></div>
+              </div>
+            </div>
+
+            <div class="row" style="align-items: flex-start;">
+              <div style="display: flex; gap: 30px;">
+                <div class="node" id="n-housing"><div class="box finance" data-eyebrow="Subsidiary"><strong>Housing Finance</strong><div class="role">Rajeev Jain</div></div></div>
+                <div class="node" id="n-securities"><div class="box finance" data-eyebrow="Subsidiary"><strong>Securities</strong><div class="role">Rajeev Jain</div></div></div>
+              </div>
+
+              <div style="position: relative; margin-left: 120px;">
+                <div class="skb-group-border" id="skb-border"></div>
+                <div class="node" id="n-skb-main"><div class="box skb" data-eyebrow="Family Branch"><strong>SKB Group</strong><div class="role">Kushagra Bajaj</div></div></div>
+                <div class="row" style="margin-top: 60px; gap: 30px;">
+                  <div class="node" id="n-sugar"><div class="box skb" data-eyebrow="Sugar"><strong>Hindusthan Sugar</strong><div class="role">Kushagra Bajaj</div></div></div>
+                  <div class="node" id="n-consumer"><div class="box skb" data-eyebrow="FMCG"><strong>Consumer Care</strong><div class="role">Kushagra Bajaj</div></div></div>
+                  <div class="node" id="n-energy"><div class="box skb" data-eyebrow="Power"><strong>Bajaj Energy</strong><div class="role">Kushagra Bajaj</div></div></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
 
         <!-- class must be scroll-narrative to match corpo.js -->
         <div class="scroll-narrative">
           <div class="step" data-target="all" class="header-overlay">
-              <h1 class="step-text header">The Bajaj Blueprint</h1>
+            <h1 class="step-text header">The Bajaj Blueprint</h1>
           </div>
 
-            <div class="step" data-target="all">
-                <div class="step-card">
-                    <div class="step-card-inner">
-                        <div class="step-text">The Bajaj Group's organisation tree, as it stood in <em>2007</em> — before the demergers reshaped everything.</div>
-                    </div>
-                </div>
+          <div class="step" data-target="all">
+            <div class="step-card">
+              <div class="step-card-inner">
+                <div class="step-text">The Bajaj Group's organisation tree, as it stood in <em>2007</em> — before the demergers reshaped everything.</div>
+              </div>
             </div>
+          </div>
 
-            <div class="step" data-target="#n-skb-main">
-                <div class="step-card">
-                    <img src="imgs/corpo/Kushagra Bajaj.png" class="step-img" alt="Family Split">
-                    <div class="step-card-inner">
-                        <div class="step-text"><em>Kushagra Bajaj</em> gained control of Asia's largest sugar company…</div>
-                    </div>
-                </div>
+          <div class="step" data-target="#n-skb-main">
+            <div class="step-card">
+              <img src="imgs/corpo/Kushagra Bajaj.png" class="step-img" alt="Family Split">
+              <div class="step-card-inner">
+                <div class="step-text"><em>Kushagra Bajaj</em> gained control of Asia's largest sugar company…</div>
+              </div>
             </div>
+          </div>
 
-            <div class="step" data-target="#n-skb-main, #n-sugar">
-                <div class="step-card">
-                    <img src="imgs/corpo/sugar.png" class="step-img" alt="Sugar Industry">
-                    <div class="step-card-inner">
-                        <div class="step-text">… secured a slice of the <em>FMCG</em> industry…</div>
-                    </div>
-                </div>
+          <div class="step" data-target="#n-skb-main, #n-sugar">
+            <div class="step-card">
+              <img src="imgs/corpo/sugar.png" class="step-img" alt="Sugar Industry">
+              <div class="step-card-inner">
+                <div class="step-text">… secured a slice of the <em>FMCG</em> industry…</div>
+              </div>
             </div>
+          </div>
 
-            <div class="step" data-target="#n-skb-main, #n-consumer">
-                <div class="step-card">
-                    <img src="imgs/corpo/energy.png" class="step-img" alt="Consumer Care">
-                    <div class="step-card-inner">
-                        <div class="step-text">… helmed one of India's largest private-sector <em>thermal generation</em> companies…</div>
-                    </div>
-                </div>
+          <div class="step" data-target="#n-skb-main, #n-consumer">
+            <div class="step-card">
+              <img src="imgs/corpo/energy.png" class="step-img" alt="Consumer Care">
+              <div class="step-card-inner">
+                <div class="step-text">… helmed one of India's largest private-sector <em>thermal generation</em> companies…</div>
+              </div>
             </div>
+          </div>
 
-            <div class="step" data-target="#n-skb-main, #n-energy">
-                <div class="step-card">
-                    <img src="imgs/corpo/power.png" class="step-img" alt="Energy">
-                    <div class="step-card-inner">
-                        <div class="step-text">… and controlled <em>critical energy infrastructure</em>.</div>
-                    </div>
-                </div>
+          <div class="step" data-target="#n-skb-main, #n-energy">
+            <div class="step-card">
+              <img src="imgs/corpo/power.png" class="step-img" alt="Energy">
+              <div class="step-card-inner">
+                <div class="step-text">… and controlled <em>critical energy infrastructure</em>.</div>
+              </div>
             </div>
+          </div>
 
         </div>
 
         <div class="editor-note"><span class="red-rule"></span> Scroll to explore</div>
 
-    </section>
+      </section>
     <!-- corpo.js loads last, after GSAP is already in the page -->
     <script src="scripts/corpo.js"></script>
 
@@ -253,7 +255,91 @@
             <iframe class="family-view" src="Family_tree/index.html"></iframe>
         </div>
     </div>
+//collage
+<div class="scrolly-container-collage">
 
+  <div id="main-stage">
+      <div class="text-wrap">
+          <div class="step-text" id="text1">Yamaha worked with Escorts.</div>
+          <div class="step-text" id="text2">Honda with Firodia for scooters and... </div>
+          <div class="step-text" id="text3">with Hero MotoCorp for motorcycles.</div>
+          <div class="step-text" id="text4">Suzuki with TVS and Maruti.</div>
+          <div class="step-text" id="text5">Kawasaki with Bajaj in a technical partnership.</div>
+          <div class="step-text" id="text6">Indians who wanted personal transportation now had more options, but two-wheelers were still a luxury.</div>
+      </div>
+
+      <div class="visual-stage">
+          <div id="visual-anchor">
+              <div id="circle" class="asset"></div>
+              <img src="imgs/collage/road.png" id="road" class="asset">
+
+              <img src="imgs/collage/bike1.png" id="bike1" class="asset bike">
+              <img src="imgs/collage/bike2.png" id="bike2" class="asset bike">
+              <img src="imgs/collage/bike31.png" id="bike3" class="asset bike">
+              <img src="imgs/collage/bike32.png" id="bike4" class="asset bike">
+              <img src="imgs/collage/bike4.png" id="bike5" class="asset bike">
+
+              <img src="imgs/collage/signal.png" id="signal" class="asset">
+              <img src="imgs/collage/person1.png" id="bike6" class="asset bike">
+              <img src="imgs/collage/person2.png" id="bike7" class="asset bike">
+          </div>
+      </div>
+  </div>
+
+  <div class="scroll-spacer"></div>
+      </div>
+<script src="scripts/collage.js"></script>
+
+
+//stocks
+<!--
+<section class="scroll-wrapper">
+        <div class="sticky-content bajaj-comparison-container">
+          <div class="layout">
+            <div class="left-panel">
+              <div class="site-header">
+                <h1>Bajaj Auto<br />vs Bajaj Hindustan</h1>
+              </div>
+
+              <div class="stock-value-legend">
+                <div class="legend-item-stock"><span class="legend-line" style="background: #0057b8"></span>Bajaj Auto</div>
+                <div class="legend-item-stock"><span class="legend-line" style="background: #0f2a5c"></span>Bajaj Hindustan</div>
+                <div class="legend-item-stock"><span class="legend-dash" style="border-color: #c2d9c2"></span>Nifty 50</div>
+              </div>
+              <div class="text-area" id="text-area">
+                <div class="text-block" id="text-0">
+                  <p class="year-label">2003</p>
+                  <h3>The Agreement</h3>
+                  <p>The fight drags on. The family members came to an agreement in 2003 with Sharad Pawar and S Gurumurthy as mediators, and decided to buy each other's stakes in companies. But a stock market rally leads to the value of Bajaj Auto and Bajaj Hindusthan to rise, and the agreement stalls.</p>
+                </div>
+                <div class="text-block" id="text-1">
+                  <p class="year-label">2007</p>
+                  <h3>Bajaj Auto & Finserv</h3>
+                  <p>Acquired a 14.5% stake in KTM Power Sports AG, which gave Bajaj entry into the global premium motorcycle segment. Demerger of Bajaj Auto and Bajaj Finserv Ltd. Bajaj Hindustan undertook aggressive greenfield capacity expansion making it India's largest ethanol producer by 2007.</p>
+                </div>
+                <div class="text-block" id="text-2">
+                  <p class="year-label">2019 - 2020</p>
+                  <h3>Chetak EV</h3>
+                  <p>Re-entry into scooters with the Chetak EV (unveiled electric Chetak in October 2019 and launched it commercially in January 2020).</p>
+                </div>
+                <div class="text-block" id="text-3">
+                  <p class="year-label">2021</p>
+                  <h3>Market Cap Milestone</h3>
+                  <p>Became the first two-wheeler company in the world to cross Rs 1 lakh crore market capitalization.</p>
+                </div>
+                <div class="text-block" id="text-4">
+                  <p class="year-label">2022 - 2023</p>
+                  <h3>Debt & Restructuring</h3>
+                  <p>SBI filed an NCLT petition in 2022, which was withdrawn in 2023 following a debt-restructuring scheme (insolvency proceedings and debt restructuring).</p>
+                </div>
+              </div>
+            </div>
+            <div class="right-panel">
+              <div id="chart-container"></div>
+            </div>
+          </div>
+        </div>
+    </section> -->
 
 //No Cost EMI
     <div class="stack-container">
@@ -278,7 +364,7 @@
     <div class="scrolly-container">
         <div id="panel-left">
             <div class="header-section">
-                <div class="panel-title">Bajaj Family Tree</div>
+                <!-- <div class="panel-title">Bajaj Family Tree</div>
                 <div class="legend">
                     <div class="legend-item"><span class="dot" style="background:#b08d57"></span> G1</div>
                     <div class="legend-item"><span class="dot" style="background:#c5a367"></span> G2</div>
@@ -286,7 +372,7 @@
                     <div class="legend-item"><span class="dot" style="background:#c45e45"></span> G4</div>
                     <div class="legend-item"><span class="dot" style="background:#e8a98c"></span> G5</div>
                 </div>
-            </div>
+            </div> -->
 
             <div class="scroll-text-block" id="trigger-allies">
                 <p class="narrative" id="text-allies">
@@ -318,7 +404,7 @@
       <h1>The Legacy of Bajaj Group</h1>
       <p>From industrial roots to a global financial powerhouse.</p>
     </div>
-    <div class="legend"><span class="dot"></span> Milestone Events</div>
+    <!-- <div class="legend"><span class="dot"></span> Milestone Events</div> -->
   </header>
 
   <div class="desktop-only">
@@ -442,7 +528,7 @@
   <script src="scripts/product.js"></script>
 
 //stocks
-
+<!--
 <section class="scroll-wrapper">
   <div class="sticky-content bajaj-comparison-container">
     <div class="layout">
@@ -491,7 +577,45 @@
     </div>
   </div>
 </section>
-  <script src="scripts/stocks.js"></script>
+  <script src="scripts/stocks.js"></script> -->
+
+//2.3collage
+
+    <div id="main-stage-collage">
+        <div class="container-collage">
+            <div class="text-wrap-collage">
+                <div class="step-text-collage" id="text1-collage">Yamaha worked with Escorts.</div>
+                <div class="step-text-collage" id="text2-collage">Honda with Firodia for scooters and... </div>
+                <div class="step-text-collage" id="text3-collage">with Hero MotoCorp for motorcycles.</div>
+                <div class="step-text-collage" id="text4-collage">Suzuki with TVS and Maruti.</div>
+                <div class="step-text-collage" id="text5-collage">Kawasaki with Bajaj in a technical partnership.</div>
+                <div class="step-text-collage" id="text6-collage">Indians who wanted personal transportation now had more options, but two-wheelers were still a luxury.</div>
+            </div>
+        </div>
+
+        <div class="visual-stage-collage">
+            <div id="visual-anchor-collage">
+                <div id="circle-collage" class="asset-collage"></div>
+                <img src="img/road.png" id="road-collage" class="asset-collage">
+
+                <img src="img/bike1.png" id="bike1-collage" class="asset-collage bike-collage">
+                <img src="img/bike2.png" id="bike2-collage" class="asset-collage bike-collage">
+                <img src="img/bike31.png" id="bike3-collage" class="asset-collage bike-collage">
+                <img src="img/bike32.png" id="bike4-collage" class="asset-collage bike-collage">
+                <img src="img/bike4.png" id="bike5-collage" class="asset-collage bike-collage">
+
+                <img src="img/signal.png" id="signal-collage" class="asset-collage">
+                <img src="img/person1.png" id="bike6-collage" class="asset-collage bike-collage">
+                <img src="img/person2.png" id="bike7-collage" class="asset-collage bike-collage">
+            </div>
+        </div>
+    </div>
+
+    <div class="scroll-spacer-collage"></div>
+
+    <script src="scripts/collage.js"></script>
+
+
 
 </body>
 </html>
