@@ -1,0 +1,149 @@
+:root {
+    --ink: #1d1b1c;
+    --navy: #590b23;
+    --blue: #d70a0d;
+    --silver: #c6c0c0;
+    --cream: #f5fef7;
+}
+
+/* Static Side-by-Side Wrapper */
+.QW4K2-scroll-wrapper {
+    background: var(--cream);
+    width: 100%;
+    min-height: 100vh;
+}
+
+.QW4K2-airtel-comparison-container .QW4K2-layout {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Left Panel: Narrative Text Content */
+.QW4K2-left-panel {
+    flex: 0 0 40%;
+    display: flex;
+    flex-direction: column;
+    padding: 60px 5%;
+    background: var(--cream);
+    box-sizing: border-box;
+    align-items: flex-start;
+    text-align: left;
+}
+
+/* Right Panel: Chart Container */
+.QW4K2-right-panel {
+    flex: 0 0 60%;
+    height: 100vh;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    position: sticky;
+    top: 0;
+}
+
+#QW4K2-stocks-chart-container {
+    width: 100%;
+    height: 70%;
+}
+
+/* Typography */
+.QW42K-site-header {
+    width: 100%;
+    text-align: left;
+}
+
+.QW4K2-site-header h1 {
+    font-family: "Reckless", serif;
+    font-size: clamp(24px, 4vw, 38px);
+    margin-bottom: 20px;
+    color: var(--ink);
+    line-height: 1.1;
+}
+
+.QW4K2-stock-value-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 40px;
+    width: 100%;
+}
+
+.QW4K2-legend-item-stock {
+    display: flex;
+    color: #000;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-family: "Reckless", serif;
+    justify-content: flex-start;
+}
+
+.QW4K2-legend-line {
+    width: 25px;
+    height: 2px;
+    flex-shrink: 0;
+}
+
+/* Text Area: Standard Top-to-Bottom Flow */
+.QW4K2-text-area {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.QW4K2-text-block {
+    width: 100%;
+    opacity: 1;
+    transform: none;
+    text-align: left;
+}
+
+.QW4K2-year-label {
+    color: #b4b4b4;
+    font-family: "Reckless", serif;
+    line-height: 1;
+    display: block;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 14px;
+}
+
+.QW4K2-text-block h3 {
+    font-family: "Reckless", serif;
+    font-size: 22px;
+    color: var(--navy);
+    margin: 0 0 10px 0;
+}
+
+.QW4K2-text-block p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ink);
+    margin: 0;
+}
+
+/* --- MOBILE STYLES --- */
+@media (max-width: 800px) {
+    .QW4K2-airtel-comparison-container .QW4K2-layout {
+        flex-direction: column;
+    }
+
+    .QW4K2-left-panel {
+        width: 100%;
+        height: auto;
+        padding: 40px 8%;
+    }
+
+    .QW4K2-right-panel {
+        width: 100%;
+        height: 50vh;
+        padding: 20px;
+        position: relative;
+    }
+}

@@ -1,0 +1,112 @@
+.QW4K-scrolly-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: transparent;
+    font-family: sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+@media (min-width: 768px) {
+    .QW4K-scrolly-container {
+        flex-direction: row;
+    }
+}
+
+/* Sticky Visual Column */
+.QW4K-scrolly-visual-wrapper {
+    width: 100%;
+    height: 50vh;
+    position: sticky;
+    top: 0;
+    overflow: visible;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+@media (min-width: 768px) {
+    .QW4K-scrolly-visual-wrapper {
+        width: 50%;
+        height: 100vh;
+    }
+}
+
+/* Image Aspect Ratio Frame */
+.QW4K-scrolly-image-container {
+    position: relative;
+    width: 75%;
+    height: 75%;
+    max-width: 28rem;
+    max-height: 70vh;
+    overflow: visible;
+}
+
+/* Layered Absolute Images */
+.QW4K-scrolly-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.QW4K-img-visible {
+    opacity: 1;
+}
+.QW4K-img-hidden {
+    opacity: 0;
+}
+
+/* Text Content Column */
+.QW4K-scrolly-story-wrapper {
+    width: 100%;
+    padding: 3rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    background-color: transparent;
+}
+
+@media (min-width: 768px) {
+    .QW4K-scrolly-story-wrapper {
+        width: 50%;
+        padding: 6rem 3rem;
+    }
+}
+
+/* Individual Content Blocks to provide scrolling runway */
+.QW4K-scrolly-block {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.QW4K-scrolly-title {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #1f2937;
+}
+
+@media (min-width: 768px) {
+    .QW4K-scrolly-title {
+        font-size: 2.25rem;
+        line-height: 2.5rem;
+    }
+}
+
+.QW4K-scrolly-text {
+    font-size: 1rem;
+    color: #4b5563;
+    line-height: 1.625;
+}
+
+@media (min-width: 768px) {
+    .QW4K-scrolly-text {
+        font-size: 1.125rem;
+    }
+}

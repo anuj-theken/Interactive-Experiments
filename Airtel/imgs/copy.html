@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GSAP Scrolling Image Swap</title>
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    </head>
+    <body class="bg-transparent font-sans antialiased m-0 p-0">
+        <div class="h-[100vh] bg-transparent"></div>
+
+        <div
+            id="scroll-section"
+            class="w-full px-6 md:px-24 pb-24 bg-transparent"
+        >
+            <div
+                class="flex flex-col md:flex-row items-end justify-between gap-12 w-full max-w-6xl mx-auto overflow-visible"
+            >
+                <div
+                    class="w-full md:w-1/2 flex justify-center md:justify-start overflow-visible"
+                >
+                    <div
+                        class="relative w-3/4 h-3/4 max-w-sm aspect-square overflow-visible"
+                    >
+                        <img
+                            id="img1"
+                            src="image1.png"
+                            alt="First Local Image"
+                            class="absolute inset-0 w-full h-full object-contain opacity-100"
+                        />
+
+                        <img
+                            id="img2"
+                            src="image2.png"
+                            alt="Second Local Image"
+                            class="absolute inset-0 w-full h-full object-contain opacity-0"
+                        />
+                    </div>
+                </div>
+
+                <div class="w-full md:w-1/2">
+                    <h1
+                        class="text-3xl md:text-4xl font-bold mb-4 text-gray-800"
+                    >
+                        Your Single Story Title
+                    </h1>
+                    <p
+                        class="text-base md:text-lg text-gray-600 leading-relaxed"
+                    >
+                        Both the text and image start at the bottom of the page
+                        and scroll up together naturally. As this block travels
+                        up the screen, the image changes exactly halfway through
+                        its journey.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="h-[50vh] bg-transparent"></div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+        <script>
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Timeline targeting the scrolling behavior of the content section
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: "#scroll-section",
+                    start: "top bottom", // Animation starts the moment the top of the section enters the bottom of the screen
+                    end: "bottom top", // Animation ends when the bottom of the section leaves the top of the screen
+                    scrub: 1, // Ties the cross-fade directly to the scroll speed
+                },
+            });
+
+            // The fade happens dynamically while everything is moving up
+            tl.to("#img1", { opacity: 0, duration: 1 }).to(
+                "#img2",
+                { opacity: 1, duration: 1 },
+                "<",
+            );
+        </script>
+    </body>
+</html>
