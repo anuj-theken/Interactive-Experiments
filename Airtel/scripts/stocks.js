@@ -129,6 +129,7 @@
         symbol: "none",
         data: [airtel[0]],
       },
+
       {
         name: "Nifty 50",
         type: "line",

@@ -14,7 +14,7 @@ body {
 }
 
 /* Section wrapper layout - Clean side padding added */
-.QW4K-chart-section {
+.QW4K2-chart-section {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -24,14 +24,14 @@ body {
     box-sizing: border-box;
 }
 
-.QW4K-chart-container {
+.QW4K2-chart-container {
     width: 100%;
     background-color: #f5efe7;
     padding: 20px 0px;
 }
 
 /* Set title header to Reckless font */
-.QW4K-chart-title {
+.QW4K2-chart-title {
     font-family: "Reckless", "Georgia", "Times New Roman", serif;
     color: #1d1b1c;
     font-size: 32px;
@@ -41,7 +41,7 @@ body {
 }
 
 /* Subtitle stays cleanly in Archivo */
-.QW4K-chart-subtitle {
+.QW4K2-chart-subtitle {
     font-family: "Archivo", sans-serif;
     color: #938e8e;
     font-size: 16px;
