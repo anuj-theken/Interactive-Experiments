@@ -214,7 +214,7 @@ function setupScrollPin() {
 
   ScrollTrigger.create({
     trigger: ".QW4K-animation-section-wrapper",
-    start: isMobile ? "top 5%" : "top top",
+    start: isMobile ? "top top" : "top top",
     // INCREASED VALUES: Desktop goes from 2000 to 3500, Mobile goes from 1500 to 2500
     end: isMobile ? "+=2500" : "+=3500",
     pin: true,
