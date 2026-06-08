@@ -1,0 +1,16 @@
+/* Component Container Styles with Height Fixes */
+#QW4K5-telecom-chart-section {
+    background-color: #f9f3e6;
+    padding-top: 24px;
+    width: 100%;
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+#QW4K5-chart-container {
+    width: 100%;
+    height: calc(
+        100vh - 24px
+    ); /* Fills out the parent height perfectly accounting for padding */
+    box-sizing: border-box;
+}
