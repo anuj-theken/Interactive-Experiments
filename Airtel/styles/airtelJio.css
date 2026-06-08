@@ -1,0 +1,461 @@
+:root {
+    --bg: #f5efe7;
+    --grey: #d2d1d1;
+    --jio: #0a2986;
+    --airtel: #e20010;
+    --legendairtel: #f2b5b0;
+    --legendjio: #6b81c4;
+    --textcolor: #170d1d;
+}
+
+/* Scroll Wrapper handles the Pinning Bounds and Height Context */
+.QW4K-animation-section-wrapper {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+    box-sizing: border-box;
+    background: var(--bg);
+}
+
+/* Locks the layout cleanly inside the pinned section viewport bounds */
+#QW4K-screen {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    overflow: hidden;
+}
+
+#QW4K-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+#QW4K-grid-shell {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+#QW4K-icon-grid {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    align-content: center;
+    justify-content: center;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.QW4K-icon-svg {
+    display: block;
+    flex-shrink: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.QW4K-icon-svg .QW4K-ip,
+.QW4K-icon-svg .QW4K-ib {
+    fill: var(--grey);
+    transition: fill 0.2s ease;
+}
+
+.QW4K-icon-svg.QW4K-blue .QW4K-ip,
+.QW4K-icon-svg.QW4K-blue .QW4K-ib {
+    fill: var(--jio);
+}
+
+.QW4K-icon-svg.QW4K-red .QW4K-ip,
+.QW4K-icon-svg.QW4K-red .QW4K-ib {
+    fill: var(--airtel);
+}
+
+#QW4K-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0);
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* --- TOOLTIP & POPUP CARD INFRASTRUCTURE --- */
+#QW4K-tt {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 92%;
+    max-width: 790px;
+    z-index: 20;
+    pointer-events: none;
+}
+
+.QW4K-tc {
+    position: absolute;
+    width: 100%;
+    box-sizing: border-box;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg);
+    padding: 30px 20px;
+    box-shadow: 0 0 16px 0 rgba(0, 0, 0, 0.18);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 22px;
+    color: var(--textcolor);
+    line-height: 1.35;
+    border-radius: 8px;
+    text-align: center;
+    opacity: 0;
+    visibility: hidden;
+}
+
+@media (min-width: 768px) {
+    .QW4K-tc {
+        padding: 60px 60px;
+        font-size: 32px;
+    }
+}
+
+.QW4K-tc .QW4K-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+#QW4K-jiotooltip .QW4K-hl {
+    font-weight: 600;
+    color: var(--jio);
+    font-size: 30px;
+}
+
+#QW4K-jiotooltip .QW4K-h2 {
+    font-weight: 600;
+    color: var(--jio);
+    font-size: 22px;
+}
+
+#QW4K-airtelltooltip .QW4K-hl {
+    font-weight: 600;
+    color: var(--airtel);
+    font-size: 30px;
+}
+
+#QW4K-airtelltooltip .QW4K-h2 {
+    font-weight: 600;
+    color: var(--airtel);
+    font-size: 22px;
+}
+
+@media (min-width: 768px) {
+    #QW4K-jiotooltip .QW4K-hl,
+    #QW4K-airtelltooltip .QW4K-hl {
+        font-size: 40px;
+    }
+    #QW4K-jiotooltip .QW4K-h2,
+    #QW4K-airtelltooltip .QW4K-h2 {
+        font-size: 32px;
+    }
+}
+
+/* --- FINAL COMBINED ANALYTICS DASHBOARD CONTAINER --- */
+#QW4K-gr {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.QW4K-combined-dashboard {
+    background: var(--bg);
+    padding: 24px 16px;
+    box-shadow: 0 0 16px 0 rgba(0, 0, 0, 0.18);
+    width: 92%;
+    max-width: 860px;
+    border-radius: 12px;
+    box-sizing: border-box;
+    /* Defensive containment height loops for narrow mobile viewport stacks */
+    max-height: 95vh;
+    overflow-y: auto;
+}
+
+.QW4K-dashboard-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    width: 100%;
+}
+
+.QW4K-chart-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.QW4K-chart-title {
+    font-style: italic;
+    font-weight: 500;
+    font-size: 18px;
+    color: var(--textcolor);
+    line-height: 1.3;
+    margin-bottom: 12px;
+}
+
+.QW4K-hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.QW4K-legend {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.QW4K-legend span {
+    font-size: 11px;
+    color: var(--textcolor);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.QW4K-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.QW4K-dot.QW4K-a {
+    background: var(--legendairtel);
+}
+
+.QW4K-dot.QW4K-j {
+    background: var(--legendjio);
+}
+
+.QW4K-dot.QW4K-ao {
+    border: 1.5px solid var(--airtel);
+    background: transparent;
+}
+
+.QW4K-dot.QW4K-jo {
+    border: 1.5px solid var(--jio);
+    background: transparent;
+}
+
+/* --- BAR GRAPH SUBSECTION STYLE SECTIONS --- */
+.QW4K-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    width: 100%;
+}
+
+.QW4K-bar-row {
+    height: 50px;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 4px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.QW4K-bar-fill {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding-left: 16px;
+    box-sizing: border-box;
+    width: 0%;
+}
+
+.QW4K-bar-fill.QW4K-a-bar {
+    background: var(--legendairtel);
+}
+
+.QW4K-bar-fill.QW4K-j-bar {
+    background: var(--legendjio);
+}
+
+.QW4K-bar-label {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.QW4K-bar-fill.QW4K-a-bar .QW4K-bar-label {
+    color: var(--airtel);
+}
+
+.QW4K-bar-fill.QW4K-j-bar .QW4K-bar-label {
+    color: var(--jio);
+}
+
+/* --- OVERLAPPING INFOGRAPHIC CIRCLES SYSTEM --- */
+#QW4K-mobiledata {
+    position: relative;
+    width: 100%;
+}
+
+.QW4K-circles-area {
+    position: relative;
+    width: 100%;
+    height: 160px; /* Reduced to safely sit inside mobile dashboard cards */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.QW4K-circ {
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    transform: scale(0);
+    box-sizing: border-box;
+}
+
+/* Aligned mobile positioning scales centered on structural splits */
+.QW4K-circ.QW4K-ca {
+    width: 110px;
+    height: 110px;
+    border: 3px solid var(--legendairtel);
+    z-index: 2;
+    left: 12%;
+}
+
+.QW4K-circ.QW4K-cj {
+    width: 135px;
+    height: 135px;
+    border: 3px solid var(--legendjio);
+    z-index: 3;
+    right: 12%;
+}
+
+.QW4K-circ-label {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.QW4K-circ.QW4K-ca .QW4K-circ-label {
+    color: var(--airtel);
+}
+
+.QW4K-circ.QW4K-cj .QW4K-circ-label {
+    color: var(--jio);
+}
+
+/* Text Annotations positioning balances */
+.QW4K-ann {
+    position: absolute;
+    font-size: 11px;
+    color: #666;
+    white-space: nowrap;
+    text-align: center;
+    opacity: 0;
+}
+
+.QW4K-ann.QW4K-a-ann {
+    top: -10px;
+    left: 12%;
+}
+
+.QW4K-ann.QW4K-j-ann {
+    bottom: -10px;
+    right: 12%;
+}
+
+/* --- DESKTOP SCREEN ADJUSTMENT RULES --- */
+@media (min-width: 768px) {
+    .QW4K-combined-dashboard {
+        padding: 45px 45px;
+    }
+
+    .QW4K-dashboard-grid {
+        flex-direction: row;
+        gap: 48px;
+    }
+
+    .QW4K-chart-section {
+        flex: 1;
+        width: 50%;
+    }
+
+    .QW4K-chart-title {
+        font-size: 22px;
+        min-height: 58px; /* Holds cross-box headings on a balanced line */
+        margin-bottom: 20px;
+    }
+
+    .QW4K-circles-area {
+        height: 200px;
+    }
+
+    .QW4K-circ.QW4K-ca {
+        width: 135px;
+        height: 135px;
+        left: 10%;
+    }
+
+    .QW4K-circ.QW4K-cj {
+        width: 175px;
+        height: 175px;
+        right: 10%;
+    }
+
+    .QW4K-circ-label {
+        font-size: 20px;
+    }
+
+    .QW4K-ann.QW4K-a-ann {
+        top: 0;
+        left: 10%;
+    }
+
+    .QW4K-ann.QW4K-j-ann {
+        bottom: 0;
+        right: 10%;
+    }
+}
+
+/* --- LOGO WRAPPER BRAND INSETS --- */
+.QW4K-logo-jio,
+.QW4K-logo-airtel {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+.QW4K-logo-airtel svg {
+    width: 100px;
+    height: 25px;
+}
+
+@media (min-width: 768px) {
+    .QW4K-logo-airtel svg {
+        width: 140px;
+        height: 35px;
+    }
+}

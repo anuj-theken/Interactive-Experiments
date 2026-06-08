@@ -1,0 +1,296 @@
+/* ==========================================================================
+   1. Base Scrolly-Driven Container Layout
+   ========================================================================== */
+.QW4K-scrolly-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: transparent;
+    font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    height: 300vh; /* Track depth providing the scrolling runtime timeline runway */
+}
+
+@media (min-width: 1024px) {
+    .QW4K-scrolly-container {
+        flex-direction: row;
+    }
+}
+
+/* ==========================================================================
+   2. Floating Section Header Text Blocks
+   ========================================================================== */
+.QW4K-scrolly-header-block {
+    position: absolute;
+    top: 0rem;
+    left: 4vh;
+    z-index: 25;
+    max-width: 450px;
+    pointer-events: none;
+}
+
+.QW4K-main-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 0.5rem;
+}
+
+.QW4K-sub-title {
+    font-size: 1.125rem;
+    color: #4b5563;
+    line-height: 1.5;
+}
+
+/* ==========================================================================
+   3. Visual Window Base Layer (Images)
+   ========================================================================== */
+.QW4K-scrolly-visual-wrapper {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background-color: transparent;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.QW4K-scrolly-image-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100vh;
+    padding-top: 2rem;
+    box-sizing: border-box;
+}
+
+/* 3-Way Responsive Image Display Toggles */
+.QW4K-desktop-only-img {
+    display: none !important;
+}
+.QW4K-ipad-only-img {
+    display: none !important;
+}
+.QW4K-mobile-only-img {
+    display: block !important;
+} /* Core fallback default */
+
+/* Tablet (iPad) Breakpoint */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .QW4K-desktop-only-img {
+        display: none !important;
+    }
+    .QW4K-ipad-only-img {
+        display: block !important;
+    }
+    .QW4K-mobile-only-img {
+        display: none !important;
+    }
+    .QW4K-card-list {
+        font-size: 1.2rem; /* Precise 16px value */
+    }
+
+    .QW4K-card-list li {
+        font-size: 1.4rem;
+    }
+}
+
+/* Desktop Breakpoint */
+@media (min-width: 1024px) {
+    .QW4K-desktop-only-img {
+        display: block !important;
+    }
+    .QW4K-ipad-only-img {
+        display: none !important;
+    }
+    .QW4K-mobile-only-img {
+        display: none !important;
+    }
+}
+
+/* Base Image Positioning Layer (Global Mobile Layout) */
+.QW4K-scrolly-img {
+    position: absolute;
+    top: 2rem;
+    bottom: 25%;
+    left: 2rem;
+    right: 2rem;
+    width: calc(100% - 4rem);
+    height: auto;
+    object-fit: contain;
+}
+
+/* IPAD TABLET LAYOUT OVERRIDES (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .QW4K-scrolly-img {
+        top: 15rem;
+        bottom: 32%;
+        left: -13vh;
+        right: 6vh;
+        width: calc(100% - -14vh);
+        height: auto;
+    }
+}
+
+/* Desktop Layout Geometry Overrides (>= 1024px) */
+@media (min-width: 1024px) {
+    .QW4K-scrolly-img {
+        top: 15rem;
+        bottom: 0;
+        left: 4vh;
+        right: 4vh;
+        width: auto;
+        height: calc(100% - 20rem);
+        object-fit: contain;
+    }
+}
+
+/* ==========================================================================
+   4. Narrative Text Column Layer (Deck Interface)
+   ========================================================================== */
+.QW4K-scrolly-story-wrapper {
+    width: 100%;
+    height: 100vh;
+    position: sticky;
+    top: 6vh;
+    padding: 0 1.5rem;
+    display: block;
+    z-index: 15;
+    box-sizing: border-box;
+}
+
+@media (min-width: 1024px) {
+    .QW4K-scrolly-story-wrapper {
+        margin-right: auto;
+        width: 35%;
+        padding: 0 3rem 0 0rem;
+    }
+}
+
+/* ==========================================================================
+   5. Compact UI Code Cards
+   ========================================================================== */
+.QW4K-card-style {
+    background-color: #fdfdf6;
+    border: 2px solid #a8a8a8;
+    border-radius: 8px;
+    padding: 1.5rem 1.25rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    opacity: 0;
+    position: absolute;
+
+    /* Global Mobile Position Settings */
+    bottom: 8%;
+    top: auto;
+
+    left: 1.25rem;
+    right: 1.25rem;
+    box-sizing: border-box;
+    transition: none;
+    max-width: 420px;
+}
+
+/* IPAD TABLET LAYOUT OVERRIDES (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .QW4K-card-style {
+        bottom: 13%;
+        left: 4rem;
+        right: 4rem;
+        max-width: 578px;
+        margin: 0 auto;
+    }
+}
+
+/* Desktop Layout Geometry Overrides (>= 1024px) */
+@media (min-width: 1024px) {
+    .QW4K-card-style {
+        top: 54%;
+        bottom: auto;
+        left: 4vh;
+        right: auto;
+        padding: 1.75rem 1.5rem;
+    }
+}
+
+/* ==========================================================================
+   6. Typography and Text Highlight Accents (Uniform 16px Sizing)
+   ========================================================================== */
+.QW4K-card-main-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.45;
+    color: #000000;
+    margin: 0 0 1rem 0;
+}
+
+.QW4K-card-standalone-text {
+    font-size: 1rem; /* Precise 16px value */
+    font-weight: 500;
+    line-height: 1.5;
+    color: #000000;
+    margin: 0 0 0.75rem 0;
+}
+
+.QW4K-card-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    list-style-type: disc;
+}
+
+.QW4K-card-list li {
+    font-size: 1rem; /* Precise 16px value */
+    font-weight: 500;
+    line-height: 1.5;
+    color: #000000;
+    margin-bottom: 0.75rem;
+}
+
+.QW4K-card-list li:last-child {
+    margin-bottom: 0;
+}
+
+/* Custom Vector Line Underlay Styles */
+.QW4K-line-red {
+    border-bottom: 2px solid #d64541;
+    display: inline-block;
+    line-height: 1.1;
+}
+.QW4K-line-yellow {
+    border-bottom: 2px solid #f5d76e;
+    display: inline-block;
+    line-height: 1.1;
+}
+.QW4K-line-green {
+    border-bottom: 2px solid #26a65b;
+    display: inline-block;
+    line-height: 1.1;
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+    .QW4K-card-main-title {
+        font-size: 1.4rem; /* Precise 16px value */
+    }
+
+    .QW4K-card-list li {
+        font-size: 1.2rem;
+    }
+    .QW4K-card-standalone-text {
+        font-size: 1.2rem;
+    }
+    .QW4K-line-red {
+        border-bottom: 4px solid #d64541;
+    }
+    .QW4K-line-yellow {
+        border-bottom: 4px solid #f5d76e;
+    }
+    .QW4K-line-green {
+        border-bottom: 4px solid #26a65b;
+    }
+}
