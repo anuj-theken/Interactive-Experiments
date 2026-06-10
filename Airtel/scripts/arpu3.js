@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const validValues = data.map((d) => d.value).filter((v) => v !== null);
   const maxValue = Math.max(...validValues);
-  const yAxisMax = Math.ceil((maxValue * 1.15) / 10000) * 10000;
+  const yAxisMax = 250000;
 
   const xData = data.map((item) => item.quarter);
   const yData = data.map((item) => item.value);
@@ -174,7 +174,7 @@ document.addEventListener("DOMContentLoaded", function () {
         fontFamily: "Archivo, Sans-serif",
         formatter: function (value) {
           if (Math.abs(value) >= 1000) {
-            return (value / 1000).toFixed(0) + "K";
+            return "₹" + (value / 1000).toFixed(0) + "K";
           }
           return value;
         },

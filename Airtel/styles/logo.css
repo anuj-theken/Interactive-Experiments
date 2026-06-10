@@ -1,6 +1,6 @@
 /* Styling Architecture & Isolated Variable Tokens */
 :root {
-    --QW4K-bg-color: #f2ebd9;
+    --QW4K-bg-color: transparent;
     --QW4K-text-main: #292524;
     --QW4K-text-muted: #b1b1b1;
     --QW4K-accent-red: #991b1b;
@@ -92,7 +92,7 @@
 }
 
 .QW4K-operator-node img {
-    width: 100%;
+    width: 63%;
     height: 100%;
     object-fit: contain;
     border-radius: 50%;
@@ -149,7 +149,7 @@
 .QW4K-section-indicator {
     position: absolute;
     left: -35%;
-    top: 15%;
+    top: 8%;
     transform: translateY(-50%);
     display: flex;
     align-items: center;
@@ -194,7 +194,7 @@
 .QW4K-card-list {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 2rem;
     max-width: 28rem;
     color: #44403c;
 }

@@ -1,11 +1,22 @@
+/* --- FONT IMPORT CONFIGURATION --- */
+/* Note: Ensure these fonts are linked in your HTML <head> or handled via your bundler */
+@import url("https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&display=swap");
+
+/* Assuming 'Reckless' is self-hosted or loaded via a font provider.
+   Fallback to 'serif' ensures the elegant editorial look remains if loading delays occur. */
+
 :root {
     --bg: #f5efe7;
     --grey: #d2d1d1;
     --jio: #0a2986;
     --airtel: #e20010;
-    --legendairtel: #f2b5b0;
-    --legendjio: #6b81c4;
+    --legendairtel: #ffd2c2;
+    --legendjio: #a2c3ff;
     --textcolor: #170d1d;
+
+    /* Font Stack Tokens */
+    --font-display: "Reckless", serif;
+    --font-body: "Archivo", sans-serif;
 }
 
 /* Scroll Wrapper handles the Pinning Bounds and Height Context */
@@ -14,7 +25,8 @@
     height: 100vh;
     position: relative;
     box-sizing: border-box;
-    background: var(--bg);
+    background: transparent;
+    font-family: var(--font-body); /* Default body assignment */
 }
 
 /* Locks the layout cleanly inside the pinned section viewport bounds */
@@ -23,7 +35,7 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    background: var(--bg);
+    background: transparent;
     overflow: hidden;
 }
 
@@ -105,7 +117,8 @@
     background: var(--bg);
     padding: 30px 20px;
     box-shadow: 0 0 16px 0 rgba(0, 0, 0, 0.18);
-    font-style: italic;
+    font-family: var(--font-display); /* Reckless for stylized tooltips */
+    /*font-style: italic;*/
     font-weight: 500;
     font-size: 22px;
     color: var(--textcolor);
@@ -187,9 +200,9 @@
     max-width: 860px;
     border-radius: 12px;
     box-sizing: border-box;
-    /* Defensive containment height loops for narrow mobile viewport stacks */
     max-height: 95vh;
     overflow-y: auto;
+    font-family: var(--font-body); /* Core UI context uses Archivo */
 }
 
 .QW4K-dashboard-grid {
@@ -206,7 +219,8 @@
 }
 
 .QW4K-chart-title {
-    font-style: italic;
+    font-family: var(--font-body); /* Reckless for editorial section titles */
+    /*font-style: italic;*/
     font-weight: 500;
     font-size: 18px;
     color: var(--textcolor);
@@ -319,7 +333,7 @@
 .QW4K-circles-area {
     position: relative;
     width: 100%;
-    height: 160px; /* Reduced to safely sit inside mobile dashboard cards */
+    height: 160px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -336,7 +350,6 @@
     box-sizing: border-box;
 }
 
-/* Aligned mobile positioning scales centered on structural splits */
 .QW4K-circ.QW4K-ca {
     width: 110px;
     height: 110px;
@@ -366,7 +379,6 @@
     color: var(--jio);
 }
 
-/* Text Annotations positioning balances */
 .QW4K-ann {
     position: absolute;
     font-size: 11px;
@@ -404,7 +416,7 @@
 
     .QW4K-chart-title {
         font-size: 22px;
-        min-height: 58px; /* Holds cross-box headings on a balanced line */
+        min-height: 58px;
         margin-bottom: 20px;
     }
 

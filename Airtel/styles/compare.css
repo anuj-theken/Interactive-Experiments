@@ -1,0 +1,339 @@
+:root {
+    /* Changed background from '#faf4ee' to transparent */
+    --QW4K7-bg-color: transparent;
+    --QW4K7-text-dark: #000000;
+    --QW4K7-airtel-color: #a62b2b;
+    --QW4K7-mtn-color: #ba7029;
+    --QW4K7-zain-color: #16527d;
+}
+
+.QW4K7-scroll-track {
+    height: 200vh;
+    position: relative;
+    width: 100%;
+    background-color: var(--QW4K7-bg-color);
+}
+
+.QW4K7-scroll-track *,
+.QW4K7-scroll-track *::before,
+.QW4K7-scroll-track *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.QW4K7-viewport-container {
+    width: 100%;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    left: 0;
+    padding: 6vh 6vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    background-color: transparent; /* Ensures transparency carries down */
+}
+
+.QW4K7-metric-section {
+    width: 100%;
+}
+
+.QW4K7-section-title {
+    font-family: "Inter", sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 4vh;
+    letter-spacing: -0.5px;
+    color: var(--QW4K7-text-dark);
+}
+
+.QW4K7-subscriber-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.3fr 0.4fr;
+    width: 100%;
+    column-gap: 40px;
+}
+
+.QW4K7-brand-column {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.QW4K7-brand-meta-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.QW4K7-brand-name {
+    font-family: "Inter", sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    height: 29px;
+}
+
+.QW4K7-sub-value-wrapper {
+    font-family: "Playfair Display", serif;
+    font-size: 42px;
+    font-weight: 500;
+    line-height: 1.2;
+    position: relative;
+    height: 120px;
+}
+
+.QW4K7-sub-value-wrapper .QW4K7-val-past {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    transition: opacity 0.4s ease;
+}
+
+.QW4K7-sub-value-wrapper .QW4K7-val-current {
+    position: absolute;
+    top: 55px;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    transform: translateY(15px);
+    transition:
+        transform 0.4s ease,
+        opacity 0.4s ease;
+}
+
+.QW4K7-brand-airtel {
+    color: var(--QW4K7-airtel-color);
+}
+.QW4K7-brand-mtn {
+    color: var(--QW4K7-mtn-color);
+}
+.QW4K7-brand-zain {
+    color: var(--QW4K7-zain-color);
+}
+
+.QW4K7-timeline-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-family: "Playfair Display", serif;
+    font-size: 22px;
+    font-weight: 500;
+}
+
+.QW4K7-timeline-header-spacer {
+    height: 29px;
+    margin-bottom: 20px;
+}
+
+.QW4K7-timeline-values-wrapper {
+    position: relative;
+    width: 100%;
+    height: 120px;
+}
+
+.QW4K7-year-past,
+.QW4K7-year-current {
+    color: #a62b2b;
+    position: absolute;
+    right: 0;
+    line-height: 3.2;
+    white-space: nowrap;
+    transition:
+        transform 0.4s ease,
+        opacity 0.4s ease;
+}
+
+.QW4K7-year-past {
+    top: 0;
+}
+.QW4K7-year-current {
+    top: 55px;
+    opacity: 0;
+    transform: translateY(15px);
+}
+
+.QW4K7-chart-section {
+    width: 100%;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    margin-top: 2vh;
+}
+
+.QW4K7-chart-wrapper {
+    width: 100%;
+    height: 38vh;
+    position: relative;
+}
+
+#QW4K7-marketCapChart {
+    width: 100%;
+    height: 100%;
+}
+
+#QW4K7-na-box {
+    position: absolute;
+    bottom: 35px;
+    left: 72.8%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 22px;
+    border: 1.5px dashed #a5a5a5;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Playfair Display", serif;
+    font-size: 14px;
+    color: var(--QW4K7-zain-color);
+    font-weight: bold;
+    opacity: 1;
+    background-color: transparent;
+    z-index: 10;
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+}
+
+.QW4K7-scroll-hint {
+    position: absolute;
+    bottom: 20px;
+    right: 30px;
+    font-family: "Inter", sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.3);
+    font-weight: 600;
+}
+
+/* Specific Fix for iPad Pro / iPad Air dimensions */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .QW4K7-subscriber-grid {
+        column-gap: 20px;
+    }
+    .QW4K7-sub-value-wrapper,
+    .QW4K7-timeline-values-wrapper {
+        font-size: 32px;
+    }
+    .QW4K7-brand-name {
+        font-size: 20px;
+    }
+    /* Explicitly target and reset line heights and alignment frames for the iPad breakpoint */
+    .QW4K7-year-past,
+    .QW4K7-year-current {
+        line-height: 1.2 !important;
+    }
+    .QW4K7-year-past {
+        top: 0px;
+    }
+    .QW4K7-year-current {
+        top: 42px; /* Adjusted downward to neatly match the dynamic offset of values on tablets */
+    }
+}
+
+/* Mobile Adaptive Rules Layer */
+@media (max-width: 768px) {
+    .QW4K7-viewport-container {
+        padding: 4vh 5vw 6vh 5vw;
+    }
+
+    .QW4K7-section-title {
+        font-size: 22px;
+        margin-bottom: 2.5vh;
+    }
+
+    .QW4K7-subscriber-grid {
+        grid-template-columns: 1fr;
+        row-gap: 24px;
+    }
+
+    .QW4K7-brand-name {
+        font-size: 18px;
+        margin-bottom: 12px;
+        height: auto;
+    }
+
+    .QW4K7-sub-value-wrapper {
+        font-size: 32px;
+        height: 85px;
+        position: relative;
+    }
+
+    .QW4K7-sub-value-wrapper .QW4K7-val-current {
+        top: 42px;
+    }
+
+    /* Target wrapper to build a vertically stacked timeline container on the far right */
+    .QW4K7-sub-value-wrapper::before,
+    .QW4K7-sub-value-wrapper::after {
+        position: absolute;
+        right: 0;
+        font-family: "Playfair Display", serif;
+        font-size: 15px;
+        font-weight: 500;
+        color: #a62b2b;
+        transition:
+            opacity 0.4s ease,
+            transform 0.4s ease,
+            visibility 0.4s ease;
+        white-space: nowrap;
+    }
+
+    /* Historical Baseline Stacked Label Element ("Then") */
+    .QW4K7-sub-value-wrapper::before {
+        content: "Then(2008)";
+        top: 0;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Target Active Stacked Label Element ("Now") - hidden completely at the start */
+    .QW4K7-sub-value-wrapper::after {
+        content: "Now(2025)";
+        top: 42px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(5px);
+    }
+
+    /* Active Animation transitions: "Then" goes to 30%, "Now" smoothly fades into full view */
+    .QW4K7-state-active .QW4K7-sub-value-wrapper::before {
+        opacity: 0.3;
+    }
+
+    .QW4K7-state-active .QW4K7-sub-value-wrapper::after {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .QW4K7-timeline-indicator {
+        display: none;
+    }
+
+    .QW4K7-chart-wrapper {
+        height: 32vh;
+    }
+
+    #QW4K7-na-box {
+        bottom: 35px;
+        left: 81%;
+        font-size: 12px;
+        width: 50px;
+        height: 20px;
+    }
+
+    .QW4K7-scroll-hint {
+        bottom: 12px;
+        left: 5vw;
+        right: auto;
+        font-size: 9px;
+    }
+}

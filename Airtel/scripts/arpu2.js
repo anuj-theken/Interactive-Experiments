@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", function () {
       axisLabel: {
         color: "#1D1B1C",
         fontFamily: "Archivo, Sans-serif",
-        formatter: "{value}",
+        formatter: "₹{value}",
       },
     },
     series: getSeriesOption(isMobile() ? null : data.length - 1),

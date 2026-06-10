@@ -1,21 +1,21 @@
 document.addEventListener("DOMContentLoaded", () => {
   gsap.registerPlugin(ScrollTrigger);
 
-  const blocks = gsap.utils.toArray(".QW4K-scrolly-block");
+  const blocks = gsap.utils.toArray(".QW4K9-scrolly-block");
 
   // PINNING TRIGGER: Universally locks image canvas layer in viewport space
   ScrollTrigger.create({
-    trigger: ".QW4K-scrolly-container",
+    trigger: ".QW4K9-scrolly-container",
     start: "top top",
     end: "bottom bottom",
-    pin: ".QW4K-scrolly-visual-wrapper",
+    pin: ".QW4K9-scrolly-visual-wrapper",
     pinSpacing: false,
   });
 
   // CONTENT TRIGGER: Drives layout progression crossfades
   const scrollyTimeline = gsap.timeline({
     scrollTrigger: {
-      trigger: ".QW4K-scrolly-container",
+      trigger: ".QW4K9-scrolly-container",
       start: "top top",
       end: "bottom bottom",
       scrub: 1,

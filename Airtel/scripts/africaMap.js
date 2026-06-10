@@ -1,21 +1,26 @@
 const chartDom = document.getElementById("africa-map");
 const myChart = echarts.init(chartDom);
 
+// Helper function to dynamically grab the CSS variable colors
+const getCSSVar = (varName) =>
+  getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+
+// Map your countries dynamically using your updated CSS variables
 const airtelCountryColors = {
-  Niger: "#fcd4cb",
-  Nigeria: "#fcd4cb",
-  Zambia: "#8c1d1d",
-  Malawi: "#8c1d1d",
-  "Democratic Republic of the Congo": "#fbf6f0",
-  Kenya: "#fcd4cb",
-  Chad: "#fcd4cb",
-  Tanzania: "#8c1d1d",
-  Uganda: "#fcd4cb",
-  Madagascar: "#fcd4cb",
-  Rwanda: "#fcd4cb",
-  "Republic of the Congo": "#8c1d1d",
-  Gabon: "#8c1d1d",
-  Seychelles: "#8c1d1d",
+  Niger: getCSSVar("--land-active-2nd"),
+  Nigeria: getCSSVar("--land-active-2nd"),
+  Zambia: getCSSVar("--land-active-1st"),
+  Malawi: getCSSVar("--land-active-1st"),
+  "Democratic Republic of the Congo": getCSSVar("--land-inactive-color"),
+  Kenya: getCSSVar("--land-active-2nd"),
+  Chad: getCSSVar("--land-active-2nd"),
+  Tanzania: getCSSVar("--land-active-1st"),
+  Uganda: getCSSVar("--land-active-2nd"),
+  Madagascar: getCSSVar("--land-active-2nd"),
+  Rwanda: getCSSVar("--land-active-2nd"),
+  "Republic of the Congo": getCSSVar("--land-active-1st"),
+  Gabon: getCSSVar("--land-active-1st"),
+  Seychelles: getCSSVar("--land-active-1st"),
 };
 
 fetch(
@@ -26,12 +31,12 @@ fetch(
     echarts.registerMap("world", worldJson);
     const isMobile = window.innerWidth <= 768;
     const option = {
-      backgroundColor: "#ededed",
+      backgroundColor: getCSSVar("--water-bg-color"),
 
       tooltip: {
         show: true,
         trigger: "item",
-        backgroundColor: "rgba(23, 23, 23, 0.95)",
+        backgroundColor: "rgba(43, 36, 32, 0.95)",
         borderWidth: 0,
         padding: [8, 12],
         textStyle: {
@@ -63,7 +68,7 @@ fetch(
         axisLine: { show: false },
         splitLine: {
           show: true,
-          lineStyle: { color: "#dbdbdb", width: 1.2 },
+          lineStyle: { color: "rgba(164, 137, 114, 0.15)", width: 1 },
         },
         zlevel: 1,
       },
@@ -78,7 +83,7 @@ fetch(
         axisLine: { show: false },
         splitLine: {
           show: true,
-          lineStyle: { color: "#dbdbdb", width: 1.2 },
+          lineStyle: { color: "rgba(164, 137, 114, 0.15)", width: 1 },
         },
         zlevel: 1,
       },
@@ -92,10 +97,11 @@ fetch(
         label: {
           show: true,
           position: "inside",
-          color: "#333333",
+          color: getCSSVar("--text-main-color"),
           fontFamily: "Archivo, sans-serif",
           fontWeight: "bold",
           fontSize: 10,
+          // UPDATED: Added Chad, Gabon, Tanzania, and remaining missing regions to map dictionary
           formatter: function (params) {
             const labelMap = {
               Niger: "Niger",
@@ -103,14 +109,21 @@ fetch(
               Zambia: "Zambia",
               Malawi: "Malawi",
               Kenya: "Kenya",
+              Chad: "Chad",
+              Gabon: "Gabon",
+              Tanzania: "Tanzania",
+              Uganda: "Uganda",
+              Madagascar: "Madagascar",
+              Rwanda: "Rwanda",
+              "Republic of the Congo": "Congo",
               "Democratic Republic of the Congo": "DRC",
             };
             return labelMap[params.name] || "";
           },
         },
         itemStyle: {
-          areaColor: "#fbf6f0",
-          borderColor: "#c7bdaf",
+          areaColor: getCSSVar("--land-inactive-color"),
+          borderColor: getCSSVar("--land-border-color"),
           borderWidth: 1.2,
         },
         regions: Object.keys(airtelCountryColors).map((countryName) => ({
@@ -123,11 +136,14 @@ fetch(
           focus: "none",
           label: {
             show: true,
-            color: "#333333",
+            color: getCSSVar("--text-main-color"),
           },
           itemStyle: {
             areaColor: function (params) {
-              return airtelCountryColors[params.name] || "#fbf6f0";
+              return (
+                airtelCountryColors[params.name] ||
+                getCSSVar("--land-inactive-color")
+              );
             },
           },
         },

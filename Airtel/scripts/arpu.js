@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
               fontWeight: fontWeight,
               fontSize: 11,
               fontFamily: "Archivo, Sans-serif",
-              formatter: "₹{c}",
+              formatter: "{c}",
             },
           };
         }),
@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", function () {
         color: "#F5EFE7",
         fontFamily: "Archivo, Sans-serif",
       },
-      formatter: "{b}: <b>₹{c}</b>",
+      formatter: "{b}: <b>{c}</b>",
     },
     grid: {
       left: "3%", // Relaxed internal padding slightly (from 1%) for yAxis label separation
