@@ -1,4 +1,4 @@
-(function () {
+document.addEventListener("DOMContentLoaded", function () {
   const moduleContainer = document.querySelector(
     ".QW4K8-telecom-timeline-module",
   );
@@ -149,6 +149,8 @@
 
       echarts.registerMap("IndiaMapQW4K8", geoJson);
 
+      const isMobileView = window.innerWidth <= 800;
+
       const option = {
         backgroundColor: "transparent",
         animationDurationUpdate: 1000,
@@ -173,15 +175,27 @@
           max: 150,
           outOfRange: { color: ["#5091E6"] },
           show: false,
-          inRange: { color: ["#F3AD44", "#E2D491", "#A6C2CD", "#5091E6"] },
+          inRange: {
+            color: [
+              "#B42529", // Deep Red (far right)
+              "#D33338", // Bright Red
+              "#F4EED1", // Light Cream / Yellow-beige
+              "#A8BC7B", // Light Olive Green
+              "#6B8A31", // Dark Olive Green (far left)
+            ],
+          },
         },
         series: [
           {
             name: "Telecom Density Map",
             type: "map",
             map: "IndiaMapQW4K8",
-            layoutCenter: ["65%", "50%"],
-            layoutSize: "85%",
+            /* DYNAMIC ADJUSTMENT FIX:
+              If mobile viewport, centers map geometric anchor perfectly on-screen.
+              Otherwise keeps desktop offset allocation frame setup.
+            */
+            layoutCenter: isMobileView ? ["50%", "50%"] : ["65%", "50%"],
+            layoutSize: isMobileView ? "100%" : "85%",
             aspectScale: 0.85,
             roam: false,
             label: { show: false },
@@ -206,7 +220,6 @@
     });
 
   function initScrollEffects() {
-    // Clean out active timeline scroll triggers for this container context
     ScrollTrigger.getAll().forEach((t) => {
       if (t.trigger && moduleContainer.contains(t.trigger)) {
         t.kill();
@@ -217,13 +230,9 @@
     const isMobile = window.innerWidth <= 800;
 
     if (isMobile) {
-      // FIX: Remove structural layout classes on mobile to stay static
       stickyWrapper.classList.remove("QW4K8-is-fixed", "QW4K8-is-bottom");
-
-      // Set 2025 as the default open map view state on mobile load
       updateActiveTimelineYear("2025");
     } else {
-      // Desk pinning monitoring logic
       ScrollTrigger.create({
         trigger: moduleContainer,
         start: "top top",
@@ -266,7 +275,6 @@
       );
       if (element) {
         element.addEventListener("click", () => {
-          // Clicking years switches maps interactively only on mobile viewports
           if (window.innerWidth <= 800) {
             updateActiveTimelineYear(year);
           }
@@ -274,9 +282,11 @@
       }
     });
   }
+
   function isMobile() {
     return window.innerWidth <= 768;
   }
+
   function updateActiveTimelineYear(activeYear) {
     const years = ["2003", "2013", "2025"];
     const activeIdx = years.indexOf(activeYear);
@@ -296,7 +306,6 @@
       if (year === activeYear) {
         element.classList.add("QW4K8-active");
       } else if (idx < activeIdx) {
-        // Keep past years filled if on desktop viewport scroll track
         if (!isMobile) {
           element.classList.add("QW4K8-revealed");
         }
@@ -307,7 +316,20 @@
   }
 
   window.addEventListener("resize", () => {
-    if (myChart) myChart.resize();
+    if (myChart) {
+      const isMobileView = window.innerWidth <= 800;
+
+      // Update map sizing parameters dynamically on runtime screen shifts
+      myChart.setOption({
+        series: [
+          {
+            layoutCenter: isMobileView ? ["50%", "50%"] : ["65%", "50%"],
+            layoutSize: isMobileView ? "100%" : "85%",
+          },
+        ],
+      });
+      myChart.resize();
+    }
     initScrollEffects();
   });
-})();
+});

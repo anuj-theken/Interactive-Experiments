@@ -14,35 +14,41 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
+  // Measure the exact pixel width of the chart container element
+  var containerWidth = QW4K6_domTarget.clientWidth || window.innerWidth;
+  var isMobile = containerWidth < 480;
+
+  // Calculate a strict physical pixel width restriction (Container Width minus padding margins)
+  var dynamicTextWidth = containerWidth - 40;
+
   var QW4K6_myChart = echarts.init(QW4K6_domTarget);
 
   var QW4K6_option = {
-    color: ["#2b5c8f", "#a1d0ec", "#4b92c4", "#9c3d63", "#e68ca4", "#adc685"],
-    title: [
-      {
-        text: "Subscriber growth over the years",
-        left: "left",
-        top: "0%",
-        textStyle: {
-          color: "#423329",
-          fontWeight: "normal",
-          // Scaled down font size slightly for better mobile compatibility
-          fontSize: window.innerWidth < 480 ? 24 : 36,
-          fontFamily: "Reckless, serif",
-        },
+    color: ["#b22b27", "#d1544c", "#e49a8f", "#f1e6cc", "#c9d1a3", "#7e9c4c"],
+    title: {
+      text: "Subscriber growth over the years",
+      subtext:
+        "The growth in number of subscribers across all telecom operators. (in Millions)",
+      left: "0%",
+      top: "0%",
+      textStyle: {
+        color: "#423329",
+        fontWeight: "normal",
+        fontSize: isMobile ? 22 : 36,
+        fontFamily: "Reckless, serif",
+        width: dynamicTextWidth, // Must be an absolute pixel number for ECharts to execute wrapping
+        overflow: "break", // Triggers auto-wrap once text hits the absolute pixel threshold
       },
-      {
-        text: "The growth in number of subscribers across all telecom operators. (in Millions)",
-        left: "left",
-        // Absolute positioning works better across screen sizes than percentages
-        top: window.innerWidth < 480 ? "40px" : "45px",
-        textStyle: {
-          color: "#66554b",
-          fontWeight: "normal",
-          fontSize: 13,
-        },
+      subtextStyle: {
+        color: "#938e8e",
+        fontWeight: "normal",
+        fontSize: isMobile ? 14 : 18,
+        fontFamily: "Archivo, sans-serif",
+        lineHeight: 20,
+        width: dynamicTextWidth, // Absolute pixel fallback applied here as well
+        overflow: "break",
       },
-    ],
+    },
     tooltip: {
       trigger: "axis",
       axisPointer: {
@@ -59,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
               params[i].seriesName +
               ": <b>" +
               params[i].value +
-              "M</b>";
+              "m</b>";
             total += parseFloat(params[i].value);
           }
         }
@@ -73,8 +79,8 @@ document.addEventListener("DOMContentLoaded", function () {
     legend: {
       data: ["Airtel", "Vodafone", "Idea/Spice", "BSNL", "Tata", "Jio"],
       left: "0%",
-      // Dynamically pushes legend down if text wraps on small devices
-      top: window.innerWidth < 480 ? "85px" : "75px",
+      // Gives extra breathing space vertically to clear the multiline wrapped header layout
+      top: isMobile ? "145px" : "75px",
       orient: "horizontal",
       icon: "rect",
       itemWidth: 18,
@@ -88,8 +94,8 @@ document.addEventListener("DOMContentLoaded", function () {
       left: "3%",
       right: "4%",
       bottom: "5%",
-      // Changed from 22% to an absolute pixel value to guarantee title safety
-      top: window.innerWidth < 480 ? "150px" : "130px",
+      // Ensures the bar chart begins safely below wrapped mobile titles and legends
+      top: isMobile ? "210px" : "130px",
       containLabel: true,
     },
     xAxis: {
@@ -106,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
         },
       },
       axisLabel: {
-        formatter: "{value}M",
+        formatter: "{value}m",
         textStyle: { color: "#444" },
       },
     },
@@ -119,12 +125,29 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       axisTick: { show: false },
       axisLabel: {
+        formatter: function (value) {
+          var parts = value.split(" ");
+          var quarter = parts[0];
+          var year = parts[1];
+
+          if (quarter === "Q1" && year) {
+            var shortYear = year.substring(2, 4);
+            return "{fy|FY" + shortYear + "} " + quarter;
+          }
+          return quarter;
+        },
         textStyle: {
           color: "#333",
           fontSize: 12,
         },
+        rich: {
+          fy: {
+            color: "#999999",
+            fontSize: 12,
+            fontWeight: "normal",
+          },
+        },
       },
-      // FIXED: Added missing 12th label to match the 12 items in your data series
       data: [
         "Q1 2015",
         "Q2 2015",
@@ -137,7 +160,6 @@ document.addEventListener("DOMContentLoaded", function () {
         "Q1 2017",
         "Q2 2017",
         "Q3 2017",
-        "Q4 2017",
       ],
     },
     series: [
@@ -148,18 +170,8 @@ document.addEventListener("DOMContentLoaded", function () {
         barWidth: "75%",
         emphasis: { focus: "series" },
         data: [
-          229.4,
-          234.1,
-          238.7,
-          246.9,
-          254.9,
-          259.5,
-          263.7,
-          269.7,
-          277.5,
-          284.5,
+          229.4, 234.1, 238.7, 246.9, 254.9, 259.5, 263.7, 269.7, 277.5, 284.5,
           285.9,
-          290.0, // Added rough placeholder or ensure data array lengths match yAxis length
         ],
       },
       {
@@ -169,7 +181,7 @@ document.addEventListener("DOMContentLoaded", function () {
         emphasis: { focus: "series" },
         data: [
           183.9, 185.5, 188.3, 193.7, 198.0, 199.5, 200.8, 204.8, 209.2, 212.1,
-          207.6, 205.0,
+          207.6,
         ],
       },
       {
@@ -179,7 +191,7 @@ document.addEventListener("DOMContentLoaded", function () {
         emphasis: { focus: "series" },
         data: [
           157.8, 162.1, 166.6, 171.9, 175.1, 176.2, 178.8, 190.5, 195.4, 196.3,
-          190.2, 188.0,
+          190.2,
         ],
       },
       {
@@ -189,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function () {
         emphasis: { focus: "series" },
         data: [
           93.6, 93.3, 95.3, 97.6, 101.1, 103.7, 107.7, 110.5, 114.7, 117.4,
-          118.6, 120.0,
+          118.6,
         ],
       },
       {
@@ -199,7 +211,6 @@ document.addEventListener("DOMContentLoaded", function () {
         emphasis: { focus: "series" },
         data: [
           68.0, 63.3, 63.7, 62.4, 61.8, 61.1, 58.8, 54.7, 50.7, 45.5, 46.8,
-          44.0,
         ],
       },
       {
@@ -207,20 +218,7 @@ document.addEventListener("DOMContentLoaded", function () {
         type: "bar",
         stack: "total",
         emphasis: { focus: "series" },
-        data: [
-          "-",
-          "-",
-          "-",
-          "-",
-          16.0,
-          "-",
-          "-",
-          72.2,
-          108.7,
-          123.4,
-          138.6,
-          150.0,
-        ],
+        data: ["-", "-", "-", "-", "-", "-", "-", 72.2, 108.7, 123.4, 138.6],
       },
     ],
   };
@@ -228,6 +226,26 @@ document.addEventListener("DOMContentLoaded", function () {
   QW4K6_myChart.setOption(QW4K6_option);
 
   window.addEventListener("resize", function () {
+    // Re-evaluate parent layout dimensions during active resize operations
+    var currentContainerWidth = QW4K6_domTarget.clientWidth;
+    var mobileMode = currentContainerWidth < 480;
+    var updatedTextWidth = currentContainerWidth - 40;
+
+    QW4K6_myChart.setOption({
+      title: {
+        textStyle: {
+          fontSize: mobileMode ? 22 : 36,
+          width: updatedTextWidth,
+        },
+        subtextStyle: {
+          fontSize: mobileMode ? 14 : 18,
+          width: updatedTextWidth,
+        },
+      },
+      legend: { top: mobileMode ? "145px" : "75px" },
+      grid: { top: mobileMode ? "210px" : "130px" },
+    });
+
     QW4K6_myChart.resize();
   });
 });

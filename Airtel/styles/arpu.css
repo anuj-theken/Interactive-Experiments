@@ -1,64 +1,75 @@
 body {
-    background-color: #f5efe7;
-    font-family: "Archivo", sans-serif;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  background-color: #f5efe7;
+  font-family: "Archivo", sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 /* Empty spacer div before the chart section */
 .QW4K-spacer {
-    height: 30vh;
-    width: 100%;
-    background-color: white;
+  height: 30vh;
+  width: 100%;
+  background-color: white;
 }
 /* Chart footer text styling */
 .QW4K2-chart-footer {
-    font-family: "Archivo", sans-serif;
-    color: #938e8e; /* Matches the subtitle color */
-    font-size: 14px; /* Makes it small */
-    text-align: center; /* Center aligns the text */
-    margin: 20px 0 0 0; /* Adds 20px of spacing above the footer */
-    font-style: italic; /* Optional: gives it a classic footnote look */
+  font-family: "Archivo", sans-serif;
+  color: #938e8e; /* Matches the subtitle color */
+  font-size: 14px; /* Makes it small */
+  text-align: center; /* Center aligns the text */
+  margin: 20px 0 0 0; /* Adds 20px of spacing above the footer */
+  font-style: italic; /* Optional: gives it a classic footnote look */
 }
 /* Section wrapper layout - Clean side padding added */
 .QW4K2-chart-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px 5%; /* 5% padding on left and right sides */
-    background-color: #f5efe7;
-    width: 100%;
-    box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 5%; /* 5% padding on left and right sides */
+  background-color: transparent;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .QW4K2-chart-container {
-    width: 100%;
-    background-color: #f5efe7;
-    padding: 20px 0px;
+  width: 100%;
+  max-width: 1200px;
+  background-color: #f5efe7; /* Pure white card body */
+  padding: 40px 30px; /* Side and vertical padding */
+  border-radius: 16px; /* Rounded corners */
+  box-sizing: border-box;
+
+  /* Enhanced dual-layer shadow for depth */
+  box-shadow:
+    0 15px 35px rgba(29, 27, 28, 0.08),
+    0 5px 15px rgba(29, 27, 28, 0.04);
+
+  /* Optional: Smooth transition if you plan on adding a hover effect later */
+  transition: box-shadow 0.3s ease;
 }
 
 /* Set title header to Reckless font */
 .QW4K2-chart-title {
-    font-family: "Reckless", "Georgia", "Times New Roman", serif;
-    color: #1d1b1c;
-    font-size: 32px;
-    font-weight: 700;
-    margin: 0 0 5px 0;
-    text-align: center;
+  font-family: "Reckless", "Georgia", "Times New Roman", serif;
+  color: #1d1b1c;
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 5px 0;
+  text-align: center;
 }
 
 /* Subtitle stays cleanly in Archivo */
 .QW4K2-chart-subtitle {
-    font-family: "Archivo", sans-serif;
-    color: #938e8e;
-    font-size: 18px;
-    margin: 0 0 30px 0;
-    text-align: center;
+  font-family: "Archivo", sans-serif;
+  color: #938e8e;
+  font-size: 18px;
+  margin: 0 0 30px 0;
+  text-align: center;
 }
 
 /* Chart container dimensions */
 #arpu-chart {
-    width: 100%;
-    height: 550px;
+  width: 100%;
+  height: 550px;
 }

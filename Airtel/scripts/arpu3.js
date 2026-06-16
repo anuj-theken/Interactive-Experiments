@@ -1,48 +1,37 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const chartDom = document.getElementById("QW4K4-arpu-chart");
+  const chartDom = document.getElementById("QW4K3-arpu-chart");
   const myChart = echarts.init(chartDom);
 
   let lastHoveredIndex = null;
 
-  // Airtel Quarterly Net Profit Data (in thousands)
+  // Updated Quarterly Data Format
   const data = [
-    { quarter: "Mar 2018", value: 5750 },
-    { quarter: "Jun 2018", value: 7043 },
-    { quarter: "Sep 2018", value: 7356 },
-    { quarter: "Dec 2018", value: 3201 },
-    { quarter: "Mar 2019", value: 1072 },
-    { quarter: "Jun 2019", value: 28660 },
-    { quarter: "Sep 2019", value: 230449 },
-    { quarter: "Dec 2019", value: 10353 },
-    { quarter: "Mar 2020", value: 52370 },
-    { quarter: "Jun 2020", value: 159331 },
-    { quarter: "Sep 2020", value: 7632 },
-    { quarter: "Dec 2020", value: 8536 },
-    { quarter: "Mar 2021", value: 7592 },
-    { quarter: "Jun 2021", value: 2835 },
-    { quarter: "Sep 2021", value: 11340 },
-    { quarter: "Dec 2021", value: 8295 },
-    { quarter: "Mar 2022", value: 20078 },
-    { quarter: "Jun 2022", value: 16069 },
-    { quarter: "Sep 2022", value: 21452 },
-    { quarter: "Dec 2022", value: 15882 },
-    { quarter: "Mar 2023", value: 30056 },
-    { quarter: "Jun 2023", value: 16125 },
-    { quarter: "Sep 2023", value: 13407 },
-    { quarter: "Dec 2023", value: 24422 },
-    { quarter: "Mar 2024", value: 20716 },
-    { quarter: "Jun 2024", value: 41599 },
-    { quarter: "Sep 2024", value: 35932 },
-    { quarter: "Dec 2024", value: 147812 },
-    { quarter: "Mar 2025", value: 110218 },
+    { quarter: "Mar 2010", value: 20444 },
+    { quarter: "Jun 2010", value: 16816 },
+    { quarter: "Sep 2010", value: 16612 },
+    { quarter: "Dec 2010", value: 13033 },
+    { quarter: "Mar 2011", value: 14007 },
+    { quarter: "Jun 2011", value: 12152 },
+    { quarter: "Sep 2011", value: 10270 },
+    { quarter: "Dec 2011", value: 10113 },
+    { quarter: "Mar 2012", value: 10059 },
+    { quarter: "Jun 2012", value: 7622 },
+    { quarter: "Sep 2012", value: 7212 },
+    { quarter: "Dec 2012", value: 2837 },
+    { quarter: "Mar 2013", value: 5086 },
   ];
 
-  const validValues = data.map((d) => d.value).filter((v) => v !== null);
-  const maxValue = Math.max(...validValues);
-  const yAxisMax = 250000;
+  // Dynamic max cap logic handles property changes cleanly
+  const maxValue = Math.max(...data.map((d) => d.value));
+  const yAxisMax = Math.ceil((maxValue * 1.2) / 1000) * 1000;
 
   const xData = data.map((item) => item.quarter);
   const yData = data.map((item) => item.value);
+
+  // Helper function to format numbers with commas (e.g., 20,444)
+  function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
 
   function isMobile() {
     return window.innerWidth <= 768;
@@ -53,21 +42,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     return [
       {
-        name: "Net Profit",
+        name: "Value",
         type: "bar",
         data: yData.map((val, idx) => {
-          const isNull = val === null;
-          const barColor = isNull
-            ? "transparent"
-            : new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: "#D70A0D" },
-                { offset: 1, color: "#ae0e2f" },
-              ]);
-
           if (mobileMode) {
             return {
               value: val,
-              itemStyle: { color: barColor },
               label: { show: false },
             };
           }
@@ -84,26 +64,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
           return {
             value: val,
-            itemStyle: { color: barColor },
-            label: isNull
-              ? { show: false }
-              : {
-                  show: true,
-                  position: "top",
-                  color: labelColor,
-                  fontWeight: fontWeight,
-                  fontSize: 10,
-                  fontFamily: "Archivo, Sans-serif",
-                  formatter: function (params) {
-                    const v = params.value;
-                    if (v === null) return "";
-                    if (v >= 1000) return (v / 1000).toFixed(0) + "K";
-                    return String(v);
-                  },
-                },
+            label: {
+              show: true,
+              position: "top",
+              color: labelColor,
+              fontWeight: fontWeight,
+              fontSize: 11,
+              fontFamily: "Archivo, Sans-serif",
+              // Formats the value over the bar with commas
+              formatter: function (params) {
+                return formatNumber(params.value);
+              },
+            },
           };
         }),
-        barWidth: "70%",
+        barWidth: "75%",
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: "#D70A0D" },
+            { offset: 1, color: "#ae0e2f" },
+          ]),
+        },
         emphasis: {
           disabled: !mobileMode,
         },
@@ -124,39 +105,59 @@ document.addEventListener("DOMContentLoaded", function () {
         color: "#F5EFE7",
         fontFamily: "Archivo, Sans-serif",
       },
+      // Ensures the tooltip matches the comma formatting style
       formatter: function (params) {
-        const p = params[0];
-        if (p.value === null) return "";
-        return p.name + ": <b>" + p.value.toLocaleString() + "</b>";
+        return (
+          params[0].name + ": <b>" + formatNumber(params[0].value) + "</b>"
+        );
       },
     },
     grid: {
-      left: "3%",
-      right: "3%",
-      bottom: "5%",
-      top: "20%",
+      left: isMobile() ? "3%" : "5%",
+      right: isMobile() ? "3%" : "3%",
+      bottom: isMobile() ? "10%" : "8%", // Marginally increased to give the two-line X-axis breathing room
+      top: isMobile() ? "12%" : "20%",
       containLabel: true,
     },
+
     xAxis: {
       type: "category",
       data: xData,
-      axisTick: { show: false },
+      axisTick: {
+        show: false,
+      },
       axisLine: {
-        lineStyle: { color: "#C6C0C0" },
+        lineStyle: {
+          color: "#C6C0C0",
+        },
       },
       axisLabel: {
         color: "#1D1B1C",
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: "600",
         fontFamily: "Archivo, Sans-serif",
         margin: 15,
         interval: 0,
         rotate: 0,
+        // Uses ECharts rich text styling to target the FY label line separately
         formatter: function (value) {
-          if (value.startsWith("Mar ")) {
-            return "FY" + value.split(" ")[1].slice(-2);
-          }
-          return "";
+          const parts = value.split(" ");
+          const month = parts[0];
+          const year = parts[1].slice(-2);
+
+          if (month === "Mar") return "Q1\n{light|FY" + year + "}";
+          if (month === "Jun") return "Q2";
+          if (month === "Sep") return "Q3";
+          if (month === "Dec") return "Q4";
+          return value;
+        },
+        rich: {
+          light: {
+            color: "#A0A0A0", // Lighter grey for fiscal years
+            fontSize: 10,
+            fontWeight: "normal",
+            lineHeight: 16,
+          },
         },
       },
     },
@@ -172,11 +173,9 @@ document.addEventListener("DOMContentLoaded", function () {
       axisLabel: {
         color: "#1D1B1C",
         fontFamily: "Archivo, Sans-serif",
+        // Formats Y-axis labels with commas (e.g., ₹20,000)
         formatter: function (value) {
-          if (Math.abs(value) >= 1000) {
-            return "₹" + (value / 1000).toFixed(0) + "K";
-          }
-          return value;
+          return "₹" + formatNumber(value);
         },
       },
     },
@@ -190,12 +189,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
   myChart.on("mouseover", function (params) {
     if (isMobile()) return;
+
     if (params.componentType === "series") {
       const currentIndex = params.dataIndex;
       if (currentIndex !== lastHoveredIndex) {
         lastHoveredIndex = currentIndex;
         myChart.setOption(
-          { series: getSeriesOption(currentIndex) },
+          {
+            series: getSeriesOption(currentIndex),
+          },
           { lazyUpdate: true },
         );
       }
@@ -204,10 +206,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   window.addEventListener("resize", function () {
     const mobileState = isMobile();
+
     myChart.setOption({
-      tooltip: { show: mobileState },
+      tooltip: {
+        show: mobileState,
+      },
       series: getSeriesOption(mobileState ? null : lastHoveredIndex),
     });
+
     myChart.resize();
   });
 });

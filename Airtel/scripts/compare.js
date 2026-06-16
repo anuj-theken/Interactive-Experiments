@@ -7,17 +7,15 @@
   };
 
   const labelMapping = {
-    Airtel_P: " 1.4 ",
-    Airtel_C: " 11.4 ",
-    MTN_P: " 0.57",
-    MTN_C: " 1.6 ",
+    Airtel_P: "₹1.4 Lakh Cr",
+    Airtel_C: "₹11.4 Lakh Cr",
+    MTN_P: "₹0.57 Lakh Cr",
+    MTN_C: "₹1.6 Lakh Cr",
     Zain_P: "NA",
-    Zain_C: " 1.6 ",
+    Zain_C: "₹1.6 Lakh Cr",
   };
 
   function getStateOptions(isMobile) {
-    const showLabel = !isMobile;
-
     return {
       past: [
         {
@@ -25,13 +23,13 @@
           value: chartData.past[0],
           itemStyle: { color: "#A62B2B", borderRadius: [3, 3, 0, 0] },
           label: {
-            show: showLabel,
+            show: true,
             position: "top",
-            formatter: " 1.4 ",
+            formatter: isMobile ? "₹1.4 Lakh Cr" : " 1.4 ",
             fontFamily: "Playfair Display",
-            fontSize: 15,
+            fontSize: isMobile ? 10 : 15,
             color: "#A62B2B",
-            offset: [0, -8],
+            offset: [0, -3],
           },
         },
         {
@@ -46,13 +44,13 @@
           value: chartData.past[1],
           itemStyle: { color: "#BA7029", borderRadius: [3, 3, 0, 0] },
           label: {
-            show: showLabel,
+            show: true,
             position: "top",
-            formatter: " 57k Cr",
+            formatter: isMobile ? "₹0.57 Lakh Cr" : " 0.57 ",
             fontFamily: "Playfair Display",
-            fontSize: 15,
+            fontSize: isMobile ? 10 : 15,
             color: "#BA7029",
-            offset: [0, -8],
+            offset: [0, -3],
           },
         },
         {
@@ -81,13 +79,13 @@
           value: chartData.past[0],
           itemStyle: { color: "#A62B2B", borderRadius: [3, 3, 0, 0] },
           label: {
-            show: showLabel,
+            show: true,
             position: "top",
-            formatter: " 1.4 ",
+            formatter: isMobile ? "₹1.4 Lakh Cr" : " 1.4 ",
             fontFamily: "Playfair Display",
-            fontSize: 15,
+            fontSize: isMobile ? 10 : 15,
             color: "#A62B2B",
-            offset: [0, -8],
+            offset: [0, -3],
           },
         },
         {
@@ -95,13 +93,13 @@
           value: chartData.current[0],
           itemStyle: { color: "#A62B2B", borderRadius: [3, 3, 0, 0] },
           label: {
-            show: showLabel,
+            show: true,
             position: "top",
-            formatter: "11.4 ",
+            formatter: isMobile ? "₹11.4 Lakh Cr" : "11.4 ",
             fontFamily: "Playfair Display",
-            fontSize: 15,
+            fontSize: isMobile ? 10 : 15,
             color: "#A62B2B",
-            offset: [0, -8],
+            offset: [0, -3],
           },
         },
         { name: "space1", value: 0, itemStyle: { color: "transparent" } },
@@ -110,13 +108,13 @@
           value: chartData.past[1],
           itemStyle: { color: "#BA7029", borderRadius: [3, 3, 0, 0] },
           label: {
-            show: showLabel,
+            show: true,
             position: "top",
-            formatter: " 0.57",
+            formatter: isMobile ? "₹0.57 Lakh Cr" : " 0.57",
             fontFamily: "Playfair Display",
-            fontSize: 15,
+            fontSize: isMobile ? 10 : 15,
             color: "#BA7029",
-            offset: [0, -8],
+            offset: [0, -3],
           },
         },
         {
@@ -124,13 +122,13 @@
           value: chartData.current[1],
           itemStyle: { color: "#BA7029", borderRadius: [3, 3, 0, 0] },
           label: {
-            show: showLabel,
+            show: true,
             position: "top",
-            formatter: " 1.6 ",
+            formatter: isMobile ? "₹1.6 Lakh Cr" : " 1.6 ",
             fontFamily: "Playfair Display",
-            fontSize: 15,
+            fontSize: isMobile ? 10 : 15,
             color: "#BA7029",
-            offset: [0, -8],
+            offset: [0, -3],
           },
         },
         { name: "space2", value: 0, itemStyle: { color: "transparent" } },
@@ -145,13 +143,13 @@
           value: chartData.current[2],
           itemStyle: { color: "#16527D", borderRadius: [3, 3, 0, 0] },
           label: {
-            show: showLabel,
+            show: true,
             position: "top",
-            formatter: " 1.6 ",
+            formatter: isMobile ? "₹1.6 Lakh Cr" : " 1.6 ",
             fontFamily: "Playfair Display",
-            fontSize: 15,
+            fontSize: isMobile ? 10 : 15,
             color: "#16527D",
-            offset: [0, -8],
+            offset: [0, -3],
           },
         },
       ],
@@ -169,8 +167,7 @@
     const activeOptions = getStateOptions(isMobile);
 
     const option = {
-      // Speeds up updating transition frames when ScrollTrigger fires
-      animationDurationUpdate: 300,
+      animationDurationUpdate: 450,
       tooltip: {
         trigger: "item",
         triggerOn: isMobile ? "click" : "mousemove",
@@ -183,11 +180,11 @@
         },
       },
       grid: {
-        top: isMobile ? "5%" : "15%",
-        left: "4%", // Increased slightly to prevent left clipping
-        right: "4%",
+        top: isMobile ? "18%" : "15%",
+        left: isMobile ? "0%" : "4%",
+        right: isMobile ? "0%" : "4%",
         bottom: "4%",
-        containLabel: true, // Forces layout computations to respect axis label bounding boxes
+        containLabel: true,
       },
       xAxis: {
         type: "category",
@@ -227,8 +224,8 @@
         {
           name: "Market Cap Balance Grid",
           type: "bar",
-          barWidth: isMobile ? "50%" : "42px",
-          barGap: isMobile ? "10%" : "20%",
+          barWidth: isMobile ? "18px" : "42px",
+          barGap: isMobile ? "4px" : "20%",
           data:
             currentAnimationState === "current"
               ? activeOptions.current
@@ -252,31 +249,27 @@
         const isMobile = window.innerWidth <= 768;
         const activeOptions = getStateOptions(isMobile);
 
+        const pastElements = document.querySelectorAll(".QW4K7-val-group-past");
+        const currentElements = document.querySelectorAll(
+          ".QW4K7-val-group-current",
+        );
+
         if (self.progress >= 0.5) {
-          currentAnimationState = "current";
-          if (chart)
-            chart.setOption({ series: [{ data: activeOptions.current }] });
-          if (trackElement) trackElement.classList.add("QW4K7-state-active");
+          if (currentAnimationState !== "current") {
+            currentAnimationState = "current";
+            if (chart)
+              chart.setOption({ series: [{ data: activeOptions.current }] });
+            if (trackElement) trackElement.classList.add("QW4K7-state-active");
+          }
 
-          document.getElementById("QW4K7-airtel-past").style.opacity = "0.3";
-          document.getElementById("QW4K7-mtn-past").style.opacity = "0.3";
-          document.getElementById("QW4K7-zain-past").style.opacity = "0.3";
-
-          const yearPast = document.getElementById("QW4K7-year-past");
-          if (yearPast) yearPast.style.opacity = "0.3";
-
-          const currentElements =
-            document.querySelectorAll(".QW4K7-val-current");
+          // Dim baseline elements according to reference style
+          pastElements.forEach((el) => {
+            el.style.opacity = "0.2";
+          });
           currentElements.forEach((el) => {
             el.style.opacity = "1";
             el.style.transform = "translateY(0)";
           });
-
-          const yearCurrent = document.getElementById("QW4K7-year-current");
-          if (yearCurrent) {
-            yearCurrent.style.opacity = "1";
-            yearCurrent.style.transform = "translateY(0)";
-          }
 
           const naBox = document.getElementById("QW4K7-na-box");
           if (naBox) {
@@ -284,30 +277,23 @@
             naBox.style.transform = "translateX(-50%) scale(0.6)";
           }
         } else {
-          currentAnimationState = "past";
-          if (chart)
-            chart.setOption({ series: [{ data: activeOptions.past }] });
-          if (trackElement) trackElement.classList.remove("QW4K7-state-active");
+          if (currentAnimationState !== "past") {
+            currentAnimationState = "past";
+            if (chart)
+              chart.setOption({ series: [{ data: activeOptions.past }] });
+            if (trackElement)
+              trackElement.classList.remove("QW4K7-state-active");
+          }
 
-          document.getElementById("QW4K7-airtel-past").style.opacity = "1";
-          document.getElementById("QW4K7-mtn-past").style.opacity = "1";
-          document.getElementById("QW4K7-zain-past").style.opacity = "1";
-
-          const yearPast = document.getElementById("QW4K7-year-past");
-          if (yearPast) yearPast.style.opacity = "1";
-
-          const currentElements =
-            document.querySelectorAll(".QW4K7-val-current");
+          pastElements.forEach((el) => {
+            el.style.opacity = "1";
+          });
           currentElements.forEach((el) => {
             el.style.opacity = "0";
-            el.style.transform = "translateY(15px)";
+            el.style.transform = isMobile
+              ? "translateY(4px)"
+              : "translateY(15px)";
           });
-
-          const yearCurrent = document.getElementById("QW4K7-year-current");
-          if (yearCurrent) {
-            yearCurrent.style.opacity = "0";
-            yearCurrent.style.transform = "translateY(15px)";
-          }
 
           const naBox = document.getElementById("QW4K7-na-box");
           if (naBox) {

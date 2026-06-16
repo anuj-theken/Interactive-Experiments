@@ -1,11 +1,11 @@
 :root {
-    --html-bg-color: transparent; /* CHANGED: Made outer container transparent */
-    --water-bg-color: #fdfbf7; /* CHANGED: Soft cream/paper background */
-    --land-inactive-color: #f3ece2; /* CHANGED: Base sand tone for inactive countries */
-    --land-active-1st: #d96b27; /* CHANGED: Terracotta Orange */
-    --land-active-2nd: #e6bfa3; /* CHANGED: Faded Ripple Orange */
-    --land-border-color: #dfd5c6; /* CHANGED: Muted brown-gray map borders */
-    --text-main-color: #4a3b32; /* CHANGED: Deep architectural charcoal-brown */
+  --html-bg-color: transparent; /* CHANGED: Made outer container transparent */
+  --water-bg-color: #fdfbf7; /* CHANGED: Soft cream/paper background */
+  --land-inactive-color: #f3ece2; /* CHANGED: Base sand tone for inactive countries */
+  --land-active-1st: #d96b27; /* CHANGED: Terracotta Orange */
+  --land-active-2nd: #e6bfa3; /* CHANGED: Faded Ripple Orange */
+  --land-border-color: #dfd5c6; /* CHANGED: Muted brown-gray map borders */
+  --text-main-color: #4a3b32; /* CHANGED: Deep architectural charcoal-brown */
 }
 
 /* Base resets or component specific scopes */
@@ -13,89 +13,89 @@
 .QW4K-map-outer-wrapper p,
 .QW4K-map-outer-wrapper span,
 .QW4K-map-outer-wrapper div {
-    font-family: "Archivo", sans-serif;
+  font-family: "Archivo", sans-serif;
 }
 .QW4K-map-outer-wrapper p {
-    font-size: 18px;
-    opacity: 0.5;
-    padding-top: 4px;
+  font-size: 18px;
+  opacity: 0.5;
+  padding-top: 4px;
 }
 
 .QW4K-map-outer-wrapper h2 {
-    font-family: "Reckless", "Times New Roman", Georgia, serif;
-    font-weight: 400;
+  font-family: "Reckless", "Times New Roman", Georgia, serif;
+  font-weight: 400;
 }
 
 .QW4K-map-outer-wrapper {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--html-bg-color);
-    box-sizing: border-box;
-    padding: 20px;
-    overflow: hidden;
+  position: relative;
+  width: 100vw;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--html-bg-color);
+  box-sizing: border-box;
+  padding: 20px;
+  overflow: hidden;
 }
 
 .QW4K-map-frame-box {
-    position: relative;
-    width: 100%;
-    max-width: 1050px;
-    height: 75vh;
-    border: 1.5px solid var(--land-border-color); /* CHANGED: Matches palette */
-    background-color: var(--water-bg-color);
-    overflow: hidden;
+  position: relative;
+  width: 100%;
+  max-width: 1050px;
+  height: 75vh;
+  border: 1.5px solid var(--land-border-color); /* CHANGED: Matches palette */
+  background-color: var(--water-bg-color);
+  overflow: hidden;
 }
 
 .QW4K-custom-map-legend {
-    position: absolute;
-    bottom: 25px;
-    left: 25px;
-    background-color: rgba(
-        253,
-        251,
-        247,
-        0.95
-    ); /* CHANGED: Matches canvas paper color */
-    border: 1px solid var(--land-border-color);
-    border-radius: 6px;
-    padding: 12px 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    z-index: 30;
-    box-shadow: 0 2px 8px rgba(74, 59, 50, 0.08);
+  position: absolute;
+  bottom: 25px;
+  left: 25px;
+  background-color: rgba(
+    253,
+    251,
+    247,
+    0.95
+  ); /* CHANGED: Matches canvas paper color */
+  border: 1px solid var(--land-border-color);
+  border-radius: 6px;
+  padding: 12px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 30;
+  box-shadow: 0 2px 8px rgba(74, 59, 50, 0.08);
 }
 
 .QW4K-legend-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    color: var(--text-main-color);
-    font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-main-color);
+  font-weight: 500;
 }
 
 .QW4K-legend-square {
-    width: 16px;
-    height: 16px;
-    border-radius: 3px;
-    border: 1px solid transparent;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1px solid transparent;
 }
 
 .QW4K-legend-square.QW4K-deep-red {
-    background-color: var(--land-active-1st);
+  background-color: var(--land-active-1st);
 }
 
 .QW4K-legend-square.QW4K-coral-pink {
-    background-color: var(--land-active-2nd);
-    border-color: rgba(74, 59, 50, 0.1);
+  background-color: var(--land-active-2nd);
+  border-color: rgba(74, 59, 50, 0.1);
 }
 
 .QW4K-legend-square.QW4K-inactive {
-    background-color: var(--land-inactive-color);
-    border-color: var(--land-border-color);
+  background-color: var(--land-inactive-color);
+  border-color: var(--land-border-color);
 }

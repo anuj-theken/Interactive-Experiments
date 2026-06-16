@@ -1,4 +1,4 @@
-(function () {
+document.addEventListener("DOMContentLoaded", function () {
   // Named initialization function to decouple from instant execution flow
   function initTelecomChart() {
     const chartDom = document.getElementById("QW4K5-chart-container");

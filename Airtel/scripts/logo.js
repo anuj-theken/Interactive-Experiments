@@ -1,53 +1,51 @@
-/**
- * Isolated Timeline Module Data Matrix.
- * Elements use the custom namespaced data-QW4K-id selector mapping properties.
- */
 const layouts = {
+  // Instance 1: Max width/height spread to maximize spacing
   state1: [
-    { id: "bsnl", top: "2%", left: "42%", bg: "#fdfaf2" },
-    { id: "airtel", top: "15%", left: "80%", bg: "#fdfaf2" },
-    { id: "idea", top: "20%", left: "5%", bg: "#fdfaf2" },
-    { id: "jt_mobile", top: "34%", left: "45%", bg: "#dcd5c5" },
-    { id: "modi_telstra", top: "42%", left: "78%", bg: "#dcd5c5" },
-    { id: "rpg", top: "45%", left: "12%", bg: "#dcd5c5" },
-    { id: "fascel", top: "60%", left: "44%", bg: "#dcd5c5" },
-    { id: "koshika", top: "68%", left: "10%", bg: "#dcd5c5" },
-    { id: "bpl", top: "70%", left: "78%", bg: "#dcd5c5" },
-    { id: "sterling", top: "85%", left: "45%", bg: "#dcd5c5" },
-    { id: "usha_martin", top: "88%", left: "14%", bg: "#dcd5c5" },
+    { id: "idea", top: "0%", left: "0%", bg: "#fdfaf2" },
+    { id: "bsnl", top: "-10%", left: "49%", bg: "#fdfaf2" },
+    { id: "airtel", top: "0%", left: "100%", bg: "#fdfaf2" },
+    { id: "rpg", top: "30%", left: "5%", bg: "#dcd5c5" },
+    { id: "jt_mobile", top: "28%", left: "49%", bg: "#dcd5c5" },
+    { id: "modi_telstra", top: "30%", left: "95%", bg: "#dcd5c5" },
+    { id: "koshika", top: "65%", left: "0%", bg: "#dcd5c5" },
+    { id: "fascel", top: "63%", left: "49%", bg: "#dcd5c5" },
+    { id: "bpl", top: "65%", left: "100%", bg: "#dcd5c5" },
+    { id: "usha_martin", top: "100%", left: "5%", bg: "#dcd5c5" },
+    { id: "sterling", top: "100%", left: "49%", bg: "#dcd5c5" },
   ],
   state2: [
-    { id: "bsnl", top: "5%", left: "42%", bg: "#fdfaf2" },
-    { id: "airtel", top: "25%", left: "82%", bg: "#fdfaf2" },
-    { id: "idea", top: "30%", left: "2%", bg: "#fdfaf2" },
-    { id: "hutch", top: "44%", left: "43%", bg: "#dcd5c5" },
-    { id: "tata", top: "68%", left: "78%", bg: "#dcd5c5" },
-    { id: "spice", top: "82%", left: "38%", bg: "#dcd5c5" },
+    { id: "bsnl", top: "2%", left: "38%", bg: "#fdfaf2" },
+    { id: "airtel", top: "21%", left: "84%", bg: "#fdfaf2" },
+    { id: "idea", top: "28%", left: "0%", bg: "#fdfaf2" },
+    { id: "hutch", top: "45%", left: "38%", bg: "#dcd5c5" },
+    { id: "tata", top: "74%", left: "84%", bg: "#dcd5c5" },
+    { id: "spice", top: "88%", left: "35%", bg: "#dcd5c5" },
   ],
+  // Instance 3: Maximized perimeter separation
   state3: [
-    { id: "bsnl", top: "2%", left: "44%", bg: "#fdfaf2" },
-    { id: "airtel", top: "15%", left: "82%", bg: "#fdfaf2" },
-    { id: "idea", top: "18%", left: "2%", bg: "#fdfaf2" },
-    { id: "vodafone", top: "38%", left: "44%", bg: "#fdfaf2" },
-    { id: "telenor", top: "46%", left: "5%", bg: "#dcd5c5" },
-    { id: "mts", top: "48%", left: "80%", bg: "#dcd5c5" },
-    { id: "videocon", top: "66%", left: "45%", bg: "#dcd5c5" },
-    { id: "stel", top: "72%", left: "8%", bg: "#dcd5c5" },
-    { id: "loop", top: "74%", left: "82%", bg: "#dcd5c5" },
-    { id: "etisalat", top: "88%", left: "44%", bg: "#dcd5c5" },
+    { id: "bsnl", top: "0%", left: "38%", bg: "#fdfaf2" },
+    { id: "airtel", top: "5%", left: "100%", bg: "#fdfaf2" },
+    { id: "idea", top: "5%", left: "0%", bg: "#fdfaf2" },
+    { id: "vodafone", top: "36%", left: "38%", bg: "#fdfaf2" },
+    { id: "telenor", top: "50%", left: "0%", bg: "#dcd5c5" },
+    { id: "mts", top: "52%", left: "100%", bg: "#dcd5c5" },
+    { id: "videocon", top: "69%", left: "63%", bg: "#dcd5c5" },
+    { id: "stel", top: "95%", left: "0%", bg: "#dcd5c5" },
+    { id: "loop", top: "95%", left: "100%", bg: "#dcd5c5" },
+    { id: "etisalat", top: "100%", left: "38%", bg: "#dcd5c5" },
   ],
   state4: [
-    { id: "bsnl", top: "5%", left: "45%", bg: "#fdfaf2" },
-    { id: "airtel", top: "25%", left: "82%", bg: "#fdfaf2" },
-    { id: "idea", top: "30%", left: "5%", bg: "#dcd5c5" },
-    { id: "vodafone", top: "58%", left: "44%", bg: "#dcd5c5" },
-    { id: "jio", top: "75%", left: "78%", bg: "#fdfaf2" },
+    { id: "bsnl", top: "2%", left: "38%", bg: "#fdfaf2" },
+    { id: "airtel", top: "21%", left: "84%", bg: "#fdfaf2" },
+    { id: "idea", top: "28%", left: "0%", bg: "#dcd5c5" },
+    { id: "vodafone", top: "59%", left: "38%", bg: "#dcd5c5" },
+    { id: "jio", top: "82%", left: "78%", bg: "#fdfaf2" },
   ],
   state5: [
-    { id: "bsnl", top: "10%", left: "45%", bg: "#fdfaf2" },
-    { id: "airtel", top: "30%", left: "80%", bg: "#fdfaf2" },
-    { id: "vi", top: "55%", left: "44%", bg: "#fdfaf2" },
-    { id: "jio", top: "78%", left: "75%", bg: "#fdfaf2" },
+    { id: "bsnl", top: "6%", left: "38%", bg: "#fdfaf2" },
+    { id: "airtel", top: "28%", left: "84%", bg: "#fdfaf2" },
+    { id: "vi", top: "59%", left: "38%", bg: "#fdfaf2" },
+    { id: "jio", top: "84%", left: "76%", bg: "#fdfaf2" },
   ],
 };
 
@@ -55,6 +53,7 @@ let activeElements = new Set();
 
 function transitionToState(stateKey) {
   const nextConfig = layouts[stateKey];
+  if (!nextConfig) return;
   const nextIds = new Set(nextConfig.map((node) => node.id));
 
   // 1. Terminate Outgoing Exits
@@ -65,7 +64,7 @@ function transitionToState(stateKey) {
         gsap.to(element, {
           opacity: 0,
           scale: 0.5,
-          duration: 0.4,
+          duration: 0.3,
           ease: "power2.in",
           onComplete: () => {
             element.style.display = "none";
@@ -75,7 +74,7 @@ function transitionToState(stateKey) {
     }
   });
 
-  // 2. Compute Entry Animations Using Predefined Layout Parameters
+  // 2. Compute Entry/Movement Animations
   nextConfig.forEach((node) => {
     const element = document.querySelector(`[data-QW4K-id="${node.id}"]`);
     if (element) {
@@ -95,8 +94,8 @@ function transitionToState(stateKey) {
         gsap.to(element, {
           opacity: 1,
           scale: 1,
-          duration: 0.6,
-          ease: "back.out(1.2)",
+          duration: 0.35,
+          ease: "power2.out",
         });
       } else {
         gsap.to(element, {
@@ -105,7 +104,7 @@ function transitionToState(stateKey) {
           backgroundColor: node.bg,
           opacity: 1,
           scale: 1,
-          duration: 0.6,
+          duration: 0.4,
           ease: "power2.out",
         });
       }
@@ -113,49 +112,126 @@ function transitionToState(stateKey) {
   });
 
   activeElements = nextIds;
+
+  // 3. Handle active classes
+  const stateIndex = parseInt(stateKey.replace("state", "")) - 1;
+  document.querySelectorAll(".QW4K-timeline-section").forEach((section, i) => {
+    if (i === stateIndex) {
+      section.classList.add("is-active-mobile");
+    } else {
+      section.classList.remove("is-active-mobile");
+    }
+  });
+
+  // 4. Handle final paragraph container text injection
+  const summaryContainer = document.getElementById("QW4K-summary-text");
+  if (summaryContainer) {
+    if (stateKey === "state5") {
+      summaryContainer.innerHTML =
+        "Airtel - 1995, Jio - 2016. Vi (life support) - 2007 and BSNL - 2000 are the only surviving players in the industry.";
+      gsap.to(summaryContainer, {
+        opacity: 1,
+        duration: 0.25,
+        ease: "power1.out",
+      });
+    } else {
+      gsap.to(summaryContainer, {
+        opacity: 0,
+        duration: 0.2,
+        ease: "power1.in",
+        onComplete: () => {
+          summaryContainer.innerHTML = "";
+        },
+      });
+    }
+  }
 }
 
-// Global Document Entry Initialization Loop
 window.addEventListener("load", () => {
   if (typeof gsap !== "undefined" && typeof ScrollTrigger !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
 
-    /*
-     * FIX: Prevent ScrollTrigger from auto-firing triggers on init based on
-     * current scroll position. This stops all 5 states from bulk-triggering
-     * when the page loads already scrolled past the module.
-     */
     ScrollTrigger.config({
       autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
     });
 
-    // Bootstrap visual layer — state1 always shown as the starting canvas
+    const isMobile = window.innerWidth < 1024;
+    const container = document.getElementById("QW4K-timeline-module");
+    const sectionWrapper =
+      document.querySelector(".QW4K-timeline-section-wrapper") || container;
+
     transitionToState("state1");
 
-    // Apply namespaced ScrollTrigger targets anchored within the view bounds
-    const triggerIds = [
-      "#QW4K-trigger1",
-      "#QW4K-trigger2",
-      "#QW4K-trigger3",
-      "#QW4K-trigger4",
-      "#QW4K-trigger5",
-    ];
+    if (isMobile) {
+      const mobileTrackHeightValue = 140;
+      const totalScrollDistance = 5 * mobileTrackHeightValue;
 
-    triggerIds.forEach((triggerId, index) => {
-      ScrollTrigger.create({
-        trigger: triggerId,
-        scroller: "body",
-        start: "top 25%" /* Section top crosses 65% down the viewport → fire */,
-        end: "bottom 35%" /* Section bottom clears 35% up the viewport → done */,
-        onEnter: () => transitionToState(`state${index + 1}`),
-        onEnterBack: () => transitionToState(`state${index + 1}`),
-      });
-    });
+      if (container) {
+        document
+          .querySelectorAll(".QW4K-virtual-mobile-track-holder")
+          .forEach((el) => el.remove());
 
-    /*
-     * FIX: Defer refresh to next animation frame so all layout measurements
-     * are stable before ScrollTrigger calculates trigger positions.
-     */
+        const trackHolder = document.createElement("div");
+        trackHolder.className = "QW4K-virtual-mobile-track-holder";
+        trackHolder.style.position = "absolute";
+        trackHolder.style.top = `${sectionWrapper.offsetTop}px`;
+        trackHolder.style.left = "0";
+        trackHolder.style.width = "100%";
+        trackHolder.style.height = `${totalScrollDistance}vh`;
+        trackHolder.style.pointerEvents = "none";
+
+        document.body.appendChild(trackHolder);
+
+        ScrollTrigger.create({
+          trigger: trackHolder,
+          start: "top top",
+          end: "bottom bottom",
+          pin: container,
+          pinSpacing: true,
+          invalidateOnRefresh: true,
+        });
+
+        for (let i = 1; i <= 5; i++) {
+          const dummyTrack = document.createElement("div");
+          dummyTrack.className = "QW4K-virtual-mobile-track";
+          dummyTrack.style.height = `${mobileTrackHeightValue}vh`;
+          dummyTrack.style.position = "relative";
+          dummyTrack.style.pointerEvents = "none";
+          trackHolder.appendChild(dummyTrack);
+
+          ScrollTrigger.create({
+            trigger: dummyTrack,
+            scroller: "body",
+            start: "top 60%",
+            end: "bottom 40%",
+            onEnter: () => transitionToState(`state${i}`),
+            onEnterBack: () => transitionToState(`state${i}`),
+          });
+        }
+      }
+    } else {
+      if (container && sectionWrapper) {
+        ScrollTrigger.create({
+          trigger: sectionWrapper,
+          start: "top top",
+          end: "bottom bottom",
+          pin: container,
+          pinSpacing: false,
+        });
+
+        const totalStates = 5;
+        for (let i = 0; i < totalStates; i++) {
+          ScrollTrigger.create({
+            trigger: sectionWrapper,
+            start: `top+=${(i / totalStates) * 100}% top`,
+            end: `top+=${((i + 1) / totalStates) * 100}% top`,
+            onEnter: () => transitionToState(`state${i + 1}`),
+            onEnterBack: () => transitionToState(`state${i + 1}`),
+          });
+        }
+      }
+    }
+
     requestAnimationFrame(() => {
       ScrollTrigger.refresh();
     });

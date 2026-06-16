@@ -1,4 +1,4 @@
-(function () {
+document.addEventListener("DOMContentLoaded", function () {
   const years = [
     "2007", // 0
     "2008", // 1
@@ -108,6 +108,7 @@
   });
 
   // Initial Chart setup
+  // Initial Chart setup
   myChart.setOption({
     grid: {
       left: "3%",
@@ -117,24 +118,56 @@
       containLabel: true,
     },
     backgroundColor: "transparent",
-    tooltip: { trigger: "axis" },
-    xAxis: { type: "category", boundaryGap: false, data: years },
-    yAxis: { type: "value", min: 0, max: 700 },
+    tooltip: {
+      trigger: "axis",
+      // Custom formatter ensures markers perfectly mirror your custom series line colors
+      formatter: function (params) {
+        let tooltipText = `<strong>${params[0].name}</strong><br/>`;
+        params.forEach((item) => {
+          // Fallback to the explicit colors if item.color is overridden or transient
+          const markerColor =
+            item.seriesName === "Bharti Airtel" ? "#d70a0d" : "#590b23";
+          tooltipText += `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${markerColor};"></span>`;
+          tooltipText += `${item.seriesName}: <strong>${item.value}</strong><br/>`;
+        });
+        return tooltipText;
+      },
+    },
+    xAxis: {
+      type: "category",
+      boundaryGap: false,
+      data: years,
+    },
+    yAxis: {
+      type: "value",
+      min: 0,
+      max: 700,
+      // Configuration to make the horizontal grid lines darker
+      splitLine: {
+        show: true,
+        lineStyle: {
+          color: "#444444", // Darker gray color (adjust to #666 if too intense)
+          width: 1,
+          type: "solid",
+        },
+      },
+    },
     series: [
       {
-        name: "Bharti Airtel", // Corrected from Bajaj Auto to match HTML legend
+        name: "Bharti Airtel",
         type: "line",
         smooth: 0.3,
         lineStyle: { color: "#d70a0d", width: 3 },
+        itemStyle: { color: "#d70a0d" }, // Enforces color consistency for data markers/tooltips
         symbol: "none",
         data: [airtel[0]],
       },
-
       {
         name: "Nifty 50",
         type: "line",
         smooth: 0.3,
         lineStyle: { type: "dashed", color: "#590b23", width: 1.8 },
+        itemStyle: { color: "#590b23" }, // Enforces color consistency for data markers/tooltips
         symbol: "none",
         data: [nifty50Data[0]],
       },

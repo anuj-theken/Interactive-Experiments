@@ -1,339 +1,382 @@
 :root {
-    /* Changed background from '#faf4ee' to transparent */
-    --QW4K7-bg-color: transparent;
-    --QW4K7-text-dark: #000000;
-    --QW4K7-airtel-color: #a62b2b;
-    --QW4K7-mtn-color: #ba7029;
-    --QW4K7-zain-color: #16527d;
+  --QW4K7-bg-color: transparent;
+  --QW4K7-text-dark: #000000;
+  --QW4K7-airtel-color: #a62b2b;
+  --QW4K7-mtn-color: #ba7029;
+  --QW4K7-zain-color: #16527d;
+  --QW4K7-divider-color: #a5a5a5;
 }
 
 .QW4K7-scroll-track {
-    height: 200vh;
-    position: relative;
-    width: 100%;
-    background-color: var(--QW4K7-bg-color);
+  height: 200vh;
+  position: relative;
+  width: 100%;
+  background-color: var(--QW4K7-bg-color);
 }
 
 .QW4K7-scroll-track *,
 .QW4K7-scroll-track *::before,
 .QW4K7-scroll-track *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 .QW4K7-viewport-container {
-    width: 100%;
-    height: 100vh;
-    position: sticky;
-    top: 0;
-    left: 0;
-    padding: 6vh 6vw;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow: hidden;
-    background-color: transparent; /* Ensures transparency carries down */
+  width: 100%;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  left: 0;
+  padding: 5vh 6vw 3vh 6vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  background-color: transparent;
 }
 
 .QW4K7-metric-section {
-    width: 100%;
+  width: 100%;
 }
 
 .QW4K7-section-title {
-    font-family: "Inter", sans-serif;
-    font-size: 26px;
-    font-weight: 700;
-    margin-bottom: 4vh;
-    letter-spacing: -0.5px;
-    color: var(--QW4K7-text-dark);
+  font-family: "Archivo", sans-serif;
+  font-size: 22px;
+  font-weight: 500;
+  margin-bottom: 3vh;
+  letter-spacing: -0.5px;
+  color: var(--QW4K7-text-dark);
 }
 
 .QW4K7-subscriber-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1.3fr 0.4fr;
-    width: 100%;
-    column-gap: 40px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  width: 100%;
+  column-gap: 60px;
 }
 
 .QW4K7-brand-column {
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
-.QW4K7-brand-meta-wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
 .QW4K7-brand-name {
-    font-family: "Inter", sans-serif;
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 20px;
-    height: 29px;
+  font-family: "Archivo", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
 }
 
 .QW4K7-sub-value-wrapper {
-    font-family: "Playfair Display", serif;
-    font-size: 42px;
-    font-weight: 500;
-    line-height: 1.2;
-    position: relative;
-    height: 120px;
+  position: relative;
+  height: 140px;
+  width: 100%;
 }
 
-.QW4K7-sub-value-wrapper .QW4K7-val-past {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    transition: opacity 0.4s ease;
+.QW4K7-val-group-past,
+.QW4K7-val-group-current {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
 }
 
-.QW4K7-sub-value-wrapper .QW4K7-val-current {
-    position: absolute;
-    top: 55px;
-    left: 0;
-    width: 100%;
-    opacity: 0;
-    transform: translateY(15px);
-    transition:
-        transform 0.4s ease,
-        opacity 0.4s ease;
+.QW4K7-val-group-past {
+  top: 15px;
 }
 
+.QW4K7-val-group-current {
+  top: 110px;
+  opacity: 0;
+  transform: translateY(15px);
+}
+
+.QW4K7-val-year {
+  font-family: "Archivo", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  opacity: 0.8;
+}
+
+.QW4K7-val-text {
+  font-family: "Reckless", serif;
+  font-size: 44px;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.QW4K7-main-title {
+  font-family: "Reckless", serif;
+  font-size: 36px;
+  font-weight: 500;
+  margin-bottom: 3vh;
+}
 .QW4K7-brand-airtel {
-    color: var(--QW4K7-airtel-color);
+  color: var(--QW4K7-airtel-color);
 }
 .QW4K7-brand-mtn {
-    color: var(--QW4K7-mtn-color);
+  color: var(--QW4K7-mtn-color);
 }
 .QW4K7-brand-zain {
-    color: var(--QW4K7-zain-color);
+  color: var(--QW4K7-zain-color);
 }
 
-.QW4K7-timeline-indicator {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    font-family: "Playfair Display", serif;
-    font-size: 22px;
-    font-weight: 500;
-}
-
-.QW4K7-timeline-header-spacer {
-    height: 29px;
-    margin-bottom: 20px;
-}
-
-.QW4K7-timeline-values-wrapper {
-    position: relative;
-    width: 100%;
-    height: 120px;
-}
-
-.QW4K7-year-past,
-.QW4K7-year-current {
-    color: #a62b2b;
-    position: absolute;
-    right: 0;
-    line-height: 3.2;
-    white-space: nowrap;
-    transition:
-        transform 0.4s ease,
-        opacity 0.4s ease;
-}
-
-.QW4K7-year-past {
-    top: 0;
-}
-.QW4K7-year-current {
-    top: 55px;
-    opacity: 0;
-    transform: translateY(15px);
+.QW4K7-section-divider {
+  border: none;
+  border-top: 1px dotted var(--QW4K7-divider-color);
+  width: 100%;
+  margin: 7vh 0 1vh 0;
 }
 
 .QW4K7-chart-section {
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  margin-bottom: 0.5vh; /* Reduced from 1vh to pull content upward */
+}
+
+.QW4K7-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 1.5vh;
+}
+
+.QW4K7-chart-legend {
+  display: flex;
+  gap: 24px;
+}
+
+.QW4K7-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.QW4K7-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.QW4K7-bg-airtel {
+  background-color: var(--QW4K7-airtel-color);
+}
+.QW4K7-bg-mtn {
+  background-color: var(--QW4K7-mtn-color);
+}
+.QW4K7-bg-zain {
+  background-color: var(--QW4K7-zain-color);
+}
+
+.QW4K7-legend-label {
+  font-family: "Archivo", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+}
+
+.QW4K7-chart-wrapper {
+  width: 100%;
+  height: 32vh; /* Reduced from 40vh to safely bring footer into view */
+  position: relative;
+  margin-top: 1vh; /* Reduced from 2vh */
+}
+
+#QW4K7-marketCapChart {
+  width: 100%;
+  height: 100%;
+}
+
+#QW4K7-na-box {
+  position: absolute;
+  bottom: 45px;
+  left: 76.5%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 22px;
+  border: 1.5px dashed #a5a5a5;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Reckless", serif;
+  font-size: 14px;
+  color: var(--QW4K7-zain-color);
+  font-weight: bold;
+  opacity: 1;
+  background-color: transparent;
+  z-index: 10;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.QW4K7-component-footer {
+  width: 100%;
+  font-family: "Archivo", sans-serif;
+  font-size: 12px;
+  color: #666666;
+  line-height: 1.5;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 1.5vh;
+  margin-top: 1.5vh;
+  opacity: 0.5;
+}
+
+/* Tablet Layout Layer Rules */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .QW4K7-subscriber-grid {
+    column-gap: 30px;
+  }
+  .QW4K7-val-text {
+    font-size: 34px;
+  }
+  .QW4K7-brand-name {
+    font-size: 20px;
+  }
+}
+
+/* Mobile Responsive Adaptive Framework Layers */
+@media (max-width: 768px) {
+  .QW4K7-viewport-container {
+    padding: 2vh 4vw 1vh 4vw;
+    height: 94vh;
+    position: sticky;
+    top: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .QW4K7-scroll-track {
+    height: 200vh;
+  }
+
+  .QW4K7-section-title {
+    font-size: 18px;
+    margin-bottom: 3vh;
+  }
+
+  .QW4K7-subscriber-grid {
+    grid-template-columns: 1fr;
+    row-gap: 12px;
+    width: 100%;
+  }
+
+  .QW4K7-brand-column {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.05);
+    padding-bottom: 6px;
+  }
+
+  .QW4K7-brand-name {
+    font-size: 18px;
+    margin-bottom: 0;
+    width: 30%;
+    text-align: left;
+  }
+
+  .QW4K7-sub-value-wrapper {
+    height: 40px;
+    width: 70%;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 24px;
+    position: relative;
+  }
+
+  .QW4K7-val-group-past,
+  .QW4K7-val-group-current {
+    position: relative;
+    left: auto;
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    top: 0 !important;
+  }
+
+  .QW4K7-val-group-current {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  .QW4K7-val-year {
+    font-size: 10px;
+    margin-bottom: 1px;
+  }
+
+  .QW4K7-val-text {
+    font-size: 18px;
+  }
+
+  .QW4K7-section-divider {
+    margin: 5vh 0 5vh 0;
+  }
+
+  .QW4K7-chart-section {
     width: 100%;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    margin-top: 2vh;
-}
+  }
 
-.QW4K7-chart-wrapper {
-    width: 100%;
-    height: 38vh;
-    position: relative;
-}
-
-#QW4K7-marketCapChart {
-    width: 100%;
-    height: 100%;
-}
-
-#QW4K7-na-box {
-    position: absolute;
-    bottom: 35px;
-    left: 72.8%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 22px;
-    border: 1.5px dashed #a5a5a5;
-    border-radius: 3px;
-    display: flex;
+  .QW4K7-chart-header {
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    font-family: "Playfair Display", serif;
-    font-size: 14px;
-    color: var(--QW4K7-zain-color);
-    font-weight: bold;
-    opacity: 1;
-    background-color: transparent;
-    z-index: 10;
-    transition:
-        opacity 0.3s ease,
-        transform 0.3s ease;
-}
+    margin-bottom: 0.5vh;
+  }
 
-.QW4K7-scroll-hint {
-    position: absolute;
-    bottom: 20px;
-    right: 30px;
-    font-family: "Inter", sans-serif;
+  .QW4K7-chart-legend {
+    gap: 10px;
+    margin-bottom: 0;
+  }
+
+  .QW4K7-legend-label {
     font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: rgba(0, 0, 0, 0.3);
-    font-weight: 600;
-}
+  }
 
-/* Specific Fix for iPad Pro / iPad Air dimensions */
-@media (min-width: 769px) and (max-width: 1024px) {
-    .QW4K7-subscriber-grid {
-        column-gap: 20px;
-    }
-    .QW4K7-sub-value-wrapper,
-    .QW4K7-timeline-values-wrapper {
-        font-size: 32px;
-    }
-    .QW4K7-brand-name {
-        font-size: 20px;
-    }
-    /* Explicitly target and reset line heights and alignment frames for the iPad breakpoint */
-    .QW4K7-year-past,
-    .QW4K7-year-current {
-        line-height: 1.2 !important;
-    }
-    .QW4K7-year-past {
-        top: 0px;
-    }
-    .QW4K7-year-current {
-        top: 42px; /* Adjusted downward to neatly match the dynamic offset of values on tablets */
-    }
-}
+  .QW4K7-legend-dot {
+    width: 8px;
+    height: 8px;
+  }
 
-/* Mobile Adaptive Rules Layer */
-@media (max-width: 768px) {
-    .QW4K7-viewport-container {
-        padding: 4vh 5vw 6vh 5vw;
-    }
+  .QW4K7-chart-wrapper {
+    height: 30vh; /* Reduced from 38vh to bring footer back into viewpoint */
+    margin-top: 0.5vh;
+  }
 
-    .QW4K7-section-title {
-        font-size: 22px;
-        margin-bottom: 2.5vh;
-    }
+  #QW4K7-na-box {
+    bottom: 28px; /* Adjusted downward to match the lower wrapper framework */
+    left: 81%;
+    font-size: 9px;
+    width: 26px;
+    height: 14px;
+  }
 
-    .QW4K7-subscriber-grid {
-        grid-template-columns: 1fr;
-        row-gap: 24px;
-    }
-
-    .QW4K7-brand-name {
-        font-size: 18px;
-        margin-bottom: 12px;
-        height: auto;
-    }
-
-    .QW4K7-sub-value-wrapper {
-        font-size: 32px;
-        height: 85px;
-        position: relative;
-    }
-
-    .QW4K7-sub-value-wrapper .QW4K7-val-current {
-        top: 42px;
-    }
-
-    /* Target wrapper to build a vertically stacked timeline container on the far right */
-    .QW4K7-sub-value-wrapper::before,
-    .QW4K7-sub-value-wrapper::after {
-        position: absolute;
-        right: 0;
-        font-family: "Playfair Display", serif;
-        font-size: 15px;
-        font-weight: 500;
-        color: #a62b2b;
-        transition:
-            opacity 0.4s ease,
-            transform 0.4s ease,
-            visibility 0.4s ease;
-        white-space: nowrap;
-    }
-
-    /* Historical Baseline Stacked Label Element ("Then") */
-    .QW4K7-sub-value-wrapper::before {
-        content: "Then(2008)";
-        top: 0;
-        opacity: 1;
-        visibility: visible;
-    }
-
-    /* Target Active Stacked Label Element ("Now") - hidden completely at the start */
-    .QW4K7-sub-value-wrapper::after {
-        content: "Now(2025)";
-        top: 42px;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(5px);
-    }
-
-    /* Active Animation transitions: "Then" goes to 30%, "Now" smoothly fades into full view */
-    .QW4K7-state-active .QW4K7-sub-value-wrapper::before {
-        opacity: 0.3;
-    }
-
-    .QW4K7-state-active .QW4K7-sub-value-wrapper::after {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-    }
-
-    .QW4K7-timeline-indicator {
-        display: none;
-    }
-
-    .QW4K7-chart-wrapper {
-        height: 32vh;
-    }
-
-    #QW4K7-na-box {
-        bottom: 35px;
-        left: 81%;
-        font-size: 12px;
-        width: 50px;
-        height: 20px;
-    }
-
-    .QW4K7-scroll-hint {
-        bottom: 12px;
-        left: 5vw;
-        right: auto;
-        font-size: 9px;
-    }
+  .QW4K7-component-footer {
+    font-size: 10px;
+    margin-top: 0vh;
+    padding-top: 0vh;
+    opacity: 0.5;
+  }
 }

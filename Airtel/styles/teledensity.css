@@ -1,267 +1,318 @@
 /* Container sandbox bounds to lock the sticky module context */
 .QW4K8-telecom-timeline-module {
-    position: relative;
-    width: 100%;
-    background-color: transparent;
+  position: relative;
+  width: 100%;
+  background-color: transparent;
 }
 
 .QW4K8-dashboard-container {
-    width: 100%;
-    display: flex;
-    position: relative;
+  width: 100%;
+  display: flex;
+  position: relative;
 }
 
 /* Left Side Panel setup (Desktop Default) */
 .QW4K8-left-panel {
-    width: 35%;
-    height: 100vh;
-    position: sticky;
-    top: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    padding: 60px 0 60px 80px;
-    z-index: 10;
+  width: 35%;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 60px 0 60px 80px;
+  z-index: 10;
 }
 
 .QW4K8-main-title {
-    font-family: "Georgia", "Times New Roman", serif;
-    font-size: 38px;
-    font-weight: 400;
-    line-height: 1.2;
-    color: #000000;
-    margin: 0 0 12px 0;
-    letter-spacing: -0.5px;
+  font-family: "Reckless", "Times New Roman", serif;
+  font-size: 38px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #000000;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.5px;
 }
 
 .QW4K8-subheader {
-    font-size: 18px;
-    line-height: 1.5;
-    color: #555555;
-    margin: 0 0 40px 0;
-    font-weight: 400;
-    max-width: 90%;
+  font-size: 18px;
+  line-height: 1.5;
+  color: #555555;
+  margin: 0 0 40px 0;
+  font-weight: 400;
+  max-width: 90%;
 }
 
 .QW4K8-legend-container {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .QW4K8-legend-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #000000;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .QW4K8-gradient-wrapper {
-    display: flex;
-    flex-direction: column;
-    width: 280px;
+  display: flex;
+  flex-direction: column;
+  width: 280px;
 }
 
 .QW4K8-gradient-bar {
-    width: 100%;
-    height: 14px;
-    background: linear-gradient(
-        to right,
-        #f3ad44 0%,
-        #e2d491 30%,
-        #a6c2cd 65%,
-        #5091e6 100%
-    );
-    border-radius: 2px;
+  width: 100%;
+  height: 14px;
+  background: linear-gradient(
+    to right,
+    #b42529 0%,
+    /* Deep Red */ #d33338 25%,
+    /* Bright Red */ #f4eed1 50%,
+    /* Light Cream */ #a8bc7b 75%,
+    /* Light Olive Green */ #6b8a31 100% /* Dark Olive Green */
+  );
+  border-radius: 2px;
 }
 
 .QW4K8-gradient-labels {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 8px;
-    font-size: 13px;
-    color: #000000;
-    font-weight: 400;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #000000;
+  font-weight: 400;
 }
 
 .QW4K8-spacer {
-    flex-grow: 0.5;
+  flex-grow: 0.5;
 }
 
 /* Timeline text metrics styling */
 .QW4K8-year-timeline {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 30px;
 }
 
 .QW4K8-year-display {
-    font-size: 32px;
-    font-weight: 600;
-    color: #a4a4a4;
-    transition:
-        color 0.4s ease,
-        transform 0.4s ease,
-        opacity 0.4s ease;
-    transform-origin: left center;
-    opacity: 0;
-    transform: translateY(20px);
+  font-size: 32px;
+  font-weight: 600;
+  color: #a4a4a4;
+  transition:
+    color 0.4s ease,
+    transform 0.4s ease,
+    opacity 0.4s ease;
+  transform-origin: left center;
+  opacity: 0;
+  transform: translateY(20px);
 }
 
 .QW4K8-year-display.QW4K8-active {
-    color: #000000;
-    transform: translateY(0) scale(1.1);
-    opacity: 1 !important;
+  color: #000000;
+  transform: translateY(0) scale(1.1);
+  opacity: 1 !important;
 }
 
 .QW4K8-year-display.QW4K8-revealed {
-    opacity: 0.35 !important;
-    color: #a4a4a4;
-    transform: translateY(0) scale(1);
+  opacity: 0.35 !important;
+  color: #a4a4a4;
+  transform: translateY(0) scale(1);
 }
 
 .QW4K8-footer-note {
-    font-size: 11px;
-    line-height: 1.6;
-    color: #a4a4a4;
-    max-width: 95%;
-    text-align: left;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #a4a4a4;
+  max-width: 95%;
+  text-align: left;
 }
 
 /* Right Panel Context Box */
 .QW4K8-right-panel {
-    width: 65%;
-    position: relative;
+  width: 65%;
+  position: relative;
 }
 
 /* Sticky layout constraints */
 .QW4K8-map-sticky-wrapper {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100%;
-    height: 100vh;
-    padding: 40px;
-    z-index: 1;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100vh;
+  padding: 40px;
+  z-index: 1;
 }
 
 .QW4K8-map-sticky-wrapper.QW4K8-is-fixed {
-    position: fixed;
-    width: 65%;
-    right: 0;
-    left: auto;
+  position: fixed;
+  width: 65%;
+  right: 0;
+  left: auto;
 }
 
 .QW4K8-map-sticky-wrapper.QW4K8-is-bottom {
-    position: absolute;
-    top: auto;
-    bottom: 0;
-    right: 0;
+  position: absolute;
+  top: auto;
+  bottom: 0;
+  right: 0;
 }
 
 .QW4K8-map-container-el {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 /* Active Scroll Canvas triggers */
 .QW4K8-scroll-section {
-    height: 100vh;
-    width: 100%;
-    position: relative;
-    z-index: 2;
-    pointer-events: none;
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
 }
 
 /* --- MOBILE VIEWPORTS ENGINE FIXES (WIDTHS <= 800PX) --- */
+/* --- MOBILE VIEWPORTS ENGINE FIXES (WIDTHS <= 800PX) --- */
+/* --- MOBILE VIEWPORTS ENGINE FIXES (WIDTHS <= 800PX) --- */
 @media screen and (max-width: 800px) {
-    .QW4K8-dashboard-container {
-        width: 85%;
-        flex-direction: column-reverse; /* Flips order so right panel (map) goes to the top */
-    }
+  /* 1. Master Container Constraint Reset */
+  .QW4K8-dashboard-container {
+    width: 100% !important;
+    max-width: 100% !important; /* Changed from 100vw to prevent screen-spillover */
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    padding: 24px 20px 40px 20px !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
 
-    .QW4K8-left-panel {
-        width: 100%;
-        height: auto;
-        position: relative !important;
-        top: auto !important;
-        padding: 20px 24px 40px 24px; /* Balanced layout breathing room below map */
-    }
+  /* Force every child element to calculate padding safely inside its width */
+  .QW4K8-dashboard-container *,
+  .QW4K8-dashboard-container *::before,
+  .QW4K8-dashboard-container *::after {
+    box-sizing: border-box !important;
+  }
 
-    .QW4K8-main-title {
-        font-size: 34px; /* Matches visual weight of reference image */
-        line-height: 1.2;
-        margin-bottom: 16px;
-    }
+  /* 2. Parent Container contents mode */
+  .QW4K8-left-panel,
+  .QW4K8-right-panel {
+    display: contents !important;
+  }
 
-    .QW4K8-subheader {
-        max-width: 100%;
-        font-size: 15px;
-        margin-bottom: 30px;
-    }
+  /* 3. GRID SEQUENCING */
+  .QW4K8-main-title {
+    grid-row: 1 !important;
+    font-size: 34px !important;
+    line-height: 1.2 !important;
+    margin-bottom: 12px !important;
+    width: 100% !important;
+  }
 
-    .QW4K8-legend-container {
-        margin-bottom: 35px;
-    }
+  .QW4K8-subheader {
+    grid-row: 2 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: 15px !important;
+    margin-bottom: 20px !important;
+  }
 
-    .QW4K8-gradient-wrapper {
-        width: 100%;
-        max-width: 100%; /* Spans to mirror reference scale row perfectly */
-    }
+  /* Map Wrapper sits at position 3 */
+  .QW4K8-right-panel {
+    grid-row: 3 !important;
+  }
 
-    .QW4K8-spacer {
-        display: none;
-    }
+  .QW4K8-legend-container {
+    grid-row: 4 !important;
+    width: 100% !important;
+    max-width: 100% !important; /* Guardrail against bleeding wide */
+    margin-top: 24px !important;
+    margin-bottom: 30px !important;
+  }
 
-    .QW4K8-year-timeline {
-        flex-direction: row;
-        gap: 24px;
-        margin: 0 0 35px 0;
-    }
+  /* 4. BUTTONIZED TIMELINE ROW CONTAINER */
+  .QW4K8-year-timeline {
+    grid-row: 5 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin: 0 0 30px 0 !important;
+    width: 90% !important;
+  }
 
-    .QW4K8-year-display {
-        font-size: 36px; /* Enhanced sizing to match design image */
-        opacity: 0.15; /* Subdued look for inactive items */
-        transform: none !important;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-    }
+  /* 5. INDIVIDUAL YEAR PILL BUTTONS */
+  .QW4K8-year-display {
+    flex: 1 !important;
+    text-align: center !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    padding: 12px 16px !important;
+    background-color: #d5d8dc !important;
+    color: #4b5563 !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: all 0.25s ease !important;
+    cursor: pointer !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
 
-    .QW4K8-year-display.QW4K8-active {
-        opacity: 1 !important;
-        transform: none !important;
-    }
+  .QW4K8-year-display.QW4K8-active {
+    background-color: #ce4a4d !important;
+    color: #ffffff !important;
+    opacity: 1 !important;
+    transform: scale(1.02) !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
+  }
 
-    .QW4K8-right-panel {
-        width: 100%;
-        position: relative !important;
-        top: auto !important;
-        z-index: 1;
-    }
+  /* 6. MAP BOUNDARY FIXES */
+  .QW4K8-map-sticky-wrapper,
+  .QW4K8-map-sticky-wrapper.QW4K8-is-fixed,
+  .QW4K8-map-sticky-wrapper.QW4K8-is-bottom {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1.05 !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    right: auto !important;
+    left: auto !important;
+  }
 
-    /* FIX: Standard block layout wrapper constraints with clean dynamic aspect ratio bounds */
-    .QW4K8-map-sticky-wrapper,
-    .QW4K8-map-sticky-wrapper.QW4K8-is-fixed,
-    .QW4K8-map-sticky-wrapper.QW4K8-is-bottom {
-        position: relative !important;
-        width: 100% !important;
-        height: auto !important;
-        aspect-ratio: 1 / 1.15 !important; /* Perfect square layout scale targeting Indian geographic projections */
-        padding: 20px 24px 0 24px !important; /* Positions map seamlessly at screen top */
-        top: auto !important;
-        bottom: auto !important;
-        right: auto !important;
-        left: auto !important;
-    }
+  .QW4K8-map-container-el {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    min-height: 400px;
+  }
 
-    .QW4K8-map-container-el {
-        width: 100%;
-        height: 100%;
-    }
+  /* 7. OTHER RESETTABLE ELEMENTS */
+  .QW4K8-footer-note {
+    grid-row: 6 !important; /* Explicitly anchored below timeline row */
+    width: 95% !important;
+    max-width: 100% !important;
+    margin-top: 10px !important;
+  }
 
-    .QW4K8-scroll-section {
-        height: 0vh !important;
-        display: none !important;
-    }
+  .QW4K8-gradient-wrapper {
+    width: 90% !important;
+    max-width: 100% !important;
+  }
+
+  .QW4K8-spacer {
+    display: none !important;
+  }
+
+  .QW4K8-scroll-section {
+    height: 0vh !important;
+    display: none !important;
+  }
 }

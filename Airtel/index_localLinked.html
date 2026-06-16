@@ -35,6 +35,13 @@
                 <p class="QW4K3-chart-subtitle">
                     12 quarters of decline (2010 Q1 to 2013 Q1)
                 </p>
+
+                <!-- New Legend Section -->
+                <div class="QW4K3-chart-legend">
+                    <span class="QW4K3-legend-color"></span>
+                    <span class="QW4K3-legend-text">Amount in ₹ Million</span>
+                </div>
+
                 <div id="QW4K3-arpu-chart"></div>
             </div>
         </section>
@@ -48,6 +55,13 @@
                 <p class="QW4K4-chart-subtitle">
                     Present Day Growth (2018 Q1 to 2025 Q1)
                 </p>
+
+                <!-- New Legend Section -->
+                <div class="QW4K4-chart-legend">
+                    <span class="QW4K3-legend-color"></span>
+                    <span class="QW4K3-legend-text">Amount in ₹ Million</span>
+                </div>
+
                 <div id="QW4K4-arpu-chart"></div>
             </div>
         </section>
@@ -61,6 +75,9 @@
                     <div class="QW4K-left-panel">
                         <div class="QW4K-site-header">
                             <h1>Airtel Stock Value</h1>
+                            <div class="QW4K-sub-header">
+                                All the stock prices are rebased to 100.
+                            </div>
                         </div>
 
                         <div class="QW4K-stock-value-legend">
@@ -203,26 +220,23 @@
             <div class="QW4K9-scrolly-story-wrapper">
                 <div class="QW4K9-scrolly-block QW4K9-card-style">
                     <h2 class="QW4K9-card-main-title">
+                        <span class="QW4K9-line-yellow"
+                            >Bharti Telecom Ltd</span
+                        >
+                        controlled by
+                    </h2>
+
+                    <ul class="QW4K9-card-list">
                         <span class="QW4K9-line-red"
                             >Bharti Enterprises Ltd</span
                         >
-                        (~100%) controls
-                    </h2>
-                    <ul class="QW4K9-card-list">
-                        <li>
-                            <span class="QW4K9-line-yellow"
-                                >Bharti Telecom Ltd</span
-                            >
-                            (~50.5%), which eventually controls
-                            <span class="QW4K9-line-green">Airtel</span> (~40%).
-                        </li>
-                        <li>
-                            the remaining stake in
-                            <span class="QW4K9-line-yellow"
-                                >Bharti Telecom</span
-                            >
-                            (~49.5%) is held by SingTel
-                        </li>
+                        (~50.5%) and
+                        <span class="QW4K9-line-red">SingTel</span>
+                        (~49.5%).
+                        <br /><br />
+                        Bharati Telecom eventually controlled ~40% of
+                        <span class="QW4K9-line-green">Airtel</span
+                        >.
                     </ul>
                 </div>
 
@@ -274,102 +288,140 @@
 
         <div class="QW4K-spacer"></div>
 
-        <!--v7.3-->
         <section class="QW4K7-scroll-track">
             <div class="QW4K7-viewport-container">
-                <div class="QW4K7-metric-section">
-                    <h2 class="QW4K7-section-title">Subscriber Count</h2>
-                    <div class="QW4K7-subscriber-grid">
-                        <div class="QW4K7-brand-column QW4K7-brand-airtel">
-                            <div class="QW4K7-brand-meta-wrapper">
+                <header class="QW4K7-component-header">
+                    <h1 class="QW4K7-main-title">Telecom Giants Comparison</h1>
+                </header>
+
+                <div class="QW4K7-scrollable-content">
+                    <div class="QW4K7-metric-section">
+                        <h2 class="QW4K7-section-title">Subscriber Count</h2>
+                        <div class="QW4K7-subscriber-grid">
+                            <div class="QW4K7-brand-column QW4K7-brand-airtel">
                                 <span class="QW4K7-brand-name">Airtel</span>
-                            </div>
-                            <div class="QW4K7-sub-value-wrapper">
-                                <div
-                                    class="QW4K7-val-past"
-                                    id="QW4K7-airtel-past"
-                                >
-                                    64 Million
+                                <div class="QW4K7-sub-value-wrapper">
+                                    <div
+                                        class="QW4K7-val-group-past"
+                                        id="QW4K7-airtel-past"
+                                    >
+                                        <span class="QW4K7-val-year">2008</span>
+                                        <div class="QW4K7-val-text">
+                                            64 Million
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="QW4K7-val-group-current"
+                                        id="QW4K7-airtel-current"
+                                    >
+                                        <span class="QW4K7-val-year">2026</span>
+                                        <div class="QW4K7-val-text">
+                                            650 Million
+                                        </div>
+                                    </div>
                                 </div>
-                                <div
-                                    class="QW4K7-val-current"
-                                    id="QW4K7-airtel-current"
-                                >
-                                    650+ Million
-                                </div>
                             </div>
-                        </div>
 
-                        <div class="QW4K7-brand-column QW4K7-brand-mtn">
-                            <div class="QW4K7-brand-meta-wrapper">
+                            <div class="QW4K7-brand-column QW4K7-brand-mtn">
                                 <span class="QW4K7-brand-name">MTN</span>
-                            </div>
-                            <div class="QW4K7-sub-value-wrapper">
-                                <div class="QW4K7-val-past" id="QW4K7-mtn-past">
-                                    24 Million
+                                <div class="QW4K7-sub-value-wrapper">
+                                    <div
+                                        class="QW4K7-val-group-past"
+                                        id="QW4K7-mtn-past"
+                                    >
+                                        <span class="QW4K7-val-year">2007</span>
+                                        <div class="QW4K7-val-text">
+                                            24 Million
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="QW4K7-val-group-current"
+                                        id="QW4K7-mtn-current"
+                                    >
+                                        <span class="QW4K7-val-year">2025</span>
+                                        <div class="QW4K7-val-text">
+                                            350+ Million
+                                        </div>
+                                    </div>
                                 </div>
-                                <div
-                                    class="QW4K7-val-current"
-                                    id="QW4K7-mtn-current"
-                                >
-                                    300+ Million
-                                </div>
                             </div>
-                        </div>
 
-                        <div class="QW4K7-brand-column QW4K7-brand-zain">
-                            <div class="QW4K7-brand-meta-wrapper">
+                            <div class="QW4K7-brand-column QW4K7-brand-zain">
                                 <span class="QW4K7-brand-name"
-                                    >Zain Africa / Airtel Africa</span
+                                    >Zain Africa</span
                                 >
-                            </div>
-                            <div class="QW4K7-sub-value-wrapper">
-                                <div
-                                    class="QW4K7-val-past"
-                                    id="QW4K7-zain-past"
-                                >
-                                    42 Million
-                                </div>
-                                <div
-                                    class="QW4K7-val-current"
-                                    id="QW4K7-zain-current"
-                                >
-                                    179 Million
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="QW4K7-timeline-indicator">
-                            <div class="QW4K7-timeline-header-spacer"></div>
-                            <div class="QW4K7-timeline-values-wrapper">
-                                <div
-                                    class="QW4K7-year-past"
-                                    id="QW4K7-year-past"
-                                >
-                                    Then(2008)
-                                </div>
-                                <div
-                                    class="QW4K7-year-current"
-                                    id="QW4K7-year-current"
-                                >
-                                    Now(2025)
+                                <div class="QW4K7-sub-value-wrapper">
+                                    <div
+                                        class="QW4K7-val-group-past"
+                                        id="QW4K7-zain-past"
+                                    >
+                                        <span class="QW4K7-val-year">2009</span>
+                                        <div class="QW4K7-val-text">
+                                            46 Million
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="QW4K7-val-group-current"
+                                        id="QW4K7-zain-current"
+                                    >
+                                        <span class="QW4K7-val-year">2025</span>
+                                        <div class="QW4K7-val-text">
+                                            350+ Million
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="QW4K7-chart-section">
-                    <h2 class="QW4K7-section-title" style="margin-bottom: 0">
-                        Market Cap
-                    </h2>
-                    <div class="QW4K7-chart-wrapper">
-                        <div id="QW4K7-marketCapChart"></div>
-                        <div id="QW4K7-na-box">NA</div>
+                    <hr class="QW4K7-section-divider" />
+
+                    <div class="QW4K7-chart-section">
+                        <div class="QW4K7-chart-header">
+                            <h2
+                                class="QW4K7-section-title"
+                                style="margin-bottom: 0"
+                            >
+                                Market Cap
+                            </h2>
+
+                            <div class="QW4K7-chart-legend">
+                                <div class="QW4K7-legend-item">
+                                    <span
+                                        class="QW4K7-legend-dot QW4K7-bg-airtel"
+                                    ></span>
+                                    <span class="QW4K7-legend-label"
+                                        >Airtel</span
+                                    >
+                                </div>
+                                <div class="QW4K7-legend-item">
+                                    <span
+                                        class="QW4K7-legend-dot QW4K7-bg-mtn"
+                                    ></span>
+                                    <span class="QW4K7-legend-label">MTN</span>
+                                </div>
+                                <div class="QW4K7-legend-item">
+                                    <span
+                                        class="QW4K7-legend-dot QW4K7-bg-zain"
+                                    ></span>
+                                    <span class="QW4K7-legend-label"
+                                        >Zain Africa</span
+                                    >
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="QW4K7-chart-wrapper">
+                            <div id="QW4K7-marketCapChart"></div>
+                            <div id="QW4K7-na-box">NA</div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="QW4K7-scroll-hint">↓ Scroll to update dataset</div>
+                    <footer class="QW4K7-component-footer">
+                        Airtel Africa was not listed in 2008 and hence, market
+                        capitalization is Nil in the graph
+                    </footer>
+                </div>
             </div>
         </section>
 
@@ -392,9 +444,9 @@
                     >
                         Airtel Africa Operating Footprint
                     </h2>
-                    <p style="margin: 5px 0 0 0; color: #555; font-size: 14px">
+                    <p style="margin: 5px 0 0 0; color: #555; font-size: 18px">
                         Map of Airtel's 14 Operating Countries in Africa with
-                        it's respective Market Rankings
+                        it's market ranking in that country.
                     </p>
                 </div>
 
@@ -413,7 +465,7 @@
                             <div
                                 class="QW4K-legend-square QW4K-coral-pink"
                             ></div>
-                            <span>2nd Market Rank </span>
+                            <span>2nd Market Rank</span>
                         </div>
                         <div class="QW4K-legend-item">
                             <div class="QW4K-legend-square QW4K-inactive"></div>
@@ -506,8 +558,8 @@
 
         <!--v9.2 DONT USE THIS - Replace with 9.2 below-->
         <!--<section id="QW4K5-telecom-chart-section">
-            <div id="QW4K5-chart-container"></div>
-        </section>-->
+        <div id="QW4K5-chart-container"></div>
+    </section>-->
 
         <div class="QW4K-spacer"></div>
 
@@ -695,380 +747,202 @@
         <div class="QW4K-spacer"></div>
 
         <!--v12.2-->
-        <section id="QW4K-timeline-module" class="QW4K-module-container">
-            <div class="QW4K-layout-wrapper">
-                <div class="QW4K-canvas-workspace">
-                    <div id="QW4K-canvas" class="QW4K-canvas-container">
-                        <div data-QW4K-id="bsnl" class="QW4K-operator-node">
-                            <img src="imgs/logo/bsnl.png" alt="BSNL" />
-                        </div>
-
-                        <div data-QW4K-id="airtel" class="QW4K-operator-node">
-                            <img src="imgs/logo/airtel.png" alt="Airtel" />
-                        </div>
-
-                        <div data-QW4K-id="idea" class="QW4K-operator-node">
-                            <img src="imgs/logo/idea.png" alt="Idea" />
-                        </div>
-
-                        <div data-QW4K-id="hutch" class="QW4K-operator-node">
-                            <img src="imgs/logo/hutch.png" alt="Hutch" />
-                        </div>
-
-                        <div data-QW4K-id="tata" class="QW4K-operator-node">
-                            <img src="imgs/logo/tata.png" alt="Tata Indicom" />
-                        </div>
-
-                        <div data-QW4K-id="spice" class="QW4K-operator-node">
-                            <img src="imgs/logo/spice.png" alt="Spice" />
-                        </div>
-
-                        <div data-QW4K-id="vodafone" class="QW4K-operator-node">
-                            <img src="imgs/logo/vodafone.png" alt="Vodafone" />
-                        </div>
-
-                        <div data-QW4K-id="telenor" class="QW4K-operator-node">
-                            <img src="imgs/logo/telenor.png" alt="Telenor" />
-                        </div>
-
-                        <div data-QW4K-id="mts" class="QW4K-operator-node">
-                            <img src="imgs/logo/mts.png" alt="MTS" />
-                        </div>
-
-                        <div data-QW4K-id="videocon" class="QW4K-operator-node">
-                            <img src="imgs/logo/videocon.png" alt="Videocon" />
-                        </div>
-
-                        <div data-QW4K-id="stel" class="QW4K-operator-node">
-                            <img src="imgs/logo/stel.png" alt="S Tel" />
-                        </div>
-
-                        <div data-QW4K-id="etisalat" class="QW4K-operator-node">
-                            <img src="imgs/logo/etisalat.png" alt="Etisalat" />
-                        </div>
-
-                        <div data-QW4K-id="loop" class="QW4K-operator-node">
-                            <img src="imgs/logo/loop.png" alt="Loop Mobile" />
-                        </div>
-
-                        <div data-QW4K-id="jio" class="QW4K-operator-node">
-                            <img src="imgs/logo/jio.png" alt="Jio" />
-                        </div>
-
-                        <div data-QW4K-id="vi" class="QW4K-operator-node">
-                            <img src="imgs/logo/vi.png" alt="Vi" />
-                        </div>
-
-                        <div
-                            data-QW4K-id="jt_mobile"
-                            class="QW4K-operator-node"
+        <!-- Wrapper ensures the page gets enough scrolling track height on web -->
+        <div class="QW4K-timeline-section-wrapper">
+            <section id="QW4K-timeline-module" class="QW4K-module-container">
+                <div class="QW4K-layout-wrapper">
+                    <!-- LEFT SIDE: Fixed Vertical Date Sidebar -->
+                    <div class="QW4K10-global-header">
+                        <h2 class="QW4K10-main-title">
+                            Evolution of the telecom industry
+                        </h2>
+                        <p class="QW4K10-subtitle">
+                            Many of the players went bankrupt or got absorbed.
+                        </p>
+                    </div>
+                    <div class="QW4K-text-panel">
+                        <section
+                            id="QW4K-trigger1"
+                            class="QW4K-timeline-section"
                         >
-                            <span>JT Mobile</span>
-                        </div>
-                        <div
-                            data-QW4K-id="modi_telstra"
-                            class="QW4K-operator-node"
+                            <div class="QW4K-content-card">
+                                <span class="QW4K-time-stamp">1995 - 2002</span>
+                            </div>
+                        </section>
+
+                        <section
+                            id="QW4K-trigger2"
+                            class="QW4K-timeline-section"
                         >
-                            <span>Modi Telstra</span>
-                        </div>
-                        <div data-QW4K-id="rpg" class="QW4K-operator-node">
-                            <span>RPG</span>
-                        </div>
-                        <div data-QW4K-id="bpl" class="QW4K-operator-node">
-                            <span>BPL</span>
-                        </div>
-                        <div data-QW4K-id="fascel" class="QW4K-operator-node">
-                            <span>Fascel</span>
-                        </div>
-                        <div data-QW4K-id="koshika" class="QW4K-operator-node">
-                            <span>Koshika</span>
-                        </div>
-                        <div data-QW4K-id="sterling" class="QW4K-operator-node">
-                            <span>Sterling</span>
-                        </div>
-                        <div
-                            data-QW4K-id="usha_martin"
-                            class="QW4K-operator-node"
+                            <div class="QW4K-content-card">
+                                <span class="QW4K-time-stamp">2002 - 2010</span>
+                            </div>
+                        </section>
+
+                        <section
+                            id="QW4K-trigger3"
+                            class="QW4K-timeline-section"
                         >
-                            <span>Usha Martin</span>
+                            <div class="QW4K-content-card">
+                                <span class="QW4K-time-stamp">2010 - 2014</span>
+                            </div>
+                        </section>
+
+                        <section
+                            id="QW4K-trigger4"
+                            class="QW4K-timeline-section"
+                        >
+                            <div class="QW4K-content-card">
+                                <span class="QW4K-time-stamp">2016 - 2020</span>
+                            </div>
+                        </section>
+
+                        <section
+                            id="QW4K-trigger5"
+                            class="QW4K-timeline-section"
+                        >
+                            <div class="QW4K-content-card">
+                                <span class="QW4K-time-stamp">2026</span>
+                            </div>
+                        </section>
+                        <!-- Summary Paragraph Target Container -->
+                        <div
+                            id="QW4K-summary-text"
+                            class="QW4K-summary-paragraph"
+                        ></div>
+                    </div>
+
+                    <!-- RIGHT SIDE: Logo Workspace Canvas -->
+                    <div class="QW4K-canvas-workspace">
+                        <div id="QW4K-canvas" class="QW4K-canvas-container">
+                            <div data-QW4K-id="bsnl" class="QW4K-operator-node">
+                                <img src="imgs/logo/bsnl.png" alt="BSNL" />
+                            </div>
+                            <div
+                                data-QW4K-id="airtel"
+                                class="QW4K-operator-node"
+                            >
+                                <img src="imgs/logo/airtel.png" alt="Airtel" />
+                            </div>
+                            <div data-QW4K-id="idea" class="QW4K-operator-node">
+                                <img src="imgs/logo/idea.png" alt="Idea" />
+                            </div>
+                            <div
+                                data-QW4K-id="hutch"
+                                class="QW4K-operator-node"
+                            >
+                                <img src="imgs/logo/hutch.png" alt="Hutch" />
+                            </div>
+                            <div data-QW4K-id="tata" class="QW4K-operator-node">
+                                <img
+                                    src="imgs/logo/tata.png"
+                                    alt="Tata Indicom"
+                                />
+                            </div>
+                            <div
+                                data-QW4K-id="spice"
+                                class="QW4K-operator-node"
+                            >
+                                <img src="imgs/logo/spice.png" alt="Spice" />
+                            </div>
+                            <div
+                                data-QW4K-id="vodafone"
+                                class="QW4K-operator-node"
+                            >
+                                <img
+                                    src="imgs/logo/vodafone.png"
+                                    alt="Vodafone"
+                                />
+                            </div>
+                            <div
+                                data-QW4K-id="telenor"
+                                class="QW4K-operator-node"
+                            >
+                                <img
+                                    src="imgs/logo/telenor.png"
+                                    alt="Telenor"
+                                />
+                            </div>
+                            <div data-QW4K-id="mts" class="QW4K-operator-node">
+                                <img src="imgs/logo/mts.png" alt="MTS" />
+                            </div>
+                            <div
+                                data-QW4K-id="videocon"
+                                class="QW4K-operator-node"
+                            >
+                                <img
+                                    src="imgs/logo/videocon.png"
+                                    alt="Videocon"
+                                />
+                            </div>
+                            <div data-QW4K-id="stel" class="QW4K-operator-node">
+                                <img src="imgs/logo/stel.png" alt="S Tel" />
+                            </div>
+                            <div
+                                data-QW4K-id="etisalat"
+                                class="QW4K-operator-node"
+                            >
+                                <img
+                                    src="imgs/logo/etisalat.png"
+                                    alt="Etisalat"
+                                />
+                            </div>
+                            <div data-QW4K-id="jio" class="QW4K-operator-node">
+                                <img src="imgs/logo/jio.png" alt="Jio" />
+                            </div>
+                            <div data-QW4K-id="vi" class="QW4K-operator-node">
+                                <img src="imgs/logo/vi.png" alt="Vi" />
+                            </div>
+                            <div
+                                data-QW4K-id="jt_mobile"
+                                class="QW4K-operator-node"
+                            >
+                                <span>JT Mobile</span>
+                            </div>
+                            <div
+                                data-QW4K-id="modi_telstra"
+                                class="QW4K-operator-node"
+                            >
+                                <span>Modi Telstra</span>
+                            </div>
+                            <div data-QW4K-id="loop" class="QW4K-operator-node">
+                                <span>Loop Mobile</span>
+                            </div>
+                            <div data-QW4K-id="rpg" class="QW4K-operator-node">
+                                <span>RPG</span>
+                            </div>
+                            <div data-QW4K-id="bpl" class="QW4K-operator-node">
+                                <span>BPL</span>
+                            </div>
+                            <div
+                                data-QW4K-id="fascel"
+                                class="QW4K-operator-node"
+                            >
+                                <span>Fascel</span>
+                            </div>
+                            <div
+                                data-QW4K-id="koshika"
+                                class="QW4K-operator-node"
+                            >
+                                <span>Koshika</span>
+                            </div>
+                            <div
+                                data-QW4K-id="sterling"
+                                class="QW4K-operator-node"
+                            >
+                                <span>Sterling</span>
+                            </div>
+                            <div
+                                data-QW4K-id="usha_martin"
+                                class="QW4K-operator-node"
+                            >
+                                <span>Usha Martin</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="QW4K-text-panel">
-                    <div class="QW4K-mobile-spacer"></div>
-
-                    <section id="QW4K-trigger1" class="QW4K-timeline-section">
-                        <div class="QW4K-content-card">
-                            <div class="QW4K-section-indicator">
-                                <div class="QW4K-indicator-line"></div>
-                                <div class="QW4K-indicator-dot"></div>
-                            </div>
-
-                            <div class="QW4K-card-inner">
-                                <span class="QW4K-time-stamp">1995 - 2002</span>
-                                <h2 class="QW4K-section-title">
-                                    The Early Dropouts
-                                </h2>
-                                <div class="QW4K-card-list">
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            JT Mobile
-                                        </h4>
-                                        <p class="QW4K-company-desc">
-                                            Andhra/Karnataka licences. Collapsed
-                                            late 1990s.
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            Modi Telstra
-                                        </h4>
-                                        <p class="QW4K-company-desc">
-                                            Kolkata 1st-round winner. Telstra
-                                            exited. Gone by the late 1990s.
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            RPG Cellular
-                                        </h4>
-                                        <p class="QW4K-company-desc">
-                                            absorbed.
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            Sterling Cellular (Sivasankaran)
-                                        </h4>
-                                        <p class="QW4K-company-desc">
-                                            Andhra/Karnataka licences. Collapsed
-                                            late 1990s.
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            Fascel, Koshika, Usha Martin Telecom
-                                        </h4>
-                                        <p class="QW4K-company-desc">
-                                            all gone.
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            BPL Mobile (Rajeev Chandrasekhar)
-                                        </h4>
-                                        <p class="QW4K-company-desc">
-                                            sold to Hutchison Essar.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section id="QW4K-trigger2" class="QW4K-timeline-section">
-                        <div class="QW4K-content-card">
-                            <div class="QW4K-section-indicator">
-                                <div class="QW4K-indicator-line"></div>
-                                <div class="QW4K-indicator-dot"></div>
-                            </div>
-                            <div class="QW4K-card-inner">
-                                <span class="QW4K-time-stamp">2002 - 2010</span>
-                                <h2 class="QW4K-section-title">Absorbed</h2>
-                                <div class="QW4K-card-list">
-                                    <div>
-                                        <h4 class="QW4K-company-name">Hutch</h4>
-                                        <p class="QW4K-company-desc">
-                                            Sold to Vodafone 2007. Survivor in
-                                            mutated form
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            Spice Telecom (Modi)
-                                        </h4>
-                                        <p class="QW4K-company-desc">
-                                            Absorbed
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            Tata Indicom
-                                        </h4>
-                                        <p class="QW4K-company-desc">Folded</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section id="QW4K-trigger3" class="QW4K-timeline-section">
-                        <div class="QW4K-content-card">
-                            <div class="QW4K-section-indicator">
-                                <div class="QW4K-indicator-line"></div>
-                                <div class="QW4K-indicator-dot"></div>
-                            </div>
-                            <div class="QW4K-card-inner">
-                                <span class="QW4K-time-stamp">2010 - 2014</span>
-                                <h2 class="QW4K-section-title">The Cull</h2>
-                                <div class="QW4K-card-list">
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            Etisalat Swan
-                                        </h4>
-                                        <p class="QW4K-company-desc">
-                                            Etisalat exited India
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            Unitech Wireless / Uninor (Sanjay
-                                            Chandra → Telenor)
-                                        </h4>
-                                        <p class="QW4K-company-desc">
-                                            Telenor exits 2017.
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            Loop Telecom
-                                        </h4>
-                                        <p class="QW4K-company-desc">Gone</p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">S Tel</h4>
-                                        <p class="QW4K-company-desc">Gone</p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            Videocon Telecom
-                                        </h4>
-                                        <p class="QW4K-company-desc">Gone</p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            MTS / Sistema Shyam
-                                        </h4>
-                                        <p class="QW4K-company-desc">
-                                            merged into RCom 2017, then RCom
-                                            died anyway.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section id="QW4K-trigger4" class="QW4K-timeline-section">
-                        <div class="QW4K-content-card">
-                            <div class="QW4K-section-indicator">
-                                <div class="QW4K-indicator-line"></div>
-                                <div class="QW4K-indicator-dot"></div>
-                            </div>
-                            <div class="QW4K-card-inner">
-                                <span class="QW4K-time-stamp">2016 - 2020</span>
-                                <h2 class="QW4K-section-title">The Jio Era</h2>
-                                <div class="QW4K-card-list">
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            Aircel (Sivasankaran)
-                                        </h4>
-                                        <p class="QW4K-company-desc">
-                                            insolvency March 2018. Founder flees
-                                            to Seychelles, faces investigations.
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            Reliance Communications (Anil
-                                            Ambani)
-                                        </h4>
-                                        <p class="QW4K-company-desc">
-                                            insolvency February 2019.
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            Tata Teleservices consumer business
-                                        </h4>
-                                        <p class="QW4K-company-desc">
-                                            given to Airtel for token
-                                            consideration.
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            Telenor
-                                        </h4>
-                                        <p class="QW4K-company-desc">
-                                            exits 2017.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section id="QW4K-trigger5" class="QW4K-timeline-section">
-                        <div class="QW4K-content-card">
-                            <div class="QW4K-section-indicator">
-                                <div class="QW4K-indicator-line"></div>
-                                <div class="QW4K-indicator-dot"></div>
-                            </div>
-                            <div class="QW4K-card-inner">
-                                <span class="QW4K-time-stamp">2026</span>
-                                <h2 class="QW4K-section-title">
-                                    Surviving Players
-                                </h2>
-                                <div class="QW4K-summary-text">
-                                    <div>
-                                        <h4 class="QW4K-company-name"></h4>
-                                        <p class="QW4K-company-desc">
-                                            Only a small handful of
-                                            consolidated, major national
-                                            operators control the modern market
-                                            workspace landscape namely
-                                        </p>
-                                    </div>
-                                    <br />
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            Airtel
-                                        </h4>
-                                        <p class="QW4K-company-desc">
-                                            Since 1995.
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">Jio</h4>
-                                        <p class="QW4K-company-desc">
-                                            Since 2006.
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">
-                                            Vi (life support)
-                                        </h4>
-                                        <p class="QW4K-company-desc">
-                                            Since 2007.
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <h4 class="QW4K-company-name">BSNL</h4>
-                                        <p class="QW4K-company-desc">
-                                            Since 2000.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <div class="QW4K-bottom-spacer"></div>
-                </div>
-            </div>
-        </section>
+            </section>
+        </div>
 
         <div class="QW4K-spacer"></div>
 

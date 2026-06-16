@@ -87,54 +87,6 @@ document.addEventListener("DOMContentLoaded", function () {
         emphasis: {
           disabled: !mobileMode,
         },
-        markArea: {
-          silent: true,
-          itemStyle: {
-            color: "rgba(198, 192, 192, 0.25)",
-          },
-          data: [
-            [
-              {
-                name: "ARPUs diluted due to\naddition of more\nJioPhone subs",
-                xAxis: "FY18",
-                yAxis: 1300,
-                label: {
-                  color: "#1D1B1C",
-                  fontSize: 12,
-                  fontFamily: "Archivo, Sans-serif",
-                  align: "left",
-                  verticalAlign: "top",
-                  position: ["5%", "-60px"],
-                  lineHeight: 16,
-                },
-              },
-              {
-                xAxis: "FY20",
-                yAxis: 0,
-              },
-            ],
-            [
-              {
-                name: "Benefit of tariff hike\n& FTTH* subs bring\nmuch higher\nARPUs",
-                xAxis: "FY21",
-                yAxis: 800,
-                label: {
-                  color: "#1D1B1C",
-                  fontSize: 12,
-                  fontFamily: "Archivo, Sans-serif",
-                  align: "left",
-                  verticalAlign: "top",
-                  position: ["5%", "-85px"],
-                  lineHeight: 16,
-                },
-              },
-              {
-                xAxis: "FY23",
-                yAxis: 0,
-              },
-            ],
-          ],
-        },
       },
     ];
   }

@@ -1,310 +1,276 @@
-/* Styling Architecture & Isolated Variable Tokens */
 :root {
-    --QW4K-bg-color: transparent;
-    --QW4K-text-main: #292524;
-    --QW4K-text-muted: #b1b1b1;
-    --QW4K-accent-red: #991b1b;
-    --QW4K-node-white: #fdfaf2;
-    --QW4K-node-grey: #dcd5c5;
-    --QW4K-font-sans:
-        "Archivo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        Roboto, Helvetica, Arial, sans-serif;
-    --QW4K-font-serif:
-        "Reckless" Georgia, Cambria, "Times New Roman", Times, serif;
+  --QW4K-bg-color: transparent;
+  --QW4K-text-main: #991b1b;
+  --QW4K-text-muted: #bcbbba;
+  --QW4K-font-sans: "Archivo", system-ui, -apple-system, sans-serif;
 }
 
-/* Enforce isolation containment over the root section element wrapper */
+.QW4K-timeline-section-wrapper {
+  position: relative;
+  width: 100%;
+}
+
 #QW4K-timeline-module.QW4K-module-container {
-    position: relative;
-    width: 100%;
-    overflow: visible; /* FIX: overflow:hidden on any ancestor breaks position:sticky */
-    background-color: var(--QW4K-bg-color);
+  position: relative;
+  width: 100%;
+  overflow: visible;
 }
 
 .QW4K-module-container * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* Local Layout Context Container */
 .QW4K-layout-wrapper {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    color: var(--QW4K-text-main);
-    font-family: var(--QW4K-font-sans);
-    -webkit-font-smoothing: antialiased;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column-reverse;
+  /*font-family: var(--QW4K-font-sans);*/
+  overflow: hidden;
 }
 
-.QW4K-layout-wrapper ::selection {
-    background-color: #d6d3d1;
-}
-.QW4K-timeline-section {
-    min-height: 70vh;
-}
-
-/* ==========================================
-   MOBILE & TABLET STICKY BASE STYLES
-   ========================================== */
-.QW4K-canvas-workspace {
-    width: 100%;
-    height: 50vh; /* Rigid viewport height box for mobile view tracking */
-    position: sticky; /* Pinning activated for mobile scroll frames */
-    top: 45vh; /* Locks to top of device screen while text wrapper scrolls */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    padding: 1rem;
-    z-index: 5;
-    pointer-events: none; /* Allows touch sweeps to pass down to scrolling container */
-}
-
-.QW4K-canvas-container {
-    position: relative;
-    width: 100%;
-    max-width: 440px;
-    aspect-ratio: 1 / 1;
-    transform: scale(0.85);
-}
-
-/* Operator Circle Items */
-.QW4K-operator-node {
-    position: absolute;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem;
-    opacity: 0;
-    transform: scale(0.5);
-    transition: background-color 0.3s ease;
-}
-
-.QW4K-operator-node[data-QW4K-id="jio"] {
-    width: 96px;
-    height: 96px;
-}
-
-.QW4K-operator-node img {
-    width: 63%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 50%;
-}
-
-.QW4K-operator-node span {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--QW4K-text-muted);
-    text-align: center;
-    line-height: 1.2;
-}
-
-.QW4K-operator-node[data-QW4K-id="bpl"] span {
-    font-size: 13px;
-    font-weight: 900;
-}
-
-/* Left Panel Scrolling Content Areas */
 .QW4K-text-panel {
-    width: 100%;
-    padding: 1rem 1rem 0 1rem;
-    position: relative;
-    z-index: 10;
-    pointer-events: auto; /* Restores gesture mechanics on text blocks */
-}
-
-.QW4K-mobile-spacer {
-    height: 10vh; /* Creates initial space under mobile canvas header */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.5rem;
+  z-index: 10;
 }
 
 .QW4K-timeline-section {
-    min-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 4rem 0;
-    position: relative;
-    pointer-events: auto;
+  position: relative;
+  width: 100%;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .QW4K-content-card {
-    background-color: rgba(242, 235, 217, 0.95);
-    padding: 1.5rem;
-    border-radius: 1rem;
-    box-shadow:
-        0 10px 25px -5px rgba(0, 0, 0, 0.1),
-        0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(120, 113, 108, 0.2);
-    position: relative;
-}
-
-/* Connectors styling rules */
-.QW4K-section-indicator {
-    position: absolute;
-    left: -35%;
-    top: 8%;
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    width: 3rem;
-}
-
-.QW4K-indicator-line {
-    height: 2px;
-    background-color: var(--QW4K-accent-red);
-    width: 100%;
-}
-
-.QW4K-indicator-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: var(--QW4K-accent-red);
-    flex-shrink: 0;
-}
-
-.QW4K-card-inner {
-    padding-left: 1.5rem;
+  padding: 0;
+  text-align: center;
 }
 
 .QW4K-time-stamp {
-    display: block;
-    font-size: 1.2rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    color: var(--QW4K-text-muted);
-    margin-bottom: 0.25rem;
+  font-weight: 800;
+  color: var(--QW4K-text-muted);
+  transition:
+    color 0.4s ease,
+    transform 0.4s ease;
+  display: inline-block;
+  transform-origin: center center;
 }
 
-.QW4K-section-title {
-    font-family: var(--QW4K-font-serif);
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--QW4K-accent-red);
-    margin-bottom: 1.5rem;
+.QW4K-timeline-section.is-active-mobile .QW4K-time-stamp {
+  color: var(--QW4K-text-main);
+  transform: scale(1.08);
 }
 
-.QW4K-card-list {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    max-width: 28rem;
-    color: #44403c;
-}
-
-.QW4K-company-name {
-    font-weight: 700;
-    color: #1c1917;
-}
-
-.QW4K-company-desc {
-    font-size: 0.875rem;
-    line-height: 1.5;
-    margin-top: 0.125rem;
-}
-
-.QW4K-summary-text {
-    max-width: 28rem;
-    font-size: 0.875rem;
-    line-height: 1.6;
-    color: #44403c;
-}
-
-.QW4K-bottom-spacer {
-    height: 40vh;
+/* Styled Summary Text Block - Kept in flow layout to stop structural layout jumping */
+.QW4K-summary-paragraph {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #44403c;
+  font-weight: 500;
+  margin-top: 1rem;
+  opacity: 0; /* Hidden initially by default */
+  display: block; /* Kept active in DOM tree to hold layout space */
+  visibility: visible;
 }
 
 /* ==========================================
-   DESKTOP RESPONSIVE LAYOUT CONTEXTS
+   DESKTOP CORE HOOKS (>= 1024px Layout)
    ========================================== */
-@media (min-width: 768px) {
-    .QW4K-layout-wrapper {
-        flex-direction: row;
-        align-items: flex-start; /* FIX: Prevents stretching so sticky bounding track can calculate correctly */
-        min-height: 100vh;
-        height: 100%; /* FIX: Gives the sticky element a defined scroll track to travel within */
-        width: 100%;
-        position: relative;
-    }
+@media (min-width: 1024px) {
+  .QW4K-timeline-section-wrapper {
+    height: 1400vh;
+  }
 
-    .QW4K-canvas-workspace {
-        width: 50%;
-        height: 100vh; /* Canvas locks to full size of wide viewport */
-        position: sticky; /* Native fixed tracking window enabled */
-        top: 0;
-        order: 2; /* Shifts visual grid space onto right panel */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        padding: 2rem;
-        z-index: 10;
-        pointer-events: auto;
-    }
+  .QW4K-layout-wrapper {
+    flex-direction: row;
+    padding: 0 4rem;
+  }
 
-    .QW4K-canvas-container {
-        max-width: 500px;
-        width: 100%;
-        aspect-ratio: 1 / 1;
-        transform: scale(1);
-        position: relative;
-    }
+  .QW4K-text-panel {
+    width: 35%;
+    height: 100%;
+    gap: 2rem;
+    align-items: flex-start;
+  }
 
-    .QW4K-operator-node {
-        width: 96px;
-        height: 96px;
-    }
+  .QW4K-timeline-section {
+    justify-content: flex-start;
+  }
 
-    .QW4K-operator-node[data-QW4K-id="jio"] {
-        width: 112px;
-        height: 112px;
-        padding: 0.75rem;
-    }
+  .QW4K-time-stamp {
+    font-size: 2.5rem;
+    transform-origin: left center;
+  }
 
-    .QW4K-text-panel {
-        width: 50%;
-        padding: 3rem 4rem 0 6rem;
-        order: 1; /* Forces typography column onto left side */
-        pointer-events: auto;
-    }
+  .QW4K-summary-paragraph {
+    max-width: 320px;
+    font-size: 1.05rem;
+    text-align: left;
+  }
 
-    .QW4K-mobile-spacer {
-        display: none;
-    }
+  .QW4K-canvas-workspace {
+    width: 65%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 4rem;
+  }
 
-    .QW4K-timeline-section {
-        min-height: 100vh;
-        padding: 10vh 0;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
+  .QW4K-canvas-container {
+    width: 100%;
+    max-width: 380px;
+    aspect-ratio: 1 / 1;
+    position: relative;
+  }
 
-    .QW4K-content-card {
-        background-color: transparent;
-        padding: 0;
-        border-radius: 0;
-        box-shadow: none;
-        border: none;
-    }
+  .QW4K-operator-node {
+    width: 100px;
+    height: 100px;
+  }
+}
 
-    .QW4K-section-indicator {
-        left: -6rem;
-        width: 4rem;
-    }
+/* ==========================================
+   MOBILE CONSTRAINTS OVERRIDES (< 1024px)
+   ========================================== */
+@media (max-width: 1023px) {
+  .QW4K-layout-wrapper {
+    padding: 0 1.5rem;
+  }
 
-    .QW4K-card-inner {
-        padding-left: 0;
-    }
+  .QW4K-text-panel {
+    width: 100%;
+    height: 45vh;
+    justify-content: flex-start;
+    padding-top: 6rem;
+    align-items: center;
+    gap: 0.5rem;
+  }
 
-    .QW4K-section-title {
-        font-size: 2.25rem;
-    }
+  .QW4K-time-stamp {
+    font-size: 1.3rem;
+    transform-origin: center center;
+  }
+
+  .QW4K-summary-paragraph {
+    font-size: 0.85rem;
+    text-align: center;
+    max-width: 90%;
+    margin-top: 0.4rem;
+  }
+
+  .QW4K-canvas-workspace {
+    width: 80%;
+    height: 55vh;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 1rem;
+  }
+
+  /* MODIFIED: Added padding to box-in the right edge so absolute circles can't hug the screen margin */
+  .QW4K-canvas-container {
+    width: 90%;
+    max-width: 300px;
+    aspect-ratio: 1 / 1;
+    position: relative;
+    /*padding-right: 1.25rem;
+    padding-left: -3.25rem;*/
+  }
+
+  .QW4K-operator-node {
+    width: 72px;
+    height: 72px;
+    padding: 0.45rem;
+  }
+
+  .QW4K-operator-node span {
+    font-size: 10px !important;
+  }
+}
+
+.QW4K-operator-node {
+  position: absolute;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.QW4K-operator-node img {
+  width: 85%;
+  height: 85%;
+  object-fit: contain;
+}
+
+.QW4K-operator-node span {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1c1917;
+  text-align: center;
+  line-height: 1.1;
+}
+/* ==========================================
+   ISOLATED TIMELINE HEADER BLOCK
+   ========================================== */
+.QW4K10-global-header {
+  position: absolute; /* Lifts the element out of the layout flow completely */
+  top: 40px;
+  left: 60px;
+  z-index: 9999; /* Forces it to hover cleanly above everything else */
+  pointer-events: none; /* Mouse scrolls/clicks pass straight through it safely */
+}
+
+.QW4K10-main-title {
+  font-size: 32px; /* Exact size requested */
+  font-weight: 800;
+  color: #1c1917; /* Deep elegant dark charcoal */
+  line-height: 1.2;
+  margin-bottom: 6px;
+
+  font-family: "Reckless", serif;
+}
+
+.QW4K10-subtitle {
+  font-family: "Archivo", sans-serif;
+  font-size: 18px; /* Exact size requested */
+  font-weight: 500;
+  color: #9ca3af; /* Exact light grey color requested */
+  line-height: 1.4;
+}
+
+/* ==========================================
+   MOBILE LAYOUT ADJUSTMENT (< 1024px)
+   ========================================== */
+@media (max-width: 1023px) {
+  .QW4K10-global-header {
+    top: 24px;
+    left: 0;
+    width: 100%;
+    padding: 0 24px;
+    text-align: center;
+  }
+
+  .QW4K10-main-title {
+    font-size: 32px; /* Responsively scaled down just for smaller phone viewports */
+
+    font-family: "Reckless", serif;
+  }
+
+  .QW4K10-subtitle {
+    font-family: "Archivo", sans-serif;
+    font-size: 18px;
+  }
 }

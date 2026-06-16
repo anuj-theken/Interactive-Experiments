@@ -1,56 +1,99 @@
 body {
-    background-color: #f5efe7;
-    font-family: "Archivo", sans-serif;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  background-color: #f5efe7;
+  font-family: "Archivo", sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 /* Empty spacer div before the chart section */
 .QW4K3-spacer {
-    height: 30vh;
-    width: 100%;
-    background-color: white;
+  height: 30vh;
+  width: 100%;
+  background-color: white;
 }
 
 /* Section wrapper layout */
 .QW4K3-chart-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px 5%;
-    background-color: #f5efe7;
-    width: 100%;
-    box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 5%;
+  background-color: transparent;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .QW4K3-chart-container {
-    width: 100%;
-    background-color: #f5efe7;
-    padding: 20px 0px;
+  width: 100%;
+  max-width: 1200px;
+  background-color: #f5efe7; /* Pure white card body */
+  padding: 40px 30px; /* Side and vertical padding */
+  border-radius: 16px; /* Rounded corners */
+  box-sizing: border-box;
+
+  /* Enhanced dual-layer shadow for depth */
+  box-shadow:
+    0 15px 35px rgba(29, 27, 28, 0.08),
+    0 5px 15px rgba(29, 27, 28, 0.04);
+
+  /* Optional: Smooth transition if you plan on adding a hover effect later */
+  transition: box-shadow 0.3s ease;
 }
 
 /* Set title header to Reckless font */
 .QW4K3-chart-title {
-    font-family: "Reckless", "Georgia", "Times New Roman", serif;
-    color: #1d1b1c;
-    font-size: 32px;
-    font-weight: 700;
-    margin: 0 0 5px 0;
-    text-align: center;
+  font-family: "Reckless", "Georgia", "Times New Roman", serif;
+  color: #1d1b1c;
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 5px 0;
+  text-align: center;
 }
 
 /* Subtitle stays cleanly in Archivo */
 .QW4K3-chart-subtitle {
-    font-family: "Archivo", sans-serif;
-    color: #938e8e;
-    font-size: 18px;
-    margin: 12px 0 30px 0;
-    text-align: center;
+  font-family: "Archivo", sans-serif;
+  color: #938e8e;
+  font-size: 18px;
+  margin: 12px 0 30px 0;
+  text-align: center;
 }
 
 /* Chart container dimensions with consistent prefix */
 #QW4K3-arpu-chart {
-    width: 100%;
-    height: 550px;
+  width: 100%;
+  height: 550px;
+}
+/* New Legend Layout Styles */
+.QW4K3-chart-legend {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin: 0px 0 -26px 0;
+}
+
+.QW4K3-legend-color {
+  width: 10px;
+  height: 10px;
+  /*border-radius: 3px;*/
+  /* Matches the brand red gradient used in your arpu2.js bar configurations */
+  background: linear-gradient(135deg, #d70a0d, #ae0e2f);
+}
+
+.QW4K3-legend-text {
+  font-family: "Archivo", sans-serif;
+  color: #999999;
+  font-size: 12px;
+  /*font-weight: 600;*/
+}
+
+/* Adjust subtitle margin to sit closer to the new legend */
+.QW4K3-chart-subtitle {
+  font-family: "Archivo", sans-serif;
+  color: #938e8e;
+  font-size: 18px;
+  margin: 12px 0 15px 0; /* Reduced from 30px to 15px */
+  text-align: center;
 }
