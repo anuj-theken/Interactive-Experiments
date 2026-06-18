@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
     title: {
       text: "Subscriber growth over the years",
       subtext:
-        "The growth in number of subscribers across all telecom operators. (in Millions)",
+        "The growth in number of subscribers across all telecom operators. (in millions)",
       left: "0%",
       top: "0%",
       textStyle: {

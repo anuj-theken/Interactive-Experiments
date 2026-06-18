@@ -93,7 +93,7 @@
 
   .QW4K-layout-wrapper {
     flex-direction: row;
-    padding: 0 4rem;
+    padding: 0 4rem 0 6rem;
   }
 
   .QW4K-text-panel {
@@ -228,7 +228,7 @@
 .QW4K10-global-header {
   position: absolute; /* Lifts the element out of the layout flow completely */
   top: 40px;
-  left: 40px;
+  /*left: 40px;*/
   z-index: 9999; /* Forces it to hover cleanly above everything else */
   pointer-events: none; /* Mouse scrolls/clicks pass straight through it safely */
 }
