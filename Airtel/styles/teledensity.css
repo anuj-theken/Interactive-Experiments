@@ -2,7 +2,7 @@
 .QW4K8-telecom-timeline-module {
   position: relative;
   width: 100%;
-  background-color: transparent;
+  background: linear-gradient(rgb(215, 10, 13) 0%, rgb(89, 11, 35) 40.865002%);
 }
 
 .QW4K8-dashboard-container {
@@ -26,10 +26,10 @@
 
 .QW4K8-main-title {
   font-family: "Reckless", "Times New Roman", serif;
-  font-size: 38px;
+  font-size: 32px;
   font-weight: 400;
   line-height: 1.2;
-  color: #000000;
+  color: #fbf1e7;
   margin: 0 0 12px 0;
   letter-spacing: -0.5px;
 }
@@ -37,7 +37,7 @@
 .QW4K8-subheader {
   font-size: 18px;
   line-height: 1.5;
-  color: #555555;
+  color: #edddcb;
   margin: 0 0 40px 0;
   font-weight: 400;
   max-width: 90%;
@@ -50,7 +50,7 @@
 .QW4K8-legend-title {
   font-size: 13px;
   font-weight: 600;
-  color: #000000;
+  color: #edddcb;
   margin-bottom: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -81,7 +81,7 @@
   justify-content: space-between;
   margin-top: 8px;
   font-size: 13px;
-  color: #000000;
+  color: #edddcb;
   font-weight: 400;
 }
 
@@ -93,14 +93,14 @@
 .QW4K8-year-timeline {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 4vh;
   margin-bottom: 30px;
 }
 
 .QW4K8-year-display {
   font-size: 32px;
   font-weight: 600;
-  color: #a4a4a4;
+  color: #edddcb;
   transition:
     color 0.4s ease,
     transform 0.4s ease,
@@ -111,14 +111,14 @@
 }
 
 .QW4K8-year-display.QW4K8-active {
-  color: #000000;
+  color: #edddcb;
   transform: translateY(0) scale(1.1);
   opacity: 1 !important;
 }
 
 .QW4K8-year-display.QW4K8-revealed {
   opacity: 0.35 !important;
-  color: #a4a4a4;
+  color: #ffc1c1;
   transform: translateY(0) scale(1);
 }
 
@@ -189,6 +189,9 @@
     box-sizing: border-box !important;
     overflow-x: hidden !important;
   }
+  .QW4K8-gradient-labels {
+    font-size: 16px;
+  }
 
   /* Force every child element to calculate padding safely inside its width */
   .QW4K8-dashboard-container *,
@@ -206,7 +209,7 @@
   /* 3. GRID SEQUENCING */
   .QW4K8-main-title {
     grid-row: 1 !important;
-    font-size: 34px !important;
+    font-size: 32px !important;
     line-height: 1.2 !important;
     margin-bottom: 12px !important;
     width: 100% !important;
@@ -216,7 +219,7 @@
     grid-row: 2 !important;
     width: 100% !important;
     max-width: 100% !important;
-    font-size: 15px !important;
+    font-size: 18px !important;
     margin-bottom: 20px !important;
   }
 
@@ -251,9 +254,9 @@
     font-size: 18px !important;
     font-weight: 600 !important;
     padding: 12px 16px !important;
-    background-color: #d5d8dc !important;
+    background-color: #f9ebcc !important;
     color: #4b5563 !important;
-    border: 1px solid #e5e7eb !important;
+    /* border: 1px solid #e5e7eb !important; */
     border-radius: 8px !important;
     opacity: 1 !important;
     transform: none !important;
@@ -300,6 +303,7 @@
     width: 95% !important;
     max-width: 100% !important;
     margin-top: 10px !important;
+    font-size: 16px;
   }
 
   .QW4K8-gradient-wrapper {

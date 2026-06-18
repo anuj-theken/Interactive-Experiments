@@ -73,7 +73,7 @@
 
 /* Styled Summary Text Block - Kept in flow layout to stop structural layout jumping */
 .QW4K-summary-paragraph {
-  font-size: 1rem;
+  font-size: 16px;
   line-height: 1.5;
   color: #44403c;
   font-weight: 500;
@@ -114,7 +114,7 @@
 
   .QW4K-summary-paragraph {
     max-width: 320px;
-    font-size: 1.05rem;
+    font-size: 16px;
     text-align: left;
   }
 
@@ -228,7 +228,7 @@
 .QW4K10-global-header {
   position: absolute; /* Lifts the element out of the layout flow completely */
   top: 40px;
-  left: 60px;
+  left: 40px;
   z-index: 9999; /* Forces it to hover cleanly above everything else */
   pointer-events: none; /* Mouse scrolls/clicks pass straight through it safely */
 }
@@ -272,5 +272,103 @@
   .QW4K10-subtitle {
     font-family: "Archivo", sans-serif;
     font-size: 18px;
+  }
+}
+
+/* ==========================================
+   TIMELINE LEGEND STYLES
+   ========================================== */
+.QW4K-timeline-legend {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 12px;
+}
+
+.QW4K-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.QW4K-legend-circle {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Background mappings from JS layouts */
+.QW4K-legend-survived {
+  background-color: #fdfaf2;
+  border: 1px solid #e2ddcf; /* Subtle border for visibility against light panels */
+}
+
+.QW4K-legend-closed {
+  background-color: #dcd5c5;
+}
+
+.QW4K-legend-text {
+  font-family: "Archivo", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #44403c;
+}
+
+/* Mobile Center Alignment Breakpoint */
+@media (max-width: 1023px) {
+  .QW4K-timeline-legend {
+    justify-content: center;
+    margin-top: 8px;
+    gap: 1rem;
+  }
+  .QW4K-legend-text {
+    font-size: 12px;
+  }
+}
+
+/* ==========================================
+   IPAD / TABLET SPECIFIC OVERRIDES (768px - 1024px)
+   ========================================== */
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* 1. Push the layout down slightly to accommodate the header/legend */
+  .QW4K-text-panel {
+    padding-top: 16rem !important;
+    gap: 1.5rem !important;
+  }
+
+  /* 2. Adjust the date/timestamp size and scaling */
+  .QW4K-time-stamp {
+    font-size: 26px !important;
+    line-height: 26px;
+  }
+
+  .QW4K-timeline-section.is-active-mobile .QW4K-time-stamp {
+    transform: scale(1.05) !important;
+  }
+
+  /* 3. Make the Canvas and Logo Circles Larger */
+  .QW4K-canvas-workspace {
+    height: 32vh !important;
+    align-items: center !important; /* Centers them better vertically on iPad screens */
+  }
+
+  .QW4K-canvas-container {
+    max-width: 360px !important; /* Expanded canvas area for larger circles to roam */
+  }
+
+  .QW4K-operator-node {
+    width: 90px !important; /* Increased from 72px mobile size */
+    height: 90px !important; /* Increased from 72px mobile size */
+    padding: 0.6rem !important;
+  }
+
+  /* Adjust text inside text-only nodes so it scales nicely with the bigger circles */
+  .QW4K-operator-node span {
+    font-size: 12px !important;
+  }
+  .QW4K-summary-paragraph {
+    font-size: 20px;
+    max-width: 60%;
   }
 }

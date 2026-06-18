@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function isMobile() {
-    return window.innerWidth <= 768;
+    return window.innerWidth <= 1023;
   }
 
   function getSeriesOption(hoveredIndex = null) {
@@ -104,6 +104,7 @@ document.addEventListener("DOMContentLoaded", function () {
       textStyle: {
         color: "#F5EFE7",
         fontFamily: "Archivo, Sans-serif",
+        fontSize: 18,
       },
       // Ensures the tooltip matches the comma formatting style
       formatter: function (params) {
@@ -133,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       axisLabel: {
         color: "#1D1B1C",
-        fontSize: 11,
+        fontSize: isMobile() ? 18 : 10,
         fontWeight: "600",
         fontFamily: "Archivo, Sans-serif",
         margin: 15,
@@ -144,11 +145,19 @@ document.addEventListener("DOMContentLoaded", function () {
           const parts = value.split(" ");
           const month = parts[0];
           const year = parts[1].slice(-2);
+          const mobileMode = isMobile();
 
-          if (month === "Mar") return "Q1\n{light|FY" + year + "}";
-          if (month === "Jun") return "Q2";
-          if (month === "Sep") return "Q3";
-          if (month === "Dec") return "Q4";
+          if (mobileMode) {
+            // On mobile, only display the FY label on March (the start of your data's FY cycle)
+            // returning an empty string for other quarters prevents overcrowding.
+            return month === "Mar" ? "FY" + year : "";
+          } else {
+            // Original Desktop Layout
+            if (month === "Mar") return "Q1\n{light|FY" + year + "}";
+            if (month === "Jun") return "Q2";
+            if (month === "Sep") return "Q3";
+            if (month === "Dec") return "Q4";
+          }
           return value;
         },
         rich: {
@@ -173,6 +182,7 @@ document.addEventListener("DOMContentLoaded", function () {
       axisLabel: {
         color: "#1D1B1C",
         fontFamily: "Archivo, Sans-serif",
+        fontSize: isMobile() ? 18 : 10,
         // Formats Y-axis labels with commas (e.g., ₹20,000)
         formatter: function (value) {
           return "₹" + formatNumber(value);
@@ -210,6 +220,17 @@ document.addEventListener("DOMContentLoaded", function () {
     myChart.setOption({
       tooltip: {
         show: mobileState,
+      },
+      xAxis: {
+        // Force the font size and formatter updates on resize
+        axisLabel: {
+          fontSize: mobileState ? 12 : 32,
+        },
+      },
+      yAxis: {
+        axisLabel: {
+          fontSize: mobileState ? 12 : 32,
+        },
       },
       series: getSeriesOption(mobileState ? null : lastHoveredIndex),
     });

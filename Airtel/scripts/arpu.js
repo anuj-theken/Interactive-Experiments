@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const yData = data.map((item) => item.arpu);
 
   function isMobile() {
-    return window.innerWidth <= 768;
+    return window.innerWidth <= 1023;
   }
 
   function getSeriesOption(hoveredIndex = null) {
@@ -103,6 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
       textStyle: {
         color: "#F5EFE7",
         fontFamily: "Archivo, Sans-serif",
+        fontSize: 18,
       },
       formatter: "{b}: <b>{c}</b>",
     },
@@ -126,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       axisLabel: {
         color: "#1D1B1C",
-        fontSize: 12,
+        fontSize: isMobile() ? 18 : 10,
         fontWeight: "600",
         fontFamily: "Archivo, Sans-serif",
         margin: 15,
@@ -145,6 +146,7 @@ document.addEventListener("DOMContentLoaded", function () {
         color: "#1D1B1C",
         fontFamily: "Archivo, Sans-serif",
         formatter: "₹{value}",
+        fontSize: isMobile() ? 18 : 10,
       },
     },
     series: getSeriesOption(isMobile() ? null : data.length - 1),

@@ -128,7 +128,7 @@ function transitionToState(stateKey) {
   if (summaryContainer) {
     if (stateKey === "state5") {
       summaryContainer.innerHTML =
-        "Airtel - 1995, Jio - 2016. Vi (life support) - 2007 and BSNL - 2000 are the only surviving players in the industry.";
+        "Airtel - 1995, Jio - 2016. Vi - 2007 and BSNL - 2000 are the only surviving players in the industry.";
       gsap.to(summaryContainer, {
         opacity: 1,
         duration: 0.25,

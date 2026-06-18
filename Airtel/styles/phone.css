@@ -38,14 +38,14 @@
 }
 
 .QW4K9-main-title {
-  font-size: 2.25rem;
+  font-size: 32px;
   font-weight: 800;
   color: #111827;
   margin-bottom: 0rem;
 }
 @media (min-width: 1024px) {
   .QW4K9-main-title {
-    font-size: 2.25rem;
+    font-size: 32px;
     font-weight: 800;
     color: #111827;
     margin-bottom: 0.5rem;
@@ -53,7 +53,7 @@
 }
 
 .QW4K9-sub-title {
-  font-size: 1.125rem;
+  font-size: 18px;
   color: #4b5563;
   line-height: 1.5;
 }
@@ -131,12 +131,37 @@
 /* IPAD TABLET LAYOUT OVERRIDES (768px - 1023px) */
 @media (min-width: 768px) and (max-width: 1023px) {
   .QW4K9-scrolly-img {
-    top: 15rem;
-    bottom: 32%;
-    left: -13vh;
+    top: 31rem;
+    bottom: 29%;
+    left: -6vh;
     right: 6vh;
-    width: calc(100% - -14vh);
+    width: 130vh;
     height: auto;
+  }
+  .QW4K9-sub-title {
+    font-size: 22px;
+    color: #4b5563;
+    line-height: 1.5;
+    padding-top: 2vh;
+  }
+  .QW4K9-main-title {
+    font-size: 36px;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 0rem;
+    align-items: center;
+  }
+
+  .QW4K9-scrolly-header-block {
+    position: absolute;
+    top: 6rem;
+    left: 4vh;
+    z-index: 25;
+    max-width: 450px;
+    pointer-events: none;
+  }
+  .QW4K9-card-list {
+    font-size: 18px;
   }
 }
 
@@ -236,7 +261,7 @@
    6. Typography and Text Highlight Accents (Uniform 16px Sizing)
    ========================================================================== */
 .QW4K9-card-main-title {
-  font-size: 1.125rem;
+  font-size: 18px;
   font-weight: 700;
   line-height: 1.45;
   color: #000000;
@@ -253,7 +278,10 @@
 
 .QW4K9-card-list {
   margin: 0;
-  padding-left: 1.25rem;
+  /* padding-left: 1.25rem; */
+  font-size: 14px;
+  line-height: 26px;
+  padding-top: 14px;
   list-style-type: disc;
 }
 
@@ -287,14 +315,19 @@
 }
 @media (min-width: 768px) and (max-width: 1023px) {
   .QW4K9-card-main-title {
-    font-size: 1.4rem; /* Precise 16px value */
+    font-size: 24px; /* Precise 16px value */
   }
-
+  /*
   .QW4K9-card-list li {
     font-size: 1.2rem;
   }
   .QW4K9-card-standalone-text {
     font-size: 1.2rem;
+  }*/
+
+  .QW4K9-card-list {
+    font-size: 18px;
+    line-height: 32px;
   }
   .QW4K9-line-red {
     border-bottom: 4px solid #d64541;

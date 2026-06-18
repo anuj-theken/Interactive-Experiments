@@ -26,8 +26,8 @@
             show: true,
             position: "top",
             formatter: isMobile ? "₹1.4 Lakh Cr" : " 1.4 ",
-            fontFamily: "Playfair Display",
-            fontSize: isMobile ? 10 : 15,
+            fontFamily: "Archivo",
+            fontSize: isMobile ? 10 : 18,
             color: "#A62B2B",
             offset: [0, -3],
           },
@@ -47,8 +47,8 @@
             show: true,
             position: "top",
             formatter: isMobile ? "₹0.57 Lakh Cr" : " 0.57 ",
-            fontFamily: "Playfair Display",
-            fontSize: isMobile ? 10 : 15,
+            fontFamily: "Archivo",
+            fontSize: isMobile ? 10 : 18,
             color: "#BA7029",
             offset: [0, -3],
           },
@@ -82,8 +82,8 @@
             show: true,
             position: "top",
             formatter: isMobile ? "₹1.4 Lakh Cr" : " 1.4 ",
-            fontFamily: "Playfair Display",
-            fontSize: isMobile ? 10 : 15,
+            fontFamily: "Archivo",
+            fontSize: isMobile ? 10 : 18,
             color: "#A62B2B",
             offset: [0, -3],
           },
@@ -96,8 +96,8 @@
             show: true,
             position: "top",
             formatter: isMobile ? "₹11.4 Lakh Cr" : "11.4 ",
-            fontFamily: "Playfair Display",
-            fontSize: isMobile ? 10 : 15,
+            fontFamily: "Archivo",
+            fontSize: isMobile ? 10 : 18,
             color: "#A62B2B",
             offset: [0, -3],
           },
@@ -111,8 +111,8 @@
             show: true,
             position: "top",
             formatter: isMobile ? "₹0.57 Lakh Cr" : " 0.57",
-            fontFamily: "Playfair Display",
-            fontSize: isMobile ? 10 : 15,
+            fontFamily: "Archivo",
+            fontSize: isMobile ? 10 : 18,
             color: "#BA7029",
             offset: [0, -3],
           },
@@ -125,8 +125,8 @@
             show: true,
             position: "top",
             formatter: isMobile ? "₹1.6 Lakh Cr" : " 1.6 ",
-            fontFamily: "Playfair Display",
-            fontSize: isMobile ? 10 : 15,
+            fontFamily: "Archivo",
+            fontSize: isMobile ? 10 : 18,
             color: "#BA7029",
             offset: [0, -3],
           },
@@ -146,8 +146,8 @@
             show: true,
             position: "top",
             formatter: isMobile ? "₹1.6 Lakh Cr" : " 1.6 ",
-            fontFamily: "Playfair Display",
-            fontSize: isMobile ? 10 : 15,
+            fontFamily: "Archivo",
+            fontSize: isMobile ? 10 : 18,
             color: "#16527D",
             offset: [0, -3],
           },
@@ -173,7 +173,7 @@
         triggerOn: isMobile ? "click" : "mousemove",
         backgroundColor: "rgba(0, 0, 0, 0.85)",
         borderWidth: 0,
-        textStyle: { color: "#FAF4EE", fontFamily: "Inter", fontSize: 13 },
+        textStyle: { color: "#FAF4EE", fontFamily: "Inter", fontSize: 24 },
         formatter: function (params) {
           if (params.name.includes("space") || params.value === 0) return null;
           return `${labelMapping[params.name] || params.value}`;
@@ -210,7 +210,7 @@
         axisLabel: {
           show: !isMobile,
           fontFamily: "Inter",
-          fontSize: 12,
+          fontSize: isMobile ? 12 : 18,
           color: "#666666",
           formatter: function (value) {
             return "₹ " + (value > 0 ? value + " Lakh Cr" : value);
@@ -224,8 +224,12 @@
         {
           name: "Market Cap Balance Grid",
           type: "bar",
-          barWidth: isMobile ? "18px" : "42px",
+          barWidth: isMobile ? "32px" : "42px",
           barGap: isMobile ? "4px" : "20%",
+          itemStyle: {
+            fontFamily: "Archivo",
+            fontSize: isMobile ? 12 : 16,
+          },
           data:
             currentAnimationState === "current"
               ? activeOptions.current

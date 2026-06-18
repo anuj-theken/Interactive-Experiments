@@ -42,7 +42,7 @@
 
 .QW4K7-section-title {
   font-family: "Archivo", sans-serif;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 500;
   margin-bottom: 3vh;
   letter-spacing: -0.5px;
@@ -91,7 +91,7 @@
 }
 
 .QW4K7-val-group-current {
-  top: 110px;
+  top: 90px;
   opacity: 0;
   transform: translateY(15px);
 }
@@ -113,7 +113,7 @@
 
 .QW4K7-main-title {
   font-family: "Reckless", serif;
-  font-size: 36px;
+  font-size: 32px;
   font-weight: 500;
   margin-bottom: 3vh;
 }
@@ -235,7 +235,7 @@
 }
 
 /* Tablet Layout Layer Rules */
-@media (min-width: 769px) and (max-width: 1024px) {
+@media (min-width: 768px) and (max-width: 1024px) {
   .QW4K7-subscriber-grid {
     column-gap: 30px;
   }
@@ -245,10 +245,19 @@
   .QW4K7-brand-name {
     font-size: 20px;
   }
+  .QW4K7-viewport-container {
+    height: 90vh !important;
+  }
+  .QW4K7-component-footer {
+    font-size: 16px;
+  }
+  .QW4K7-section-divider {
+    margin: 5vh 0 5vh 0;
+  }
 }
 
 /* Mobile Responsive Adaptive Framework Layers */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .QW4K7-viewport-container {
     padding: 2vh 4vw 1vh 4vw;
     height: 94vh;

@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const yData = data.map((item) => item.value);
 
   function isMobile() {
-    return window.innerWidth <= 768;
+    return window.innerWidth <= 1023;
   }
 
   function getSeriesOption(hoveredIndex = null) {
@@ -120,6 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
       textStyle: {
         color: "#F5EFE7",
         fontFamily: "Archivo, Sans-serif",
+        fontSize: 18,
       },
       formatter: function (params) {
         const p = params[0];
@@ -143,7 +144,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       axisLabel: {
         color: "#1D1B1C",
-        fontSize: 11,
+        fontSize: isMobile() ? 18 : 10,
         fontWeight: "600",
         fontFamily: "Archivo, Sans-serif",
         margin: 15,
@@ -199,6 +200,7 @@ document.addEventListener("DOMContentLoaded", function () {
       axisLabel: {
         color: "#1D1B1C",
         fontFamily: "Archivo, Sans-serif",
+        fontSize: isMobile() ? 18 : 10,
         formatter: function (value) {
           if (Math.abs(value) >= 1000) {
             return "₹" + (value / 1000).toFixed(0) + "K"; // Also rounded y-axis labels to whole numbers
