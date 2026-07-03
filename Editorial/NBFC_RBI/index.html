@@ -7,7 +7,6 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
         <style>
-            /* Custom corporate/editorial font families from template */
             @font-face {
                 font-family: "Jazmin Alt";
                 src: url("JazminAlt-Bold.otf");
@@ -18,11 +17,6 @@
                 src: url("GT-America-Standard-Light.ttf");
                 font-weight: 300;
             }
-            @font-face {
-                font-family: "GT America Bold";
-                src: url("GT-America-Standard-Black.ttf");
-                font-weight: 300;
-            }
 
             * {
                 margin: 0;
@@ -30,7 +24,6 @@
                 box-sizing: border-box;
             }
 
-            /* Fine noise overlay to simulate canvas texture from painting/template */
             body::before {
                 content: "";
                 position: fixed;
@@ -43,7 +36,7 @@
             }
 
             body {
-                background: #f5f2eb; /* Off-white canvas tone matching the artwork */
+                background: #f6f2f2;
                 font-family: "GT America", "Segoe UI", sans-serif;
                 padding: 12px 20px 8px;
                 display: flex;
@@ -52,7 +45,6 @@
                 overflow: hidden;
             }
 
-            /* --- Header Section Styling --- */
             #header-section {
                 text-align: center;
                 padding-bottom: 20px;
@@ -61,114 +53,78 @@
             }
             #header-section h1 {
                 font-family: "Jazmin Alt", serif;
-                font-size: clamp(32px, 5vw, 54px);
+                font-size: clamp(26px, 4vw, 54px);
                 color: #2b2a2a;
                 margin-bottom: 8px;
                 font-weight: 900;
                 letter-spacing: -0.5px;
             }
             #header-section .subheader {
-                font-family: "GT America", "Segoe UI", sans-serif;
-                font-size: clamp(16px, 1.8vw, 20px);
+                font-size: clamp(14px, 1.5vw, 20px);
                 color: #555;
                 max-width: 900px;
                 margin: 0 auto 15px;
                 line-height: 1.5;
             }
 
-            /* Single line dynamic legend & instruction */
             .inline-legend-row {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 8px;
-                font-family: "GT America", "Segoe UI", sans-serif;
-                font-size: 14px;
+                gap: 12px;
+                font-size: 13px;
                 color: #444;
-                letter-spacing: 0.2px;
                 flex-wrap: wrap;
             }
-            .legend-circle-large {
-                width: 16px;
-                height: 16px;
+            .legend-circle-positive {
+                width: 12px;
+                height: 12px;
                 border-radius: 50%;
-                background-color: #54785d;
+                background: linear-gradient(90deg, #b4f0cd, #194b2d);
                 display: inline-block;
-                vertical-align: middle;
             }
-            .legend-circle-small {
-                width: 8px;
-                height: 8px;
+            .legend-circle-negative {
+                width: 12px;
+                height: 12px;
                 border-radius: 50%;
-                background-color: #54785d;
+                background-color: #e48d73;
                 display: inline-block;
-                vertical-align: middle;
-            }
-            .inline-legend-row i {
-                color: #777;
-                margin-left: 10px;
             }
 
-            /* --- Chart Visualization Area --- */
             #chart-area {
                 flex: 1 1 auto;
                 position: relative;
-                overflow: hidden;
-                min-height: 300px;
+                min-height: 250px;
             }
             #chart-container {
                 width: 100%;
                 height: 100%;
             }
 
-            /* --- Footer Section Styling --- */
             #footer {
                 display: flex;
-                flex-direction: row;
                 justify-content: space-between;
                 align-items: center;
                 padding: 15px 0;
                 border-top: 1px solid #e0e0e0;
-                font-family: "GT America", "Segoe UI", sans-serif;
-                font-size: 14px;
+                font-size: 13px;
                 color: #777;
                 width: 100%;
-                white-space: nowrap;
                 z-index: 10;
             }
-            .footer-left {
-                flex: 1;
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-            }
-            .footer-center {
-                flex: 1.5;
-                text-align: center;
-            }
-            .footer-right {
-                flex: 1.5;
-                display: flex;
-                justify-content: flex-end;
-                text-align: right;
-            }
             .footer-logo {
-                height: 18px;
-                width: auto;
-                max-width: 130px;
+                height: 16px;
                 object-fit: contain;
             }
 
-            @media (max-width: 800px) {
-                #footer {
-                    padding: 10px 5px;
-                    flex-direction: row;
-                    gap: 4px;
-                    white-space: normal;
-                    font-size: 13px !important;
+            @media (max-width: 768px) {
+                body {
+                    padding: 10px 10px 5px;
                 }
-                .footer-right {
-                    font-size: 13px !important;
+                #footer {
+                    flex-direction: column;
+                    gap: 6px;
+                    text-align: center;
                 }
             }
         </style>
@@ -178,13 +134,13 @@
             <h1>The Great Portfolio Pivot</h1>
             <p class="subheader">
                 India's largest financial ecosystems are reshaping their setups,
-                expanding consumer connections and digital delivery network
-                maps.
+                expanding consumer connections and digital network maps.
             </p>
             <div class="inline-legend-row">
-                <span class="legend-circle-large"></span> Company &nbsp;•&nbsp;
-                <span class="legend-circle-small"></span> Brand Channel
-                <i>(Hover over bubbles to view portfolio details)</i>
+                <span class="legend-circle-positive"></span> Positive Profits
+                &nbsp;•&nbsp;
+                <span class="legend-circle-negative"></span> Negative (Loss)
+                <i>(Hover bubbles to view portfolio details)</i>
             </div>
         </div>
 
@@ -193,13 +149,9 @@
         </div>
 
         <div id="footer">
-            <div class="footer-left">
-                <img src="logo.png" class="footer-logo" alt="The Ken" />
-            </div>
-            <div class="footer-center">Graphic by Anuj, 15 Apr '26</div>
-            <div class="footer-right">
-                Source: Annual Reports, Exchange Filings (2026)
-            </div>
+            <div><img src="logo.png" class="footer-logo" alt="The Ken" /></div>
+            <div>Graphic by Anuj, 15 Apr '26</div>
+            <div>Source: Annual Reports, Exchange Filings (2026)</div>
         </div>
 
         <script>
@@ -211,18 +163,26 @@
                     name: "Agrim Fincap Pvt.Ltd.",
                     val: 1245,
                     subs: ["Rupeyalelo", "Speedo loan"],
+                    yoe: 1995,
                 },
                 {
                     name: "Ava Finance Private Limited.",
                     val: 1650,
                     subs: ["Kamakshi Money"],
+                    yoe: 1995,
                 },
                 {
                     name: "Junoon Capital Services (P) Ltd.",
                     val: 297,
                     subs: ["Paisa Udhar", "Insta Paise"],
+                    yoe: 1996,
                 },
-                { name: "Niskha Finvest Pvt. Ltd.", val: 88, subs: ["CashPe"] },
+                {
+                    name: "Niskha Finvest Pvt. Ltd.",
+                    val: 88,
+                    subs: ["CashPe"],
+                    yoe: 1994,
+                },
                 {
                     name: "Achiievers Finance India Lmtd",
                     val: 73,
@@ -234,11 +194,13 @@
                         "Moneywalle",
                         "Jhatpat loan",
                     ],
+                    yoe: 1996,
                 },
                 {
                     name: "SURYA SHAKTI VYAPAAR Pvt. Ltd.",
                     val: 360,
                     subs: ["Easyrupeeloan"],
+                    yoe: 1995,
                 },
                 {
                     name: "Agf Finlease (India) Ltd",
@@ -249,6 +211,7 @@
                         "Next big loan",
                         "Wepay Loan",
                     ],
+                    yoe: 1996,
                 },
                 {
                     name: "Aman Fincap Ltd.",
@@ -261,6 +224,7 @@
                         "Tejas loan",
                         "Udhaar Portal",
                     ],
+                    yoe: 1996,
                 },
                 {
                     name: "Ampire Finance Private Limited",
@@ -272,137 +236,157 @@
                         "Salaryadda",
                         "Salarysetu",
                     ],
+                    yoe: 1981,
                 },
                 {
                     name: "Avinash Capital Markets Pvt. Ltd.",
                     val: -1,
                     subs: ["Bright loans"],
+                    yoe: 1994,
                 },
                 {
                     name: "Ayaan Finserve India Private Limited",
                     val: 126,
                     subs: ["Dhanvriddhi"],
+                    yoe: 1982,
                 },
                 {
                     name: "Comero Leasing & Financials Pvt. Ltd.",
                     val: 482,
                     subs: ["Xpressloan"],
+                    yoe: 1992,
                 },
                 {
                     name: "Naman Finlease Pvt. Ltd.",
                     val: 275,
                     subs: ["Qua loan", "Zeptofinance"],
+                    yoe: 1997,
                 },
                 {
                     name: "Dev-Aashish Capital (PLtd)",
                     val: 47547,
                     subs: ["Rupee112"],
+                    yoe: 1995,
                 },
                 {
                     name: "Devmuni Leasing & Finance Ltd.",
                     val: 127,
                     subs: ["Bharatloan"],
+                    yoe: 1995,
                 },
                 {
                     name: "Digner Finlease & Investment Private Limited",
                     val: 2036,
                     subs: ["Creditpey", "Kreditsure"],
+                    yoe: 1995,
                 },
                 {
                     name: "Everlight Holding Pvt Ltd",
                     val: 72,
                     subs: ["Everpay"],
+                    yoe: 1989,
                 },
                 {
                     name: "Girdhar Finlease Pvt Ltd.",
                     val: 79,
                     subs: ["30 Days loan"],
+                    yoe: 1983,
                 },
                 {
                     name: "Goodskill Securities And Services Limited",
                     val: 30,
                     subs: ["Every Day Loan", "Lonepey"],
+                    yoe: 1990,
                 },
                 {
                     name: "Kasar Credit & Capital Pvt.Ltd.",
                     val: 332900,
                     subs: ["Salary on time"],
+                    yoe: 1995,
                 },
                 {
                     name: "Loan2Grow Fincap Private Limited",
                     val: 10,
                     subs: ["Jhatpat cash"],
+                    yoe: 2020,
                 },
                 {
                     name: "Tycoon Credit & Portfolio Ltd.",
                     val: 2214,
                     subs: ["Loan Hub"],
+                    yoe: 1992,
                 },
                 {
                     name: "Solomon Capital Private Limited",
                     val: 47627,
                     subs: ["Bharat loan", "Rupee112 (Solomon)"],
+                    yoe: 2014,
                 },
                 {
                     name: "Woodland Securities Private Limited",
                     val: 18100,
                     subs: ["Creditwalle"],
+                    yoe: 1992,
                 },
                 {
                     name: "R.K. Bansal Finance Private Limited",
                     val: 2664,
                     subs: ["Ramfincorp"],
+                    yoe: 1984,
                 },
             ];
 
-            const palette = [
-                "#54785d",
-                "#4a6f96",
-                "#b55254",
-                "#cca049",
-                "#c28d93",
-                "#2b2a2a",
-                "#7d7a58",
-                "#9281a8",
-                "#5d4656",
-                "#3f8596",
-            ];
+            const TERRACOTTA_RED = "#e48d73";
 
-            function renderChart() {
-                // Calculate dynamic scaling factor based on the container width
-                const containerWidth = chartDom.clientWidth;
-                const isMobile = containerWidth < 768;
+            function getPositiveColor(val) {
+                const maxExpectedVal = 333000;
+                const ratio = Math.min(
+                    1,
+                    Math.max(0, Math.log1p(val) / Math.log1p(maxExpectedVal)),
+                );
+                const r = Math.round(180 - ratio * (180 - 25));
+                const g = Math.round(240 - ratio * (240 - 75));
+                const b = Math.round(205 - ratio * (205 - 45));
+                return `rgb(${r}, ${g}, ${b})`;
+            }
 
-                // Scale factor: smaller sizes on mobile to prevent overlaps
-                const scaleFactor = isMobile ? 0.55 : 1.0;
-                const subsidiarySize = 14 * scaleFactor;
+            function isMobile() {
+                return window.innerWidth < 768;
+            }
 
-                function calculateParentSize(val) {
-                    const absVal = Math.abs(val);
-                    let baseSize = Math.log1p(absVal) * 9 * scaleFactor;
-                    const minSize = 35 * scaleFactor;
-                    if (baseSize < minSize) baseSize = minSize;
-                    return baseSize;
-                }
+            function calculateParentSize(val) {
+                const absVal = Math.abs(val);
+                let multiplier = isMobile() ? 5.2 : 9;
+                let baseSize = Math.log1p(absVal) * multiplier;
+                const minSize = isMobile() ? 22 : 35;
+                if (baseSize < minSize) baseSize = minSize;
+                return baseSize;
+            }
 
+            let globalNodes = []; // Saved globally to share across mouse event triggers
+
+            function buildGraphData() {
                 const simNodes = [];
-                const simLinks = [];
                 const echartsLinks = [];
+                const subSize = isMobile() ? 8 : 14;
 
                 rawData.forEach((item, index) => {
-                    const groupColor = palette[index % palette.length];
+                    const groupColor =
+                        item.val < 0
+                            ? TERRACOTTA_RED
+                            : getPositiveColor(item.val);
                     const parentSize = calculateParentSize(item.val);
-
                     const sharedMetaData = {
                         parentName: item.name,
                         growth: item.val,
                         subsList: item.subs,
+                        yoe: item.yoe,
                     };
 
                     simNodes.push({
                         id: item.name,
                         name: item.name,
-                        radius: parentSize / 2 + (isMobile ? 1.5 : 2), // Extra padding buffer
+                        radius: parentSize / 2,
                         symbolSize: parentSize,
                         category: index,
                         isParent: true,
@@ -414,37 +398,34 @@
                         simNodes.push({
                             id: sub,
                             name: sub,
-                            radius: subsidiarySize / 2 + (isMobile ? 1 : 1.5),
-                            symbolSize: subsidiarySize,
+                            radius: subSize / 2,
+                            symbolSize: subSize,
                             category: index,
                             isParent: false,
                             color: groupColor,
                             customData: sharedMetaData,
                         });
-
-                        simLinks.push({ source: item.name, target: sub });
                         echartsLinks.push({ source: item.name, target: sub });
                     });
                 });
 
-                // Run D3 Simulation with localized constraints
                 const simulation = d3
                     .forceSimulation(simNodes)
                     .force(
                         "link",
                         d3
-                            .forceLink(simLinks)
+                            .forceLink(echartsLinks)
                             .id((d) => d.id)
                             .distance((l) => l.source.radius + l.target.radius)
                             .strength(1),
                     )
-                    .force("x", d3.forceX(0).strength(0.3))
-                    .force("y", d3.forceY(0).strength(0.3))
+                    .force("x", d3.forceX(0).strength(0.35))
+                    .force("y", d3.forceY(0).strength(0.35))
                     .force(
                         "collide",
                         d3
                             .forceCollide()
-                            .radius((d) => d.radius)
+                            .radius((d) => d.radius + 1)
                             .strength(1)
                             .iterations(5),
                     )
@@ -452,7 +433,7 @@
 
                 for (let i = 0; i < 600; i++) simulation.tick();
 
-                const nodes = simNodes.map((n) => ({
+                globalNodes = simNodes.map((n) => ({
                     name: n.name,
                     x: n.x,
                     y: n.y,
@@ -464,12 +445,15 @@
                     },
                     label: n.isParent
                         ? {
-                              show: n.symbolSize > 22, // Hide percentages on ultra-small bubbles
+                              show: true,
                               position: "inside",
                               color: "#ffffff",
                               fontSize: Math.max(
-                                  isMobile ? 7 : 9,
-                                  Math.min(13, n.symbolSize / 5.5),
+                                  isMobile() ? 7 : 9,
+                                  Math.min(
+                                      isMobile() ? 10 : 13,
+                                      n.symbolSize / 6,
+                                  ),
                               ),
                               fontWeight: "bold",
                               formatter: (p) => `${p.data.customData.growth}%`,
@@ -478,71 +462,201 @@
                     customData: n.customData,
                 }));
 
-                const option = {
+                return { nodes: globalNodes, links: echartsLinks };
+            }
+
+            function getChartOption() {
+                const graphData = buildGraphData();
+                const mobileMode = isMobile();
+
+                return {
                     tooltip: {
                         trigger: "item",
-                        backgroundColor: "rgba(255, 255, 255, 0.98)",
-                        borderColor: "#2b2a2a",
-                        borderWidth: 1,
+                        backgroundColor: "#f6f2f2",
+                        borderColor: "#194b2d",
+                        borderWidth: 2,
+                        padding: 0,
+                        confine: false,
+                        appendTo: "body",
+                        extraCssText:
+                            "border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 9999999 !important; position: fixed !important; pointer-events: none;",
                         textStyle: {
-                            color: "#2b2a2a",
                             fontFamily: "GT America, Segoe UI, sans-serif",
                         },
+
+                        position: function (point, params, dom, rect, size) {
+                            const mouseX = point[0];
+                            const mouseY = point[1];
+                            const tooltipWidth = size.contentSize[0];
+                            const tooltipHeight = size.contentSize[1];
+                            const viewWidth = window.innerWidth;
+                            const viewHeight = window.innerHeight;
+
+                            let finalX = mouseX + 15;
+                            let finalY = mouseY - tooltipHeight / 2;
+
+                            if (finalX + tooltipWidth > viewWidth) {
+                                finalX = mouseX - tooltipWidth - 15;
+                            }
+                            if (finalX < 0) {
+                                finalX = 10;
+                            }
+                            if (finalY + tooltipHeight > viewHeight) {
+                                finalY = viewHeight - tooltipHeight - 10;
+                            }
+                            if (finalY < 0) {
+                                finalY = 10;
+                            }
+
+                            return [finalX, finalY];
+                        },
+
                         formatter: function (params) {
                             if (!params.data || !params.data.customData)
                                 return "";
+
                             const data = params.data.customData;
-                            const subsFormatted =
-                                data.subsList.length > 0
-                                    ? data.subsList.join(", ")
-                                    : "None";
+                            const hoveredNodeName = params.name;
+                            const isNegative = data.growth < 0;
+                            const accentColor = isNegative
+                                ? "#e48d73"
+                                : "#32a869";
+
+                            let rev25 = 1.2,
+                                rev26 = 2.5;
+                            if (Math.abs(data.growth) > 2000) {
+                                rev25 = 0.05;
+                                rev26 = (
+                                    rev25 *
+                                    (1 + data.growth / 100)
+                                ).toFixed(1);
+                            } else if (Math.abs(data.growth) > 200) {
+                                rev25 = 0.4;
+                                rev26 = (
+                                    rev25 *
+                                    (1 + data.growth / 100)
+                                ).toFixed(1);
+                            } else {
+                                rev25 = 1.5;
+                                rev26 = (
+                                    rev25 *
+                                    (1 + data.growth / 100)
+                                ).toFixed(1);
+                            }
+
+                            const cardWidth = mobileMode ? "250px" : "320px";
+                            const titleSize = mobileMode ? "16px" : "20px";
+                            const valueSize = mobileMode ? "18px" : "22px";
+                            const bodySize = mobileMode ? "12px" : "14px";
+                            const metaSize = mobileMode ? "11px" : "13px";
+                            const minColWidth = mobileMode ? "75px" : "95px";
+
+                            let channelsHtml = "";
+                            if (data.subsList.length > 0) {
+                                channelsHtml = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px ${mobileMode ? "8px" : "16px"}; font-family: 'GT America', sans-serif;">`;
+                                data.subsList.forEach((sub) => {
+                                    const isTargetSub = sub === hoveredNodeName;
+                                    const subBg = isTargetSub
+                                        ? "background-color: rgba(25, 75, 45, 0.15); padding: 1px 4px; border-radius: 2px;"
+                                        : "";
+                                    const subWeight = isTargetSub
+                                        ? "font-weight: bold; color: #194b2d;"
+                                        : "color: #2b2a2a;";
+                                    channelsHtml += `<div style="font-size: ${metaSize}; ${subBg} ${subWeight} word-wrap: break-word; word-break: break-all;">${sub}</div>`;
+                                });
+                                channelsHtml += "</div>";
+                            } else {
+                                channelsHtml = `<div style="font-size: ${metaSize}; color: #777; font-family: 'GT America', sans-serif;">None</div>`;
+                            }
+
                             return `
-                                <div style="font-size: 12px; line-height: 1.6; padding: 4px; max-width: 250px; white-space: normal;">
-                                    <strong style="font-size: 13px; color: #000;">${data.parentName}</strong><br/>
-                                    <hr style="border:none; border-top:1px solid #eee; margin:6px 0;"/>
-                                    <strong>Growth/Increase:</strong> ${data.growth}%<br/>
-                                    <strong>Brand Channels:</strong> <span style="color: #666;">${subsFormatted}</span>
+                                <div style="width: ${cardWidth}; padding: ${mobileMode ? "12px 14px" : "18px 20px"}; line-height: 1.4; box-sizing: border-box; font-family: 'GT America', sans-serif;">
+                                    <div style="font-size: ${titleSize}; font-weight: bold; color: #000; letter-spacing: -0.3px; margin-bottom: 2px; white-space: normal; word-wrap: break-word;">${data.parentName}</div>
+                                    <div style="font-size: ${metaSize}; color: #555; margin-bottom: 8px;">est. ${data.yoe}</div>
+
+                                    <hr style="border: none; border-top: 1.5px solid #194b2d; margin-bottom: 10px; opacity: 0.8;"/>
+
+                                    <div style="font-size: ${bodySize}; font-weight: bold; color: #000; margin-bottom: 10px;">
+                                        Revenue growth - <span style="color: ${accentColor}; font-weight: bold;">${data.growth}%</span>
+                                    </div>
+
+                                    <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-family: 'GT America', sans-serif;">
+                                        <div style="display: flex; flex-direction: column; align-items: center; min-width: ${minColWidth};">
+                                            <span style="font-size: ${valueSize}; font-weight: bold; color: #000;">Rs. ${rev25}cr</span>
+                                            <span style="font-size: ${metaSize}; color: #555; margin-top: 2px; font-weight: normal;">(2025)</span>
+                                        </div>
+                                        <div style="font-size: ${valueSize}; font-weight: bold; color: #000; padding-top: 2px;">&rarr;</div>
+                                        <div style="display: flex; flex-direction: column; align-items: center; min-width: ${minColWidth};">
+                                            <span style="font-size: ${valueSize}; font-weight: bold; color: #000;">Rs. ${rev26}cr</span>
+                                            <span style="font-size: ${metaSize}; color: #555; margin-top: 2px; font-weight: normal;">(2026)</span>
+                                        </div>
+                                    </div>
+
+                                    <hr style="border: none; border-top: 1.5px solid #194b2d; margin-bottom: 10px; opacity: 0.8;"/>
+
+                                    <div style="font-size: ${bodySize}; font-weight: bold; color: #000; margin-bottom: 6px;">Brand Channels</div>
+                                    ${channelsHtml}
                                 </div>
                             `;
                         },
                     },
-                    animationDuration: 800,
+                    animationDuration: 1200,
+                    animationEasingUpdate: "quinticInOut",
                     series: [
                         {
                             type: "graph",
                             layout: "none",
-                            data: nodes,
-                            links: echartsLinks,
+                            data: graphData.nodes,
+                            links: graphData.links,
                             roam: false,
-                            legendHoverLink: true,
-                            emphasis: {
-                                focus: "adjacency",
-                                lineStyle: {
-                                    width: 1.5,
-                                    color: "rgba(43, 42, 42, 0.4)",
-                                },
-                                itemStyle: {
-                                    shadowBlur: 15,
-                                    shadowColor: "rgba(0, 0, 0, 0.15)",
-                                },
-                            },
-                            lineStyle: {
-                                width: 0,
-                            },
+                            focusNodeAdjacency: false,
+                            emphasis: { disabled: true },
+                            lineStyle: { width: 0, curveness: 0 },
                         },
                     ],
                 };
-
-                myChart.setOption(option);
             }
 
-            // Initial render
-            renderChart();
+            myChart.setOption(getChartOption());
 
-            // Clean dynamic scaling on resize
+            // --- INTERACTION EVENT LIFECYCLE FOR CLUSTER HIGHLIGHTS ---
+
+            myChart.on("mouseover", "series", function (params) {
+                if (!params.data || !params.data.customData) return;
+
+                const targetCategory = params.data.category;
+
+                const updatedNodes = globalNodes.map((node) => {
+                    const isSameCluster = node.category === targetCategory;
+                    return {
+                        ...node,
+                        itemStyle: {
+                            ...node.itemStyle,
+                            opacity: isSameCluster
+                                ? node.label.show
+                                    ? 0.95
+                                    : 0.75
+                                : 0.15,
+                        },
+                        label: {
+                            ...node.label,
+                            color: isSameCluster
+                                ? "#ffffff"
+                                : "rgba(255, 255, 255, 0.2)",
+                        },
+                    };
+                });
+
+                myChart.setOption({ series: [{ data: updatedNodes }] });
+            });
+
+            myChart.on("mouseout", "series", function () {
+                myChart.setOption({ series: [{ data: globalNodes }] });
+            });
+
             window.addEventListener("resize", () => {
+                myChart.setOption(getChartOption());
                 myChart.resize();
-                renderChart();
             });
         </script>
     </body>

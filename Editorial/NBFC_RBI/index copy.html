@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>NBFC Clustered Graph (Packed)</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+        <style>
+            /* Custom corporate/editorial font families from template */
+            @font-face {
+                font-family: "Jazmin Alt";
+                src: url("JazminAlt-Bold.otf");
+                font-weight: bold;
+            }
+            @font-face {
+                font-family: "GT America";
+                src: url("GT-America-Standard-Light.ttf");
+                font-weight: 300;
+            }
+            @font-face {
+                font-family: "GT America Bold";
+                src: url("GT-America-Standard-Black.ttf");
+                font-weight: 300;
+            }
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            /* Fine noise overlay to simulate canvas texture from painting/template */
+            body::before {
+                content: "";
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+                opacity: 0.4;
+                mix-blend-mode: multiply;
+                z-index: 0;
+            }
+
+            body {
+                background: #f5f2eb; /* Off-white canvas tone matching the artwork */
+                font-family: "GT America", "Segoe UI", sans-serif;
+                padding: 12px 20px 8px;
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            /* --- Header Section Styling --- */
+            #header-section {
+                text-align: center;
+                padding-bottom: 20px;
+                border-bottom: 1px solid #e0e0e0;
+                z-index: 10;
+            }
+            #header-section h1 {
+                font-family: "Jazmin Alt", serif;
+                font-size: clamp(32px, 5vw, 54px);
+                color: #2b2a2a;
+                margin-bottom: 8px;
+                font-weight: 900;
+                letter-spacing: -0.5px;
+            }
+            #header-section .subheader {
+                font-family: "GT America", "Segoe UI", sans-serif;
+                font-size: clamp(16px, 1.8vw, 20px);
+                color: #555;
+                max-width: 900px;
+                margin: 0 auto 15px;
+                line-height: 1.5;
+            }
+
+            /* Single line dynamic legend & instruction */
+            .inline-legend-row {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                font-family: "GT America", "Segoe UI", sans-serif;
+                font-size: 14px;
+                color: #444;
+                letter-spacing: 0.2px;
+                flex-wrap: wrap;
+            }
+            .legend-circle-large {
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background-color: #54785d;
+                display: inline-block;
+                vertical-align: middle;
+            }
+            .legend-circle-small {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background-color: #54785d;
+                display: inline-block;
+                vertical-align: middle;
+            }
+            .inline-legend-row i {
+                color: #777;
+                margin-left: 10px;
+            }
+
+            /* --- Chart Visualization Area --- */
+            #chart-area {
+                flex: 1 1 auto;
+                position: relative;
+                overflow: hidden;
+                min-height: 300px;
+            }
+            #chart-container {
+                width: 100%;
+                height: 100%;
+            }
+
+            /* --- Footer Section Styling --- */
+            #footer {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px 0;
+                border-top: 1px solid #e0e0e0;
+                font-family: "GT America", "Segoe UI", sans-serif;
+                font-size: 14px;
+                color: #777;
+                width: 100%;
+                white-space: nowrap;
+                z-index: 10;
+            }
+            .footer-left {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+            }
+            .footer-center {
+                flex: 1.5;
+                text-align: center;
+            }
+            .footer-right {
+                flex: 1.5;
+                display: flex;
+                justify-content: flex-end;
+                text-align: right;
+            }
+            .footer-logo {
+                height: 18px;
+                width: auto;
+                max-width: 130px;
+                object-fit: contain;
+            }
+
+            @media (max-width: 800px) {
+                #footer {
+                    padding: 10px 5px;
+                    flex-direction: row;
+                    gap: 4px;
+                    white-space: normal;
+                    font-size: 13px !important;
+                }
+                .footer-right {
+                    font-size: 13px !important;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div id="header-section">
+            <h1>The Great Portfolio Pivot</h1>
+            <p class="subheader">
+                India's largest financial ecosystems are reshaping their setups,
+                expanding consumer connections and digital delivery network
+                maps.
+            </p>
+            <div class="inline-legend-row">
+                <span class="legend-circle-large"></span> Company &nbsp;•&nbsp;
+                <span class="legend-circle-small"></span> Brand Channel
+                <i>(Hover over bubbles to view portfolio details)</i>
+            </div>
+        </div>
+
+        <div id="chart-area">
+            <div id="chart-container"></div>
+        </div>
+
+        <div id="footer">
+            <div class="footer-left">
+                <img src="logo.png" class="footer-logo" alt="The Ken" />
+            </div>
+            <div class="footer-center">Graphic by Anuj, 15 Apr '26</div>
+            <div class="footer-right">
+                Source: Annual Reports, Exchange Filings (2026)
+            </div>
+        </div>
+
+        <script>
+            const chartDom = document.getElementById("chart-container");
+            const myChart = echarts.init(chartDom);
+
+            const rawData = [
+                {
+                    name: "Agrim Fincap Pvt.Ltd.",
+                    val: 1245,
+                    subs: ["Rupeyalelo", "Speedo loan"],
+                },
+                {
+                    name: "Ava Finance Private Limited.",
+                    val: 1650,
+                    subs: ["Kamakshi Money"],
+                },
+                {
+                    name: "Junoon Capital Services (P) Ltd.",
+                    val: 297,
+                    subs: ["Paisa Udhar", "Insta Paise"],
+                },
+                { name: "Niskha Finvest Pvt. Ltd.", val: 88, subs: ["CashPe"] },
+                {
+                    name: "Achiievers Finance India Lmtd",
+                    val: 73,
+                    subs: [
+                        "Borrowera",
+                        "Credxpres",
+                        "Loan Finserve",
+                        "LoanMitraa",
+                        "Moneywalle",
+                        "Jhatpat loan",
+                    ],
+                },
+                {
+                    name: "SURYA SHAKTI VYAPAAR Pvt. Ltd.",
+                    val: 360,
+                    subs: ["Easyrupeeloan"],
+                },
+                {
+                    name: "Agf Finlease (India) Ltd",
+                    val: 352,
+                    subs: [
+                        "Cashkredit",
+                        "Loanforcare",
+                        "Next big loan",
+                        "Wepay Loan",
+                    ],
+                },
+                {
+                    name: "Aman Fincap Ltd.",
+                    val: -33,
+                    subs: [
+                        "Dhanrishi",
+                        "Duniya Finance",
+                        "Loanzap",
+                        "Paisa on salary",
+                        "Tejas loan",
+                        "Udhaar Portal",
+                    ],
+                },
+                {
+                    name: "Ampire Finance Private Limited",
+                    val: 450,
+                    subs: [
+                        "F1 Speed loan",
+                        "FastPaise",
+                        "SnapPaisa",
+                        "Salaryadda",
+                        "Salarysetu",
+                    ],
+                },
+                {
+                    name: "Avinash Capital Markets Pvt. Ltd.",
+                    val: -1,
+                    subs: ["Bright loans"],
+                },
+                {
+                    name: "Ayaan Finserve India Private Limited",
+                    val: 126,
+                    subs: ["Dhanvriddhi"],
+                },
+                {
+                    name: "Comero Leasing & Financials Pvt. Ltd.",
+                    val: 482,
+                    subs: ["Xpressloan"],
+                },
+                {
+                    name: "Naman Finlease Pvt. Ltd.",
+                    val: 275,
+                    subs: ["Qua loan", "Zeptofinance"],
+                },
+                {
+                    name: "Dev-Aashish Capital (PLtd)",
+                    val: 47547,
+                    subs: ["Rupee112"],
+                },
+                {
+                    name: "Devmuni Leasing & Finance Ltd.",
+                    val: 127,
+                    subs: ["Bharatloan"],
+                },
+                {
+                    name: "Digner Finlease & Investment Private Limited",
+                    val: 2036,
+                    subs: ["Creditpey", "Kreditsure"],
+                },
+                {
+                    name: "Everlight Holding Pvt Ltd",
+                    val: 72,
+                    subs: ["Everpay"],
+                },
+                {
+                    name: "Girdhar Finlease Pvt Ltd.",
+                    val: 79,
+                    subs: ["30 Days loan"],
+                },
+                {
+                    name: "Goodskill Securities And Services Limited",
+                    val: 30,
+                    subs: ["Every Day Loan", "Lonepey"],
+                },
+                {
+                    name: "Kasar Credit & Capital Pvt.Ltd.",
+                    val: 332900,
+                    subs: ["Salary on time"],
+                },
+                {
+                    name: "Loan2Grow Fincap Private Limited",
+                    val: 10,
+                    subs: ["Jhatpat cash"],
+                },
+                {
+                    name: "Tycoon Credit & Portfolio Ltd.",
+                    val: 2214,
+                    subs: ["Loan Hub"],
+                },
+                {
+                    name: "Solomon Capital Private Limited",
+                    val: 47627,
+                    subs: ["Bharat loan", "Rupee112 (Solomon)"],
+                },
+                {
+                    name: "Woodland Securities Private Limited",
+                    val: 18100,
+                    subs: ["Creditwalle"],
+                },
+                {
+                    name: "R.K. Bansal Finance Private Limited",
+                    val: 2664,
+                    subs: ["Ramfincorp"],
+                },
+            ];
+
+            const palette = [
+                "#54785d",
+                "#4a6f96",
+                "#b55254",
+                "#cca049",
+                "#c28d93",
+                "#2b2a2a",
+                "#7d7a58",
+                "#9281a8",
+                "#5d4656",
+                "#3f8596",
+            ];
+
+            // Global references to allow the loop engine to update dynamically
+            let baseNodes = [];
+            let echartsLinks = [];
+            let maxExtent = 100;
+            let isMobile = false;
+            let animationFrameId = null;
+
+            function renderChart() {
+                const containerWidth = chartDom.clientWidth;
+                isMobile = containerWidth < 768;
+
+                const scaleFactor = isMobile ? 0.55 : 1.0;
+                const subsidiarySize = 14 * scaleFactor;
+
+                function calculateParentSize(val) {
+                    const absVal = Math.abs(val);
+                    let baseSize = Math.log1p(absVal) * 9 * scaleFactor;
+                    const minSize = 35 * scaleFactor;
+                    if (baseSize < minSize) baseSize = minSize;
+                    return baseSize;
+                }
+
+                const simNodes = [];
+                const simLinks = [];
+                echartsLinks = [];
+
+                rawData.forEach((item, index) => {
+                    const groupColor = palette[index % palette.length];
+                    const parentSize = calculateParentSize(item.val);
+                    const sharedMetaData = {
+                        parentName: item.name,
+                        growth: item.val,
+                        subsList: item.subs,
+                    };
+
+                    simNodes.push({
+                        id: item.name,
+                        name: item.name,
+                        radius: parentSize / 2 + (isMobile ? 1.5 : 2.5),
+                        symbolSize: parentSize,
+                        category: index,
+                        isParent: true,
+                        color: groupColor,
+                        customData: sharedMetaData,
+                    });
+
+                    item.subs.forEach((sub) => {
+                        simNodes.push({
+                            id: sub,
+                            name: sub,
+                            radius: subsidiarySize / 2 + (isMobile ? 1 : 1.5),
+                            symbolSize: subsidiarySize,
+                            category: index,
+                            isParent: false,
+                            color: groupColor,
+                            customData: sharedMetaData,
+                        });
+                        simLinks.push({ source: item.name, target: sub });
+                        echartsLinks.push({ source: item.name, target: sub });
+                    });
+                });
+
+                const simulation = d3
+                    .forceSimulation(simNodes)
+                    .force(
+                        "link",
+                        d3
+                            .forceLink(simLinks)
+                            .id((d) => d.id)
+                            .distance((l) => l.source.radius + l.target.radius)
+                            .strength(1),
+                    )
+                    .force("x", d3.forceX(0).strength(0.35))
+                    .force("y", d3.forceY(0).strength(0.35))
+                    .force(
+                        "collide",
+                        d3
+                            .forceCollide()
+                            .radius((d) => d.radius)
+                            .strength(1)
+                            .iterations(5),
+                    )
+                    .stop();
+
+                for (let i = 0; i < 600; i++) simulation.tick();
+
+                const xCoords = simNodes.map((n) => n.x);
+                const yCoords = simNodes.map((n) => n.y);
+                const xMin = Math.min(...xCoords),
+                    xMax = Math.max(...xCoords);
+                const yMin = Math.min(...yCoords),
+                    yMax = Math.max(...yCoords);
+
+                maxExtent =
+                    Math.max(
+                        Math.abs(xMin),
+                        Math.abs(xMax),
+                        Math.abs(yMin),
+                        Math.abs(yMax),
+                    ) * 1.15;
+
+                // Map fixed base nodes. We add unique offset factors to give each group its own floating cadence.
+                baseNodes = simNodes.map((n) => ({
+                    name: n.name,
+                    baseX: n.x,
+                    baseY: n.y,
+                    symbolSize: n.symbolSize,
+                    category: n.category,
+                    itemStyle: {
+                        color: n.color,
+                        opacity: n.isParent ? 0.95 : 0.75,
+                    },
+                    label: n.isParent
+                        ? {
+                              show: n.symbolSize > 22,
+                              position: "inside",
+                              color: "#ffffff",
+                              fontSize: Math.max(
+                                  isMobile ? 7 : 9,
+                                  Math.min(13, n.symbolSize / 5.5),
+                              ),
+                              fontWeight: "bold",
+                              formatter: (p) => `${p.data.customData.growth}%`,
+                          }
+                        : { show: false },
+                    customData: n.customData,
+                    // Unique speeds per category so bubbles don't move identical to each other
+                    phaseX: n.category * 0.45,
+                    phaseY: n.category * 0.7 + 1.5,
+                }));
+
+                // Set static canvas configuration structure
+                myChart.setOption({
+                    tooltip: {
+                        trigger: "item",
+                        backgroundColor: "rgba(255, 255, 255, 0.98)",
+                        borderColor: "#2b2a2a",
+                        borderWidth: 1,
+                        textStyle: {
+                            color: "#2b2a2a",
+                            fontFamily: "GT America, Segoe UI, sans-serif",
+                        },
+                        formatter: function (params) {
+                            if (!params.data || !params.data.customData)
+                                return "";
+                            const data = params.data.customData;
+                            const subsFormatted =
+                                data.subsList.length > 0
+                                    ? data.subsList.join(", ")
+                                    : "None";
+                            return `
+                            <div style="font-size: 12px; line-height: 1.6; padding: 4px; max-width: 250px; white-space: normal;">
+                                <strong style="font-size: 13px; color: #000;">${data.parentName}</strong><br/>
+                                <hr style="border:none; border-top:1px solid #eee; margin:6px 0;"/>
+                                <strong>Growth/Increase:</strong> ${data.growth}%<br/>
+                                <strong>Brand Channels:</strong> <span style="color: #666;">${subsFormatted}</span>
+                            </div>
+                        `;
+                        },
+                    },
+                    grid: {
+                        left: "center",
+                        top: "center",
+                        width: isMobile ? "90%" : "78%",
+                        height: isMobile ? "90%" : "78%",
+                    },
+                    xAxis: {
+                        type: "value",
+                        min: -maxExtent,
+                        max: maxExtent,
+                        show: false,
+                    },
+                    yAxis: {
+                        type: "value",
+                        min: -maxExtent,
+                        max: maxExtent,
+                        show: false,
+                    },
+                    series: [
+                        {
+                            type: "graph",
+                            coordinateSystem: "cartesian2d",
+                            links: echartsLinks.map((l) => ({
+                                source: l.source,
+                                target: l.target,
+                            })),
+                            roam: false,
+                            z: 10,
+                            emphasis: {
+                                focus: "adjacency",
+                                lineStyle: {
+                                    width: 1.5,
+                                    color: "rgba(43, 42, 42, 0.4)",
+                                },
+                                itemStyle: {
+                                    shadowBlur: 15,
+                                    shadowColor: "rgba(0, 0, 0, 0.15)",
+                                },
+                            },
+                            lineStyle: { width: 0 },
+                        },
+                    ],
+                });
+            }
+
+            // Subtle Animation Loop Engine
+            function startAnimationLoop() {
+                let startTime = performance.now();
+
+                function updatePositions(timestamp) {
+                    const elapsed = (timestamp - startTime) * 0.0015; // Slow down clock speed
+
+                    // Maximum floating boundary distance (scaled automatically based on layout footprint)
+                    const driftAmp = maxExtent * 0.015;
+
+                    const animatedNodes = baseNodes.map((n) => {
+                        // Apply unique wavy trajectory paths per bubble cluster
+                        const dx = Math.sin(elapsed + n.phaseX) * driftAmp;
+                        const dy =
+                            Math.cos(elapsed * 0.8 + n.phaseY) * driftAmp;
+
+                        return {
+                            ...n,
+                            value: [n.baseX + dx, n.baseY + dy],
+                        };
+                    });
+
+                    myChart.setOption(
+                        {
+                            series: [{ data: animatedNodes }],
+                        },
+                        { lazyUpdate: true },
+                    ); // Crucial for performance: prevents resetting chart canvas state
+
+                    animationFrameId = requestAnimationFrame(updatePositions);
+                }
+
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                animationFrameId = requestAnimationFrame(updatePositions);
+            }
+
+            // Initial setup Execution
+            renderChart();
+            startAnimationLoop();
+
+            window.addEventListener("resize", () => {
+                myChart.resize();
+                renderChart();
+                startAnimationLoop();
+            });
+        </script>
+    </body>
+</html>
