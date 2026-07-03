@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>NBFC Revenue Density Matrix</title>
+        <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                    Helvetica, Arial, sans-serif;
+            }
+
+            body {
+                background-color: #fafafa;
+                color: #0f172a;
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+            }
+
+            header {
+                background: #ffffff;
+                padding: 20px 15px;
+                text-align: center;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            header h1 {
+                font-size: 1.4rem;
+                font-weight: 700;
+                margin-bottom: 6px;
+                letter-spacing: -0.03em;
+            }
+
+            header p {
+                font-size: 0.85rem;
+                color: #64748b;
+            }
+
+            .controls-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 12px;
+                margin: 15px 0;
+            }
+
+            .btn {
+                background-color: #f1f5f9;
+                color: #475569;
+                border: 1px solid #e2e8f0;
+                padding: 8px 20px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .btn:hover {
+                background-color: #e2e8f0;
+            }
+
+            .btn.active {
+                background-color: #0f172a;
+                color: #ffffff;
+                border-color: #0f172a;
+            }
+
+            .metric-caption {
+                text-align: center;
+                font-size: 0.8rem;
+                color: #64748b;
+                margin: 0 auto 15px auto;
+                max-width: 600px;
+                padding: 0 15px;
+                line-height: 1.4;
+            }
+
+            .metric-box-sample {
+                display: inline-block;
+                width: 11px;
+                height: 11px;
+                background-color: #475569;
+                border-radius: 2px;
+                vertical-align: middle;
+                margin-right: 4px;
+            }
+
+            main {
+                flex: 1;
+                width: 100%;
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .chart-wrapper {
+                background: #ffffff;
+                padding: 10px;
+                width: 100%;
+                border-radius: 8px;
+                border: 1px solid #e2e8f0;
+            }
+
+            #chart-container {
+                width: 100%;
+                /* Strict responsive base height for desktop layout */
+                height: 540px;
+            }
+
+            /* Mobile specific layout override */
+            @media (max-width: 768px) {
+                header h1 {
+                    font-size: 1.25rem;
+                }
+                main {
+                    padding: 0 8px;
+                }
+                .chart-wrapper {
+                    padding: 5px;
+                }
+                #chart-container {
+                    /* Dynamically match container width to make a perfect square viewport on mobile */
+                    height: 92vw;
+                }
+            }
+
+            footer {
+                background-color: #f8fafc;
+                color: #94a3b8;
+                text-align: center;
+                padding: 15px;
+                font-size: 0.78rem;
+                border-top: 1px solid #e2e8f0;
+                margin-top: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>NBFC Regulated Entities Revenue Matrix</h1>
+            <p>Symmetrical $10 \times 10$ Structural Matrix Grid Systems</p>
+        </header>
+
+        <div class="controls-container">
+            <button
+                class="btn active"
+                id="btn-fy24"
+                onclick="switchYear('fy24')"
+            >
+                FY24 Revenue
+            </button>
+            <button class="btn" id="btn-fy25" onclick="switchYear('fy25')">
+                FY25 Revenue
+            </button>
+        </div>
+
+        <div class="metric-caption">
+            <span class="metric-box-sample"></span> Each visible cell block
+            metrics proportional values up to <strong>0.67 Cr</strong>,
+            collapsing and assembling seamlessly across peripheral axes.
+        </div>
+
+        <main>
+            <div class="chart-wrapper">
+                <div id="chart-container"></div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 NBFC Financial Framework Directory</p>
+        </footer>
+
+        <script>
+            const rawData = [
+                {
+                    name: "Agrim Fincap Pvt.Ltd.",
+                    fy24: 0.19,
+                    fy25: 72.65,
+                    color: "#1b5e20",
+                },
+                {
+                    name: "Ava Finance Private Limited.",
+                    fy24: 0.2,
+                    fy25: 3.5,
+                    color: "#2e7d32",
+                },
+                {
+                    name: "Junoon Capital Services (P) Ltd.",
+                    fy24: 2.91,
+                    fy25: 11.5,
+                    color: "#0d47a1",
+                },
+                {
+                    name: "Niskha Finvest Pvt. Ltd.",
+                    fy24: 2.5,
+                    fy25: 4.7,
+                    color: "#1565c0",
+                },
+                {
+                    name: "Achiievers Finance India Lmtd",
+                    fy24: 14.7,
+                    fy25: 25.4,
+                    color: "#4a148c",
+                },
+                {
+                    name: "SURYA SHAKTI VYAPAAR Pvt. Ltd.",
+                    fy24: 14.6,
+                    fy25: 14.6,
+                    color: "#6a1b9a",
+                },
+                {
+                    name: "Agf Finlease (India) Ltd",
+                    fy24: 5.0,
+                    fy25: 22.6,
+                    color: "#880e4f",
+                },
+                {
+                    name: "Aman Fincap Ltd.",
+                    fy24: 1.2,
+                    fy25: 0.8,
+                    color: "#ad1457",
+                },
+                {
+                    name: "Ampire Finance Private Limited",
+                    fy24: 0.4,
+                    fy25: 2.2,
+                    color: "#bf360c",
+                },
+                {
+                    name: "Avinash Capital Markets Pvt. Ltd.",
+                    fy24: 0.24,
+                    fy25: 0.237,
+                    color: "#d84315",
+                },
+                {
+                    name: "Ayaan Finserve India Private Limited",
+                    fy24: 3.57,
+                    fy25: 7.9,
+                    color: "#e65100",
+                },
+                {
+                    name: "Comero Leasing & Financials Pvt. Ltd.",
+                    fy24: 1.16,
+                    fy25: 6.4,
+                    color: "#f57c00",
+                },
+                {
+                    name: "Daksh Lefins Ltd.",
+                    fy24: 0.5,
+                    fy25: 1.0,
+                    color: "#fbc02d",
+                },
+                {
+                    name: "Dev-Aashish Capital (PLtd)",
+                    fy24: 0.18,
+                    fy25: 1.0,
+                    color: "#afb42b",
+                },
+                {
+                    name: "Devmuni Leasing & Finance Ltd.",
+                    fy24: 32.97,
+                    fy25: 4.7,
+                    color: "#004d40",
+                },
+                {
+                    name: "Digner Finlease & Investment Private Limited",
+                    fy24: 0.11,
+                    fy25: 2.35,
+                    color: "#00695c",
+                },
+                {
+                    name: "Everlight Holding Pvt Ltd",
+                    fy24: 0.13,
+                    fy25: 0.224,
+                    color: "#006064",
+                },
+                {
+                    name: "Girdhar Finlease Pvt Ltd.",
+                    fy24: 8.0,
+                    fy25: 14.3,
+                    color: "#00838f",
+                },
+                {
+                    name: "Goodskill Securities And Services Limited",
+                    fy24: 36.8,
+                    fy25: 47.9,
+                    color: "#212121",
+                },
+                {
+                    name: "Kasar Credit & Capital Pvt.Ltd.",
+                    fy24: 0.01,
+                    fy25: 33.3,
+                    color: "#37474f",
+                },
+                {
+                    name: "Loan2Grow Fincap Private Limited",
+                    fy24: 0.4,
+                    fy25: 0.44,
+                    color: "#4e342e",
+                },
+                {
+                    name: "Tycoon Credit & Portfolio Ltd.",
+                    fy24: 0.71,
+                    fy25: 16.2,
+                    color: "#6d4c41",
+                },
+            ];
+
+            const chartDom = document.getElementById("chart-container");
+            const myChart = echarts.init(chartDom);
+
+            function getSortedGridCells() {
+                let cells = [];
+                for (let r = 0; r < 10; r++) {
+                    for (let c = 0; c < 10; c++) {
+                        const distToCenter = Math.sqrt(
+                            Math.pow(c - 4.5, 2) + Math.pow(r - 4.5, 2),
+                        );
+                        cells.push({ r, c, distToCenter });
+                    }
+                }
+                return cells.sort((a, b) => a.distToCenter - b.distToCenter);
+            }
+            const sharedGridStructure = getSortedGridCells();
+
+            function generateData(metric) {
+                let points = [];
+
+                // To ensure layout looks perfectly balanced on a mobile square format,
+                // we use an even grid layout distribution (e.g. 5 columns instead of 6)
+                const isMobile = window.innerWidth <= 768;
+                const columnsCount = isMobile ? 5 : 6;
+                const gridSpacing = 11;
+
+                rawData.forEach((company, cIndex) => {
+                    const matrixX = (cIndex % columnsCount) * gridSpacing;
+                    const matrixY =
+                        Math.floor(cIndex / columnsCount) * gridSpacing;
+
+                    let activeBoxes = 0;
+                    if (company[metric] > 0) {
+                        activeBoxes = Math.min(
+                            100,
+                            Math.max(1, Math.round(company[metric] * 1.5)),
+                        );
+                    }
+
+                    sharedGridStructure.forEach((cell, orderIdx) => {
+                        const stateActive = orderIdx < activeBoxes;
+                        points.push({
+                            value: [
+                                matrixX + cell.c,
+                                matrixY + cell.r,
+                                stateActive ? 1 : 0,
+                            ],
+                            itemStyle: {
+                                color: stateActive
+                                    ? company.color
+                                    : "rgba(241, 245, 249, 1)",
+                            },
+                            metaData: {
+                                name: company.name,
+                                revenue: company[metric],
+                            },
+                        });
+                    });
+                });
+                return points;
+            }
+
+            function buildChartOption(metricKey) {
+                const isMobile = window.innerWidth <= 768;
+
+                // Bounds calculation based on chosen column layout distributions
+                const xMax = isMobile ? 54 : 64;
+                const yMax = isMobile ? 54 : 44;
+
+                return {
+                    tooltip: {
+                        position: "top",
+                        trigger: "item",
+                        backgroundColor: "rgba(15, 23, 42, 0.95)",
+                        textStyle: { color: "#fff", fontSize: 11 },
+                        borderWidth: 0,
+                        formatter: function (params) {
+                            if (params.data.value[2] === 0) return null;
+                            return `<div style="padding: 2px 4px;">
+                                    <strong>${params.data.metaData.name}</strong><br/>
+                                    <span style="color:#60a5fa;">Revenue: ${params.data.metaData.revenue} Cr</span>
+                                </div>`;
+                        },
+                    },
+                    xAxis: { type: "value", show: false, min: 0, max: xMax },
+                    yAxis: {
+                        type: "value",
+                        show: false,
+                        min: 0,
+                        max: yMax,
+                        inverse: true,
+                    },
+                    grid: { top: "2%", bottom: "2%", left: "2%", right: "2%" },
+                    series: [
+                        {
+                            type: "heatmap",
+                            data: generateData(metricKey),
+                            itemStyle: {
+                                borderColor: "#ffffff",
+                                borderWidth: isMobile ? 0.5 : 0.8,
+                            },
+                            animationType: "all",
+                            animationDuration: 700,
+                            animationDurationUpdate: 450,
+                            animationEasingUpdate: "linear",
+                        },
+                    ],
+                };
+            }
+
+            // Handle structural reconfiguration on resize events
+            let currentYear = "fy24";
+            myChart.setOption(buildChartOption(currentYear));
+
+            function switchYear(targetYear) {
+                const currentActive = document.querySelector(".btn.active");
+                if (currentActive && currentActive.id === `btn-${targetYear}`)
+                    return;
+
+                document
+                    .querySelectorAll(".btn")
+                    .forEach((b) => b.classList.remove("active"));
+                document
+                    .getElementById(`btn-${targetYear}`)
+                    .classList.add("active");
+
+                currentYear = targetYear;
+                myChart.setOption(buildChartOption(currentYear));
+            }
+
+            window.addEventListener("resize", () => {
+                // Re-render config properties when crossing breakpoints to maintain the square symmetry
+                myChart.setOption(buildChartOption(currentYear));
+                myChart.resize();
+            });
+        </script>
+    </body>
+</html>

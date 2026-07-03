@@ -3,453 +3,546 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>NBFC Revenue Density Matrix</title>
-        <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+        <title>NBFC Clustered Graph (Packed)</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
         <style>
+            /* Custom corporate/editorial font families from template */
+            @font-face {
+                font-family: "Jazmin Alt";
+                src: url("JazminAlt-Bold.otf");
+                font-weight: bold;
+            }
+            @font-face {
+                font-family: "GT America";
+                src: url("GT-America-Standard-Light.ttf");
+                font-weight: 300;
+            }
+            @font-face {
+                font-family: "GT America Bold";
+                src: url("GT-America-Standard-Black.ttf");
+                font-weight: 300;
+            }
+
             * {
-                box-sizing: border-box;
                 margin: 0;
                 padding: 0;
-                font-family:
-                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-                    Helvetica, Arial, sans-serif;
+                box-sizing: border-box;
+            }
+
+            /* Fine noise overlay to simulate canvas texture from painting/template */
+            body::before {
+                content: "";
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+                opacity: 0.4;
+                mix-blend-mode: multiply;
+                z-index: 0;
             }
 
             body {
-                background-color: #fafafa;
-                color: #0f172a;
+                background: #f5f2eb; /* Off-white canvas tone matching the artwork */
+                font-family: "GT America", "Segoe UI", sans-serif;
+                padding: 12px 20px 8px;
                 display: flex;
                 flex-direction: column;
-                min-height: 100vh;
+                height: 100vh;
+                overflow: hidden;
             }
 
-            header {
-                background: #ffffff;
-                padding: 20px 15px;
+            /* --- Header Section Styling --- */
+            #header-section {
                 text-align: center;
-                border-bottom: 1px solid #e2e8f0;
+                padding-bottom: 20px;
+                border-bottom: 1px solid #e0e0e0;
+                z-index: 10;
+            }
+            #header-section h1 {
+                font-family: "Jazmin Alt", serif;
+                font-size: clamp(32px, 5vw, 54px);
+                color: #2b2a2a;
+                margin-bottom: 8px;
+                font-weight: 900;
+                letter-spacing: -0.5px;
+            }
+            #header-section .subheader {
+                font-family: "GT America", "Segoe UI", sans-serif;
+                font-size: clamp(16px, 1.8vw, 20px);
+                color: #555;
+                max-width: 900px;
+                margin: 0 auto 15px;
+                line-height: 1.5;
             }
 
-            header h1 {
-                font-size: 1.4rem;
-                font-weight: 700;
-                margin-bottom: 6px;
-                letter-spacing: -0.03em;
-            }
-
-            header p {
-                font-size: 0.85rem;
-                color: #64748b;
-            }
-
-            .controls-container {
+            /* Single line dynamic legend & instruction */
+            .inline-legend-row {
                 display: flex;
-                justify-content: center;
                 align-items: center;
-                gap: 12px;
-                margin: 15px 0;
+                justify-content: center;
+                gap: 8px;
+                font-family: "GT America", "Segoe UI", sans-serif;
+                font-size: 14px;
+                color: #444;
+                letter-spacing: 0.2px;
+                flex-wrap: wrap;
             }
-
-            .btn {
-                background-color: #f1f5f9;
-                color: #475569;
-                border: 1px solid #e2e8f0;
-                padding: 8px 20px;
-                font-size: 0.85rem;
-                font-weight: 600;
-                border-radius: 6px;
-                cursor: pointer;
-                transition: all 0.2s ease;
-            }
-
-            .btn:hover {
-                background-color: #e2e8f0;
-            }
-
-            .btn.active {
-                background-color: #0f172a;
-                color: #ffffff;
-                border-color: #0f172a;
-            }
-
-            .metric-caption {
-                text-align: center;
-                font-size: 0.8rem;
-                color: #64748b;
-                margin: 0 auto 15px auto;
-                max-width: 600px;
-                padding: 0 15px;
-                line-height: 1.4;
-            }
-
-            .metric-box-sample {
+            .legend-circle-large {
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background-color: #54785d;
                 display: inline-block;
-                width: 11px;
-                height: 11px;
-                background-color: #475569;
-                border-radius: 2px;
                 vertical-align: middle;
-                margin-right: 4px;
+            }
+            .legend-circle-small {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background-color: #54785d;
+                display: inline-block;
+                vertical-align: middle;
+            }
+            .inline-legend-row i {
+                color: #777;
+                margin-left: 10px;
             }
 
-            main {
-                flex: 1;
-                width: 100%;
-                max-width: 1200px;
-                margin: 0 auto;
-                padding: 0 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+            /* --- Chart Visualization Area --- */
+            #chart-area {
+                flex: 1 1 auto;
+                position: relative;
+                overflow: hidden;
+                min-height: 300px;
             }
-
-            .chart-wrapper {
-                background: #ffffff;
-                padding: 10px;
-                width: 100%;
-                border-radius: 8px;
-                border: 1px solid #e2e8f0;
-            }
-
             #chart-container {
                 width: 100%;
-                /* Strict responsive base height for desktop layout */
-                height: 540px;
+                height: 100%;
             }
 
-            /* Mobile specific layout override */
-            @media (max-width: 768px) {
-                header h1 {
-                    font-size: 1.25rem;
-                }
-                main {
-                    padding: 0 8px;
-                }
-                .chart-wrapper {
-                    padding: 5px;
-                }
-                #chart-container {
-                    /* Dynamically match container width to make a perfect square viewport on mobile */
-                    height: 92vw;
-                }
+            /* --- Footer Section Styling --- */
+            #footer {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px 0;
+                border-top: 1px solid #e0e0e0;
+                font-family: "GT America", "Segoe UI", sans-serif;
+                font-size: 14px;
+                color: #777;
+                width: 100%;
+                white-space: nowrap;
+                z-index: 10;
             }
-
-            footer {
-                background-color: #f8fafc;
-                color: #94a3b8;
+            .footer-left {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+            }
+            .footer-center {
+                flex: 1.5;
                 text-align: center;
-                padding: 15px;
-                font-size: 0.78rem;
-                border-top: 1px solid #e2e8f0;
-                margin-top: 20px;
+            }
+            .footer-right {
+                flex: 1.5;
+                display: flex;
+                justify-content: flex-end;
+                text-align: right;
+            }
+            .footer-logo {
+                height: 18px;
+                width: auto;
+                max-width: 130px;
+                object-fit: contain;
+            }
+
+            @media (max-width: 800px) {
+                #footer {
+                    padding: 10px 5px;
+                    flex-direction: row;
+                    gap: 4px;
+                    white-space: normal;
+                    font-size: 13px !important;
+                }
+                .footer-right {
+                    font-size: 13px !important;
+                }
             }
         </style>
     </head>
     <body>
-        <header>
-            <h1>NBFC Regulated Entities Revenue Matrix</h1>
-            <p>Symmetrical $10 \times 10$ Structural Matrix Grid Systems</p>
-        </header>
-
-        <div class="controls-container">
-            <button
-                class="btn active"
-                id="btn-fy24"
-                onclick="switchYear('fy24')"
-            >
-                FY24 Revenue
-            </button>
-            <button class="btn" id="btn-fy25" onclick="switchYear('fy25')">
-                FY25 Revenue
-            </button>
-        </div>
-
-        <div class="metric-caption">
-            <span class="metric-box-sample"></span> Each visible cell block
-            metrics proportional values up to <strong>0.67 Cr</strong>,
-            collapsing and assembling seamlessly across peripheral axes.
-        </div>
-
-        <main>
-            <div class="chart-wrapper">
-                <div id="chart-container"></div>
+        <div id="header-section">
+            <h1>The Great Portfolio Pivot</h1>
+            <p class="subheader">
+                India's largest financial ecosystems are reshaping their setups,
+                expanding consumer connections and digital delivery network
+                maps.
+            </p>
+            <div class="inline-legend-row">
+                <span class="legend-circle-large"></span> Company &nbsp;•&nbsp;
+                <span class="legend-circle-small"></span> Brand Channel
+                <i>(Hover over bubbles to view portfolio details)</i>
             </div>
-        </main>
+        </div>
 
-        <footer>
-            <p>&copy; 2026 NBFC Financial Framework Directory</p>
-        </footer>
+        <div id="chart-area">
+            <div id="chart-container"></div>
+        </div>
+
+        <div id="footer">
+            <div class="footer-left">
+                <img src="logo.png" class="footer-logo" alt="The Ken" />
+            </div>
+            <div class="footer-center">Graphic by Anuj, 15 Apr '26</div>
+            <div class="footer-right">
+                Source: Annual Reports, Exchange Filings (2026)
+            </div>
+        </div>
 
         <script>
-            const rawData = [
-                {
-                    name: "Agrim Fincap Pvt.Ltd.",
-                    fy24: 0.19,
-                    fy25: 72.65,
-                    color: "#1b5e20",
-                },
-                {
-                    name: "Ava Finance Private Limited.",
-                    fy24: 0.2,
-                    fy25: 3.5,
-                    color: "#2e7d32",
-                },
-                {
-                    name: "Junoon Capital Services (P) Ltd.",
-                    fy24: 2.91,
-                    fy25: 11.5,
-                    color: "#0d47a1",
-                },
-                {
-                    name: "Niskha Finvest Pvt. Ltd.",
-                    fy24: 2.5,
-                    fy25: 4.7,
-                    color: "#1565c0",
-                },
-                {
-                    name: "Achiievers Finance India Lmtd",
-                    fy24: 14.7,
-                    fy25: 25.4,
-                    color: "#4a148c",
-                },
-                {
-                    name: "SURYA SHAKTI VYAPAAR Pvt. Ltd.",
-                    fy24: 14.6,
-                    fy25: 14.6,
-                    color: "#6a1b9a",
-                },
-                {
-                    name: "Agf Finlease (India) Ltd",
-                    fy24: 5.0,
-                    fy25: 22.6,
-                    color: "#880e4f",
-                },
-                {
-                    name: "Aman Fincap Ltd.",
-                    fy24: 1.2,
-                    fy25: 0.8,
-                    color: "#ad1457",
-                },
-                {
-                    name: "Ampire Finance Private Limited",
-                    fy24: 0.4,
-                    fy25: 2.2,
-                    color: "#bf360c",
-                },
-                {
-                    name: "Avinash Capital Markets Pvt. Ltd.",
-                    fy24: 0.24,
-                    fy25: 0.237,
-                    color: "#d84315",
-                },
-                {
-                    name: "Ayaan Finserve India Private Limited",
-                    fy24: 3.57,
-                    fy25: 7.9,
-                    color: "#e65100",
-                },
-                {
-                    name: "Comero Leasing & Financials Pvt. Ltd.",
-                    fy24: 1.16,
-                    fy25: 6.4,
-                    color: "#f57c00",
-                },
-                {
-                    name: "Daksh Lefins Ltd.",
-                    fy24: 0.5,
-                    fy25: 1.0,
-                    color: "#fbc02d",
-                },
-                {
-                    name: "Dev-Aashish Capital (PLtd)",
-                    fy24: 0.18,
-                    fy25: 1.0,
-                    color: "#afb42b",
-                },
-                {
-                    name: "Devmuni Leasing & Finance Ltd.",
-                    fy24: 32.97,
-                    fy25: 4.7,
-                    color: "#004d40",
-                },
-                {
-                    name: "Digner Finlease & Investment Private Limited",
-                    fy24: 0.11,
-                    fy25: 2.35,
-                    color: "#00695c",
-                },
-                {
-                    name: "Everlight Holding Pvt Ltd",
-                    fy24: 0.13,
-                    fy25: 0.224,
-                    color: "#006064",
-                },
-                {
-                    name: "Girdhar Finlease Pvt Ltd.",
-                    fy24: 8.0,
-                    fy25: 14.3,
-                    color: "#00838f",
-                },
-                {
-                    name: "Goodskill Securities And Services Limited",
-                    fy24: 36.8,
-                    fy25: 47.9,
-                    color: "#212121",
-                },
-                {
-                    name: "Kasar Credit & Capital Pvt.Ltd.",
-                    fy24: 0.01,
-                    fy25: 33.3,
-                    color: "#37474f",
-                },
-                {
-                    name: "Loan2Grow Fincap Private Limited",
-                    fy24: 0.4,
-                    fy25: 0.44,
-                    color: "#4e342e",
-                },
-                {
-                    name: "Tycoon Credit & Portfolio Ltd.",
-                    fy24: 0.71,
-                    fy25: 16.2,
-                    color: "#6d4c41",
-                },
-            ];
-
             const chartDom = document.getElementById("chart-container");
             const myChart = echarts.init(chartDom);
 
-            function getSortedGridCells() {
-                let cells = [];
-                for (let r = 0; r < 10; r++) {
-                    for (let c = 0; c < 10; c++) {
-                        const distToCenter = Math.sqrt(
-                            Math.pow(c - 4.5, 2) + Math.pow(r - 4.5, 2),
-                        );
-                        cells.push({ r, c, distToCenter });
-                    }
+            const rawData = [
+                {
+                    name: "Agrim Fincap Pvt.Ltd.",
+                    val: 1245,
+                    subs: ["Rupeyalelo", "Speedo loan"],
+                },
+                {
+                    name: "Ava Finance Private Limited.",
+                    val: 1650,
+                    subs: ["Kamakshi Money"],
+                },
+                {
+                    name: "Junoon Capital Services (P) Ltd.",
+                    val: 297,
+                    subs: ["Paisa Udhar", "Insta Paise"],
+                },
+                { name: "Niskha Finvest Pvt. Ltd.", val: 88, subs: ["CashPe"] },
+                {
+                    name: "Achiievers Finance India Lmtd",
+                    val: 73,
+                    subs: [
+                        "Borrowera",
+                        "Credxpres",
+                        "Loan Finserve",
+                        "LoanMitraa",
+                        "Moneywalle",
+                        "Jhatpat loan",
+                    ],
+                },
+                {
+                    name: "SURYA SHAKTI VYAPAAR Pvt. Ltd.",
+                    val: 360,
+                    subs: ["Easyrupeeloan"],
+                },
+                {
+                    name: "Agf Finlease (India) Ltd",
+                    val: 352,
+                    subs: [
+                        "Cashkredit",
+                        "Loanforcare",
+                        "Next big loan",
+                        "Wepay Loan",
+                    ],
+                },
+                {
+                    name: "Aman Fincap Ltd.",
+                    val: -33,
+                    subs: [
+                        "Dhanrishi",
+                        "Duniya Finance",
+                        "Loanzap",
+                        "Paisa on salary",
+                        "Tejas loan",
+                        "Udhaar Portal",
+                    ],
+                },
+                {
+                    name: "Ampire Finance Private Limited",
+                    val: 450,
+                    subs: [
+                        "F1 Speed loan",
+                        "FastPaise",
+                        "SnapPaisa",
+                        "Salaryadda",
+                        "Salarysetu",
+                    ],
+                },
+                {
+                    name: "Avinash Capital Markets Pvt. Ltd.",
+                    val: -1,
+                    subs: ["Bright loans"],
+                },
+                {
+                    name: "Ayaan Finserve India Private Limited",
+                    val: 126,
+                    subs: ["Dhanvriddhi"],
+                },
+                {
+                    name: "Comero Leasing & Financials Pvt. Ltd.",
+                    val: 482,
+                    subs: ["Xpressloan"],
+                },
+                {
+                    name: "Naman Finlease Pvt. Ltd.",
+                    val: 275,
+                    subs: ["Qua loan", "Zeptofinance"],
+                },
+                {
+                    name: "Dev-Aashish Capital (PLtd)",
+                    val: 47547,
+                    subs: ["Rupee112"],
+                },
+                {
+                    name: "Devmuni Leasing & Finance Ltd.",
+                    val: 127,
+                    subs: ["Bharatloan"],
+                },
+                {
+                    name: "Digner Finlease & Investment Private Limited",
+                    val: 2036,
+                    subs: ["Creditpey", "Kreditsure"],
+                },
+                {
+                    name: "Everlight Holding Pvt Ltd",
+                    val: 72,
+                    subs: ["Everpay"],
+                },
+                {
+                    name: "Girdhar Finlease Pvt Ltd.",
+                    val: 79,
+                    subs: ["30 Days loan"],
+                },
+                {
+                    name: "Goodskill Securities And Services Limited",
+                    val: 30,
+                    subs: ["Every Day Loan", "Lonepey"],
+                },
+                {
+                    name: "Kasar Credit & Capital Pvt.Ltd.",
+                    val: 332900,
+                    subs: ["Salary on time"],
+                },
+                {
+                    name: "Loan2Grow Fincap Private Limited",
+                    val: 10,
+                    subs: ["Jhatpat cash"],
+                },
+                {
+                    name: "Tycoon Credit & Portfolio Ltd.",
+                    val: 2214,
+                    subs: ["Loan Hub"],
+                },
+                {
+                    name: "Solomon Capital Private Limited",
+                    val: 47627,
+                    subs: ["Bharat loan", "Rupee112 (Solomon)"],
+                },
+                {
+                    name: "Woodland Securities Private Limited",
+                    val: 18100,
+                    subs: ["Creditwalle"],
+                },
+                {
+                    name: "R.K. Bansal Finance Private Limited",
+                    val: 2664,
+                    subs: ["Ramfincorp"],
+                },
+            ];
+
+            const palette = [
+                "#54785d",
+                "#4a6f96",
+                "#b55254",
+                "#cca049",
+                "#c28d93",
+                "#2b2a2a",
+                "#7d7a58",
+                "#9281a8",
+                "#5d4656",
+                "#3f8596",
+            ];
+
+            function renderChart() {
+                // Calculate dynamic scaling factor based on the container width
+                const containerWidth = chartDom.clientWidth;
+                const isMobile = containerWidth < 768;
+
+                // Scale factor: smaller sizes on mobile to prevent overlaps
+                const scaleFactor = isMobile ? 0.55 : 1.0;
+                const subsidiarySize = 14 * scaleFactor;
+
+                function calculateParentSize(val) {
+                    const absVal = Math.abs(val);
+                    let baseSize = Math.log1p(absVal) * 9 * scaleFactor;
+                    const minSize = 35 * scaleFactor;
+                    if (baseSize < minSize) baseSize = minSize;
+                    return baseSize;
                 }
-                return cells.sort((a, b) => a.distToCenter - b.distToCenter);
-            }
-            const sharedGridStructure = getSortedGridCells();
 
-            function generateData(metric) {
-                let points = [];
+                const simNodes = [];
+                const simLinks = [];
+                const echartsLinks = [];
 
-                // To ensure layout looks perfectly balanced on a mobile square format,
-                // we use an even grid layout distribution (e.g. 5 columns instead of 6)
-                const isMobile = window.innerWidth <= 768;
-                const columnsCount = isMobile ? 5 : 6;
-                const gridSpacing = 11;
+                rawData.forEach((item, index) => {
+                    const groupColor = palette[index % palette.length];
+                    const parentSize = calculateParentSize(item.val);
 
-                rawData.forEach((company, cIndex) => {
-                    const matrixX = (cIndex % columnsCount) * gridSpacing;
-                    const matrixY =
-                        Math.floor(cIndex / columnsCount) * gridSpacing;
+                    const sharedMetaData = {
+                        parentName: item.name,
+                        growth: item.val,
+                        subsList: item.subs,
+                    };
 
-                    let activeBoxes = 0;
-                    if (company[metric] > 0) {
-                        activeBoxes = Math.min(
-                            100,
-                            Math.max(1, Math.round(company[metric] * 1.5)),
-                        );
-                    }
+                    simNodes.push({
+                        id: item.name,
+                        name: item.name,
+                        radius: parentSize / 2 + (isMobile ? 1.5 : 2), // Extra padding buffer
+                        symbolSize: parentSize,
+                        category: index,
+                        isParent: true,
+                        color: groupColor,
+                        customData: sharedMetaData,
+                    });
 
-                    sharedGridStructure.forEach((cell, orderIdx) => {
-                        const stateActive = orderIdx < activeBoxes;
-                        points.push({
-                            value: [
-                                matrixX + cell.c,
-                                matrixY + cell.r,
-                                stateActive ? 1 : 0,
-                            ],
-                            itemStyle: {
-                                color: stateActive
-                                    ? company.color
-                                    : "rgba(241, 245, 249, 1)",
-                            },
-                            metaData: {
-                                name: company.name,
-                                revenue: company[metric],
-                            },
+                    item.subs.forEach((sub) => {
+                        simNodes.push({
+                            id: sub,
+                            name: sub,
+                            radius: subsidiarySize / 2 + (isMobile ? 1 : 1.5),
+                            symbolSize: subsidiarySize,
+                            category: index,
+                            isParent: false,
+                            color: groupColor,
+                            customData: sharedMetaData,
                         });
+
+                        simLinks.push({ source: item.name, target: sub });
+                        echartsLinks.push({ source: item.name, target: sub });
                     });
                 });
-                return points;
-            }
 
-            function buildChartOption(metricKey) {
-                const isMobile = window.innerWidth <= 768;
+                // Run D3 Simulation with localized constraints
+                const simulation = d3
+                    .forceSimulation(simNodes)
+                    .force(
+                        "link",
+                        d3
+                            .forceLink(simLinks)
+                            .id((d) => d.id)
+                            .distance((l) => l.source.radius + l.target.radius)
+                            .strength(1),
+                    )
+                    .force("x", d3.forceX(0).strength(0.3))
+                    .force("y", d3.forceY(0).strength(0.3))
+                    .force(
+                        "collide",
+                        d3
+                            .forceCollide()
+                            .radius((d) => d.radius)
+                            .strength(1)
+                            .iterations(5),
+                    )
+                    .stop();
 
-                // Bounds calculation based on chosen column layout distributions
-                const xMax = isMobile ? 54 : 64;
-                const yMax = isMobile ? 54 : 44;
+                for (let i = 0; i < 600; i++) simulation.tick();
 
-                return {
+                const nodes = simNodes.map((n) => ({
+                    name: n.name,
+                    x: n.x,
+                    y: n.y,
+                    symbolSize: n.symbolSize,
+                    category: n.category,
+                    itemStyle: {
+                        color: n.color,
+                        opacity: n.isParent ? 0.95 : 0.75,
+                    },
+                    label: n.isParent
+                        ? {
+                              show: n.symbolSize > 22, // Hide percentages on ultra-small bubbles
+                              position: "inside",
+                              color: "#ffffff",
+                              fontSize: Math.max(
+                                  isMobile ? 7 : 9,
+                                  Math.min(13, n.symbolSize / 5.5),
+                              ),
+                              fontWeight: "bold",
+                              formatter: (p) => `${p.data.customData.growth}%`,
+                          }
+                        : { show: false },
+                    customData: n.customData,
+                }));
+
+                const option = {
                     tooltip: {
-                        position: "top",
                         trigger: "item",
-                        backgroundColor: "rgba(15, 23, 42, 0.95)",
-                        textStyle: { color: "#fff", fontSize: 11 },
-                        borderWidth: 0,
+                        backgroundColor: "rgba(255, 255, 255, 0.98)",
+                        borderColor: "#2b2a2a",
+                        borderWidth: 1,
+                        textStyle: {
+                            color: "#2b2a2a",
+                            fontFamily: "GT America, Segoe UI, sans-serif",
+                        },
                         formatter: function (params) {
-                            if (params.data.value[2] === 0) return null;
-                            return `<div style="padding: 2px 4px;">
-                                    <strong>${params.data.metaData.name}</strong><br/>
-                                    <span style="color:#60a5fa;">Revenue: ${params.data.metaData.revenue} Cr</span>
-                                </div>`;
+                            if (!params.data || !params.data.customData)
+                                return "";
+                            const data = params.data.customData;
+                            const subsFormatted =
+                                data.subsList.length > 0
+                                    ? data.subsList.join(", ")
+                                    : "None";
+                            return `
+                                <div style="font-size: 12px; line-height: 1.6; padding: 4px; max-width: 250px; white-space: normal;">
+                                    <strong style="font-size: 13px; color: #000;">${data.parentName}</strong><br/>
+                                    <hr style="border:none; border-top:1px solid #eee; margin:6px 0;"/>
+                                    <strong>Growth/Increase:</strong> ${data.growth}%<br/>
+                                    <strong>Brand Channels:</strong> <span style="color: #666;">${subsFormatted}</span>
+                                </div>
+                            `;
                         },
                     },
-                    xAxis: { type: "value", show: false, min: 0, max: xMax },
-                    yAxis: {
-                        type: "value",
-                        show: false,
-                        min: 0,
-                        max: yMax,
-                        inverse: true,
-                    },
-                    grid: { top: "2%", bottom: "2%", left: "2%", right: "2%" },
+                    animationDuration: 800,
                     series: [
                         {
-                            type: "heatmap",
-                            data: generateData(metricKey),
-                            itemStyle: {
-                                borderColor: "#ffffff",
-                                borderWidth: isMobile ? 0.5 : 0.8,
+                            type: "graph",
+                            layout: "none",
+                            data: nodes,
+                            links: echartsLinks,
+                            roam: false,
+                            legendHoverLink: true,
+                            emphasis: {
+                                focus: "adjacency",
+                                lineStyle: {
+                                    width: 1.5,
+                                    color: "rgba(43, 42, 42, 0.4)",
+                                },
+                                itemStyle: {
+                                    shadowBlur: 15,
+                                    shadowColor: "rgba(0, 0, 0, 0.15)",
+                                },
                             },
-                            animationType: "all",
-                            animationDuration: 700,
-                            animationDurationUpdate: 450,
-                            animationEasingUpdate: "linear",
+                            lineStyle: {
+                                width: 0,
+                            },
                         },
                     ],
                 };
+
+                myChart.setOption(option);
             }
 
-            // Handle structural reconfiguration on resize events
-            let currentYear = "fy24";
-            myChart.setOption(buildChartOption(currentYear));
+            // Initial render
+            renderChart();
 
-            function switchYear(targetYear) {
-                const currentActive = document.querySelector(".btn.active");
-                if (currentActive && currentActive.id === `btn-${targetYear}`)
-                    return;
-
-                document
-                    .querySelectorAll(".btn")
-                    .forEach((b) => b.classList.remove("active"));
-                document
-                    .getElementById(`btn-${targetYear}`)
-                    .classList.add("active");
-
-                currentYear = targetYear;
-                myChart.setOption(buildChartOption(currentYear));
-            }
-
+            // Clean dynamic scaling on resize
             window.addEventListener("resize", () => {
-                // Re-render config properties when crossing breakpoints to maintain the square symmetry
-                myChart.setOption(buildChartOption(currentYear));
                 myChart.resize();
+                renderChart();
             });
         </script>
     </body>

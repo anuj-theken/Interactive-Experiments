@@ -1,0 +1,193 @@
+<script>
+    const chartDom = document.getElementById("chart-container");
+    const myChart = echarts.init(chartDom);
+
+    const rawData = [
+        { name: "Agrim Fincap Pvt.Ltd.", val: 1245, subs: ["Rupeyalelo", "Speedo loan"] },
+        { name: "Ava Finance Private Limited.", val: 1650, subs: ["Kamakshi Money"] },
+        { name: "Junoon Capital Services (P) Ltd.", val: 297, subs: ["Paisa Udhar", "Insta Paise"] },
+        { name: "Niskha Finvest Pvt. Ltd.", val: 88, subs: ["CashPe"] },
+        { name: "Achiievers Finance India Lmtd", val: 73, subs: ["Borrowera", "Credxpres", "Loan Finserve", "LoanMitraa", "Moneywalle", "Jhatpat loan"] },
+        { name: "SURYA SHAKTI VYAPAAR Pvt. Ltd.", val: 360, subs: ["Easyrupeeloan"] },
+        { name: "Agf Finlease (India) Ltd", val: 352, subs: ["Cashkredit", "Loanforcare", "Next big loan", "Wepay Loan"] },
+        { name: "Aman Fincap Ltd.", val: -33, subs: ["Dhanrishi", "Duniya Finance", "Loanzap", "Paisa on salary", "Tejas loan", "Udhaar Portal"] },
+        { name: "Ampire Finance Private Limited", val: 450, subs: ["F1 Speed loan", "FastPaise", "SnapPaisa", "Salaryadda", "Salarysetu"] },
+        { name: "Avinash Capital Markets Pvt. Ltd.", val: -1, subs: ["Bright loans"] },
+        { name: "Ayaan Finserve India Private Limited", val: 126, subs: ["Dhanvriddhi"] },
+        { name: "Comero Leasing & Financials Pvt. Ltd.", val: 482, subs: ["Xpressloan"] },
+        { name: "Naman Finlease Pvt. Ltd.", val: 275, subs: ["Qua loan", "Zeptofinance"] },
+        { name: "Dev-Aashish Capital (PLtd)", val: 47547, subs: ["Rupee112"] },
+        { name: "Devmuni Leasing & Finance Ltd.", val: 127, subs: ["Bharatloan"] },
+        { name: "Digner Finlease & Investment Private Limited", val: 2036, subs: ["Creditpey", "Kreditsure"] },
+        { name: "Everlight Holding Pvt Ltd", val: 72, subs: ["Everpay"] },
+        { name: "Girdhar Finlease Pvt Ltd.", val: 79, subs: ["30 Days loan"] },
+        { name: "Goodskill Securities And Services Limited", val: 30, subs: ["Every Day Loan", "Lonepey"] },
+        { name: "Kasar Credit & Capital Pvt.Ltd.", val: 332900, subs: ["Salary on time"] },
+        { name: "Loan2Grow Fincap Private Limited", val: 10, subs: ["Jhatpat cash"] },
+        { name: "Tycoon Credit & Portfolio Ltd.", val: 2214, subs: ["Loan Hub"] },
+        { name: "Solomon Capital Private Limited", val: 47627, subs: ["Bharat loan", "Rupee112 (Solomon)"] },
+        { name: "Woodland Securities Private Limited", val: 18100, subs: ["Creditwalle"] },
+        { name: "R.K. Bansal Finance Private Limited", val: 2664, subs: ["Ramfincorp"] }
+    ];
+
+    const palette = [
+        "#54785d", "#4a6f96", "#b55254", "#cca049", "#c28d93", 
+        "#2b2a2a", "#7d7a58", "#9281a8", "#5d4656", "#3f8596"
+    ];
+
+    function renderChart() {
+        // Calculate dynamic scaling factor based on the container width
+        const containerWidth = chartDom.clientWidth;
+        const isMobile = containerWidth < 768;
+        
+        // Scale factor: smaller sizes on mobile to prevent overlaps
+        const scaleFactor = isMobile ? 0.55 : 1.0; 
+        const subsidiarySize = 14 * scaleFactor;
+
+        function calculateParentSize(val) {
+            const absVal = Math.abs(val);
+            let baseSize = Math.log1p(absVal) * 9 * scaleFactor;
+            const minSize = 35 * scaleFactor;
+            if (baseSize < minSize) baseSize = minSize;
+            return baseSize;
+        }
+
+        const simNodes = [];
+        const simLinks = [];
+        const echartsLinks = [];
+
+        rawData.forEach((item, index) => {
+            const groupColor = palette[index % palette.length];
+            const parentSize = calculateParentSize(item.val);
+
+            const sharedMetaData = {
+                parentName: item.name,
+                growth: item.val,
+                subsList: item.subs,
+            };
+
+            simNodes.push({
+                id: item.name,
+                name: item.name,
+                radius: (parentSize / 2) + (isMobile ? 1.5 : 2), // Extra padding buffer
+                symbolSize: parentSize,
+                category: index,
+                isParent: true,
+                color: groupColor,
+                customData: sharedMetaData,
+            });
+
+            item.subs.forEach((sub) => {
+                simNodes.push({
+                    id: sub,
+                    name: sub,
+                    radius: (subsidiarySize / 2) + (isMobile ? 1 : 1.5),
+                    symbolSize: subsidiarySize,
+                    category: index,
+                    isParent: false,
+                    color: groupColor,
+                    customData: sharedMetaData,
+                });
+
+                simLinks.push({ source: item.name, target: sub });
+                echartsLinks.push({ source: item.name, target: sub });
+            });
+        });
+
+        // Run D3 Simulation with localized constraints
+        const simulation = d3
+            .forceSimulation(simNodes)
+            .force("link", d3.forceLink(simLinks).id((d) => d.id).distance((l) => l.source.radius + l.target.radius).strength(1))
+            .force("x", d3.forceX(0).strength(0.3))
+            .force("y", d3.forceY(0).strength(0.3))
+            .force("collide", d3.forceCollide().radius((d) => d.radius).strength(1).iterations(5))
+            .stop();
+
+        for (let i = 0; i < 600; i++) simulation.tick();
+
+        const nodes = simNodes.map((n) => ({
+            name: n.name,
+            x: n.x,
+            y: n.y,
+            symbolSize: n.symbolSize,
+            category: n.category,
+            itemStyle: {
+                color: n.color,
+                opacity: n.isParent ? 0.95 : 0.75,
+            },
+            label: n.isParent
+                ? {
+                      show: n.symbolSize > 22, // Hide percentages on ultra-small bubbles
+                      position: "inside",
+                      color: "#ffffff",
+                      fontSize: Math.max(isMobile ? 7 : 9, Math.min(13, n.symbolSize / 5.5)),
+                      fontWeight: "bold",
+                      formatter: (p) => `${p.data.customData.growth}%`,
+                  }
+                : { show: false },
+            customData: n.customData,
+        }));
+
+        const option = {
+            tooltip: {
+                trigger: "item",
+                backgroundColor: "rgba(255, 255, 255, 0.98)",
+                borderColor: "#2b2a2a",
+                borderWidth: 1,
+                textStyle: {
+                    color: "#2b2a2a",
+                    fontFamily: "GT America, Segoe UI, sans-serif",
+                },
+                formatter: function (params) {
+                    if (!params.data || !params.data.customData) return "";
+                    const data = params.data.customData;
+                    const subsFormatted = data.subsList.length > 0 ? data.subsList.join(", ") : "None";
+                    return `
+                        <div style="font-size: 12px; line-height: 1.6; padding: 4px; max-width: 250px; white-space: normal;">
+                            <strong style="font-size: 13px; color: #000;">${data.parentName}</strong><br/>
+                            <hr style="border:none; border-top:1px solid #eee; margin:6px 0;"/>
+                            <strong>Growth/Increase:</strong> ${data.growth}%<br/>
+                            <strong>Brand Channels:</strong> <span style="color: #666;">${subsFormatted}</span>
+                        </div>
+                    `;
+                },
+            },
+            animationDuration: 800,
+            series: [
+                {
+                    type: "graph",
+                    layout: "none",
+                    data: nodes,
+                    links: echartsLinks,
+                    roam: false,
+                    legendHoverLink: true,
+                    emphasis: {
+                        focus: "adjacency",
+                        lineStyle: {
+                            width: 1.5,
+                            color: "rgba(43, 42, 42, 0.4)",
+                        },
+                        itemStyle: {
+                            shadowBlur: 15,
+                            shadowColor: "rgba(0, 0, 0, 0.15)",
+                        },
+                    },
+                    lineStyle: {
+                        width: 0,
+                    },
+                },
+            ],
+        };
+
+        myChart.setOption(option);
+    }
+
+    // Initial render
+    renderChart();
+
+    // Clean dynamic scaling on resize
+    window.addEventListener("resize", () => {
+        myChart.resize();
+        renderChart();
+    });
+</script>
