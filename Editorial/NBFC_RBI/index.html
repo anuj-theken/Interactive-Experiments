@@ -138,21 +138,33 @@
                     padding: 8px 0;
                 }
             }
+
+            .inline-legend-row {
+                display: flex;
+                flex-direction: column;
+                gap: 8px; /* Adds a clean spacing between the two lines */
+            }
         </style>
     </head>
     <body>
         <div id="header-section">
-            <h1>The Great Portfolio Pivot</h1>
+            <h1>Class of FY25</h1>
             <p class="subheader">
-                India's largest financial ecosystems are reshaping their setups,
-                expanding consumer connections and digital network maps.
+                NBFCs running high-APR personal loans saw their revenues
+                skyrocket through FY25
             </p>
             <div class="inline-legend-row">
-                <span class="legend-circle-positive"></span> Positive Growth
-                &nbsp;•&nbsp;
-                <span class="legend-circle-negative"></span> Negative / Flat
-                Growth &nbsp;•&nbsp;
-                <i>(Hover bubbles to view portfolio details)</i>
+                <span class="legend-text">
+                    Each bubble is one NBFC, sized by how many times its revenue
+                    multiplied between FY24 and FY25
+                </span>
+                <div class="legend-items">
+                    <span class="legend-circle-positive"></span> Profitable
+                    &nbsp;•&nbsp;
+                    <span class="legend-circle-negative"></span> Loss making
+                    Growth &nbsp;•&nbsp;
+                    <i>(Hover bubbles to view company details)</i>
+                </div>
             </div>
         </div>
 
@@ -640,7 +652,7 @@
 
                             const growthString = isNegativeOrFlat
                                 ? `<b>Revenue</b> dropped <span style="font-weight: normal; color: ${accentColor};">x${data.growthMult}</span>`
-                                : `<b>Revenue</b> grew <span style="font-weight: normal; color: ${accentColor};">x${data.growthMult}</span> times`;
+                                : `<b>Revenue</b> grew <span style="font-weight: normal; color: ${accentColor};">${data.growthMult}x</span> times`;
 
                             return `
                                 <div style="width: ${cardWidth}; padding: ${profile === "mobile" ? "12px 14px" : "16px 18px"}; line-height: 1.4; box-sizing: border-box; font-family: 'GT America', sans-serif; font-weight: normal; color: #333;">
