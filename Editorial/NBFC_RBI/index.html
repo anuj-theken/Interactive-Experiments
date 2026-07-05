@@ -71,22 +71,27 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 12px;
+                gap: 14px;
                 font-size: 13px;
                 color: #444;
                 flex-wrap: wrap;
             }
-            .legend-circle-positive {
+            .legend-box-size-icon {
+                width: 14px;
+                height: 14px;
+                border: 1px solid #777;
+                background-color: transparent;
+                display: inline-block;
+            }
+            .legend-square-positive {
                 width: 12px;
                 height: 12px;
-                border-radius: 50%;
                 background: linear-gradient(90deg, #b4f0cd, #194b2d);
                 display: inline-block;
             }
-            .legend-circle-negative {
+            .legend-square-negative {
                 width: 12px;
                 height: 12px;
-                border-radius: 50%;
                 background-color: #e48d73;
                 display: inline-block;
             }
@@ -137,10 +142,12 @@
                 expanding consumer connections and digital network maps.
             </p>
             <div class="inline-legend-row">
-                <span class="legend-circle-positive"></span> Positive Profits
-                &nbsp;•&nbsp;
-                <span class="legend-circle-negative"></span> Negative (Loss)
-                <i>(Hover bubbles to view portfolio details)</i>
+                <span class="legend-box-size-icon"></span>Box Size - Growth in
+                FY26 &nbsp;&nbsp;
+                <span class="legend-square-positive"></span> Darker Color -
+                Higher Revenue &nbsp;&nbsp;
+                <span class="legend-square-negative"></span> Negative growth
+                <i>(Hover boxes to view portfolio details)</i>
             </div>
         </div>
 
@@ -160,51 +167,58 @@
 
             const rawData = [
                 {
-                    name: "Agrim Fincap Pvt.Ltd.",
-                    val: 1245,
-                    subs: ["Rupeyalelo", "Speedo loan"],
+                    name: "Agrim Fincap",
+                    rev24: 0.2,
+                    rev25: 2.7,
+                    multiple: 13.5,
+                    subs: ["Rupyalelo", "Speedo loan"],
                     yoe: 1995,
                 },
                 {
-                    name: "Ava Finance Private Limited.",
-                    val: 1650,
+                    name: "Ava Finance",
+                    rev24: 0.2,
+                    rev25: 3.5,
+                    multiple: 21.8,
                     subs: ["Kamakshi Money"],
                     yoe: 1995,
                 },
                 {
-                    name: "Junoon Capital Services (P) Ltd.",
-                    val: 297,
+                    name: "Junoon Capital",
+                    rev24: 2.9,
+                    rev25: 11.5,
+                    multiple: 4.0,
                     subs: ["Paisa Udhar", "Insta Paise"],
                     yoe: 1996,
                 },
                 {
-                    name: "Niskha Finvest Pvt. Ltd.",
-                    val: 88,
+                    name: "Niskha Finvest",
+                    rev24: 2.5,
+                    rev25: 4.7,
+                    multiple: 1.9,
                     subs: ["CashPe"],
                     yoe: 1994,
                 },
                 {
-                    name: "Achiievers Finance India Lmtd",
-                    val: 73,
-                    subs: [
-                        "Borrowera",
-                        "Credxpres",
-                        "Loan Finserve",
-                        "LoanMitraa",
-                        "Moneywalle",
-                        "Jhatpat loan",
-                    ],
+                    name: "Achiievers Finance India",
+                    rev24: 14.7,
+                    rev25: 25.4,
+                    multiple: 1.7,
+                    subs: ["Jhatpat loan"],
                     yoe: 1996,
                 },
                 {
-                    name: "SURYA SHAKTI VYAPAAR Pvt. Ltd.",
-                    val: 360,
-                    subs: ["Easyrupeeloan"],
+                    name: "SURYA SHAKTI VYAPAAR",
+                    rev24: 1.0,
+                    rev25: 4.6,
+                    multiple: 4.6,
+                    subs: ["Easyrupeeloan", "ClapCredit"],
                     yoe: 1995,
                 },
                 {
-                    name: "Agf Finlease (India) Ltd",
-                    val: 352,
+                    name: "AGF Finlease",
+                    rev24: 5.0,
+                    rev25: 22.6,
+                    multiple: 4.6,
                     subs: [
                         "Cashkredit",
                         "Loanforcare",
@@ -214,21 +228,24 @@
                     yoe: 1996,
                 },
                 {
-                    name: "Aman Fincap Ltd.",
-                    val: -33,
+                    name: "Aman Fincap",
+                    rev24: 1.2,
+                    rev25: 0.8,
+                    multiple: 0.7,
                     subs: [
-                        "Dhanrishi",
                         "Duniya Finance",
-                        "Loanzap",
+                        "Squidloan",
                         "Paisa on salary",
                         "Tejas loan",
-                        "Udhaar Portal",
+                        "LoanZap",
                     ],
                     yoe: 1996,
                 },
                 {
-                    name: "Ampire Finance Private Limited",
-                    val: 450,
+                    name: "Ampire Finance",
+                    rev24: 0.4,
+                    rev25: 2.2,
+                    multiple: 5.8,
                     subs: [
                         "F1 Speed loan",
                         "FastPaise",
@@ -239,98 +256,130 @@
                     yoe: 1981,
                 },
                 {
-                    name: "Avinash Capital Markets Pvt. Ltd.",
-                    val: -1,
-                    subs: ["Bright loans"],
+                    name: "Acolyte Finance",
+                    rev24: 0.2,
+                    rev25: 11.3,
+                    multiple: 56.5,
+                    subs: ["Borrwera", "Credxpress"],
                     yoe: 1994,
                 },
                 {
-                    name: "Ayaan Finserve India Private Limited",
-                    val: 126,
+                    name: "Ayaan Finserve",
+                    rev24: 3.5,
+                    rev25: 7.9,
+                    multiple: 2.3,
                     subs: ["Dhanvriddhi"],
                     yoe: 1982,
                 },
                 {
-                    name: "Comero Leasing & Financials Pvt. Ltd.",
-                    val: 482,
+                    name: "Comero Leasing & Financials",
+                    rev24: 1.1,
+                    rev25: 6.4,
+                    multiple: 5.8,
                     subs: ["Xpressloan"],
                     yoe: 1992,
                 },
                 {
-                    name: "Naman Finlease Pvt. Ltd.",
-                    val: 275,
+                    name: "Naman Finlease",
+                    rev24: 1.6,
+                    rev25: 6.0,
+                    multiple: 3.8,
                     subs: ["Qua loan", "Zeptofinance"],
                     yoe: 1997,
                 },
                 {
-                    name: "Dev-Aashish Capital (PLtd)",
-                    val: 47547,
+                    name: "Dev-Aashish Capital",
+                    rev24: 0.08,
+                    rev25: 0.9,
+                    multiple: 11.3,
                     subs: ["Rupee112"],
                     yoe: 1995,
                 },
                 {
-                    name: "Devmuni Leasing & Finance Ltd.",
-                    val: 127,
+                    name: "Devmuni Leasing & Finance",
+                    rev24: 32.9,
+                    rev25: 74.7,
+                    multiple: 2.3,
                     subs: ["Bharatloan"],
                     yoe: 1995,
                 },
                 {
-                    name: "Digner Finlease & Investment Private Limited",
-                    val: 2036,
+                    name: "Digner Finlease & Investment",
+                    rev24: 0.1,
+                    rev25: 2.4,
+                    multiple: 24.0,
                     subs: ["Creditpey", "Kreditsure"],
                     yoe: 1995,
                 },
                 {
-                    name: "Everlight Holding Pvt Ltd",
-                    val: 72,
+                    name: "Everlight Holding",
+                    rev24: 0.1,
+                    rev25: 0.2,
+                    multiple: 2.0,
                     subs: ["Everpay"],
                     yoe: 1989,
                 },
                 {
-                    name: "Girdhar Finlease Pvt Ltd.",
-                    val: 79,
+                    name: "Girdhar Finlease",
+                    rev24: 8.0,
+                    rev25: 14.2,
+                    multiple: 1.8,
                     subs: ["30 Days loan"],
                     yoe: 1983,
                 },
                 {
-                    name: "Goodskill Securities And Services Limited",
-                    val: 30,
+                    name: "Goodskill Securities And Services",
+                    rev24: 36.8,
+                    rev25: 47.9,
+                    multiple: 1.3,
                     subs: ["Every Day Loan", "Lonepey"],
                     yoe: 1990,
                 },
                 {
-                    name: "Kasar Credit & Capital Pvt.Ltd.",
-                    val: 332900,
+                    name: "Kasar Credit & Capital",
+                    rev24: 0.01,
+                    rev25: 33.3,
+                    multiple: 3330.0,
                     subs: ["Salary on time"],
                     yoe: 1995,
                 },
                 {
-                    name: "Loan2Grow Fincap Private Limited",
-                    val: 10,
+                    name: "Loan2Grow Fincap",
+                    rev24: 0.4,
+                    rev25: 0.4,
+                    multiple: 1.0,
                     subs: ["Jhatpat cash"],
                     yoe: 2020,
                 },
                 {
-                    name: "Tycoon Credit & Portfolio Ltd.",
-                    val: 2214,
+                    name: "Tycoon Credit & Portfolio",
+                    rev24: 0.7,
+                    rev25: 16.2,
+                    multiple: 23.1,
                     subs: ["Loan Hub"],
                     yoe: 1992,
                 },
                 {
-                    name: "Solomon Capital Private Limited",
-                    val: 47627,
+                    name: "Solomon Capital",
+                    rev24: 0.2,
+                    rev25: 104.9,
+                    multiple: 524.5,
                     subs: ["Bharat loan", "Rupee112 (Solomon)"],
                     yoe: 2014,
                 },
                 {
-                    name: "Woodland Securities Private Limited",
-                    val: 18100,
+                    name: "Woodland Securities",
+                    rev24: 0.4,
+                    rev25: 7.3,
+                    multiple: 18.3,
                     subs: ["Creditwalle"],
                     yoe: 1992,
                 },
                 {
-                    name: "R.K. Bansal Finance Private Limited",
-                    val: 2664,
+                    name: "R.K. Bansal Finance",
+                    rev24: 19.1,
+                    rev25: 528.0,
+                    multiple: 27.6,
                     subs: ["Ramfincorp"],
                     yoe: 1984,
                 },
@@ -338,11 +387,11 @@
 
             const TERRACOTTA_RED = "#e48d73";
 
-            function getPositiveColor(val) {
-                const maxExpectedVal = 333000;
+            function getRevenueColor(rev25) {
+                const maxExpectedRev = 530;
                 const ratio = Math.min(
                     1,
-                    Math.max(0, Math.log1p(val) / Math.log1p(maxExpectedVal)),
+                    Math.max(0, Math.log1p(rev25) / Math.log1p(maxExpectedRev)),
                 );
                 const r = Math.round(180 - ratio * (180 - 25));
                 const g = Math.round(240 - ratio * (240 - 75));
@@ -354,119 +403,38 @@
                 return window.innerWidth < 768;
             }
 
-            function calculateParentSize(val) {
-                const absVal = Math.abs(val);
-                let multiplier = isMobile() ? 5.2 : 9;
-                let baseSize = Math.log1p(absVal) * multiplier;
-                const minSize = isMobile() ? 22 : 35;
-                if (baseSize < minSize) baseSize = minSize;
-                return baseSize;
-            }
+            function buildTreemapData() {
+                return rawData.map((item) => {
+                    const isNegativeOrSlow = item.multiple < 1.0;
+                    const groupColor = isNegativeOrSlow
+                        ? TERRACOTTA_RED
+                        : getRevenueColor(item.rev25);
 
-            let globalNodes = []; // Saved globally to share across mouse event triggers
+                    const sizeValue = Math.max(1.8, item.multiple);
 
-            function buildGraphData() {
-                const simNodes = [];
-                const echartsLinks = [];
-                const subSize = isMobile() ? 8 : 14;
-
-                rawData.forEach((item, index) => {
-                    const groupColor =
-                        item.val < 0
-                            ? TERRACOTTA_RED
-                            : getPositiveColor(item.val);
-                    const parentSize = calculateParentSize(item.val);
-                    const sharedMetaData = {
-                        parentName: item.name,
-                        growth: item.val,
-                        subsList: item.subs,
-                        yoe: item.yoe,
-                    };
-
-                    simNodes.push({
-                        id: item.name,
+                    return {
                         name: item.name,
-                        radius: parentSize / 2,
-                        symbolSize: parentSize,
-                        category: index,
-                        isParent: true,
-                        color: groupColor,
-                        customData: sharedMetaData,
-                    });
-
-                    item.subs.forEach((sub) => {
-                        simNodes.push({
-                            id: sub,
-                            name: sub,
-                            radius: subSize / 2,
-                            symbolSize: subSize,
-                            category: index,
-                            isParent: false,
+                        value: sizeValue,
+                        itemStyle: {
                             color: groupColor,
-                            customData: sharedMetaData,
-                        });
-                        echartsLinks.push({ source: item.name, target: sub });
-                    });
+                            borderColor: "#f6f2f2",
+                            borderWidth: 1,
+                        },
+                        customData: {
+                            parentName: item.name,
+                            growth: ((item.multiple - 1) * 100).toFixed(0),
+                            subsList: item.subs,
+                            yoe: item.yoe,
+                            rev24: item.rev24,
+                            rev25: item.rev25,
+                            displayMultiple: item.multiple,
+                        },
+                    };
                 });
-
-                const simulation = d3
-                    .forceSimulation(simNodes)
-                    .force(
-                        "link",
-                        d3
-                            .forceLink(echartsLinks)
-                            .id((d) => d.id)
-                            .distance((l) => l.source.radius + l.target.radius)
-                            .strength(1),
-                    )
-                    .force("x", d3.forceX(0).strength(0.35))
-                    .force("y", d3.forceY(0).strength(0.35))
-                    .force(
-                        "collide",
-                        d3
-                            .forceCollide()
-                            .radius((d) => d.radius + 1)
-                            .strength(1)
-                            .iterations(5),
-                    )
-                    .stop();
-
-                for (let i = 0; i < 600; i++) simulation.tick();
-
-                globalNodes = simNodes.map((n) => ({
-                    name: n.name,
-                    x: n.x,
-                    y: n.y,
-                    symbolSize: n.symbolSize,
-                    category: n.category,
-                    itemStyle: {
-                        color: n.color,
-                        opacity: n.isParent ? 0.95 : 0.75,
-                    },
-                    label: n.isParent
-                        ? {
-                              show: true,
-                              position: "inside",
-                              color: "#ffffff",
-                              fontSize: Math.max(
-                                  isMobile() ? 7 : 9,
-                                  Math.min(
-                                      isMobile() ? 10 : 13,
-                                      n.symbolSize / 6,
-                                  ),
-                              ),
-                              fontWeight: "bold",
-                              formatter: (p) => `${p.data.customData.growth}%`,
-                          }
-                        : { show: false },
-                    customData: n.customData,
-                }));
-
-                return { nodes: globalNodes, links: echartsLinks };
             }
 
             function getChartOption() {
-                const graphData = buildGraphData();
+                const treemapData = buildTreemapData();
                 const mobileMode = isMobile();
 
                 return {
@@ -517,32 +485,10 @@
 
                             const data = params.data.customData;
                             const hoveredNodeName = params.name;
-                            const isNegative = data.growth < 0;
+                            const isNegative = data.displayMultiple < 1.0;
                             const accentColor = isNegative
                                 ? "#e48d73"
                                 : "#32a869";
-
-                            let rev25 = 1.2,
-                                rev26 = 2.5;
-                            if (Math.abs(data.growth) > 2000) {
-                                rev25 = 0.05;
-                                rev26 = (
-                                    rev25 *
-                                    (1 + data.growth / 100)
-                                ).toFixed(1);
-                            } else if (Math.abs(data.growth) > 200) {
-                                rev25 = 0.4;
-                                rev26 = (
-                                    rev25 *
-                                    (1 + data.growth / 100)
-                                ).toFixed(1);
-                            } else {
-                                rev25 = 1.5;
-                                rev26 = (
-                                    rev25 *
-                                    (1 + data.growth / 100)
-                                ).toFixed(1);
-                            }
 
                             const cardWidth = mobileMode ? "250px" : "320px";
                             const titleSize = mobileMode ? "16px" : "20px";
@@ -560,7 +506,7 @@
                                         ? "background-color: rgba(25, 75, 45, 0.15); padding: 1px 4px; border-radius: 2px;"
                                         : "";
                                     const subWeight = isTargetSub
-                                        ? "font-weight: bold; color: #194b2d;"
+                                        ? "font-weight: normal; color: #194b2d;"
                                         : "color: #2b2a2a;";
                                     channelsHtml += `<div style="font-size: ${metaSize}; ${subBg} ${subWeight} word-wrap: break-word; word-break: break-all;">${sub}</div>`;
                                 });
@@ -571,30 +517,30 @@
 
                             return `
                                 <div style="width: ${cardWidth}; padding: ${mobileMode ? "12px 14px" : "18px 20px"}; line-height: 1.4; box-sizing: border-box; font-family: 'GT America', sans-serif;">
-                                    <div style="font-size: ${titleSize}; font-weight: bold; color: #000; letter-spacing: -0.3px; margin-bottom: 2px; white-space: normal; word-wrap: break-word;">${data.parentName}</div>
+                                    <div style="font-size: ${titleSize}; font-weight: normal; color: #000; letter-spacing: -0.3px; margin-bottom: 2px; white-space: normal; word-wrap: break-word;">${data.parentName}</div>
                                     <div style="font-size: ${metaSize}; color: #555; margin-bottom: 8px;">est. ${data.yoe}</div>
 
                                     <hr style="border: none; border-top: 1.5px solid #194b2d; margin-bottom: 10px; opacity: 0.8;"/>
 
-                                    <div style="font-size: ${bodySize}; font-weight: bold; color: #000; margin-bottom: 10px;">
-                                        Revenue growth - <span style="color: ${accentColor}; font-weight: bold;">${data.growth}%</span>
+                                    <div style="font-size: ${bodySize}; font-weight: normal; color: #000; margin-bottom: 10px;">
+                                        Revenue grew by <span style="color: ${accentColor}; font-weight: normal;">x${data.displayMultiple}</span> times
                                     </div>
 
                                     <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-family: 'GT America', sans-serif;">
                                         <div style="display: flex; flex-direction: column; align-items: center; min-width: ${minColWidth};">
-                                            <span style="font-size: ${valueSize}; font-weight: bold; color: #000;">Rs. ${rev25}cr</span>
-                                            <span style="font-size: ${metaSize}; color: #555; margin-top: 2px; font-weight: normal;">(2025)</span>
+                                            <span style="font-size: ${valueSize}; font-weight: normal; color: #000;">Rs. ${data.rev24}cr</span>
+                                            <span style="font-size: ${metaSize}; color: #555; margin-top: 2px; font-weight: normal;">(2024)</span>
                                         </div>
-                                        <div style="font-size: ${valueSize}; font-weight: bold; color: #000; padding-top: 2px;">&rarr;</div>
+                                        <div style="font-size: ${valueSize}; font-weight: normal; color: #000; padding-top: 2px;">&rarr;</div>
                                         <div style="display: flex; flex-direction: column; align-items: center; min-width: ${minColWidth};">
-                                            <span style="font-size: ${valueSize}; font-weight: bold; color: #000;">Rs. ${rev26}cr</span>
-                                            <span style="font-size: ${metaSize}; color: #555; margin-top: 2px; font-weight: normal;">(2026)</span>
+                                            <span style="font-size: ${valueSize}; font-weight: normal; color: #000;">Rs. ${data.rev25}cr</span>
+                                            <span style="font-size: ${metaSize}; color: #555; margin-top: 2px; font-weight: normal;">(2025)</span>
                                         </div>
                                     </div>
 
                                     <hr style="border: none; border-top: 1.5px solid #194b2d; margin-bottom: 10px; opacity: 0.8;"/>
 
-                                    <div style="font-size: ${bodySize}; font-weight: bold; color: #000; margin-bottom: 6px;">Brand Channels</div>
+                                    <div style="font-size: ${bodySize}; font-weight: normal; color: #000; margin-bottom: 6px;">Brand Channels</div>
                                     ${channelsHtml}
                                 </div>
                             `;
@@ -604,55 +550,29 @@
                     animationEasingUpdate: "quinticInOut",
                     series: [
                         {
-                            type: "graph",
-                            layout: "none",
-                            data: graphData.nodes,
-                            links: graphData.links,
+                            type: "treemap",
+                            data: treemapData,
                             roam: false,
-                            focusNodeAdjacency: false,
-                            emphasis: { disabled: true },
-                            lineStyle: { width: 0, curveness: 0 },
+                            nodeClick: false,
+                            breadcrumb: { show: false },
+                            label: {
+                                show: true,
+                                position: "inside",
+                                color: "#ffffff",
+                                fontWeight: "bold",
+                                fontFamily: "GT America, Segoe UI, sans-serif",
+                                formatter: function (params) {
+                                    if (!params.data || !params.data.customData)
+                                        return "";
+                                    return `x${params.data.customData.displayMultiple}`;
+                                },
+                            },
                         },
                     ],
                 };
             }
 
             myChart.setOption(getChartOption());
-
-            // --- INTERACTION EVENT LIFECYCLE FOR CLUSTER HIGHLIGHTS ---
-
-            myChart.on("mouseover", "series", function (params) {
-                if (!params.data || !params.data.customData) return;
-
-                const targetCategory = params.data.category;
-
-                const updatedNodes = globalNodes.map((node) => {
-                    const isSameCluster = node.category === targetCategory;
-                    return {
-                        ...node,
-                        itemStyle: {
-                            ...node.itemStyle,
-                            opacity: isSameCluster
-                                ? node.label.show
-                                    ? 0.95
-                                    : 0.75
-                                : 0.15,
-                        },
-                        label: {
-                            ...node.label,
-                            color: isSameCluster
-                                ? "#ffffff"
-                                : "rgba(255, 255, 255, 0.2)",
-                        },
-                    };
-                });
-
-                myChart.setOption({ series: [{ data: updatedNodes }] });
-            });
-
-            myChart.on("mouseout", "series", function () {
-                myChart.setOption({ series: [{ data: globalNodes }] });
-            });
 
             window.addEventListener("resize", () => {
                 myChart.setOption(getChartOption());
