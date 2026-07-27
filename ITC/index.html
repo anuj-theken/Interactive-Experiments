@@ -21,6 +21,7 @@
         <link rel="stylesheet" href="/ITC/styles/stocks.css" />
         <link rel="stylesheet" href="/ITC/styles/smoke.css" />
         <link rel="stylesheet" href="/ITC/styles/timeline.css" />
+        <link rel="stylesheet" href="/ITC/styles/government.css" />
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
@@ -327,6 +328,130 @@
             <div class="QW4K8-mobile-only">
                 <div class="QW4K8-vertical-timeline" id="QW4K8-mobile-list"></div>
             </div>
+        </section>
+
+        <div class="QW4K-spacer"></div>
+
+        <!--v1.0-->
+        <section class="QW4K9-government-section">
+          <div class="QW4K9-app-layout">
+
+            <!-- Editorial Section -->
+            <div class="QW4K9-editorial-panel">
+              <h1 class="QW4K9-chart-title">The relationship between ITC and government-linked entities.</h1>
+              <p class="QW4K9-chart-subtitle">A self-sustaining system of the flow of funds through ownership and taxation.</p>
+            </div>
+
+            <!-- Interactive Graphic Grid Area -->
+            <div class="QW4K9-diagram-viewport">
+
+              <!-- Left Info Panel -->
+              <div class="QW4K9-side-panel QW4K9-panel-left">
+                <div class="QW4K9-panel-header">
+                  <div class="QW4K9-arrow-green"></div>
+                  <span>Government Investors</span>
+                </div>
+                <div class="QW4K9-panel-details">
+                  <div class="QW4K9-animated-text QW4K9-text-step-1">Specified Undertaking of the Unit Trust of India</div>
+                  <div class="QW4K9-animated-text QW4K9-text-step-2">General Insurance Corporation</div>
+                  <div class="QW4K9-animated-text QW4K9-text-step-3">The New India Assurance Company Limited</div>
+                  <div class="QW4K9-animated-text QW4K9-text-step-4">The Oriental Insurance Company Limited</div>
+                  <div class="QW4K9-animated-text QW4K9-text-step-5">Indian Bank</div>
+                </div>
+              </div>
+
+              <!-- Center Stacking Axis -->
+              <div class="QW4K9-center-visual-column">
+                <div class="QW4K9-label-top">ITC</div>
+
+                <div class="QW4K9-svg-wrapper">
+                  <svg viewBox="0 0 600 600">
+                    <defs>
+                      <marker id="QW4K9-arrow-black" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--color-secondary)" />
+                      </marker>
+                      <marker id="QW4K9-arrow-white" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--color-bg)" />
+                      </marker>
+                      <marker id="QW4K9-ring-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--color-secondary)" />
+                      </marker>
+
+                      <clipPath id="QW4K9-bottom-half">
+                        <rect x="-50" y="300" width="700" height="350" />
+                      </clipPath>
+                      <clipPath id="QW4K9-top-half">
+                        <rect x="-50" y="-50" width="700" height="350" />
+                      </clipPath>
+
+                      <g id="QW4K9-all-radial-rays">
+                        <line x1="300" y1="272" x2="300" y2="50" />
+                        <line x1="300" y1="272" x2="300" y2="50" transform="rotate(36, 300, 300)" />
+                        <line x1="300" y1="272" x2="300" y2="50" transform="rotate(72, 300, 300)" />
+                        <line x1="300" y1="272" x2="300" y2="50" transform="rotate(108, 300, 300)" />
+                        <line x1="300" y1="272" x2="300" y2="50" transform="rotate(144, 300, 300)" />
+                        <line x1="300" y1="272" x2="300" y2="50" transform="rotate(180, 300, 300)" />
+                        <line x1="300" y1="272" x2="300" y2="50" transform="rotate(216, 300, 300)" />
+                        <line x1="300" y1="272" x2="300" y2="50" transform="rotate(252, 300, 300)" />
+                        <line x1="300" y1="272" x2="300" y2="50" transform="rotate(288, 300, 300)" />
+                        <line x1="300" y1="272" x2="300" y2="50" transform="rotate(324, 300, 300)" />
+                      </g>
+                    </defs>
+
+                    <circle cx="300" cy="300" r="250" fill="var(--color-secondary)" clip-path="url(#QW4K9-bottom-half)" />
+
+                    <g clip-path="url(#QW4K9-top-half)">
+                      <use href="#QW4K9-all-radial-rays" class="QW4K9-rotate-clockwise" stroke="var(--color-secondary)" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#QW4K9-arrow-black)" />
+                    </g>
+                    <g clip-path="url(#QW4K9-bottom-half)">
+                      <use href="#QW4K9-all-radial-rays" class="QW4K9-rotate-clockwise" stroke="var(--color-bg)" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#QW4K9-arrow-white)" />
+                    </g>
+
+                    <circle cx="300" cy="300" r="250" fill="none" stroke="var(--color-secondary)" stroke-width="2" stroke-dasharray="5,4" />
+
+                    <g class="QW4K9-rotate-clockwise">
+                      <circle cx="300" cy="300" r="268" fill="none" stroke="var(--color-secondary)" stroke-width="2" />
+                      <path d="M 32,300 A 268,268 0 0,1 300,32" fill="none" stroke="var(--color-secondary)" stroke-width="2" marker-end="url(#QW4K9-ring-arrow)" />
+                      <path d="M 300,32 A 268,268 0 0,1 568,300" fill="none" stroke="var(--color-secondary)" stroke-width="2" marker-end="url(#QW4K9-ring-arrow)" />
+                      <path d="M 568,300 A 268,268 0 0,1 300,568" fill="none" stroke="var(--color-secondary)" stroke-width="2" marker-end="url(#QW4K9-ring-arrow)" />
+                      <path d="M 300,568 A 268,268 0 0,1 32,300" fill="none" stroke="var(--color-secondary)" stroke-width="2" marker-end="url(#QW4K9-ring-arrow)" />
+                    </g>
+
+                    <!-- Scalable Group wrapper -->
+                    <g class="QW4K9-center-hub-group">
+                      <circle cx="300" cy="300" r="28" fill="var(--color-bg)" />
+                      <circle cx="300" cy="300" r="28" fill="none" stroke="var(--color-secondary)" stroke-width="1.8" stroke-dasharray="4,3" />
+
+                      <g transform="translate(285, 285)">
+                        <path d="M 2,22 L 22,22 M 25,22 L 28,22" stroke="var(--color-secondary)" stroke-width="2.5" stroke-linecap="round" fill="none" />
+                        <line x1="22" y1="20" x2="22" y2="24" stroke="var(--color-secondary)" stroke-width="1" />
+                        <path d="M 20,15 C 20,10 25,12 23,7 C 22,5 20,5 23,2" stroke="var(--color-secondary)" stroke-width="1.8" stroke-linecap="round" fill="none" />
+                        <path d="M 25,15 C 25,11 29,13 28,8 C 27,6 25,6 28,3" stroke="var(--color-secondary)" stroke-width="1.8" stroke-linecap="round" fill="none" />
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+
+                <div class="QW4K9-label-bottom">Government</div>
+              </div>
+
+              <!-- Right Info Panel -->
+              <div class="QW4K9-side-panel QW4K9-panel-right">
+                <div class="QW4K9-panel-header">
+                  <span>Income Tax</span>
+                  <div class="QW4K9-arrow-red"></div>
+                </div>
+                <div class="QW4K9-panel-details">
+                  <div class="QW4K9-animated-text QW4K9-text-step-1">GST launch</div>
+                  <div class="QW4K9-animated-text QW4K9-text-step-2">GST + cess</div>
+                  <div class="QW4K9-animated-text QW4K9-text-step-3">GST + ad valorem cess</div>
+                  <div class="QW4K9-animated-text QW4K9-text-step-4">GST + NDBP</div>
+                  <div class="QW4K9-animated-text QW4K9-text-step-5">GST + Excise Duty</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
         </section>
 
         <div class="QW4K-spacer"></div>
