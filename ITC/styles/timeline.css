@@ -1,0 +1,122 @@
+/* styles/timeline.css — QW4K8 */
+
+.QW4K8-timeline-section {
+  width: 100%;
+  padding: 60px 0;
+  background-color: var(--color-bg);
+  overflow: hidden;
+}
+
+.QW4K8-timeline-header {
+  padding: 0 60px 40px 60px;
+}
+
+.QW4K8-chart-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--type-heading);
+  font-weight: 400;
+  color: var(--color-text);
+}
+
+.QW4K8-chart-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--type-subheading);
+  color: var(--color-muted);
+  margin: 10px 0 0 0;
+}
+
+/* Desktop scroll logic */
+.QW4K8-timeline-scroll-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  padding-top: 20px;
+  cursor: grab;
+}
+
+.QW4K8-timeline-scroll-wrapper::-webkit-scrollbar {
+  height: 12px;
+}
+
+.QW4K8-timeline-scroll-wrapper::-webkit-scrollbar-track {
+  background: rgba(107, 107, 128, 0.12);
+  margin: 0 60px;
+  border-radius: 10px;
+}
+
+.QW4K8-timeline-scroll-wrapper::-webkit-scrollbar-thumb {
+  background-color: var(--color-primary);
+  border-radius: 10px;
+  border: 3px solid var(--color-bg);
+}
+
+#QW4K8-main-chart {
+  width: 5800px; /* total width for the ITC nodes + terminal tail room */
+  height: 500px;
+  background: transparent;
+}
+
+/* Toggle views */
+.QW4K8-desktop-only {
+  display: block;
+}
+.QW4K8-mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .QW4K8-desktop-only {
+    display: none !important;
+  }
+  .QW4K8-mobile-only {
+    display: block !important;
+    padding: 20px 40px;
+  }
+
+  .QW4K8-vertical-timeline {
+    border-left: 2px solid var(--color-primary);
+    margin-left: 10px;
+    padding-left: 30px;
+    position: relative;
+    height: auto;
+  }
+
+  .QW4K8-timeline-item {
+    position: relative;
+    margin-bottom: 40px;
+  }
+
+  .QW4K8-timeline-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 80px;
+  }
+
+  .QW4K8-timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -41px;
+    top: 25px;
+    width: 15px;
+    height: 15px;
+    background: var(--color-primary);
+    border: 3px solid var(--color-bg);
+    border-radius: 50%;
+  }
+
+  .QW4K8-m-date {
+    color: var(--color-muted);
+    font-weight: bold;
+    font-size: var(--type-legend);
+  }
+  .QW4K8-m-title {
+    color: var(--color-primary);
+    font-weight: bold;
+    font-size: var(--type-subheading);
+    margin: 8px 0;
+  }
+  .QW4K8-m-desc {
+    color: var(--color-muted);
+    font-size: var(--type-body);
+    line-height: 1.6;
+  }
+}

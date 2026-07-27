@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cigarette Tax Incidence Chart</title>
+    <!-- Include ECharts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        body {
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        #chart-container {
+            width: 90%;
+            max-width: 900px;
+            height: 600px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="chart-container"></div>
+
+    <script>
+        const chartDom = document.getElementById('chart-container');
+        const myChart = echarts.init(chartDom);
+
+        // Single clean values for static bar labels
+        const staticLabels = ['50%', '51.5%', '53%', '70%', '70%'];
+
+        const option = {
+            backgroundColor: '#ffffff',
+            title: {
+                text: 'Cigarette Tax Incidence Evolution in India',
+                subtext: 'Hover over a cigarette stick to reveal deep breakdown data and live smoke',
+                left: 'center',
+                textStyle: { color: '#0f172a', fontSize: 20, fontWeight: 'bold' },
+                subtextStyle: { color: '#64748b', fontSize: 14 }
+            },
+            tooltip: {
+                trigger: 'axis',
+                // Deactivated the grey bounding box highlight entirely
+                axisPointer: { type: 'none' },
+                backgroundColor: '#ffffff',
+                borderColor: '#cbd5e1',
+                borderWidth: 1,
+                padding: 12,
+                textStyle: { color: '#334155' },
+                formatter: function (params) {
+                    const idx = params[0].dataIndex;
+                    const titles = [
+                        '1 Jul 2017 (GST Launch)',
+                        '18 Jul 2017 (Cess Hike)',
+                        '2018–2024 (Stable Regime)',
+                        '22 Sep 2025 (GST 2.0)',
+                        '1 Feb 2026 (Current Framework)'
+                    ];
+                    // Retained full approximation ranges and exact legal details here
+                    const spectrums = ['~50%', '~50%+', '~53%', 'rising toward ~65–75%', '~65–75%'];
+                    const details = [
+                        'Base GST set at 28% in line with historical ~28.7% weighted-average VAT rate, plus compensation cess matching specific excise duties.',
+                        'The Council hiked the fixed per-stick cess (between ₹485–₹792 per 1,000 sticks) on top of the base 28% GST and 5% ad valorem cess.',
+                        'Stable era where combined base GST, compensation cess, central excise, and NCCD together leveled out around ~53% of retail pricing.',
+                        'Base GST raised to 40% under IndiaFilings updates, with compensation cess initially still applied during tax transitions.',
+                        'Compensation cess completely abolished; RSP-based (printed retail price) valuation introduced; cess replaced by per-stick excise duty.'
+                    ];
+                    // Real-world cost examples based on a standard ₹350 premium pack of 20 cigarettes
+                    const examples = [
+                        '<strong>On a ₹350 pack (20 sticks):</strong> ~₹175.00 goes to taxes.',
+                        '<strong>On a ₹350 pack (20 sticks):</strong> ~₹180.25 goes to taxes.',
+                        '<strong>On a ₹350 pack (20 sticks):</strong> ~₹185.50 goes to taxes.',
+                        '<strong>On a ₹350 pack (20 sticks):</strong> ~₹227.50–₹262.50 goes to taxes.',
+                        '<strong>On a ₹350 pack (20 sticks):</strong> ~₹227.50–₹262.50 goes to taxes.'
+                    ];
+
+                    return `
+                        <div style="font-size: 14px; max-width: 320px; white-space: normal; line-height: 1.5;">
+                            <strong style="color: #0f172a; font-size: 15px;">${titles[idx]}</strong><br/>
+                            <span style="color: #e11d48; font-size: 15px; font-weight: bold; display: inline-block; margin: 4px 0;">
+                                Total Incidence Range: ${spectrums[idx]}
+                            </span><br/>
+                            <span style="color: #0284c7; font-size: 12.5px; display: block; margin-bottom: 8px; font-family: monospace;">
+                                ${examples[idx]}
+                            </span>
+                            <span style="color: #475569; font-size: 12px; display: block; border-top: 1px dashed #e2e8f0; padding-top: 6px;">
+                                ${details[idx]}
+                            </span>
+                        </div>
+                    `;
+                }
+            },
+            grid: { left: '8%', right: '8%', bottom: '12%', top: '18%', containLabel: true },
+            xAxis: {
+                type: 'category',
+                data: [
+                    'Jul 2017\n(GST Launch)',
+                    'Mid-Jul 2017\n(Cess Hike)',
+                    '2018–2024\n(Stable)',
+                    'Sep 2025\n(GST 2.0)',
+                    'Feb 2026\n(Current)'
+                ],
+                axisLabel: { color: '#64748b', fontSize: 12, interval: 0, lineHeight: 16 },
+                axisLine: { lineStyle: { color: '#cbd5e1' } },
+                axisTick: { show: false }
+            },
+            yAxis: {
+                type: 'value',
+                name: 'Estimated Total Tax Burden (%)',
+                nameTextStyle: { color: '#64748b', fontSize: 13, padding: [0, 0, 15, 0] },
+                max: 100,
+                axisLabel: { color: '#64748b', formatter: '{value}%' },
+                axisLine: { show: false },
+                splitLine: { lineStyle: { color: '#f1f5f9', type: 'solid' } }
+            },
+            series: [
+                {
+                    name: 'Cigarette Filter',
+                    type: 'bar',
+                    stack: 'cigarette',
+                    barWidth: 20,
+                    data: [15, 15, 15, 15, 15],
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                            { offset: 0, color: '#d97706' },
+                            { offset: 0.2, color: '#fbbf24' },
+                            { offset: 0.8, color: '#fbbf24' },
+                            { offset: 1, color: '#b45309' }
+                        ]),
+                        borderRadius: [0, 0, 2, 2]
+                    }
+                },
+                {
+                    name: 'Cigarette Body',
+                    type: 'bar',
+                    stack: 'cigarette',
+                    data: [33, 34.5, 36, 53, 53],
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                            { offset: 0, color: '#e2e8f0' },
+                            { offset: 0.2, color: '#ffffff' },
+                            { offset: 0.8, color: '#ffffff' },
+                            { offset: 1, color: '#cbd5e1' }
+                        ]),
+                        borderColor: '#e2e8f0',
+                        borderWidth: 1
+                    }
+                },
+                {
+                    name: 'Burning Tip',
+                    type: 'bar',
+                    stack: 'cigarette',
+                    data: [2, 2, 2, 2, 2],
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: '#94a3b8' },
+                            { offset: 0.4, color: '#f43f5e' },
+                            { offset: 1, color: '#f97316' }
+                        ]),
+                        borderRadius: [2, 2, 0, 0],
+                        shadowBlur: 8,
+                        shadowColor: '#f43f5e'
+                    },
+                    label: {
+                        show: true,
+                        position: 'top',
+                        distance: 8,
+                        color: '#475569',
+                        fontWeight: 'normal',
+                        fontSize: 12,
+                        formatter: function(params) {
+                            return staticLabels[params.dataIndex];
+                        }
+                    }
+                }
+            ],
+            graphic: []
+        };
+
+        myChart.setOption(option);
+
+        // Particle System Variables
+        let smokeParticles = [];
+        let animationFrameId = null;
+        let activeEmitterX = null;
+        let activeEmitterY = null;
+
+        function updateSmoke() {
+            if (activeEmitterX !== null && Math.random() < 0.35) {
+                smokeParticles.push({
+                    x: activeEmitterX + (Math.random() * 4 - 2),
+                    y: activeEmitterY,
+                    radius: 6 + Math.random() * 5,
+                    opacity: 0.08 + Math.random() * 0.04, // Slightly raised opacity for distinctness
+                    vx: (Math.random() * 0.4 - 0.2),
+                    vy: -(0.9 + Math.random() * 0.9)
+                });
+            }
+
+            smokeParticles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.radius += 0.22;
+                p.opacity -= 0.0009;
+                p.vx += (Math.random() * 0.08 - 0.04);
+            });
+
+            smokeParticles = smokeParticles.filter(p => p.opacity > 0 && p.radius < 45);
+
+            const graphicElements = smokeParticles.map((p, index) => ({
+                id: 'smoke_p_' + index,
+                type: 'circle',
+                shape: { cx: p.x, cy: p.y, r: p.radius },
+                style: {
+                    fill: 'rgba(148, 163, 184, ' + Math.max(0, p.opacity) + ')',
+                    shadowBlur: 20, // Amplified blur effect
+                    shadowColor: 'rgba(148, 163, 184, ' + Math.max(0, p.opacity * 1.5) + ')' // Richer shadow depth
+                },
+                silent: true
+            }));
+
+            myChart.setOption({ graphic: graphicElements }, { replaceMerge: ['graphic'] });
+            animationFrameId = requestAnimationFrame(updateSmoke);
+        }
+
+        myChart.on('mouseover', function (params) {
+            const coord = myChart.convertToPixel({ seriesIndex: 2 }, [params.dataIndex, params.value]);
+            activeEmitterX = coord[0];
+            activeEmitterY = coord[1] - 50; // Shifted origin well above the burning tip area
+
+            if (!animationFrameId) {
+                updateSmoke();
+            }
+        });
+
+        myChart.on('mouseout', function () {
+            activeEmitterX = null;
+            activeEmitterY = null;
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+            smokeParticles = [];
+            myChart.setOption({ graphic: [] }, { replaceMerge: ['graphic'] });
+        });
+
+        window.addEventListener('resize', function() {
+            myChart.resize();
+        });
+    </script>
+</body>
+</html>

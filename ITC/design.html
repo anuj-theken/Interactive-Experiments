@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ITC — Design System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #ffffff;
+            color: #1a1a32;
+            font-family: 'Archivo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .page {
+            width: 860px;
+            margin: 0 auto;
+            padding: 72px 0 100px;
+        }
+
+        /* ── Header ── */
+        .header {
+            margin-bottom: 64px;
+        }
+
+        .header-eyebrow {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #d4aa3d;
+            margin-bottom: 10px;
+        }
+
+        .header-title {
+            font-family: Georgia, serif;
+            font-size: 44px;
+            font-weight: 400;
+            color: #1a1a32;
+            line-height: 1.05;
+        }
+
+        /* ── Section label ── */
+        .label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #6b6b80;
+            margin-bottom: 20px;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #e0ecf7;
+            margin: 56px 0;
+        }
+
+        /* ── Colors ── */
+        .color-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .swatch {
+            flex: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.07);
+        }
+
+        .swatch-block { height: 96px; }
+
+        .swatch-info {
+            padding: 11px 13px;
+            background: #fafafa;
+        }
+
+        .swatch-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1a1a32;
+            margin-bottom: 3px;
+        }
+
+        .swatch-hex {
+            font-size: 11px;
+            color: #6b6b80;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* ── Typography ── */
+        .type-row {
+            display: flex;
+            gap: 32px;
+            align-items: baseline;
+            padding: 28px 0;
+            border-bottom: 1px solid #e0ecf7;
+        }
+
+        .type-row:first-of-type { border-top: 1px solid #e0ecf7; }
+
+        .type-meta {
+            width: 160px;
+            flex-shrink: 0;
+        }
+
+        .type-role {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1a1a32;
+            margin-bottom: 3px;
+        }
+
+        .type-spec {
+            font-size: 11px;
+            color: #6b6b80;
+            line-height: 1.5;
+        }
+
+        .specimen-h1 {
+            font-family: Georgia, serif;
+            font-size: 36px;
+            font-weight: 400;
+            line-height: 1.1;
+            color: #1a1a32;
+        }
+
+        .specimen-h2 {
+            font-family: Georgia, serif;
+            font-size: 22px;
+            font-weight: 400;
+            line-height: 1.2;
+            color: #1a1a32;
+        }
+
+        .specimen-body {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #1a1a32;
+        }
+
+        .specimen-foot {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #6b6b80;
+        }
+
+        .reckless-note {
+            margin-top: 16px;
+            font-size: 11px;
+            color: #6b6b80;
+            font-style: italic;
+        }
+
+        /* ── Spacing ── */
+        .spacing-demo {
+            display: flex;
+            gap: 18px;
+            align-items: stretch;
+        }
+
+        .spacing-bar {
+            width: 4px;
+            height: 80px;
+            background: #d4aa3d;
+            border-radius: 2px;
+        }
+
+        .spacing-label strong {
+            display: block;
+            font-family: Georgia, serif;
+            font-size: 28px;
+            font-weight: 400;
+            color: #1a1a32;
+            margin-bottom: 4px;
+        }
+
+        .spacing-label span {
+            font-size: 13px;
+            color: #6b6b80;
+        }
+
+        /* ── Breakpoints ── */
+        .bp-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .bp-item {
+            flex: 1;
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.07);
+            padding: 16px;
+            background: #fafafa;
+        }
+
+        .bp-item strong {
+            display: block;
+            font-family: Georgia, serif;
+            font-size: 20px;
+            font-weight: 400;
+            color: #1a1a32;
+            margin-bottom: 4px;
+        }
+
+        .bp-item span {
+            font-size: 12px;
+            color: #6b6b80;
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <div class="header">
+        <div class="header-eyebrow">Design System</div>
+        <h1 class="header-title">ITC Interactives</h1>
+    </div>
+
+    <!-- Colors -->
+    <p class="label">Colors</p>
+    <div class="color-row">
+        <div class="swatch">
+            <div class="swatch-block" style="background:#f2f1ef;"></div>
+            <div class="swatch-info">
+                <div class="swatch-name">Background</div>
+                <div class="swatch-hex">#f2f1ef</div>
+            </div>
+        </div>
+        <div class="swatch">
+            <div class="swatch-block" style="background:#d4aa3d;"></div>
+            <div class="swatch-info">
+                <div class="swatch-name">Primary · Gold</div>
+                <div class="swatch-hex">#d4aa3d</div>
+            </div>
+        </div>
+        <div class="swatch">
+            <div class="swatch-block" style="background:#2a9d8f;"></div>
+            <div class="swatch-info">
+                <div class="swatch-name">Accent · Turquoise</div>
+                <div class="swatch-hex">#2a9d8f</div>
+            </div>
+        </div>
+        <div class="swatch">
+            <div class="swatch-block" style="background:#2d3e8a;"></div>
+            <div class="swatch-info">
+                <div class="swatch-name">Secondary · Blue</div>
+                <div class="swatch-hex">#2d3e8a</div>
+            </div>
+        </div>
+        <div class="swatch">
+            <div class="swatch-block" style="background:#1a1a32;"></div>
+            <div class="swatch-info">
+                <div class="swatch-name">Text · Navy</div>
+                <div class="swatch-hex">#1a1a32</div>
+            </div>
+        </div>
+        <div class="swatch">
+            <div class="swatch-block" style="background:#6b6b80;"></div>
+            <div class="swatch-info">
+                <div class="swatch-name">Muted</div>
+                <div class="swatch-hex">#6b6b80</div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Typography -->
+    <p class="label">Typography</p>
+
+    <div class="type-row">
+        <div class="type-meta">
+            <div class="type-role">Heading</div>
+            <div class="type-spec">Reckless · 36 / 32 / 28px<br>pc / iPad / mobile<br>Chart titles, section heads</div>
+        </div>
+        <div class="specimen-h1">How ITC grew its revenue</div>
+    </div>
+
+    <div class="type-row">
+        <div class="type-meta">
+            <div class="type-role">Subheading</div>
+            <div class="type-spec">Archivo · 22 / 20 / 17px<br>pc / iPad / mobile<br>Subtitles, labels</div>
+        </div>
+        <div class="specimen-h2" style="font-family:'Archivo',sans-serif;">Cigarettes to FMCG, 2000–2024</div>
+    </div>
+
+    <div class="type-row">
+        <div class="type-meta">
+            <div class="type-role">Body</div>
+            <div class="type-spec">Archivo · 18 / 16 / 14px<br>pc / iPad / mobile<br>Annotations, copy</div>
+        </div>
+        <div class="specimen-body">ITC's non-cigarette businesses now account for over 40% of total revenue — a shift that took two decades to play out.</div>
+    </div>
+
+    <div class="type-row">
+        <div class="type-meta">
+            <div class="type-role">Legend</div>
+            <div class="type-spec">Archivo · 14 / 12 / 11px<br>pc / iPad / mobile<br>Chart legends, chip labels</div>
+        </div>
+        <div class="specimen-foot" style="font-size:14px;">FIIs &nbsp;·&nbsp; DIIs (Govt) &nbsp;·&nbsp; Public</div>
+    </div>
+
+    <div class="type-row">
+        <div class="type-meta">
+            <div class="type-role">Footnote</div>
+            <div class="type-spec">Archivo · 13px<br>Source lines, disclaimers</div>
+        </div>
+        <div class="specimen-foot">Source: ITC Annual Reports, BSE filings. All figures in ₹ crore.</div>
+    </div>
+
+    <p class="reckless-note">* Reckless is a licensed typeface — specimens above show a serif fallback. Reckless renders in the live prototypes. Heading and subheading scale down at the same ratio as body copy at each breakpoint.</p>
+
+    <hr>
+
+    <!-- Spacing -->
+    <p class="label">Section Spacing</p>
+    <div class="spacing-demo">
+        <div class="spacing-bar"></div>
+        <div class="spacing-label">
+            <strong>120 / 110 / 100px</strong>
+            <span>Gap between every visualization section — pc (≥1024px) / iPad (769–1023px) / mobile (≤768px)</span>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Breakpoints -->
+    <p class="label">Breakpoints</p>
+    <div class="bp-row">
+        <div class="bp-item">
+            <strong>PC</strong>
+            <span>≥ 1024px</span>
+        </div>
+        <div class="bp-item">
+            <strong>iPad</strong>
+            <span>769px – 1023px</span>
+        </div>
+        <div class="bp-item">
+            <strong>Mobile</strong>
+            <span>≤ 768px</span>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

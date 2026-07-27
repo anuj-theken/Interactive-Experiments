@@ -1,0 +1,140 @@
+/* styles/atta.css — QW4K3 */
+
+.QW4K3-atta-section, .QW4K3-atta-section *{ box-sizing: border-box; margin: 0; padding: 0; }
+
+.QW4K3-atta-section{
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* pinned viewport */
+.QW4K3-pin {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.QW4K3-stage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+/* left: cross-fading text */
+.QW4K3-left { position: relative; height: 340px; }
+.QW4K3-panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+}
+.QW4K3-panel .QW4K3-year {
+  font-family: var(--font-display);
+  font-size: 76px;
+  line-height: 1;
+  color: var(--color-primary);
+  font-weight: 400;
+  margin-bottom: 20px;
+}
+.QW4K3-panel .QW4K3-body {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  color: var(--color-muted);
+  max-width: 42ch;
+}
+
+/* full-frame header bar */
+.QW4K3-rhead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid var(--color-muted);
+  padding-bottom: 16px;
+}
+.QW4K3-rtitle h2 {
+  font-family: var(--font-display);
+  font-size: var(--type-heading);
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-text);
+  margin: 0;
+}
+.QW4K3-rtitle p {
+  font-family: var(--font-body);
+  font-size: var(--type-subheading);
+  color: var(--color-muted);
+  margin: 4px 0 0;
+}
+.QW4K3-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+.QW4K3-legend span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-body);
+  font-size: var(--type-legend);
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+.QW4K3-legend i {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+#QW4K3-chart { width: 100%; height: 420px; }
+
+/* scroll driver — invisible height that ScrollTrigger reads */
+.QW4K3-driver { height: 400vh; }
+
+/* aligned to the project's iPad/mobile breakpoint (≤1023px), not the prototype's
+   original ad-hoc 820px cutoff — --type-* tokens already resize on their own via
+   globals.css, this query only handles the layout/grid changes */
+@media (max-width: 1023px) {
+  .QW4K3-stage { grid-template-columns: 1fr; gap: 24px; }
+  .QW4K3-left { height: 200px; order: 2; }
+  #QW4K3-chart { height: 300px; }
+  .QW4K3-panel .QW4K3-year { font-size: 56px; }
+}
+
+/* Mobile gets a shorter scroll-driver — 400vh was tuned for desktop scroll speed;
+   on a mobile viewport that same distance makes the pin release noticeably late. */
+@media (max-width: 768px) {
+  .QW4K3-driver { height: 180vh; }
+
+  /* 100vh on mobile browsers is measured against the largest possible viewport
+     (address bar hidden) — the actually-visible area is shorter, so content
+     sized to fill 100vh overflows it. 100dvh tracks the real visible area;
+     declared after vh as a fallback for browsers that don't support it. */
+  .QW4K3-pin {
+    height: 100vh;
+    height: 100dvh;
+    /* center cropped the overflow symmetrically (chart pushed above the top
+       edge, as seen in testing) — flex-start plus scroll keeps content
+       anchored from the top and never hides it off-screen. */
+    justify-content: flex-start;
+    overflow-y: auto;
+    gap: 16px;
+    padding-top: 16px;
+  }
+  .QW4K3-rhead { padding-bottom: 12px; }
+  .QW4K3-stage { gap: 16px; }
+  .QW4K3-left { height: 170px; }
+  #QW4K3-chart { height: 220px; }
+  .QW4K3-panel .QW4K3-year { font-size: 44px; margin-bottom: 10px; }
+}

@@ -1,0 +1,53 @@
+@font-face {
+  font-family: "Reckless";
+  src: url("/fonts/Reckless-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+
+:root {
+  /* Type scale — pc / desktop (≥1024px) */
+  --type-heading:    36px;
+  --type-subheading: 22px;
+  --type-body:       18px;
+  --type-legend:     14px;
+  --font-display: "Reckless", serif;  /* headings only */
+  --font-body:    "Archivo", sans-serif; /* subheadings, body, legends, footnotes */
+
+  /* Section spacing — pc / desktop (≥1024px) */
+  --spacing: 120px;
+
+  /* ITC color palette */
+  --color-bg:        #f2f1ef;
+  --color-primary:   #d4aa3d;
+  --color-accent:    #2a9d8f;
+  --color-secondary: #2d3e8a;
+  --color-text:      #1a1a32;
+  --color-muted:     #6b6b80;
+}
+
+/* iPad (769px–1023px) — heading/subheading/spacing scaled to the body's ratio */
+@media (max-width: 1023px) {
+  :root {
+    --type-heading:    32px;
+    --type-subheading: 20px;
+    --type-body:       16px;
+    --type-legend:     12px;
+    --spacing: 110px;
+  }
+}
+
+/* Mobile (≤768px) — heading/subheading/spacing scaled to the body's ratio */
+@media (max-width: 768px) {
+  :root {
+    --type-heading:    28px;
+    --type-subheading: 17px;
+    --type-body:       14px;
+    --type-legend:     11px;
+    --spacing: 100px;
+  }
+}
+
+.QW4K-spacer {
+  height: var(--spacing);
+}

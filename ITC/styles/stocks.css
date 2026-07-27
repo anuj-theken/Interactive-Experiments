@@ -1,0 +1,192 @@
+/* styles/stocks.css — QW4K6 */
+
+.QW4K6-scroll-wrapper {
+  height: 850vh;
+  position: relative;
+  background: transparent;
+  font-family: var(--font-body);
+}
+
+.QW4K6-sticky-content {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Proportional Scaling Layout */
+.QW4K6-airtel-comparison-container .QW4K6-layout {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+.QW4K6-left-panel {
+  flex: 0 0 40%;
+  display: flex;
+  flex-direction: column;
+  padding: 60px 5%;
+  background: transparent;
+  z-index: 2;
+  box-sizing: border-box;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.QW4K6-right-panel {
+  flex: 0 0 60%;
+  height: 100vh;
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+#QW4K6-main-chart {
+  width: 100%;
+  height: 80%;
+  margin-top: 24vh;
+}
+
+/* Typography */
+.QW4K6-site-header {
+  width: 100%;
+  text-align: left;
+}
+
+.QW4K6-site-header h1 {
+  font-family: var(--font-display);
+  font-size: var(--type-heading);
+  margin-bottom: 20px;
+  color: var(--color-text);
+  line-height: 1.1;
+}
+
+.QW4K6-sub-header {
+  font-family: var(--font-body);
+  font-size: var(--type-subheading);
+  color: var(--color-muted);
+  margin-top: -10px;
+  margin-bottom: 25px;
+  line-height: 1.4;
+  text-align: left;
+  width: 100%;
+}
+
+.QW4K6-stock-value-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 40px;
+  width: 100%;
+}
+
+.QW4K6-legend-item-stock {
+  display: flex;
+  color: var(--color-text);
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-size: var(--type-legend);
+  justify-content: flex-start;
+}
+
+.QW4K6-legend-line {
+  width: 25px;
+  height: 2px;
+  flex-shrink: 0;
+}
+
+.QW4K6-legend-dash {
+  width: 25px;
+  border-top: 2px dashed;
+  flex-shrink: 0;
+}
+
+/* Text Area Alignment */
+.QW4K6-text-area {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  text-align: left;
+}
+
+.QW4K6-text-block {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+  text-align: left;
+}
+
+.QW4K6-year-label {
+  color: var(--color-muted) !important;
+  font-family: var(--font-display);
+  line-height: 1;
+  display: block;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: var(--type-legend);
+}
+
+.QW4K6-text-block h3 {
+  font-family: var(--font-display);
+  font-size: var(--type-subheading);
+  color: var(--color-secondary);
+  margin: 0 0 10px 0;
+  text-align: left;
+}
+
+.QW4K6-text-block p {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: 1.6;
+  color: var(--color-text);
+  margin: 0;
+  text-align: left;
+  max-width: 100%;
+}
+
+/* --- MOBILE / TABLET --- aligned to the project's iPad/mobile breakpoints
+   (1023px / 768px) rather than the prototype's original ad-hoc 800 / 769 / 376 / 375px
+   cutoffs — those three overlapping queries also fought over .text-block p's font-size;
+   var(--type-body) already handles that responsively, so no override is needed here. */
+@media (max-width: 1023px) {
+  .QW4K6-airtel-comparison-container .QW4K6-layout {
+    flex-direction: column;
+  }
+
+  .QW4K6-left-panel {
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    min-height: 34vh;
+    padding: 40px 8%;
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .QW4K6-right-panel {
+    flex: 0 0 auto;
+    width: 100%;
+    height: 50vh;
+    padding: 20px;
+  }
+
+  .QW4K6-stock-value-legend {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin-bottom: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .QW4K6-left-panel { min-height: 40vh; }
+}

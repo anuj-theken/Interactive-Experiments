@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITC Stock vs Nifty 50 Comparison</title>
+
+    <!-- ECharts CDN Dependency -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+    <style>
+        :root {
+            --ink: #1d1b1c;
+            --navy: #590b23;
+            --blue: #d70a0d;
+            --silver: #c6c0c0;
+            --cream: transparent;
+        }
+
+        /* Sticky Scroll Wrapper - Increased to 850vh to naturally frame 7 text blocks */
+        .QW4K-scroll-wrapper {
+            height: 850vh;
+            position: relative;
+            background: transparent;
+        }
+
+        .QW4K-sticky-content {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* Proportional Scaling Layout */
+        .QW4K-airtel-comparison-container .QW4K-layout {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .QW4K-left-panel {
+            flex: 0 0 40%;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 5%;
+            background: transparent;
+            z-index: 2;
+            box-sizing: border-box;
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .QW4K-right-panel {
+            flex: 0 0 60%;
+            height: 100vh;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+
+        #QW4K-stocks-chart-container {
+            width: 100%;
+            height: 80%;
+            margin-top: 24vh;
+        }
+
+        /* Typography */
+        .QW4K-site-header {
+            width: 100%;
+            text-align: left;
+        }
+
+        .QW4K-site-header h1 {
+            font-family: "Reckless", serif;
+            font-size: clamp(24px, 4vw, 38px);
+            margin-bottom: 20px;
+            color: var(--ink);
+            line-height: 1.1;
+        }
+
+        .QW4K-sub-header {
+            font-family: "Archivo", serif;
+            font-size: 14px;
+            color: #1f1f1f;
+            margin-top: -10px;
+            margin-bottom: 25px;
+            line-height: 1.4;
+            text-align: left;
+            width: 100%;
+        }
+
+        .QW4K-stock-value-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 40px;
+            width: 100%;
+        }
+
+        .QW4K-legend-item-stock {
+            display: flex;
+            color: #000;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-family: "Reckless", serif;
+            justify-content: flex-start;
+        }
+
+        .QW4K-legend-line {
+            width: 25px;
+            height: 2px;
+            flex-shrink: 0;
+        }
+
+        .QW4K-legend-dash {
+            width: 25px;
+            border-top: 2px dashed;
+            flex-shrink: 0;
+        }
+
+        /* Text Area Alignment */
+        .QW4K-text-area {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            text-align: left;
+        }
+
+        .QW4K-text-block {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+            text-align: left;
+        }
+
+        .QW4K-year-label {
+            color: #888888 !important;
+            font-family: "Reckless", serif;
+            line-height: 1;
+            display: block;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+        }
+
+        .QW4K-text-block h3 {
+            font-family: "Reckless", serif;
+            font-size: 22px;
+            color: var(--navy);
+            margin: 0 0 10px 0;
+            text-align: left;
+        }
+
+        .QW4K-text-block p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--ink);
+            margin: 0;
+            text-align: left;
+            max-width: 100%;
+        }
+
+        /* --- MOBILE STYLES --- */
+        @media (max-width: 800px) {
+            .QW4K-airtel-comparison-container .QW4K-layout {
+                flex-direction: column;
+            }
+
+            .QW4K-left-panel {
+                flex: 0 0 auto;
+                width: 100%;
+                height: auto;
+                min-height: 34vh;
+                padding: 40px 8%;
+                text-align: left;
+                align-items: flex-start;
+            }
+
+            .QW4K-right-panel {
+                flex: 0 0 auto;
+                width: 100%;
+                height: 50vh;
+                padding: 20px;
+            }
+
+            .QW4K-stock-value-legend {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: flex-start;
+                margin-bottom: 30px;
+            }
+
+            .QW4K-text-block p {
+                font-size: 17px;
+                width: 100%;
+            }
+        }
+
+        @media (min-width: 376px) and (max-width: 769px) {
+            .QW4K-text-block p {
+                font-size: 20px;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 375px) {
+            .QW4K-text-block p {
+                font-size: 14px;
+            }
+
+            .QW4K-left-panel {
+                min-height: 40vh;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<section class="QW4K-scroll-wrapper">
+    <div class="QW4K-sticky-content QW4K-airtel-comparison-container">
+        <div class="QW4K-layout">
+            <div class="QW4K-left-panel">
+                <div class="QW4K-site-header">
+                    <h1>ITC Stock Value</h1>
+                    <div class="QW4K-sub-header">
+                        All the stock prices are rebased to 100.
+                    </div>
+                </div>
+
+                <div class="QW4K-stock-value-legend">
+                    <div class="QW4K-legend-item-stock">
+                        <span class="QW4K-legend-line" style="background: #d70a0d"></span>ITC
+                    </div>
+                    <div class="QW4K-legend-item-stock">
+                        <span class="QW4K-legend-dash" style="border-color: #590b23"></span>Nifty 50
+                    </div>
+                </div>
+
+                <div class="QW4K-text-area" id="text-area">
+                    <div class="QW4K-text-block" id="text-0">
+                        <p class="QW4K-year-label">2012</p>
+                        <h3>FMCG Milestone</h3>
+                        <p>FMCG business crosses Rs 5,000 crore in revenue.</p>
+                    </div>
+                    <div class="QW4K-text-block" id="text-1">
+                        <p class="QW4K-year-label">2013</p>
+                        <h3>Profitability Turn</h3>
+                        <p>FMCG turns profitable in 2013.</p>
+                    </div>
+                    <div class="QW4K-text-block" id="text-2">
+                        <p class="QW4K-year-label">2017</p>
+                        <h3>Scale Expansion</h3>
+                        <p>FMCG business crosses Rs 10,000 crore in revenue.</p>
+                    </div>
+                    <div class="QW4K-text-block" id="text-3">
+                        <p class="QW4K-year-label">2019</p>
+                        <h3>Leadership Transition</h3>
+                        <p>Deveshwar passes away and Sanjiv Puri is appointed as chairman.</p>
+                    </div>
+                    <div class="QW4K-text-block" id="text-4">
+                        <p class="QW4K-year-label">2022</p>
+                        <h3>Strategic Exit</h3>
+                        <p>Exited the lifestyle retailing business.</p>
+                    </div>
+                    <div class="QW4K-text-block" id="text-5">
+                        <p class="QW4K-year-label">2025</p>
+                        <h3>Hotel Demerger</h3>
+                        <p>Demerger of hotel business effective 1 January 2025.</p>
+                    </div>
+                    <div class="QW4K-text-block" id="text-6">
+                        <p class="QW4K-year-label">2026</p>
+                        <h3>Tax Regulation</h3>
+                        <p>The government raised cigarette taxes in Feb 2026 by 20% to 55% depending on size.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="QW4K-right-panel">
+                <div id="QW4K-stocks-chart-container"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const years = [
+    "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016",
+    "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"
+  ];
+
+  const itcData = [
+    100, 46.00, 66.67, 59.87, 63.07, 81.75, 92.38, 101.20, 196.05,
+    114.60, 97.32, 120.60, 125.54, 124.25, 92.46, 76.88, 76.47, 54.22, 61.40
+  ];
+
+  const nifty50Data = [
+    100, 55.96, 95.03, 107.17, 101.20, 117.47, 118.53, 171.46, 147.22,
+    166.64, 214.65, 210.82, 232.84, 265.40, 337.52, 343.79, 422.89, 457.59, 492.86
+  ];
+
+  const steps = [
+    { revealUntil: 5, markerAt: 4 },   // 2012
+    { revealUntil: 6, markerAt: 5 },   // 2013
+    { revealUntil: 10, markerAt: 9 },  // 2017
+    { revealUntil: 12, markerAt: 11 }, // 2019
+    { revealUntil: 15, markerAt: 14 }, // 2022
+    { revealUntil: 18, markerAt: 17 }, // 2025
+    { revealUntil: 19, markerAt: 18 }  // 2026
+  ];
+
+  const wrapper = document.querySelector(".QW4K-scroll-wrapper");
+  const blocks = Array.from(document.querySelectorAll(".QW4K-text-block"));
+  const chartDom = document.getElementById("QW4K-stocks-chart-container");
+  const myChart = echarts.init(chartDom);
+
+  let currentStep = -1;
+
+  function setBlockStyle(el, visible, direction) {
+    if (!el) return;
+    el.style.opacity = visible ? "1" : "0";
+    const ty = visible ? 0 : direction === "down" ? -20 : 20;
+    el.style.transform = `translateY(${ty}px)`;
+    el.style.pointerEvents = visible ? "auto" : "none";
+  }
+
+  function updateChart(stepIdx) {
+    const step = steps[stepIdx];
+    if (!step) return;
+
+    const revealCount = step.revealUntil;
+    const markerIndex = step.markerAt;
+
+    const createMarker = (val, color) => ({
+      symbol: "circle",
+      symbolSize: 10,
+      itemStyle: { color: color, borderWidth: 0 },
+      data: [{ coord: [years[markerIndex], val] }],
+    });
+
+    myChart.setOption({
+      series: [
+        {
+          name: "ITC",
+          data: itcData.slice(0, revealCount),
+          markPoint: createMarker(itcData[markerIndex], "#d70a0d"),
+        },
+        {
+          name: "Nifty 50",
+          data: nifty50Data.slice(0, revealCount),
+        },
+      ],
+    });
+  }
+
+  function handleScroll() {
+    if (!wrapper) return;
+    const rect = wrapper.getBoundingClientRect();
+    const scrollFraction = Math.max(
+      0,
+      Math.min(1, -rect.top / (rect.height - window.innerHeight)),
+    );
+
+    let stepIdx = Math.floor(scrollFraction * steps.length);
+    if (stepIdx >= steps.length) stepIdx = steps.length - 1;
+
+    if (stepIdx !== currentStep) {
+      const direction = stepIdx > currentStep ? "down" : "up";
+      if (currentStep !== -1) setBlockStyle(blocks[currentStep], false, direction);
+      currentStep = stepIdx;
+      setBlockStyle(blocks[currentStep], true, direction);
+      updateChart(currentStep);
+    }
+  }
+
+  // Base layout configuration for the chart
+  myChart.setOption({
+    grid: {
+      left: "3%",
+      right: "4%",
+      bottom: "3%",
+      top: "10%",
+      containLabel: true,
+    },
+    backgroundColor: "transparent",
+    tooltip: {
+      trigger: "axis",
+      formatter: function (params) {
+        let tooltipText = `<strong>${params[0].name}</strong><br/>`;
+        params.forEach((item) => {
+          const markerColor = item.seriesName === "ITC" ? "#d70a0d" : "#590b23";
+          tooltipText += `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${markerColor};"></span>`;
+          tooltipText += `${item.seriesName}: <strong>${item.value}</strong><br/>`;
+        });
+        return tooltipText;
+      },
+    },
+    xAxis: {
+      type: "category",
+      boundaryGap: false,
+      data: years,
+    },
+    yAxis: {
+      type: "value",
+      min: 0,
+      max: 550,
+      splitLine: {
+        show: true,
+        lineStyle: {
+          color: "#444444",
+          width: 1,
+          type: "solid",
+        },
+      },
+    },
+    series: [
+      {
+        name: "ITC",
+        type: "line",
+        smooth: 0.3,
+        lineStyle: { color: "#d70a0d", width: 3 },
+        itemStyle: { color: "#d70a0d" },
+        symbol: "none",
+        data: [itcData[0]],
+      },
+      {
+        name: "Nifty 50",
+        type: "line",
+        smooth: 0.3,
+        lineStyle: { type: "dashed", color: "#590b23", width: 1.8 },
+        itemStyle: { color: "#590b23" },
+        symbol: "none",
+        data: [nifty50Data[0]],
+      },
+    ],
+  });
+
+  // Force initialize Step 0 instantly so it renders before any user interaction
+  currentStep = 0;
+  setBlockStyle(blocks[0], true, "down");
+  updateChart(0);
+
+  // Bind scrolling and resizing handlers
+  window.addEventListener("scroll", handleScroll);
+  window.addEventListener("resize", () => myChart.resize());
+});
+</script>
+</body>
+</html>

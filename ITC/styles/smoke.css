@@ -1,0 +1,89 @@
+/* styles/smoke.css — QW4K7 */
+
+.QW4K7-chart-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.QW4K7-chart-frame {
+  width: 100%;
+  max-width: 1450px;
+  min-width: 0;
+  margin: 0 auto;
+  padding: 40px 24px;
+  box-sizing: border-box;
+}
+
+.QW4K7-chart-container {
+  width: 100%;
+  max-width: 1350px;
+  min-width: 0;
+  margin: 0 auto;
+  background: var(--color-bg);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* Grid layout for header (left) and custom legend node (right) */
+.QW4K7-header-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  margin-bottom: 15px;
+  gap: 20px;
+  max-width: 85%; /* reduced 15% from full container width */
+}
+
+.QW4K7-chart-title {
+  font-family: var(--font-display);
+  font-size: var(--type-heading);
+  color: var(--color-text);
+  font-weight: 400;
+  margin: 0 0 4px 0;
+}
+
+.QW4K7-chart-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--type-subheading);
+  color: var(--color-muted);
+  font-weight: 400;
+  margin: 0 0 6px 0;
+  line-height: 1.4;
+}
+
+.QW4K7-chart-body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-muted);
+  font-weight: 400;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Container dimensions for the custom legend chart instance */
+#QW4K7-custom-legend {
+  width: 440px;
+  height: 40px;
+}
+
+#QW4K7-main-chart {
+  width: 100%;
+  height: 550px;
+}
+
+@media (max-width: 1023px) {
+  .QW4K7-chart-frame { padding: 30px 20px; }
+  .QW4K7-chart-container { padding: 20px; }
+  #QW4K7-main-chart { height: 460px; }
+  .QW4K7-header-grid { grid-template-columns: 1fr; }
+  #QW4K7-custom-legend { width: 100%; justify-self: start; }
+}
+
+@media (max-width: 768px) {
+  .QW4K7-chart-frame { padding: 20px 12px; }
+  .QW4K7-chart-container { padding: 16px; }
+  #QW4K7-main-chart { height: 400px; }
+}
