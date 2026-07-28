@@ -22,6 +22,7 @@
         <link rel="stylesheet" href="styles/smoke.css" />
         <link rel="stylesheet" href="styles/timeline.css" />
         <link rel="stylesheet" href="styles/government.css" />
+        <link rel="stylesheet" href="styles/logofarm.css" />
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
@@ -454,6 +455,66 @@
 
         <div class="QW4K-spacer"></div>
 
+        <!--v1.0-->
+        <section class="QW4K10-logofarm-section">
+
+          <!-- Gooey filter: fuses overlapping puffs into one continuous cloud shape -->
+          <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+            <defs>
+              <filter id="QW4K10-goo">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+                <feColorMatrix in="blur" mode="matrix"
+                    values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9" result="goo"/>
+                <feBlend in="SourceGraphic" in2="goo"/>
+              </filter>
+            </defs>
+          </svg>
+
+          <div class="QW4K10-content-wrap">
+            <header class="QW4K10-header">
+              <div class="QW4K10-header-text">
+                <h1>ITC Limited <span>Brands</span></h1>
+                <p class="QW4K10-chart-subtitle">A huge collection of brands are maintained<br>and harvested by ITC.</p>
+              </div>
+              <div class="QW4K10-legend">
+                <div class="QW4K10-legend-item"><div class="QW4K10-legend-badge" style="background:#4d7c0f"></div>Foods</div>
+                <div class="QW4K10-legend-item"><div class="QW4K10-legend-badge" style="background:#65a30d"></div>Personal Care</div>
+                <div class="QW4K10-legend-item"><div class="QW4K10-legend-badge" style="background:#ca8a04"></div>Hotels</div>
+                <div class="QW4K10-legend-item"><div class="QW4K10-legend-badge" style="background:#a3a337"></div>Tobacco</div>
+                <div class="QW4K10-legend-item"><div class="QW4K10-legend-badge" style="background:#3f6212"></div>Others</div>
+              </div>
+            </header>
+
+            <div class="QW4K10-treemap-container">
+              <div class="QW4K10-industry-sector" id="QW4K10-sector-foods">
+                <div class="QW4K10-sector-title">FMCG: Foods</div>
+                <div class="QW4K10-brands-canvas" id="QW4K10-canvas-foods"></div>
+              </div>
+              <div class="QW4K10-industry-sector" id="QW4K10-sector-tobacco">
+                <div class="QW4K10-sector-title">Cigarettes &amp; Tobacco</div>
+                <div class="QW4K10-brands-canvas" id="QW4K10-canvas-tobacco"></div>
+              </div>
+              <div class="QW4K10-industry-sector" id="QW4K10-sector-personal">
+                <div class="QW4K10-sector-title">FMCG: Personal Care</div>
+                <div class="QW4K10-brands-canvas" id="QW4K10-canvas-personal"></div>
+              </div>
+              <div class="QW4K10-industry-sector" id="QW4K10-sector-hotels">
+                <div class="QW4K10-sector-title">Hotels &amp; Hospitality</div>
+                <div class="QW4K10-brands-canvas" id="QW4K10-canvas-hotels"></div>
+              </div>
+              <div class="QW4K10-industry-sector" id="QW4K10-sector-others">
+                <div class="QW4K10-sector-title">Agri, Paper &amp; Safety</div>
+                <div class="QW4K10-brands-canvas" id="QW4K10-canvas-others"></div>
+              </div>
+              <div class="QW4K10-cloud-layer" id="QW4K10-cloud-layer"></div>
+            </div>
+          </div>
+
+          <div class="QW4K10-brand-tooltip" id="QW4K10-brand-tooltip"></div>
+        </section>
+
+        <div class="QW4K-spacer"></div>
+
         <!-- module JS files go here -->
         <script src="scripts/shareholding.js"></script>
         <script src="scripts/mandiMap_geo.js"></script>
@@ -464,6 +525,7 @@
         <script src="scripts/stocks.js"></script>
         <script src="scripts/smoke.js"></script>
         <script src="scripts/timeline.js"></script>
+        <script src="scripts/logofarm.js"></script>
 
     </body>
 </html>

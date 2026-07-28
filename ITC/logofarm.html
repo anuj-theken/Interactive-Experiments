@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITC Portfolio - Farmland Treemap</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        :root {
+            --bg-canvas: #dbe7c9;
+            --text-dark: #1a2e05;
+            --text-muted: #5b6b47;
+            --field-border: #a67c52;
+            --industry-gap: #7dd3fc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-canvas);
+            color: var(--text-dark);
+            height: 100vh;
+            width: 100vw;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            height: 6vh;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(255,255,255,0.5);
+            padding-bottom: 0.5rem;
+            margin-bottom: 2vh;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            color: #1a2e05;
+        }
+
+        header h1 span { color: #4d7c0f; }
+
+        .legend { display: flex; gap: 1.25rem; }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .legend-badge {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .treemap-container {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(12, 1fr);
+            gap: 10px;
+            height: 88vh;
+            width: 100%;
+            padding: 10px;
+            position: relative;
+            border: 4px solid var(--field-border);
+            border-radius: 4px;
+            box-shadow: 0 40px 80px -20px rgba(30, 50, 20, 0.22),
+                        0 20px 50px -30px rgba(30, 50, 20, 0.15);
+            /* Water: layered light-blue gradients that drift to feel like moving water */
+            background-color: var(--industry-gap);
+            background-image:
+                linear-gradient(120deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0.35) 55%, rgba(255,255,255,0) 80%),
+                linear-gradient(60deg, rgba(14,165,233,0.45) 0%, rgba(125,211,252,0) 40%, rgba(56,189,248,0.4) 70%, rgba(125,211,252,0) 100%),
+                repeating-linear-gradient(65deg, rgba(255,255,255,0.18) 0px, rgba(255,255,255,0.18) 2px, transparent 2px, transparent 10px),
+                repeating-linear-gradient(115deg, rgba(2,132,199,0.14) 0px, rgba(2,132,199,0.14) 2px, transparent 2px, transparent 14px),
+                linear-gradient(to bottom, rgba(3,105,161,0) 45%, rgba(3,105,161,0.35) 78%, rgba(7,89,133,0.6) 100%);
+            background-size: 260% 260%, 200% 200%, 60px 60px, 80px 80px, 100% 100%;
+            background-blend-mode: screen, normal, overlay, overlay, normal;
+            animation: waterFlow 12s linear infinite;
+        }
+
+        @keyframes waterFlow {
+            0%   { background-position: 0% 50%, 0% 0%, 0 0, 0 0, 0 0; }
+            50%  { background-position: 100% 50%, 100% 100%, 60px 30px, -80px 40px, 0 0; }
+            100% { background-position: 0% 50%, 0% 0%, 120px 60px, -160px 80px, 0 0; }
+        }
+
+        /* A sector = a region of farmland */
+        .industry-sector {
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            z-index: 2;
+            box-shadow:
+                4px 4px 10px rgba(7, 30, 50, 0.45),
+                2px 2px 4px rgba(7, 30, 50, 0.35);
+        }
+
+        .sector-title {
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            position: absolute;
+            top: 0.6rem;
+            left: 0.7rem;
+            z-index: 30;
+            pointer-events: none;
+            color: #fff;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.55);
+        }
+
+        .brands-canvas {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Each brand = a field plot */
+        .brand-node {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            overflow: hidden;
+            border: 5px solid var(--field-border);
+            will-change: transform, filter;
+        }
+
+        /* Texture stack: crop rows + soft mottling, sits under the label */
+        .brand-node::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image:
+                /* fine ploughed crop rows */
+                repeating-linear-gradient(
+                    var(--furrow-angle, 60deg),
+                    rgba(255,255,255,0.07) 0px,
+                    rgba(255,255,255,0.07) 1px,
+                    rgba(0,0,0,0.06) 1px,
+                    rgba(0,0,0,0.06) 4px),
+                /* cross furrows for a woven field feel */
+                repeating-linear-gradient(
+                    calc(var(--furrow-angle, 60deg) + 90deg),
+                    rgba(0,0,0,0.03) 0px,
+                    rgba(0,0,0,0.03) 1px,
+                    transparent 1px,
+                    transparent 9px),
+                /* soft irregular patches of light/dark soil */
+                radial-gradient(ellipse 60% 45% at 25% 30%, rgba(255,255,255,0.16), transparent 60%),
+                radial-gradient(ellipse 55% 50% at 78% 72%, rgba(0,0,0,0.14), transparent 62%),
+                radial-gradient(ellipse 40% 35% at 60% 20%, rgba(0,0,0,0.08), transparent 60%);
+        }
+
+        /* Fine speckled grain over everything */
+        .brand-node::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.5;
+            mix-blend-mode: overlay;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 140px 140px;
+        }
+
+        .brand-node .plot-label {
+            position: relative;
+            z-index: 3;
+            padding: 2px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Logo placeholder — replace files in the /logos folder with real PNGs */
+        .brand-logo {
+            object-fit: contain;
+            margin-bottom: 3px;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));
+            background: #6b4a2b;
+            border: 2px solid var(--field-border);
+            border-radius: 6px;
+            padding: 4px;
+        }
+        /* When a logo PNG is missing, hide the broken image and fall back to the text icon */
+        .brand-logo.logo-missing { display: none; }
+        .brand-logo:not(.logo-missing) + .brand-icon { display: none; }
+
+        .brand-icon {
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .brand-name {
+            font-size: 0.55rem;
+            font-weight: 700;
+            max-width: 95%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: rgba(255,255,255,0.95);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+            margin-top: 1px;
+        }
+
+        /* Floating brand tooltip */
+        .brand-tooltip {
+            position: fixed;
+            z-index: 9999;
+            top: 0;
+            left: 0;
+            min-width: 160px;
+            max-width: 240px;
+            padding: 10px 12px;
+            background: rgba(20, 33, 12, 0.94);
+            color: #f2f7e8;
+            border: 1px solid rgba(166, 124, 82, 0.7);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+            font-size: 0.72rem;
+            line-height: 1.35;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+        .brand-tooltip .tt-logo-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        .brand-tooltip .tt-logo {
+            width: 84px;
+            height: 84px;
+            object-fit: contain;
+            background: #6b4a2b;
+            border: 2px solid var(--field-border);
+            border-radius: 8px;
+            padding: 6px;
+        }
+        .brand-tooltip .tt-name {
+            font-size: 0.85rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+            color: #fff;
+            text-align: center;
+        }
+        .brand-tooltip .tt-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .brand-tooltip .tt-label {
+            color: #a8c07a;
+            font-weight: 600;
+        }
+        .brand-tooltip .tt-val {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        /* Drifting cloud shadows over the fields */
+        /* A cloud is a wrapper holding several overlapping puffs */
+        .cloud-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 50;
+            pointer-events: none;
+            overflow: visible;
+        }
+
+        .cloud {
+            position: absolute;
+            z-index: 20;
+            pointer-events: none;
+            opacity: 0.65;
+        }
+
+        /* Each group's gooey filter fuses its puffs into one blob,
+           then a larger blur softens the merged edge back to a fluffy cloud */
+        .cloud .puff-group {
+            position: absolute;
+            inset: 0;
+        }
+        .cloud .shadow-group { filter: url(#goo) blur(7px); }
+        .cloud .white-group  { filter: url(#goo) blur(6px); }
+
+        .cloud .puff-shadow {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 50%,
+                rgba(22, 38, 16, 0.34) 0%,
+                rgba(22, 38, 16, 0.28) 55%,
+                rgba(22, 38, 16, 0) 100%);
+        }
+
+        .cloud .puff {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 50%,
+                rgba(255, 255, 255, 0.98) 0%,
+                rgba(255, 255, 255, 0.92) 55%,
+                rgba(255, 255, 255, 0) 100%);
+        }
+
+        /* Sector footprint on the 12x12 grid */
+        #sector-foods    { grid-column: span 5; grid-row: span 6; }
+        #sector-tobacco  { grid-column: span 7; grid-row: span 7; }
+        #sector-personal { grid-column: span 5; grid-row: span 6; }
+        #sector-hotels   { grid-column: span 4; grid-row: span 5; }
+        #sector-others   { grid-column: span 3; grid-row: span 5; }
+    </style>
+</head>
+<body>
+
+    <!-- Gooey filter: fuses overlapping puffs into one continuous cloud shape -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <filter id="goo">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+                <feColorMatrix in="blur" mode="matrix"
+                    values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9" result="goo"/>
+                <feBlend in="SourceGraphic" in2="goo"/>
+            </filter>
+        </defs>
+    </svg>
+
+    <header>
+        <h1>ITC Limited <span>Farmland Portfolio</span></h1>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-badge" style="background:#4d7c0f"></div>Foods</div>
+            <div class="legend-item"><div class="legend-badge" style="background:#65a30d"></div>Personal Care</div>
+            <div class="legend-item"><div class="legend-badge" style="background:#ca8a04"></div>Hotels</div>
+            <div class="legend-item"><div class="legend-badge" style="background:#a3a337"></div>Tobacco</div>
+            <div class="legend-item"><div class="legend-badge" style="background:#3f6212"></div>Others</div>
+        </div>
+    </header>
+
+    <div class="treemap-container">
+        <div class="industry-sector" id="sector-foods">
+            <div class="sector-title">FMCG: Foods</div>
+            <div class="brands-canvas" id="canvas-foods"></div>
+        </div>
+        <div class="industry-sector" id="sector-tobacco">
+            <div class="sector-title">Cigarettes &amp; Tobacco</div>
+            <div class="brands-canvas" id="canvas-tobacco"></div>
+        </div>
+        <div class="industry-sector" id="sector-personal">
+            <div class="sector-title">FMCG: Personal Care</div>
+            <div class="brands-canvas" id="canvas-personal"></div>
+        </div>
+        <div class="industry-sector" id="sector-hotels">
+            <div class="sector-title">Hotels &amp; Hospitality</div>
+            <div class="brands-canvas" id="canvas-hotels"></div>
+        </div>
+        <div class="industry-sector" id="sector-others">
+            <div class="sector-title">Agri, Paper &amp; Safety</div>
+            <div class="brands-canvas" id="canvas-others"></div>
+        </div>
+        <div class="cloud-layer" id="cloud-layer"></div>
+    </div>
+
+    <div class="brand-tooltip" id="brand-tooltip"></div>
+
+    <script>
+        const portfolioData = [
+            { name: "Aashirvaad", sector: "foods", logo: "AV", size: 75, founded: 2002, category: "Staples & Atta" },
+            { name: "Sunfeast", sector: "foods", logo: "SF", size: 70, founded: 2003, category: "Biscuits & Cookies" },
+            { name: "Bingo!", sector: "foods", logo: "BN!", size: 68, founded: 2007, category: "Snacks & Chips" },
+            { name: "YiPPee!", sector: "foods", logo: "YP!", size: 65, founded: 2010, category: "Instant Noodles" },
+            { name: "B Natural", sector: "foods", logo: "BN", size: 62, founded: 2015, category: "Juices & Beverages" },
+            { name: "Fabelle", sector: "foods", logo: "FB", size: 62, founded: 2016, category: "Premium Chocolate" },
+            { name: "Sunbean", sector: "foods", logo: "SB", size: 58, founded: 2017, category: "Gourmet Coffee" },
+            { name: "Master Chef", sector: "foods", logo: "MC", size: 58, founded: 2016, category: "Frozen & Ready Meals" },
+            { name: "Candyman", sector: "foods", logo: "CM", size: 55, founded: 2002, category: "Confectionery" },
+            { name: "mint-o", sector: "foods", logo: "MO", size: 55, founded: 2001, category: "Mints & Candy" },
+            { name: "Sunrise Pure", sector: "foods", logo: "SR", size: 60, founded: 2020, category: "Spices & Masala" },
+            { name: "Farmland", sector: "foods", logo: "FL", size: 58, founded: 2016, category: "Fresh & Frozen Produce" },
+
+            { name: "Gold Flake", sector: "tobacco", logo: "GF", size: 70, founded: 1908, category: "Premium Cigarettes" },
+            { name: "Classic", sector: "tobacco", logo: "CL", size: 68, founded: 1990, category: "Premium Cigarettes" },
+            { name: "Insignia", sector: "tobacco", logo: "IN", size: 64, founded: 2016, category: "Super-Premium Cigarettes" },
+            { name: "Wills", sector: "tobacco", logo: "WL", size: 64, founded: 1958, category: "Cigarettes" },
+            { name: "Player's", sector: "tobacco", logo: "PL", size: 58, founded: 2005, category: "Cigarettes" },
+            { name: "India Kings", sector: "tobacco", logo: "IK", size: 62, founded: 2002, category: "Premium Cigarettes" },
+            { name: "American Club", sector: "tobacco", logo: "AC", size: 60, founded: 1997, category: "Cigarettes" },
+            { name: "Flake", sector: "tobacco", logo: "FK", size: 56, founded: 1970, category: "Cigarettes" },
+            { name: "Silk Cut", sector: "tobacco", logo: "SC", size: 54, founded: 1964, category: "Cigarettes" },
+            { name: "Duke", sector: "tobacco", logo: "DK", size: 54, founded: 2000, category: "Cigarettes" },
+
+            { name: "Fiama", sector: "personal", logo: "FM", size: 68, founded: 2007, category: "Bath & Shower" },
+            { name: "Vivel", sector: "personal", logo: "VV", size: 66, founded: 2008, category: "Soaps & Skincare" },
+            { name: "Engage", sector: "personal", logo: "EG", size: 66, founded: 2013, category: "Deodorants & Fragrance" },
+            { name: "Savlon", sector: "personal", logo: "SV", size: 68, founded: 1990, category: "Hygiene & Antiseptic" },
+            { name: "Charmis", sector: "personal", logo: "CH", size: 58, founded: 1965, category: "Skincare & Creams" },
+            { name: "Dermafique", sector: "personal", logo: "DF", size: 60, founded: 2016, category: "Premium Skincare" },
+            { name: "Nimyle", sector: "personal", logo: "NM", size: 56, founded: 2017, category: "Home Cleaning" },
+            { name: "Nimwash", sector: "personal", logo: "NW", size: 56, founded: 2020, category: "Fruit & Veg Wash" },
+            { name: "EDW Essenza", sector: "personal", logo: "EE", size: 62, founded: 2018, category: "Premium Fragrance" },
+
+            { name: "ITC Hotels", sector: "hotels", logo: "ITC", size: 72, founded: 1975, category: "Luxury Hotels" },
+            { name: "Welcomhotel", sector: "hotels", logo: "WH", size: 66, founded: 1984, category: "Upscale Hotels" },
+            { name: "Fortune Hotels", sector: "hotels", logo: "FH", size: 62, founded: 1996, category: "Mid-market Hotels" },
+            { name: "Mementos", sector: "hotels", logo: "MM", size: 58, founded: 2021, category: "Luxury Resorts" },
+            { name: "Storii", sector: "hotels", logo: "ST", size: 58, founded: 2022, category: "Boutique Hotels" },
+            { name: "WelcomHeritage", sector: "hotels", logo: "WHg", size: 56, founded: 1997, category: "Heritage Hotels" },
+
+            { name: "Classmate", sector: "others", logo: "CM", size: 68, founded: 2003, category: "Stationery & Notebooks" },
+            { name: "Paperkraft", sector: "others", logo: "PK", size: 64, founded: 2007, category: "Premium Stationery" },
+            { name: "Mangaldeep", sector: "others", logo: "MD", size: 62, founded: 1997, category: "Agarbatti & Incense" },
+            { name: "Homelite", sector: "others", logo: "HL", size: 55, founded: 2005, category: "Safety Matches" },
+            { name: "AIM", sector: "others", logo: "AM", size: 55, founded: 1996, category: "Safety Matches" }
+        ];
+
+        // Field-tone palettes per sector: a spread of greens & golds like real farmland
+        const fieldPalettes = {
+            foods:    ["#4d7c0f", "#3f6212", "#65a30d", "#84cc16", "#a3b18a", "#556b2f", "#6b8e23"],
+            tobacco:  ["#a3a337", "#8a8a2a", "#bfa83a", "#9c9a48", "#c2b280", "#7d7d33", "#b5a642"],
+            personal: ["#65a30d", "#4d7c0f", "#77b52a", "#3f6212", "#8fbc5a", "#5c8a1e", "#6ea82f"],
+            hotels:   ["#ca8a04", "#a16207", "#d4a017", "#b8860b", "#c9a227", "#9a7b0a", "#dbb42c"],
+            others:   ["#3f6212", "#2f4f1e", "#4d7c0f", "#365314", "#5a7d2a", "#33691e", "#456a1a"]
+        };
+
+        // Squarified treemap: turns brand sizes into gap-free rectangular plots
+        function squarify(items, x, y, w, h) {
+            const total = items.reduce((s, it) => s + it.size, 0);
+            const scale = (w * h) / total;
+            const scaled = items.map(it => ({ ...it, area: it.size * scale }));
+            const rects = [];
+
+            function worst(row, len) {
+                const sum = row.reduce((s, r) => s + r.area, 0);
+                const max = Math.max(...row.map(r => r.area));
+                const min = Math.min(...row.map(r => r.area));
+                return Math.max((len * len * max) / (sum * sum), (sum * sum) / (len * len * min));
+            }
+
+            function layoutRow(row, len, horizontal, ox, oy) {
+                const sum = row.reduce((s, r) => s + r.area, 0);
+                const thick = sum / len;
+                let offset = 0;
+                row.forEach(r => {
+                    const cell = r.area / thick;
+                    if (horizontal) {
+                        rects.push({ ...r, x: ox, y: oy + offset, w: thick, h: cell });
+                    } else {
+                        rects.push({ ...r, x: ox + offset, y: oy, w: cell, h: thick });
+                    }
+                    offset += cell;
+                });
+                return thick;
+            }
+
+            let cx = x, cy = y, cw = w, ch = h;
+            let remaining = scaled.slice();
+            let row = [];
+
+            while (remaining.length) {
+                const horizontal = cw >= ch;
+                const len = horizontal ? ch : cw;
+                const candidate = row.concat(remaining[0]);
+                if (row.length === 0 || worst(candidate, len) <= worst(row, len)) {
+                    row = candidate;
+                    remaining.shift();
+                    if (remaining.length === 0) layoutRow(row, len, horizontal, cx, cy);
+                } else {
+                    const thick = layoutRow(row, len, horizontal, cx, cy);
+                    if (horizontal) { cx += thick; cw -= thick; }
+                    else { cy += thick; ch -= thick; }
+                    row = [];
+                }
+            }
+            return rects;
+        }
+
+        // ---- Tooltip ----
+        const tooltipEl = document.getElementById('brand-tooltip');
+        function showTooltip(r) {
+            const src2x = `logos/${r.logo}@2x.png`;
+            tooltipEl.innerHTML = `
+                <div class="tt-logo-wrap" style="display:none">
+                    <img class="tt-logo" alt="${r.name} logo"
+                         onload="this.parentElement.style.display='flex'">
+                </div>
+                <div class="tt-name">${r.name}</div>
+                <div class="tt-row"><span class="tt-label">Founded</span><span class="tt-val">${r.founded || '—'}</span></div>
+                <div class="tt-row"><span class="tt-label">Category</span><span class="tt-val">${r.category || '—'}</span></div>`;
+            // set src after wiring onload so the wrap reveals only when an image actually loads;
+            // try hi-res first, fall back to standard, stay hidden if neither exists
+            const ttImg = tooltipEl.querySelector('.tt-logo');
+            if (ttImg) {
+                ttImg.onerror = () => {
+                    if (ttImg.src.indexOf('@2x') !== -1) {
+                        ttImg.onerror = null;
+                        ttImg.src = `logos/${r.logo}.png`;
+                    }
+                };
+                ttImg.src = src2x;
+            }
+            tooltipEl.style.opacity = '1';
+        }
+        function moveTooltip(e) {
+            const pad = 16;
+            let x = e.clientX + pad;
+            let y = e.clientY + pad;
+            const tw = tooltipEl.offsetWidth;
+            const th = tooltipEl.offsetHeight;
+            if (x + tw > window.innerWidth - 8)  x = e.clientX - tw - pad;
+            if (y + th > window.innerHeight - 8) y = e.clientY - th - pad;
+            tooltipEl.style.left = `${x}px`;
+            tooltipEl.style.top = `${y}px`;
+        }
+        function hideTooltip() { tooltipEl.style.opacity = '0'; }
+
+        function buildSector(canvasId, items, palette, animate) {
+            const container = document.getElementById(canvasId);
+            container.innerHTML = '';
+            const W = container.offsetWidth;
+            const H = container.offsetHeight;
+            if (!W || !H || items.length === 0) return;
+
+            const rects = squarify(items, 0, 0, W, H);
+
+            rects.forEach((r, idx) => {
+                const node = document.createElement('div');
+                node.className = 'brand-node';
+                const baseColor = palette[idx % palette.length];
+                node.style.background = baseColor;
+                node.style.setProperty('--furrow-angle', `${(idx * 37) % 180}deg`);
+
+                const showLabel = r.w > 46 && r.h > 30;
+                const showLogo = r.w > 40 && r.h > 40;
+                // Logo size scales with plot but stays within bounds
+                const logoSize = Math.max(20, Math.min(52, Math.min(r.w, r.h) * 0.4));
+                const logoImg = showLogo
+                    ? `<img class="brand-logo" src="logos/${r.logo}.png"
+                            alt="${r.name} logo"
+                            style="width:${logoSize}px;height:${logoSize}px"
+                            onerror="this.classList.add('logo-missing')">`
+                    : '';
+
+                node.innerHTML = showLabel ? `
+                    <div class="plot-label">
+                        ${logoImg}
+                        <div class="brand-icon">${r.logo}</div>
+                        <div class="brand-name">${r.name}</div>
+                    </div>` : `<div class="plot-label">${logoImg}<div class="brand-icon">${r.logo}</div></div>`;
+
+                container.appendChild(node);
+
+                gsap.set(node, {
+                    x: r.x, y: r.y, width: r.w, height: r.h,
+                    scale: animate ? 0.4 : 1,
+                    opacity: animate ? 0 : 1,
+                    transformOrigin: "center center"
+                });
+
+                if (animate) {
+                    gsap.to(node, {
+                        scale: 1, opacity: 1,
+                        duration: 0.5, delay: idx * 0.025,
+                        ease: "power2.out"
+                    });
+                }
+
+                // Highlight this field plot on hover; dim the rest; show tooltip
+                node.addEventListener('mouseenter', () => {
+                    gsap.to(node, {
+                        scale: 1.12,
+                        zIndex: 40,
+                        boxShadow: "0 14px 32px rgba(20,40,5,0.5)",
+                        duration: 0.25
+                    });
+                    // dim neighbours subtly with a dark overlay feel, not by brightening the target
+                    container.querySelectorAll('.brand-node').forEach(o => {
+                        if (o !== node) gsap.to(o, { filter: "brightness(0.6)", duration: 0.25 });
+                    });
+                    showTooltip(r);
+                });
+                node.addEventListener('mousemove', moveTooltip);
+                node.addEventListener('mouseleave', () => {
+                    container.querySelectorAll('.brand-node').forEach(o => {
+                        gsap.to(o, { filter: "brightness(1)", scale: 1, zIndex: 1, boxShadow: "none", duration: 0.25 });
+                    });
+                    hideTooltip();
+                });
+            });
+        }
+
+        // Soft drifting clouds — each a cluster of overlapping puffs seen from
+        // above, with a matching shadow cluster cast onto the farm below.
+        function addClouds(layerEl) {
+            layerEl.innerHTML = '';
+            const w = layerEl.offsetWidth;
+            const h = layerEl.offsetHeight;
+            const count = 2 + Math.floor(Math.random() * 2); // 2 or 3 clouds
+            for (let i = 0; i < count; i++) {
+                const cloud = document.createElement('div');
+                cloud.className = 'cloud';
+                const scale = 0.7 + Math.random() * 0.9;          // overall cloud size
+                const base = 46 * scale;                          // base puff diameter
+                const cloudW = base * 2.6;
+                const cloudH = base * 2.0;                        // rounder footprint (top view)
+                cloud.style.width = `${cloudW}px`;
+                cloud.style.height = `${cloudH}px`;
+                cloud.style.top = `${Math.random() * (h - cloudH)}px`;
+                cloud.style.left = `${Math.random() * (w - cloudW)}px`;
+
+                // Generate a tight cluster of overlapping puffs with randomized
+                // positions and sizes; the gooey filter fuses them into one shape.
+                const puffCount = 6 + Math.floor(Math.random() * 3);
+                const chosen = [];
+                for (let k = 0; k < puffCount; k++) {
+                    // keep centers near the middle so puffs overlap heavily
+                    const angle = Math.random() * Math.PI * 2;
+                    const spread = Math.pow(Math.random(), 0.7) * 0.26; // biased toward center
+                    chosen.push({
+                        x: 0.5 + Math.cos(angle) * spread * 1.15,
+                        y: 0.5 + Math.sin(angle) * spread,
+                        r: 0.75 + Math.random() * 0.6
+                    });
+                }
+                // guarantee one big central puff to anchor the mass
+                chosen[0] = { x: 0.5, y: 0.5, r: 1.35 };
+
+                const shadowOffX = base * 0.26;
+                const shadowOffY = base * 0.32;
+
+                // Shadow group (cast on farm), fused separately
+                const shadowGroup = document.createElement('div');
+                shadowGroup.className = 'puff-group shadow-group';
+                chosen.forEach(p => {
+                    const shadow = document.createElement('div');
+                    shadow.className = 'puff-shadow';
+                    const d = base * p.r;
+                    shadow.style.width = `${d}px`;
+                    shadow.style.height = `${d}px`;
+                    shadow.style.left = `${p.x * cloudW - d / 2 + shadowOffX}px`;
+                    shadow.style.top = `${p.y * cloudH - d / 2 + shadowOffY}px`;
+                    shadowGroup.appendChild(shadow);
+                });
+                cloud.appendChild(shadowGroup);
+
+                // White group on top, fused separately
+                const whiteGroup = document.createElement('div');
+                whiteGroup.className = 'puff-group white-group';
+                chosen.forEach(p => {
+                    const puff = document.createElement('div');
+                    puff.className = 'puff';
+                    const d = base * p.r;
+                    puff.style.width = `${d}px`;
+                    puff.style.height = `${d}px`;
+                    puff.style.left = `${p.x * cloudW - d / 2}px`;
+                    puff.style.top = `${p.y * cloudH - d / 2}px`;
+                    whiteGroup.appendChild(puff);
+                });
+                cloud.appendChild(whiteGroup);
+
+                layerEl.appendChild(cloud);
+
+                // Slow drift, mostly sideways like real clouds
+                gsap.to(cloud, {
+                    x: (Math.random() > 0.5 ? 1 : -1) * (w * 0.3 + Math.random() * w * 0.25),
+                    y: (Math.random() - 0.5) * h * 0.1,
+                    duration: 75 + Math.random() * 45,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "sine.inOut"
+                });
+            }
+        }
+
+        const sectors = ["foods", "tobacco", "personal", "hotels", "others"];
+
+        function layoutAll(animate) {
+            sectors.forEach(sec => {
+                const items = portfolioData.filter(it => it.sector === sec);
+                buildSector(`canvas-${sec}`, items, fieldPalettes[sec], animate);
+            });
+        }
+
+        window.addEventListener('load', () => {
+            layoutAll(true);
+            addClouds(document.getElementById('cloud-layer'));
+        });
+
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                layoutAll(false);
+                addClouds(document.getElementById('cloud-layer'));
+            }, 150);
+        });
+    </script>
+</body>
+</html>
