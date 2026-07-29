@@ -24,7 +24,7 @@
   height: 680px;
   margin: 0 auto;
   background: var(--color-bg);
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.34);
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -38,6 +38,8 @@
 }
 
 #QW4K12-pie-chart {
+  position: relative;
+  z-index: 2;
   width: 100%;
   height: 100%;
 }
@@ -53,51 +55,78 @@
 .QW4K12-wrapper-storii      { bottom: 15%; left: 12%; }
 .QW4K12-wrapper-heritage    { top: 25%; left: 6%; }
 
+/* Tooltips are siblings of the wrappers (direct children of the left panel)
+   so they can sit at one static, centered spot regardless of which corner
+   logo triggered them — see the Section HTML for the sibling pairing. */
+.QW4K12-left-panel:has(.QW4K12-wrapper-itc:hover) .QW4K12-tooltip-itc,
+.QW4K12-left-panel:has(.QW4K12-wrapper-fortune:hover) .QW4K12-tooltip-fortune,
+.QW4K12-left-panel:has(.QW4K12-wrapper-welcomhotel:hover) .QW4K12-tooltip-welcomhotel,
+.QW4K12-left-panel:has(.QW4K12-wrapper-storii:hover) .QW4K12-tooltip-storii,
+.QW4K12-left-panel:has(.QW4K12-wrapper-heritage:hover) .QW4K12-tooltip-heritage {
+  opacity: 1;
+  visibility: visible;
+}
+
 .QW4K12-floating-logo {
+  position: relative;
+  z-index: 2;
   width: 90px;
   height: 90px;
-  background: var(--color-bg);
-  border-radius: 12px;
+  border-radius: 50%;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 4px;
+  overflow: hidden;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   border: 1px solid rgba(0, 0, 0, 0.05);
   box-sizing: border-box;
 }
 
+/* Background tint matches each logo's own dominant brand color instead of a
+   flat neutral, since the logo now fills the circle edge-to-edge (no padding
+   to show a plain background through). */
+.QW4K12-wrapper-itc         .QW4K12-floating-logo { background: #C9A961; }
+.QW4K12-wrapper-fortune     .QW4K12-floating-logo { background: #1F5F94; }
+.QW4K12-wrapper-welcomhotel .QW4K12-floating-logo { background: #C5715B; }
+.QW4K12-wrapper-storii      .QW4K12-floating-logo { background: #827040; }
+.QW4K12-wrapper-heritage    .QW4K12-floating-logo { background: #962926; }
+
 .QW4K12-floating-logo img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
+/* Static, centered circular readout — always the same spot (over the donut),
+   regardless of which corner logo triggered it. top:52% matches the pie's
+   own center:['50%','52%'] in hotels.js, not the panel's literal midpoint. */
 .QW4K12-brand-tooltip {
   position: absolute;
-  width: 280px;
+  top: 52%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
   background: var(--color-text);
   color: #fff;
-  padding: 16px;
-  border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 26px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   font-family: var(--font-body);
-  font-size: var(--type-legend);
   opacity: 0;
   visibility: hidden;
-  transition: all 0.25s ease;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
   pointer-events: none;
   z-index: 100;
   box-sizing: border-box;
 }
-
-.QW4K12-wrapper-itc .QW4K12-brand-tooltip         { top: 100px; left: 50%; transform: translateX(-50%); }
-.QW4K12-wrapper-fortune .QW4K12-brand-tooltip     { top: 0; right: 105px; }
-.QW4K12-wrapper-welcomhotel .QW4K12-brand-tooltip { bottom: 0; right: 105px; }
-.QW4K12-wrapper-storii .QW4K12-brand-tooltip      { bottom: 0; left: 105px; }
-.QW4K12-wrapper-heritage .QW4K12-brand-tooltip    { top: 0; left: 105px; }
 
 .QW4K12-logo-wrapper:hover .QW4K12-floating-logo {
   transform: scale(1.05);
@@ -105,36 +134,29 @@
   border-color: var(--color-primary);
 }
 
-.QW4K12-logo-wrapper:hover .QW4K12-brand-tooltip {
-  opacity: 1;
-  visibility: visible;
+.QW4K12-tt-logo-wrap {
+  margin-bottom: 6px;
+}
+
+.QW4K12-tt-logo {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
 }
 
 .QW4K12-tooltip-title {
   font-family: var(--font-body);
-  font-size: var(--type-body);
+  font-size: 16px;
   font-weight: 700;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding-bottom: 6px;
-  margin-bottom: 10px;
+  line-height: 1.25;
+  margin-bottom: 6px;
   color: var(--color-primary);
 }
 
-.QW4K12-tooltip-grid {
-  display: grid;
-  grid-template-columns: 80px 1fr;
-  row-gap: 6px;
-  column-gap: 4px;
-  line-height: 1.4;
-}
-
-.QW4K12-label {
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 600;
-}
-
-.QW4K12-value {
-  color: rgba(255, 255, 255, 0.9);
+.QW4K12-tt-meta {
+  font-size: 13px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.75);
 }
 
 /* Right: narrative + legend */
@@ -223,7 +245,7 @@
   .QW4K12-chart-frame { padding: 30px 20px; }
   .QW4K12-dashboard-container { height: 600px; }
   .QW4K12-floating-logo { width: 74px; height: 74px; }
-  .QW4K12-brand-tooltip { width: 240px; }
+  .QW4K12-brand-tooltip { width: 210px; height: 210px; padding: 20px; }
   .QW4K12-right-panel { padding: 28px; }
 }
 
@@ -249,12 +271,7 @@
 
   .QW4K12-floating-logo { width: 64px; height: 64px; padding: 6px; }
 
-  .QW4K12-brand-tooltip { width: 200px; }
-  .QW4K12-wrapper-fortune .QW4K12-brand-tooltip,
-  .QW4K12-wrapper-welcomhotel .QW4K12-brand-tooltip { right: 70px; }
-  .QW4K12-wrapper-storii .QW4K12-brand-tooltip,
-  .QW4K12-wrapper-heritage .QW4K12-brand-tooltip { left: 70px; }
-  .QW4K12-wrapper-itc .QW4K12-brand-tooltip { top: 74px; }
+  .QW4K12-brand-tooltip { width: 170px; height: 170px; padding: 16px; }
 
   .QW4K12-chart-subtitle { margin-bottom: 24px; }
 

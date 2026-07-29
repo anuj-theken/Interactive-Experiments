@@ -38,9 +38,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 center: ['50%', '52%'],
                 avoidLabelOverlap: false,
                 itemStyle: {
-                    borderRadius: 8,
-                    borderColor: getColor('--color-bg'),
-                    borderWidth: 3
+                    borderRadius: 0,
+                    borderWidth: 0,
+                    shadowBlur: 14,
+                    shadowColor: 'rgba(0, 0, 0, 0.35)',
+                    shadowOffsetY: 4
                 },
                 label: {
                     show: true,

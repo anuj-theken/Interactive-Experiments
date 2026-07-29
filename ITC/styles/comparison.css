@@ -43,7 +43,7 @@
 
 .QW4K4-chart-subtitle {
   font-family: var(--font-body);
-  font-size: var(--type-legend);
+  font-size: var(--type-subheading);
   font-weight: 400;
   color: var(--color-muted);
   margin-top: 2px;
@@ -56,9 +56,9 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--color-muted);
-  background: rgba(0, 0, 0, 0.05);
-  padding: 6px 12px;
-  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 6px 14px;
+  border-radius: 20px;
   white-space: nowrap;
 }
 

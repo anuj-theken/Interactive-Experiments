@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const tipData = absoluteTaxTotal.map((t, idx) => (staticLabels[idx] === '-') ? '-' : Math.round(t * 0.05));
 
     // Updated requested custom legend names
-    const sharedLegendData = ['Reveneue through Ciggeretes', 'Tax on Ciggeretes %'];
+    const sharedLegendData = ['Reveneue through Ciggeretes', 'New tax rate in %'];
 
     // Main Chart Setup Options
     const mainOption = {
@@ -211,7 +211,7 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         series: [
             { name: 'Reveneue through Ciggeretes', type: 'line', color: revenueColor, itemStyle: { color: revenueColor } },
-            { name: 'Tax on Ciggeretes %', type: 'bar', color: '#fbbf24', itemStyle: { color: '#fbbf24' } }
+            { name: 'New tax rate in %', type: 'bar', color: '#fbbf24', itemStyle: { color: '#fbbf24' } }
         ]
     };
 
@@ -220,7 +220,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Bind interacting toggle filters securely between separate DOM nodes
     myLegend.on('legendselectchanged', function(params) {
-        const isTaxActive = params.selected['Tax on Ciggeretes %'];
+        const isTaxActive = params.selected['New tax rate in %'];
         myChart.setOption({
             legend: {
                 selected: {

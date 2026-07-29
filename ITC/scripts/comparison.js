@@ -20,16 +20,37 @@ document.addEventListener("DOMContentLoaded", function () {
         return window.innerWidth <= 1023;
     }
 
-    const labelConfig = {
-        show: true,
-        position: 'inside',
-        formatter: function (params) {
-            return params.value > 0 ? params.seriesName + '\n' + params.value + '%' : '';
-        },
-        color: '#ffffff',
-        fontSize: 9,
-        fontWeight: 'bold'
-    };
+    function parseRgbTriplet(colorStr) {
+        if (colorStr.charAt(0) === '#') {
+            const h = colorStr.replace('#', '');
+            return [parseInt(h.substring(0, 2), 16), parseInt(h.substring(2, 4), 16), parseInt(h.substring(4, 6), 16)];
+        }
+        const m = colorStr.match(/rgba?\(([^)]+)\)/);
+        const parts = m ? m[1].split(',').map(function (x) { return parseFloat(x); }) : [0, 0, 0];
+        return [parts[0], parts[1], parts[2]];
+    }
+
+    // labels sit "inside" the bar segment, so their color must react to that
+    // segment's own fill — a light fill (e.g. the grey "Other" filler) needs
+    // dark text, a dark fill needs white, or the label disappears into it
+    function labelColorFor(fillColor) {
+        const rgb = parseRgbTriplet(fillColor);
+        const luminance = (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) / 255;
+        return luminance > 0.6 ? getColor('--color-text') : '#ffffff';
+    }
+
+    function labelConfig(fillColor) {
+        return {
+            show: true,
+            position: 'inside',
+            formatter: function (params) {
+                return params.value > 0 ? params.seriesName + '\n' + params.value + '%' : '';
+            },
+            color: labelColorFor(fillColor),
+            fontSize: 9,
+            fontWeight: 'bold'
+        };
+    }
 
     const gridConfig = { left: '4%', right: '6%', bottom: '5%', top: '10%', containLabel: true };
 
@@ -46,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
             legendId: 'QW4K4-legend1',
             categories: ['2003', '2021', '2023'],
             series: [
-                { name: 'Britannia & Parle', data: [80, 0, 0], colorVar: '--color-muted' },
+                { name: 'Britannia & Parle', data: [80, 80, 0], colorVar: '--color-rival' },
                 { name: 'Sunfeast', data: [0, 7.3, 0], colorVar: '--color-primary' },
                 { name: 'Britannia', data: [0, 0, 31], colorVar: '--color-secondary' },
                 { name: 'Parle', data: [0, 0, 29], colorVar: '--color-accent' }
@@ -77,6 +98,9 @@ document.addEventListener("DOMContentLoaded", function () {
     function seriesColor(colorVar) {
         if (colorVar === '--color-primary-alpha') return hexToRgba(getColor('--color-primary'), 0.45);
         if (colorVar === '--color-other') return '#d1d5db';
+        // a warm terracotta — brighter than --color-muted and rounds out the
+        // gold/navy/teal palette into a balanced 4-color qualitative set
+        if (colorVar === '--color-rival') return '#c9634a';
         return getColor(colorVar);
     }
 
@@ -102,12 +126,13 @@ document.addEventListener("DOMContentLoaded", function () {
     function buildOption(def) {
         const allSeries = seriesWithOther(def);
         const series = allSeries.map(function (s) {
+            const fillColor = seriesColor(s.colorVar);
             return {
                 name: s.name,
                 type: 'bar',
                 stack: 'total',
-                label: labelConfig,
-                itemStyle: { color: seriesColor(s.colorVar) },
+                label: labelConfig(fillColor),
+                itemStyle: { color: fillColor },
                 data: s.data
             };
         });

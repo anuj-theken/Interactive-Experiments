@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     show: true,
                     position: 'inside',
                     textStyle: {
-                        color: isFirst || isLast ? '#ffffff' : '#1e293b',
+                        color: isFirst || isLast ? '#ffffff' : getColor('--color-muted'),
                         fontSize: isFirst ? (mobile ? 11 : 12) : 10,
                         fontWeight: isFirst || isLast ? 'bold' : '600'
                     },
@@ -77,7 +77,8 @@ document.addEventListener("DOMContentLoaded", function () {
                         const minAbs = isFirst ? 0 : (isLast ? 1200 : 2000);
                         if (total === 0 || Math.abs(params.value) < minAbs) return '';
                         const pct = Math.round((params.value / total) * 100);
-                        return isFirst ? (mobile ? pct + '%' : 'Cigarettes\n(' + pct + '%)') : pct + '%';
+                        if (mobile || isLast) return pct + '%';
+                        return cat + '\n(' + pct + '%)';
                     }
                 },
                 data: seriesData[cat]

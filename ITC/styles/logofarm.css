@@ -26,7 +26,7 @@
 
 .QW4K10-content-wrap {
   width: 100%;
-  max-width: 1024px;
+  max-width: 1200px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -34,13 +34,13 @@
 
 .QW4K10-header {
   flex: 0 0 auto;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 2px solid rgba(0,0,0,0.1);
   padding-bottom: 1.5rem;
   margin-bottom: 2.25rem;
-  margin-left: 1rem;
 }
 
 .QW4K10-header h1 {
@@ -101,20 +101,26 @@
   border-radius: 4px;
   box-shadow: 0 40px 80px -20px rgba(30, 50, 20, 0.22),
               0 20px 50px -30px rgba(30, 50, 20, 0.15);
-  /* Water: a light-to-dark blue gradient that slowly sweeps across, plus one
-     subtle ripple texture layer (static, doesn't move with the sweep). */
+  /* Water: layered light-blue gradients that drift to feel like moving water
+     (ported from water waves.html) — a diagonal sheen sweep, a color sweep,
+     two crossing ripple-line layers at different angles/speeds, and a static
+     bottom vignette for depth. */
   background-color: var(--industry-gap);
   background-image:
-      linear-gradient(120deg, #bfe9fc 0%, #38bdf8 45%, #075985 100%),
-      repeating-linear-gradient(75deg, rgba(255,255,255,0.14) 0px, rgba(255,255,255,0.14) 2px, transparent 2px, transparent 12px);
-  background-size: 260% 260%, 40px 40px;
-  animation: QW4K10-waterFlow 12s ease-in-out infinite;
+      linear-gradient(120deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0.55) 55%, rgba(255,255,255,0) 80%),
+      linear-gradient(60deg, rgba(14,165,233,0.6) 0%, rgba(125,211,252,0) 40%, rgba(56,189,248,0.55) 70%, rgba(125,211,252,0) 100%),
+      repeating-linear-gradient(65deg, rgba(255,255,255,0.3) 0px, rgba(255,255,255,0.3) 2px, transparent 2px, transparent 10px),
+      repeating-linear-gradient(115deg, rgba(2,132,199,0.22) 0px, rgba(2,132,199,0.22) 2px, transparent 2px, transparent 14px),
+      linear-gradient(to bottom, rgba(3,105,161,0) 45%, rgba(3,105,161,0.35) 78%, rgba(7,89,133,0.6) 100%);
+  background-size: 260% 260%, 200% 200%, 60px 60px, 80px 80px, 100% 100%;
+  background-blend-mode: screen, normal, overlay, overlay, normal;
+  animation: QW4K10-waterFlow 12s linear infinite;
 }
 
 @keyframes QW4K10-waterFlow {
-  0%   { background-position: 0% 50%, 0 0; }
-  50%  { background-position: 100% 50%, 0 0; }
-  100% { background-position: 0% 50%, 0 0; }
+  0%   { background-position: 0% 50%, 0% 0%, 0 0, 0 0, 0 0; }
+  50%  { background-position: 100% 50%, 100% 100%, 60px 30px, -80px 40px, 0 0; }
+  100% { background-position: 0% 50%, 0% 0%, 120px 60px, -160px 80px, 0 0; }
 }
 
 /* A sector = a region of farmland */

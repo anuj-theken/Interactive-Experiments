@@ -6,10 +6,18 @@ document.addEventListener("DOMContentLoaded", function () {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   }
 
+  function hexToRgba(hex, alpha) {
+    var h = hex.replace('#', '');
+    var r = parseInt(h.substring(0, 2), 16);
+    var g = parseInt(h.substring(2, 4), 16);
+    var b = parseInt(h.substring(4, 6), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+  }
+
   var steps = [
-    { share: 75, radius: 60, cap: "Branded segment ≈ ₹3,500 cr" },
-    { share: 28, radius: 88, cap: "Branded market — larger, fragmented" },
-    { share: 45, radius: 120, cap: "Branded category — mature, large" }
+    { share: 75, radius: 60, cap: "Small market" },
+    { share: 28, radius: 88, cap: "Medium sized market" },
+    { share: 45, radius: 120, cap: "Large market" }
   ];
   var currentStep = -1;
 
@@ -24,11 +32,45 @@ document.addEventListener("DOMContentLoaded", function () {
     ];
   }
 
+  // a ring traces the pie's own radius (which already grows with market size)
+  // and is labelled with that step's market-size caption, so the market's
+  // growth reads even without following the narrative text
+  function buildGraphics(step) {
+    var cx = chart.getWidth() / 2;
+    var cy = chart.getHeight() / 2;
+    var ringColor = hexToRgba(getColor('--color-text'), 0.25);
+    var labelColor = hexToRgba(getColor('--color-secondary'), 0.55);
+    return [
+      {
+        type: 'circle',
+        shape: { cx: cx, cy: cy, r: step.radius },
+        style: { fill: 'transparent', stroke: ringColor, lineWidth: 1.5 },
+        silent: true
+      },
+      {
+        type: 'text',
+        x: cx,
+        y: Math.max(10, cy - step.radius - 14),
+        style: {
+          text: step.cap,
+          fill: labelColor,
+          fontFamily: 'Archivo',
+          fontSize: 12,
+          fontWeight: 600,
+          align: 'center',
+          verticalAlign: 'bottom'
+        },
+        silent: true
+      }
+    ];
+  }
+
   function baseOption(step) {
     return {
       animationDuration: 700,
       animationEasing: 'cubicInOut',
       tooltip: { trigger: 'item', formatter: function (p) { return p.name + ': ' + p.value + '%'; } },
+      graphic: buildGraphics(step),
       series: [{
         type: 'pie',
         radius: [0, step.radius],
@@ -37,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
         label: {
           show: true,
           formatter: function (p) { return p.name === 'Aashirvaad' ? p.value + '%' : ''; },
-          fontSize: 20, fontWeight: 500, color: getColor('--color-text')
+          fontFamily: 'Reckless', fontSize: 30, fontWeight: 500, color: getColor('--color-text')
         },
         labelLine: { show: false },
         data: pieData(step.share)
@@ -70,5 +112,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  window.addEventListener('resize', function () { chart.resize(); });
+  window.addEventListener('resize', function () {
+    chart.resize();
+    chart.setOption({ graphic: buildGraphics(steps[currentStep]) });
+  });
 });

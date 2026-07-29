@@ -27,6 +27,7 @@
 .QW4K9-editorial-panel {
   flex: 1 1 400px;
   min-width: 280px;
+  padding-left: 40px; /* aligns the header with other modules' left inset */
 }
 
 .QW4K9-chart-title {
@@ -40,11 +41,12 @@
 
 .QW4K9-chart-subtitle {
   font-family: var(--font-body);
-  font-size: var(--type-subheading);
+  font-size: var(--type-body);
   font-weight: 400;
   line-height: 1.5;
   color: var(--color-muted);
   margin: 0;
+  padding-top: 12px;
 }
 
 /* Central diagram grid architecture */
@@ -115,7 +117,7 @@
   line-height: 1.4;
   color: var(--color-muted);
   position: relative;
-  height: 70px;
+  height: 44px;
   width: 100%;
 }
 
@@ -143,13 +145,15 @@
   transition: transform 0.2s ease;
 }
 
-/* Dynamic fade animation logic rules */
+/* Fade timing is driven by scripts/government.js (a rAF clock, not CSS
+   keyframes) — see that file for why: swapping animation-duration on hover
+   remaps elapsed time against the new duration and jumps the phase, instead
+   of continuing smoothly from wherever the slow animation left off. */
 .QW4K9-animated-text {
   position: absolute;
   top: 0;
   width: 100%;
   opacity: 0;
-  animation: QW4K9-textCycle 20s infinite ease-in-out;
   white-space: normal;
 }
 
@@ -160,12 +164,6 @@
 .QW4K9-panel-right .QW4K9-animated-text {
   left: 0;
 }
-
-.QW4K9-text-step-1 { animation-delay: 0s; }
-.QW4K9-text-step-2 { animation-delay: 4s; }
-.QW4K9-text-step-3 { animation-delay: 8s; }
-.QW4K9-text-step-4 { animation-delay: 12s; }
-.QW4K9-text-step-5 { animation-delay: 16s; }
 
 /* Indicator arrow elements — green/red are semantic (money in / tax out),
    not brand chrome, so kept as authored rather than mapped to design tokens. */
@@ -191,15 +189,9 @@
   animation: QW4K9-bobDown 1.5s infinite ease-in-out;
 }
 
-/* Rotation keyframe properties hooks */
+/* Rotation angle is set inline by scripts/government.js every frame. */
 .QW4K9-rotate-clockwise {
   transform-origin: 300px 300px;
-  animation: QW4K9-spin-cw 70s linear infinite;
-}
-
-@keyframes QW4K9-spin-cw {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 @keyframes QW4K9-bobUp {
@@ -210,12 +202,6 @@
 @keyframes QW4K9-bobDown {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(4px); }
-}
-
-@keyframes QW4K9-textCycle {
-  0%, 15% { opacity: 1; }
-  20%, 95% { opacity: 0; }
-  100% { opacity: 1; }
 }
 
 /* --- RESPONSIVE — aligned to the project's iPad/mobile breakpoints (1023px / 768px)
@@ -236,8 +222,7 @@
     max-width: 500px;
     min-width: 100%;
     margin-bottom: 0px;
-    max-height: 100px;
-    overflow: hidden;
+    padding-left: 0; /* the desktop-only left nudge doesn't apply once centered */
   }
   /* nowrap only makes sense at full desktop width (≥1024px) where the 1fr grid
      columns have room; below that the text can overflow its shrunk column and

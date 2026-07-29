@@ -113,7 +113,10 @@ function cropLabel(c){
   return lang==="hi" ? (CROP_HI[c]||c) : c;
 }
 
-const fmt=function(n){ return "₹"+n.toLocaleString("en-IN"); };
+// source prices are quoted per quintal (100kg) — divide by 100 for a per-kg rate
+var perKgOpts={minimumFractionDigits:2,maximumFractionDigits:2};
+const fmt=function(n){ return "Rs."+(n/100).toLocaleString("en-IN",perKgOpts)+"/kg"; };
+const fmtRange=function(lo,hi){ return "Rs."+(lo/100).toLocaleString("en-IN",perKgOpts)+"–"+(hi/100).toLocaleString("en-IN",perKgOpts)+"/kg"; };
 
 // ---- i18n ----
 const dict={
@@ -125,14 +128,14 @@ const dict={
     cropsel:"फसल:", low:"निम्न", high:"उच्च", markets:"मंडियां",
     fewer:"कम फसलें", more:"अधिक फसलें", norate:"कोई भाव नहीं", nrec:"कोई दर्ज नहीं",
     admin:"एडमिन विकल्प", stateLbl:"वरीयता:", code:"प्रवेश कोड बदलिये" },
-  en:{ title:"e-Choupal : Harnessing technology for the Indian farmer...",
+  en:{ title:"e-Choupal was a revolutionary technology for farmers. This is re-imagined representation of the old website.",
     brand:"e-Choupal", side:"Commodities",
     desc:"District-wise Madhya Pradesh map of modal mandi price for the selected commodity:",
     descAll:"District-wise Madhya Pradesh map of how many commodities each district recorded:",
     th1:"Mandi Terminal", th2:"District", th3:"Commodity", th4:"Variety", th5:"Govt Mandi Rate",
     cropsel:"Crop:", low:"Low", high:"High", markets:"markets",
     fewer:"Fewer crops", more:"More crops", norate:"No rate", nrec:"No record",
-    admin:"Admin Options", stateLbl:"Priority:", code:"Change access code" }
+    admin:"2026 Prices", stateLbl:"Priority:", code:"Change access code" }
 };
 let lang="en", currentCrop=ALL;
 
@@ -244,7 +247,7 @@ function render(){
   document.getElementById("QW4K2-map-title").textContent = mapPrefix + cropLabel(currentCrop);
   document.getElementById("QW4K2-map-stat").textContent = isAll
     ? (Object.keys(valMap).length+" "+(lang==="hi"?"जिले":"districts")+" · "+lo+"–"+hi+" "+(lang==="hi"?"फसलें":"crops"))
-    : (Object.keys(valMap).length+" "+d.markets+" · "+fmt(lo)+"–"+fmt(hi));
+    : (Object.keys(valMap).length+" "+d.markets+" · "+fmtRange(lo,hi));
 
   // table
   var tbody=document.getElementById("QW4K2-table-body"); tbody.innerHTML="";
@@ -355,7 +358,7 @@ function refreshLegend(){
   var d=dict[lang];
   var isAll=(currentCrop===ALL);
   var head = isAll ? (lang==="hi"?"फसलों की संख्या":"No. of commodities")
-                   : (lang==="hi"?"मंडी भाव (₹)":"Mandi price (₹)");
+                   : (lang==="hi"?"मंडी भाव (Rs./kg)":"Mandi price (Rs./kg)");
   var hiTxt = isAll ? d.more : d.high;
   var loTxt = isAll ? d.fewer : d.low;
   var none  = isAll ? d.nrec : d.norate;

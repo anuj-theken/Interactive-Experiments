@@ -49,26 +49,32 @@ document.addEventListener("DOMContentLoaded", function () {
     el.style.pointerEvents = visible ? "auto" : "none";
   }
 
+  // accumulates every step's marker up to and including the current one, so
+  // scrolling forward doesn't erase markers already triggered earlier
+  function buildMarkPoints(stepIdx) {
+    const points = steps.slice(0, stepIdx + 1).map((step) => ({
+      coord: [years[step.markerAt], itcData[step.markerAt]],
+    }));
+    return {
+      symbol: "circle",
+      symbolSize: 10,
+      itemStyle: { color: itcColor, borderWidth: 0 },
+      data: points,
+    };
+  }
+
   function updateChart(stepIdx) {
     const step = steps[stepIdx];
     if (!step) return;
 
     const revealCount = step.revealUntil;
-    const markerIndex = step.markerAt;
-
-    const createMarker = (val, color) => ({
-      symbol: "circle",
-      symbolSize: 10,
-      itemStyle: { color: color, borderWidth: 0 },
-      data: [{ coord: [years[markerIndex], val] }],
-    });
 
     myChart.setOption({
       series: [
         {
           name: "ITC",
           data: itcData.slice(0, revealCount),
-          markPoint: createMarker(itcData[markerIndex], itcColor),
+          markPoint: buildMarkPoints(stepIdx),
         },
         {
           name: "Nifty 50",
