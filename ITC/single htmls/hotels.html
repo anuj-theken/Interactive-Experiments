@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITC Hotel Strategy: Asset-Right Transition</title>
+    <!-- Include Apache ECharts from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            height: 680px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        /* Left side: Visual representation zone */
+        .left-panel {
+            flex: 1.4;
+            position: relative;
+            background: #ffffff;
+            border-right: 1px solid #edf2f7;
+        }
+
+        #pie-chart {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Container to group logo and its hidden tooltip */
+        .logo-wrapper {
+            position: absolute;
+            z-index: 10;
+        }
+
+        /* Absolute positioning wrapper blocks around the central pie chart */
+        .wrapper-itc          { top: 5%;  left: 50%; transform: translateX(-50%); }
+        .wrapper-fortune      { top: 25%; right: 6%; }
+        .wrapper-welcomhotel  { bottom: 15%; right: 12%; }
+        .wrapper-storii       { bottom: 15%; left: 12%; }
+        .wrapper-heritage     { top: 25%; left: 6%; }
+
+        /* Floating HTML Logos with Shadow */
+        .floating-logo {
+            width: 90px;
+            height: 90px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .floating-logo img {
+            max-width: 100%;
+            max-height: 65%;
+            object-fit: contain;
+        }
+
+        .floating-logo span {
+            font-size: 10px;
+            font-weight: 600;
+            color: #718096;
+            margin-top: 4px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        /* Rich Informational Tooltip Styling */
+        .brand-tooltip {
+            position: absolute;
+            width: 280px;
+            background: #1a202c;
+            color: #ffffff;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            font-size: 12px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s ease;
+            pointer-events: none; /* Prevents cursor stuttering */
+            z-index: 100;
+        }
+
+        /* Smart directional positioning for tooltips so they don't clip outside borders */
+        .wrapper-itc .brand-tooltip      { top: 100px; left: 50%; transform: translateX(-50%); }
+        .wrapper-fortune .brand-tooltip  { top: 0; right: 105px; }
+        .wrapper-welcomhotel .brand-tooltip { bottom: 0; right: 105px; }
+        .wrapper-storii .brand-tooltip   { bottom: 0; left: 105px; }
+        .wrapper-heritage .brand-tooltip { top: 0; left: 105px; }
+
+        /* Hover Actions */
+        .logo-wrapper:hover .floating-logo {
+            transform: scale(1.05);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
+            border-color: #5470c6;
+        }
+
+        .logo-wrapper:hover .brand-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Tooltip Inner Formatting */
+        .tooltip-title {
+            font-size: 14px;
+            font-weight: 700;
+            border-bottom: 1px solid #4a5568;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+            color: #fbd38d;
+        }
+
+        .tooltip-grid {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            row-gap: 6px;
+            column-gap: 4px;
+            line-height: 1.4;
+        }
+
+        .label {
+            color: #a0aec0;
+            font-weight: 600;
+        }
+
+        .value {
+            color: #e2e8f0;
+        }
+
+        /* Right side: Information zone */
+        .right-panel {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #fafafa;
+        }
+
+        .header-tag {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #b7791f;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-size: 32px;
+            color: #1a202c;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .subheader {
+            font-size: 15px;
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        /* Custom Structured Legend */
+        .custom-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            border-top: 2px solid #edf2f7;
+            padding-top: 30px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            margin-right: 14px;
+        }
+
+        .legend-color.owned { background-color: #5470c6; }
+        .legend-color.managed { background-color: #91cc75; }
+
+        .legend-text {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 15px;
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        .legend-value {
+            font-weight: 700;
+            color: #1a202c;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        
+        <!-- Left Column: Pie Chart and Wrapper Blocks (Logo + Tooltip Data) -->
+        <div class="left-panel">
+            <div id="pie-chart"></div>
+
+            <!-- ITC Hotels -->
+            <div class="logo-wrapper wrapper-itc">
+                <div class="floating-logo">
+                    <img src="itc_hotels.png" alt="ITC Hotels">
+                    <span>ITC Hotels</span>
+                </div>
+                <div class="brand-tooltip">
+                    <div class="tooltip-title">ITC Hotels</div>
+                    <div class="tooltip-grid">
+                        <div class="label">Portfolio:</div><div class="value">~17+ Signature Properties</div>
+                        <div class="label">Founded:</div><div class="value">1975</div>
+                        <div class="label">Founder:</div><div class="value">ITC Limited</div>
+                        <div class="label">Strategy:</div><div class="value">Flagship luxury tier; highly selective architectural icons shifting to mixed equity/asset-right structures.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Fortune -->
+            <div class="logo-wrapper wrapper-fortune">
+                <div class="floating-logo">
+                    <img src="fortune.png" alt="Fortune">
+                    <span>Fortune</span>
+                </div>
+                <div class="brand-tooltip">
+                    <div class="tooltip-title">Fortune Hotels</div>
+                    <div class="tooltip-grid">
+                        <div class="label">Portfolio:</div><div class="value">~55+ Operational Hotels</div>
+                        <div class="label">Founded:</div><div class="value">1995</div>
+                        <div class="label">Founder:</div><div class="value">ITC Subsidiary (FPHL)</div>
+                        <div class="label">Strategy:</div><div class="value">Mid-market to upscale business hotels scaled aggressively through pure management contracts.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- WelcomHotel -->
+            <div class="logo-wrapper wrapper-welcomhotel">
+                <div class="floating-logo">
+                    <img src="welcomhotel.png" alt="WelcomHotel">
+                    <span>WelcomHotel</span>
+                </div>
+                <div class="brand-tooltip">
+                    <div class="tooltip-title">Welcomhotel (WH)</div>
+                    <div class="tooltip-grid">
+                        <div class="label">Portfolio:</div><div class="value">~25+ Hotels</div>
+                        <div class="label">Founded:</div><div class="value">1975 (Rebranded modern tier)</div>
+                        <div class="label">Founder:</div><div class="value">ITC Limited</div>
+                        <div class="label">Strategy:</div><div class="value">Upper-upscale brand targeting new-age business &amp; leisure travelers, driven heavily by management contracts.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Storii -->
+            <div class="logo-wrapper wrapper-storii">
+                <div class="floating-logo">
+                    <img src="storii.png" alt="Storii">
+                    <span>Storii</span>
+                </div>
+                <div class="brand-tooltip">
+                    <div class="tooltip-title">Storii by ITC</div>
+                    <div class="tooltip-grid">
+                        <div class="label">Portfolio:</div><div class="value">Rapidly Expanding Boutique Tier</div>
+                        <div class="label">Founded:</div><div class="value">2022</div>
+                        <div class="label">Founder:</div><div class="value">ITC Limited</div>
+                        <div class="label">Strategy:</div><div class="value">Boutique premium resorts offering curated, storytelling experiences. Operates with near-zero asset ownership.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Welcomheritage -->
+            <div class="logo-wrapper wrapper-heritage">
+                <div class="floating-logo">
+                    <img src="welcomheritage.png" alt="Welcomheritage">
+                    <span>Welcomheritage</span>
+                </div>
+                <div class="brand-tooltip">
+                    <div class="tooltip-title">Welcomheritage</div>
+                    <div class="tooltip-grid">
+                        <div class="label">Portfolio:</div><div class="value">~40+ Heritage Properties</div>
+                        <div class="label">Founded:</div><div class="value">1997</div>
+                        <div class="label">Founder:</div><div class="value">Joint Venture (ITC &amp; Jodhana)</div>
+                        <div class="label">Strategy:</div><div class="value">Preservation of palaces, forts, and Havelis. Built completely on marketing and operational management alliances.</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Context, Narrative, and Legend Details -->
+        <div class="right-panel">
+            <span class="header-tag">Strategic Restructuring</span>
+            <h1>The Asset-Right Transition</h1>
+            <p class="subheader">
+                Demonstrating ITC Limited's structural pivot away from heavy capital deployment. By scaling modern sub-brands via asset-light management frameworks, ITC captures premium hospitality margins while maximizing return on capital employed.
+            </p>
+
+            <div class="custom-legend">
+                <div class="legend-item">
+                    <div class="legend-color owned"></div>
+                    <div class="legend-text">
+                        <span>Owned Footprint</span>
+                        <span class="legend-value">45%</span>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color managed"></div>
+                    <div class="legend-text">
+                        <span>Managed &amp; Maintained Portfolio</span>
+                        <span class="legend-value">55%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ECharts Initialization Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const chartDom = document.getElementById('pie-chart');
+            const myChart = echarts.init(chartDom);
+            
+            const option = {
+                backgroundColor: 'transparent',
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}: <strong>{c}%</strong>'
+                },
+                series: [
+                    {
+                        name: 'Portfolio Mix',
+                        type: 'pie',
+                        radius: ['38%', '58%'],
+                        center: ['50%', '52%'],
+                        avoidLabelOverlap: false,
+                        itemStyle: {
+                            borderRadius: 8,
+                            borderColor: '#fff',
+                            borderWidth: 3
+                        },
+                        label: {
+                            show: true,
+                            position: 'inside',
+                            formatter: '{c}%',
+                            fontSize: 14,
+                            fontWeight: 'bold',
+                            color: '#fff'
+                        },
+                        emphasis: {
+                            label: {
+                                show: true,
+                                fontSize: 16
+                            }
+                        },
+                        color: ['#5470c6', '#91cc75'],
+                        data: [
+                            { value: 45, name: 'Owned' },
+                            { value: 55, name: 'Managed' }
+                        ]
+                    }
+                ]
+            };
+
+            myChart.setOption(option);
+
+            window.addEventListener('resize', function() {
+                myChart.resize();
+            });
+        });
+    </script>
+</body>
+</html>

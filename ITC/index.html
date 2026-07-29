@@ -16,13 +16,15 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
         <link rel="stylesheet" href="/ITC/styles/mandiMap.css" />
         <link rel="stylesheet" href="/ITC/styles/atta.css" />
-        <link rel="stylesheet" href="/ITC/styles/brands.css" />
+        <link rel="stylesheet" href="/ITC/styles/comparison.css" />
         <link rel="stylesheet" href="/ITC/styles/market_cap.css" />
         <link rel="stylesheet" href="/ITC/styles/stocks.css" />
         <link rel="stylesheet" href="/ITC/styles/smoke.css" />
         <link rel="stylesheet" href="/ITC/styles/timeline.css" />
         <link rel="stylesheet" href="/ITC/styles/government.css" />
         <link rel="stylesheet" href="/ITC/styles/logofarm.css" />
+        <link rel="stylesheet" href="/ITC/styles/cigarette.css" />
+        <link rel="stylesheet" href="/ITC/styles/hotels.css" />
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
@@ -165,31 +167,51 @@
         <div class="QW4K-spacer"></div>
 
         <!--v1.0-->
-        <section class="QW4K4-brands-section">
-          <div class="QW4K4-scroll-container">
-            <div class="QW4K4-scroll-step" id="QW4K4-step-biscuits"></div>
-            <div class="QW4K4-scroll-step" id="QW4K4-step-snacks"></div>
-            <div class="QW4K4-scroll-step" id="QW4K4-step-noodles"></div>
-
-            <div class="QW4K4-viewport-container">
-              <header class="QW4K4-header-group">
-                <h1 class="QW4K4-main-title">ITC FMCG Market Share</h1>
-                <h2 class="QW4K4-sub-title">ITC diversified and captured other industries</h2>
-
-                <div class="QW4K4-category-switcher">
-                  <span class="QW4K4-category-tab" id="QW4K4-tab-biscuits">Biscuits (2023)</span>
-                  <span class="QW4K4-category-tab" id="QW4K4-tab-snacks">Snacks (2007)</span>
-                  <span class="QW4K4-category-tab" id="QW4K4-tab-noodles">Instant Noodles (2026)</span>
+        <section class="QW4K4-comparison-section">
+          <div class="QW4K4-driver" id="QW4K4-driver">
+            <div class="QW4K4-pin" id="QW4K4-pin">
+              <header class="QW4K4-topbar">
+                <div>
+                  <h1 class="QW4K4-chart-title">ITC FMCG brands</h1>
+                  <p class="QW4K4-chart-subtitle">The consumer products that ITC made became household names</p>
                 </div>
+                <div class="QW4K4-scroll-hint">Scroll &darr;</div>
               </header>
 
-              <div class="QW4K4-data-display-grid" id="QW4K4-main-grid-workspace">
-                <div class="QW4K4-chart-side">
-                  <div id="QW4K4-dynamicFMCGChart"></div>
+              <div class="QW4K4-stage">
+                <div class="QW4K4-chart-grid">
+                  <div class="QW4K4-chart-wrap" id="QW4K4-chart1-wrap">
+                    <div class="QW4K4-chart-legend" id="QW4K4-legend1"></div>
+                    <div id="QW4K4-chart1" class="QW4K4-chart-el"></div>
+                  </div>
+                  <div class="QW4K4-chart-wrap" id="QW4K4-chart2-wrap">
+                    <div class="QW4K4-chart-legend" id="QW4K4-legend2"></div>
+                    <div id="QW4K4-chart2" class="QW4K4-chart-el"></div>
+                  </div>
+                  <div class="QW4K4-chart-wrap" id="QW4K4-chart3-wrap">
+                    <div class="QW4K4-chart-legend" id="QW4K4-legend3"></div>
+                    <div id="QW4K4-chart3" class="QW4K4-chart-el"></div>
+                  </div>
+                </div>
+
+                <div class="QW4K4-narrative-layer">
+                  <div class="QW4K4-narrative-card" data-step="0">
+                    <span class="QW4K4-narrative-tag">July 2003</span>
+                    <h2 class="QW4K4-narrative-title">Sunfeast</h2>
+                    <p class="QW4K4-narrative-body">At launch in 2003, Britannia and Parle held a combined market share of over 80%. By 2021, Sunfeast secured 7.30%. By 2023, Britannia stood at 31%, Parle at 29%, and ITC was designated inside the top three capturing over 70% together.</p>
+                  </div>
+                  <div class="QW4K4-narrative-card" data-step="1">
+                    <span class="QW4K4-narrative-tag">March 2007</span>
+                    <h2 class="QW4K4-narrative-title">ITC Bingo!</h2>
+                    <p class="QW4K4-narrative-body">Within 9 months of its 2007 launch, Bingo! captured approximately 16% market share. During this period, Frito-Lay (PepsiCo) held around 50%, while Haldiram's retained roughly 25% share.</p>
+                  </div>
+                  <div class="QW4K4-narrative-card" data-step="2">
+                    <span class="QW4K4-narrative-tag">September 2010</span>
+                    <h2 class="QW4K4-narrative-title">Sunfeast Yippee!</h2>
+                    <p class="QW4K4-narrative-body">By 2016, Nestl&eacute; Maggi led the category with more than 50% market share, while Yippee! achieved a 30% to 40% share. In 2026, Nestl&eacute; Maggi stands at 66% with Yippee! holding 22% share.</p>
+                  </div>
                 </div>
               </div>
-
-              <footer class="QW4K4-component-footer" id="QW4K4-dynamic-footer"></footer>
             </div>
           </div>
         </section>
@@ -517,17 +539,135 @@
 
         <div class="QW4K-spacer"></div>
 
+        <!--v1.0-->
+        <section class="QW4K11-chart-section">
+          <div class="QW4K11-chart-frame">
+            <div class="QW4K11-chart-container">
+              <div class="QW4K11-chart-header">
+                <div class="QW4K11-chart-header-text">
+                  <h2 class="QW4K11-chart-title">Segment Performance Breakdown (FY25 vs FY26)</h2>
+                  <p class="QW4K11-chart-subtitle">Chronological side-by-side view of Revenue &amp; Profit metrics (Values in Rs. Crores)</p>
+                </div>
+                <div class="QW4K11-legend" id="QW4K11-legend"></div>
+              </div>
+              <div id="QW4K11-main-chart"></div>
+            </div>
+          </div>
+        </section>
+
+        <div class="QW4K-spacer"></div>
+
+        <!--v1.0-->
+        <section class="QW4K12-hotels-section">
+          <div class="QW4K12-chart-frame">
+            <div class="QW4K12-dashboard-container">
+
+              <div class="QW4K12-left-panel">
+                <div id="QW4K12-pie-chart"></div>
+
+                <div class="QW4K12-logo-wrapper QW4K12-wrapper-itc">
+                  <div class="QW4K12-floating-logo">
+                    <img src="/ITC/logos/ITC.png" alt="ITC Hotels">
+                  </div>
+                  <div class="QW4K12-brand-tooltip">
+                    <div class="QW4K12-tooltip-title">ITC Hotels</div>
+                    <div class="QW4K12-tooltip-grid">
+                      <div class="QW4K12-label">Portfolio:</div><div class="QW4K12-value">~17+ Signature Properties</div>
+                      <div class="QW4K12-label">Founded:</div><div class="QW4K12-value">1975</div>
+                      <div class="QW4K12-label">Founder:</div><div class="QW4K12-value">ITC Limited</div>
+                      <div class="QW4K12-label">Strategy:</div><div class="QW4K12-value">Flagship luxury tier; highly selective architectural icons shifting to mixed equity/asset-right structures.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="QW4K12-logo-wrapper QW4K12-wrapper-fortune">
+                  <div class="QW4K12-floating-logo">
+                    <img src="/ITC/logos/FH.png" alt="Fortune">
+                  </div>
+                  <div class="QW4K12-brand-tooltip">
+                    <div class="QW4K12-tooltip-title">Fortune Hotels</div>
+                    <div class="QW4K12-tooltip-grid">
+                      <div class="QW4K12-label">Portfolio:</div><div class="QW4K12-value">~55+ Operational Hotels</div>
+                      <div class="QW4K12-label">Founded:</div><div class="QW4K12-value">1995</div>
+                      <div class="QW4K12-label">Founder:</div><div class="QW4K12-value">ITC Subsidiary (FPHL)</div>
+                      <div class="QW4K12-label">Strategy:</div><div class="QW4K12-value">Mid-market to upscale business hotels scaled aggressively through pure management contracts.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="QW4K12-logo-wrapper QW4K12-wrapper-welcomhotel">
+                  <div class="QW4K12-floating-logo">
+                    <img src="/ITC/logos/WH.png" alt="WelcomHotel">
+                  </div>
+                  <div class="QW4K12-brand-tooltip">
+                    <div class="QW4K12-tooltip-title">Welcomhotel (WH)</div>
+                    <div class="QW4K12-tooltip-grid">
+                      <div class="QW4K12-label">Portfolio:</div><div class="QW4K12-value">~25+ Hotels</div>
+                      <div class="QW4K12-label">Founded:</div><div class="QW4K12-value">1975 (Rebranded modern tier)</div>
+                      <div class="QW4K12-label">Founder:</div><div class="QW4K12-value">ITC Limited</div>
+                      <div class="QW4K12-label">Strategy:</div><div class="QW4K12-value">Upper-upscale brand targeting new-age business &amp; leisure travelers, driven heavily by management contracts.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="QW4K12-logo-wrapper QW4K12-wrapper-storii">
+                  <div class="QW4K12-floating-logo">
+                    <img src="/ITC/logos/ST.png" alt="Storii">
+                  </div>
+                  <div class="QW4K12-brand-tooltip">
+                    <div class="QW4K12-tooltip-title">Storii by ITC</div>
+                    <div class="QW4K12-tooltip-grid">
+                      <div class="QW4K12-label">Portfolio:</div><div class="QW4K12-value">Rapidly Expanding Boutique Tier</div>
+                      <div class="QW4K12-label">Founded:</div><div class="QW4K12-value">2022</div>
+                      <div class="QW4K12-label">Founder:</div><div class="QW4K12-value">ITC Limited</div>
+                      <div class="QW4K12-label">Strategy:</div><div class="QW4K12-value">Boutique premium resorts offering curated, storytelling experiences. Operates with near-zero asset ownership.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="QW4K12-logo-wrapper QW4K12-wrapper-heritage">
+                  <div class="QW4K12-floating-logo">
+                    <img src="/ITC/logos/WHg.png" alt="Welcomheritage">
+                  </div>
+                  <div class="QW4K12-brand-tooltip">
+                    <div class="QW4K12-tooltip-title">Welcomheritage</div>
+                    <div class="QW4K12-tooltip-grid">
+                      <div class="QW4K12-label">Portfolio:</div><div class="QW4K12-value">~40+ Heritage Properties</div>
+                      <div class="QW4K12-label">Founded:</div><div class="QW4K12-value">1997</div>
+                      <div class="QW4K12-label">Founder:</div><div class="QW4K12-value">Joint Venture (ITC &amp; Jodhana)</div>
+                      <div class="QW4K12-label">Strategy:</div><div class="QW4K12-value">Preservation of palaces, forts, and Havelis. Built completely on marketing and operational management alliances.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="QW4K12-right-panel">
+                <span class="QW4K12-header-tag">Strategic Restructuring</span>
+                <h1 class="QW4K12-chart-title">The Asset-Right Transition</h1>
+                <p class="QW4K12-chart-subtitle">Demonstrating ITC Limited's structural pivot away from heavy capital deployment. By scaling modern sub-brands via asset-light management frameworks, ITC captures premium hospitality margins while maximizing return on capital employed.</p>
+
+                <div class="QW4K12-legend" id="QW4K12-legend"></div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <div class="QW4K-spacer"></div>
+
         <!-- module JS files go here -->
         <script src="/ITC/scripts/shareholding.js"></script>
         <script src="/ITC/scripts/mandiMap_geo.js"></script>
         <script src="/ITC/scripts/mandiMap.js"></script>
         <script src="/ITC/scripts/atta.js"></script>
-        <script src="/ITC/scripts/brands.js"></script>
+        <script src="/ITC/scripts/comparison.js"></script>
         <script src="/ITC/scripts/market_cap.js"></script>
         <script src="/ITC/scripts/stocks.js"></script>
         <script src="/ITC/scripts/smoke.js"></script>
         <script src="/ITC/scripts/timeline.js"></script>
         <script src="/ITC/scripts/logofarm.js"></script>
+        <script src="/ITC/scripts/cigarette.js"></script>
+        <script src="/ITC/scripts/hotels.js"></script>
 
     </body>
 </html>
