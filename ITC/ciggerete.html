@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Standalone Segment Results - Responsive Visual Prototype</title>
+    <!-- Include Apache ECharts from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            padding: 24px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+        header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 1.6rem;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+        p {
+            font-size: 0.95rem;
+            color: #64748b;
+        }
+        #mainChart {
+            width: 100%;
+            height: 600px;
+            min-height: 450px;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+            .container {
+                padding: 16px;
+            }
+            h1 {
+                font-size: 1.2rem;
+            }
+            #mainChart {
+                height: 520px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Segment Performance Breakdown (FY25 vs FY26)</h1>
+        <p>Chronological side-by-side view of Revenue & Profit metrics (Values in Rs. Crores)</p>
+    </header>
+
+    <!-- Unified Stacked Chart System -->
+    <div id="mainChart"></div>
+</div>
+
+<script>
+    const chartDom = document.getElementById('mainChart');
+    const myChart = echarts.init(chartDom);
+
+    const columnTotals = [73467, 26531, 0, 80868, 26768];
+
+    function buildChartOptions() {
+        // Detect mobile screen sizing thresholds
+        const isMobile = window.innerWidth <= 768;
+
+        return {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: { type: 'shadow' },
+                formatter: function (params) {
+                    let title = params[0].axisValue;
+                    let html = `<b>${title}</b><br/>`;
+                    let total = 0;
+                    params.forEach(item => {
+                        if (item.value !== 0) {
+                            html += `${item.marker} ${item.seriesName}: <b>${item.value.toLocaleString()} cr</b><br/>`;
+                            total += item.value;
+                        }
+                    });
+                    if (title !== '') {
+                        html += `<hr style="margin: 5px 0; border: 0; border-top: 1px solid #e2e8f0;"/>`;
+                        html += `Gross Total: <b>${total.toLocaleString()} cr</b>`;
+                        return html;
+                    }
+                    return null;
+                }
+            },
+            legend: {
+                data: ['Cigarettes', 'Other FMCG', 'Agri Business', 'Paper & Packaging', 'Others / Inter-segment Adjustments'],
+                top: '0%',
+                left: 'center',
+                // Adjust typography footprints dynamically for restricted viewports
+                textStyle: { color: '#475569', fontSize: isMobile ? 10 : 12 },
+                itemWidth: isMobile ? 14 : 25,
+                padding: [0, 5]
+            },
+            grid: {
+                left: '2%',
+                right: '2%',
+                bottom: '4%',
+                // Dynamic top margin expansion provides safety spacing below wrapped legends on mobile
+                top: isMobile ? '22%' : '14%',
+                containLabel: true
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    data: [
+                        'FY25\nGross Revenue', 
+                        'FY25\nSegment Profit', 
+                        '', 
+                        'FY26\nGross Revenue', 
+                        'FY26\nSegment Profit'
+                    ],
+                    axisTick: { 
+                        alignWithLabel: true,
+                        interval: (index) => index !== 2 
+                    },
+                    axisLabel: {
+                        textStyle: {
+                            color: '#334155',
+                            fontSize: isMobile ? 10 : 12,
+                            fontWeight: '600',
+                            lineHeight: 14
+                        }
+                    }
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+                    name: 'Rs. Crores',
+                    nameTextStyle: { color: '#64748b', padding: [0, 0, 0, isMobile ? 10 : 40] },
+                    splitLine: { lineStyle: { type: 'dashed', color: '#cbd5e1' } }
+                }
+            ],
+            color: ['#d97706', '#fafaf9', '#e7e5e4', '#d6d3d1', '#dc2626'],
+            series: [
+                {
+                    name: 'Cigarettes',
+                    type: 'bar',
+                    stack: 'Total',
+                    barWidth: isMobile ? '80%' : '70%',
+                    itemStyle: { borderColor: '#b45309', borderWidth: 1 },
+                    label: {
+                        show: true,
+                        position: 'inside',
+                        rotate: 0,
+                        textStyle: { fontWeight: 'bold', color: '#ffffff', fontSize: isMobile ? 11 : 12 },
+                        formatter: function(params) {
+                            const total = columnTotals[params.dataIndex];
+                            if (total === 0) return '';
+                            const pct = Math.round((params.value / total) * 100);
+                            // Conditional text labeling logic based on active device properties
+                            return isMobile ? `${pct}%` : `Cigarettes\n(${pct}%)`;
+                        }
+                    },
+                    data: [32631, 20025, 0, 37100, 21051]
+                },
+                {
+                    name: 'Other FMCG',
+                    type: 'bar',
+                    stack: 'Total',
+                    itemStyle: { borderColor: '#e4e4e7', borderWidth: 1 },
+                    label: {
+                        show: true,
+                        position: 'inside',
+                        textStyle: { color: '#1e293b', fontSize: 10, fontWeight: '600' },
+                        formatter: function(params) {
+                            const total = columnTotals[params.dataIndex];
+                            if (total === 0 || Math.abs(params.value) < 2000) return ''; 
+                            return `${Math.round((params.value / total) * 100)}%`;
+                        }
+                    },
+                    data: [21982, 1580, 0, 24210, 1803]
+                },
+                {
+                    name: 'Agri Business',
+                    type: 'bar',
+                    stack: 'Total',
+                    itemStyle: { borderColor: '#d4d4d8', borderWidth: 1 },
+                    label: {
+                        show: true,
+                        position: 'inside',
+                        textStyle: { color: '#1e293b', fontSize: 10, fontWeight: '600' },
+                        formatter: function(params) {
+                            const total = columnTotals[params.dataIndex];
+                            if (total === 0 || Math.abs(params.value) < 2000) return '';
+                            return `${Math.round((params.value / total) * 100)}%`;
+                        }
+                    },
+                    data: [19754, 1478, 0, 20296, 1496]
+                },
+                {
+                    name: 'Paper & Packaging',
+                    type: 'bar',
+                    stack: 'Total',
+                    itemStyle: { borderColor: '#a1a1aa', borderWidth: 1 },
+                    label: {
+                        show: true,
+                        position: 'inside',
+                        textStyle: { color: '#1e293b', fontSize: 10, fontWeight: '600' },
+                        formatter: function(params) {
+                            const total = columnTotals[params.dataIndex];
+                            if (total === 0 || Math.abs(params.value) < 2000) return '';
+                            return `${Math.round((params.value / total) * 100)}%`;
+                        }
+                    },
+                    data: [8423, 911, 0, 8766, 797]
+                },
+                {
+                    name: 'Others / Inter-segment Adjustments',
+                    type: 'bar',
+                    stack: 'Total',
+                    itemStyle: {
+                        borderRadius: [4, 4, 0, 0],
+                        borderColor: '#b91c1c',
+                        borderWidth: 1
+                    },
+                    label: {
+                        show: true,
+                        position: 'inside',
+                        textStyle: { color: '#ffffff', fontSize: 10, fontWeight: 'bold' },
+                        formatter: function(params) {
+                            const total = columnTotals[params.dataIndex];
+                            if (total === 0 || Math.abs(params.value) < 1200) return '';
+                            const pct = Math.round((params.value / total) * 100);
+                            return `${pct}%`;
+                        }
+                    },
+                    data: [-9323, 2537, 0, -9504, 1621]
+                }
+            ]
+        };
+    }
+
+    // Set initial configuration parameters
+    myChart.setOption(buildChartOptions());
+
+    // Dynamic viewport tracking updates configuration options seamlessly on orientation/size shifting
+    window.addEventListener('resize', function() {
+        myChart.setOption(buildChartOptions());
+        myChart.resize();
+    });
+</script>
+</body>
+</html>

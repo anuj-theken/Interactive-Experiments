@@ -1,5 +1,13 @@
 // scripts/logofarm.js — QW4K10
 
+// Server (index.html) loads this script from /ITC/scripts/logofarm.js; local
+// (index_localLinked.html) loads it via a relative path. Derive the logos
+// folder path from how this very script was loaded so both work unmodified.
+const QW4K10_LOGO_BASE = (function () {
+    const src = document.currentScript && document.currentScript.getAttribute('src');
+    return src && src.indexOf('/ITC/') === 0 ? '/ITC/logos/' : 'logos/';
+})();
+
 document.addEventListener("DOMContentLoaded", function () {
 
     const portfolioData = [
@@ -115,7 +123,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ---- Tooltip ----
     const tooltipEl = document.getElementById('QW4K10-brand-tooltip');
     function showTooltip(r) {
-        const src2x = `logos/${r.logo}@2x.png`;
+        const src2x = `${QW4K10_LOGO_BASE}${r.logo}@2x.png`;
         tooltipEl.innerHTML = `
             <div class="QW4K10-tt-logo-wrap" style="display:none">
                 <img class="QW4K10-tt-logo" alt="${r.name} logo"
@@ -131,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ttImg.onerror = () => {
                 if (ttImg.src.indexOf('@2x') !== -1) {
                     ttImg.onerror = null;
-                    ttImg.src = `logos/${r.logo}.png`;
+                    ttImg.src = `${QW4K10_LOGO_BASE}${r.logo}.png`;
                 }
             };
             ttImg.src = src2x;
@@ -171,7 +179,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // Logo size scales with plot but stays within bounds
             const logoSize = Math.max(20, Math.min(52, Math.min(r.w, r.h) * 0.4));
             const logoImg = showLogo
-                ? `<img class="QW4K10-brand-logo" src="logos/${r.logo}.png"
+                ? `<img class="QW4K10-brand-logo" src="${QW4K10_LOGO_BASE}${r.logo}.png"
                         alt="${r.name} logo"
                         style="width:${logoSize}px;height:${logoSize}px"
                         onerror="this.classList.add('QW4K10-logo-missing')">`
