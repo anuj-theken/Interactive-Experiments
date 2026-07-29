@@ -37,6 +37,7 @@
   line-height: 1.25;
   color: var(--color-text);
   margin: 0 0 15px 0;
+  max-width: 520px;
 }
 
 .QW4K9-chart-subtitle {
@@ -47,6 +48,7 @@
   color: var(--color-muted);
   margin: 0;
   padding-top: 12px;
+  max-width: 520px;
 }
 
 /* Central diagram grid architecture */
@@ -223,6 +225,14 @@
     min-width: 100%;
     margin-bottom: 0px;
     padding-left: 0; /* the desktop-only left nudge doesn't apply once centered */
+  }
+  /* the capped title/subtitle need their own centering once the panel is
+     text-align:center — a max-width alone would leave them hugging the left
+     edge of the now-centered panel instead of sitting in the middle of it */
+  .QW4K9-chart-title,
+  .QW4K9-chart-subtitle {
+    margin-left: auto;
+    margin-right: auto;
   }
   /* nowrap only makes sense at full desktop width (≥1024px) where the 1fr grid
      columns have room; below that the text can overflow its shrunk column and

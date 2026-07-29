@@ -77,8 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         const minAbs = isFirst ? 0 : (isLast ? 1200 : 2000);
                         if (total === 0 || Math.abs(params.value) < minAbs) return '';
                         const pct = Math.round((params.value / total) * 100);
-                        if (mobile || isLast) return pct + '%';
-                        return cat + '\n(' + pct + '%)';
+                        return pct + '%';
                     }
                 },
                 data: seriesData[cat]
