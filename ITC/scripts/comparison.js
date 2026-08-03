@@ -30,6 +30,17 @@ document.addEventListener("DOMContentLoaded", function () {
         return [parts[0], parts[1], parts[2]];
     }
 
+    // pales a color toward white by `amount` (0-1) — turns each series' own
+    // hue into a flat pastel tint (the bar.png reference look: light, solid,
+    // no gradient/shading — just clean flat color blocks)
+    function lighten(colorStr, amount) {
+        const rgb = parseRgbTriplet(colorStr);
+        const r = Math.round(rgb[0] + (255 - rgb[0]) * amount);
+        const g = Math.round(rgb[1] + (255 - rgb[1]) * amount);
+        const b = Math.round(rgb[2] + (255 - rgb[2]) * amount);
+        return 'rgb(' + r + ',' + g + ',' + b + ')';
+    }
+
     // labels sit "inside" the bar segment, so their color must react to that
     // segment's own fill — a light fill (e.g. the grey "Other" filler) needs
     // dark text, a dark fill needs white, or the label disappears into it
@@ -39,16 +50,27 @@ document.addEventListener("DOMContentLoaded", function () {
         return luminance > 0.6 ? getColor('--color-text') : '#ffffff';
     }
 
+    // breaks long two-word-plus names onto 2 lines near their midpoint, so
+    // they don't run past the edges of a narrow bar segment
+    function wrapLabelName(name) {
+        if (name.length <= 10) return name;
+        const mid = Math.floor(name.length / 2);
+        let breakAt = name.lastIndexOf(' ', mid);
+        if (breakAt === -1) breakAt = name.indexOf(' ', mid);
+        if (breakAt === -1) return name;
+        return name.slice(0, breakAt) + '\n' + name.slice(breakAt + 1);
+    }
+
     function labelConfig(fillColor) {
         return {
             show: true,
             position: 'inside',
             formatter: function (params) {
-                return params.value > 0 ? params.seriesName + '\n' + params.value + '%' : '';
+                return params.value > 0 ? wrapLabelName(params.seriesName) + '\n' + params.value + '%' : '';
             },
-            color: labelColorFor(fillColor),
+            color: hexToRgba(labelColorFor(fillColor), 0.8),
             fontSize: 9,
-            fontWeight: 'bold'
+            fontWeight: '600'
         };
     }
 
@@ -97,10 +119,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function seriesColor(colorVar) {
         if (colorVar === '--color-primary-alpha') return hexToRgba(getColor('--color-primary'), 0.45);
-        if (colorVar === '--color-other') return '#d1d5db';
-        // a warm terracotta — brighter than --color-muted and rounds out the
-        // gold/navy/teal palette into a balanced 4-color qualitative set
-        if (colorVar === '--color-rival') return '#c9634a';
+        if (colorVar === '--color-other') return '#d8d3c9';
+        // a muted clay tone — sits closer in saturation to gold/navy/teal than
+        // a brighter terracotta would, so it reads as part of the same family
+        // rather than clashing where it sits next to --color-primary
+        if (colorVar === '--color-rival') return '#b3705a';
         return getColor(colorVar);
     }
 
@@ -126,13 +149,13 @@ document.addEventListener("DOMContentLoaded", function () {
     function buildOption(def) {
         const allSeries = seriesWithOther(def);
         const series = allSeries.map(function (s) {
-            const fillColor = seriesColor(s.colorVar);
+            const fillColor = lighten(seriesColor(s.colorVar), 0.68);
             return {
                 name: s.name,
                 type: 'bar',
                 stack: 'total',
                 label: labelConfig(fillColor),
-                itemStyle: { color: fillColor },
+                itemStyle: { color: fillColor, borderColor: '#ffffff', borderWidth: 2 },
                 data: s.data
             };
         });
@@ -245,4 +268,16 @@ document.addEventListener("DOMContentLoaded", function () {
             goTo(i);
         }
     });
+
+    // ECharts measures its container's size the instant echarts.init() runs.
+    // GSAP's pin setup can still be adjusting this section's layout at that
+    // same moment, so the charts sometimes end up sized against a stale
+    // (near-zero) box and every bar collapses into one corner. Re-measuring
+    // once layout has settled (next frame, and again once everything —
+    // fonts/images elsewhere on the page — has finished loading) fixes it.
+    function resizeAllCharts() {
+        charts.forEach(function (entry) { if (entry.chart) entry.chart.resize(); });
+    }
+    requestAnimationFrame(resizeAllCharts);
+    window.addEventListener('load', resizeAllCharts);
 });

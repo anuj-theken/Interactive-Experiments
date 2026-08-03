@@ -75,6 +75,11 @@
   inset: 0;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  /* explicit row height, not auto — align-items:center otherwise leaves the
+     single implicit row sized to content, so .QW4K4-chart-wrap's height:100%
+     resolves against an indefinite height (collapses to ~0), which collapses
+     the ECharts canvas beneath it and squashes every bar into one corner */
+  grid-template-rows: 1fr;
   gap: 24px;
   align-items: center;
   padding: 24px 32px;

@@ -96,6 +96,14 @@
   height: 600px;
 }
 
+.QW4K11-footer-note {
+  margin-top: 20px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-muted);
+  text-align: left;
+}
+
 @media (max-width: 1023px) {
   .QW4K11-chart-frame { padding: 30px 20px; }
   .QW4K11-chart-container { padding: 24px; }
