@@ -124,7 +124,7 @@ const dict={
     brand:"ई-चौपाल", side:"कृषि जिंस",
     desc:"चयनित फसल की मंडी भाव का जिलावार मध्य प्रदेश नक्शा:",
     descAll:"प्रत्येक जिले में दर्ज फसलों की संख्या का मध्य प्रदेश नक्शा:",
-    th1:"मंडी क्षेत्र", th2:"जिला", th3:"फसल", th4:"किस्म", th5:"सरकारी मंडी भाव",
+    th1:"मंडी क्षेत्र", th2:"जिला", th3:"फसल", th5:"सरकारी मंडी भाव",
     cropsel:"फसल:", low:"निम्न", high:"उच्च", markets:"मंडियां",
     fewer:"कम फसलें", more:"अधिक फसलें", norate:"कोई भाव नहीं", nrec:"कोई दर्ज नहीं",
     admin:"एडमिन विकल्प", stateLbl:"वरीयता:", code:"प्रवेश कोड बदलिये" },
@@ -132,7 +132,7 @@ const dict={
     brand:"e-Choupal", side:"Commodities",
     desc:"District-wise Madhya Pradesh map of modal mandi price for the selected commodity:",
     descAll:"District-wise Madhya Pradesh map of how many commodities each district recorded:",
-    th1:"Mandi Terminal", th2:"District", th3:"Commodity", th4:"Variety", th5:"Govt Mandi Rate",
+    th1:"Mandi Terminal", th2:"District", th3:"Commodity", th5:"Govt Mandi Rate",
     cropsel:"Crop:", low:"Low", high:"High", markets:"markets",
     fewer:"Fewer crops", more:"More crops", norate:"No rate", nrec:"No record",
     admin:"2026 Prices", stateLbl:"Priority:", code:"Change access code" }
@@ -148,7 +148,10 @@ const map=L.map("QW4K2-map",{
   touchZoom:false,
   boxZoom:false,
   keyboard:false,
-  zoomControl:false
+  zoomControl:false,
+  // on mobile the map sits inside a page that's already meant to scroll
+  // vertically — a draggable map there just fights that scroll gesture
+  dragging: window.innerWidth > 768
 });
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,
   attribution:"© OpenStreetMap contributors"}).addTo(map);
@@ -253,19 +256,19 @@ function render(){
   var tbody=document.getElementById("QW4K2-table-body"); tbody.innerHTML="";
   if(isAll){
     document.getElementById("QW4K2-table-headers").innerHTML=
-      "<th>"+d.th1+"</th><th>"+d.th2+"</th><th>"+d.th3+"</th><th>"+d.th4+"</th><th>"+d.th5+"</th>";
+      "<th>"+d.th1+"</th><th>"+d.th2+"</th><th>"+d.th3+"</th><th>"+d.th5+"</th>";
     RAW.forEach(function(r){
       var tr=document.createElement("tr");
       tr.innerHTML="<td>"+r.market+"</td><td>"+r.district+"</td><td>"+cropLabel(r.commodity)+
-        "</td><td>"+r.variety+"</td><td class='QW4K2-highlight-row'>"+fmt(r.modal)+"</td>";
+        "</td><td class='QW4K2-highlight-row'>"+fmt(r.modal)+"</td>";
       tbody.appendChild(tr);
     });
   }else{
     document.getElementById("QW4K2-table-headers").innerHTML=
-      "<th>"+d.th1+"</th><th>"+d.th2+"</th><th>"+d.th4+"</th><th>"+d.th5+"</th>";
+      "<th>"+d.th1+"</th><th>"+d.th2+"</th><th>"+d.th5+"</th>";
     (byCommodity[currentCrop]||[]).forEach(function(r){
       var tr=document.createElement("tr");
-      tr.innerHTML="<td>"+r.market+"</td><td>"+r.district+"</td><td>"+r.variety+
+      tr.innerHTML="<td>"+r.market+"</td><td>"+r.district+
         "</td><td class='QW4K2-highlight-row'>"+fmt(r.modal)+"</td>";
       tbody.appendChild(tr);
     });

@@ -109,7 +109,9 @@
 @media (max-width: 1023px) {
   .QW4K3-stage { grid-template-columns: 1fr; gap: 24px; }
   .QW4K3-left { height: 200px; order: 2; }
-  #QW4K3-chart { height: 300px; }
+  /* the value label now sits below the ring (see atta.js) — radius:120 plus
+     that label's height needs ~360px of clearance to avoid clipping */
+  #QW4K3-chart { height: 360px; }
   .QW4K3-panel .QW4K3-year { font-size: 56px; }
 }
 
@@ -125,17 +127,32 @@
   .QW4K3-pin {
     height: 100vh;
     height: 100dvh;
-    /* center cropped the overflow symmetrically (chart pushed above the top
-       edge, as seen in testing) — flex-start plus scroll keeps content
-       anchored from the top and never hides it off-screen. */
-    justify-content: flex-start;
+    /* space-between only redistributes leftover space once content already
+       fits — when it doesn't, negative free space clamps to zero and this
+       degrades to the same top-anchored packing flex-start gave, so the
+       overflow-safety from the earlier fix still holds. */
+    justify-content: space-between;
     overflow-y: auto;
     gap: 16px;
-    padding-top: 16px;
+    padding: 16px 24px;
   }
   .QW4K3-rhead { padding-bottom: 12px; }
-  .QW4K3-stage { gap: 16px; }
+  /* pulls the legend down to sit flush against the header's bottom
+     separator instead of centering with the (taller) title block */
+  .QW4K3-legend {
+    align-self: flex-end;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+  /* display:contents drops the stage box so header, chart and text panel
+     become three direct flex children of .QW4K3-pin — that's what lets
+     space-between spread all three evenly instead of just two. */
+  .QW4K3-stage { display: contents; }
   .QW4K3-left { height: 170px; }
-  #QW4K3-chart { height: 220px; }
+  /* the largest step's pie draws at radius:120, plus a caption above the
+     ring and the value label below it (see atta.js) — needs ~360px of
+     clearance or the ring/labels clip against the container's edges */
+  #QW4K3-chart { height: 360px; }
   .QW4K3-panel .QW4K3-year { font-size: 44px; margin-bottom: 10px; }
 }

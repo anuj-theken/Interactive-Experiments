@@ -30,14 +30,12 @@ document.addEventListener("DOMContentLoaded", function () {
         return [parts[0], parts[1], parts[2]];
     }
 
-    // pales a color toward white by `amount` (0-1) — turns each series' own
-    // hue into a flat pastel tint (the bar.png reference look: light, solid,
-    // no gradient/shading — just clean flat color blocks)
-    function lighten(colorStr, amount) {
+    // shades a color toward black by `amount` (0-1), for a segment's border
+    function darken(colorStr, amount) {
         const rgb = parseRgbTriplet(colorStr);
-        const r = Math.round(rgb[0] + (255 - rgb[0]) * amount);
-        const g = Math.round(rgb[1] + (255 - rgb[1]) * amount);
-        const b = Math.round(rgb[2] + (255 - rgb[2]) * amount);
+        const r = Math.round(rgb[0] * (1 - amount));
+        const g = Math.round(rgb[1] * (1 - amount));
+        const b = Math.round(rgb[2] * (1 - amount));
         return 'rgb(' + r + ',' + g + ',' + b + ')';
     }
 
@@ -149,13 +147,13 @@ document.addEventListener("DOMContentLoaded", function () {
     function buildOption(def) {
         const allSeries = seriesWithOther(def);
         const series = allSeries.map(function (s) {
-            const fillColor = lighten(seriesColor(s.colorVar), 0.68);
+            const fillColor = seriesColor(s.colorVar);
             return {
                 name: s.name,
                 type: 'bar',
                 stack: 'total',
                 label: labelConfig(fillColor),
-                itemStyle: { color: fillColor, borderColor: '#ffffff', borderWidth: 2 },
+                itemStyle: { color: fillColor, borderColor: darken(fillColor, 0.3), borderWidth: 1.5 },
                 data: s.data
             };
         });
@@ -166,13 +164,13 @@ document.addEventListener("DOMContentLoaded", function () {
             grid: gridConfig,
             xAxis: {
                 type: 'category', data: def.categories,
-                axisLine: { lineStyle: { color: 'rgba(0,0,0,0.15)' } },
+                axisLine: { lineStyle: { color: hexToRgba(getColor('--color-text'), 0.18) } },
                 axisLabel: { textStyle: axisTextStyle() }
             },
             yAxis: {
                 type: 'value', min: 0, max: 100,
                 axisLabel: { formatter: '{value}%', textStyle: axisTextStyle() },
-                splitLine: { lineStyle: { color: 'rgba(0,0,0,0.06)' } }
+                splitLine: { lineStyle: { color: hexToRgba(getColor('--color-text'), 0.08) } }
             },
             series: series
         };

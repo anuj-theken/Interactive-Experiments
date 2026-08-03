@@ -20,6 +20,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const lineColor = getColor('--color-primary');
 
+    function isMobile() {
+        return window.innerWidth <= 768;
+    }
+
     // Base values in Lakh Crores (originally Trillions)
     const rawData = [
         { year: '2006', value: 0.665 },
@@ -125,7 +129,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     fontWeight: 'bold',
                     fontSize: 10,
                     color: getColor('--color-text'),
+                    // 21 years of labels is too cramped on a narrow mobile
+                    // chart — thin them out to every 3rd year there, but
+                    // keep every label on wider (tablet/desktop) screens
                     formatter: function(params) {
+                        if (isMobile() && params.dataIndex % 3 !== 0) return '';
                         return params.value;
                     }
                 },

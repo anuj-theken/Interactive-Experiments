@@ -349,7 +349,17 @@
 }
 
 @media (max-width: 768px) {
-  .QW4K10-logofarm-section { height: 520px; padding: 1rem; }
-  .QW4K10-header h1 { font-size: var(--type-subheading); }
-  .QW4K10-legend { gap: 0.6rem; flex-wrap: wrap; }
+  /* more height so the farm's sectors have more vertical room to spread
+     into, instead of being squeezed flatter than the desktop/tablet sizes */
+  .QW4K10-logofarm-section { height: 850px; padding: 1rem; }
+  .QW4K10-header h1 { font-size: var(--type-heading); }
+  /* right-aligned (so a wrapped second line still meets the right edge
+     instead of trailing off from the legend box's left edge) and pulled
+     down to the header's bottom edge, next to the separator */
+  .QW4K10-legend {
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-self: flex-end;
+  }
 }

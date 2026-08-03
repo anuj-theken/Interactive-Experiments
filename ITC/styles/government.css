@@ -25,7 +25,7 @@
 
 /* Editorial left sidebar */
 .QW4K9-editorial-panel {
-  flex: 1 1 400px;
+  flex: 1 1 265px;
   min-width: 280px;
   padding-left: 40px; /* aligns the header with other modules' left inset */
 }
@@ -258,6 +258,14 @@
     grid-template-columns: 1fr 160px 1fr;
     gap: 0px;
     max-height: 270px;
+  }
+  /* the base rule's min-width:120px is a floor CSS Grid respects even when a
+     1fr track has no room for it — on phones narrower than ~400px
+     (120+160+120 + section padding) that floor forces the whole diagram,
+     and everything above it up to <body>, wider than the viewport, which
+     shows up as a page-wide horizontal scrollbar / dead space on the right */
+  .QW4K9-side-panel {
+    min-width: 0;
   }
   .QW4K9-svg-wrapper {
     width: 160px;

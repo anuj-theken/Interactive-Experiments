@@ -94,6 +94,10 @@
 .QW4K12-wrapper-heritage    .QW4K12-floating-logo { background: #962926; }
 
 .QW4K12-floating-logo img {
+  /* oversized + cover: the source logo files carry their own built-in
+     whitespace margin, so sizing to exactly 100% still shows that margin
+     inside the circle — scaling past the container and letting the parent's
+     overflow:hidden clip it crops that margin away instead */
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -269,9 +273,28 @@
     padding: 24px;
   }
 
-  .QW4K12-floating-logo { width: 64px; height: 64px; padding: 6px; }
+  .QW4K12-floating-logo { width: 64px; height: 64px; }
 
-  .QW4K12-brand-tooltip { width: 170px; height: 170px; padding: 16px; }
+  /* the wrapper percentages above (top:25%/left:6% etc.) were tuned for the
+     wide desktop panel where the dashboard sits side-by-side (row layout);
+     stacked full-width on mobile the panel is much narrower and near-square,
+     so those same offsets bunch the logos off-center instead of spreading
+     them evenly toward the four corners */
+  .QW4K12-wrapper-itc         { top: 4%; }
+  .QW4K12-wrapper-fortune     { top: 20%; right: 6%; }
+  .QW4K12-wrapper-heritage    { top: 20%; left: 6%; }
+  .QW4K12-wrapper-welcomhotel { bottom: 6%; right: 10%; }
+  .QW4K12-wrapper-storii      { bottom: 6%; left: 10%; }
+
+  /* the donut's radius is a % of min(panel width, panel height) — on this
+     narrow, near-square mobile panel that shrinks the hole well below the
+     170px this tooltip used at larger breakpoints, so it was spilling out
+     past the ring instead of sitting inside it */
+  .QW4K12-brand-tooltip { width: 130px; height: 130px; padding: 12px; }
+  .QW4K12-tt-logo-wrap { margin-bottom: 4px; }
+  .QW4K12-tt-logo { width: 32px; height: 32px; }
+  .QW4K12-tooltip-title { font-size: 13px; margin-bottom: 4px; }
+  .QW4K12-tt-meta { font-size: 11px; }
 
   .QW4K12-chart-subtitle { margin-bottom: 24px; }
 

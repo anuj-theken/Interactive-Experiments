@@ -40,6 +40,15 @@ document.addEventListener("DOMContentLoaded", function () {
     var cy = chart.getHeight() / 2;
     var ringColor = hexToRgba(getColor('--color-text'), 0.25);
     var labelColor = hexToRgba(getColor('--color-secondary'), 0.55);
+
+    // native pie labels default to 'outside', anchored along the slice's
+    // mid-angle — for the widest step that angle sits near 3 o'clock, so
+    // clamping it back horizontally could land it inside the ring's own
+    // edge (looking "hidden" under the pie). Anchoring it below the ring
+    // instead — mirroring the caption above — keeps it outside the circle
+    // at every step, with no horizontal dependency on frame width.
+    var vy = cy + step.radius + 14;
+
     return [
       {
         type: 'circle',
@@ -61,6 +70,21 @@ document.addEventListener("DOMContentLoaded", function () {
           verticalAlign: 'bottom'
         },
         silent: true
+      },
+      {
+        type: 'text',
+        x: cx,
+        y: vy,
+        style: {
+          text: step.share + '%',
+          fill: getColor('--color-text'),
+          fontFamily: 'Reckless',
+          fontSize: 30,
+          fontWeight: 500,
+          align: 'center',
+          verticalAlign: 'top'
+        },
+        silent: true
       }
     ];
   }
@@ -76,11 +100,10 @@ document.addEventListener("DOMContentLoaded", function () {
         radius: [0, step.radius],
         center: ['50%', '50%'],
         avoidLabelOverlap: true,
-        label: {
-          show: true,
-          formatter: function (p) { return p.name === 'Aashirvaad' ? p.value + '%' : ''; },
-          fontFamily: 'Reckless', fontSize: 30, fontWeight: 500, color: getColor('--color-text')
-        },
+        // value is drawn as its own clamped graphic (see buildGraphics)
+        // instead of the native label, so it can sit outside the ring
+        // without ever overflowing the chart frame.
+        label: { show: false },
         labelLine: { show: false },
         data: pieData(step.share)
       }]

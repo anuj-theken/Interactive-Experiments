@@ -188,3 +188,11 @@
   .QW4K2-content-area{height:auto;overflow:visible;}
   .QW4K2-map-frame{height:440px;flex:0 0 auto;}
 }
+
+/* Mobile only: keep both the commodity list and the price table (Mandi
+   Terminal + rates) capped and internally scrollable — letting either
+   expand to full height instead ate up too much vertical space on phones. */
+@media(max-width:768px){
+  .QW4K2-commodity-list{max-height:110px;overflow-y:auto;}
+  .QW4K2-table-wrap{height:120px;overflow-y:auto;}
+}
