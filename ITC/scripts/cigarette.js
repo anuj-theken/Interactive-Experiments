@@ -131,7 +131,23 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             xAxis: [{
                 type: 'category',
-                data: [
+                // full qualifiers ("Gross Revenue"/"Segment Profit") fit
+                // fine at desktop's per-category width, but at mobile's much
+                // narrower slots they're what forced the rotation/collision
+                // above — shortened to just the metric name there instead
+                data: mobile ? [
+                    'FY23\nRevenue',
+                    'FY23\nProfit',
+                    '',
+                    'FY24\nRevenue',
+                    'FY24\nProfit',
+                    '',
+                    'FY25\nRevenue',
+                    'FY25\nProfit',
+                    '',
+                    'FY26\nRevenue',
+                    'FY26\nProfit'
+                ] : [
                     'FY23\nGross Revenue',
                     'FY23\nSegment Profit',
                     '',
@@ -152,7 +168,17 @@ document.addEventListener("DOMContentLoaded", function () {
                     color: getColor('--color-text'),
                     fontSize: mobile ? 10 : 12,
                     fontWeight: '600',
-                    lineHeight: 14
+                    lineHeight: 14,
+                    // default interval:'auto' hides labels it judges as
+                    // colliding, but its collision check doesn't know the
+                    // 3 empty spacer categories are blank — the labels it
+                    // keeps end up an inconsistent, unpredictable mix (e.g.
+                    // "Segment Profit" surviving for one FY, "Gross Revenue"
+                    // for the next). interval:0 forces every real label to
+                    // show; rotating on mobile keeps the narrower two-line
+                    // labels from overlapping in that tighter slot width.
+                    interval: 0,
+                    rotate: mobile ? 45 : 0
                 }
             }],
             yAxis: [{
