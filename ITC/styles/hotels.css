@@ -202,12 +202,20 @@
   margin-bottom: 40px;
 }
 
-.QW4K12-legend {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.QW4K12-legend-heading {
+  font-family: var(--font-body);
+  font-size: var(--type-subheading);
+  font-weight: 700;
+  color: var(--color-text);
   border-top: 2px solid rgba(0, 0, 0, 0.08);
   padding-top: 30px;
+  margin-bottom: 16px;
+}
+
+.QW4K12-legend {
+  display: flex;
+  flex-direction: row;
+  gap: 28px;
 }
 
 .QW4K12-legend-item {
@@ -231,17 +239,14 @@
 }
 
 .QW4K12-legend-text {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
   font-family: var(--font-body);
   font-size: var(--type-body);
-  font-weight: 500;
+  font-weight: 400;
   color: var(--color-text);
 }
 
 .QW4K12-legend-value {
-  font-weight: 700;
+  font-weight: 400;
   color: var(--color-text);
 }
 
@@ -249,7 +254,17 @@
   .QW4K12-chart-frame { padding: 30px 20px; }
   .QW4K12-dashboard-container { height: 600px; }
   .QW4K12-floating-logo { width: 74px; height: 74px; }
-  .QW4K12-brand-tooltip { width: 210px; height: 210px; padding: 20px; }
+
+  /* the donut's radius is a % of min(panel width, panel height) — across
+     this breakpoint's width range (769-1023px) the panel narrows enough
+     that the hole shrinks well below the 210px this used, worst at the
+     narrow end (~146px hole at 769px viewport) */
+  .QW4K12-brand-tooltip { width: 135px; height: 135px; padding: 14px; }
+  .QW4K12-tt-logo-wrap { margin-bottom: 4px; }
+  .QW4K12-tt-logo { width: 34px; height: 34px; }
+  .QW4K12-tooltip-title { font-size: 13px; margin-bottom: 4px; }
+  .QW4K12-tt-meta { font-size: 11px; }
+
   .QW4K12-right-panel { padding: 28px; }
 }
 

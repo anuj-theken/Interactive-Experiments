@@ -228,89 +228,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Soft drifting clouds — each a cluster of overlapping puffs seen from
-    // above, with a matching shadow cluster cast onto the farm below.
-    function addClouds(layerEl) {
-        layerEl.innerHTML = '';
-        const w = layerEl.offsetWidth;
-        const h = layerEl.offsetHeight;
-        const count = 2 + Math.floor(Math.random() * 2); // 2 or 3 clouds
-        for (let i = 0; i < count; i++) {
-            const cloud = document.createElement('div');
-            cloud.className = 'QW4K10-cloud';
-            const scale = 0.7 + Math.random() * 0.9;          // overall cloud size
-            const base = 46 * scale;                          // base puff diameter
-            const cloudW = base * 2.6;
-            const cloudH = base * 2.0;                        // rounder footprint (top view)
-            cloud.style.width = `${cloudW}px`;
-            cloud.style.height = `${cloudH}px`;
-            cloud.style.top = `${Math.random() * (h - cloudH)}px`;
-            cloud.style.left = `${Math.random() * (w - cloudW)}px`;
-
-            // Generate a tight cluster of overlapping puffs with randomized
-            // positions and sizes; the gooey filter fuses them into one shape.
-            const puffCount = 6 + Math.floor(Math.random() * 3);
-            const chosen = [];
-            for (let k = 0; k < puffCount; k++) {
-                // keep centers near the middle so puffs overlap heavily
-                const angle = Math.random() * Math.PI * 2;
-                const spread = Math.pow(Math.random(), 0.7) * 0.26; // biased toward center
-                chosen.push({
-                    x: 0.5 + Math.cos(angle) * spread * 1.15,
-                    y: 0.5 + Math.sin(angle) * spread,
-                    r: 0.75 + Math.random() * 0.6
-                });
-            }
-            // guarantee one big central puff to anchor the mass
-            chosen[0] = { x: 0.5, y: 0.5, r: 1.35 };
-
-            const shadowOffX = base * 0.26;
-            const shadowOffY = base * 0.32;
-
-            // Shadow group (cast on farm), fused separately
-            const shadowGroup = document.createElement('div');
-            shadowGroup.className = 'QW4K10-puff-group QW4K10-shadow-group';
-            chosen.forEach(p => {
-                const shadow = document.createElement('div');
-                shadow.className = 'QW4K10-puff-shadow';
-                const d = base * p.r;
-                shadow.style.width = `${d}px`;
-                shadow.style.height = `${d}px`;
-                shadow.style.left = `${p.x * cloudW - d / 2 + shadowOffX}px`;
-                shadow.style.top = `${p.y * cloudH - d / 2 + shadowOffY}px`;
-                shadowGroup.appendChild(shadow);
-            });
-            cloud.appendChild(shadowGroup);
-
-            // White group on top, fused separately
-            const whiteGroup = document.createElement('div');
-            whiteGroup.className = 'QW4K10-puff-group QW4K10-white-group';
-            chosen.forEach(p => {
-                const puff = document.createElement('div');
-                puff.className = 'QW4K10-puff';
-                const d = base * p.r;
-                puff.style.width = `${d}px`;
-                puff.style.height = `${d}px`;
-                puff.style.left = `${p.x * cloudW - d / 2}px`;
-                puff.style.top = `${p.y * cloudH - d / 2}px`;
-                whiteGroup.appendChild(puff);
-            });
-            cloud.appendChild(whiteGroup);
-
-            layerEl.appendChild(cloud);
-
-            // Slow drift, mostly sideways like real clouds
-            gsap.to(cloud, {
-                x: (Math.random() > 0.5 ? 1 : -1) * (w * 0.3 + Math.random() * w * 0.25),
-                y: (Math.random() - 0.5) * h * 0.1,
-                duration: 75 + Math.random() * 45,
-                repeat: -1,
-                yoyo: true,
-                ease: "sine.inOut"
-            });
-        }
-    }
-
     const sectors = ["foods", "tobacco", "personal", "hotels", "others"];
 
     function layoutAll(animate) {
@@ -322,7 +239,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     window.addEventListener('load', () => {
         layoutAll(true);
-        addClouds(document.getElementById('QW4K10-cloud-layer'));
     });
 
     let resizeTimer;
@@ -330,7 +246,6 @@ document.addEventListener("DOMContentLoaded", function () {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => {
             layoutAll(false);
-            addClouds(document.getElementById('QW4K10-cloud-layer'));
         }, 150);
     });
 

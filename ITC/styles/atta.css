@@ -70,12 +70,6 @@
   color: var(--color-text);
   margin: 0;
 }
-.QW4K3-rtitle p {
-  font-family: var(--font-body);
-  font-size: var(--type-subheading);
-  color: var(--color-muted);
-  margin: 4px 0 0;
-}
 .QW4K3-legend {
   display: flex;
   flex-direction: row;

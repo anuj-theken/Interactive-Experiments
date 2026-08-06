@@ -64,17 +64,6 @@
   line-height: 1.1;
 }
 
-.QW4K6-sub-header {
-  font-family: var(--font-body);
-  font-size: var(--type-subheading);
-  color: var(--color-muted);
-  margin-top: -10px;
-  margin-bottom: 25px;
-  line-height: 1.4;
-  text-align: left;
-  width: 100%;
-}
-
 .QW4K6-stock-value-legend {
   display: flex;
   flex-direction: column;

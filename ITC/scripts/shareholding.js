@@ -9,80 +9,73 @@ document.addEventListener("DOMContentLoaded", function () {
     // 2. Library init
     const myChart = echarts.init(chartDom);
 
-    // 3. Data configuration
-    const timeline = ["1950", "1954", "1970", "1974", "1976", "1985", "1993", "2001", "2005", "2010", "2011", "2020", "2023", "2024", "2025", "2026"];
+    function getColor(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    // 3. Data configuration — from BAT_holdings2.csv. Post-2020 the source is
+    // quarterly (Sep-23 through Jun-26); per feedback we only keep Mar-24,
+    // Mar-25, Mar-26 and Jun-26 and drop the rest of the quarters.
+    const timeline = ["1950", "1954", "1970", "1974", "1976", "1985", "1993", "2001", "2005", "2010", "2011", "2020", "2024", "2025", "2026"];
 
     const fullFormMap = {
-        'Foreign Institutional Investors (FIIs)': 'Foreign Institutional Investors (FIIs)',
-        'Domestic Institutional Investors (Government Backed)': 'Domestic Institutional Investors (DIIs - Government Backed)',
+        'BAT': 'BAT (British American Tobacco) entities',
+        'Other FIIs': 'Other Foreign Institutional Investors (FIIs)',
+        'DIIs': 'Domestic Institutional Investors (DIIs)',
+        'Public': 'Public Shareholders (Retail)'
+    };
+
+    // Static entity rosters from the source sheet (informational — the sheet
+    // doesn't give a per-period breakdown at this granularity, only each
+    // category's total, so this list isn't filtered by which period is shown)
+    const entityRoster = {
+        'BAT': ['Tobacco Manufacturers (India) Limited', 'Myddleton Investment Company Limited', 'Rothmans International Enterprises Limited'],
+        'Other FIIs': ['GQG Partners Emerging Markets Equity Fund', 'Goldman Sachs Trust II - Goldman Sachs GQG', 'Government of Singapore', 'and other foreign institutional investors'],
+        'DIIs': ['Life Insurance Corporation of India', 'Specified Undertaking of the Unit Trust of India', 'General Insurance Corporation of India', 'The New India Assurance Company Limited', 'The Oriental Insurance Company Limited', 'SBI / ICICI Prudential / HDFC / UTI / Nippon / Mirae / Parag Parikh Mutual Funds', 'NPS Trust (various Pension Funds)'],
+        'Public': ['Retail shareholders']
+    };
+
+    const categories = ['BAT', 'Other FIIs', 'DIIs', 'Public'];
+    const shortNames = {
+        'BAT': 'BAT',
+        'Other FIIs': 'Other Foreign Institutional Investors',
+        'DIIs': 'Domestic Institutional Investors',
         'Public': 'Public Shareholders'
     };
 
     const rawData = {
-        'Foreign Institutional Investors (FIIs)': {
-            total: [43, 43, 41, 40, 41, 40, 40, 38, 37, 36, 35, 34, 40, 36, 34, 32],
-            breakdown: {
-                'Tobacco Manufacturers (India) Ltd (BAT)': [24, 24, 20, 20, 20, 20, 20, 18, 18, 18, 18, 18, 18, 14, 14, 14],
-                'Myddleton Investment Co. Ltd (BAT)': [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
-                'Rothmans International Enterprises (BAT)': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                'GQG Partners Emerging Markets Equity Fund': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1],
-                'Goldman Sachs Trust II - GS GQG': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2],
-                'Government of Singapore': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-                'Other Balancing Foreign Institutional Investors': [13, 13, 15, 14, 15, 13, 13, 14, 12, 11, 10, 10, 13, 13, 11, 10]
-            }
-        },
-        'Domestic Institutional Investors (Government Backed)': {
-            total: [0, 0.04, 0.09, 10.04, 19.04, 28.04, 34.04, 38.04, 35.04, 34.04, 37.04, 36.04, 42.04, 45.04, 47.04, 49.04],
-            breakdown: {
-                'Central / State Government Holdings': [0, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04],
-                'Life Insurance Corporation of India': [0, 0, 0.05, 5, 10, 12, 14, 15, 15, 15, 15, 15, 15, 15, 16, 16],
-                'Specified Undertaking of the Unit Trust of India (SUUTI)': [0, 0, 0, 2, 4, 6, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
-                'General Insurance Corporation of India': [0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-                'The New India Assurance Company Ltd': [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                'The Oriental Insurance Company Ltd': [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                'SBI Mutual Funds': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3],
-                'ICICI Prudential Mutual Funds': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 0, 0],
-                'Parag Parikh Mutual Funds': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0],
-                'NPS Trust (Pension Funds)': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0],
-                'Nippon Life India Trustee MFs': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-                'Parag Parikh Flexi Cap MF': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-                'SBI Nifty 50 ETF': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
-                'UTI Mutual Funds': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
-                'HDFC Mutual Funds': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-                'Mirae Asset Mutual Funds': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-                'Balancing Figure (Other DIIs)': [0, 0, 0, 2, 2, 6, 8, 12, 9, 8, 10, 10, 4, 5, 18, 22]
-            }
-        },
-        'Public': {
-            total: [57, 56.96, 58.91, 49.96, 39.96, 31.96, 25.96, 23.96, 27.96, 29.96, 27.96, 29.96, 17.96, 18.96, 18.96, 18.96],
-            breakdown: {
-                'Retail Public': [7, 15, 21, 32, 33, 31, 21, 11, 16, 18, 19, 15, 15, 15, 15, 16],
-                'Non-Institutional & Other Public Corporates': [50, 41.96, 37.91, 17.96, 6.96, 0.96, 4.96, 12.96, 11.96, 11.96, 8.96, 14.96, 2.96, 3.96, 3.96, 2.96]
-            }
-        }
-    };
-
-    const categories = [
-        'Foreign Institutional Investors (FIIs)',
-        'Domestic Institutional Investors (Government Backed)',
-        'Public'
-    ];
-    const shortNames = {
-        'Foreign Institutional Investors (FIIs)': 'FIIs',
-        'Domestic Institutional Investors (Government Backed)': 'DIIs (Govt)',
-        'Public': 'Public'
+        // 1950 has no recorded FII/DII/Public split at all — BAT alone
+        // accounted for the full 100%, so the other three are genuinely 0.
+        'BAT':       [100, 93, 75, 60, 40, 33, 32, 33, 32, 32, 31, 31, 26, 25, 23, 23],
+        'Other FIIs': [0,   0,  0,  0,  0,  0,  0, 11, 17, 13, 14, 15, 15, 14, 12, 11],
+        'DIIs':       [0,   0, 10, 19, 28, 34, 38, 35, 34, 37, 36, 40, 44, 45, 49, 49],
+        'Public':     [0,   7, 15, 21, 32, 33, 30, 21, 16, 18, 19, 14, 15, 16, 16, 17]
     };
 
     function isMobile() {
         return window.innerWidth <= 768;
     }
 
+    function hexToRgba(hex, alpha) {
+        const h = hex.replace('#', '');
+        const r = parseInt(h.substring(0, 2), 16);
+        const g = parseInt(h.substring(2, 4), 16);
+        const b = parseInt(h.substring(4, 6), 16);
+        return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+    }
+
+    // BAT and Other FIIs share the primary (gold) hue — same foreign-investor
+    // family, BAT solid since it's the focus of the chart, Other FIIs a
+    // lighter tint. DIIs and Public each get their own solid color.
     function getDesignSystemColors() {
-        const rootStyle = getComputedStyle(document.documentElement);
+        const primary = getColor('--color-primary');
+        const secondary = getColor('--color-secondary');
+        const accent = getColor('--color-accent');
         return [
-            rootStyle.getPropertyValue('--color-primary').trim(),
-            rootStyle.getPropertyValue('--color-secondary').trim(),
-            rootStyle.getPropertyValue('--color-accent').trim()
+            primary,
+            hexToRgba(primary, 0.5),
+            secondary,
+            accent
         ];
     }
 
@@ -93,12 +86,21 @@ document.addEventListener("DOMContentLoaded", function () {
         return [x, Math.max(10, y)];
     }
 
+    // the dot swatch uses each series' own color, which for "Other FIIs" is
+    // a light 0.5-alpha tint that reads too faint for the bold category
+    // text next to it — the text instead uses a fixed solid color per family
+    const textColorByCat = {
+        'BAT': '--color-primary',
+        'Other FIIs': '--color-primary',
+        'DIIs': '--color-secondary',
+        'Public': '--color-accent'
+    };
+
     function tooltipFormatter(param, desktop) {
-        const dataIndex = param.dataIndex;
-        const timePeriod = param.name;
         const catName = param.seriesName;
         const catTotal = param.value;
         const catColor = param.color;
+        const textColor = getColor(textColorByCat[catName] || '--color-text');
 
         if (catTotal === 0) return '';
 
@@ -117,31 +119,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let tooltipHtml = `
             <div style="max-width: ${outerMaxWidth}; white-space: normal; overflow-wrap: break-word;">
-            <div style="font-weight: bold; margin-bottom: 6px; border-bottom: 1px solid #ddd; padding-bottom: 3px; font-size: ${headerSize};">
-                Period: ${timePeriod}
+            <div style="font-weight: 500; margin-bottom: 6px; border-bottom: 1px solid #ddd; padding-bottom: 3px; font-size: ${headerSize}; color: #888;">
+                As of ${param.name}
             </div>
             <div style="margin-bottom: 6px; font-size: ${catSize};">
                 <span style="display:inline-block;margin-right:5px;border-radius:10px;width:${dotSize};height:${dotSize};background-color:${catColor};"></span>
-                <strong style="color:${catColor}">${fullTitle}: ${catTotal.toFixed(2)}%</strong>
+                <strong style="color:${textColor}">${fullTitle}: ${catTotal.toFixed(2)}%</strong>
             </div>
-            <div style="margin-top: 3px; color:#666; font-size: ${labelSize}; padding-left: 4px;">Active Entities:</div>
+            <div style="margin-top: 3px; color:#666; font-size: ${labelSize}; padding-left: 4px;">Includes:</div>
             <ul style="margin: 3px 0 0 0; padding-left: 16px; font-size: ${listSize}; color: #444; max-width: ${listMaxWidth}; white-space: normal; overflow-wrap: break-word; line-height: 1.4em;">
         `;
 
-        const subcats = rawData[catName].breakdown;
-        let holdsData = false;
-
-        for (const [subcatName, values] of Object.entries(subcats)) {
-            const val = values[dataIndex];
-            if (val > 0) {
-                tooltipHtml += `<li style="margin-bottom: 2px;">${subcatName}</li>`;
-                holdsData = true;
-            }
-        }
-
-        if (!holdsData) {
-            tooltipHtml += `<li style="list-style-type: none; padding-left:0;">No specific constituent sub-entities</li>`;
-        }
+        (entityRoster[catName] || []).forEach(function (name) {
+            tooltipHtml += `<li style="margin-bottom: 2px;">${name}</li>`;
+        });
 
         tooltipHtml += `</ul></div>`;
         return tooltipHtml;
@@ -171,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     fontSize: 12,
                     fontWeight: 'bold'
                 },
-                data: rawData[cat].total
+                data: rawData[cat]
             };
         });
 

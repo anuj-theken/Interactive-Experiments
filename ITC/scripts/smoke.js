@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const tipData = absoluteTaxTotal.map((t, idx) => (staticLabels[idx] === '-') ? '-' : Math.round(t * 0.05));
 
     // Updated requested custom legend names
-    const sharedLegendData = ['Reveneue through Ciggeretes', 'New tax rate in %'];
+    const sharedLegendData = ['Cigarette sales revenue (Rs crore)', 'Tax rate (%)'];
 
     // Main Chart Setup Options
     const mainOption = {
@@ -60,12 +60,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 const idx = params[0].dataIndex;
                 let tooltipContent = `
                     <div style="font-size: 13.5px; max-width: 340px; white-space: normal; line-height: 1.5;">
-                        <strong style="color: ${textColor}; font-size: 14.5px;">${allTimelineYears[idx]} Performance Overview</strong><br/>
-                        <span style="color: ${revenueColor}; font-weight: bold; display: block; margin-top: 4px;">
-                            ITC Segment Gross Revenue: ₹${grossRevenue8Points[idx].toLocaleString('en-IN')} Cr
+                        <span style="color: ${revenueColor}; font-weight: bold; display: block;">
+                            Revenue from Cigarettes: Rs ${grossRevenue8Points[idx].toLocaleString('en-IN')} Cr
                         </span>
-                        <span style="color: #e11d48; font-weight: bold; display: block; margin-bottom: 6px;">
-                            Total Taxes Collected: ₹${absoluteTaxTotal[idx].toLocaleString('en-IN')} Cr
+                        <div style="margin: 6px 0; border-top: 1px dashed ${mutedColor};"></div>
+                        <span style="color: ${mutedColor}; font-weight: bold; display: block; margin-bottom: 6px;">
+                            Total Taxes Collected: Rs ${absoluteTaxTotal[idx].toLocaleString('en-IN')} Cr
                         </span>
                 `;
 
@@ -83,8 +83,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     ];
 
                     tooltipContent += `
-                        <div style="margin-top: 8px; border-top: 1px dashed ${mutedColor}; padding-top: 6px;">
-                            <strong style="color: ${mutedColor}; font-size: 12.5px; display: block; margin-bottom: 4px;">Rate Breakdown (Effective Burden: ${staticLabels[idx]})</strong>
+                        <div style="margin-top: 8px;">
+                            <strong style="color: ${mutedColor}; font-size: 12.5px; display: block; margin-bottom: 4px;">Tax Rate Breakdown (Effective Burden: ${staticLabels[idx]})</strong>
                             <div style="background-color: ${hexToRgba(mutedColor, 0.08)}; border-left: 3px solid ${mutedColor}; padding: 6px 8px; font-family: monospace; font-size: 12px; color: ${mutedColor}; line-height: 1.6;">
                                 ${percentageBreakdowns[idx]}
                             </div>
@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
             {
                 type: 'value',
                 name: '',
-                axisLabel: { color: mutedColor, formatter: '₹{value}' },
+                axisLabel: { color: mutedColor, formatter: 'Rs {value}' },
                 splitLine: { lineStyle: { color: hexToRgba(mutedColor, 0.15), type: 'solid' } },
                 min: 0,
                 max: 65000
@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
             {
                 type: 'value',
                 name: '',
-                axisLabel: { color: mutedColor, formatter: '₹{value}' },
+                axisLabel: { color: mutedColor, formatter: 'Rs {value}' },
                 splitLine: { show: false },
                 min: 0,
                 max: 65000
@@ -210,8 +210,8 @@ document.addEventListener("DOMContentLoaded", function () {
             textStyle: { color: mutedColor, fontSize: 13 }
         },
         series: [
-            { name: 'Reveneue through Ciggeretes', type: 'line', color: revenueColor, itemStyle: { color: revenueColor } },
-            { name: 'New tax rate in %', type: 'bar', color: '#fbbf24', itemStyle: { color: '#fbbf24' } }
+            { name: 'Cigarette sales revenue (Rs crore)', type: 'line', color: revenueColor, itemStyle: { color: revenueColor } },
+            { name: 'Tax rate (%)', type: 'bar', color: '#fbbf24', itemStyle: { color: '#fbbf24' } }
         ]
     };
 
@@ -220,14 +220,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Bind interacting toggle filters securely between separate DOM nodes
     myLegend.on('legendselectchanged', function(params) {
-        const isTaxActive = params.selected['New tax rate in %'];
+        const isTaxActive = params.selected['Tax rate (%)'];
         myChart.setOption({
             legend: {
                 selected: {
                     'Cigarette Filter': isTaxActive,
                     'Cigarette Body': isTaxActive,
                     'Burning Tip': isTaxActive,
-                    'ITC Gross Segment Revenue': params.selected['Reveneue through Ciggeretes']
+                    'ITC Gross Segment Revenue': params.selected['Cigarette sales revenue (Rs crore)']
                 }
             }
         });

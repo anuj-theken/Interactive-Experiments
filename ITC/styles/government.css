@@ -8,7 +8,7 @@
   padding: 40px 15px;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   background-color: var(--color-bg);
   font-family: var(--font-body);
 }
@@ -20,12 +20,11 @@
   align-items: center;
   justify-content: center;
   gap: 40px;
-  margin-top: 40px;
 }
 
 /* Editorial left sidebar */
 .QW4K9-editorial-panel {
-  flex: 1 1 265px;
+  flex: 1 1 320px;
   min-width: 280px;
   padding-left: 40px; /* aligns the header with other modules' left inset */
 }
@@ -51,179 +50,42 @@
   max-width: 520px;
 }
 
-/* Central diagram grid architecture */
+/* Diagram: the reference circular-flow image, dropped in directly rather
+   than redrawn as SVG. The source file has uneven transparent padding
+   baked in on every edge (~10% left, 9% right, 8% top, 5% bottom) — an
+   aspect-ratio matched to the actual drawn content plus object-fit:cover
+   crops that dead margin out visually without touching the file itself. */
 .QW4K9-diagram-viewport {
-  flex: 0 0 650px;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 24px;
-  position: relative;
+  flex: 1 1 330px;
+  min-width: 0;
+  max-width: 780px;
+  aspect-ratio: 1000 / 1000;
+  overflow: hidden;
 }
 
-/* Center column stacking */
-.QW4K9-center-visual-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.QW4K9-label-top, .QW4K9-label-bottom {
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: var(--type-legend);
-  color: var(--color-text);
-  text-align: center;
-  z-index: 5;
-}
-
-/* Side panels laid out safely outside vector canvas bounds */
-.QW4K9-side-panel {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  min-width: 120px;
-  z-index: 4;
-  align-self: center;
-}
-
-.QW4K9-panel-left {
-  text-align: right;
-  max-width: 180px;
-  margin-left: auto;
-}
-
-.QW4K9-panel-right {
-  text-align: left;
-}
-
-.QW4K9-panel-header {
-  display: flex;
-  align-items: center;
-  font-family: var(--font-body);
-  font-size: var(--type-legend);
-  font-weight: 500;
-  color: var(--color-text);
-  margin-bottom: 8px;
-  white-space: nowrap;
-}
-
-.QW4K9-panel-left .QW4K9-panel-header {
-  justify-content: flex-end;
-}
-
-.QW4K9-panel-details {
-  font-family: var(--font-body);
-  font-size: var(--type-legend);
-  line-height: 1.4;
-  color: var(--color-muted);
-  position: relative;
-  height: 44px;
-  width: 100%;
-}
-
-/* Canvas scalable box container */
-.QW4K9-svg-wrapper {
-  width: 380px;
-  height: 380px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0;
-  margin-top: -15px;
-  margin-bottom: -15px;
-}
-
-.QW4K9-svg-wrapper svg {
+.QW4K9-flow-image {
   width: 100%;
   height: 100%;
-  overflow: visible;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
-/* Center hub scalable element definition */
-.QW4K9-center-hub-group {
-  transform-origin: 300px 300px;
-  transition: transform 0.2s ease;
-}
-
-/* Fade timing is driven by scripts/government.js (a rAF clock, not CSS
-   keyframes) — see that file for why: swapping animation-duration on hover
-   remaps elapsed time against the new duration and jumps the phase, instead
-   of continuing smoothly from wherever the slow animation left off. */
-.QW4K9-animated-text {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  opacity: 0;
-  white-space: normal;
-}
-
-.QW4K9-panel-left .QW4K9-animated-text {
-  right: 0;
-}
-
-.QW4K9-panel-right .QW4K9-animated-text {
-  left: 0;
-}
-
-/* Indicator arrow elements — green/red are semantic (money in / tax out),
-   not brand chrome, so kept as authored rather than mapped to design tokens. */
-.QW4K9-arrow-green {
-  width: 0;
-  height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-bottom: 11px solid #8ec59a;
-  margin-right: 8px;
-  flex-shrink: 0;
-  animation: QW4K9-bobUp 1.5s infinite ease-in-out;
-}
-
-.QW4K9-arrow-red {
-  width: 0;
-  height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 11px solid #f68989;
-  margin-left: 8px;
-  flex-shrink: 0;
-  animation: QW4K9-bobDown 1.5s infinite ease-in-out;
-}
-
-/* Rotation angle is set inline by scripts/government.js every frame. */
-.QW4K9-rotate-clockwise {
-  transform-origin: 300px 300px;
-}
-
-@keyframes QW4K9-bobUp {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-
-@keyframes QW4K9-bobDown {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(4px); }
-}
-
-/* --- RESPONSIVE — aligned to the project's iPad/mobile breakpoints (1023px / 768px)
-   rather than the prototype's original ad-hoc 900px / 600px cutoffs. --- */
+/* --- RESPONSIVE — aligned to the project's iPad/mobile breakpoints (1023px / 768px) --- */
 
 @media (max-width: 1023px) {
   .QW4K9-government-section {
-    align-items: flex-start;
-    min-height: 700px; /* prevents the section's background from ending before the diagram does */
+    min-height: 0;
   }
   .QW4K9-app-layout {
     flex-direction: column;
-    gap: 0px;
-    margin-top: 10px;
+    gap: 24px;
   }
   .QW4K9-editorial-panel {
     text-align: center;
     max-width: 500px;
     min-width: 100%;
-    margin-bottom: 0px;
+    max-height: 18em;
     padding-left: 0; /* the desktop-only left nudge doesn't apply once centered */
   }
   /* the capped title/subtitle need their own centering once the panel is
@@ -234,59 +96,39 @@
     margin-left: auto;
     margin-right: auto;
   }
-  /* nowrap only makes sense at full desktop width (≥1024px) where the 1fr grid
-     columns have room; below that the text can overflow its shrunk column and
-     bleed out through un-clipped ancestors, inflating the page's total scroll
-     width and causing a page-wide horizontal scrollbar. Let it wrap instead. */
-  .QW4K9-panel-header {
-    white-space: normal;
-  }
+  /* .QW4K9-app-layout is now column-direction here, which makes the base
+     rule's flex-basis:640px (meant for the desktop row layout's width)
+     apply to height instead — overridden back to auto so the wrapper's
+     height comes from its content (the image's own aspect ratio) again */
   .QW4K9-diagram-viewport {
+    flex: 0 1 auto;
     width: 100%;
-    /* was max-height: 24px — a leftover from the prototype that didn't clip the
-       diagram (it still rendered at full size), it just told the parent layout
-       this element was only 24px tall, so the section's background ended short
-       of where the diagram actually drew. Removed; min-height above covers it. */
+    max-width: 560px;
   }
 }
 
 @media (max-width: 768px) {
-  .QW4K9-government-section {
-    min-height: 520px;
+  .QW4K9-app-layout {
+    gap: 8px;
   }
+  /* the desktop/tablet crop (aspect-ratio + object-fit:cover above) would
+     double up with this breakpoint's own oversized bleed — that bleed
+     already pushes the image's transparent margin off-screen on its own,
+     so re-enable the image's natural sizing here instead of cropping twice */
   .QW4K9-diagram-viewport {
-    grid-template-columns: 1fr 160px 1fr;
-    gap: 0px;
-    max-height: 270px;
+    aspect-ratio: unset;
+    overflow: visible;
   }
-  /* the base rule's min-width:120px is a floor CSS Grid respects even when a
-     1fr track has no room for it — on phones narrower than ~400px
-     (120+160+120 + section padding) that floor forces the whole diagram,
-     and everything above it up to <body>, wider than the viewport, which
-     shows up as a page-wide horizontal scrollbar / dead space on the right */
-  .QW4K9-side-panel {
-    min-width: 0;
+  .QW4K9-flow-image {
+    height: auto;
+    object-fit: unset;
   }
-  .QW4K9-svg-wrapper {
-    width: 160px;
-    height: 160px;
-    margin-top: -8px;
-    margin-bottom: -8px;
-  }
-  .QW4K9-panel-header {
-    font-size: 11px;
-    white-space: normal;
-  }
-  .QW4K9-panel-details {
-    font-size: 10px;
-    height: 85px;
-  }
-  .QW4K9-label-top, .QW4K9-label-bottom {
-    font-size: 13px;
-  }
-
-  /* Reduced by half from scale(4) down to scale(2) */
-  .QW4K9-center-hub-group {
-    transform: scale(2);
+  /* bleed past the section's 15px horizontal padding so the image reads
+     larger on phone widths, where it has the most room to gain */
+  .QW4K9-diagram-viewport {
+    width: calc(100% + 48px);
+    max-width: none;
+    margin-left: -15px;
+    margin-right: -15px;
   }
 }

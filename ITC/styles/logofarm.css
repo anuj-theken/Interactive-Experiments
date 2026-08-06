@@ -51,19 +51,6 @@
   color: var(--color-text);
 }
 
-.QW4K10-header h1 span {
-  color: var(--color-primary);
-}
-
-.QW4K10-chart-subtitle {
-  font-family: var(--font-body);
-  font-size: var(--type-subheading);
-  font-weight: 400;
-  color: var(--color-muted);
-  margin-top: 0.25rem;
-  max-width: 500px;
-}
-
 .QW4K10-legend {
   display: flex;
   align-items: center;
@@ -289,52 +276,6 @@
 .QW4K10-brand-tooltip .QW4K10-tt-val {
   text-align: right;
   font-weight: 600;
-}
-
-/* Drifting cloud shadows over the fields */
-.QW4K10-cloud-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 50;
-  pointer-events: none;
-  overflow: visible;
-}
-
-.QW4K10-cloud {
-  position: absolute;
-  z-index: 20;
-  pointer-events: none;
-  opacity: 0.65;
-}
-
-/* Each group's gooey filter fuses its puffs into one blob,
-   then a larger blur softens the merged edge back to a fluffy cloud */
-.QW4K10-cloud .QW4K10-puff-group {
-  position: absolute;
-  inset: 0;
-}
-.QW4K10-cloud .QW4K10-shadow-group { filter: url(#QW4K10-goo) blur(7px); }
-.QW4K10-cloud .QW4K10-white-group  { filter: url(#QW4K10-goo) blur(6px); }
-
-.QW4K10-cloud .QW4K10-puff-shadow {
-  position: absolute;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 50%,
-      rgba(22, 38, 16, 0.34) 0%,
-      rgba(22, 38, 16, 0.28) 55%,
-      rgba(22, 38, 16, 0) 100%);
-}
-
-.QW4K10-cloud .QW4K10-puff {
-  position: absolute;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 50%,
-      rgba(255, 255, 255, 0.98) 0%,
-      rgba(255, 255, 255, 0.92) 55%,
-      rgba(255, 255, 255, 0) 100%);
 }
 
 /* Sector footprint on the 12x12 grid */

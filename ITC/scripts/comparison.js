@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
             categories: ['2003', '2021', '2023'],
             series: [
                 { name: 'Britannia & Parle', data: [80, 80, 0], colorVar: '--color-rival' },
-                { name: 'Sunfeast', data: [0, 7.3, 0], colorVar: '--color-primary' },
+                { name: 'Sunfeast', data: [0, 7.3, 7.3], colorVar: '--color-primary' },
                 { name: 'Britannia', data: [0, 0, 31], colorVar: '--color-secondary' },
                 { name: 'Parle', data: [0, 0, 29], colorVar: '--color-accent' }
             ]
@@ -159,7 +159,17 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         return {
-            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: { type: 'shadow' },
+                formatter: function (params) {
+                    var html = '<b>' + params[0].axisValue + '</b><br/>';
+                    params.forEach(function (p) {
+                        if (p.value > 0) html += p.marker + ' ' + p.seriesName + ': <b>' + p.value + '%</b><br/>';
+                    });
+                    return html;
+                }
+            },
             legend: { data: allSeries.map(function (s) { return s.name; }), show: false },
             grid: gridConfig,
             xAxis: {

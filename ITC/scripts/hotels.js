@@ -14,8 +14,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // Portfolio mix (Owned vs Managed) — independent of the 5 brand
     // logos floating around the donut, which are static context callouts.
     const categories = [
-        { key: 'Owned', label: 'Owned Footprint', value: 45 },
-        { key: 'Managed', label: 'Managed & Maintained Portfolio', value: 55 }
+        { key: 'Owned', label: 'Owned', value: 45 },
+        { key: 'Managed', label: 'Managed', value: 55 }
     ];
 
     function palette() {
@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const text = document.createElement('div');
             text.className = 'QW4K12-legend-text';
-            text.innerHTML = '<span>' + cat.label + '</span><span class="QW4K12-legend-value">' + cat.value + '%</span>';
+            text.innerHTML = '<span>' + cat.label + ' - <span class="QW4K12-legend-value">' + cat.value + '%</span></span>';
 
             item.appendChild(swatch);
             item.appendChild(text);

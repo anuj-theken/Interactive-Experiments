@@ -1,0 +1,81 @@
+Version,Chart Description,Content Change,Visualisation Change,Data Change,Design Feedback,Tracker (done or not),,"Status
+(Raghav)"
+3.2,BAT's shareholding in ITC declined — stacked bar chart,"1. Post 2020, we can just present March 2024, 2025, 2026 and June 2026. We can leave the rest of the months
+2. Remove the word - ""Balancing figure"" and ""Other balancing"" from text
+","1. Pls present BAT and other FIIs shareholding separately to show the decline in BAT appropriately
+2. Similarly, present Govt institutions and DII separately","1. Chart not consistent with the data shared (eg. BAT shareholding in 1950 was 100%, differences in other years as well)
+2. Text at the top will change BAT shareholding as per the graph",,,,Checked
+3.2,,"(1) the title: BAT’s shareholding in ITC declined over the decades, from roughly ___% to today’s __%
+
+(2) no strap
+
+(3) confirm the figures for the blanks above. i flag this because the numbers in your chart don’t match what i lifted from the script. and the 43% and 32% don’t look right either, because hover over the gold bars and you will see a breakdown, where entities that are not BAT contribute to those %s
+
+(4) related to the above point: when i hover over the bars, i don’t understand things like “Period: Mar-24” or “Period: Mar-26”. what periods are these? in any case, don’t use a hyphen.
+
+(5) in the legend, write out what the acronyms mean",,1970 doesn't add up to 100%. check all other bars.,,,,
+7.2,Mandi/Simulation e-Choupal — dashboard/viz,,Colour coding for the second one is blank - to be removed,,,,,Checked
+7.2,,"e-Choupal was revolutionary for farmers. This is a re-imagined representation of its website.
+","(1) Upper right of map: 1 markets, 4 markets, etc. — needs logic for singular
+
+(2) When I select Hindi, fields in table (district, variety, etc.) remain in English. Is this deliberate?",,,,,
+8.2,Atta market share by brand — bar graph (mobile version not working),"(1) The title: Aashirvaad defines packaged atta
+
+(2) No strap
+
+(3) Change rupee symbol to Rs (two instances)","Remove ""small market"", etc. — use the size of the pie to visually convey this (i suggest: more exaggerated than it is now). mark the market size numerically as well.",,,,,
+8.5,"ITC's market share vs. category leaders biscuits, snacks, instant noodles (mobile version not working)","(1) The title: ITC's consumer brands are householdn names
+
+(2) No strap","(1) We don’t need the info that reads “At launch in 2003, Britannia and Parle held a combined market share…” because it repeats what the user already sees. The same goes for the other two frames.
+
+(2) Each frame needs to be labeled. For example, is frame #1 biscuits and chocolates and...? Is frame #2 chips? Is frame #3 noodles?",,,,,
+8.6,ITC's market value growth from 1996 to 2019 — line graph,"(1) Change Market cap to Market capitalization
+
+(2) Remove ""How ITC grew its revenue""",,"(1) Show data upto 1 decimal or max upto 2 decimal
+
+(2) Absolute amount in tooltips display should have 1 more Zero to present ""lakh crores""",,,,checked
+8.6,,The title: A steady rise in ITC's market capitalisation,,,,,,
+9.1,Split of owned vs. managed hotels over time — bubble chart with pie elements,"Update ""The Asset-Right Transition"" to ""Pivot to asset-light model""
+
+Update text to ""ITC built the business by owning its hotels, but subsequently pivoted to asset light model, i.e., managing properties instead of blocking capital in real estate""
+Portfolio mix 
+Owned - 45%
+Managed - 55%",,,,,,checked
+9.3,"ITC stock price vs. Sensex (rebased), Feb 2017 to Feb 2022 — line graph (alignment can be better)","(1) Update headers: 
+2012 - Revenue milestone
+2013 - Profitability achieved
+2017 - Revenue doubled
+2022 - Divestment
+2025 - Demerger
+2026 - Tax hike
+
+(2) Remove all ""final"" periods, e.g. ""FMCG business crosses Rs 5,000 crore in revenue"" (no period)
+
+(3) For Raghav to confirm: ""The government raised cigarette taxes in Feb 2026 by 20% to 55% depending on size"" — should this be *20 percentage points*?
+
+(4) The title: How has ITC fared against the Nifty 50?
+
+(5) No strap",,Why is this plotted against the Nifty 50 instead of Sensex? See script (unless that changed during recording).,,,,
+10.1,Indian tax rate on cigarettes over time ,"(1) The title: The evolution of cigarette sales revenue and taxation
+
+(2) Strap: Even if prices go higher, ITC's gross revenue in the cigarette segment still goes up
+
+(3) Replace rupee symbol with Rs
+
+(4) Legend: 
+- Cigarette sales revenue (Rs crore)
+- Tax rate (%)",,,,,,
+10.2,Relationship between ITC and government-linked entities — flowchart (showing the tax/income cycle),Text to be updated based on viz change >>,"To discuss whether viz in the form of wheel is appropriate or we should use flow chart?
+We need to highlight the following contradiction / conflict of interest:
+- Govt levy taxes and increase taxes regularly in budget to discourage cigarette consumption
+- At the same time, govt through insurance companies and other instututions is a shareholder of ITC and directly benefits from cigarette consumption through the dividends coming out of cigarette profits",,,,,checked
+10.3,All brands under ITC - Logo farm,"(1) The title: The brands of ITC Limited
+
+(2) No strap",Pls remove white cloud over brands,Pls share underlying data (brand name and year),,,,
+10.4,Revenue vs. profit split-bar showing cigarettes at 45%,"(1) I don't understand the current x-axis label choices (gross rev or segment profit, depending on FY)
+
+(2) The title: Still a smokes company
+
+(3) Strap: Cigarettes account for less than half of ITC's annual revenue, but bring in 75% of profit","The ""zero-thickness"" spacer columns need to be removed. But maybe an easier fix is to make them colorless.",,,,,
+10.4,Revenue vs. profit split-bar showing cigarettes at 45%,Would recommend presenting separate graphs for revenue and profits,,,,,,
+11,Timeline — flowchart,N/A,,,,,,

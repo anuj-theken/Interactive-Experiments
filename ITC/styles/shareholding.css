@@ -32,6 +32,9 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+  /* bottom-aligns the legend with the title's last wrapped line — there's
+     no separate subheader anymore (merged into the title), so the title's
+     last line is effectively where a subheader would sit */
   align-items: flex-end;
   gap: 12px 20px;
   margin-bottom: 24px;
@@ -40,7 +43,12 @@
 }
 
 .QW4K1-chart-header-text {
-  flex: 1;
+  /* 50% each plus the header's 20px column-gap adds up to slightly over
+     100%, which was enough to force the legend to wrap onto its own line
+     instead of sitting beside the title — calc() accounts for the gap so
+     both halves plus the gap between them add up to exactly 100% */
+  flex: 0 1 calc(50% - 10px);
+  max-width: calc(50% - 10px);
   min-width: 0;
 }
 
@@ -55,6 +63,7 @@
   margin: 0;
   font-family: var(--font-body);
   font-size: var(--type-subheading);
+  font-weight: 400;
   color: var(--color-muted);
   max-width: 100%;
 }
@@ -64,8 +73,8 @@
   flex-wrap: wrap;
   gap: 8px 14px;
   justify-content: flex-end;
-  flex-shrink: 0;
-  margin-left: auto;
+  flex: 0 1 calc(50% - 10px);
+  max-width: calc(50% - 10px);
 }
 
 .QW4K1-legend-item {
@@ -122,12 +131,13 @@
 
   .QW4K1-chart-header-text {
     width: 100%;
+    max-width: 100%;
   }
 
   .QW4K1-legend {
     width: 100%;
+    max-width: 100%;
     justify-content: center;
-    margin-left: 0;
   }
 
   #QW4K1-main-chart {

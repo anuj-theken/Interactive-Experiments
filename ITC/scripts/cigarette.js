@@ -1,11 +1,13 @@
 // scripts/cigarette.js — QW4K11
 
 document.addEventListener("DOMContentLoaded", function () {
-    const chartDom = document.getElementById('QW4K11-main-chart');
+    const revenueDom = document.getElementById('QW4K11-revenue-chart');
+    const profitDom = document.getElementById('QW4K11-profit-chart');
     const legendDom = document.getElementById('QW4K11-legend');
-    if (!chartDom) return;
+    if (!revenueDom || !profitDom) return;
 
-    const myChart = echarts.init(chartDom);
+    const revenueChart = echarts.init(revenueDom);
+    const profitChart = echarts.init(profitDom);
 
     function getColor(name) {
         return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -15,10 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return window.innerWidth <= 768;
     }
 
-    // Column order: [FY23 Rev, FY23 Profit, spacer, FY24 Rev, FY24 Profit, spacer,
-    //                FY25 Rev, FY25 Profit, spacer, FY26 Rev, FY26 Profit]
-    // FY25/FY26 figures are unchanged from before — only FY23/FY24 columns were added.
-    const columnTotals = [69481, 24750, 0, 69446, 26316, 0, 73467, 26531, 0, 80868, 26768];
+    const years = ['FY23', 'FY24', 'FY25', 'FY26'];
 
     // FY23/FY24 source data (market.png) reports Hotels as its own segment,
     // but Inter-Segment Revenue and Other Adjustments are folded together
@@ -46,31 +45,44 @@ document.addEventListener("DOMContentLoaded", function () {
         'Others':              { color: '#dc2626', borderColor: '#b91c1c' }
     };
 
-    const seriesData = {
-        'Cigarettes':          [28207, 17927, 0, 30597, 19089, 0, 32631, 20025, 0, 37100, 21051],
-        'Other FMCG':          [19123, 1374, 0, 20967, 1779, 0, 21982, 1580, 0, 24210, 1803],
-        'Agri Business':       [18172, 1328, 0, 15792, 1254, 0, 19754, 1478, 0, 20296, 1496],
-        'Paper & Packaging':   [9081, 2294, 0, 8344, 1378, 0, 8423, 911, 0, 8766, 797],
-        'Hotels':              [2585, 542, 0, 2990, 754, 0, 0, 0, 0, 0, 0],
-        // Inter-Segment Revenue (FY23/24) + Other Adjustments (FY23/24) + legacy Others/Inter-segment Adjustments (FY25/26)
-        'Others':              [-7687, 1285, 0, -9243, 2062, 0, -9323, 2537, 0, -9504, 1621]
+    // Revenue and profit used to share one combined chart (Rev, Profit, spacer,
+    // Rev, Profit, spacer, ...) — split into two separate charts per feedback,
+    // one per metric, each a plain 4-year (FY23-26) series with no spacers needed.
+    const revenueTotals = [69481, 69446, 73467, 80868];
+    const profitTotals = [24750, 26316, 26531, 26768];
+
+    const revenueData = {
+        'Cigarettes':        [28207, 30597, 32631, 37100],
+        'Other FMCG':        [19123, 20967, 21982, 24210],
+        'Agri Business':     [18172, 15792, 19754, 20296],
+        'Paper & Packaging': [9081, 8344, 8423, 8766],
+        'Hotels':            [2585, 2990, 0, 0],
+        'Others':            [-7687, -9243, -9323, -9504]
+    };
+    const profitData = {
+        'Cigarettes':        [17927, 19089, 20025, 21051],
+        'Other FMCG':        [1374, 1779, 1580, 1803],
+        'Agri Business':     [1328, 1254, 1478, 1496],
+        'Paper & Packaging': [2294, 1378, 911, 797],
+        'Hotels':            [542, 754, 0, 0],
+        'Others':            [1285, 2062, 2537, 1621]
     };
 
-    function buildOption() {
+    function buildOption(dataSet, totals) {
         const mobile = isMobile();
 
         const series = categories.map(function (cat) {
             const style = seriesStyle[cat];
             const isFirst = cat === 'Cigarettes';
-            // the last series drawn in each column type (revenue vs profit)
-            // caps the stack — gets the rounded top and bold white label
+            // the last series drawn caps the stack — gets the rounded top
+            // and bold white label
             const isCapping = cat === 'Others';
 
             return {
                 name: cat,
                 type: 'bar',
                 stack: 'Total',
-                barWidth: isFirst ? (mobile ? '80%' : '70%') : undefined,
+                barWidth: isFirst ? (mobile ? '55%' : '45%') : undefined,
                 itemStyle: {
                     color: style.color,
                     borderColor: style.borderColor,
@@ -86,14 +98,14 @@ document.addEventListener("DOMContentLoaded", function () {
                         fontWeight: isFirst || isCapping ? 'bold' : '600'
                     },
                     formatter: function (params) {
-                        const total = columnTotals[params.dataIndex];
+                        const total = totals[params.dataIndex];
                         const minAbs = isFirst ? 0 : (isCapping ? 1200 : 2000);
                         if (total === 0 || Math.abs(params.value) < minAbs) return '';
                         const pct = Math.round((params.value / total) * 100);
                         return pct + '%';
                     }
                 },
-                data: seriesData[cat]
+                data: dataSet[cat]
             };
         });
 
@@ -107,7 +119,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 textStyle: { color: '#333', fontSize: mobile ? 11 : 13 },
                 formatter: function (params) {
                     const title = params[0].axisValue;
-                    if (title === '') return null;
                     let html = '<b>' + title + '</b><br/>';
                     let total = 0;
                     params.forEach(function (item) {
@@ -131,58 +142,24 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             xAxis: [{
                 type: 'category',
-                // full qualifiers ("Gross Revenue"/"Segment Profit") fit
-                // fine at desktop's per-category width, but at mobile's much
-                // narrower slots they're what forced the rotation/collision
-                // above — shortened to just the metric name there instead
-                data: mobile ? [
-                    'FY23\nRevenue',
-                    'FY23\nProfit',
-                    '',
-                    'FY24\nRevenue',
-                    'FY24\nProfit',
-                    '',
-                    'FY25\nRevenue',
-                    'FY25\nProfit',
-                    '',
-                    'FY26\nRevenue',
-                    'FY26\nProfit'
-                ] : [
-                    'FY23\nGross Revenue',
-                    'FY23\nSegment Profit',
-                    '',
-                    'FY24\nGross Revenue',
-                    'FY24\nSegment Profit',
-                    '',
-                    'FY25\nGross Revenue',
-                    'FY25\nSegment Profit',
-                    '',
-                    'FY26\nGross Revenue',
-                    'FY26\nSegment Profit'
-                ],
-                axisTick: {
-                    alignWithLabel: true,
-                    interval: function (index) { return index !== 2 && index !== 5 && index !== 8; }
-                },
+                data: years,
+                axisTick: { alignWithLabel: true },
                 axisLabel: {
                     color: getColor('--color-text'),
                     fontSize: mobile ? 10 : 12,
-                    fontWeight: '600',
-                    lineHeight: 14,
-                    // default interval:'auto' hides labels it judges as
-                    // colliding, but its collision check doesn't know the
-                    // 3 empty spacer categories are blank — the labels it
-                    // keeps end up an inconsistent, unpredictable mix (e.g.
-                    // "Segment Profit" surviving for one FY, "Gross Revenue"
-                    // for the next). interval:0 forces every real label to
-                    // show; rotating on mobile keeps the narrower two-line
-                    // labels from overlapping in that tighter slot width.
-                    interval: 0,
-                    rotate: mobile ? 45 : 0
+                    fontWeight: '600'
                 }
             }],
+            // fixed (not auto-scaled) and identical on both charts — Revenue
+            // and Profit used to be one combined chart, and sharing a scale
+            // is what keeps their gridlines/baseline aligned now that
+            // they're split, so bar heights stay directly comparable
+            // between the two even though profit's own values are smaller
             yAxis: [{
                 type: 'value',
+                min: -20000,
+                max: 100000,
+                interval: 20000,
                 axisLabel: { color: getColor('--color-muted') },
                 splitLine: { lineStyle: { type: 'dashed', color: '#e0e0e0' } }
             }],
@@ -210,7 +187,10 @@ document.addEventListener("DOMContentLoaded", function () {
             item.appendChild(dot);
             item.appendChild(label);
             item.addEventListener('click', function () {
-                myChart.dispatchAction({ type: 'legendToggleSelect', name: cat });
+                // one shared legend drives both charts, so a toggle here
+                // needs to be dispatched to both instances to stay in sync
+                revenueChart.dispatchAction({ type: 'legendToggleSelect', name: cat });
+                profitChart.dispatchAction({ type: 'legendToggleSelect', name: cat });
             });
 
             legendDom.appendChild(item);
@@ -218,7 +198,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    myChart.on('legendselectchanged', function (params) {
+    revenueChart.on('legendselectchanged', function (params) {
         categories.forEach(function (cat) {
             const el = legendItemEls[cat];
             if (el) el.classList.toggle('is-inactive', !params.selected[cat]);
@@ -226,14 +206,17 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     buildLegend();
-    myChart.setOption(buildOption());
+    revenueChart.setOption(buildOption(revenueData, revenueTotals));
+    profitChart.setOption(buildOption(profitData, profitTotals));
 
     let resizeTimer = null;
     window.addEventListener('resize', function () {
-        myChart.resize();
+        revenueChart.resize();
+        profitChart.resize();
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(function () {
-            myChart.setOption(buildOption(), true);
+            revenueChart.setOption(buildOption(revenueData, revenueTotals), true);
+            profitChart.setOption(buildOption(profitData, profitTotals), true);
             buildLegend();
         }, 150);
     });

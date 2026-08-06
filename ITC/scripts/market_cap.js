@@ -54,9 +54,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Helper function to format absolute number using the Indian number system
     function formatIndianCurrency(num) {
-        // 1 Lakh Crore = 1,00,00,00,00,000 (11 zeros or value * 10^11)
+        // 1 Lakh Crore = 1,00,000 crore = 1,00,000 x 1,00,00,000 = 10^12 (12 zeros)
         // Converting base value to absolute numerical value
-        let absoluteVal = Math.round(num * 100000000000).toString();
+        let absoluteVal = Math.round(num * 1000000000000).toString();
 
         let lastThree = absoluteVal.substring(absoluteVal.length - 3);
         let otherBits = absoluteVal.substring(0, absoluteVal.length - 3);
@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     // keep every label on wider (tablet/desktop) screens
                     formatter: function(params) {
                         if (isMobile() && params.dataIndex % 3 !== 0) return '';
-                        return params.value;
+                        return params.value.toFixed(1);
                     }
                 },
                 areaStyle: {

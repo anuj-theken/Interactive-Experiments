@@ -41,14 +41,6 @@
   color: var(--color-text);
 }
 
-.QW4K4-chart-subtitle {
-  font-family: var(--font-body);
-  font-size: var(--type-subheading);
-  font-weight: 400;
-  color: var(--color-muted);
-  margin-top: 2px;
-}
-
 .QW4K4-scroll-hint {
   font-family: var(--font-body);
   font-size: var(--type-legend);
@@ -96,6 +88,17 @@
   display: flex;
   flex-direction: column;
   opacity: 0.15;
+}
+
+.QW4K4-chart-label {
+  font-family: var(--font-body);
+  font-size: var(--type-legend);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text);
+  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .QW4K4-chart-legend {
@@ -164,30 +167,12 @@
 .QW4K4-narrative-card[data-step="1"] { grid-column: 1; grid-row: 1; }
 .QW4K4-narrative-card[data-step="2"] { grid-column: 2; grid-row: 1; }
 
-.QW4K4-narrative-tag {
-  display: block;
-  font-family: var(--font-body);
-  font-size: var(--type-legend);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-primary);
-  margin-bottom: 6px;
-}
-
 .QW4K4-narrative-title {
   font-family: var(--font-display);
   font-size: var(--type-subheading);
   font-weight: 400;
   color: var(--color-text);
-  margin-bottom: 6px;
-}
-
-.QW4K4-narrative-body {
-  font-family: var(--font-body);
-  font-size: var(--type-legend);
-  line-height: 1.5;
-  color: var(--color-muted);
+  margin: 0;
 }
 
 @media (max-width: 1023px) {
@@ -206,7 +191,10 @@
   .QW4K4-chart-grid {
     position: static;
     grid-template-columns: 1fr;
-    flex: 0 0 520px;
+    /* the narrative card now holds a single short line instead of a title
+       + body, so it needs far less of the stage's height — shifted that
+       freed-up space to the chart instead */
+    flex: 0 0 620px;
     padding: 16px 20px;
   }
 
@@ -235,16 +223,19 @@
 
   /* 100%, not a fixed cap like desktop's 360px card — so the card's edges
      line up with the chart-wrap above it, which also spans the full
-     single-column width */
-  .QW4K4-narrative-card { max-width: 100%; padding: 24px; }
-  .QW4K4-narrative-body { font-size: var(--type-body); }
+     single-column width. min-width matches max-width: the card's own
+     margin:0 auto (set above, for desktop's centered floating card) makes
+     a grid item shrink to its content size instead of stretching to fill
+     the column — with only one short line of text now, that shrink-to-fit
+     width is much narrower than the chart above it without this override. */
+  .QW4K4-narrative-card { max-width: 100%; min-width: 100%; padding: 24px; }
 }
 
 @media (max-width: 768px) {
   .QW4K4-pin { height: 100dvh; }
   .QW4K4-topbar { padding: 14px 16px; }
   .QW4K4-scroll-hint { display: none; }
-  .QW4K4-chart-grid { flex-basis: 400px; padding: 12px 16px; }
+  .QW4K4-chart-grid { flex-basis: 480px; padding: 12px 16px; }
   .QW4K4-narrative-layer { padding: 12px 16px; }
   .QW4K4-narrative-card { padding: 18px; }
 }

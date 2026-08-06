@@ -34,7 +34,7 @@
   align-items: center;
   margin-bottom: 15px;
   gap: 20px;
-  max-width: 85%; /* reduced 15% from full container width */
+  max-width: 100%; /* reduced 15% from full container width */
 }
 
 .QW4K7-chart-title {
@@ -42,7 +42,7 @@
   font-size: var(--type-heading);
   color: var(--color-text);
   font-weight: 400;
-  margin: 0 0 4px 0;
+  margin: 0 0 12px 0;
 }
 
 .QW4K7-chart-subtitle {
@@ -54,19 +54,11 @@
   line-height: 1.4;
 }
 
-.QW4K7-chart-body {
-  font-family: var(--font-body);
-  font-size: 14px;
-  color: var(--color-muted);
-  font-weight: 400;
-  margin: 0;
-  line-height: 1.4;
-}
-
 /* Container dimensions for the custom legend chart instance */
 #QW4K7-custom-legend {
   width: 440px;
-  height: 40px;
+  height: 14px;
+  margin-top: 3em;
 }
 
 #QW4K7-main-chart {

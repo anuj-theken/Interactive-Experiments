@@ -107,7 +107,28 @@ const DIST_HI={
   "Guna":"गुना","Ratlam":"रतलाम","Khargone":"खरगोन",
   "Dhar":"धार","Sehore":"सीहोर","Badwani":"बड़वानी"
 };
+// Hindi names for the mandi terminals (markets) that appear in the data
+const MARKET_HI={
+  "Sidhi Apmc":"सीधी मंडी", "Barghat Apmc":"बरघाट मंडी", "Javera Apmc":"जावेरा मंडी",
+  "Badamalhera Apmc":"बड़ामलहरा मंडी", "Banda Apmc":"बांदा मंडी", "Chaurai Apmc":"चौरई मंडी",
+  "Khurai Apmc":"खुरई मंडी", "Mandla Apmc":"मंडला मंडी", "Kailaras Apmc":"कैलारस मंडी",
+  "Umariya Apmc":"उमरिया मंडी", "Dindori Apmc":"डिंडोरी मंडी", "Mandsaur Apmc":"मंदसौर मंडी",
+  "Itarsi Apmc":"इटारसी मंडी", "Raisen Apmc":"रायसेन मंडी", "Katni Apmc":"कटनी मंडी",
+  "Neemuch Apmc":"नीमच मंडी", "Bhopal Apmc":"भोपाल मंडी", "Paatan Apmc":"पाटन मंडी",
+  "Khatora Apmc":"खटोरा मंडी", "Sagar F V Apmc":"सागर फल-सब्जी मंडी",
+  "Ujjain F V Apmc":"उज्जैन फल-सब्जी मंडी", "Burhanpur F V Apmc":"बुरहानपुर फल-सब्जी मंडी",
+  "Seoni Apmc":"सिवनी मंडी", "Gotegaon Apmc":"गोटेगांव मंडी", "Kolaras Apmc":"कोलारस मंडी",
+  "Guna Apmc":"गुना मंडी", "Keolari Apmc":"केवलारी मंडी", "Taal Apmc":"ताल मंडी",
+  "Kasrawad Apmc":"कसरावद मंडी", "Badwaha Apmc":"बड़वाहा मंडी", "Sanawad Apmc":"सनावद मंडी",
+  "Rajgarh Apmc":"राजगढ़ मंडी", "Shyampur Apmc":"श्यामपुर मंडी", "Sendhwa F V Apmc":"सेंधवा फल-सब्जी मंडी"
+};
 function distLabel(dname){ return lang==="hi" ? (DIST_HI[dname]||dname) : dname; }
+function marketLabel(mname){ return lang==="hi" ? (MARKET_HI[mname]||mname) : mname; }
+
+// Devanagari digits — used to localize every rendered number in Hindi mode
+const HINDI_DIGITS=['०','१','२','३','४','५','६','७','८','९'];
+function toHindiDigits(v){ return String(v).replace(/[0-9]/g, function(d){ return HINDI_DIGITS[+d]; }); }
+function localizeNum(v){ return lang==="hi" ? toHindiDigits(v) : String(v); }
 function cropLabel(c){
   if(c===ALL) return lang==="hi"?"सभी फसलें":"All commodities";
   return lang==="hi" ? (CROP_HI[c]||c) : c;
@@ -115,8 +136,9 @@ function cropLabel(c){
 
 // source prices are quoted per quintal (100kg) — divide by 100 for a per-kg rate
 var perKgOpts={minimumFractionDigits:2,maximumFractionDigits:2};
-const fmt=function(n){ return "Rs."+(n/100).toLocaleString("en-IN",perKgOpts)+"/kg"; };
-const fmtRange=function(lo,hi){ return "Rs."+(lo/100).toLocaleString("en-IN",perKgOpts)+"–"+(hi/100).toLocaleString("en-IN",perKgOpts)+"/kg"; };
+const fmt=function(n){ return localizeNum("Rs."+(n/100).toLocaleString("en-IN",perKgOpts)+"/kg"); };
+const fmtRange=function(lo,hi){ return localizeNum("Rs."+(lo/100).toLocaleString("en-IN",perKgOpts)+"–"+(hi/100).toLocaleString("en-IN",perKgOpts)+"/kg"); };
+const pluralize=function(n,singular,plural){ return n===1 ? singular : plural; };
 
 // ---- i18n ----
 const dict={
@@ -126,15 +148,15 @@ const dict={
     descAll:"प्रत्येक जिले में दर्ज फसलों की संख्या का मध्य प्रदेश नक्शा:",
     th1:"मंडी क्षेत्र", th2:"जिला", th3:"फसल", th5:"सरकारी मंडी भाव",
     cropsel:"फसल:", low:"निम्न", high:"उच्च", markets:"मंडियां",
-    fewer:"कम फसलें", more:"अधिक फसलें", norate:"कोई भाव नहीं", nrec:"कोई दर्ज नहीं",
+    norate:"कोई भाव नहीं", nrec:"कोई दर्ज नहीं",
     admin:"एडमिन विकल्प", stateLbl:"वरीयता:", code:"प्रवेश कोड बदलिये" },
-  en:{ title:"e-Choupal was a revolutionary technology for farmers. This is re-imagined representation of the old website.",
+  en:{ title:"e-Choupal was revolutionary for farmers. This is a re-imagined representation of its website.",
     brand:"e-Choupal", side:"Commodities",
     desc:"District-wise Madhya Pradesh map of modal mandi price for the selected commodity:",
     descAll:"District-wise Madhya Pradesh map of how many commodities each district recorded:",
     th1:"Mandi Terminal", th2:"District", th3:"Commodity", th5:"Govt Mandi Rate",
     cropsel:"Crop:", low:"Low", high:"High", markets:"markets",
-    fewer:"Fewer crops", more:"More crops", norate:"No rate", nrec:"No record",
+    norate:"No rate", nrec:"No record",
     admin:"2026 Prices", stateLbl:"Priority:", code:"Change access code" }
 };
 let lang="en", currentCrop=ALL;
@@ -169,6 +191,7 @@ function rampColor(t){ // t in [0,1]
 }
 
 var geoLayer=null, labelLayer=L.layerGroup().addTo(map), mpBounds=null;
+var lastLo=null, lastHi=null;
 
 // modal price per district for a crop (max across that district's markets)
 function priceByDistrict(crop){
@@ -185,12 +208,12 @@ function countByDistrict(){
 }
 
 function popupHtml(dist,rows,isAll){
-  var sub = isAll ? (rows.length+" "+(lang==="hi"?"फसलें":"commodities")) : cropLabel(currentCrop);
-  var h='<div class="QW4K2-pop-h">'+dist+'</div><div class="QW4K2-pop-sub">'+sub+'</div><hr class="QW4K2-pop-rule">';
+  var sub = isAll ? (localizeNum(rows.length)+" "+(lang==="hi"?"फसलें":"commodities")) : cropLabel(currentCrop);
+  var h='<div class="QW4K2-pop-h">'+distLabel(dist)+'</div><div class="QW4K2-pop-sub">'+sub+'</div><hr class="QW4K2-pop-rule">';
   rows.forEach(function(r){
-    var name = isAll ? "<b>"+cropLabel(r.commodity)+"</b> " : "<b>"+r.market+"</b><br>";
+    var name = isAll ? "<b>"+cropLabel(r.commodity)+"</b> " : "<b>"+marketLabel(r.market)+"</b><br>";
     h+='<div style="margin:2px 0">'+name+'<span style="font-family:monospace">'+fmt(r.modal)+
-       '</span> <span style="color:#555">('+(isAll?r.market:r.variety)+')</span></div>';
+       '</span> <span style="color:#555">('+(isAll?marketLabel(r.market):r.variety)+')</span></div>';
   });
   return h;
 }
@@ -207,6 +230,7 @@ function render(){
   lo=Math.min.apply(null,vals); hi=Math.max.apply(null,vals);
   if(!isFinite(lo)){lo=0;hi=1;}
   var span=(hi-lo)||1;
+  lastLo=lo; lastHi=hi;
 
   if(geoLayer) map.removeLayer(geoLayer);
   labelLayer.clearLayers();
@@ -230,7 +254,7 @@ function render(){
       lyr.on("mouseout",function(){geoLayer.resetStyle(lyr);});
       try{
         var mk=L.marker(lyr.getBounds().getCenter(),
-          {icon:L.divIcon({className:"QW4K2-dlabel",html:dist,iconSize:null}),interactive:false});
+          {icon:L.divIcon({className:"QW4K2-dlabel",html:distLabel(dist),iconSize:null}),interactive:false});
         labelLayer.addLayer(mk);
       }catch(e){}
     }
@@ -248,9 +272,15 @@ function render(){
   // caption + stat
   var mapPrefix = lang==="hi" ? "म.प्र. मंडी मानचित्र — " : "MP Mandi Map — ";
   document.getElementById("QW4K2-map-title").textContent = mapPrefix + cropLabel(currentCrop);
+  var districtCount = Object.keys(valMap).length;
+  // Hindi nouns here don't inflect for count the way English does, so the
+  // singular/plural split only applies to the English labels
+  var districtsWord = lang==="hi" ? "जिले" : pluralize(districtCount,"district","districts");
+  var cropsWord = lang==="hi" ? "फसलें" : pluralize(hi,"crop","crops");
+  var marketsWord = lang==="hi" ? d.markets : pluralize(districtCount,"market","markets");
   document.getElementById("QW4K2-map-stat").textContent = isAll
-    ? (Object.keys(valMap).length+" "+(lang==="hi"?"जिले":"districts")+" · "+lo+"–"+hi+" "+(lang==="hi"?"फसलें":"crops"))
-    : (Object.keys(valMap).length+" "+d.markets+" · "+fmtRange(lo,hi));
+    ? (localizeNum(districtCount)+" "+districtsWord+" · "+localizeNum(lo)+"–"+localizeNum(hi)+" "+cropsWord)
+    : (localizeNum(districtCount)+" "+marketsWord+" · "+fmtRange(lo,hi));
 
   // table
   var tbody=document.getElementById("QW4K2-table-body"); tbody.innerHTML="";
@@ -259,7 +289,7 @@ function render(){
       "<th>"+d.th1+"</th><th>"+d.th2+"</th><th>"+d.th3+"</th><th>"+d.th5+"</th>";
     RAW.forEach(function(r){
       var tr=document.createElement("tr");
-      tr.innerHTML="<td>"+r.market+"</td><td>"+r.district+"</td><td>"+cropLabel(r.commodity)+
+      tr.innerHTML="<td>"+marketLabel(r.market)+"</td><td>"+distLabel(r.district)+"</td><td>"+cropLabel(r.commodity)+
         "</td><td class='QW4K2-highlight-row'>"+fmt(r.modal)+"</td>";
       tbody.appendChild(tr);
     });
@@ -268,7 +298,7 @@ function render(){
       "<th>"+d.th1+"</th><th>"+d.th2+"</th><th>"+d.th5+"</th>";
     (byCommodity[currentCrop]||[]).forEach(function(r){
       var tr=document.createElement("tr");
-      tr.innerHTML="<td>"+r.market+"</td><td>"+r.district+
+      tr.innerHTML="<td>"+marketLabel(r.market)+"</td><td>"+distLabel(r.district)+
         "</td><td class='QW4K2-highlight-row'>"+fmt(r.modal)+"</td>";
       tbody.appendChild(tr);
     });
@@ -362,14 +392,30 @@ function refreshLegend(){
   var isAll=(currentCrop===ALL);
   var head = isAll ? (lang==="hi"?"फसलों की संख्या":"No. of commodities")
                    : (lang==="hi"?"मंडी भाव (Rs./kg)":"Mandi price (Rs./kg)");
-  var hiTxt = isAll ? d.more : d.high;
-  var loTxt = isAll ? d.fewer : d.low;
   var none  = isAll ? d.nrec : d.norate;
+
+  var rampRows;
+  if(isAll && lastLo!==null && lastHi!==null){
+    // real district crop counts, not vague "fewer/more" labels — mirrors
+    // the 3-stop gradient in rampColor() (low/mid/high)
+    var mid=Math.round((lastLo+lastHi)/2);
+    var cropWord=function(n){ return lang==="hi" ? "फसलें" : pluralize(n,"crop","crops"); };
+    var loTxt=localizeNum(lastLo)+" "+cropWord(lastLo);
+    var midTxt=localizeNum(mid)+" "+cropWord(mid);
+    var hiTxt=localizeNum(lastHi)+"+ "+cropWord(lastHi);
+    rampRows=
+      "<div><span class='QW4K2-sw' style='background:rgb(0,102,0)'></span>"+hiTxt+"</div>"+
+      "<div><span class='QW4K2-sw' style='background:rgb(179,162,93)'></span>"+midTxt+"</div>"+
+      "<div><span class='QW4K2-sw' style='background:rgb(238,221,171)'></span>"+loTxt+"</div>";
+  } else {
+    rampRows=
+      "<div><span class='QW4K2-sw' style='background:rgb(0,102,0)'></span>"+d.high+"</div>"+
+      "<div><span class='QW4K2-sw' style='background:rgb(238,221,171)'></span>"+d.low+"</div>";
+  }
+
   document.getElementById("QW4K2-leg-body").innerHTML=
     "<div style='margin-bottom:3px'>"+head+"</div>"+
-    "<div><span class='QW4K2-sw' style='background:rgb(0,102,0)'></span>"+hiTxt+"</div>"+
-    "<div><span class='QW4K2-sw' style='background:rgb(179,162,93)'></span>&nbsp;</div>"+
-    "<div><span class='QW4K2-sw' style='background:rgb(238,221,171)'></span>"+loTxt+"</div>"+
+    rampRows+
     "<div><span class='QW4K2-sw' style='background:#f3f0e0'></span>"+none+"</div>";
 }
 var _origRender=render;
