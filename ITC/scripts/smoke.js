@@ -26,6 +26,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // ITC's own revenue line — gold, matching the "ITC's own metric is primary-colored"
     // convention already used for the stock-price line in stocks.js.
     const revenueColor = getColor('--color-primary');
+    const isMobile = window.innerWidth <= 768;
+    const cigaretteBarWidth = isMobile ? 12 : 22;
 
     // Data Streams
     const allTimelineYears = ['FY2016', 'FY2017', 'FY2018', 'FY2019', 'FY2020', 'FY2021', 'FY2024', 'FY2025'];
@@ -126,7 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 name: 'Cigarette Filter',
                 type: 'bar',
                 stack: 'cigarette',
-                barWidth: 22,
+                barWidth: cigaretteBarWidth,
                 data: filterData,
                 itemStyle: {
                     color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
@@ -205,7 +207,8 @@ document.addEventListener("DOMContentLoaded", function () {
         legend: {
             show: true,
             data: sharedLegendData,
-            right: '0%',
+            left: isMobile ? 'center' : undefined,
+            right: isMobile ? undefined : '0%',
             top: 'center',
             textStyle: { color: mutedColor, fontSize: 13 }
         },

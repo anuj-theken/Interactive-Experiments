@@ -29,10 +29,9 @@
 
 .QW4K5-chart-header {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
   margin-bottom: 20px;
 }
 
@@ -77,9 +76,4 @@
   .QW4K5-chart-frame { padding: 20px 12px; }
   .QW4K5-chart-container { padding: 16px; }
   #QW4K5-main-chart { height: 360px; }
-
-  .QW4K5-chart-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
 }

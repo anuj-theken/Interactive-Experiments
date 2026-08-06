@@ -71,11 +71,18 @@
   .QW4K7-chart-container { padding: 20px; }
   #QW4K7-main-chart { height: 460px; }
   .QW4K7-header-grid { grid-template-columns: 1fr; }
-  #QW4K7-custom-legend { width: 100%; justify-self: start; }
+  /* the desktop 3em/14px sizing assumes the legend sits beside the title on
+     one row — stacked under the subtitle here, that margin reads as a big
+     gap, and 14px is too short for the (possibly 2-line) legend text, which
+     was getting cut off since the chart canvas is sized to its container */
+  #QW4K7-custom-legend { width: 100%; justify-self: start; margin-top: 0.5em; height: 44px; }
 }
 
 @media (max-width: 768px) {
   .QW4K7-chart-frame { padding: 20px 12px; }
   .QW4K7-chart-container { padding: 16px; }
   #QW4K7-main-chart { height: 400px; }
+
+  .QW4K7-header-grid { justify-items: center; }
+  .QW4K7-title-group { text-align: center; }
 }

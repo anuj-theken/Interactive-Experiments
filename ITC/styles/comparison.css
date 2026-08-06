@@ -6,7 +6,7 @@
 
 .QW4K4-comparison-section {
   font-family: var(--font-body);
-  background: var(--color-bg);
+  background: transparent;
   color: var(--color-text);
 }
 
@@ -20,7 +20,7 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--color-bg);
+  background: transparent;
   overflow: hidden;
 }
 

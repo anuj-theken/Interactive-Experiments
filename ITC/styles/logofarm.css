@@ -15,7 +15,7 @@
   --field-border: #88582f;
   --field-outline: #895226;
 
-  background-color: var(--color-bg);
+  background-color: transparent;
   height: 700px;
   width: 100%;
   padding: 1.5rem;
@@ -64,7 +64,7 @@
   font-family: var(--font-body);
   font-size: var(--type-legend);
   font-weight: 600;
-  color: var(--color-muted);
+  color: var(--color-text);
 }
 
 .QW4K10-legend-badge {

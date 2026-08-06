@@ -3,7 +3,7 @@
 .QW4K8-timeline-section {
   width: 100%;
   padding: 60px 0;
-  background-color: var(--color-bg);
+  background-color: transparent;
   overflow: hidden;
 }
 

@@ -174,16 +174,6 @@
   box-sizing: border-box;
 }
 
-.QW4K12-header-tag {
-  font-family: var(--font-body);
-  font-size: var(--type-legend);
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--color-primary);
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-
 .QW4K12-chart-title {
   font-family: var(--font-display);
   font-size: var(--type-heading);

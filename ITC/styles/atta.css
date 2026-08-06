@@ -4,7 +4,7 @@
 
 .QW4K3-atta-section{
   font-family: var(--font-body);
-  background: var(--color-bg);
+  /*background: var(--color-bg);*/
   color: var(--color-text);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
