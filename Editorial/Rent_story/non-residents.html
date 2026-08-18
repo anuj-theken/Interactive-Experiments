@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bengaluru Rent Survey Dashboard</title>
+    <!-- Apache ECharts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-outer: #F2EFE6;
+            --container-bg: #E3DFD2;
+            --card-bg: #EAE6D9;
+            --card-border: #D5CFBD;
+            --text-dark: #1C2417;
+            --text-muted: #596152;
+            
+            /* Unified Sage/Olive Palette */
+            --c-1: #2D3A27;
+            --c-2: #4B5E3C;
+            --c-3: #768A5E;
+            --c-4: #A1B382;
+            --c-5: #C8D6AE;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            background-color: var(--bg-outer);
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        /* Encapsulated Main Container */
+        .dashboard-container {
+            width: 100%;
+            max-width: 1300px;
+            height: 92vh;
+            max-height: 920px;
+            background-color: var(--container-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow: hidden;
+        }
+
+        header {
+            text-align: left;
+            padding-bottom: 4px;
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            letter-spacing: -0.3px;
+            text-align: left;
+        }
+
+        header p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-align: left;
+            margin-top: 2px;
+        }
+
+        /* 2x2 Grid for Desktop */
+        .dashboard-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 16px;
+            min-height: 0;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            position: relative;
+            text-align: left;
+        }
+
+        .card-header {
+            margin-bottom: 8px;
+            text-align: left;
+        }
+
+        .card-title {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            line-height: 1.25;
+            text-align: left;
+        }
+
+        .card-subtitle {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-top: 3px;
+            text-align: left;
+        }
+
+        .chart-box {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+        }
+
+        .blue-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .blue-stack > div {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        /* --- RESPONSIVE MOBILE STACK --- */
+        @media (max-width: 868px) {
+            html, body {
+                height: auto;
+                overflow: auto;
+                padding: 10px;
+            }
+
+            .dashboard-container {
+                height: auto;
+                max-height: none;
+                overflow: visible;
+                padding: 16px;
+                border-radius: 16px;
+            }
+
+            .dashboard-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .card {
+                height: 380px; /* Fixed height per card on mobile stack */
+            }
+
+            .blue-stack {
+                height: 480px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SINGLE ENCAPSULATED CONTAINER -->
+    <div class="dashboard-container">
+        <header>
+            <h1>Bengaluru Rent Survey — Non-Resident Perspectives</h1>
+            <p>Data summary from respondents living outside Bengaluru</p>
+        </header>
+
+        <div class="dashboard-grid">
+            
+            <!-- TOP LEFT: Comparison Bar Graph -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Impact on Personal Choice vs. Advice to Others</div>
+                    <div class="card-subtitle">Said no to move/job in BLR vs. Told someone not to move</div>
+                </div>
+                <div id="chart-top-left" class="chart-box"></div>
+            </div>
+
+            <!-- TOP RIGHT: Stacked Bar Graph -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Frequency of Cost of Living Discussions</div>
+                    <div class="card-subtitle">How often does Bengaluru's high cost of living come up?</div>
+                </div>
+                <div id="chart-top-right" class="chart-box"></div>
+            </div>
+
+            <!-- BOTTOM LEFT: Dot Matrix with Explicit Legend -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Would Lower Rent Make You Consider Moving?</div>
+                    <div class="card-subtitle">Dot matrix representation (N = 69 non-residents)</div>
+                </div>
+                <div id="chart-bottom-left" class="chart-box"></div>
+            </div>
+
+            <!-- BOTTOM RIGHT: 2 Horizontal Bar Charts -->
+            <div class="card blue-stack">
+                <div>
+                    <div class="card-title">In your own city, is rent a big worry too?</div>
+                    <div id="chart-bottom-right-1" class="chart-box"></div>
+                </div>
+                <div>
+                    <div class="card-title" style="margin-top: 4px;">How do Bengaluru's rents compare to your city?</div>
+                    <div id="chart-bottom-right-2" class="chart-box"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const fontStyle = { fontFamily: 'Plus Jakarta Sans', fontWeight: 600, fontSize: 10, color: '#1C2417' };
+        const palette = ['#2D3A27', '#4B5E3C', '#768A5E', '#A1B382', '#C8D6AE'];
+
+        // --- 1. TOP LEFT: Comparison Bar Graph ---
+        const chartTopLeft = echarts.init(document.getElementById('chart-top-left'));
+        chartTopLeft.setOption({
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+            legend: { 
+                left: '0%', 
+                top: 0, 
+                orient: 'horizontal', 
+                textStyle: fontStyle, 
+                itemWidth: 10, 
+                itemHeight: 10 
+            },
+            grid: { left: '0%', right: '3%', bottom: '3%', top: '22%', containLabel: true },
+            xAxis: {
+                type: 'category',
+                data: ['Yes / Direct', 'Paused / Thought', 'No / Never', 'N/A / Encouraged'],
+                axisLabel: { fontSize: 9.5, fontWeight: 700, color: '#1C2417', align: 'center' },
+                axisLine: { lineStyle: { color: '#B5AF9E' } }
+            },
+            yAxis: { 
+                type: 'value', 
+                splitLine: { lineStyle: { type: 'dashed', color: 'rgba(0,0,0,0.08)' } },
+                axisLabel: { fontSize: 9 }
+            },
+            series: [
+                {
+                    name: 'Said No to Move/Job',
+                    type: 'bar',
+                    itemStyle: { color: palette[0], borderRadius: [4, 4, 0, 0] },
+                    data: [16, 18, 15, 19]
+                },
+                {
+                    name: 'Told Others Not to Move',
+                    type: 'bar',
+                    itemStyle: { color: palette[2], borderRadius: [4, 4, 0, 0] },
+                    data: [28, 15, 20, 7]
+                }
+            ]
+        });
+
+        // --- 2. TOP RIGHT: Stacked Bar Chart ---
+        const chartTopRight = echarts.init(document.getElementById('chart-top-right'));
+        chartTopRight.setOption({
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+            legend: { 
+                left: '0%', 
+                bottom: 0, 
+                orient: 'horizontal', 
+                textStyle: fontStyle, 
+                itemWidth: 10, 
+                itemHeight: 10 
+            },
+            grid: { left: '0%', right: '4%', bottom: '28%', top: '8%', containLabel: true },
+            xAxis: { 
+                type: 'value', 
+                splitLine: { lineStyle: { type: 'dashed', color: 'rgba(0,0,0,0.08)' } },
+                axisLabel: { fontSize: 9 }
+            },
+            yAxis: { 
+                type: 'category', 
+                data: ['Mentions'], 
+                axisTick: { show: false },
+                axisLabel: { fontSize: 10, fontWeight: 700, color: '#1C2417' }
+            },
+            series: [
+                { name: 'All the time', type: 'bar', stack: 'total', itemStyle: { color: palette[0] }, data: [20] },
+                { name: 'Fairly often', type: 'bar', stack: 'total', itemStyle: { color: palette[1] }, data: [35] },
+                { name: 'Once in a while', type: 'bar', stack: 'total', itemStyle: { color: palette[2] }, data: [8] },
+                { name: 'Rarely', type: 'bar', stack: 'total', itemStyle: { color: palette[3] }, data: [2] },
+                { name: 'I never hear about it', type: 'bar', stack: 'total', itemStyle: { color: palette[4] }, data: [3] }
+            ]
+        });
+
+        // --- 3. BOTTOM LEFT: Dot Matrix Chart with Explicit Legend ---
+        const chartBottomLeft = echarts.init(document.getElementById('chart-bottom-left'));
+        
+        const dotCategories = [
+            { name: 'Yes, main holding factor (4)', count: 4, color: palette[0] },
+            { name: 'Maybe, with other factors (31)', count: 31, color: palette[1] },
+            { name: 'No, rent is not why I stay away (25)', count: 25, color: palette[2] },
+            { name: 'Would never move there anyway (9)', count: 9, color: palette[4] }
+        ];
+
+        // Generate scatter points grouped by category
+        const seriesList = dotCategories.map((cat) => {
+            return {
+                name: cat.name,
+                type: 'scatter',
+                symbolSize: 13,
+                itemStyle: { color: cat.color },
+                data: []
+            };
+        });
+
+        let catIdx = 0;
+        let x = 0, y = 0;
+        const cols = 12;
+
+        dotCategories.forEach((cat, idx) => {
+            for (let i = 0; i < cat.count; i++) {
+                seriesList[idx].data.push([x, y]);
+                x++;
+                if (x >= cols) {
+                    x = 0;
+                    y++;
+                }
+            }
+        });
+
+        chartBottomLeft.setOption({
+            tooltip: {
+                formatter: function (params) {
+                    return `<b>Response:</b> ${params.seriesName}`;
+                }
+            },
+            legend: {
+                left: '0%',
+                bottom: 0,
+                orient: 'vertical',
+                textStyle: fontStyle,
+                itemWidth: 10,
+                itemHeight: 10,
+                itemGap: 6
+            },
+            grid: { left: '0%', right: '5%', bottom: '38%', top: '5%' },
+            xAxis: { show: false, min: -0.5, max: cols - 0.5 },
+            yAxis: { show: false, min: -0.5, max: y + 0.5, inverse: true },
+            series: seriesList
+        });
+
+        // --- 4. BOTTOM RIGHT (1): Horizontal Bar Chart ---
+        const chartBottomRight1 = echarts.init(document.getElementById('chart-bottom-right-1'));
+        chartBottomRight1.setOption({
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+            grid: { left: '0%', right: '10%', bottom: '5%', top: '5%', containLabel: true },
+            xAxis: { type: 'value', show: false },
+            yAxis: {
+                type: 'category',
+                data: ['Manageable/Affordable', 'Yes, just as bad', 'Yes, but not as bad'],
+                axisLabel: { fontSize: 9, fontWeight: 700, color: '#1C2417', align: 'right' },
+                axisLine: { show: false },
+                axisTick: { show: false }
+            },
+            series: [{
+                type: 'bar',
+                data: [23, 24, 25],
+                itemStyle: { color: palette[1], borderRadius: [0, 4, 4, 0] },
+                label: { show: true, position: 'right', fontSize: 9, fontWeight: 700, color: '#1C2417' }
+            }]
+        });
+
+        // --- 4. BOTTOM RIGHT (2): Horizontal Bar Chart ---
+        const chartBottomRight2 = echarts.init(document.getElementById('chart-bottom-right-2'));
+        chartBottomRight2.setOption({
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+            grid: { left: '0%', right: '10%', bottom: '5%', top: '5%', containLabel: true },
+            xAxis: { type: 'value', show: false },
+            yAxis: {
+                type: 'category',
+                data: ['Unknown/Left BLR', 'About the same', 'My city is worse', 'BLR is much worse'],
+                axisLabel: { fontSize: 9, fontWeight: 700, color: '#1C2417', align: 'right' },
+                axisLine: { show: false },
+                axisTick: { show: false }
+            },
+            series: [{
+                type: 'bar',
+                data: [9, 14, 17, 31],
+                itemStyle: { color: palette[2], borderRadius: [0, 4, 4, 0] },
+                label: { show: true, position: 'right', fontSize: 9, fontWeight: 700, color: '#1C2417' }
+            }]
+        });
+
+        // Window resize listener for dynamic responsiveness
+        window.addEventListener('resize', () => {
+            chartTopLeft.resize();
+            chartTopRight.resize();
+            chartBottomLeft.resize();
+            chartBottomRight1.resize();
+            chartBottomRight2.resize();
+        });
+    </script>
+</body>
+</html>

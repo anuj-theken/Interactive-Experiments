@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bengaluru Rent Survey Dashboard</title>
+  
+  <!-- Plus Jakarta Sans Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Apache ECharts -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+  <style>
+    /* 
+      COLOR SYSTEM (WARM SAND / TERRACOTTA PALETTE)
+      Neutral layer: Paper tones (bg-outer < container-bg < card-bg)
+      Data layer: 5-step sequential monochromatic ramp (Dark Terracotta -> Pale Terracotta)
+    */
+    :root {
+      /* Neutral / UI Layer */
+      --bg-outer: #f3efe9;
+      --container-bg: #f9f6f0;
+      --card-bg: #ffffff;
+      --border-color: rgba(60, 40, 30, 0.08);
+      --text-dark: #2c201a;
+      --text-muted: #786960;
+
+      /* Data Layer Palette Array: c1 (darkest) -> c5 (lightest) */
+      --c1: #6b2d18;
+      --c2: #99472a;
+      --c3: #c26946;
+      --c4: #e09170;
+      --c5: #f2beaa;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    }
+
+    /* 1. Overall Structure */
+    html, body {
+      height: 100%;
+      background-color: var(--bg-outer);
+      color: var(--text-dark);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    body {
+      padding: 16px;
+    }
+
+    .dashboard-container {
+      width: 100%;
+      max-width: 1300px;
+      height: 92vh;
+      max-height: 920px;
+      background-color: var(--container-bg);
+      border-radius: 24px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow: hidden;
+    }
+
+    /* Header Typography */
+    .dashboard-header {
+      text-align: left;
+    }
+
+    .dashboard-header h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--text-dark);
+      margin-bottom: 2px;
+    }
+
+    .dashboard-header p {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* Grid Layout: Left 2 Charts, Right 3 Charts */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr;
+      gap: 16px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .pies-row {
+      display: flex;
+      gap: 16px;
+      flex: 1;
+    }
+
+    /* Card Styling */
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      text-align: left;
+    }
+
+    .card h2 {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+      line-height: 1.25;
+    }
+
+    .card .subtitle {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .chart-box {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+
+    /* 2. Responsiveness (Mobile Breakpoint <= 868px) */
+    @media (max-width: 868px) {
+      html, body {
+        height: auto;
+        overflow: auto;
+      }
+
+      body {
+        padding: 8px;
+      }
+
+      .dashboard-container {
+        height: auto;
+        max-height: none;
+        overflow: visible;
+        border-radius: 16px;
+        padding: 16px;
+      }
+
+      .dashboard-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .left-column, .right-column, .pies-row {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .card {
+        height: 380px;
+        flex: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-container">
+    <header class="dashboard-header">
+      <h1>Bengaluru Rent & Homeownership Survey</h1>
+      <p>Owner perspectives on rent limits, historical rent increases, and market feasibility for young buyers</p>
+    </header>
+
+    <div class="dashboard-grid">
+      
+      <!-- LEFT COLUMN: 2 Separate Vertical Bar Charts -->
+      <div class="left-column">
+        <!-- Vertical Bar 1 -->
+        <div class="card">
+          <h2>Before you owned a home, did you rent in Bengaluru?</h2>
+          <div class="subtitle">Prior rental history of current home owners</div>
+          <div id="chart-rented-before" class="chart-box"></div>
+        </div>
+
+        <!-- Vertical Bar 2 -->
+        <div class="card">
+          <h2>How much did rising rent push you to buy a home?</h2>
+          <div class="subtitle">Impact of rent hikes on buying decision</div>
+          <div id="chart-pushed-buy" class="chart-box"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Stacked Bar (Top) + 2 Pie Charts (Bottom Row) -->
+      <div class="right-column">
+        <!-- Top Stacked Bar -->
+        <div class="card">
+          <h2>Do you think Bengaluru should put a limit on how much rent can go up?</h2>
+          <div class="subtitle">Support for rent control policies in the city</div>
+          <div id="chart-rent-limit" class="chart-box"></div>
+        </div>
+
+        <!-- Bottom Row (2 Pie Charts) -->
+        <div class="pies-row">
+          <div class="card">
+            <h2>Compared to what you once paid, how do today's rents look?</h2>
+            <div class="subtitle">Owner perception of current rental costs</div>
+            <div id="chart-today-rents" class="chart-box"></div>
+          </div>
+
+          <div class="card">
+            <h2>Do you think buying a home is still possible for young renters today?</h2>
+            <div class="subtitle">Market feasibility for new buyers</div>
+            <div id="chart-buying-possible" class="chart-box"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Palette variables matching CSS Data Ramp
+    const PALETTE = ['#6b2d18', '#99472a', '#c26946', '#e09170', '#f2beaa'];
+    const TEXT_DARK = '#2c201a';
+    const TEXT_MUTED = '#786960';
+    const BORDER_TONE = 'rgba(60, 40, 30, 0.08)';
+
+    // Global Font Settings for ECharts
+    const commonTextStyle = {
+      fontFamily: 'Plus Jakarta Sans, sans-serif',
+      fontSize: 10,
+      fontWeight: 600,
+      color: TEXT_MUTED
+    };
+
+    // --- CHART 1: Rented Before (Vertical Bar) ---
+    const chartRentedBefore = echarts.init(document.getElementById('chart-rented-before'));
+    chartRentedBefore.setOption({
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      legend: {
+        top: 0,
+        left: 0,
+        icon: 'rect',
+        itemWidth: 10,
+        itemHeight: 10,
+        textStyle: commonTextStyle,
+        data: ['Respondents']
+      },
+      grid: { left: '0%', right: '3%', bottom: '0%', top: '15%', containLabel: true },
+      xAxis: {
+        type: 'category',
+        data: ['Yes, many years', 'Yes, short time', 'Family property', 'Bought directly'],
+        axisLine: { lineStyle: { color: BORDER_TONE } },
+        axisTick: { show: false },
+        axisLabel: { ...commonTextStyle, interval: 0 }
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: { lineStyle: { type: 'dashed', color: BORDER_TONE } },
+        axisLabel: commonTextStyle
+      },
+      series: [{
+        name: 'Respondents',
+        type: 'bar',
+        barWidth: '36%',
+        data: [
+          { value: 54, itemStyle: { color: PALETTE[0] } },
+          { value: 17, itemStyle: { color: PALETTE[1] } },
+          { value: 11, itemStyle: { color: PALETTE[2] } },
+          { value: 2,  itemStyle: { color: PALETTE[3] } }
+        ],
+        itemStyle: { borderRadius: [4, 4, 0, 0] },
+        label: { show: true, position: 'top', ...commonTextStyle, color: TEXT_DARK }
+      }]
+    });
+
+    // --- CHART 2: Pushed to Buy (Vertical Bar) ---
+    const chartPushedBuy = echarts.init(document.getElementById('chart-pushed-buy'));
+    chartPushedBuy.setOption({
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      legend: {
+        top: 0,
+        left: 0,
+        icon: 'rect',
+        itemWidth: 10,
+        itemHeight: 10,
+        textStyle: commonTextStyle,
+        data: ['Respondents']
+      },
+      grid: { left: '0%', right: '3%', bottom: '0%', top: '15%', containLabel: true },
+      xAxis: {
+        type: 'category',
+        data: ['One of reasons', 'Other reasons', 'Tired of rent up', 'Did not rent'],
+        axisLine: { lineStyle: { color: BORDER_TONE } },
+        axisTick: { show: false },
+        axisLabel: { ...commonTextStyle, interval: 0 }
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: { lineStyle: { type: 'dashed', color: BORDER_TONE } },
+        axisLabel: commonTextStyle
+      },
+      series: [{
+        name: 'Respondents',
+        type: 'bar',
+        barWidth: '36%',
+        data: [
+          { value: 31, itemStyle: { color: PALETTE[0] } },
+          { value: 29, itemStyle: { color: PALETTE[1] } },
+          { value: 11, itemStyle: { color: PALETTE[2] } },
+          { value: 11, itemStyle: { color: PALETTE[3] } }
+        ],
+        itemStyle: { borderRadius: [4, 4, 0, 0] },
+        label: { show: true, position: 'top', ...commonTextStyle, color: TEXT_DARK }
+      }]
+    });
+
+    // --- CHART 3: Rent Limit (100% Horizontal Stacked Bar) ---
+    const chartRentLimit = echarts.init(document.getElementById('chart-rent-limit'));
+    chartRentLimit.setOption({
+      tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+      legend: {
+        top: 0,
+        left: 0,
+        icon: 'rect',
+        itemWidth: 10,
+        itemHeight: 10,
+        textStyle: commonTextStyle,
+        data: ['Strongly agree', 'Agree', 'Not sure', 'Disagree', 'Strongly disagree']
+      },
+      grid: { left: '0%', right: '0%', bottom: '15%', top: '25%', containLabel: true },
+      xAxis: { type: 'value', show: false },
+      yAxis: { type: 'category', data: ['Limit Rent'], show: false },
+      series: [
+        {
+          name: 'Strongly agree', type: 'bar', stack: 'total', data: [19],
+          itemStyle: { color: PALETTE[0], borderRadius: [4, 0, 0, 4] }
+        },
+        {
+          name: 'Agree', type: 'bar', stack: 'total', data: [22],
+          itemStyle: { color: PALETTE[1] }
+        },
+        {
+          name: 'Not sure', type: 'bar', stack: 'total', data: [8],
+          itemStyle: { color: PALETTE[2] }
+        },
+        {
+          name: 'Disagree', type: 'bar', stack: 'total', data: [16],
+          itemStyle: { color: PALETTE[3] }
+        },
+        {
+          name: 'Strongly disagree', type: 'bar', stack: 'total', data: [16],
+          itemStyle: { color: PALETTE[4], borderRadius: [0, 4, 4, 0] }
+        }
+      ]
+    });
+
+    // --- CHART 4: Today's Rents Look (Doughnut / Pie Chart) ---
+    const chartTodayRents = echarts.init(document.getElementById('chart-today-rents'));
+    chartTodayRents.setOption({
+      tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+      legend: {
+        top: 0,
+        left: 0,
+        orient: 'horizontal',
+        icon: 'rect',
+        itemWidth: 8,
+        itemHeight: 8,
+        textStyle: commonTextStyle
+      },
+      series: [{
+        name: 'Today Rents',
+        type: 'pie',
+        radius: ['38%', '65%'],
+        center: ['50%', '60%'],
+        avoidLabelOverlap: true,
+        label: { show: false },
+        data: [
+          { value: 35, name: 'Worse, manage', itemStyle: { color: PALETTE[0] } },
+          { value: 25, name: 'Cannot afford', itemStyle: { color: PALETTE[1] } },
+          { value: 11, name: 'About same', itemStyle: { color: PALETTE[2] } },
+          { value: 10, name: 'Do not know', itemStyle: { color: PALETTE[3] } }
+        ]
+      }]
+    });
+
+    // --- CHART 5: Buying Possible (Doughnut / Pie Chart) ---
+    const chartBuyingPossible = echarts.init(document.getElementById('chart-buying-possible'));
+    chartBuyingPossible.setOption({
+      tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+      legend: {
+        top: 0,
+        left: 0,
+        orient: 'horizontal',
+        icon: 'rect',
+        itemWidth: 8,
+        itemHeight: 8,
+        textStyle: commonTextStyle
+      },
+      series: [{
+        name: 'Buying Possible',
+        type: 'pie',
+        radius: ['38%', '65%'],
+        center: ['50%', '60%'],
+        avoidLabelOverlap: true,
+        label: { show: false },
+        data: [
+          { value: 34, name: 'Hard, possible', itemStyle: { color: PALETTE[0] } },
+          { value: 17, name: 'Impossible now', itemStyle: { color: PALETTE[1] } },
+          { value: 15, name: 'Family help', itemStyle: { color: PALETTE[2] } },
+          { value: 15, name: 'If plan/save', itemStyle: { color: PALETTE[3] } },
+          { value: 2,  name: 'No chance', itemStyle: { color: PALETTE[4] } }
+        ]
+      }]
+    });
+
+    // Handle viewport resize for responsiveness
+    window.addEventListener('resize', () => {
+      chartRentedBefore.resize();
+      chartPushedBuy.resize();
+      chartRentLimit.resize();
+      chartTodayRents.resize();
+      chartBuyingPossible.resize();
+    });
+  </script>
+</body>
+</html>

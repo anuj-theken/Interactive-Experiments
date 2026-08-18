@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bengaluru Rent Survey Dashboard</title>
+
+  <!-- Plus Jakarta Sans Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Apache ECharts -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+  <style>
+    /*
+      COLOR SYSTEM
+      Neutral page layer shared by both tabs: --bg-outer
+      Each dashboard theme sets container-bg == card-bg (so cards read as
+      part of the same paper as the dashboard, not a separate layer),
+      plus its own 5-step sequential data ramp.
+    */
+    :root {
+      --bg-outer: #f1eee5;
+      --page-text-dark: #262620;
+      --page-text-muted: #6b6a5f;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    }
+
+    html, body {
+      min-height: 100%;
+      background-color: var(--bg-outer);
+      color: var(--page-text-dark);
+    }
+
+    body {
+      padding: 28px 16px;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1300px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ---------------- Page-level header (shared by both dashboards) ---------------- */
+    .page-header {
+      text-align: left;
+      padding: 0 4px;
+    }
+
+    .page-header h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--page-text-dark);
+      margin-bottom: 4px;
+    }
+
+    .page-header p {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--page-text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* Tabs double as a legend for the two respondent categories */
+    .tabs {
+      display: flex;
+      gap: 10px;
+    }
+
+    .tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(38, 38, 32, 0.12);
+      background: #ffffff;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.82rem;
+      color: var(--page-text-muted);
+      cursor: pointer;
+      transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+    }
+
+    .tab-btn .tab-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .tab-btn:hover {
+      border-color: rgba(38, 38, 32, 0.28);
+    }
+
+    .tab-btn.active {
+      color: #ffffff;
+      border-color: transparent;
+    }
+
+    .tab-btn[data-tab="homeowner"].active { background-color: #6b2d18; }
+    .tab-btn[data-tab="nonresident"].active { background-color: #2D3A27; }
+
+    /* ---------------- Dashboard container (per-theme) ---------------- */
+    .dashboard-container {
+      width: 100%;
+      height: 80vh;
+      max-height: 820px;
+      background-color: var(--container-bg);
+      border-radius: 24px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      padding: 24px;
+      flex-direction: column;
+      gap: 16px;
+      overflow: hidden;
+    }
+
+    /* Homeowner theme — warm sand / terracotta */
+    .dashboard-container.theme-homeowner {
+      --container-bg: #f7efe7;
+      --card-bg: #f7efe7;
+      --border-color: rgba(60, 40, 30, 0.10);
+      --text-dark: #2c201a;
+      --text-muted: #786960;
+      --c1: #6b2d18;
+      --c2: #99472a;
+      --c3: #c26946;
+      --c4: #e09170;
+      --c5: #f2beaa;
+    }
+
+    /* Non-resident theme — sage / olive */
+    .dashboard-container.theme-nonresident {
+      --container-bg: #e7e4d6;
+      --card-bg: #e7e4d6;
+      --border-color: rgba(30, 40, 20, 0.14);
+      --text-dark: #1c2417;
+      --text-muted: #596152;
+      --c1: #2D3A27;
+      --c2: #4B5E3C;
+      --c3: #768A5E;
+      --c4: #A1B382;
+      --c5: #C8D6AE;
+    }
+
+    /* Grid Layout: Left 2 Charts, Right 3 Charts (homeowner tab) */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr;
+      gap: 16px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* 2x2 grid (non-resident tab) */
+    .dashboard-grid.grid-2x2 {
+      grid-template-rows: 1fr 1fr;
+    }
+
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .pies-row {
+      display: flex;
+      gap: 16px;
+      flex: 1;
+    }
+
+    /* Card Styling */
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      text-align: left;
+      position: relative;
+    }
+
+    .card h2, .card .card-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+      line-height: 1.25;
+    }
+
+    .card .subtitle, .card .card-subtitle {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .chart-box {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .stack-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .stack-wrap > div {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    /* 2. Responsiveness (Mobile Breakpoint <= 868px) */
+    @media (max-width: 868px) {
+      body {
+        padding: 16px 8px;
+      }
+
+      .dashboard-container {
+        height: auto;
+        max-height: none;
+        overflow: visible;
+        border-radius: 16px;
+        padding: 16px;
+      }
+
+      .dashboard-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .left-column, .right-column, .pies-row {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .card {
+        height: 380px;
+        flex: none;
+      }
+
+      .stack-wrap {
+        height: 480px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page">
+
+    <header class="page-header">
+      <h1>Bengaluru Rent Survey Dashboard</h1>
+      <p id="dynamic-subtitle">Owner perspectives on rent limits, historical rent increases, and market feasibility for young buyers</p>
+
+      <nav class="tabs" role="tablist" aria-label="Respondent category">
+        <button class="tab-btn active" data-tab="homeowner" role="tab" aria-selected="true">
+          <span class="tab-swatch" style="background:#6b2d18"></span>
+          Homeowners
+        </button>
+        <button class="tab-btn" data-tab="nonresident" role="tab" aria-selected="false">
+          <span class="tab-swatch" style="background:#2D3A27"></span>
+          Non-Residents
+        </button>
+      </nav>
+    </header>
+
+    <!-- HOMEOWNER DASHBOARD -->
+    <div class="dashboard-container theme-homeowner" id="panel-homeowner" style="display:flex;">
+      <div class="dashboard-grid">
+
+        <!-- LEFT COLUMN: 2 Separate Vertical Bar Charts -->
+        <div class="left-column">
+          <div class="card">
+            <h2>Before you owned a home, did you rent in Bengaluru?</h2>
+            <div class="subtitle">Prior rental history of current home owners</div>
+            <div id="ho-chart-rented-before" class="chart-box"></div>
+          </div>
+
+          <div class="card">
+            <h2>How much did rising rent push you to buy a home?</h2>
+            <div class="subtitle">Impact of rent hikes on buying decision</div>
+            <div id="ho-chart-pushed-buy" class="chart-box"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Stacked Bar (Top) + 2 Pie Charts (Bottom Row) -->
+        <div class="right-column">
+          <div class="card">
+            <h2>Do you think Bengaluru should put a limit on how much rent can go up?</h2>
+            <div class="subtitle">Support for rent control policies in the city</div>
+            <div id="ho-chart-rent-limit" class="chart-box"></div>
+          </div>
+
+          <div class="pies-row">
+            <div class="card">
+              <h2>Compared to what you once paid, how do today's rents look?</h2>
+              <div class="subtitle">Owner perception of current rental costs</div>
+              <div id="ho-chart-today-rents" class="chart-box"></div>
+            </div>
+
+            <div class="card">
+              <h2>Do you think buying a home is still possible for young renters today?</h2>
+              <div class="subtitle">Market feasibility for new buyers</div>
+              <div id="ho-chart-buying-possible" class="chart-box"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- NON-RESIDENT DASHBOARD -->
+    <div class="dashboard-container theme-nonresident" id="panel-nonresident" style="display:none;">
+      <div class="dashboard-grid grid-2x2">
+
+        <!-- TOP LEFT: Comparison Bar Graph -->
+        <div class="card">
+          <div class="card-title">Impact on Personal Choice vs. Advice to Others</div>
+          <div class="card-subtitle">Said no to move/job in BLR vs. Told someone not to move</div>
+          <div id="nr-chart-top-left" class="chart-box"></div>
+        </div>
+
+        <!-- TOP RIGHT: Stacked Bar Graph -->
+        <div class="card">
+          <div class="card-title">Frequency of Cost of Living Discussions</div>
+          <div class="card-subtitle">How often does Bengaluru's high cost of living come up?</div>
+          <div id="nr-chart-top-right" class="chart-box"></div>
+        </div>
+
+        <!-- BOTTOM LEFT: Dot Matrix with Explicit Legend -->
+        <div class="card">
+          <div class="card-title">Would Lower Rent Make You Consider Moving?</div>
+          <div class="card-subtitle">Dot matrix representation (N = 69 non-residents)</div>
+          <div id="nr-chart-bottom-left" class="chart-box"></div>
+        </div>
+
+        <!-- BOTTOM RIGHT: 2 Horizontal Bar Charts -->
+        <div class="card stack-wrap">
+          <div>
+            <div class="card-title">In your own city, is rent a big worry too?</div>
+            <div id="nr-chart-bottom-right-1" class="chart-box"></div>
+          </div>
+          <div>
+            <div class="card-title" style="margin-top: 4px;">How do Bengaluru's rents compare to your city?</div>
+            <div id="nr-chart-bottom-right-2" class="chart-box"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const subtitles = {
+      homeowner: "Owner perspectives on rent limits, historical rent increases, and market feasibility for young buyers",
+      nonresident: "Data summary from respondents living outside Bengaluru who weighed Bengaluru's rents against a move or a job here"
+    };
+
+    const homeownerCharts = {};
+    const nonresidentCharts = {};
+    const initialized = { homeowner: false, nonresident: false };
+
+    function initHomeownerCharts() {
+      const PALETTE = ['#6b2d18', '#99472a', '#c26946', '#e09170', '#f2beaa'];
+      const TEXT_DARK = '#2c201a';
+      const TEXT_MUTED = '#786960';
+      const BORDER_TONE = 'rgba(60, 40, 30, 0.08)';
+
+      const commonTextStyle = {
+        fontFamily: 'Plus Jakarta Sans, sans-serif',
+        fontSize: 10,
+        fontWeight: 600,
+        color: TEXT_MUTED
+      };
+
+      homeownerCharts.rentedBefore = echarts.init(document.getElementById('ho-chart-rented-before'));
+      homeownerCharts.rentedBefore.setOption({
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        legend: {
+          top: 0, left: 0, icon: 'rect', itemWidth: 10, itemHeight: 10,
+          textStyle: commonTextStyle, data: ['Respondents']
+        },
+        grid: { left: '0%', right: '3%', bottom: '0%', top: '15%', containLabel: true },
+        xAxis: {
+          type: 'category',
+          data: ['Yes, many years', 'Yes, short time', 'Family property', 'Bought directly'],
+          axisLine: { lineStyle: { color: BORDER_TONE } },
+          axisTick: { show: false },
+          axisLabel: { ...commonTextStyle, interval: 0 }
+        },
+        yAxis: {
+          type: 'value', axisLine: { show: false }, axisTick: { show: false },
+          splitLine: { lineStyle: { type: 'dashed', color: BORDER_TONE } },
+          axisLabel: commonTextStyle
+        },
+        series: [{
+          name: 'Respondents', type: 'bar', barWidth: '36%',
+          data: [
+            { value: 54, itemStyle: { color: PALETTE[0] } },
+            { value: 17, itemStyle: { color: PALETTE[1] } },
+            { value: 11, itemStyle: { color: PALETTE[2] } },
+            { value: 2, itemStyle: { color: PALETTE[3] } }
+          ],
+          itemStyle: { borderRadius: [4, 4, 0, 0] },
+          label: { show: true, position: 'top', ...commonTextStyle, color: TEXT_DARK }
+        }]
+      });
+
+      homeownerCharts.pushedBuy = echarts.init(document.getElementById('ho-chart-pushed-buy'));
+      homeownerCharts.pushedBuy.setOption({
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        legend: {
+          top: 0, left: 0, icon: 'rect', itemWidth: 10, itemHeight: 10,
+          textStyle: commonTextStyle, data: ['Respondents']
+        },
+        grid: { left: '0%', right: '3%', bottom: '0%', top: '15%', containLabel: true },
+        xAxis: {
+          type: 'category',
+          data: ['One of reasons', 'Other reasons', 'Tired of rent up', 'Did not rent'],
+          axisLine: { lineStyle: { color: BORDER_TONE } },
+          axisTick: { show: false },
+          axisLabel: { ...commonTextStyle, interval: 0 }
+        },
+        yAxis: {
+          type: 'value', axisLine: { show: false }, axisTick: { show: false },
+          splitLine: { lineStyle: { type: 'dashed', color: BORDER_TONE } },
+          axisLabel: commonTextStyle
+        },
+        series: [{
+          name: 'Respondents', type: 'bar', barWidth: '36%',
+          data: [
+            { value: 31, itemStyle: { color: PALETTE[0] } },
+            { value: 29, itemStyle: { color: PALETTE[1] } },
+            { value: 11, itemStyle: { color: PALETTE[2] } },
+            { value: 11, itemStyle: { color: PALETTE[3] } }
+          ],
+          itemStyle: { borderRadius: [4, 4, 0, 0] },
+          label: { show: true, position: 'top', ...commonTextStyle, color: TEXT_DARK }
+        }]
+      });
+
+      homeownerCharts.rentLimit = echarts.init(document.getElementById('ho-chart-rent-limit'));
+      homeownerCharts.rentLimit.setOption({
+        tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+        legend: {
+          top: 0, left: 0, icon: 'rect', itemWidth: 10, itemHeight: 10,
+          textStyle: commonTextStyle,
+          data: ['Strongly agree', 'Agree', 'Not sure', 'Disagree', 'Strongly disagree']
+        },
+        grid: { left: '0%', right: '0%', bottom: '15%', top: '25%', containLabel: true },
+        xAxis: { type: 'value', show: false },
+        yAxis: { type: 'category', data: ['Limit Rent'], show: false },
+        series: [
+          { name: 'Strongly agree', type: 'bar', stack: 'total', data: [19], itemStyle: { color: PALETTE[0], borderRadius: [4, 0, 0, 4] } },
+          { name: 'Agree', type: 'bar', stack: 'total', data: [22], itemStyle: { color: PALETTE[1] } },
+          { name: 'Not sure', type: 'bar', stack: 'total', data: [8], itemStyle: { color: PALETTE[2] } },
+          { name: 'Disagree', type: 'bar', stack: 'total', data: [16], itemStyle: { color: PALETTE[3] } },
+          { name: 'Strongly disagree', type: 'bar', stack: 'total', data: [16], itemStyle: { color: PALETTE[4], borderRadius: [0, 4, 4, 0] } }
+        ]
+      });
+
+      homeownerCharts.todayRents = echarts.init(document.getElementById('ho-chart-today-rents'));
+      homeownerCharts.todayRents.setOption({
+        tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+        legend: { top: 0, left: 0, orient: 'horizontal', icon: 'rect', itemWidth: 8, itemHeight: 8, textStyle: commonTextStyle },
+        series: [{
+          name: 'Today Rents', type: 'pie', radius: ['38%', '65%'], center: ['50%', '60%'],
+          avoidLabelOverlap: true, label: { show: false },
+          data: [
+            { value: 35, name: 'Worse, manage', itemStyle: { color: PALETTE[0] } },
+            { value: 25, name: 'Cannot afford', itemStyle: { color: PALETTE[1] } },
+            { value: 11, name: 'About same', itemStyle: { color: PALETTE[2] } },
+            { value: 10, name: 'Do not know', itemStyle: { color: PALETTE[3] } }
+          ]
+        }]
+      });
+
+      homeownerCharts.buyingPossible = echarts.init(document.getElementById('ho-chart-buying-possible'));
+      homeownerCharts.buyingPossible.setOption({
+        tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+        legend: { top: 0, left: 0, orient: 'horizontal', icon: 'rect', itemWidth: 8, itemHeight: 8, textStyle: commonTextStyle },
+        series: [{
+          name: 'Buying Possible', type: 'pie', radius: ['38%', '65%'], center: ['50%', '60%'],
+          avoidLabelOverlap: true, label: { show: false },
+          data: [
+            { value: 34, name: 'Hard, possible', itemStyle: { color: PALETTE[0] } },
+            { value: 17, name: 'Impossible now', itemStyle: { color: PALETTE[1] } },
+            { value: 15, name: 'Family help', itemStyle: { color: PALETTE[2] } },
+            { value: 15, name: 'If plan/save', itemStyle: { color: PALETTE[3] } },
+            { value: 2, name: 'No chance', itemStyle: { color: PALETTE[4] } }
+          ]
+        }]
+      });
+    }
+
+    function initNonresidentCharts() {
+      const fontStyle = { fontFamily: 'Plus Jakarta Sans', fontWeight: 600, fontSize: 10, color: '#1C2417' };
+      const palette = ['#2D3A27', '#4B5E3C', '#768A5E', '#A1B382', '#C8D6AE'];
+
+      nonresidentCharts.topLeft = echarts.init(document.getElementById('nr-chart-top-left'));
+      nonresidentCharts.topLeft.setOption({
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        legend: { left: '0%', top: 0, orient: 'horizontal', textStyle: fontStyle, itemWidth: 10, itemHeight: 10 },
+        grid: { left: '0%', right: '3%', bottom: '3%', top: '22%', containLabel: true },
+        xAxis: {
+          type: 'category',
+          data: ['Yes / Direct', 'Paused / Thought', 'No / Never', 'N/A / Encouraged'],
+          axisLabel: { fontSize: 9.5, fontWeight: 700, color: '#1C2417', align: 'center' },
+          axisLine: { lineStyle: { color: '#B5AF9E' } }
+        },
+        yAxis: { type: 'value', splitLine: { lineStyle: { type: 'dashed', color: 'rgba(0,0,0,0.08)' } }, axisLabel: { fontSize: 9 } },
+        series: [
+          { name: 'Said No to Move/Job', type: 'bar', itemStyle: { color: palette[0], borderRadius: [4, 4, 0, 0] }, data: [16, 18, 15, 19] },
+          { name: 'Told Others Not to Move', type: 'bar', itemStyle: { color: palette[2], borderRadius: [4, 4, 0, 0] }, data: [28, 15, 20, 7] }
+        ]
+      });
+
+      nonresidentCharts.topRight = echarts.init(document.getElementById('nr-chart-top-right'));
+      nonresidentCharts.topRight.setOption({
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        legend: { left: '0%', bottom: 0, orient: 'horizontal', textStyle: fontStyle, itemWidth: 10, itemHeight: 10 },
+        grid: { left: '0%', right: '4%', bottom: '28%', top: '8%', containLabel: true },
+        xAxis: { type: 'value', splitLine: { lineStyle: { type: 'dashed', color: 'rgba(0,0,0,0.08)' } }, axisLabel: { fontSize: 9 } },
+        yAxis: { type: 'category', data: ['Mentions'], axisTick: { show: false }, axisLabel: { fontSize: 10, fontWeight: 700, color: '#1C2417' } },
+        series: [
+          { name: 'All the time', type: 'bar', stack: 'total', itemStyle: { color: palette[0] }, data: [20] },
+          { name: 'Fairly often', type: 'bar', stack: 'total', itemStyle: { color: palette[1] }, data: [35] },
+          { name: 'Once in a while', type: 'bar', stack: 'total', itemStyle: { color: palette[2] }, data: [8] },
+          { name: 'Rarely', type: 'bar', stack: 'total', itemStyle: { color: palette[3] }, data: [2] },
+          { name: 'I never hear about it', type: 'bar', stack: 'total', itemStyle: { color: palette[4] }, data: [3] }
+        ]
+      });
+
+      nonresidentCharts.bottomLeft = echarts.init(document.getElementById('nr-chart-bottom-left'));
+
+      const dotCategories = [
+        { name: 'Yes, main holding factor (4)', count: 4, color: palette[0] },
+        { name: 'Maybe, with other factors (31)', count: 31, color: palette[1] },
+        { name: 'No, rent is not why I stay away (25)', count: 25, color: palette[2] },
+        { name: 'Would never move there anyway (9)', count: 9, color: palette[4] }
+      ];
+
+      const seriesList = dotCategories.map((cat) => ({
+        name: cat.name, type: 'scatter', symbolSize: 13, itemStyle: { color: cat.color }, data: []
+      }));
+
+      let x = 0, y = 0;
+      const cols = 12;
+      dotCategories.forEach((cat, idx) => {
+        for (let i = 0; i < cat.count; i++) {
+          seriesList[idx].data.push([x, y]);
+          x++;
+          if (x >= cols) { x = 0; y++; }
+        }
+      });
+
+      nonresidentCharts.bottomLeft.setOption({
+        tooltip: { formatter: (params) => `<b>Response:</b> ${params.seriesName}` },
+        legend: { left: '0%', bottom: 0, orient: 'vertical', textStyle: fontStyle, itemWidth: 10, itemHeight: 10, itemGap: 6 },
+        grid: { left: '0%', right: '5%', bottom: '38%', top: '5%' },
+        xAxis: { show: false, min: -0.5, max: cols - 0.5 },
+        yAxis: { show: false, min: -0.5, max: y + 0.5, inverse: true },
+        series: seriesList
+      });
+
+      nonresidentCharts.bottomRight1 = echarts.init(document.getElementById('nr-chart-bottom-right-1'));
+      nonresidentCharts.bottomRight1.setOption({
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        grid: { left: '0%', right: '10%', bottom: '5%', top: '5%', containLabel: true },
+        xAxis: { type: 'value', show: false },
+        yAxis: {
+          type: 'category',
+          data: ['Manageable/Affordable', 'Yes, just as bad', 'Yes, but not as bad'],
+          axisLabel: { fontSize: 9, fontWeight: 700, color: '#1C2417', align: 'right' },
+          axisLine: { show: false }, axisTick: { show: false }
+        },
+        series: [{
+          type: 'bar', data: [23, 24, 25], itemStyle: { color: palette[1], borderRadius: [0, 4, 4, 0] },
+          label: { show: true, position: 'right', fontSize: 9, fontWeight: 700, color: '#1C2417' }
+        }]
+      });
+
+      nonresidentCharts.bottomRight2 = echarts.init(document.getElementById('nr-chart-bottom-right-2'));
+      nonresidentCharts.bottomRight2.setOption({
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        grid: { left: '0%', right: '10%', bottom: '5%', top: '5%', containLabel: true },
+        xAxis: { type: 'value', show: false },
+        yAxis: {
+          type: 'category',
+          data: ['Unknown/Left BLR', 'About the same', 'My city is worse', 'BLR is much worse'],
+          axisLabel: { fontSize: 9, fontWeight: 700, color: '#1C2417', align: 'right' },
+          axisLine: { show: false }, axisTick: { show: false }
+        },
+        series: [{
+          type: 'bar', data: [9, 14, 17, 31], itemStyle: { color: palette[2], borderRadius: [0, 4, 4, 0] },
+          label: { show: true, position: 'right', fontSize: 9, fontWeight: 700, color: '#1C2417' }
+        }]
+      });
+    }
+
+    function resizeAll(charts) {
+      Object.values(charts).forEach(c => c && c.resize());
+    }
+
+    function showTab(tab) {
+      document.getElementById('panel-homeowner').style.display = tab === 'homeowner' ? 'flex' : 'none';
+      document.getElementById('panel-nonresident').style.display = tab === 'nonresident' ? 'flex' : 'none';
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        const isActive = btn.dataset.tab === tab;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', String(isActive));
+      });
+
+      document.getElementById('dynamic-subtitle').textContent = subtitles[tab];
+
+      if (tab === 'homeowner' && !initialized.homeowner) {
+        initHomeownerCharts();
+        initialized.homeowner = true;
+      }
+      if (tab === 'nonresident' && !initialized.nonresident) {
+        initNonresidentCharts();
+        initialized.nonresident = true;
+      }
+
+      requestAnimationFrame(() => {
+        resizeAll(tab === 'homeowner' ? homeownerCharts : nonresidentCharts);
+      });
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => showTab(btn.dataset.tab));
+    });
+
+    showTab('homeowner');
+
+    window.addEventListener('resize', () => {
+      resizeAll(homeownerCharts);
+      resizeAll(nonresidentCharts);
+    });
+  </script>
+</body>
+</html>
