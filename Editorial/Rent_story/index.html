@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bengaluru Rent Survey Dashboard</title>
+
+  <!-- Apache ECharts (used by all 5 dashboards) -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+  <!-- Leaflet (used by the Overview and Landlord dashboards' maps) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Combined dashboard stylesheet: layout skeleton, card system, 5 themes,
+       and @font-face declarations for the local Jazmin Alt / GT America
+       font files (JazminAlt-Bold.otf, GT-America-Standard-Light.ttf,
+       GT-America-Standard-Black.ttf) sitting next to this file. -->
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+
+  <div class="page">
+
+    <!-- ======================================================================
+         PAGE HEADER
+         Title + subtitle on the left; folder tabs on the right, bottom-
+         aligned so their right edge lines up with the dashboard-container's
+         right edge below (both share the page's max-width). Tabs are styled
+         after tabs.png: colored flaps attached to the top edge of the
+         "sheet" below them (the active .dashboard-container) — see
+         css/dashboard.css section 2 for how the attach illusion works.
+         Tab order is the literal display order — Overview, Tenants,
+         Landlords, Homeowners, Non-Residents. Each tab's flap color is a
+         mid-tone pulled from that dashboard's own theme ramp, not the full
+         chart palette, to keep it dusty/muted like the reference.
+         ====================================================================== -->
+    <header class="page-header">
+      <div class="title-block">
+        <h1>Bengaluru Rent Survey Dashboard</h1>
+        <p id="dynamic-subtitle">An analysis of tenant perspectives, rent caps, and demographics across Bengaluru</p>
+      </div>
+
+      <nav class="tabs-row" role="tablist" aria-label="Respondent category">
+        <button class="tab-btn active" data-tab="overview" role="tab" aria-selected="true">Overview</button>
+        <button class="tab-btn" data-tab="tenant" role="tab" aria-selected="false">Tenants</button>
+        <button class="tab-btn" data-tab="landlord" role="tab" aria-selected="false">Landlords</button>
+        <button class="tab-btn" data-tab="homeowner" role="tab" aria-selected="false">Homeowners</button>
+        <button class="tab-btn" data-tab="nonresident" role="tab" aria-selected="false">Non-Residents</button>
+      </nav>
+    </header>
+
+    <!-- ======================================================================
+         OVERVIEW DASHBOARD PANEL  (id: panel-overview, theme: theme-overview)
+         Default/first tab. Chart ids prefixed `ov-`. Charts + map defined in
+         js/overview.js. Unlike the 4 respondent-category tabs, this one uses
+         its own 3-column x 2-row grid (.dashboard-grid.overview-grid, see
+         css/dashboard.css section 4) — a KPI summary + featured stacked bar
+         on top, map + 2 demographic pies on the bottom — since it's a
+         cross-cutting summary rather than a per-category chart set.
+         ====================================================================== -->
+    <div class="dashboard-container theme-overview" id="panel-overview" style="display:flex;">
+      <div class="dashboard-grid overview-grid">
+
+        <!-- TOP LEFT: KPI summary panel -->
+        <div class="card span-col-1">
+          <div class="card-title">Survey Submissions Breakdown</div>
+          <div class="card-subtitle">Exact counts from raw survey response data</div>
+          <div class="kpi-wrapper">
+
+            <div class="kpi-main-row">
+              <div class="kpi-main-value">621</div>
+              <div class="kpi-main-meta">
+                <div class="kpi-main-title">
+                  <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                  Total Survey Submissions
+                </div>
+              </div>
+            </div>
+
+            <div class="kpi-sub-row">
+              <div class="kpi-sub-item">
+                <div class="kpi-sub-header">
+                  <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                  Tenants
+                </div>
+                <div class="kpi-sub-value">373</div>
+                <div class="kpi-sub-label">Pay rent</div>
+              </div>
+
+              <div class="kpi-sub-item">
+                <div class="kpi-sub-header">
+                  <svg viewBox="0 0 24 24"><path d="M12 3L2 12h3v8h14v-8h3L12 3zm1 15h-2v-2h2v2zm0-4h-2V9h2v5z"/></svg>
+                  Owners
+                </div>
+                <div class="kpi-sub-value">85</div>
+                <div class="kpi-sub-label">Own home</div>
+              </div>
+
+              <div class="kpi-sub-item">
+                <div class="kpi-sub-header">
+                  <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                  Landlords
+                </div>
+                <div class="kpi-sub-value">58</div>
+                <div class="kpi-sub-label">Rent out</div>
+              </div>
+
+              <div class="kpi-sub-item">
+                <div class="kpi-sub-header">
+                  <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                  Non-Res.
+                </div>
+                <div class="kpi-sub-value">105</div>
+                <div class="kpi-sub-label">Outside BLR</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- TOP RIGHT (spans 2 cols): 100% stacked bar, one row per respondent category -->
+        <div class="card stat-bar-card span-col-2">
+          <div class="card-title">Do you think Bengaluru should put a limit on rent hikes?</div>
+          <div class="card-subtitle">100% normalized proportions by resident category</div>
+          <div id="ov-chart-bar" class="chart-box"></div>
+        </div>
+
+        <!-- BOTTOM LEFT: regional distribution map -->
+        <div class="card span-col-1">
+          <div class="card-title">Tenant &amp; Landlord Regional Distribution</div>
+          <div class="card-subtitle">Tenant locations and landlord rental areas only</div>
+          <div class="chart-box">
+            <div id="ov-map"></div>
+          </div>
+        </div>
+
+        <!-- BOTTOM MIDDLE: age demographics pie. pie-fit-card sizes the card to
+             its content's actual height (see css/dashboard.css section 4) so
+             any leftover row height shows as empty space in the grid cell
+             below the card, not as whitespace inside it. -->
+        <div class="card pie-fit-card">
+          <div class="card-title">Age Demographics</div>
+          <div class="card-subtitle">Respondent distribution by age group</div>
+          <div id="ov-pie-age" class="chart-box"></div>
+        </div>
+
+        <!-- BOTTOM RIGHT: career position pie -->
+        <div class="card pie-fit-card">
+          <div class="card-title">Career Position</div>
+          <div class="card-subtitle">Respondent distribution by employment tier</div>
+          <div id="ov-pie-career" class="chart-box"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         HOMEOWNER DASHBOARD PANEL  (id: panel-homeowner, theme: theme-homeowner)
+         Chart ids prefixed `ho-`. Charts defined in js/homeowner.js.
+         ====================================================================== -->
+    <div class="dashboard-container theme-homeowner" id="panel-homeowner" style="display:none;">
+      <div class="dashboard-grid">
+
+        <!-- LEFT COLUMN: 2 stacked vertical bar charts -->
+        <div class="left-column">
+          <div class="card">
+            <h2>Before you owned a home, did you rent in Bengaluru?</h2>
+            <div class="subtitle">Prior rental history of current home owners</div>
+            <div id="ho-chart-rented-before" class="chart-box"></div>
+          </div>
+
+          <div class="card">
+            <h2>How much did rising rent push you to buy a home?</h2>
+            <div class="subtitle">Impact of rent hikes on buying decision</div>
+            <div id="ho-chart-pushed-buy" class="chart-box"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: stacked bar (top) + 2 pie charts (pies-row) -->
+        <div class="right-column">
+          <div class="card stat-bar-card">
+            <h2>Do you think Bengaluru should put a limit on how much rent can go up?</h2>
+            <div class="subtitle">Support for rent control policies in the city</div>
+            <div id="ho-chart-rent-limit" class="chart-box"></div>
+          </div>
+
+          <div class="pies-row">
+            <div class="card">
+              <h2>Compared to what you once paid, how do today's rents look?</h2>
+              <div class="subtitle">Owner perception of current rental costs</div>
+              <div id="ho-chart-today-rents" class="chart-box"></div>
+            </div>
+
+            <div class="card">
+              <h2>Do you think buying a home is still possible for young renters today?</h2>
+              <div class="subtitle">Market feasibility for new buyers</div>
+              <div id="ho-chart-buying-possible" class="chart-box"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         NON-RESIDENT DASHBOARD PANEL  (id: panel-nonresident, theme: theme-nonresident)
+         Chart ids prefixed `nr-`. Charts defined in js/nonresident.js.
+         Uses the exact same left-column / right-column / pies-row skeleton
+         as the Homeowner panel above so cards stay aligned across tabs.
+         ====================================================================== -->
+    <div class="dashboard-container theme-nonresident" id="panel-nonresident" style="display:none;">
+      <div class="dashboard-grid">
+
+        <!-- LEFT COLUMN: grouped bar + dot matrix -->
+        <div class="left-column">
+          <div class="card">
+            <div class="card-title">Impact on Personal Choice vs. Advice to Others</div>
+            <div class="card-subtitle">Said no to move/job in BLR vs. Told someone not to move</div>
+            <div id="nr-chart-top-left" class="chart-box"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Would Lower Rent Make You Consider Moving?</div>
+            <div class="card-subtitle">Dot matrix representation (N = 69 non-residents)</div>
+            <div class="matrix-horizontal-wrapper">
+              <div id="nr-dot-matrix" class="dot-matrix-grid"></div>
+              <div id="nr-legend-matrix" class="right-legend"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: stacked bar (top) + 2 horizontal bar charts (pies-row) -->
+        <div class="right-column">
+          <div class="card stat-bar-card">
+            <div class="card-title">Frequency of Cost of Living Discussions</div>
+            <div class="card-subtitle">How often does Bengaluru's high cost of living come up?</div>
+            <div id="nr-chart-top-right" class="chart-box"></div>
+          </div>
+
+          <div class="pies-row">
+            <div class="card">
+              <div class="card-title">In your own city, is rent a big worry too?</div>
+              <div class="card-subtitle">Cost-of-living concern back home</div>
+              <div id="nr-chart-bottom-right-1" class="chart-box"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">How do Bengaluru's rents compare to your city?</div>
+              <div class="card-subtitle">Relative cost perception</div>
+              <div id="nr-chart-bottom-right-2" class="chart-box"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         LANDLORD DASHBOARD PANEL  (id: panel-landlord, theme: theme-landlord)
+         Chart ids prefixed `ll-`. Charts + map defined in js/landlord.js.
+         LEFT COLUMN mirrors the other two panels (2 stacked row-slots, the
+         second slot split into a pies-row of 2 cards) so the left-side
+         cards keep the same rhythm across all 3 tabs. RIGHT COLUMN has 3
+         stacked cards (rent-cap / tenancy pies / dot-matrix) since this
+         dashboard covers more ground than the other two.
+         ====================================================================== -->
+    <div class="dashboard-container theme-landlord" id="panel-landlord" style="display:none;">
+      <div class="dashboard-grid">
+
+        <!-- LEFT COLUMN: map+portfolio split card, then 2 bar charts side-by-side. -->
+        <div class="left-column">
+          <div class="card">
+            <div class="card-title">What area of Bangalore do you rent properties in?</div>
+            <div class="card-subtitle">Key rental zone hubs &amp; landlord property count breakdown</div>
+            <div class="split-card-content">
+              <div id="ll-map"></div>
+              <div id="ll-chart-portfolio" class="chart-box"></div>
+            </div>
+          </div>
+
+          <div class="pies-row">
+            <div class="card">
+              <div class="card-title">Why become a landlord?</div>
+              <div class="card-subtitle">Primary ownership motivations</div>
+              <div id="ll-chart-motivation" class="chart-box"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Rent pricing logic?</div>
+              <div class="card-subtitle">Setting initial rent decision basis</div>
+              <div id="ll-chart-pricing" class="chart-box"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: rent-cap stacked bar (fixed height, see .stat-bar-card),
+             2 tenancy pies (pies-row), dot matrix. The remaining 2 slots
+             split whatever height the fixed card leaves behind, the pies-row
+             getting a bit more room. Standard-size pies (ChartTheme.pieOption
+             default radius), matching every other pie card on the site —
+             the "Broker usage & cost" pie was dropped to keep these 2 at
+             full standard size instead of shrinking 3 across. -->
+        <div class="right-column">
+          <div class="card stat-bar-card">
+            <div class="card-title">Do you think Bengaluru should put a limit on how much rent can go up?</div>
+            <div class="card-subtitle">Support for rent control policies among landlords</div>
+            <div id="ll-chart-rent-cap" class="chart-box"></div>
+          </div>
+
+          <div class="pies-row" style="flex: 1.3;">
+            <div class="card">
+              <div class="card-title">Last renewal hike?</div>
+              <div class="card-subtitle">Rent increase at the most recent tenant turnover</div>
+              <div id="ll-pie-hike" class="chart-box"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Time to find tenant?</div>
+              <div class="card-subtitle">Vacancy duration between tenants</div>
+              <div id="ll-pie-speed" class="chart-box"></div>
+            </div>
+          </div>
+
+          <div class="card" style="flex: 1;">
+            <div class="card-title">Why did you raise the rent last time?</div>
+            <div class="card-subtitle">Single matrix grid mapped to category legend on the right</div>
+            <div class="matrix-horizontal-wrapper">
+              <div id="ll-dot-matrix" class="dot-matrix-grid"></div>
+              <div id="ll-legend-matrix" class="right-legend"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         TENANT DASHBOARD PANEL  (id: panel-tenant, theme: theme-tenant)
+         Chart ids prefixed `tn-`. Charts defined in js/tenant.js.
+         LEFT COLUMN mirrors the other panels' pies-row-first pattern, then
+         adds a dot-matrix card and a treemap card (3 row-slots, same shape
+         as the Landlord tab's right column). RIGHT COLUMN leads with the
+         rent-cap stacked bar using the exact shared spec as the other 3
+         tabs' top-right chart, then a diverging bar, then a pies-row.
+         ====================================================================== -->
+    <div class="dashboard-container theme-tenant" id="panel-tenant" style="display:none;">
+      <div class="dashboard-grid">
+
+        <!-- LEFT COLUMN: 2 bar charts side-by-side, dot matrix, treemap. -->
+        <div class="left-column">
+          <div class="pies-row">
+            <div class="card">
+              <div class="card-title">Security Deposit Paid</div>
+              <div class="card-subtitle">The security deposit you paid was roughly&hellip;</div>
+              <div id="tn-chart-deposit" class="chart-box"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Monthly Rent Share</div>
+              <div class="card-subtitle">Share of take-home pay spent on rent</div>
+              <div id="tn-chart-pay-share" class="chart-box"></div>
+            </div>
+          </div>
+
+          <div class="card" style="flex: 0.85;">
+            <div class="card-title">Biggest Reason Rents Have Risen</div>
+            <div class="card-subtitle">What tenants think is driving Bengaluru rents up</div>
+            <div class="matrix-horizontal-wrapper">
+              <div id="tn-dot-matrix" class="dot-matrix-grid"></div>
+              <div id="tn-legend-reasons" class="right-legend"></div>
+            </div>
+          </div>
+
+          <div class="card" style="flex: 1.15;">
+            <div class="card-title">When Landlords Last Hiked Rent</div>
+            <div class="card-subtitle">What happened after the most recent rent hike</div>
+            <div id="tn-chart-treemap" class="chart-box"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: rent-cap stacked bar (fixed height, see .stat-bar-card),
+             diverging bar, 2 pies. -->
+        <div class="right-column">
+          <div class="card stat-bar-card">
+            <div class="card-title">Do you think Bengaluru should put a limit on how much rent can go up?</div>
+            <div class="card-subtitle">Rent cap support among tenants</div>
+            <div id="tn-chart-rent-limit" class="chart-box"></div>
+          </div>
+
+          <div class="card" style="flex: 0.8;">
+            <div class="card-title">Max Rent Before Leaving City</div>
+            <div class="card-subtitle">What tenants would pay before leaving Bengaluru</div>
+            <div id="tn-chart-leave-rent" class="chart-box"></div>
+          </div>
+
+          <div class="pies-row" style="flex: 1.6;">
+            <div class="card">
+              <div class="card-title">Landlord Hike Reactions</div>
+              <div class="card-subtitle">What happened after the last rent hike</div>
+              <div id="tn-chart-hike-pie" class="chart-box"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Moving &amp; Coping Trade-offs</div>
+              <div class="card-subtitle">Hardest trade-offs made to keep up with rent</div>
+              <div id="tn-chart-coping-pie" class="chart-box"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- chart-theme.js (the shared design-system helpers) must load before the
+       5 chart modules below, which must in turn load before main.js -->
+  <script src="js/chart-theme.js"></script>
+  <script src="js/overview.js"></script>
+  <script src="js/homeowner.js"></script>
+  <script src="js/nonresident.js"></script>
+  <script src="js/tenant.js"></script>
+  <script src="js/landlord.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

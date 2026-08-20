@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bengaluru Rent Survey Dashboard</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Apache ECharts -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    :root {
+      /* Neutral / UI Layer (Paper Tone) */
+      --bg-outer: #eef1ef;
+      --container-bg: #e4e9e5;
+      --card-bg: #f7f9f7;
+      --border-color: #d1dad3;
+      --text-main: #1b2620;
+      --text-muted: #5c6e63;
+
+      /* Data Monochromatic Ramp (Sage Green) */
+      --c-1: #1f2e24;
+      --c-2: #344c3c;
+      --c-3: #4d6d57;
+      --c-4: #70917b;
+      --c-5: #9bb7a5;
+      --c-6: #c4d7cc;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      text-align: left;
+    }
+
+    body {
+      background-color: var(--bg-outer);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .dashboard-container {
+      width: 100%;
+      max-width: 1380px;
+      height: 92vh;
+      max-height: 940px;
+      background-color: var(--container-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow: hidden;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--text-main);
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* Grid Layout: Left Column (1.3fr) / Center & Right Columns (0.85fr each) */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 0.85fr 0.85fr;
+      grid-template-rows: 1fr 1.3fr;
+      gap: 16px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-header {
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .card-subtitle {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .chart-box {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .span-col-1 { grid-column: span 1; }
+    .span-col-2 { grid-column: span 2; }
+
+    /* Top Left KPI Panel — 2-Row Layout */
+    .kpi-wrapper {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .kpi-main-row {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.45);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px 16px;
+      gap: 16px;
+    }
+
+    .kpi-main-value {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: var(--c-1);
+      line-height: 1;
+    }
+
+    .kpi-main-meta {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .kpi-main-title {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .kpi-main-title svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--c-2);
+    }
+
+    .kpi-main-subtext {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .kpi-sub-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .kpi-sub-item {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 6px 10px;
+      border-right: 1px solid var(--border-color);
+    }
+
+    .kpi-sub-item:last-child {
+      border-right: none;
+    }
+
+    .kpi-sub-header {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+      white-space: nowrap;
+    }
+
+    .kpi-sub-header svg {
+      width: 12px;
+      height: 12px;
+      fill: var(--c-3);
+    }
+
+    .kpi-sub-value {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--c-2);
+      line-height: 1.1;
+    }
+
+    .kpi-sub-label {
+      font-size: 0.64rem;
+      font-weight: 600;
+      color: var(--c-4);
+      margin-top: 2px;
+      white-space: nowrap;
+    }
+
+    /* Map styling */
+    #map {
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      z-index: 1;
+    }
+
+    /* Mobile Responsive Vertical Stack */
+    @media (max-width: 868px) {
+      body {
+        height: auto;
+        overflow: auto;
+      }
+
+      .dashboard-container {
+        height: auto;
+        max-height: none;
+        overflow: visible;
+        border-radius: 16px;
+        padding: 16px;
+      }
+
+      .dashboard-grid {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .kpi-sub-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .kpi-sub-item {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 8px;
+      }
+
+      .card {
+        height: 380px;
+      }
+
+      .stats-card {
+        height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-container">
+    <header>
+      <h1>Bengaluru Housing & Rent Survey</h1>
+      <div class="subtitle">An analysis of tenant perspectives, rent caps, and demographics</div>
+    </header>
+
+    <div class="dashboard-grid">
+      
+      <!-- TOP LEFT: 2-Row Layout KPI Panel -->
+      <div class="card stats-card span-col-1">
+        <div class="card-header">
+          <div class="card-title">Survey Submissions Breakdown</div>
+          <div class="card-subtitle">Exact counts from raw survey response data</div>
+        </div>
+        <div class="kpi-wrapper">
+          
+          <div class="kpi-main-row">
+            <div class="kpi-main-value">621</div>
+            <div class="kpi-main-meta">
+              <div class="kpi-main-title">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                Total Survey Submissions
+              </div>
+              <div class="kpi-main-subtext">100% verified primary responses collected</div>
+            </div>
+          </div>
+
+          <div class="kpi-sub-row">
+            <div class="kpi-sub-item">
+              <div class="kpi-sub-header">
+                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                Tenants
+              </div>
+              <div class="kpi-sub-value">373</div>
+              <div class="kpi-sub-label">Pay rent</div>
+            </div>
+
+            <div class="kpi-sub-item">
+              <div class="kpi-sub-header">
+                <svg viewBox="0 0 24 24"><path d="M12 3L2 12h3v8h14v-8h3L12 3zm1 15h-2v-2h2v2zm0-4h-2V9h2v5z"/></svg>
+                Owners
+              </div>
+              <div class="kpi-sub-value">85</div>
+              <div class="kpi-sub-label">Own home</div>
+            </div>
+
+            <div class="kpi-sub-item">
+              <div class="kpi-sub-header">
+                <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                Landlords
+              </div>
+              <div class="kpi-sub-value">58</div>
+              <div class="kpi-sub-label">Rent out</div>
+            </div>
+
+            <div class="kpi-sub-item">
+              <div class="kpi-sub-header">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                Non-Res.
+              </div>
+              <div class="kpi-sub-value">105</div>
+              <div class="kpi-sub-label">Outside BLR</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TOP RIGHT: 100% Normalized Stacked Bar -->
+      <div class="card span-col-2">
+        <div class="card-header">
+          <div class="card-title">Do you think Bengaluru should put a limit on rent hikes?</div>
+          <div class="card-subtitle">100% normalized proportions by resident category</div>
+        </div>
+        <div id="bar-chart" class="chart-box"></div>
+      </div>
+
+      <!-- BOTTOM LEFT: Leaflet Map -->
+      <div class="card span-col-1">
+        <div class="card-header">
+          <div class="card-title">Tenant & Landlord Regional Distribution</div>
+          <div class="card-subtitle">Tenant locations and landlord rental areas only</div>
+        </div>
+        <div class="chart-box">
+          <div id="map"></div>
+        </div>
+      </div>
+
+      <!-- BOTTOM RIGHT 1: Age Pie Chart (%) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Age Demographics</div>
+          <div class="card-subtitle">Respondent distribution by age group</div>
+        </div>
+        <div id="pie-age" class="chart-box"></div>
+      </div>
+
+      <!-- BOTTOM RIGHT 2: Career Position Pie Chart (%) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Career Position</div>
+          <div class="card-subtitle">Respondent distribution by employment tier</div>
+        </div>
+        <div id="pie-career" class="chart-box"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Monochromatic Sage Palette
+    const palette = ['#1f2e24', '#344c3c', '#4d6d57', '#70917b', '#9bb7a5', '#c4d7cc'];
+
+    const fontStyle = {
+      fontFamily: 'Plus Jakarta Sans',
+      fontSize: 10,
+      fontWeight: 600,
+      color: '#5c6e63'
+    };
+
+    // 1. 100% Normalized Stacked Bar Chart
+    const barChart = echarts.init(document.getElementById('bar-chart'));
+    const barOption = {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        valueFormatter: (value) => value + '%'
+      },
+      legend: {
+        left: '0',
+        top: '0',
+        icon: 'rect',
+        itemWidth: 10,
+        itemHeight: 10,
+        textStyle: fontStyle
+      },
+      grid: {
+        left: '0%',
+        right: '3%',
+        bottom: '0%',
+        top: '32px',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'value',
+        max: 100,
+        axisLine: { show: false },
+        splitLine: { lineStyle: { type: 'dashed', color: '#d1dad3' } },
+        axisLabel: { ...fontStyle, formatter: '{value}%' }
+      },
+      yAxis: {
+        type: 'category',
+        data: ['Pay Rent', 'Own Home', 'Landlords'],
+        axisLine: { lineStyle: { color: '#d1dad3' } },
+        axisTick: { show: false },
+        axisLabel: fontStyle
+      },
+      series: [
+        { name: 'Strongly Agree', type: 'bar', stack: 'total', color: palette[0], data: [64.18, 23.46, 6.90] },
+        { name: 'Agree', type: 'bar', stack: 'total', color: palette[1], data: [18.62, 27.16, 24.14] },
+        { name: 'Not Sure', type: 'bar', stack: 'total', color: palette[2], data: [5.44, 9.88, 8.62] },
+        { name: 'Disagree', type: 'bar', stack: 'total', color: palette[3], data: [6.30, 19.75, 27.59] },
+        { name: 'Strongly Disagree', type: 'bar', stack: 'total', color: palette[4], data: [5.44, 19.75, 32.76] }
+      ]
+    };
+    barChart.setOption(barOption);
+
+    // Formatter to hide percentage labels for slices below 4% threshold
+    const piePercentFormatter = (params) => {
+      return params.percent < 4 ? '' : `${Math.round(params.percent)}%`;
+    };
+
+    // 2. Age Pie Chart (Smaller Radius: 28% - 58%)
+    const pieAge = echarts.init(document.getElementById('pie-age'));
+    const pieAgeOption = {
+      tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+      legend: {
+        orient: 'vertical',
+        right: '0%',
+        top: 'middle',
+        icon: 'circle',
+        itemWidth: 8,
+        itemHeight: 8,
+        textStyle: { ...fontStyle, fontSize: 9 }
+      },
+      series: [{
+        type: 'pie',
+        radius: ['28%', '58%'],
+        center: ['35%', '50%'],
+        avoidLabelOverlap: true,
+        label: {
+          show: true,
+          position: 'inside',
+          formatter: piePercentFormatter,
+          color: '#ffffff',
+          fontSize: 10,
+          fontWeight: 'bold'
+        },
+        data: [
+          { value: 272, name: '25 – 34', itemStyle: { color: palette[0] } },
+          { value: 169, name: '35 – 44', itemStyle: { color: palette[1] } },
+          { value: 69,  name: '45 – 54', itemStyle: { color: palette[2] } },
+          { value: 40,  name: 'Not Specified', itemStyle: { color: palette[5] } },
+          { value: 38,  name: '55 and above', itemStyle: { color: palette[3] } },
+          { value: 33,  name: 'Under 25', itemStyle: { color: palette[4] } }
+        ]
+      }]
+    };
+    pieAge.setOption(pieAgeOption);
+
+    // 3. Career Position Pie Chart (Smaller Radius: 28% - 58%)
+    const pieCareer = echarts.init(document.getElementById('pie-career'));
+    const pieCareerOption = {
+      tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+      legend: {
+        orient: 'vertical',
+        right: '0%',
+        top: 'middle',
+        icon: 'circle',
+        itemWidth: 8,
+        itemHeight: 8,
+        textStyle: { ...fontStyle, fontSize: 9 }
+      },
+      series: [{
+        type: 'pie',
+        radius: ['28%', '58%'],
+        center: ['35%', '50%'],
+        avoidLabelOverlap: true,
+        label: {
+          show: true,
+          position: 'inside',
+          formatter: piePercentFormatter,
+          color: '#ffffff',
+          fontSize: 10,
+          fontWeight: 'bold'
+        },
+        data: [
+          { value: 239, name: 'Mid career', itemStyle: { color: palette[0] } },
+          { value: 106, name: 'Senior career', itemStyle: { color: palette[1] } },
+          { value: 98,  name: 'Not Specified', itemStyle: { color: palette[5] } },
+          { value: 90,  name: 'Early career', itemStyle: { color: palette[2] } },
+          { value: 60,  name: 'Self-employed', itemStyle: { color: palette[3] } },
+          { value: 21,  name: 'Not working', itemStyle: { color: palette[4] } },
+          { value: 7,   name: 'Student', itemStyle: { color: palette[2] } }
+        ]
+      }]
+    };
+    pieCareer.setOption(pieCareerOption);
+
+    // 4. Leaflet Map
+    const map = L.map('map', {
+      zoomControl: false,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      boxZoom: false,
+      touchZoom: false,
+      keyboard: false
+    }).setView([12.9620, 77.6250], 11);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap &copy; CARTO',
+      subdomains: 'abcd',
+      maxZoom: 19
+    }).addTo(map);
+
+    const locationData = [
+      { lat: 12.9600, lng: 77.6350, count: 128 },
+      { lat: 12.9750, lng: 77.7100, count: 121 },
+      { lat: 12.9150, lng: 77.6100, count: 113 },
+      { lat: 13.0400, lng: 77.5900, count: 27 },
+      { lat: 12.8700, lng: 77.6600, count: 23 },
+      { lat: 12.9800, lng: 77.5400, count: 18 }
+    ];
+
+    locationData.forEach(loc => {
+      const radiusSize = 1200 + (loc.count * 20);
+      const opacityVal = 0.35 + (loc.count / 128) * 0.4;
+
+      L.circle([loc.lat, loc.lng], {
+        color: '#1f2e24',
+        fillColor: '#344c3c',
+        fillOpacity: opacityVal,
+        radius: radiusSize,
+        stroke: true,
+        weight: 1.5
+      }).addTo(map);
+    });
+
+    // Resize Handler
+    window.addEventListener('resize', () => {
+      barChart.resize();
+      pieAge.resize();
+      pieCareer.resize();
+      map.invalidateSize();
+    });
+  </script>
+</body>
+</html>

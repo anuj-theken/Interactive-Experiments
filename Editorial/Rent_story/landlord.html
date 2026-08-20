@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bangalore Rent Survey - Landlord Dashboard</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- ECharts & Leaflet -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    :root {
+      /* Neutral / UI Layer */
+      --bg-outer: #eef2f0;
+      --container-bg: #e2e8e5;
+      --card-bg: #f4f7f5;
+      --border-tone: #d0ded7;
+      --text-dark: #1b2923;
+      --text-muted: #53695f;
+
+      /* Data Layer (Monochromatic sage palette) */
+      --c-1: #243b31;
+      --c-2: #3e5a4e;
+      --c-3: #5c7c6f;
+      --c-4: #83a194;
+      --c-5: #b2c7bd;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-outer);
+      color: var(--text-dark);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .dashboard-container {
+      width: 100%;
+      max-width: 1300px;
+      height: 92vh;
+      max-height: 920px;
+      background-color: var(--container-bg);
+      border: 1px solid var(--border-tone);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow: hidden;
+      text-align: left;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: left;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--text-dark);
+    }
+
+    header p {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* 2-Column Split Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .card-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-tone);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 0;
+      text-align: left;
+      position: relative;
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .card-subtitle {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: -4px;
+    }
+
+    .chart-box {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .split-card-content {
+      display: flex;
+      flex-direction: row;
+      gap: 12px;
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+    }
+
+    .row-cards-container {
+      display: flex;
+      flex-direction: row;
+      gap: 16px;
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+    }
+
+    /* Simple & Clean CartoDB Map */
+    #map {
+      flex: 1;
+      height: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border-tone);
+      z-index: 1;
+    }
+
+    .leaflet-popup-content-wrapper {
+      background: var(--card-bg);
+      color: var(--text-dark);
+      border-radius: 8px;
+      font-size: 0.75rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      padding: 2px;
+    }
+
+    .leaflet-popup-content {
+      margin: 8px 12px;
+      line-height: 1.3;
+    }
+
+    .leaflet-popup-tip {
+      background: var(--card-bg);
+    }
+
+    /* Translucent, blurred map marker with centered count badge */
+    .dynamic-map-pin {
+      border-radius: 50%;
+      opacity: 0.82;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.18);
+      transition: transform 0.2s ease, opacity 0.2s ease;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 800;
+      user-select: none;
+    }
+
+    .dynamic-map-pin:hover {
+      opacity: 0.98;
+      transform: scale(1.15);
+    }
+
+    /* Triple Pie Layout with Centered Headers & Equalized Spacing */
+    .triple-pie-container {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      height: 100%;
+      gap: 8px;
+      min-height: 0;
+    }
+
+    .pie-sub-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      align-items: center;
+      justify-content: space-between; /* Equal gaps between header, pie, and legend */
+      min-width: 0;
+    }
+
+    .pie-sub-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      text-align: center;
+      line-height: 1.1;
+      width: 100%;
+      margin-bottom: 4px;
+    }
+
+    /* Side-by-Side Dot Matrix Layout */
+    .matrix-horizontal-wrapper {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 4rem; /* Requested gap */
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+    }
+
+    .dot-matrix-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      align-content: center;
+      flex: 1.2;
+      min-width: 18rem; /* Requested min-width */
+      height: 100%;
+    }
+
+    .dot-item {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      transition: transform 0.15s ease;
+      cursor: pointer;
+    }
+
+    .dot-item:hover {
+      transform: scale(1.4);
+    }
+
+    .right-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      justify-content: center;
+      min-width: 0;
+      align-items: flex-start;
+    }
+
+    /* Centered Custom Legend for Pie Charts with proportional spacing */
+    .custom-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      width: 100%;
+      margin-top: 4px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      text-align: left;
+      line-height: 1.1;
+    }
+
+    .legend-swatch {
+      width: 7px;
+      height: 7px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .legend-swatch.circle {
+      border-radius: 50%;
+    }
+
+    /* Mobile Responsive Rules (Full Vertical Stacking for Small Screens) */
+    @media (max-width: 868px) {
+      html, body {
+        height: auto;
+        overflow-y: auto;
+      }
+
+      .dashboard-container {
+        height: auto;
+        max-height: none;
+        overflow: visible;
+        border-radius: 16px;
+        padding: 16px;
+      }
+
+      .dashboard-grid {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .card-column {
+        height: auto;
+      }
+
+      .split-card-content,
+      .row-cards-container {
+        flex-direction: column;
+      }
+
+      .card {
+        height: auto;
+        min-height: 280px;
+      }
+
+      /* Stack Pie Charts Vertically on Mobile */
+      .triple-pie-container {
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .pie-sub-box {
+        height: 200px;
+      }
+
+      /* Map Height Adjustment for Mobile */
+      #map {
+        height: 220px;
+        min-height: 220px;
+      }
+
+      /* Stack Dot Matrix & Legend Vertically on Mobile */
+      .matrix-horizontal-wrapper {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+      }
+
+      .dot-matrix-grid {
+        min-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-container">
+    <header>
+      <h1>Bangalore Landlord Insights Dashboard</h1>
+      <p>Data summary of rental caps, landlord motivations, pricing strategies, and portfolio density.</p>
+    </header>
+
+    <div class="dashboard-grid">
+      <!-- LEFT COLUMN: MAP & 2 SEPARATE BAR CHART CARDS -->
+      <div class="card-column">
+        <!-- Top Left: Map & Portfolio Bar -->
+        <div class="card" style="flex: 1;">
+          <div class="card-title">What area of Bangalore do you rent properties in?</div>
+          <div class="card-subtitle">Key rental zone hubs & landlord property count breakdown</div>
+          <div class="split-card-content">
+            <div id="map"></div>
+            <div id="chart-portfolio" class="chart-box" style="flex: 1;"></div>
+          </div>
+        </div>
+
+        <!-- Bottom Left: 2 Separate Cards Row -->
+        <div class="row-cards-container">
+          <div class="card" style="flex: 1;">
+            <div class="card-title">Why become a landlord?</div>
+            <div class="card-subtitle">Primary ownership motivations</div>
+            <div id="chart-motivation" class="chart-box"></div>
+          </div>
+
+          <div class="card" style="flex: 1;">
+            <div class="card-title">Rent pricing logic?</div>
+            <div class="card-subtitle">Setting initial rent decision basis</div>
+            <div id="chart-pricing" class="chart-box"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: STACKED BAR, PIE CHARTS & DOT MATRIX -->
+      <div class="card-column">
+        <!-- Top Right: Stacked Rent Cap Bar Chart -->
+        <div class="card" style="flex: 0.35;">
+          <div class="card-title">Do you think Bengaluru should put a limit on how much rent can go up?</div>
+          <div id="chart-rent-cap" class="chart-box"></div>
+        </div>
+
+        <!-- Middle Right: Pie Charts Card (Increased height to flex: 1.15 to equalize pie gaps) -->
+        <div class="card" style="flex: 1.15;">
+          <div class="card-title">Tenancy & Rental Dynamics</div>
+          <div class="triple-pie-container">
+            <div class="pie-sub-box">
+              <div class="pie-sub-title">Last renewal hike?</div>
+              <div id="pie-hike" class="chart-box"></div>
+              <div id="legend-hike" class="custom-legend"></div>
+            </div>
+            <div class="pie-sub-box">
+              <div class="pie-sub-title">Time to find tenant?</div>
+              <div id="pie-speed" class="chart-box"></div>
+              <div id="legend-speed" class="custom-legend"></div>
+            </div>
+            <div class="pie-sub-box">
+              <div class="pie-sub-title">Broker usage & cost?</div>
+              <div id="pie-broker" class="chart-box"></div>
+              <div id="legend-broker" class="custom-legend"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Right: Dot Matrix Card -->
+        <div class="card" style="flex: 0.70;">
+          <div class="card-title">Why did you raise the rent last time?</div>
+          <div class="card-subtitle">Single matrix grid mapped to category legend on the right</div>
+          <div class="matrix-horizontal-wrapper">
+            <div id="dot-matrix" class="dot-matrix-grid"></div>
+            <div id="legend-matrix" class="right-legend"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Monochromatic sage palette
+    const palette = ['#243b31', '#3e5a4e', '#5c7c6f', '#83a194', '#b2c7bd'];
+    const defaultFont = 'Plus Jakarta Sans';
+
+    // 1. TOP LEFT: CartoDB Map with Hover Triggered Popups
+    const map = L.map('map', { zoomControl: false }).setView([12.9650, 77.6200], 10);
+    
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    const zoneHubs = [
+      { name: "East (Whitefield, Marathahalli, KR Puram)", count: 20, coords: [12.9698, 77.7500] },
+      { name: "Central (Indiranagar, Koramangala, MG Road)", count: 13, coords: [12.9784, 77.6408] },
+      { name: "South (HSR, BTM, Jayanagar, JP Nagar)", count: 12, coords: [12.9121, 77.6445] },
+      { name: "West (Rajajinagar, Malleshwaram, Vijayanagar)", count: 5, coords: [12.9783, 77.5510] },
+      { name: "Outer / Just outside city limits", count: 4, coords: [12.8500, 77.6800] },
+      { name: "North (Hebbal, Yelahanka, Airport side)", count: 3, coords: [13.0358, 77.5970] }
+    ];
+
+    function getMarkerSize(count) {
+      return Math.round(18 + ((count - 3) / (20 - 3)) * 22);
+    }
+
+    function getFontSize(size) {
+      return Math.max(9, Math.round(size * 0.42));
+    }
+
+    function getMarkerColor(count) {
+      if (count >= 18) return '#1b2d25';
+      if (count >= 10) return '#243b31';
+      if (count >= 5)  return '#3e5a4e';
+      return '#5c7c6f';
+    }
+
+    zoneHubs.forEach(hub => {
+      const size = getMarkerSize(hub.count);
+      const fontSize = getFontSize(size);
+      const color = getMarkerColor(hub.count);
+
+      const customIcon = L.divIcon({
+        className: '',
+        html: `<div class="dynamic-map-pin" style="
+          width: ${size}px; 
+          height: ${size}px; 
+          font-size: ${fontSize}px;
+          background-color: ${color}; 
+          border: 2px solid rgba(255, 255, 255, 0.9);
+        ">${hub.count}</div>`,
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2]
+      });
+
+      const marker = L.marker(hub.coords, { icon: customIcon }).addTo(map);
+
+      const popupContent = `<b>${hub.name}</b><br>Landlord Count: <b>${hub.count}</b>`;
+      
+      marker.on('mouseover', function (e) {
+        L.popup({ offset: [0, -size / 4], closeButton: false })
+          .setLatLng(e.latlng)
+          .setContent(popupContent)
+          .openOn(map);
+      });
+
+      marker.on('mouseout', function () {
+        map.closePopup();
+      });
+    });
+
+    // Portfolio Size Bar Chart
+    const chartPortfolio = echarts.init(document.getElementById('chart-portfolio'));
+    chartPortfolio.setOption({
+      tooltip: { trigger: 'axis' },
+      grid: { top: 20, bottom: 25, left: 25, right: 10 },
+      xAxis: {
+        type: 'category',
+        data: ['One', 'Two', '3 - 5', '> 5'],
+        axisLine: { lineStyle: { color: palette[2] } },
+        axisLabel: { fontFamily: defaultFont, fontSize: 9, fontWeight: 600 }
+      },
+      yAxis: {
+        type: 'value',
+        splitLine: { lineStyle: { type: 'dashed', color: '#d0ded7' } },
+        axisLabel: { fontFamily: defaultFont, fontSize: 9 }
+      },
+      series: [{
+        data: [36, 15, 2, 1],
+        type: 'bar',
+        itemStyle: { color: palette[1], borderRadius: [4, 4, 0, 0] }
+      }]
+    });
+
+    // 2. BOTTOM LEFT: 2 Separate Cards
+    const chartMotivation = echarts.init(document.getElementById('chart-motivation'));
+    chartMotivation.setOption({
+      tooltip: { trigger: 'axis' },
+      grid: { top: 15, bottom: 55, left: 25, right: 10 },
+      xAxis: {
+        type: 'category',
+        data: ['Lived then moved', 'Inherited', 'Earn rent', 'Child / Later', 'Other'],
+        axisLine: { lineStyle: { color: palette[2] } },
+        axisLabel: { fontFamily: defaultFont, fontSize: 8, fontWeight: 600, interval: 0, rotate: 30 }
+      },
+      yAxis: {
+        type: 'value',
+        splitLine: { lineStyle: { type: 'dashed', color: '#d0ded7' } },
+        axisLabel: { fontFamily: defaultFont, fontSize: 9 }
+      },
+      series: [{
+        data: [30, 10, 9, 5, 3],
+        type: 'bar',
+        itemStyle: { color: palette[1], borderRadius: [4, 4, 0, 0] }
+      }]
+    });
+
+    const chartPricing = echarts.init(document.getElementById('chart-pricing'));
+    chartPricing.setOption({
+      tooltip: { trigger: 'axis' },
+      grid: { top: 15, bottom: 55, left: 25, right: 10 },
+      xAxis: {
+        type: 'category',
+        data: ['Matched nearby', 'Broker rate', 'Last rent + bit', 'Whatever possible', 'Covers costs'],
+        axisLine: { lineStyle: { color: palette[2] } },
+        axisLabel: { fontFamily: defaultFont, fontSize: 8, fontWeight: 600, interval: 0, rotate: 30 }
+      },
+      yAxis: {
+        type: 'value',
+        splitLine: { lineStyle: { type: 'dashed', color: '#d0ded7' } },
+        axisLabel: { fontFamily: defaultFont, fontSize: 9 }
+      },
+      series: [{
+        data: [27, 13, 9, 6, 1],
+        type: 'bar',
+        itemStyle: { color: palette[2], borderRadius: [4, 4, 0, 0] }
+      }]
+    });
+
+    // 3. TOP RIGHT: Compact Single Horizontal Stacked Bar
+    const chartRentCap = echarts.init(document.getElementById('chart-rent-cap'));
+    chartRentCap.setOption({
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        formatter: (params) => {
+          let res = `<b>Rent Cap Opinion</b><br/>`;
+          params.forEach(item => {
+            res += `${item.marker} ${item.seriesName}: <b>${item.value}%</b> (${Math.round(item.value * 0.58)} responses)<br/>`;
+          });
+          return res;
+        }
+      },
+      legend: {
+        top: 0,
+        left: 0,
+        icon: 'rect',
+        itemWidth: 8,
+        itemHeight: 8,
+        textStyle: { fontFamily: defaultFont, fontSize: 8, fontWeight: 600 }
+      },
+      grid: { top: 20, bottom: 5, left: 5, right: 5 },
+      xAxis: { type: 'value', max: 100, show: false },
+      yAxis: { type: 'category', data: ['Responses'], show: false },
+      series: [
+        { name: 'Strongly Disagree (32.8%)', type: 'bar', stack: 'total', data: [32.8], itemStyle: { color: palette[0], borderRadius: [4, 0, 0, 4] } },
+        { name: 'Disagree (27.6%)', type: 'bar', stack: 'total', data: [27.6], itemStyle: { color: palette[1] } },
+        { name: 'Agree (24.1%)', type: 'bar', stack: 'total', data: [24.1], itemStyle: { color: palette[2] } },
+        { name: 'Not Sure (8.6%)', type: 'bar', stack: 'total', data: [8.6], itemStyle: { color: palette[3] } },
+        { name: 'Strongly Agree (6.9%)', type: 'bar', stack: 'total', data: [6.9], itemStyle: { color: palette[4], borderRadius: [0, 4, 4, 0] } }
+      ]
+    });
+
+    // 4. MIDDLE RIGHT: Pie Charts Centered for Equal Gap Balance
+    function buildPieWithLegend(chartId, legendId, pieData) {
+      const chart = echarts.init(document.getElementById(chartId));
+      chart.setOption({
+        tooltip: { trigger: 'item', formatter: '{b}: <b>{c}</b> ({d}%)' },
+        series: [{
+          type: 'pie',
+          radius: ['34%', '64%'],
+          center: ['50%', '50%'],
+          avoidLabelOverlap: false,
+          label: { show: false },
+          data: pieData
+        }]
+      });
+
+      const legendContainer = document.getElementById(legendId);
+      legendContainer.innerHTML = pieData.map(item => `
+        <div class="legend-item">
+          <span class="legend-swatch" style="background-color: ${item.itemStyle.color};"></span>
+          <span>${item.name} (${item.value})</span>
+        </div>
+      `).join('');
+
+      return chart;
+    }
+
+    const pieHike = buildPieWithLegend('pie-hike', 'legend-hike', [
+      { value: 40, name: 'Up to 10%', itemStyle: { color: palette[0] } },
+      { value: 5, name: '11–20%', itemStyle: { color: palette[1] } },
+      { value: 5, name: 'No raise', itemStyle: { color: palette[2] } },
+      { value: 2, name: 'Empty / NA', itemStyle: { color: palette[3] } },
+      { value: 2, name: '>20%', itemStyle: { color: palette[4] } }
+    ]);
+
+    const pieSpeed = buildPieWithLegend('pie-speed', 'legend-speed', [
+      { value: 22, name: 'Few days', itemStyle: { color: palette[0] } },
+      { value: 17, name: '1-2 weeks', itemStyle: { color: palette[1] } },
+      { value: 11, name: '>1 month', itemStyle: { color: palette[2] } },
+      { value: 6, name: 'Not vacant', itemStyle: { color: palette[4] } }
+    ]);
+
+    const pieBroker = buildPieWithLegend('pie-broker', 'legend-broker', [
+      { value: 40, name: 'No Broker', itemStyle: { color: palette[0] } },
+      { value: 12, name: '1 Mth Rent', itemStyle: { color: palette[2] } },
+      { value: 5, name: 'Half Month', itemStyle: { color: palette[3] } },
+      { value: 1, name: 'Mgmt Fee', itemStyle: { color: palette[4] } }
+    ]);
+
+    // 5. BOTTOM RIGHT: Dot Matrix Grid & Left-Aligned Right Side Legend
+    const whyRaiseData = [
+      { reason: "Rents in area went up", count: 16, color: palette[0] },
+      { reason: "Other reasons", count: 10, color: palette[1] },
+      { reason: "Charging low before / fixed", count: 9, color: palette[2] },
+      { reason: "People ready to pay", count: 6, color: palette[3] },
+      { reason: "Costs went up (tax/repairs)", count: 6, color: palette[4] },
+      { reason: "Did not raise rent", count: 5, color: '#6d8378' },
+      { reason: "Metro / office nearby", count: 1, color: '#a0b5ab' }
+    ];
+
+    const matrixGrid = document.getElementById('dot-matrix');
+    const matrixLegend = document.getElementById('legend-matrix');
+
+    whyRaiseData.forEach(item => {
+      for (let i = 0; i < item.count; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot-item';
+        dot.style.backgroundColor = item.color;
+        dot.title = `${item.reason}`;
+        matrixGrid.appendChild(dot);
+      }
+    });
+
+    matrixLegend.innerHTML = whyRaiseData.map(item => `
+      <div class="legend-item">
+        <span class="legend-swatch circle" style="background-color: ${item.color};"></span>
+        <span>${item.reason} (${item.count})</span>
+      </div>
+    `).join('');
+
+    // Window Resize Handler
+    window.addEventListener('resize', () => {
+      chartPortfolio.resize();
+      chartRentCap.resize();
+      chartMotivation.resize();
+      chartPricing.resize();
+      pieHike.resize();
+      pieSpeed.resize();
+      pieBroker.resize();
+      map.invalidateSize();
+    });
+  </script>
+</body>
+</html>

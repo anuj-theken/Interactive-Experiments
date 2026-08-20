@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bengaluru Rent Survey Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    :root {
+      /* Neutral Paper Palette */
+      --bg-outer: #eef2ed;
+      --container-bg: #e3e8e1;
+      --card-bg: #f7f9f6;
+      --border-color: #d1d8ce;
+      --text-main: #1c261e;
+      --text-muted: #536255;
+
+      /* Analogous Sage Ramp */
+      --c1: #1e3323;
+      --c2: #34523b;
+      --c3: #52755b;
+      --c4: #7b9c83;
+      --c5: #a8c2af;
+      --c6: #c3d8c9;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100vh;
+      background-color: var(--bg-outer);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: left;
+      overflow: hidden;
+    }
+
+    /* Outer Container */
+    .dashboard-container {
+      width: 96%;
+      max-width: 1320px;
+      height: 95vh;
+      max-height: 940px;
+      background: var(--container-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+    }
+
+    header {
+      text-align: left;
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--text-main);
+    }
+
+    header p {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    /* 2 Main Columns Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Column Container */
+    .grid-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .row-split {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Card Box */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+    }
+
+    .card-header {
+      margin-bottom: 4px;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .card-subtitle {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .chart-box {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+
+    /* Layout for Dot Matrix + Side Legend */
+    .dot-card-body {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+    }
+
+    .side-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      width: 160px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      line-height: 1.2;
+    }
+
+    .legend-swatch {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* Mobile Responsiveness Fixes */
+    @media (max-width: 868px) {
+      html, body {
+        height: auto;
+        overflow-y: auto;
+      }
+
+      .dashboard-container {
+        height: auto;
+        max-height: none;
+        border-radius: 16px;
+        padding: 12px;
+        margin: 10px 0;
+      }
+
+      .dashboard-grid {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+      }
+
+      .grid-column {
+        height: auto;
+      }
+
+      .row-split {
+        flex-direction: column;
+        height: auto;
+      }
+
+      .card {
+        height: 280px;
+        min-height: 280px;
+        flex: none;
+      }
+
+      .dot-card-body {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .side-legend {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-container">
+    <header>
+      <h1>Bengaluru Rent Survey Analysis</h1>
+      <p>Insights from 373 tenant responses on hikes, deposits, limits, and moving pressure</p>
+    </header>
+
+    <div class="dashboard-grid">
+      
+      <!-- LEFT COLUMN -->
+      <div class="grid-column">
+        
+        <!-- Bar Charts Side-by-Side -->
+        <div class="row-split" style="flex: 1;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Security Deposit Paid</div>
+              <div class="card-subtitle">The security deposit you paid was roughly…</div>
+            </div>
+            <div id="chart-deposit" class="chart-box"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Monthly Rent Share</div>
+              <div class="card-subtitle">Roughly what share of your monthly take-home pay goes towards rent?</div>
+            </div>
+            <div id="chart-pay-share" class="chart-box"></div>
+          </div>
+        </div>
+
+        <!-- Dot Matrix -->
+        <div class="card" style="flex: 0.85;">
+          <div class="card-header">
+            <div class="card-title">Biggest Reason Rents Have Risen</div>
+            <div class="card-subtitle">What do you think is the biggest reason Bengaluru rents have risen?</div>
+          </div>
+          <div class="dot-card-body">
+            <div id="chart-dot-reasons" class="chart-box"></div>
+            <div class="side-legend" id="reasons-legend"></div>
+          </div>
+        </div>
+
+        <!-- Treemap -->
+        <div class="card" style="flex: 1.15;">
+          <div class="card-header">
+            <div class="card-title">When Landlords Last Hiked Rent</div>
+            <div class="card-subtitle">When your landlord last hiked the rent, what happened?</div>
+          </div>
+          <div id="chart-treemap" class="chart-box"></div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="grid-column">
+        
+        <!-- Stacked Bar (Rent Limit) -->
+        <div class="card" style="flex: 0.8;">
+          <div class="card-header">
+            <div class="card-title">Rent Cap Support</div>
+            <div class="card-subtitle">Do you think Bengaluru should put a limit on how much rent can go up?</div>
+          </div>
+          <div id="chart-rent-limit" class="chart-box"></div>
+        </div>
+
+        <!-- Diverging Horizontal Bar (Max Rent Before Leaving) -->
+        <div class="card" style="flex: 1;">
+          <div class="card-header">
+            <div class="card-title">Max Rent Before Leaving City</div>
+            <div class="card-subtitle">What's the most you'd pay in rent before you'd rather just leave Bengaluru?</div>
+          </div>
+          <div id="chart-leave-rent" class="chart-box"></div>
+        </div>
+
+        <!-- Two Separate Pie Chart Cards Side-by-Side -->
+        <div class="row-split" style="flex: 1.2;">
+          
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Landlord Hike Reactions</div>
+              <div class="card-subtitle">When your landlord last hiked the rent, what happened?</div>
+            </div>
+            <div id="chart-hike-pie" class="chart-box"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Moving & Coping Trade-offs</div>
+              <div class="card-subtitle">Hardest trade-offs made to keep up with Bengaluru rent</div>
+            </div>
+            <div id="chart-coping-pie" class="chart-box"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const palette = ['#1e3323', '#34523b', '#52755b', '#7b9c83', '#a8c2af', '#c3d8c9'];
+    const fontFam = "'Plus Jakarta Sans', sans-serif";
+
+    const tooltipStyle = {
+      backgroundColor: '#1e3323',
+      textStyle: { color: '#ffffff', fontFamily: fontFam, fontSize: 10.5 },
+      borderWidth: 0,
+      padding: [5, 8],
+      extraCssText: 'border-radius: 6px; z-index: 100;'
+    };
+
+    // Helper function to initialize and trigger initial resize
+    function initChart(id, option) {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      const chart = echarts.init(el);
+      chart.setOption(option);
+      return chart;
+    }
+
+    // 1. Bar Chart: Security Deposit
+    const chartDeposit = initChart('chart-deposit', {
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, ...tooltipStyle },
+      grid: { left: 0, right: 8, bottom: 0, top: 12, containLabel: true },
+      xAxis: {
+        type: 'category',
+        data: ['1–2m', '3–5m', '6–8m', '9–10m', '>10m'],
+        axisLine: { lineStyle: { color: '#d1d8ce' } },
+        axisTick: { show: false },
+        axisLabel: { fontSize: 9, fontFamily: fontFam, color: '#1c261e', fontWeight: '600' }
+      },
+      yAxis: {
+        type: 'value',
+        splitLine: { lineStyle: { type: 'dashed', color: '#d1d8ce' } },
+        axisLabel: { fontSize: 8, fontFamily: fontFam, color: '#536255' }
+      },
+      series: [{
+        name: 'Tenants',
+        type: 'bar',
+        barWidth: '50%',
+        data: [45, 204, 85, 18, 13],
+        itemStyle: { color: palette[0], borderRadius: [3, 3, 0, 0] }
+      }]
+    });
+
+    // 2. Bar Chart: Monthly Pay Share
+    const chartPayShare = initChart('chart-pay-share', {
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, ...tooltipStyle },
+      grid: { left: 0, right: 8, bottom: 0, top: 12, containLabel: true },
+      xAxis: {
+        type: 'category',
+        data: ['<20%', '20–30%', '30–40%', '40–50%', '>50%'],
+        axisLine: { lineStyle: { color: '#d1d8ce' } },
+        axisTick: { show: false },
+        axisLabel: { fontSize: 9, fontFamily: fontFam, color: '#1c261e', fontWeight: '600' }
+      },
+      yAxis: {
+        type: 'value',
+        splitLine: { lineStyle: { type: 'dashed', color: '#d1d8ce' } },
+        axisLabel: { fontSize: 8, fontFamily: fontFam, color: '#536255' }
+      },
+      series: [{
+        name: 'Tenants',
+        type: 'bar',
+        barWidth: '50%',
+        data: [173, 147, 28, 8, 3],
+        itemStyle: { color: palette[3], borderRadius: [3, 3, 0, 0] }
+      }]
+    });
+
+    // 3. Dot Matrix with Fixed 1:1 Aspect Ratio
+    const reasonCats = [
+      { name: 'Landlords taking advantage', rawCount: 145, dots: 48, color: palette[0] },
+      { name: 'Too many people moving', rawCount: 101, dots: 34, color: palette[1] },
+      { name: 'High IT salaries', rawCount: 57, dots: 19, color: palette[2] },
+      { name: 'Not enough housing', rawCount: 35, dots: 12, color: palette[3] },
+      { name: 'Brokers / Others', rawCount: 21, dots: 7, color: palette[4] }
+    ];
+
+    function buildFixedDotMatrix(categories, dotsPerRow = 15) {
+      const scatterData = [];
+      let totalDotIndex = 0;
+
+      categories.forEach((cat) => {
+        for (let i = 0; i < cat.dots; i++) {
+          const col = totalDotIndex % dotsPerRow;
+          const row = Math.floor(totalDotIndex / dotsPerRow);
+          scatterData.push({
+            value: [col, -row],
+            itemStyle: { color: cat.color },
+            category: cat.name,
+            rawCount: cat.rawCount
+          });
+          totalDotIndex++;
+        }
+      });
+
+      return scatterData;
+    }
+
+    const chartDotReasons = initChart('chart-dot-reasons', {
+      tooltip: {
+        ...tooltipStyle,
+        formatter: (p) => `${p.data.category}: <b>~${p.data.rawCount} responses</b>`
+      },
+      grid: { left: 10, right: 10, top: 10, bottom: 10, containLabel: false },
+      xAxis: { show: false, min: -0.5, max: 14.5 },
+      yAxis: { show: false, min: -8, max: 0.5 },
+      series: [{
+        type: 'scatter',
+        symbolSize: 6.5,
+        data: buildFixedDotMatrix(reasonCats, 15)
+      }]
+    });
+
+    const reasonsLegendEl = document.getElementById('reasons-legend');
+    reasonCats.forEach(cat => {
+      reasonsLegendEl.innerHTML += `
+        <div class="legend-item">
+          <div class="legend-swatch" style="background:${cat.color}"></div>
+          <span>${cat.name} (${cat.rawCount})</span>
+        </div>
+      `;
+    });
+
+    // 4. Treemap
+    const chartTreemap = initChart('chart-treemap', {
+      tooltip: { ...tooltipStyle, formatter: '{b}: <b>{c} tenants</b>' },
+      series: [{
+        type: 'treemap',
+        width: '100%',
+        height: '100%',
+        roam: false,
+        nodeClick: false,
+        breadcrumb: { show: false },
+        label: {
+          show: true,
+          fontFamily: fontFam,
+          fontSize: 9.5,
+          fontWeight: '700',
+          color: '#ffffff',
+          overflow: 'break',
+          lineHeight: 12,
+          formatter: (p) => `${p.name}\n(${p.value})`
+        },
+        itemStyle: {
+          borderColor: '#f7f9f6',
+          borderWidth: 2,
+          gapWidth: 2
+        },
+        data: [
+          { name: 'Paid, no discussion', value: 162, itemStyle: { color: palette[0] } },
+          { name: 'Pushed back (no budge)', value: 72, itemStyle: { color: palette[1] } },
+          { name: 'Negotiated down', value: 61, itemStyle: { color: palette[2] } },
+          { name: 'No hike faced', value: 48, itemStyle: { color: palette[3] } },
+          { name: 'Moved out over hike', value: 17, itemStyle: { color: palette[4] } }
+        ]
+      }]
+    });
+
+    // 5. Stacked Bar: Rent Limit
+    const chartLimit = initChart('chart-rent-limit', {
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, ...tooltipStyle },
+      legend: {
+        left: 0, top: 0,
+        itemWidth: 8, itemHeight: 8,
+        textStyle: { fontSize: 8.5, fontFamily: fontFam, fontWeight: 600, color: '#536255' }
+      },
+      grid: { left: 0, right: 8, bottom: 0, top: 22, containLabel: true },
+      xAxis: { type: 'value', show: false },
+      yAxis: { type: 'category', data: ['Responses'], axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false } },
+      series: [
+        { name: 'Strongly agree', type: 'bar', stack: 'total', data: [224], itemStyle: { color: palette[0], borderRadius: [3, 0, 0, 3] } },
+        { name: 'Agree', type: 'bar', stack: 'total', data: [65], itemStyle: { color: palette[1] } },
+        { name: 'Not sure', type: 'bar', stack: 'total', data: [19], itemStyle: { color: palette[2] } },
+        { name: 'Disagree', type: 'bar', stack: 'total', data: [22], itemStyle: { color: palette[3] } },
+        { name: 'Strongly disagree', type: 'bar', stack: 'total', data: [19], itemStyle: { color: palette[4], borderRadius: [0, 3, 3, 0] } }
+      ]
+    });
+
+    // 6. Diverging Bar: Leave Rent Threshold
+    const chartLeave = initChart('chart-leave-rent', {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        ...tooltipStyle,
+        formatter: (params) => `${params[0].name}: <b>${Math.abs(params[0].value)} tenants</b>`
+      },
+      grid: { left: 0, right: 10, bottom: 0, top: 5, containLabel: true },
+      xAxis: {
+        type: 'value',
+        axisLabel: {
+          formatter: (v) => Math.abs(v),
+          fontSize: 8, fontFamily: fontFam, color: '#536255'
+        },
+        splitLine: { lineStyle: { type: 'dashed', color: '#d1d8ce' } }
+      },
+      yAxis: {
+        type: 'category',
+        data: [
+          'Past limit',
+          'Another 10% out',
+          'Another 25%',
+          'Never leave',
+          'Pay whatever'
+        ],
+        axisLine: { show: false },
+        axisTick: { show: false },
+        axisLabel: { fontSize: 8.5, fontFamily: fontFam, fontWeight: '600', color: '#1c261e' }
+      },
+      series: [{
+        type: 'bar',
+        barWidth: 12,
+        data: [
+          { value: -65, itemStyle: { color: '#a84e4e', borderRadius: [3, 0, 0, 3] } },
+          { value: -67, itemStyle: { color: '#c87878', borderRadius: [3, 0, 0, 3] } },
+          { value: -102, itemStyle: { color: '#d96b6b', borderRadius: [3, 0, 0, 3] } },
+          { value: 95, itemStyle: { color: palette[1], borderRadius: [0, 3, 3, 0] } },
+          { value: 42, itemStyle: { color: palette[0], borderRadius: [0, 3, 3, 0] } }
+        ]
+      }]
+    });
+
+    // 7A. Pie Chart Card 1: Hike Outcomes
+    const chartHikePie = initChart('chart-hike-pie', {
+      tooltip: { ...tooltipStyle, formatter: '{b}: <b>{c} ({d}%)</b>' },
+      legend: {
+        orient: 'vertical',
+        right: 0,
+        top: 'center',
+        itemWidth: 8, itemHeight: 8,
+        textStyle: { fontSize: 8, fontFamily: fontFam, fontWeight: 600, color: '#536255' }
+      },
+      series: [{
+        name: 'Hike Outcome',
+        type: 'pie',
+        radius: ['40%', '72%'],
+        center: ['32%', '50%'],
+        avoidLabelOverlap: false,
+        label: { show: false },
+        data: [
+          { value: 162, name: 'Paid, no discussion', itemStyle: { color: palette[0] } },
+          { value: 72, name: 'Pushed back (no budge)', itemStyle: { color: palette[1] } },
+          { value: 61, name: 'Negotiated down', itemStyle: { color: palette[2] } },
+          { value: 48, name: 'Haven\'t faced hike', itemStyle: { color: palette[3] } },
+          { value: 17, name: 'Walked / moved out', itemStyle: { color: palette[4] } }
+        ]
+      }]
+    });
+
+    // 7B. Pie Chart Card 2: Coping Mechanisms
+    const chartCopingPie = initChart('chart-coping-pie', {
+      tooltip: { ...tooltipStyle, formatter: '{b}: <b>{c} ({d}%)</b>' },
+      legend: {
+        orient: 'vertical',
+        right: 0,
+        top: 'center',
+        itemWidth: 8, itemHeight: 8,
+        textStyle: { fontSize: 8, fontFamily: fontFam, fontWeight: 600, color: '#536255' }
+      },
+      series: [{
+        name: 'Coping Mechanisms',
+        type: 'pie',
+        radius: ['40%', '72%'],
+        center: ['32%', '50%'],
+        avoidLabelOverlap: false,
+        label: { show: false },
+        data: [
+          { value: 122, name: 'Delayed financial goals', itemStyle: { color: palette[0] } },
+          { value: 119, name: 'None of these', itemStyle: { color: palette[4] } },
+          { value: 91, name: 'Downgraded place', itemStyle: { color: palette[1] } },
+          { value: 82, name: 'Longer commute', itemStyle: { color: palette[2] } },
+          { value: 76, name: 'Dipped into savings', itemStyle: { color: palette[3] } },
+          { value: 40, name: 'Took on flatmates', itemStyle: { color: palette[5] } }
+        ]
+      }]
+    });
+
+    // Global Resize Trigger for Desktop & Mobile orientation changes
+    function triggerResize() {
+      const allCharts = [
+        chartDeposit, chartPayShare, chartDotReasons,
+        chartTreemap, chartLimit, chartLeave,
+        chartHikePie, chartCopingPie
+      ];
+      allCharts.forEach(c => c && c.resize());
+    }
+
+    window.addEventListener('resize', triggerResize);
+    setTimeout(triggerResize, 200);
+  </script>
+</body>
+</html>
