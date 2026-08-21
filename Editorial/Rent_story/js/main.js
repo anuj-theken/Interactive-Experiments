@@ -77,12 +77,44 @@
 
     document.getElementById('dynamic-subtitle').textContent = SUBTITLES[tab];
 
+    // Replay the panel's fade/slide-in every time it's opened, not just the
+    // first time — remove the class, force a reflow (offsetWidth read) so
+    // the browser forgets the animation already ran, then re-add it.
+    const panel = document.getElementById(PANEL_IDS[tab]);
+    panel.classList.remove('panel-enter');
+    void panel.offsetWidth;
+    panel.classList.add('panel-enter');
+
     fontsReady.then(() => {
       if (!initialized[tab]) {
         window[INIT_FNS[tab]]();
         initialized[tab] = true;
+      } else {
+        replayChartAnimation(tab);
       }
       requestAnimationFrame(() => resizeTab(tab));
+    });
+  }
+
+  // ECharts only plays its "grow in from nothing" entrance animation the
+  // first time a chart's data goes from empty to populated. Re-showing an
+  // already-initialized tab would otherwise just snap the charts back into
+  // view with no motion, so replay the entrance here by clearing each chart
+  // and re-applying its last option — same visual as a first load.
+  function replayChartAnimation(tab) {
+    const chartsMap = {
+      overview: window.overviewCharts,
+      homeowner: window.homeownerCharts,
+      nonresident: window.nonresidentCharts,
+      landlord: window.landlordCharts,
+      tenant: window.tenantCharts
+    }[tab];
+    if (!chartsMap) return;
+    Object.values(chartsMap).forEach((chart) => {
+      if (!chart || chart.isDisposed()) return;
+      const option = chart.getOption();
+      chart.clear();
+      chart.setOption(option);
     });
   }
 

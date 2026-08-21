@@ -90,12 +90,67 @@
 
 html, body {
   min-height: 100%;
-  background-color: var(--bg-outer);
   color: var(--page-text-dark);
 }
 
 body {
   padding: 28px 16px;
+  background-color: var(--bg-outer);
+}
+
+/* Paper texture: texture-tile.png is a processed version of the reference
+   texture.png — its low-frequency gradient/vignette was subtracted out
+   (a raw tile of the original showed a hard repeating light/dark band)
+   and the remaining fine-grain noise was recentered near-white and mirror-
+   tiled into a seamless 760x760 block. Confined to the dashboard itself
+   (container/cards/tabs/charts) — the outer page background stays plain.
+   Applied as a `::before` overlay rather than directly on each element's
+   own `background-image`, so opacity can be dialled down independently of
+   the multiply blend: mix-blend-mode blends the overlay with whatever
+   --*-bg color sits behind it. Adjust the strength here (0.45 currently). */
+.dashboard-container::before,
+.card::before,
+.chart-box::before,
+.tab-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('../texture-tile.png');
+  background-size: 420px 420px;
+  background-repeat: repeat;
+  mix-blend-mode: multiply;
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* `inset:0` fills the parent's box exactly; `z-index:-1` sinks the overlay
+   below the parent's own in-flow content per CSS stacking order, while
+   still painting above the parent's solid background-color — but ONLY if
+   the parent actually establishes its own stacking context. `position:
+   relative` alone does NOT do that (it needs a z-index other than `auto`
+   too); without one here, the negative-z-index overlay was escaping to
+   whatever real stacking context sat further up the tree (e.g. the page
+   body), landing behind ITS background instead — rendering as invisible,
+   which is why the texture vanished once nothing else (like the tab-switch
+   animation's momentary `opacity`, which forces a stacking context while
+   it's running) was incidentally forcing one into existence. `z-index: 0`
+   is the actual fix: it gives each of these 4 elements a real stacking
+   context of their own, at rest, independent of any animation. */
+.dashboard-container,
+.card,
+.chart-box,
+.tab-btn {
+  z-index: 0;
+}
+
+.dashboard-container::before,
+.card::before {
+  border-radius: inherit;
+}
+
+.tab-btn::before {
+  clip-path: inherit;
 }
 
 .page {
@@ -163,70 +218,101 @@ body {
   min-height: 2.8em;
 }
 
-/* Folder tabs (see tabs.png reference): colored flaps attached to the top
-   edge of the "sheet" below them — here, the active .dashboard-container.
-   How the attach illusion works, with no z-index math beyond one rule:
+/* Folder tabs (tab_Layour.png): ONE row, every tab sharing the exact same
+   "attach to the sheet below" mechanic, with no z-index math beyond one
+   rule:
      - .tabs-row has a negative margin-bottom, so .dashboard-container
        (next sibling, painted after it in DOM order) overlaps UP into the
        bottom of every tab.
-     - .dashboard-container gets `position: relative` so it takes part in
-       the same positioned-element paint order as the tabs — being later in
-       the DOM, it then paints OVER that overlapping bottom strip of every
-       tab, which is what makes inactive tabs look like they're tucked
-       behind/under the sheet.
+     - .dashboard-container gets `position: relative` + `z-index: 0` so it
+       has a real stacking context of its own — being later in the DOM, it
+       then paints OVER that overlapping bottom strip of every tab, which
+       is what makes inactive ones look tucked behind/under the sheet.
      - .tab-btn.active gets a higher z-index than the container, so ITS
        overlapping strip paints on top instead — it reads as the tab that's
        pulled to the front, flush and unbroken into the panel below it.
-   Inactive tabs are also nudged down + faded slightly so more of them
-   recedes behind the seam, echoing the cascading stack in the reference.
-   The negative margin-bottom is what pulls .dashboard-container (the next
-   sibling after </header>) up to overlap — it still works with .tabs-row
-   as a flex child of .page-header rather than a standalone block, since
-   .page-header uses align-items:flex-end (not the stretch default), so
-   this item keeps its own natural height instead of being force-stretched
-   to match the title block's. */
+   Since every tab shares this one mechanic and rests at the same
+   translateY, ANY of the 5 can attach flush when active, and all 5 sit on
+   the same baseline at rest — the overlap below is what gives them the
+   layered-tab look instead of a height stagger. */
 .tabs-row {
   display: flex;
   flex-shrink: 0;
-  gap: 6px;
   margin-bottom: -16px;
 }
 
+/* Trapezoid manila-tab silhouette (tab_Layour.png): flat top edge, sides
+   flaring outward going down to a full-width base, instead of a plain
+   rounded-rectangle. border-radius has no effect on a clip-path'd shape,
+   so the 2 visible top corners are rounded by approximating a curve
+   directly in the polygon (a quadratic Bezier sampled into 4 points per
+   corner) instead — the bottom 2 corners stay sharp since they're tucked
+   out of view under the dashboard sheet below. */
 .tab-btn {
   position: relative;
   border: none;
-  border-radius: 14px 14px 0 0;
-  padding: 11px 22px 24px;
+  padding: 13px 24px 26px;
   font-family: var(--font-body-bold);
   font-weight: 700;
   font-size: 0.82rem;
-  color: #fbf8f2;
   cursor: pointer;
-  opacity: 0.82;
-  transform: translateY(9px);
-  transition: transform .15s ease, opacity .15s ease;
+  opacity: 0.85;
+  clip-path: polygon(8% 7%, 8.99% 3.14%, 10.63% 0.81%, 13% 0%, 87% 0%, 89.31% 0.76%, 90.97% 3.05%, 92% 7%, 100% 100%, 0% 100%);
+  transform: translateY(15px);
+  transition: transform .32s cubic-bezier(0.22, 1, 0.36, 1), opacity .25s ease, filter .25s ease;
+  /* drop-shadow (not box-shadow) since it follows the clip-path's actual
+     trapezoid silhouette instead of the rectangular box behind it — needed
+     for definition now that tabs are pale paper tones against a similarly
+     pale page background. */
+  filter: brightness(0.94) drop-shadow(0 3px 5px rgba(0, 0, 0, 0.20));
+}
+
+/* Overlap into the previous tab a little (shingled, like real folder
+   dividers) instead of sitting apart with a gap — margin-left (not a
+   negative `gap`, which browsers clamp to 0) shifts every tab but the
+   first back into its neighbor. Since same-z-index siblings paint in DOM
+   order, each tab's left edge naturally paints OVER the previous tab's
+   right edge at the overlap — 14px stays well inside the 24px side
+   padding, so it only eats into empty tab background, never the label
+   text. */
+.tab-btn:not(:first-child) {
+  margin-left: -14px;
 }
 
 .tab-btn:hover {
-  opacity: 0.95;
-  transform: translateY(5px);
+  /* Deliberately NOT a z-index bump — hovering should only preview a tab
+     (nudge it up a little), not pull it in front of its neighbors; it
+     should only actually come forward once it's .active (clicked). No
+     `scale()` here either — shrinking a clipped shape pulls its edges in
+     from the overlap seam with its neighbors, opening a sliver gap right
+     when you're pointing at it, which read as "not attached." translateY
+     only keeps the silhouette's width solid throughout the hover motion. */
+  opacity: 0.97;
+  transform: translateY(7px);
+  filter: brightness(0.98) drop-shadow(0 3px 5px rgba(0, 0, 0, 0.20));
 }
 
 .tab-btn.active {
   z-index: 5;
   opacity: 1;
   transform: translateY(0);
-  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.06);
+  filter: brightness(1) drop-shadow(0 3px 6px rgba(0, 0, 0, 0.22));
+  box-shadow: 0 -6px 14px rgba(0, 0, 0, 0.10);
 }
 
-/* Flap colors — dusty mid-tones pulled from each dashboard's own theme ramp
-   (--c2/--c3 in section 3), inspired by tabs.png's muted folder palette
-   rather than the fully-saturated chart colors. */
-.tab-btn[data-tab="overview"] { background-color: #6b3260; }
-.tab-btn[data-tab="tenant"] { background-color: #3c7d78; }
-.tab-btn[data-tab="landlord"] { background-color: #3c4f74; }
-.tab-btn[data-tab="homeowner"] { background-color: #99472a; }
-.tab-btn[data-tab="nonresident"] { background-color: #4B5E3C; }
+/* Each tab's background is its own dashboard's paper --container-bg tone
+   and its text is that theme's --c2 accent — both straight from
+   ColorPallete.png (see css/dashboard.css section 3) — so a tab reads as
+   "the same paper as the sheet it opens," with the dashboard's own color
+   carried only in the label, echoing tab_Layour.png's cream tabs +
+   colored text rather than a solid coloured flap. --c2 (not the much
+   darker --text-dark) so the label's actual hue stays visible instead of
+   reading as near-black. */
+.tab-btn[data-tab="overview"] { background-color: #fcfaf5; color: #8e4e4d; }
+.tab-btn[data-tab="tenant"] { background-color: #f7f7f4; color: #bb5e31; }
+.tab-btn[data-tab="landlord"] { background-color: #faf9f7; color: #a27958; }
+.tab-btn[data-tab="homeowner"] { background-color: #faf6ef; color: #c27c63; }
+.tab-btn[data-tab="nonresident"] { background-color: #f9f7f3; color: #87905a; }
 
 /* --------------------------------------------------------------------------
    3. DASHBOARD CONTAINER + PER-TAB THEME VARIABLES
@@ -245,9 +331,20 @@ body {
      inactive tabs — see the .tabs-row comment above. */
   position: relative;
   background-color: var(--container-bg);
-  border-radius: 24px;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  /* Top-right corner squared off (not 24px like the other 3) so the
+     dashboard's own right edge aligns flush with the rightmost tab above
+     it instead of curving away from it. */
+  border-radius: 24px 0 24px 24px;
+  /* No border — separation from the page comes from these shadows instead
+     of an outline: the usual soft ambient shadow all around, plus a
+     second, tighter one on just the top edge for a bit of depth right
+     under the tabs. (An earlier version added 2 extra flat "ghost sheet"
+     shadows here for a stacked-paper depth effect, but on top of
+     everything else going on right at that seam, it read as more noise
+     than depth — simplified back down to one plain shadow.) */
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.05),
+    0 -4px 10px rgba(0, 0, 0, 0.08);
   padding: 24px;
   flex-direction: column;
   justify-content: flex-start;
@@ -255,83 +352,100 @@ body {
   overflow: hidden;
 }
 
-/* Overview theme — plum / aubergine (the 5th hue: terracotta, sage,
-   slate-indigo, teal and now plum sit far enough apart on the wheel that no
-   two tabs read as the same palette). 6 ramp steps to match the other
-   6-step themes. */
+/* Panel-switch entrance (js/main.js toggles this class on whichever panel
+   just became visible, re-triggering it via a reflow so it replays every
+   time — not just the first time a tab is opened). Fade only, no
+   translateY: sliding the panel up from below meant it spent part of the
+   animation physically offset downward from the tabs, i.e. visibly
+   detached from them, right when the attach illusion matters most. */
+@keyframes panelEnter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.dashboard-container.panel-enter {
+  animation: panelEnter 0.4s ease;
+}
+
+/* Overview theme — cream paper + brick-red/maroon accent, sampled from
+   overview.png (bg ~(235,224,190), accent dot ~(142,78,77)). */
 .dashboard-container.theme-overview {
-  --container-bg: #f1e7ee;
-  --card-bg: #f1e7ee;
-  --border-color: rgba(70, 20, 60, 0.12);
-  --text-dark: #2c1428;
-  --text-muted: #6b5566;
-  --c1: #4a1e42;
-  --c2: #6b3260;
-  --c3: #8f4f80;
-  --c4: #b0759d;
-  --c5: #cc9dbe;
-  --c6: #e4c6d9;
+  --container-bg: #fcfaf5;
+  --card-bg: #fcfaf5;
+  --border-color: rgba(106, 58, 58, 0.14);
+  --text-dark: #402323;
+  --text-muted: #645652;
+  --c1: #74403f;
+  --c2: #8e4e4d;
+  --c3: #a77574;
+  --c4: #c19e9d;
+  --c5: #d7c1c1;
+  --c6: #ebdfdf;
 }
 
-/* Homeowner theme — warm sand / terracotta */
+/* Homeowner theme — warm tan paper + coral accent, sampled from
+   ColorPallete.png (swatch 3: bg (233,215,181), accent (194,124,99)). */
 .dashboard-container.theme-homeowner {
-  --container-bg: #f7efe7;
-  --card-bg: #f7efe7;
-  --border-color: rgba(60, 40, 30, 0.10);
-  --text-dark: #2c201a;
-  --text-muted: #786960;
-  --c1: #6b2d18;
-  --c2: #99472a;
-  --c3: #c26946;
-  --c4: #e09170;
-  --c5: #f2beaa;
+  --container-bg: #faf6ef;
+  --card-bg: #faf6ef;
+  --border-color: rgba(146, 93, 74, 0.14);
+  --text-dark: #57382d;
+  --text-muted: #6f6056;
+  --c1: #9f6651;
+  --c2: #c27c63;
+  --c3: #cf9985;
+  --c4: #ddb7a9;
+  --c5: #ead1c8;
 }
 
-/* Non-resident theme — sage / olive */
+/* Non-resident theme — off-white paper + olive accent, sampled from
+   ColorPallete.png (swatch 4: bg (229,220,200), accent (135,144,90)). */
 .dashboard-container.theme-nonresident {
-  --container-bg: #e7e4d6;
-  --card-bg: #e7e4d6;
-  --border-color: rgba(30, 40, 20, 0.14);
-  --text-dark: #1c2417;
-  --text-muted: #596152;
-  --c1: #2D3A27;
-  --c2: #4B5E3C;
-  --c3: #768A5E;
-  --c4: #A1B382;
-  --c5: #C8D6AE;
+  --container-bg: #f9f7f3;
+  --card-bg: #f9f7f3;
+  --border-color: rgba(101, 108, 68, 0.14);
+  --text-dark: #3d4128;
+  --text-muted: #636454;
+  --c1: #6f764a;
+  --c2: #87905a;
+  --c3: #a1a87e;
+  --c4: #bdc2a4;
+  --c5: #d5d8c5;
 }
 
-/* Landlord theme — slate / indigo (kept visually distinct from the warm and
-   sage themes above so the three tabs never read as the same palette) */
+/* Landlord theme — cream paper + warm tan/camel accent, sampled from
+   landlord.png (bg ~(220,214,199), accent dot ~(162,121,88)). */
 .dashboard-container.theme-landlord {
-  --container-bg: #e7e9f1;
-  --card-bg: #e7e9f1;
-  --border-color: rgba(30, 40, 70, 0.14);
-  --text-dark: #1c2233;
-  --text-muted: #5b6478;
-  --c1: #263454;
-  --c2: #3c4f74;
-  --c3: #5f7699;
-  --c4: #93a5c2;
-  --c5: #c7d2e3;
+  --container-bg: #faf9f7;
+  --card-bg: #faf9f7;
+  --border-color: rgba(122, 91, 66, 0.14);
+  --text-dark: #493628;
+  --text-muted: #685f54;
+  --c1: #856348;
+  --c2: #a27958;
+  --c3: #b6967d;
+  --c4: #ccb5a3;
+  --c5: #ded0c5;
 }
 
-/* Tenant theme — teal (the 4th hue: warm terracotta, sage, slate-indigo and
-   now cool teal all sit in different parts of the color wheel so no two
-   tabs ever read as the same palette). 6 ramp steps since the coping-pie
-   chart needs a 6th category color. */
+/* Tenant theme — sage-khaki paper + burnt-orange accent, sampled from
+   ColorPallete.png (swatch 5: bg (155,155,122), accent (187,94,49)). 6 ramp
+   steps since the coping-pie chart needs a 6th category color. Like
+   Overview, the swatch itself is more saturated than the other 3 themes'
+   paper swatches, so it's lightened toward white more aggressively (92%
+   vs. the original ~78%) to match their whitish weight. */
 .dashboard-container.theme-tenant {
-  --container-bg: #e3edeb;
-  --card-bg: #e3edeb;
-  --border-color: rgba(20, 55, 50, 0.14);
-  --text-dark: #123330;
-  --text-muted: #4f6b67;
-  --c1: #0e3d3a;
-  --c2: #1c5955;
-  --c3: #3c7d78;
-  --c4: #6ca39d;
-  --c5: #9fc7c1;
-  --c6: #cde3df;
+  --container-bg: #f7f7f4;
+  --card-bg: #f7f7f4;
+  --border-color: rgba(140, 70, 37, 0.14);
+  --text-dark: #542a16;
+  --text-muted: #6d594c;
+  --c1: #994d28;
+  --c2: #bb5e31;
+  --c3: #ca815e;
+  --c4: #daa68e;
+  --c5: #e7c7b7;
+  --c6: #f3e2da;
 }
 
 /* --------------------------------------------------------------------------
@@ -418,7 +532,9 @@ body {
 .card {
   background-color: var(--card-bg);
   border-radius: 16px;
-  border: 1px solid var(--border-color);
+  /* No border — a soft shadow separates the card from the dashboard's own
+     background instead of an outline. */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -461,6 +577,7 @@ body {
   width: 100%;
   height: 100%;
   min-height: 0;
+  position: relative;
 }
 
 /* --------------------------------------------------------------------------
@@ -755,8 +872,28 @@ body {
   }
 
   .card {
-    height: 380px;
-    flex: none;
+    /* !important: a few cards (e.g. the Tenant treemap and diverging-bar
+       cards) carry an inline `style="flex: 1.15"`-style row ratio for
+       their desktop column layout, which otherwise beats this rule
+       outright (inline always wins over a stylesheet, any specificity).
+       Left unfixed, those cards' ECharts container resolves to 0 height
+       in this column layout — the chart silently renders nothing, which
+       reads as an empty card even though the title/subtitle are still
+       there. */
+    height: 380px !important;
+    flex: none !important;
+  }
+
+  /* .pie-fit-card's align-self:start (section 4) means something totally
+     different here than on desktop: .dashboard-grid is CSS grid there, so
+     align-self only ever touched the row/vertical axis. Here it's a flex
+     column, where align-self controls the CROSS axis instead — which for
+     a column is horizontal — so the exact same property was silently
+     shrinking these cards to their content's width instead of the full
+     row height they were meant to opt out of. Back to the default
+     (stretch) so they take the full width like every other mobile card. */
+  .pie-fit-card {
+    align-self: stretch;
   }
 
   .split-card-content {
@@ -785,24 +922,60 @@ body {
     gap: 1.5rem;
   }
 
+  /* Right-align the legend block itself (not its items' internal
+     swatch+text layout, which stays left-aligned) now that it's stacked
+     below the dot grid instead of beside it — align-self overrides the
+     wrapper's own align-items:flex-start just for this one child. */
+  .right-legend {
+    align-self: flex-end;
+  }
+
   .dot-matrix-grid {
     min-width: 100%;
   }
 
-  /* 5 folder tabs don't fit one row on a phone width — let the strip
-     scroll horizontally instead of wrapping (wrapping would break the
-     tucked-behind-the-seam illusion for whichever tabs land on row 2).
-     width:100% constrains it to the viewport (it wraps onto its own line
-     below the title first, via .page-header's flex-wrap) so there's
-     something for overflow-x to actually scroll within. */
+  /* 5 folder tabs don't fit one row at a phone width at their desktop
+     padding/font-size, so instead of scrolling (which read as broken/
+     confusing — easy to miss that more tabs exist off-screen) each one
+     flexes to fill an equal share of the full row width instead.
+     width:100% constrains .tabs-row to the viewport (it wraps onto its own
+     line below the title first, via .page-header's flex-wrap).
+     margin-bottom needs to cancel out .page's own 16px `gap` between
+     .page-header and .dashboard-container FIRST before it can create any
+     actual overlap — a previous attempt here (-14px) forgot that gap
+     existed, so the real result was gap(16) + margin(-14) = a visible
+     +2px gap, not the intended overlap. -24px nets out to an actual -8px
+     overlap into the dashboard. */
   .tabs-row {
     width: 100%;
-    overflow-x: auto;
-    padding-bottom: 2px;
-    -webkit-overflow-scrolling: touch;
+    margin-bottom: -24px;
   }
 
   .tab-btn {
-    flex-shrink: 0;
+    flex: 1 1 0%;
+    min-width: 0;
+    /* Bottom padding (24px, bigger than the 18px this started at) has to
+       clear 2 lines of text for "Non-Resident" — the one label still wide
+       enough to wrap at this width — not just 1, or its 2nd line ends up
+       under the dashboard's -14px overlap. */
+    padding: 10px 4px 24px;
+    font-size: 0.72rem;
+    text-align: center;
+    /* "Homeowner"/"Non-Resident" are wider than their equal flex share at
+       this size — without a break opportunity, a single unbroken word
+       just overflows its own box sideways instead of wrapping, silently
+       hiding under the next tab's overlap. hyphens:auto (html lang="en" is
+       set, which real syllable-based hyphenation needs) breaks it at a
+       proper syllable instead of overflow-wrap's anywhere-mid-word
+       fallback, which could otherwise strand a single orphan letter on its
+       own line. */
+    white-space: normal;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    line-height: 1.15;
+  }
+
+  .tab-btn:not(:first-child) {
+    margin-left: -8px;
   }
 }

@@ -12,10 +12,10 @@ window.homeownerCharts = {};
 window.initHomeownerCharts = function initHomeownerCharts() {
   const charts = window.homeownerCharts;
 
-  const PALETTE = ['#6b2d18', '#99472a', '#c26946', '#e09170', '#f2beaa'];
-  const TEXT_DARK = '#2c201a';
-  const TEXT_MUTED = '#786960';
-  const BORDER_TONE = 'rgba(60, 40, 30, 0.08)';
+  const PALETTE = ['#9f6651', '#c27c63', '#cf9985', '#ddb7a9', '#ead1c8'];
+  const TEXT_DARK = '#57382d';
+  const TEXT_MUTED = '#6f6056';
+  const BORDER_TONE = 'rgba(146, 93, 74, 0.14)';
 
   const commonTextStyle = {
     fontFamily: 'GT America, sans-serif',
@@ -125,7 +125,10 @@ window.initHomeownerCharts = function initHomeownerCharts() {
     { value: 25, name: 'Cannot afford', itemStyle: { color: PALETTE[1] } },
     { value: 11, name: 'About same', itemStyle: { color: PALETTE[2] } },
     { value: 10, name: 'Do not know', itemStyle: { color: PALETTE[3] } }
-  ], commonTextStyle, { name: 'Today Rents' }));
+  // legendRows:3 matches Buying Possible's own legend (5 items vs. this
+  // one's 4), so the 2 donuts land on the same Y instead of this one
+  // sitting higher.
+  ], commonTextStyle, { name: 'Today Rents', legendRows: 3 }));
 
   // --- Card: "Do you think buying a home is still possible for young renters today?" ---
   // "Impossible now" gets the darkest shade — the most negative/definitive
@@ -137,5 +140,5 @@ window.initHomeownerCharts = function initHomeownerCharts() {
     { value: 15, name: 'Family help', itemStyle: { color: PALETTE[2] } },
     { value: 15, name: 'If plan/save', itemStyle: { color: PALETTE[3] } },
     { value: 2, name: 'No chance', itemStyle: { color: PALETTE[4] } }
-  ], commonTextStyle, { name: 'Buying Possible' }));
+  ], commonTextStyle, { name: 'Buying Possible', legendRows: 3 }));
 };

@@ -21,7 +21,12 @@
      actual dimensions), top-left legend, inside % labels hidden below a 5%
      slice threshold (too small to hold text without overlapping). Pass
      {mini: true} for a smaller fixed radius where 2+ pies must fit tightly
-     side-by-side in a single card.
+     side-by-side in a single card. {legendRows: N} pins the donut's Y
+     position to what a fixed N-row legend would need, instead of each
+     pie computing its own from its own category count — pass the same N
+     to every pie in a row so they visually align even when their actual
+     category counts differ. {extraGap: N} adds N extra px between the
+     legend and the donut on top of that.
 
    window.ChartTheme.statBarAxes(textStyle, borderColor, categoryLabel)
      The shared grid/xAxis/yAxis for every "single-row 100% stacked bar"
@@ -123,9 +128,17 @@ window.ChartTheme = (function () {
   // the legend never overlaps the donut below it, regardless of how many
   // categories a particular chart has (4 categories vs. Tenant's 6-category
   // "Coping Mechanisms" pie, which was overlapping before this).
-  function pieCenterY(count, radius) {
-    const legendRows = Math.ceil(count / 2);
-    return 14 + legendRows * 15 + radius[1] + 8;
+  // opts.legendRows overrides the auto-computed row count — pass the same
+  // value to 2+ pies so their donuts land on the same Y even when their
+  // actual category counts (and so legend row counts) differ, e.g. 2 pies
+  // side by side in a row that should look aligned. opts.extraGap adds
+  // flat extra px between the legend and the donut on top of that, for
+  // when a pie just needs more breathing room on its own.
+  function pieCenterY(count, radius, opts) {
+    opts = opts || {};
+    const legendRows = opts.legendRows || Math.ceil(count / 2);
+    const extraGap = opts.extraGap || 0;
+    return 14 + legendRows * 15 + extraGap + radius[1] + 8;
   }
 
   function pieOption(data, textStyle, opts) {
@@ -142,7 +155,7 @@ window.ChartTheme = (function () {
         name: opts.name || '',
         type: 'pie',
         radius,
-        center: ['50%', pieCenterY(data.length, radius)],
+        center: ['50%', pieCenterY(data.length, radius, opts)],
         avoidLabelOverlap: true,
         label: {
           show: true,

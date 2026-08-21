@@ -16,10 +16,10 @@ window.tenantCharts = {};
 window.initTenantCharts = function initTenantCharts() {
   const charts = window.tenantCharts;
 
-  const PALETTE = ['#0e3d3a', '#1c5955', '#3c7d78', '#6ca39d', '#9fc7c1', '#cde3df'];
-  const TEXT_DARK = '#123330';
-  const TEXT_MUTED = '#4f6b67';
-  const BORDER_TONE = 'rgba(20, 55, 50, 0.12)';
+  const PALETTE = ['#994d28', '#bb5e31', '#ca815e', '#daa68e', '#e7c7b7', '#f3e2da'];
+  const TEXT_DARK = '#542a16';
+  const TEXT_MUTED = '#6d594c';
+  const BORDER_TONE = 'rgba(140, 70, 37, 0.14)';
 
   const commonTextStyle = {
     fontFamily: 'GT America, sans-serif',
@@ -128,7 +128,7 @@ window.initTenantCharts = function initTenantCharts() {
         lineHeight: 13,
         formatter: (p) => `${p.name}\n(${p.value})`
       },
-      itemStyle: { borderColor: '#e3edeb', borderWidth: 2, gapWidth: 2 },
+      itemStyle: { borderColor: '#f7f7f4', borderWidth: 2, gapWidth: 2 },
       data: [
         { name: 'Paid, no discussion', value: 162, itemStyle: { color: PALETTE[0] } },
         { name: 'Pushed back (no budge)', value: 72, itemStyle: { color: PALETTE[1] } },
@@ -195,24 +195,31 @@ window.initTenantCharts = function initTenantCharts() {
         fontFamily: 'GT America Bold, sans-serif', fontWeight: 700, fontSize: 9, color: TEXT_DARK
       },
       data: [
-        { value: -65, itemStyle: { color: '#b1615c', borderRadius: [4, 0, 0, 4] }, label: { position: 'left' } },
-        { value: -67, itemStyle: { color: '#c1817d', borderRadius: [4, 0, 0, 4] }, label: { position: 'left' } },
-        { value: -102, itemStyle: { color: '#a24842', borderRadius: [4, 0, 0, 4] }, label: { position: 'left' } },
+        { value: -65, itemStyle: { color: '#7a8290', borderRadius: [4, 0, 0, 4] }, label: { position: 'left' } },
+        { value: -67, itemStyle: { color: '#98a0ab', borderRadius: [4, 0, 0, 4] }, label: { position: 'left' } },
+        { value: -102, itemStyle: { color: '#5b6272', borderRadius: [4, 0, 0, 4] }, label: { position: 'left' } },
         { value: 95, itemStyle: { color: PALETTE[1], borderRadius: [0, 4, 4, 0] }, label: { position: 'right' } },
         { value: 42, itemStyle: { color: PALETTE[0], borderRadius: [0, 4, 4, 0] }, label: { position: 'right' } }
       ]
     }]
   });
 
-  // --- Card: "Landlord Hike Reactions" ---
+  // --- Card: "Last Renewal Hike" ("When your rent was last renewed, how
+  // much did it go up?") — ordered by increasing hike size (not by count)
+  // with color darkening as the hike gets bigger, same "meaning drives
+  // color" convention as the Overview pies; "Not renewed / N/A" sits
+  // outside that severity scale so it gets the lightest, most neutral
+  // tone rather than a slot within the gradient. Blank/unanswered rows (17
+  // of 373) are excluded, matching every other pie's convention here. ---
   charts.hikePie = ChartTheme.init('tn-chart-hike-pie');
   charts.hikePie.setOption(ChartTheme.pieOption([
-    { value: 162, name: 'Paid, no discussion', itemStyle: { color: PALETTE[0] } },
-    { value: 72, name: 'Pushed back', itemStyle: { color: PALETTE[1] } },
-    { value: 61, name: 'Negotiated down', itemStyle: { color: PALETTE[2] } },
-    { value: 48, name: "Haven't faced hike", itemStyle: { color: PALETTE[3] } },
-    { value: 17, name: 'Walked / moved out', itemStyle: { color: PALETTE[4] } }
-  ], commonTextStyle, { name: 'Hike Outcome' }));
+    { value: 26, name: "Didn't go up", itemStyle: { color: PALETTE[4] } },
+    { value: 215, name: 'Up to 10%', itemStyle: { color: PALETTE[3] } },
+    { value: 42, name: '11–20%', itemStyle: { color: PALETTE[2] } },
+    { value: 18, name: '21–40%', itemStyle: { color: PALETTE[1] } },
+    { value: 9, name: 'More than 40%', itemStyle: { color: PALETTE[0] } },
+    { value: 46, name: 'Not renewed / N/A', itemStyle: { color: PALETTE[5] } }
+  ], commonTextStyle, { name: 'Renewal Hike', extraGap: 20 }));
 
   // --- Card: "Moving & Coping Trade-offs" ---
   charts.copingPie = ChartTheme.init('tn-chart-coping-pie');
@@ -223,5 +230,5 @@ window.initTenantCharts = function initTenantCharts() {
     { value: 76, name: 'Dipped into savings', itemStyle: { color: PALETTE[3] } },
     { value: 40, name: 'Took on flatmates', itemStyle: { color: PALETTE[4] } },
     { value: 119, name: 'None of these', itemStyle: { color: PALETTE[5] } }
-  ], commonTextStyle, { name: 'Coping Mechanisms' }));
+  ], commonTextStyle, { name: 'Coping Mechanisms', extraGap: 20 }));
 };

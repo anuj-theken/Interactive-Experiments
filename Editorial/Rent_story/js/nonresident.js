@@ -12,11 +12,11 @@ window.nonresidentCharts = {};
 window.initNonresidentCharts = function initNonresidentCharts() {
   const charts = window.nonresidentCharts;
 
-  const fontStyle = { fontFamily: 'GT America', fontWeight: 300, fontSize: 10, color: '#1C2417' };
+  const fontStyle = { fontFamily: 'GT America', fontWeight: 300, fontSize: 10, color: '#3d4128' };
   const fontStyleBold = { fontFamily: 'GT America Bold', fontWeight: 700 };
-  const TEXT_MUTED = '#596152';
-  const BORDER_TONE = 'rgba(0,0,0,0.08)';
-  const palette = ['#2D3A27', '#4B5E3C', '#768A5E', '#A1B382', '#C8D6AE'];
+  const TEXT_MUTED = '#636454';
+  const BORDER_TONE = 'rgba(101, 108, 68, 0.14)';
+  const palette = ['#6f764a', '#87905a', '#a1a87e', '#bdc2a4', '#d5d8c5'];
 
   // --- Card: "Impact on Personal Choice vs. Advice to Others" ---
   charts.topLeft = ChartTheme.init('nr-chart-top-left');
@@ -27,18 +27,18 @@ window.initNonresidentCharts = function initNonresidentCharts() {
     xAxis: {
       type: 'category',
       data: ['Yes / Direct', 'Paused / Thought', 'No / Never', 'N/A / Encouraged'],
-      axisLabel: { ...fontStyleBold, fontSize: 9.5, color: '#1C2417', align: 'center' },
-      axisLine: { lineStyle: { color: '#B5AF9E' } }
+      axisLabel: { ...fontStyleBold, fontSize: 9.5, color: '#3d4128', align: 'center' },
+      axisLine: { lineStyle: { color: '#a1a87e' } }
     },
     yAxis: { type: 'value', splitLine: { lineStyle: { type: 'dashed', color: 'rgba(0,0,0,0.08)' } }, axisLabel: { fontSize: 9 } },
     series: [
       {
         name: 'Said No to Move/Job', type: 'bar', itemStyle: { color: palette[0], borderRadius: [4, 4, 0, 0] }, data: [16, 18, 15, 19],
-        label: { show: true, position: 'top', ...fontStyleBold, fontSize: 9, color: '#1C2417' }
+        label: { show: true, position: 'top', ...fontStyleBold, fontSize: 9, color: '#3d4128' }
       },
       {
         name: 'Told Others Not to Move', type: 'bar', itemStyle: { color: palette[2], borderRadius: [4, 4, 0, 0] }, data: [28, 15, 20, 7],
-        label: { show: true, position: 'top', ...fontStyleBold, fontSize: 9, color: '#1C2417' }
+        label: { show: true, position: 'top', ...fontStyleBold, fontSize: 9, color: '#3d4128' }
       }
     ]
   });
@@ -89,12 +89,12 @@ window.initNonresidentCharts = function initNonresidentCharts() {
     yAxis: {
       type: 'category',
       data: ['Manageable/Affordable', 'Yes, just as bad', 'Yes, but not as bad'],
-      axisLabel: { ...fontStyleBold, fontSize: 9, color: '#1C2417', align: 'right' },
+      axisLabel: { ...fontStyleBold, fontSize: 9, color: '#3d4128', align: 'right' },
       axisLine: { show: false }, axisTick: { show: false }
     },
     series: [{
       type: 'bar', data: [23, 24, 25], itemStyle: { color: palette[1], borderRadius: [0, 4, 4, 0] },
-      label: { show: true, position: 'right', ...fontStyleBold, fontSize: 9, color: '#1C2417' }
+      label: { show: true, position: 'right', ...fontStyleBold, fontSize: 9, color: '#3d4128' }
     }]
   });
 
@@ -107,12 +107,12 @@ window.initNonresidentCharts = function initNonresidentCharts() {
     yAxis: {
       type: 'category',
       data: ['Unknown/Left BLR', 'About the same', 'My city is worse', 'BLR is much worse'],
-      axisLabel: { ...fontStyleBold, fontSize: 9, color: '#1C2417', align: 'right' },
+      axisLabel: { ...fontStyleBold, fontSize: 9, color: '#3d4128', align: 'right' },
       axisLine: { show: false }, axisTick: { show: false }
     },
     series: [{
       type: 'bar', data: [9, 14, 17, 31], itemStyle: { color: palette[2], borderRadius: [0, 4, 4, 0] },
-      label: { show: true, position: 'right', ...fontStyleBold, fontSize: 9, color: '#1C2417' }
+      label: { show: true, position: 'right', ...fontStyleBold, fontSize: 9, color: '#3d4128' }
     }]
   });
 };

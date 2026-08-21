@@ -6,8 +6,8 @@
      window.landlordMap        — the Leaflet map instance (for invalidateSize)
      window.initLandlordCharts — lazy-init entry point called once by main.js
    DOM ids consumed here are all prefixed `ll-` (see index.html).
-   Palette is the slate/indigo theme — kept distinct from the homeowner
-   (terracotta) and non-resident (sage) themes on purpose.
+   Palette is the cream/tan-camel theme, sampled from landlord.png (see
+   css/dashboard.css section 3 for the full set of per-dashboard themes).
    ========================================================================== */
 
 window.landlordCharts = {};
@@ -15,15 +15,26 @@ window.landlordMap = null;
 
 window.initLandlordCharts = function initLandlordCharts() {
   const charts = window.landlordCharts;
-  const palette = ['#263454', '#3c4f74', '#5f7699', '#93a5c2', '#c7d2e3'];
+  const palette = ['#856348', '#a27958', '#b6967d', '#ccb5a3', '#ded0c5'];
   const defaultFont = 'GT America';
   const boldFont = 'GT America Bold';
-  const TEXT_DARK = '#1c2233';
-  const TEXT_MUTED = '#5b6478';
-  const borderTone = 'rgba(30, 40, 70, 0.14)';
+  const TEXT_DARK = '#493628';
+  const TEXT_MUTED = '#685f54';
+  const borderTone = 'rgba(122, 91, 66, 0.14)';
 
   // --- Map: "What area of Bangalore do you rent properties in?" ---
-  const map = L.map('ll-map', { zoomControl: false }).setView([12.9650, 77.6200], 10);
+  // Non-interactive, like the Overview map — a summary panel, not a
+  // dedicated exploration map, so panning/zooming would just risk losing
+  // the view rather than adding anything useful.
+  const map = L.map('ll-map', {
+    zoomControl: false,
+    dragging: false,
+    scrollWheelZoom: false,
+    doubleClickZoom: false,
+    boxZoom: false,
+    touchZoom: false,
+    keyboard: false
+  }).setView([12.9650, 77.6200], 10);
   window.landlordMap = map;
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -175,8 +186,8 @@ window.initLandlordCharts = function initLandlordCharts() {
       { name: 'Charging low before / fixed', count: 9, color: palette[2] },
       { name: 'People ready to pay', count: 6, color: palette[3] },
       { name: 'Costs went up (tax/repairs)', count: 6, color: palette[4] },
-      { name: 'Did not raise rent', count: 5, color: '#4a5b80' },
-      { name: 'Metro / office nearby', count: 1, color: '#aab7d0' }
+      { name: 'Did not raise rent', count: 5, color: '#7e5a3e' },
+      { name: 'Metro / office nearby', count: 1, color: '#c8ab8f' }
     ]
   );
 };

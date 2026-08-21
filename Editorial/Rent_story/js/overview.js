@@ -6,8 +6,8 @@
      window.overviewMap        — the Leaflet map instance (for invalidateSize)
      window.initOverviewCharts — lazy-init entry point called once by main.js
    DOM ids consumed here are all prefixed `ov-` (see index.html).
-   Palette is the plum theme — the 5th hue alongside homeowner's terracotta,
-   non-resident's sage, landlord's slate-indigo and tenant's teal.
+   Palette is the cream/brick-red theme, sampled from overview.png (see
+   css/dashboard.css section 3 for the full set of per-dashboard themes).
 
    Adjustments made from the original standalone overview.html to match the
    site-wide design system (dashboardstyleprompt.md, js/chart-theme.js) and
@@ -33,10 +33,10 @@ window.overviewMap = null;
 window.initOverviewCharts = function initOverviewCharts() {
   const charts = window.overviewCharts;
 
-  const PALETTE = ['#4a1e42', '#6b3260', '#8f4f80', '#b0759d', '#cc9dbe', '#e4c6d9'];
-  const TEXT_DARK = '#2c1428';
-  const TEXT_MUTED = '#6b5566';
-  const BORDER_TONE = 'rgba(70, 20, 60, 0.12)';
+  const PALETTE = ['#74403f', '#8e4e4d', '#a77574', '#c19e9d', '#d7c1c1', '#ebdfdf'];
+  const TEXT_DARK = '#402323';
+  const TEXT_MUTED = '#645652';
+  const BORDER_TONE = 'rgba(106, 58, 58, 0.14)';
 
   const commonTextStyle = {
     fontFamily: 'GT America, sans-serif',
@@ -94,7 +94,9 @@ window.initOverviewCharts = function initOverviewCharts() {
     { value: 38, name: '55 and above', itemStyle: { color: PALETTE[0] } },
     { value: 33, name: 'Under 25', itemStyle: { color: PALETTE[4] } },
     { value: 40, name: 'Not specified', itemStyle: { color: PALETTE[5] } }
-  ], commonTextStyle, { name: 'Age' }));
+  // legendRows:4 matches Career's own legend (7 items vs. Age's 6), so the
+  // 2 donuts land on the same Y instead of Age's sitting higher.
+  ], commonTextStyle, { name: 'Age', legendRows: 4 }));
 
   // --- Card: "Career Position" ---
   // Colors assigned by career seniority, not response count: Senior career
@@ -110,7 +112,7 @@ window.initOverviewCharts = function initOverviewCharts() {
     { value: 21, name: 'Not working', itemStyle: { color: PALETTE[4] } },
     { value: 7, name: 'Student', itemStyle: { color: PALETTE[3] } },
     { value: 98, name: 'Not specified', itemStyle: { color: PALETTE[5] } }
-  ], commonTextStyle, { name: 'Career' }));
+  ], commonTextStyle, { name: 'Career', legendRows: 4 }));
 
   // --- Card: "Tenant & Landlord Regional Distribution" (static, non-interactive map) ---
   // Same numbered-badge-with-name-popup marker style as the Landlord map

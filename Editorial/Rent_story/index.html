@@ -27,13 +27,13 @@
          Title + subtitle on the left; folder tabs on the right, bottom-
          aligned so their right edge lines up with the dashboard-container's
          right edge below (both share the page's max-width). Tabs are styled
-         after tabs.png: colored flaps attached to the top edge of the
-         "sheet" below them (the active .dashboard-container) — see
-         css/dashboard.css section 2 for how the attach illusion works.
-         Tab order is the literal display order — Overview, Tenants,
-         Landlords, Homeowners, Non-Residents. Each tab's flap color is a
-         mid-tone pulled from that dashboard's own theme ramp, not the full
-         chart palette, to keep it dusty/muted like the reference.
+         after tab_Layour.png: a single row, all 5 sharing the same "attach
+         to the sheet below" mechanic and the same resting height (see
+         css/dashboard.css section 2) — the shingled overlap (each tab's
+         margin-left pulling it back into its neighbor) is what gives them
+         the layered-tab look, not a height stagger. Each tab's own paper-bg
+         + text color come straight from that dashboard's theme
+         (ColorPallete.png), not a hand-picked flap color.
          ====================================================================== -->
     <header class="page-header">
       <div class="title-block">
@@ -43,10 +43,10 @@
 
       <nav class="tabs-row" role="tablist" aria-label="Respondent category">
         <button class="tab-btn active" data-tab="overview" role="tab" aria-selected="true">Overview</button>
-        <button class="tab-btn" data-tab="tenant" role="tab" aria-selected="false">Tenants</button>
-        <button class="tab-btn" data-tab="landlord" role="tab" aria-selected="false">Landlords</button>
-        <button class="tab-btn" data-tab="homeowner" role="tab" aria-selected="false">Homeowners</button>
-        <button class="tab-btn" data-tab="nonresident" role="tab" aria-selected="false">Non-Residents</button>
+        <button class="tab-btn" data-tab="tenant" role="tab" aria-selected="false">Tenant</button>
+        <button class="tab-btn" data-tab="landlord" role="tab" aria-selected="false">Landlord</button>
+        <button class="tab-btn" data-tab="homeowner" role="tab" aria-selected="false">Homeowner</button>
+        <button class="tab-btn" data-tab="nonresident" role="tab" aria-selected="false">Non-Resident</button>
       </nav>
     </header>
 
@@ -388,16 +388,16 @@
             <div id="tn-chart-rent-limit" class="chart-box"></div>
           </div>
 
-          <div class="card" style="flex: 0.8;">
+          <div class="card" style="flex: 0.65;">
             <div class="card-title">Max Rent Before Leaving City</div>
             <div class="card-subtitle">What tenants would pay before leaving Bengaluru</div>
             <div id="tn-chart-leave-rent" class="chart-box"></div>
           </div>
 
-          <div class="pies-row" style="flex: 1.6;">
+          <div class="pies-row" style="flex: 1.9;">
             <div class="card">
-              <div class="card-title">Landlord Hike Reactions</div>
-              <div class="card-subtitle">What happened after the last rent hike</div>
+              <div class="card-title">Last Renewal Hike</div>
+              <div class="card-subtitle">How much rent went up at last renewal</div>
               <div id="tn-chart-hike-pie" class="chart-box"></div>
             </div>
 
