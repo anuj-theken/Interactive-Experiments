@@ -3,27 +3,48 @@
    ==========================================================================
    Sections in this file:
      1. Reset & page-level tokens
-     2. Page header + folder tabs (attached to the dashboard, tabs.png ref)
+     2. Page header (title + subtitle only — see note below)
      3. Dashboard container + per-tab theme variables
-     4. Shared grid skeleton (left-column / right-column / pies-row) +
-        Overview's own grid (overview-grid)
+     4. Shared grid skeleton (top-row / left-column / right-column / pies-row)
+        + Overview's own grid (overview-grid)
      5. Card component (shared by all five dashboards)
-     6. Landlord-only sub-layouts (map split card, dot matrix)
-     7. Overview-only sub-layouts (KPI panel, map)
-     8. Responsive breakpoint (<= 868px)
+     6. Map + dot-matrix sub-layouts (Tenant, Landlord)
+     7. Overview-only sub-layouts (KPI panel)
+     8. Filter card + section tabs (Charts / Responses / Suggestions)
+     9. Responses tab + pagination
+     10. Site footer (logo / credit / source line)
+     11. Responsive breakpoint (<= 868px)
+
+   STRUCTURE NOTE: Tenant/Landlord/Homeowner/Non-Resident now each live in
+   their own standalone HTML file (tenant.html etc.) instead of as 5 tabs
+   toggled inside one page — index.html is a landing page that embeds
+   Overview inline and the other 4 as iframes, stacked one below the other.
+   Because of that, the "folder tab" component (tab_Layour.png) no longer
+   switches BETWEEN dashboards — it's reused inside each dashboard, as the
+   Charts/Responses (or Charts/Suggestions) switch. `.section-tabs` /
+   `.section-tab-btn` below carry that same visual mechanic (see section 8);
+   only their color now comes from the dashboard's own --card-bg/--c2
+   instead of 5 hand-picked per-dashboard swatches, since there's only ever
+   one dashboard's theme active on a page now.
+
    Theme variables (--container-bg, --card-bg, --border-color, --text-dark,
-   --text-muted, --c1..--c6) are set per `.dashboard-container.theme-*` and
+   --text-muted, --c1..--c6) are set per `.theme-*` (applied to both `.page`
+   and `.dashboard-container` in each standalone dashboard file, so the
+   section-tabs sitting between them — see section 8 — inherit the vars
+   too) and
    inherited by every `.card` inside it — this is the single place to retune
    a dashboard's color identity.
 
    TYPOGRAPHY SYSTEM: two families, hierarchy via size + opacity (not weight
    — Jazmin Alt only ships Bold, GT America ships Light + Black).
-     --font-header (Jazmin Alt)     -> page <h1> and every .card-title/h2,
-                                        i.e. anything acting as a headline.
+     --font-header (Jazmin Alt)     -> ONLY the page <h1> (the one dashboard
+                                        title per file) — nothing else.
      --font-body (GT America Light) -> all supporting/body text: subtitles,
                                         chart chrome, legends, KPI labels.
-     --font-body-bold (GT America Black) -> emphasized body text: tab labels,
-                                        KPI values, in-chart data labels.
+     --font-body-bold (GT America Black) -> everything else that needs
+                                        headline weight: .card-title/h2, tab
+                                        labels, KPI values, in-chart data
+                                        labels.
    Each tier then gets its own `opacity` (full 1 for the primary line in a
    pair, ~0.55-0.7 for the line under it) on top of that size/family choice
    — see .page-header h1/p and .card-title/.card-subtitle below for the
@@ -111,7 +132,7 @@ body {
 .dashboard-container::before,
 .card::before,
 .chart-box::before,
-.tab-btn::before {
+.section-tab-btn::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -135,12 +156,12 @@ body {
    which is why the texture vanished once nothing else (like the tab-switch
    animation's momentary `opacity`, which forces a stacking context while
    it's running) was incidentally forcing one into existence. `z-index: 0`
-   is the actual fix: it gives each of these 4 elements a real stacking
+   is the actual fix: it gives each of these elements a real stacking
    context of their own, at rest, independent of any animation. */
 .dashboard-container,
 .card,
 .chart-box,
-.tab-btn {
+.section-tab-btn {
   z-index: 0;
 }
 
@@ -149,7 +170,7 @@ body {
   border-radius: inherit;
 }
 
-.tab-btn::before {
+.section-tab-btn::before {
   clip-path: inherit;
 }
 
@@ -163,34 +184,13 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   2. PAGE HEADER + FOLDER TABS
+   2. PAGE HEADER
    -------------------------------------------------------------------------- */
-/* Title on the left, folder tabs on the right, both bottom-aligned so the
-   tabs' baseline lines up with the title block's baseline and — more
-   importantly — .tabs-row's right edge lines up with the
-   .dashboard-container's right edge below (page-header carries no side
-   padding, same as .dashboard-container, so both share the .page's edges
-   exactly). */
+/* Just a title + subtitle now — each standalone dashboard file has its own
+   header naming its category; index.html's is the site-wide title. No more
+   cross-dashboard tabs here (see the file-level note above). */
 .page-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 20px;
   text-align: left;
-}
-
-.title-block {
-  /* flex-basis:0 (not auto) so this item's share of the row is computed
-     purely from flex-grow, ignoring its content's natural/unwrapped width.
-     With basis:auto, the browser used the SUBTITLE TEXT's max-content width
-     (i.e. its width if it never wrapped) to decide whether .tabs-row still
-     fits on the same line — since that text differs per tab, tabs sat on
-     the right for tabs with a short subtitle (Overview, Tenant) but wrapped
-     tabs-row onto its own left-aligned line for tabs with a longer one
-     (Homeowner, Non-Resident, Landlord), even at the same viewport width. */
-  flex: 1 1 0%;
-  min-width: 0;
 }
 
 .page-header h1 {
@@ -210,166 +210,100 @@ body {
   line-height: 1.4;
   color: var(--page-text-dark);
   opacity: 0.62;
-  /* Reserve 2 lines' worth of height always, whether the active tab's
-     subtitle needs 1 line (e.g. Tenant) or 2 (e.g. Non-Resident) — without
-     this, a longer subtitle wrapping to a 2nd line pushes the whole
-     .dashboard-container down, so any "constant" card (e.g. the rent-cap
-     stacked bar) visibly jumps position when switching tabs. */
-  min-height: 2.8em;
 }
-
-/* Folder tabs (tab_Layour.png): ONE row, every tab sharing the exact same
-   "attach to the sheet below" mechanic, with no z-index math beyond one
-   rule:
-     - .tabs-row has a negative margin-bottom, so .dashboard-container
-       (next sibling, painted after it in DOM order) overlaps UP into the
-       bottom of every tab.
-     - .dashboard-container gets `position: relative` + `z-index: 0` so it
-       has a real stacking context of its own — being later in the DOM, it
-       then paints OVER that overlapping bottom strip of every tab, which
-       is what makes inactive ones look tucked behind/under the sheet.
-     - .tab-btn.active gets a higher z-index than the container, so ITS
-       overlapping strip paints on top instead — it reads as the tab that's
-       pulled to the front, flush and unbroken into the panel below it.
-   Since every tab shares this one mechanic and rests at the same
-   translateY, ANY of the 5 can attach flush when active, and all 5 sit on
-   the same baseline at rest — the overlap below is what gives them the
-   layered-tab look instead of a height stagger. */
-.tabs-row {
-  display: flex;
-  flex-shrink: 0;
-  margin-bottom: -16px;
-}
-
-/* Trapezoid manila-tab silhouette (tab_Layour.png): flat top edge, sides
-   flaring outward going down to a full-width base, instead of a plain
-   rounded-rectangle. border-radius has no effect on a clip-path'd shape,
-   so the 2 visible top corners are rounded by approximating a curve
-   directly in the polygon (a quadratic Bezier sampled into 4 points per
-   corner) instead — the bottom 2 corners stay sharp since they're tucked
-   out of view under the dashboard sheet below. */
-.tab-btn {
-  position: relative;
-  border: none;
-  padding: 13px 24px 26px;
-  font-family: var(--font-body-bold);
-  font-weight: 700;
-  font-size: 0.82rem;
-  cursor: pointer;
-  opacity: 0.85;
-  clip-path: polygon(8% 7%, 8.99% 3.14%, 10.63% 0.81%, 13% 0%, 87% 0%, 89.31% 0.76%, 90.97% 3.05%, 92% 7%, 100% 100%, 0% 100%);
-  transform: translateY(15px);
-  transition: transform .32s cubic-bezier(0.22, 1, 0.36, 1), opacity .25s ease, filter .25s ease;
-  /* drop-shadow (not box-shadow) since it follows the clip-path's actual
-     trapezoid silhouette instead of the rectangular box behind it — needed
-     for definition now that tabs are pale paper tones against a similarly
-     pale page background. */
-  filter: brightness(0.94) drop-shadow(0 3px 5px rgba(0, 0, 0, 0.20));
-}
-
-/* Overlap into the previous tab a little (shingled, like real folder
-   dividers) instead of sitting apart with a gap — margin-left (not a
-   negative `gap`, which browsers clamp to 0) shifts every tab but the
-   first back into its neighbor. Since same-z-index siblings paint in DOM
-   order, each tab's left edge naturally paints OVER the previous tab's
-   right edge at the overlap — 14px stays well inside the 24px side
-   padding, so it only eats into empty tab background, never the label
-   text. */
-.tab-btn:not(:first-child) {
-  margin-left: -14px;
-}
-
-.tab-btn:hover {
-  /* Deliberately NOT a z-index bump — hovering should only preview a tab
-     (nudge it up a little), not pull it in front of its neighbors; it
-     should only actually come forward once it's .active (clicked). No
-     `scale()` here either — shrinking a clipped shape pulls its edges in
-     from the overlap seam with its neighbors, opening a sliver gap right
-     when you're pointing at it, which read as "not attached." translateY
-     only keeps the silhouette's width solid throughout the hover motion. */
-  opacity: 0.97;
-  transform: translateY(7px);
-  filter: brightness(0.98) drop-shadow(0 3px 5px rgba(0, 0, 0, 0.20));
-}
-
-.tab-btn.active {
-  z-index: 5;
-  opacity: 1;
-  transform: translateY(0);
-  filter: brightness(1) drop-shadow(0 3px 6px rgba(0, 0, 0, 0.22));
-  box-shadow: 0 -6px 14px rgba(0, 0, 0, 0.10);
-}
-
-/* Each tab's background is its own dashboard's paper --container-bg tone
-   and its text is that theme's --c2 accent — both straight from
-   ColorPallete.png (see css/dashboard.css section 3) — so a tab reads as
-   "the same paper as the sheet it opens," with the dashboard's own color
-   carried only in the label, echoing tab_Layour.png's cream tabs +
-   colored text rather than a solid coloured flap. --c2 (not the much
-   darker --text-dark) so the label's actual hue stays visible instead of
-   reading as near-black. */
-.tab-btn[data-tab="overview"] { background-color: #fcfaf5; color: #8e4e4d; }
-.tab-btn[data-tab="tenant"] { background-color: #f7f7f4; color: #bb5e31; }
-.tab-btn[data-tab="landlord"] { background-color: #faf9f7; color: #a27958; }
-.tab-btn[data-tab="homeowner"] { background-color: #faf6ef; color: #c27c63; }
-.tab-btn[data-tab="nonresident"] { background-color: #f9f7f3; color: #87905a; }
 
 /* --------------------------------------------------------------------------
    3. DASHBOARD CONTAINER + PER-TAB THEME VARIABLES
    -------------------------------------------------------------------------- */
-/* min-height (not a fixed height/vh) so the tallest tab — Tenant, whose
-   3-row-slot columns need the most room — is never squeezed by a short
-   viewport; the page scrolls instead. Lighter tabs (Homeowner,
-   Non-Resident) cap their own .dashboard-grid below this (section 4) and
-   leave the leftover as visible empty space rather than stretching their
-   cards to fill it. */
+/* .panel-body's min-height (not a fixed height/vh — see that rule, just
+   below) is what keeps the tallest dashboard — Tenant, whose 3-row-slot
+   columns need the most room — from being squeezed by a short viewport;
+   the page scrolls instead. Lighter dashboards (Homeowner, Non-Resident)
+   cap their own .dashboard-grid below this (section 4) and leave the
+   leftover as visible empty space rather than stretching their cards to
+   fill it. */
 .dashboard-container {
   width: 100%;
-  min-height: 900px;
-  /* Positioned (not static) so it shares a paint layer with .tab-btn and,
-     being later in the DOM, paints over the overlapping bottom strip of
-     inactive tabs — see the .tabs-row comment above. */
+  /* No min-height here (moved to .panel-body below) — this container's
+     own height is just "however tall its content needs to be": the
+     section-tabs plus .panel-body. */
+  /* Positioned (not static) so it shares a paint layer with the texture
+     overlay above — see that comment in section 1. */
   position: relative;
   background-color: var(--container-bg);
-  /* Top-right corner squared off (not 24px like the other 3) so the
-     dashboard's own right edge aligns flush with the rightmost tab above
-     it instead of curving away from it. */
-  border-radius: 24px 0 24px 24px;
-  /* No border — separation from the page comes from these shadows instead
-     of an outline: the usual soft ambient shadow all around, plus a
-     second, tighter one on just the top edge for a bit of depth right
-     under the tabs. (An earlier version added 2 extra flat "ghost sheet"
-     shadows here for a stacked-paper depth effect, but on top of
-     everything else going on right at that seam, it read as more noise
-     than depth — simplified back down to one plain shadow.) */
+  border-radius: 24px;
+  /* No border — separation from the page comes from this shadow instead
+     of an outline. */
   box-shadow:
     0 10px 30px rgba(0, 0, 0, 0.05),
     0 -4px 10px rgba(0, 0, 0, 0.08);
   padding: 24px;
+  display: flex;
   flex-direction: column;
   justify-content: flex-start;
   gap: 16px;
-  overflow: hidden;
+  /* No overflow:hidden — redundant anyway: the texture overlay clips
+     itself via border-radius:inherit, and every card stays safely inside
+     this container's own padding. */
 }
 
-/* Panel-switch entrance (js/main.js toggles this class on whichever panel
-   just became visible, re-triggering it via a reflow so it replays every
-   time — not just the first time a tab is opened). Fade only, no
-   translateY: sliding the panel up from below meant it spent part of the
-   animation physically offset downward from the tabs, i.e. visibly
-   detached from them, right when the attach illusion matters most. */
+/* Holds everything the section-tabs sit above: .dashboard-grid directly
+   (Overview) or .charts-view + .responses-view (the 4 category
+   dashboards). Carries the `min-height: 900px` that used to sit directly
+   on `.dashboard-container` — moved here, rather than just left in place
+   with the section-tabs added as another sibling, so the tabs' own height
+   doesn't eat into that 900px floor and starve .dashboard-grid's `flex: 1`
+   rows (Landlord/Tenant) of the room they need — .dashboard-container has
+   no height constraint of its own now, so it simply grows to fit
+   "section-tabs + panel-body" instead of splitting a fixed budget between
+   them. Also the thing the section-tabs visually "attach" to (see section
+   8) — needs its own stacking context for that same reason
+   .dashboard-container needs one for the texture overlay (section 1). */
+.panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 900px;
+  min-width: 0;
+  position: relative;
+  z-index: 0;
+}
+
+/* Tenant and Landlord both add a `.top-row` (filter card + map, ~298px
+   measured) as an extra `auto`-sized row INSIDE `.dashboard-grid` (section
+   4) — same 900px floor as before, but now that floor has to cover
+   top-row's own height too, or `.dashboard-grid`'s remaining `1fr` row
+   (holding .left-column/.right-column) gets whatever's left over after
+   top-row, which starves their flex:1 cards exactly the way an external
+   sibling used to (see the .panel-body comment above) — just from inside
+   the grid instead of outside it. Homeowner/Non-Resident's `.top-row` has
+   no map (just the filter card, ~170px) and their `.dashboard-grid` is a
+   fixed `flex: 0 0 772px` anyway (section 4), so they don't need this. */
+.theme-tenant .panel-body,
+.theme-landlord .panel-body {
+  min-height: 1220px;
+}
+
+/* Charts<->Responses switch entrance (js/filters.js's FilterUI.replayEnter
+   toggles this class on whichever view just became visible — .dashboard-
+   grid for Charts, .responses-view for Responses — re-triggering it via a
+   forced reflow so it replays every time, not just the first time a tab is
+   opened). Fade only, no translateY: sliding the panel up from below meant
+   it spent part of the animation physically offset downward from the tabs,
+   i.e. visibly detached from them, right when the attach illusion matters
+   most. */
 @keyframes panelEnter {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-.dashboard-container.panel-enter {
+.view-enter {
   animation: panelEnter 0.4s ease;
 }
 
 /* Overview theme — cream paper + brick-red/maroon accent, sampled from
    overview.png (bg ~(235,224,190), accent dot ~(142,78,77)). */
-.dashboard-container.theme-overview {
+.theme-overview {
   --container-bg: #fcfaf5;
   --card-bg: #fcfaf5;
   --border-color: rgba(106, 58, 58, 0.14);
@@ -385,7 +319,7 @@ body {
 
 /* Homeowner theme — warm tan paper + coral accent, sampled from
    ColorPallete.png (swatch 3: bg (233,215,181), accent (194,124,99)). */
-.dashboard-container.theme-homeowner {
+.theme-homeowner {
   --container-bg: #faf6ef;
   --card-bg: #faf6ef;
   --border-color: rgba(146, 93, 74, 0.14);
@@ -400,7 +334,7 @@ body {
 
 /* Non-resident theme — off-white paper + olive accent, sampled from
    ColorPallete.png (swatch 4: bg (229,220,200), accent (135,144,90)). */
-.dashboard-container.theme-nonresident {
+.theme-nonresident {
   --container-bg: #f9f7f3;
   --card-bg: #f9f7f3;
   --border-color: rgba(101, 108, 68, 0.14);
@@ -415,7 +349,7 @@ body {
 
 /* Landlord theme — cream paper + warm tan/camel accent, sampled from
    landlord.png (bg ~(220,214,199), accent dot ~(162,121,88)). */
-.dashboard-container.theme-landlord {
+.theme-landlord {
   --container-bg: #faf9f7;
   --card-bg: #faf9f7;
   --border-color: rgba(122, 91, 66, 0.14);
@@ -434,7 +368,7 @@ body {
    Overview, the swatch itself is more saturated than the other 3 themes'
    paper swatches, so it's lightened toward white more aggressively (92%
    vs. the original ~78%) to match their whitish weight. */
-.dashboard-container.theme-tenant {
+.theme-tenant {
   --container-bg: #f7f7f4;
   --card-bg: #f7f7f4;
   --border-color: rgba(140, 70, 37, 0.14);
@@ -456,7 +390,15 @@ body {
        .left-column   (stacked cards, flex:1 each -> equal height)
        .right-column  (stacked cards, flex:1 each -> equal height)
          .pies-row    (optional: 2+ cards side-by-side inside a row slot)
-   This is what keeps the left-side cards aligned across tabs. */
+   This is what keeps the left-side cards aligned across tabs. `.top-row`
+   (filter card [+ map]) is a SIBLING of this grid inside `.panel-body`, not
+   a row inside it — deliberately, so it stays visible on both the Charts
+   and Responses tabs. It briefly lived as this grid's first row instead,
+   but `.charts-view` (which wraps this whole grid) gets `display:none` on
+   the Responses tab, taking the filter card down with it — exactly the
+   pills a reader would want to keep using while reading responses. See
+   `.top-row` and `.panel-body`'s own comments (below / section 3) for the
+   rest of that layout. */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -489,13 +431,37 @@ body {
   gap: 16px;
 }
 
+/* Filter card [+ map card], side by side, both stretched to the taller
+   one's natural content height (default align-items:stretch — deliberately
+   no fixed height here: Homeowner/Non-Resident's filter-only row and
+   Tenant/Landlord's filter+map row need different heights, and forcing a
+   shared number fought whichever side had more content — see js/filters.js
+   and each dashboard module's top-row markup). */
+.top-row {
+  display: flex;
+  gap: 16px;
+}
+
+.top-row .card {
+  flex: 1;
+}
+
+/* Filter card gets more of the row than the map (1.3 : 1, not an even
+   split) — wider pills wrap onto fewer lines per Age/Career/Area row, and
+   the map still has enough room to stay legible. */
+.top-row .filter-card {
+  flex: 1.3;
+}
+
 /* Overview's own grid shape: KPI + featured bar chart on top, map + 2 pies
-   on the bottom. Applied together with the base .dashboard-grid class above
-   (`class="dashboard-grid overview-grid"`) so it still participates in the
-   flex/height rules but overrides the column/row template. Row 1 is pinned
-   to --stat-bar-height (not `1fr`) so the bar-chart card lines up with the
-   .stat-bar-card height used on the other 4 tabs; the KPI card shares that
-   row and height too. */
+   on the bottom (its own `.top-row` filter card sits above this grid, as a
+   sibling — see the base `.dashboard-grid` comment above). Applied together
+   with the base .dashboard-grid class above (`class="dashboard-grid
+   overview-grid"`) so it still participates in the flex/height rules but
+   overrides the column/row template. Row 1 is pinned to --stat-bar-height
+   (not `1fr`) so the bar-chart card lines up with the .stat-bar-card height
+   used on the other 4 dashboards; the KPI card shares that row and height
+   too. */
 .overview-grid {
   grid-template-columns: 1.3fr 0.85fr 0.85fr;
   grid-template-rows: var(--stat-bar-height) 1fr;
@@ -503,6 +469,7 @@ body {
 
 .overview-grid .span-col-1 { grid-column: span 1; }
 .overview-grid .span-col-2 { grid-column: span 2; }
+.overview-grid .span-col-3 { grid-column: span 3; }
 
 .pies-row {
   display: flex;
@@ -554,7 +521,7 @@ body {
 }
 
 .card h2, .card .card-title {
-  font-family: var(--font-header);
+  font-family: var(--font-body-bold);
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-dark);
@@ -581,21 +548,15 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   6. LANDLORD-ONLY SUB-LAYOUTS
+   6. MAP + DOT-MATRIX SUB-LAYOUTS (Tenant, Landlord)
    -------------------------------------------------------------------------- */
-/* 6a. Map + portfolio chart split inside one card */
-.split-card-content {
-  display: flex;
-  flex-direction: row;
-  gap: 12px;
+/* 6a. The map living inside a .top-row's map card (#tn-map / #ll-map) — a
+   shared class instead of per-id rules now that Tenant has its own map too
+   (previously only Landlord's existed). */
+.map-box {
   flex: 1;
-  min-height: 0;
   width: 100%;
-}
-
-#ll-map {
-  flex: 1;
-  height: 100%;
+  min-height: 220px;
   border-radius: 12px;
   border: 1px solid var(--border-color);
   z-index: 1;
@@ -638,6 +599,23 @@ body {
 .dynamic-map-pin:hover {
   opacity: 0.98;
   transform: scale(1.15);
+}
+
+/* Selected-region ring on the Tenant/Landlord map's marker, driven by the
+   Area filter pill (or the marker's own click — see js/tenant.js and
+   js/landlord.js) so the map and the pill group always agree on which
+   region, if any, is active. */
+.dynamic-map-pin.pin-selected {
+  border-width: 3px !important;
+  box-shadow: 0 0 0 3px #fff, 0 0 14px rgba(0, 0, 0, 0.45) !important;
+  transform: scale(1.12);
+}
+
+/* Every other marker once one region is selected — see the isDimmed
+   comment in js/chart-theme.js's buildMapMarkers. Opacity only: size and
+   count stay exactly as they'd be with no Area filter at all. */
+.dynamic-map-pin.pin-dimmed {
+  opacity: 0.35;
 }
 
 /* 6b. Dot-matrix + explicit legend (Why did you raise the rent card) */
@@ -718,7 +696,7 @@ body {
 /* --------------------------------------------------------------------------
    7. OVERVIEW-ONLY SUB-LAYOUTS
    -------------------------------------------------------------------------- */
-/* 7a. KPI summary panel (top-left card) */
+/* 7a. KPI summary panel */
 .kpi-wrapper {
   display: flex;
   flex-direction: column;
@@ -827,16 +805,543 @@ body {
   white-space: nowrap;
 }
 
-/* 7b. Regional distribution map (bottom-left card) */
-#ov-map {
-  width: 100%;
-  height: 100%;
-  border-radius: 8px;
-  z-index: 1;
+/* --------------------------------------------------------------------------
+   8. FILTER CARD + SECTION TABS (Charts / Responses / Suggestions)
+   -------------------------------------------------------------------------- */
+/* Built by js/filters.js (window.FilterUI.buildFilterCard) and placed in a
+   `.top-row`, next to the map card where one exists (Tenant, Landlord) —
+   "these are selectable categories" reads more intuitively sitting right
+   beside the geography they can also filter by, per the map's own marker
+   clicks (see js/landlord.js / js/tenant.js). Homeowner/Non-Resident/
+   Overview have no per-respondent geography, so their `.top-row` holds only
+   the filter card, full width. */
+/* --c5 (not --card-bg, same as every other card) so the filter card reads
+   as a distinct control panel at a glance rather than blending into the
+   data cards around it — the individual pills stay on --card-bg (below),
+   so they still pop against this tinted background. */
+.filter-card {
+  gap: 10px;
+  background-color: var(--c5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+}
+
+/* Row, not column, and left-aligned (not centered) — Age/Career/Area sit
+   side by side reading left to right like a toolbar, wrapping to a 2nd line
+   only if they don't fit. */
+.filter-groups {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  column-gap: 22px;
+  row-gap: 10px;
+  flex: 1;
+}
+
+/* Overview has only Age + Career (no Area, so just 2 lines) — tighter than
+   the shared row-gap above. Its filter card is stretched to match the map
+   card's height regardless (`.top-row`'s default align-items:stretch,
+   section 4), not sized by its own content, so the 2 tightened rows simply
+   leave more empty space at the card's own bottom — left alone rather than
+   filled with anything. */
+.theme-overview .filter-groups {
+  row-gap: 4px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+/* Career/Area start hidden (js/filters.js's buildFilterCard toggles this
+   class) — only Age shows by default, so the filter card reads as compact
+   up front instead of the tallest card on the dashboard before a reader's
+   even looked at a chart. */
+.filter-group-collapsed {
+  display: none;
+}
+
+/* A text link, not a pill — visually distinct from the actual filter
+   controls so it doesn't read as one more option in the Age row it sits
+   next to. */
+.filter-toggle {
+  align-self: center;
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: var(--font-body-bold);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--c2);
+  opacity: 0.75;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+
+.filter-toggle:hover {
+  opacity: 1;
+}
+
+.filter-label {
+  font-family: var(--font-body-bold);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dark);
+  opacity: 0.45;
+  flex: 0 0 auto;
+}
+
+/* Squarish, minimally-rounded chips (not the pill/capsule shape used
+   elsewhere on the site) — a deliberately plainer, more toolbar-like control
+   than a rounded filter pill. */
+.filter-pill {
+  border: 1px solid var(--border-color);
+  background-color: var(--card-bg);
+  color: var(--text-dark);
+  opacity: 0.7;
+  padding: 7px 14px;
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+  font-weight: 300;
+  cursor: pointer;
+  transition: background-color .18s ease, opacity .18s ease, color .18s ease, border-color .18s ease;
+  white-space: nowrap;
+}
+
+.filter-pill:hover {
+  opacity: 0.95;
+}
+
+/* Career has up to 7 pills (All + 6 career stages) — the widest group by
+   far. A little tighter than the default pill footprint (below) is what
+   keeps all 7 on one line instead of the last one or two wrapping onto a
+   second line under the rest of the group. */
+.filter-group[data-filter="career"] .filter-pill {
+  padding: 7px 10px;
+  font-size: 0.7rem;
+}
+
+.filter-pill.active {
+  background-color: var(--c2);
+  border-color: var(--c2);
+  color: #fff;
+  opacity: 1;
+  font-family: var(--font-body-bold);
+  font-weight: 700;
+}
+
+/* Charts/Responses(/Suggestions) switch — the same folder-tab mechanic that
+   used to switch between the 5 top-level dashboards (tab_Layour.png): one
+   row, inserted by js/filters.js (mountSectionTabs) as a SIBLING of
+   `.dashboard-container` — not nested inside it — so the tabs sit on the
+   page's own background (--bg-outer) and read as genuinely attached to the
+   top of the dashboard sheet, rather than boxed inside its padding.
+   `.section-tabs` overlaps down into `.dashboard-container` (the "sheet"
+   below it) via a negative margin-bottom, `.dashboard-container`'s own
+   stacking context (section 3) painting over that overlap for inactive
+   tabs, and `.section-tab-btn.active` raising its own z-index to paint its
+   overlap on top instead — so it reads as pulled to the front, flush into
+   the sheet. Only 2 tabs now (vs. the old 5), and colored from the
+   dashboard's own theme (--card-bg/--c2, now defined on `.theme-*` broadly
+   rather than `.dashboard-container.theme-*` specifically — see section 3
+   — so these vars still reach the tabs despite living outside the
+   container) instead of a hand-picked per-dashboard swatch, since only one
+   dashboard's theme is ever active on a given page. */
+.section-tabs {
+  display: flex;
+  flex-shrink: 0;
+  margin-bottom: -16px;
+  /* .dashboard-container's rounded corner (24px, section 3) curves inward
+     starting from its own left edge, but the first tab's bottom-left corner
+     is a sharp 90° corner (its clip-path leaves the bottom edge flat — see
+     the trapezoid comment below) sitting flush at that same x:0. Where the
+     tab overlaps down into the container (the negative margin-bottom
+     above), the container's edge has already curved inward of x:0, so the
+     tab's sharp corner reads as jutting left of the sheet instead of flush
+     with it. Nudging the whole row right by roughly the same amount the
+     corner has curved in at that depth realigns the two edges. */
+  margin-left: 20px;
+}
+
+/* Trapezoid manila-tab silhouette: flat top edge, sides flaring outward
+   going down to a full-width base, instead of a plain rounded-rectangle.
+   border-radius has no effect on a clip-path'd shape, so the 2 visible top
+   corners are rounded by approximating a curve directly in the polygon (a
+   quadratic Bezier sampled into 4 points per corner) instead — the bottom 2
+   corners stay sharp since they're tucked out of view under the panel
+   below. */
+.section-tab-btn {
+  position: relative;
+  border: none;
+  padding: 11px 22px 22px;
+  font-family: var(--font-body-bold);
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  opacity: 0.85;
+  background-color: var(--card-bg);
+  color: var(--c2);
+  clip-path: polygon(8% 7%, 8.99% 3.14%, 10.63% 0.81%, 13% 0%, 87% 0%, 89.31% 0.76%, 90.97% 3.05%, 92% 7%, 100% 100%, 0% 100%);
+  transform: translateY(13px);
+  transition: transform .32s cubic-bezier(0.22, 1, 0.36, 1), opacity .25s ease, filter .25s ease;
+  /* drop-shadow (not box-shadow) since it follows the clip-path's actual
+     trapezoid silhouette instead of the rectangular box behind it. */
+  filter: brightness(0.94) drop-shadow(0 3px 5px rgba(0, 0, 0, 0.20));
+}
+
+.section-tab-btn:not(:first-child) {
+  margin-left: -14px;
+}
+
+.section-tab-btn:hover {
+  opacity: 0.97;
+  transform: translateY(6px);
+  filter: brightness(0.98) drop-shadow(0 3px 5px rgba(0, 0, 0, 0.20));
+}
+
+.section-tab-btn.active {
+  z-index: 5;
+  opacity: 1;
+  transform: translateY(0);
+  /* Noticeably heavier than the resting/hover shadow (not just a bump) —
+     now that the tabs sit on the page's own background rather than boxed
+     inside the dashboard, the active one needs its own shadow to read as
+     lifted above both the page AND its sibling tab, not just brighter. */
+  filter: brightness(1) drop-shadow(0 10px 22px rgba(0, 0, 0, 0.42));
+  box-shadow: 0 -14px 30px rgba(0, 0, 0, 0.22);
+}
+
+.charts-view {
+  display: contents;
 }
 
 /* --------------------------------------------------------------------------
-   8. RESPONSIVE (<= 868px) — desktop grid collapses to a scrolling stack
+   9. RESPONSES TAB + PAGINATION
+   -------------------------------------------------------------------------- */
+/* flex: 0 0 auto (not 1) — sized to its own content (one page of cards +
+   the pagination bar right below them), not stretched to fill whatever
+   height the Charts tab happens to need. `.panel-body`'s own min-height
+   (section 3) still puts a floor under the page's overall height either
+   way; the difference is where the leftover space (Responses' content is
+   almost always shorter than Charts') ends up — below this block, same
+   "collects outside the card" convention as .pie-fit-card (section 4) —
+   rather than as one huge gap stretched between the cards and Prev/Next. */
+.responses-view {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
+/* No internal scrolling any more — js/filters.js (mountResponses) shows one
+   fixed-size page of cards at a time instead, with Prev/Next controls below
+   (.pagination), specifically so the page's overall height stays constant
+   switching between the Charts and Responses tabs and between filters,
+   rather than growing to however many responses happen to match. */
+.responses-scroll {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  /* A minimum, not 1fr: 1fr stretched every card to fill .responses-view's
+     full height even when a page's quotes were short, mostly-empty cards.
+     Cards now size to their own (clamped) content instead — see
+     .responses-view's own flex:0 0 auto, just below, for where the leftover
+     page height goes instead. */
+  grid-auto-rows: minmax(150px, auto);
+  align-content: start;
+  gap: 12px;
+  min-height: 0;
+}
+
+/* Clickable — see js/filters.js's buildResponseCards: each card previews a
+   short (~25-word) truncation of its quote(s) and opens the full text in
+   the shared modal (further below) on click. */
+.response-card {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow .15s ease, transform .15s ease;
+}
+
+.response-card:hover, .response-card:focus-visible {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+/* Clamped to a fixed number of lines (not just overflow:hidden) so a very
+   long answer never blows out its card's row height in the fixed 3x3 grid
+   above — .responses-scroll's whole point is a page that doesn't change
+   size, so a card has to lose its overflow text to an ellipsis rather than
+   stretch. */
+.response-quote {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 300;
+  line-height: 1.45;
+  color: var(--text-dark);
+  opacity: 0.92;
+  display: -webkit-box;
+  -webkit-line-clamp: 7;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.response-quote-label {
+  font-family: var(--font-body-bold);
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--c2);
+  opacity: 0.85;
+  margin-top: 6px;
+}
+
+.response-quote-label:first-child {
+  margin-top: 0;
+}
+
+/* Landlord's cards carry 2 labeled quotes instead of 1 (see js/landlord.js)
+   — a shorter clamp per quote keeps their combined height in the same
+   budget as every other card's single longer quote. */
+.response-card:has(.response-quote-label) .response-quote {
+  -webkit-line-clamp: 3;
+}
+
+.response-meta {
+  margin-top: auto;
+  padding-top: 8px;
+  font-family: var(--font-body-bold);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  opacity: 0.45;
+  border-top: 1px solid var(--border-color);
+}
+
+.responses-empty {
+  grid-column: 1 / -1;
+  align-self: center;
+  text-align: center;
+  padding: 60px 20px;
+  font-family: var(--font-body);
+  color: var(--text-dark);
+  opacity: 0.45;
+  font-size: 0.85rem;
+}
+
+/* Above the card grid (see the responses-view markup in each dashboard
+   file) — the "Page X of Y" count reads more naturally as a header for
+   what's below it than a footer, and it means Prev/Next stays in the same
+   place regardless of how many cards the current page has, rather than
+   drifting up and down the page. */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex: 0 0 auto;
+  padding-bottom: 12px;
+}
+
+.page-btn {
+  border: 1px solid var(--border-color);
+  background-color: var(--card-bg);
+  color: var(--text-dark);
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-family: var(--font-body-bold);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .18s ease, background-color .18s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+  background-color: var(--c2);
+  color: #fff;
+  border-color: var(--c2);
+}
+
+.page-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.page-label {
+  font-family: var(--font-body-bold);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  opacity: 0.6;
+}
+
+/* Shared full-response modal (js/filters.js's ensureModal/openModal) —
+   position:fixed + appended to <body>, so it lands on top of literally
+   everything (including the theme's own .dashboard-container) regardless
+   of which dashboard/card opened it, rather than growing the clicked card
+   in place. --c2/--card-bg still come through here since a modal built by
+   whichever dashboard's JS opened it inherits nothing itself — the theme
+   vars are actually read live off :root's cascade at open time only if the
+   modal sits inside a themed ancestor, which body isn't, so this uses
+   fixed neutral tones instead of the active dashboard's own palette. */
+.response-modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(38, 38, 32, 0.55);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.response-modal-backdrop.open {
+  display: flex;
+}
+
+.response-modal {
+  position: relative;
+  background: #fcfaf5;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  padding: 28px;
+  max-width: 560px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.response-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.06);
+  color: #262620;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.response-modal-close:hover {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.response-modal-body .response-quote {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 300;
+  line-height: 1.6;
+  color: #262620;
+  /* Full text here — no clamp, unlike the card's own preview. */
+  display: block;
+  -webkit-line-clamp: unset;
+}
+
+.response-modal-body .response-quote-label {
+  font-family: var(--font-body-bold);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #8e4e4d;
+  opacity: 0.85;
+  margin-top: 14px;
+}
+
+.response-modal-body .response-quote-label:first-child {
+  margin-top: 0;
+}
+
+.response-modal-meta {
+  margin-top: 16px;
+  padding-top: 12px;
+  font-family: var(--font-body-bold);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #262620;
+  opacity: 0.5;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* --------------------------------------------------------------------------
+   10. SITE FOOTER
+   -------------------------------------------------------------------------- */
+/* One per dashboard (5 total: Overview inline in index.html, the other 4 in
+   their own standalone files) — the last child INSIDE `.dashboard-container`
+   (a sibling of `.panel-body`, below it), so it sits on the dashboard's own
+   themed --container-bg and inside its rounded/shadowed sheet rather than
+   loose on the page background. The border-top is the separator setting it
+   off from the charts above; `.dashboard-container`'s own `gap: 16px` (flex
+   column, section 3) already spaces it from `.panel-body`, so this only
+   needs its own top padding to sit clear of that rule. 3-column grid (not
+   flex + justify-content:space-between) so the center credit line stays
+   truly centered regardless of the logo's and the source line's own widths
+   differing. */
+.site-footer {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.footer-logo {
+  justify-self: start;
+  height: 18px;
+  width: auto;
+  /* The source PNG is drawn in solid black — this is what lets it sit on
+     any of the 5 themes' own paper tones without a separate light/dark
+     asset. */
+  opacity: 0.82;
+}
+
+/* 14px floor (not the ~11px --font-body default used elsewhere for fine
+   print like card subtitles) — a page credit/source line reads as
+   deliberately understated via low opacity, same as everywhere else in this
+   file, not via being hard to read. */
+.footer-credit {
+  justify-self: center;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 300;
+  color: var(--text-dark);
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+.footer-source {
+  justify-self: end;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 300;
+  color: var(--text-dark);
+  opacity: 0.6;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   11. RESPONSIVE (<= 868px) — desktop grid collapses to a scrolling stack
    -------------------------------------------------------------------------- */
 @media (max-width: 868px) {
   body {
@@ -844,12 +1349,15 @@ body {
   }
 
   .dashboard-container {
-    min-height: 0;
     height: auto;
     max-height: none;
     overflow: visible;
     border-radius: 16px;
     padding: 16px;
+  }
+
+  .panel-body {
+    min-height: 0;
   }
 
   .dashboard-grid {
@@ -866,9 +1374,18 @@ body {
     flex: 1;
   }
 
-  .left-column, .right-column, .pies-row {
+  .left-column, .right-column, .pies-row, .top-row {
     flex-direction: column;
     gap: 16px;
+  }
+
+  /* Age/Career/Area back to one dimension per row — desktop's single
+     left-aligned toolbar row (section 8) doesn't have the width to work
+     with here; wrapping mid-group at this width read as broken rather than
+     just wrapped. */
+  .filter-groups {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .card {
@@ -884,6 +1401,17 @@ body {
     flex: none !important;
   }
 
+  /* .top-row's own cards opt back out of the 380px mobile default above —
+     the filter card's stacked pill rows and the map both want to size to
+     their own content instead of a fixed chart-card height. */
+  .top-row .card {
+    height: auto !important;
+  }
+
+  .map-box {
+    height: 240px;
+  }
+
   /* .pie-fit-card's align-self:start (section 4) means something totally
      different here than on desktop: .dashboard-grid is CSS grid there, so
      align-self only ever touched the row/vertical axis. Here it's a flex
@@ -896,13 +1424,8 @@ body {
     align-self: stretch;
   }
 
-  .split-card-content {
-    flex-direction: column;
-  }
-
-  #ll-map, #ov-map {
-    height: 220px;
-    min-height: 220px;
+  .responses-scroll {
+    grid-template-columns: 1fr;
   }
 
   .kpi-sub-row {
@@ -934,48 +1457,31 @@ body {
     min-width: 100%;
   }
 
-  /* 5 folder tabs don't fit one row at a phone width at their desktop
-     padding/font-size, so instead of scrolling (which read as broken/
-     confusing — easy to miss that more tabs exist off-screen) each one
-     flexes to fill an equal share of the full row width instead.
-     width:100% constrains .tabs-row to the viewport (it wraps onto its own
-     line below the title first, via .page-header's flex-wrap).
-     margin-bottom needs to cancel out .page's own 16px `gap` between
-     .page-header and .dashboard-container FIRST before it can create any
-     actual overlap — a previous attempt here (-14px) forgot that gap
-     existed, so the real result was gap(16) + margin(-14) = a visible
-     +2px gap, not the intended overlap. -24px nets out to an actual -8px
-     overlap into the dashboard. */
-  .tabs-row {
+  .section-tabs {
     width: 100%;
-    margin-bottom: -24px;
+    margin-bottom: -8px;
+    margin-left: 0;
   }
 
-  .tab-btn {
+  .section-tab-btn {
     flex: 1 1 0%;
     min-width: 0;
-    /* Bottom padding (24px, bigger than the 18px this started at) has to
-       clear 2 lines of text for "Non-Resident" — the one label still wide
-       enough to wrap at this width — not just 1, or its 2nd line ends up
-       under the dashboard's -14px overlap. */
-    padding: 10px 4px 24px;
-    font-size: 0.72rem;
     text-align: center;
-    /* "Homeowner"/"Non-Resident" are wider than their equal flex share at
-       this size — without a break opportunity, a single unbroken word
-       just overflows its own box sideways instead of wrapping, silently
-       hiding under the next tab's overlap. hyphens:auto (html lang="en" is
-       set, which real syllable-based hyphenation needs) breaks it at a
-       proper syllable instead of overflow-wrap's anywhere-mid-word
-       fallback, which could otherwise strand a single orphan letter on its
-       own line. */
-    white-space: normal;
-    overflow-wrap: break-word;
-    hyphens: auto;
-    line-height: 1.15;
   }
 
-  .tab-btn:not(:first-child) {
-    margin-left: -8px;
+  /* Stacked, logo first, same center-aligned reading order as everything
+     else at this width — the 3-column grid has no room to keep the credit
+     line genuinely centered once the source line wraps under it. */
+  .site-footer {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    gap: 6px;
+    padding-bottom: 8px;
+  }
+
+  .footer-logo, .footer-credit, .footer-source {
+    justify-self: center;
+    text-align: center;
   }
 }

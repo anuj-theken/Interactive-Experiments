@@ -5,71 +5,86 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bengaluru Rent Survey Dashboard</title>
 
-  <!-- Apache ECharts (used by all 5 dashboards) -->
+  <!-- Apache ECharts (Overview's own charts, rendered inline below) -->
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
-  <!-- Leaflet (used by the Overview and Landlord dashboards' maps) -->
+  <!-- Leaflet (Overview's own map) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- Combined dashboard stylesheet: layout skeleton, card system, 5 themes,
        and @font-face declarations for the local Jazmin Alt / GT America
        font files (JazminAlt-Bold.otf, GT-America-Standard-Light.ttf,
-       GT-America-Standard-Black.ttf) sitting next to this file. -->
+       GT-America-Standard-Black.ttf) sitting next to this file. Every
+       standalone dashboard file (tenant.html etc.) loads this same
+       stylesheet, so all 5 stay visually identical. -->
   <link rel="stylesheet" href="css/dashboard.css" />
+
+  <style>
+    /* Landing-page-only styles: the 4 embedded dashboards. Each iframe is
+       same-origin (all 5 files sit side by side in this folder), so its
+       height is read directly from its own document rather than guessed —
+       see the script at the bottom of this file. */
+    .embed-frame {
+      display: block;
+      width: 100%;
+      border: none;
+      /* A sane first paint before the load handler measures the real
+         height — close to a typical dashboard's natural height so the page
+         doesn't jump far once it resizes. */
+      height: 1400px;
+    }
+  </style>
 </head>
 <body>
 
   <div class="page">
 
-    <!-- ======================================================================
-         PAGE HEADER
-         Title + subtitle on the left; folder tabs on the right, bottom-
-         aligned so their right edge lines up with the dashboard-container's
-         right edge below (both share the page's max-width). Tabs are styled
-         after tab_Layour.png: a single row, all 5 sharing the same "attach
-         to the sheet below" mechanic and the same resting height (see
-         css/dashboard.css section 2) — the shingled overlap (each tab's
-         margin-left pulling it back into its neighbor) is what gives them
-         the layered-tab look, not a height stagger. Each tab's own paper-bg
-         + text color come straight from that dashboard's theme
-         (ColorPallete.png), not a hand-picked flap color.
-         ====================================================================== -->
     <header class="page-header">
       <div class="title-block">
         <h1>Bengaluru Rent Survey Dashboard</h1>
-        <p id="dynamic-subtitle">An analysis of tenant perspectives, rent caps, and demographics across Bengaluru</p>
+        <p>Five views into the same survey — tenants, landlords, homeowners and non-residents — each filterable by age, career and (where asked) area of the city.</p>
       </div>
-
-      <nav class="tabs-row" role="tablist" aria-label="Respondent category">
-        <button class="tab-btn active" data-tab="overview" role="tab" aria-selected="true">Overview</button>
-        <button class="tab-btn" data-tab="tenant" role="tab" aria-selected="false">Tenant</button>
-        <button class="tab-btn" data-tab="landlord" role="tab" aria-selected="false">Landlord</button>
-        <button class="tab-btn" data-tab="homeowner" role="tab" aria-selected="false">Homeowner</button>
-        <button class="tab-btn" data-tab="nonresident" role="tab" aria-selected="false">Non-Resident</button>
-      </nav>
     </header>
 
     <!-- ======================================================================
-         OVERVIEW DASHBOARD PANEL  (id: panel-overview, theme: theme-overview)
-         Default/first tab. Chart ids prefixed `ov-`. Charts + map defined in
-         js/overview.js. Unlike the 4 respondent-category tabs, this one uses
-         its own 3-column x 2-row grid (.dashboard-grid.overview-grid, see
-         css/dashboard.css section 4) — a KPI summary + featured stacked bar
-         on top, map + 2 demographic pies on the bottom — since it's a
-         cross-cutting summary rather than a per-category chart set.
+         OVERVIEW DASHBOARD  (id: panel-overview, theme: theme-overview)
+         The one dashboard rendered inline rather than embedded — a cross-
+         cutting summary across all 4 categories, so it doesn't belong to
+         any one standalone file. Chart ids prefixed `ov-`. Charts + map
+         defined in js/overview.js. Top row: filter card + regional map
+         (same layout as Tenant/Landlord). Below it, its own 3-column x
+         2-row grid (.dashboard-grid.overview-grid, see css/dashboard.css
+         section 4) — KPI summary + featured stacked bar, then 2 demographic
+         pies.
          ====================================================================== -->
-    <div class="dashboard-container theme-overview" id="panel-overview" style="display:flex;">
+    <div class="dashboard-container theme-overview" id="panel-overview">
+      <div class="panel-body">
+
+      <!-- TOP ROW: filter card (age/career — no Area; this summary spans
+           categories that don't all share one geography) + regional map,
+           same top-row layout as Tenant/Landlord. The filter card is
+           inserted here by js/overview.js, before this static map card. A
+           sibling of .dashboard-grid, not a row inside it — see
+           css/dashboard.css section 4. -->
+      <div class="top-row" id="ov-top-row">
+        <div class="card map-card">
+          <div class="card-title">Tenant &amp; Landlord Regional Distribution</div>
+          <div class="card-subtitle">Tenant locations and landlord rental areas only</div>
+          <div id="ov-map" class="map-box"></div>
+        </div>
+      </div>
+
       <div class="dashboard-grid overview-grid">
 
-        <!-- TOP LEFT: KPI summary panel -->
+        <!-- KPI summary panel -->
         <div class="card span-col-1">
           <div class="card-title">Survey Submissions Breakdown</div>
           <div class="card-subtitle">Exact counts from raw survey response data</div>
           <div class="kpi-wrapper">
 
             <div class="kpi-main-row">
-              <div class="kpi-main-value">621</div>
+              <div class="kpi-main-value" id="ov-kpi-total">621</div>
               <div class="kpi-main-meta">
                 <div class="kpi-main-title">
                   <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
@@ -84,7 +99,7 @@
                   <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
                   Tenants
                 </div>
-                <div class="kpi-sub-value">373</div>
+                <div class="kpi-sub-value" id="ov-kpi-tenant">373</div>
                 <div class="kpi-sub-label">Pay rent</div>
               </div>
 
@@ -93,7 +108,7 @@
                   <svg viewBox="0 0 24 24"><path d="M12 3L2 12h3v8h14v-8h3L12 3zm1 15h-2v-2h2v2zm0-4h-2V9h2v5z"/></svg>
                   Owners
                 </div>
-                <div class="kpi-sub-value">85</div>
+                <div class="kpi-sub-value" id="ov-kpi-owner">85</div>
                 <div class="kpi-sub-label">Own home</div>
               </div>
 
@@ -102,7 +117,7 @@
                   <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
                   Landlords
                 </div>
-                <div class="kpi-sub-value">58</div>
+                <div class="kpi-sub-value" id="ov-kpi-landlord">58</div>
                 <div class="kpi-sub-label">Rent out</div>
               </div>
 
@@ -111,7 +126,7 @@
                   <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
                   Non-Res.
                 </div>
-                <div class="kpi-sub-value">105</div>
+                <div class="kpi-sub-value" id="ov-kpi-nonresident">105</div>
                 <div class="kpi-sub-label">Outside BLR</div>
               </div>
             </div>
@@ -119,309 +134,166 @@
           </div>
         </div>
 
-        <!-- TOP RIGHT (spans 2 cols): 100% stacked bar, one row per respondent category -->
+        <!-- Featured stacked bar (spans 2 cols) -->
         <div class="card stat-bar-card span-col-2">
           <div class="card-title">Do you think Bengaluru should put a limit on rent hikes?</div>
           <div class="card-subtitle">100% normalized proportions by resident category</div>
           <div id="ov-chart-bar" class="chart-box"></div>
         </div>
 
-        <!-- BOTTOM LEFT: regional distribution map -->
-        <div class="card span-col-1">
-          <div class="card-title">Tenant &amp; Landlord Regional Distribution</div>
-          <div class="card-subtitle">Tenant locations and landlord rental areas only</div>
-          <div class="chart-box">
-            <div id="ov-map"></div>
+        <!-- Age + Career pies, side by side, filling the row the map used
+             to occupy alongside them (map moved to the top-row above).
+             pie-fit-card sizes each card to its content's actual height
+             (see css/dashboard.css section 4) so any leftover row height
+             shows as empty space in the grid cell below, not as whitespace
+             inside it. -->
+        <div class="span-col-3 pies-row">
+          <div class="card pie-fit-card">
+            <div class="card-title">Age Demographics</div>
+            <div class="card-subtitle">Respondent distribution by age group</div>
+            <div id="ov-pie-age" class="chart-box"></div>
+          </div>
+
+          <div class="card pie-fit-card">
+            <div class="card-title">Career Position</div>
+            <div class="card-subtitle">Respondent distribution by employment tier</div>
+            <div id="ov-pie-career" class="chart-box"></div>
           </div>
         </div>
 
-        <!-- BOTTOM MIDDLE: age demographics pie. pie-fit-card sizes the card to
-             its content's actual height (see css/dashboard.css section 4) so
-             any leftover row height shows as empty space in the grid cell
-             below the card, not as whitespace inside it. -->
-        <div class="card pie-fit-card">
-          <div class="card-title">Age Demographics</div>
-          <div class="card-subtitle">Respondent distribution by age group</div>
-          <div id="ov-pie-age" class="chart-box"></div>
-        </div>
-
-        <!-- BOTTOM RIGHT: career position pie -->
-        <div class="card pie-fit-card">
-          <div class="card-title">Career Position</div>
-          <div class="card-subtitle">Respondent distribution by employment tier</div>
-          <div id="ov-pie-career" class="chart-box"></div>
-        </div>
-
       </div>
+      </div>
+
+      <footer class="site-footer">
+        <img src="logo.png" alt="The Ken" class="footer-logo" width="110" height="18">
+        <div class="footer-credit">Graphic by Anuj, 3 Sept '26</div>
+        <div class="footer-source">Source: Rent Survey, Aug '26</div>
+      </footer>
     </div>
 
     <!-- ======================================================================
-         HOMEOWNER DASHBOARD PANEL  (id: panel-homeowner, theme: theme-homeowner)
-         Chart ids prefixed `ho-`. Charts defined in js/homeowner.js.
+         TENANT / LANDLORD / HOMEOWNER / NON-RESIDENT DASHBOARDS
+         Each is its own standalone file (see tenant.html, landlord.html,
+         homeowner.html, nonresident.html) — same-origin iframes, auto-sized
+         to their real content height by the script at the bottom of this
+         file, so they read as 4 more sections of one continuous page
+         instead of 4 boxed-in embeds with their own scrollbars.
          ====================================================================== -->
-    <div class="dashboard-container theme-homeowner" id="panel-homeowner" style="display:none;">
-      <div class="dashboard-grid">
-
-        <!-- LEFT COLUMN: 2 stacked vertical bar charts -->
-        <div class="left-column">
-          <div class="card">
-            <h2>Before you owned a home, did you rent in Bengaluru?</h2>
-            <div class="subtitle">Prior rental history of current home owners</div>
-            <div id="ho-chart-rented-before" class="chart-box"></div>
-          </div>
-
-          <div class="card">
-            <h2>How much did rising rent push you to buy a home?</h2>
-            <div class="subtitle">Impact of rent hikes on buying decision</div>
-            <div id="ho-chart-pushed-buy" class="chart-box"></div>
-          </div>
-        </div>
-
-        <!-- RIGHT COLUMN: stacked bar (top) + 2 pie charts (pies-row) -->
-        <div class="right-column">
-          <div class="card stat-bar-card">
-            <h2>Do you think Bengaluru should put a limit on how much rent can go up?</h2>
-            <div class="subtitle">Support for rent control policies in the city</div>
-            <div id="ho-chart-rent-limit" class="chart-box"></div>
-          </div>
-
-          <div class="pies-row">
-            <div class="card">
-              <h2>Compared to what you once paid, how do today's rents look?</h2>
-              <div class="subtitle">Owner perception of current rental costs</div>
-              <div id="ho-chart-today-rents" class="chart-box"></div>
-            </div>
-
-            <div class="card">
-              <h2>Do you think buying a home is still possible for young renters today?</h2>
-              <div class="subtitle">Market feasibility for new buyers</div>
-              <div id="ho-chart-buying-possible" class="chart-box"></div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ======================================================================
-         NON-RESIDENT DASHBOARD PANEL  (id: panel-nonresident, theme: theme-nonresident)
-         Chart ids prefixed `nr-`. Charts defined in js/nonresident.js.
-         Uses the exact same left-column / right-column / pies-row skeleton
-         as the Homeowner panel above so cards stay aligned across tabs.
-         ====================================================================== -->
-    <div class="dashboard-container theme-nonresident" id="panel-nonresident" style="display:none;">
-      <div class="dashboard-grid">
-
-        <!-- LEFT COLUMN: grouped bar + dot matrix -->
-        <div class="left-column">
-          <div class="card">
-            <div class="card-title">Impact on Personal Choice vs. Advice to Others</div>
-            <div class="card-subtitle">Said no to move/job in BLR vs. Told someone not to move</div>
-            <div id="nr-chart-top-left" class="chart-box"></div>
-          </div>
-
-          <div class="card">
-            <div class="card-title">Would Lower Rent Make You Consider Moving?</div>
-            <div class="card-subtitle">Dot matrix representation (N = 69 non-residents)</div>
-            <div class="matrix-horizontal-wrapper">
-              <div id="nr-dot-matrix" class="dot-matrix-grid"></div>
-              <div id="nr-legend-matrix" class="right-legend"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- RIGHT COLUMN: stacked bar (top) + 2 horizontal bar charts (pies-row) -->
-        <div class="right-column">
-          <div class="card stat-bar-card">
-            <div class="card-title">Frequency of Cost of Living Discussions</div>
-            <div class="card-subtitle">How often does Bengaluru's high cost of living come up?</div>
-            <div id="nr-chart-top-right" class="chart-box"></div>
-          </div>
-
-          <div class="pies-row">
-            <div class="card">
-              <div class="card-title">In your own city, is rent a big worry too?</div>
-              <div class="card-subtitle">Cost-of-living concern back home</div>
-              <div id="nr-chart-bottom-right-1" class="chart-box"></div>
-            </div>
-
-            <div class="card">
-              <div class="card-title">How do Bengaluru's rents compare to your city?</div>
-              <div class="card-subtitle">Relative cost perception</div>
-              <div id="nr-chart-bottom-right-2" class="chart-box"></div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ======================================================================
-         LANDLORD DASHBOARD PANEL  (id: panel-landlord, theme: theme-landlord)
-         Chart ids prefixed `ll-`. Charts + map defined in js/landlord.js.
-         LEFT COLUMN mirrors the other two panels (2 stacked row-slots, the
-         second slot split into a pies-row of 2 cards) so the left-side
-         cards keep the same rhythm across all 3 tabs. RIGHT COLUMN has 3
-         stacked cards (rent-cap / tenancy pies / dot-matrix) since this
-         dashboard covers more ground than the other two.
-         ====================================================================== -->
-    <div class="dashboard-container theme-landlord" id="panel-landlord" style="display:none;">
-      <div class="dashboard-grid">
-
-        <!-- LEFT COLUMN: map+portfolio split card, then 2 bar charts side-by-side. -->
-        <div class="left-column">
-          <div class="card">
-            <div class="card-title">What area of Bangalore do you rent properties in?</div>
-            <div class="card-subtitle">Key rental zone hubs &amp; landlord property count breakdown</div>
-            <div class="split-card-content">
-              <div id="ll-map"></div>
-              <div id="ll-chart-portfolio" class="chart-box"></div>
-            </div>
-          </div>
-
-          <div class="pies-row">
-            <div class="card">
-              <div class="card-title">Why become a landlord?</div>
-              <div class="card-subtitle">Primary ownership motivations</div>
-              <div id="ll-chart-motivation" class="chart-box"></div>
-            </div>
-
-            <div class="card">
-              <div class="card-title">Rent pricing logic?</div>
-              <div class="card-subtitle">Setting initial rent decision basis</div>
-              <div id="ll-chart-pricing" class="chart-box"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- RIGHT COLUMN: rent-cap stacked bar (fixed height, see .stat-bar-card),
-             2 tenancy pies (pies-row), dot matrix. The remaining 2 slots
-             split whatever height the fixed card leaves behind, the pies-row
-             getting a bit more room. Standard-size pies (ChartTheme.pieOption
-             default radius), matching every other pie card on the site —
-             the "Broker usage & cost" pie was dropped to keep these 2 at
-             full standard size instead of shrinking 3 across. -->
-        <div class="right-column">
-          <div class="card stat-bar-card">
-            <div class="card-title">Do you think Bengaluru should put a limit on how much rent can go up?</div>
-            <div class="card-subtitle">Support for rent control policies among landlords</div>
-            <div id="ll-chart-rent-cap" class="chart-box"></div>
-          </div>
-
-          <div class="pies-row" style="flex: 1.3;">
-            <div class="card">
-              <div class="card-title">Last renewal hike?</div>
-              <div class="card-subtitle">Rent increase at the most recent tenant turnover</div>
-              <div id="ll-pie-hike" class="chart-box"></div>
-            </div>
-
-            <div class="card">
-              <div class="card-title">Time to find tenant?</div>
-              <div class="card-subtitle">Vacancy duration between tenants</div>
-              <div id="ll-pie-speed" class="chart-box"></div>
-            </div>
-          </div>
-
-          <div class="card" style="flex: 1;">
-            <div class="card-title">Why did you raise the rent last time?</div>
-            <div class="card-subtitle">Single matrix grid mapped to category legend on the right</div>
-            <div class="matrix-horizontal-wrapper">
-              <div id="ll-dot-matrix" class="dot-matrix-grid"></div>
-              <div id="ll-legend-matrix" class="right-legend"></div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ======================================================================
-         TENANT DASHBOARD PANEL  (id: panel-tenant, theme: theme-tenant)
-         Chart ids prefixed `tn-`. Charts defined in js/tenant.js.
-         LEFT COLUMN mirrors the other panels' pies-row-first pattern, then
-         adds a dot-matrix card and a treemap card (3 row-slots, same shape
-         as the Landlord tab's right column). RIGHT COLUMN leads with the
-         rent-cap stacked bar using the exact shared spec as the other 3
-         tabs' top-right chart, then a diverging bar, then a pies-row.
-         ====================================================================== -->
-    <div class="dashboard-container theme-tenant" id="panel-tenant" style="display:none;">
-      <div class="dashboard-grid">
-
-        <!-- LEFT COLUMN: 2 bar charts side-by-side, dot matrix, treemap. -->
-        <div class="left-column">
-          <div class="pies-row">
-            <div class="card">
-              <div class="card-title">Security Deposit Paid</div>
-              <div class="card-subtitle">The security deposit you paid was roughly&hellip;</div>
-              <div id="tn-chart-deposit" class="chart-box"></div>
-            </div>
-
-            <div class="card">
-              <div class="card-title">Monthly Rent Share</div>
-              <div class="card-subtitle">Share of take-home pay spent on rent</div>
-              <div id="tn-chart-pay-share" class="chart-box"></div>
-            </div>
-          </div>
-
-          <div class="card" style="flex: 0.85;">
-            <div class="card-title">Biggest Reason Rents Have Risen</div>
-            <div class="card-subtitle">What tenants think is driving Bengaluru rents up</div>
-            <div class="matrix-horizontal-wrapper">
-              <div id="tn-dot-matrix" class="dot-matrix-grid"></div>
-              <div id="tn-legend-reasons" class="right-legend"></div>
-            </div>
-          </div>
-
-          <div class="card" style="flex: 1.15;">
-            <div class="card-title">When Landlords Last Hiked Rent</div>
-            <div class="card-subtitle">What happened after the most recent rent hike</div>
-            <div id="tn-chart-treemap" class="chart-box"></div>
-          </div>
-        </div>
-
-        <!-- RIGHT COLUMN: rent-cap stacked bar (fixed height, see .stat-bar-card),
-             diverging bar, 2 pies. -->
-        <div class="right-column">
-          <div class="card stat-bar-card">
-            <div class="card-title">Do you think Bengaluru should put a limit on how much rent can go up?</div>
-            <div class="card-subtitle">Rent cap support among tenants</div>
-            <div id="tn-chart-rent-limit" class="chart-box"></div>
-          </div>
-
-          <div class="card" style="flex: 0.65;">
-            <div class="card-title">Max Rent Before Leaving City</div>
-            <div class="card-subtitle">What tenants would pay before leaving Bengaluru</div>
-            <div id="tn-chart-leave-rent" class="chart-box"></div>
-          </div>
-
-          <div class="pies-row" style="flex: 1.9;">
-            <div class="card">
-              <div class="card-title">Last Renewal Hike</div>
-              <div class="card-subtitle">How much rent went up at last renewal</div>
-              <div id="tn-chart-hike-pie" class="chart-box"></div>
-            </div>
-
-            <div class="card">
-              <div class="card-title">Moving &amp; Coping Trade-offs</div>
-              <div class="card-subtitle">Hardest trade-offs made to keep up with rent</div>
-              <div id="tn-chart-coping-pie" class="chart-box"></div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
+    <!-- Not loading="lazy": auto-height (below) needs each iframe's real
+         document to exist and its `load` event to fire promptly, but lazy
+         defers both until the iframe nears the viewport — on a page this
+         tall, "near" never arrives for the lower ones before a reader
+         scrolls to them, leaving stale fallback-height gaps just above
+         each one. -->
+    <iframe class="embed-frame" src="tenant.html" title="Tenant Dashboard" scrolling="no"></iframe>
+    <iframe class="embed-frame" src="landlord.html" title="Landlord Dashboard" scrolling="no"></iframe>
+    <iframe class="embed-frame" src="homeowner.html" title="Homeowner Dashboard" scrolling="no"></iframe>
+    <iframe class="embed-frame" src="nonresident.html" title="Non-Resident Dashboard" scrolling="no"></iframe>
 
   </div>
 
-  <!-- chart-theme.js (the shared design-system helpers) must load before the
-       5 chart modules below, which must in turn load before main.js -->
+  <!-- js/data.js (raw survey records) and js/chart-theme.js + js/filters.js
+       (shared design-system + filtering helpers) for the inline Overview
+       dashboard. The 4 embedded dashboards load their own copies of these
+       inside their own iframe document — nothing here is shared across the
+       iframe boundary. -->
+  <script src="js/data.js"></script>
   <script src="js/chart-theme.js"></script>
+  <script src="js/filters.js"></script>
   <script src="js/overview.js"></script>
-  <script src="js/homeowner.js"></script>
-  <script src="js/nonresident.js"></script>
-  <script src="js/tenant.js"></script>
-  <script src="js/landlord.js"></script>
-  <script src="js/main.js"></script>
+  <script>
+    (document.fonts && document.fonts.ready || Promise.resolve()).then(() => {
+      window.initOverviewCharts();
+      window.addEventListener('resize', () => {
+        Object.values(window.overviewCharts).forEach((c) => c && !c.isDisposed() && c.resize());
+        if (window.overviewMap) window.overviewMap.invalidateSize();
+      });
+    });
+
+    // Auto-height for the 4 embedded dashboards: same-origin iframes, so
+    // their real document height is readable directly instead of guessed.
+    // A ResizeObserver on the iframe's own <html> (not a fixed setTimeout
+    // schedule) catches every reflow that changes its height — web-font
+    // swap-in, the charts' entrance animation, a filter changing which
+    // cards render — for as long as the page is open, not just once at
+    // load. A short-lived poll (below) backs it up for the first few
+    // seconds in case one browser's ResizeObserver drops a callback for a
+    // reflow it should have caught (webfont swap-in via @font-face has a
+    // history of exactly this in some engines) — cheap insurance against
+    // the iframe settling on a stale, too-short height and clipping its
+    // own bottom edge.
+    function watchFrameHeight(frame) {
+      let observer = null;
+      let pollTimer = null;
+
+      function measure(doc, pageEl) {
+        // Measured off `.page`, not documentElement/body.scrollHeight.
+        // css/dashboard.css sets `html, body { min-height: 100% }` —
+        // 100% on <html> resolves against the iframe's own current
+        // viewport (its CSS height, set by us, right here), and body's
+        // min-height:100% then resolves against THAT already-inflated
+        // html height, so both scrollHeights are circular: each new
+        // height we set becomes the next reading's floor, converging on
+        // a fixed point unrelated to the actual content (confirmed empt
+        // -ically — 4 dashboards with visibly different content all
+        // converged on the exact same wrong number). `.page` carries no
+        // height/min-height of its own — it's sized purely by its
+        // children — so it isn't part of that loop.
+        const bodyStyle = doc.defaultView.getComputedStyle(doc.body);
+        // Math.ceil + a small fixed pad: a sub-pixel-off measurement
+        // (fractional getBoundingClientRect values are common, and can
+        // differ slightly from the engine that actually painted the page
+        // vs. the one reading this rect) would otherwise round down just
+        // enough for the iframe's own document to think it's taller than
+        // its box and clip its own bottom edge despite scrolling="no" —
+        // better a few harmless px of extra blank space than that.
+        const h = Math.ceil(pageEl.getBoundingClientRect().height +
+          parseFloat(bodyStyle.paddingTop) + parseFloat(bodyStyle.paddingBottom)) + 8;
+        if (h > 0) frame.style.height = h + 'px';
+      }
+
+      // Always (re)bind on `load` — an iframe starts on about:blank before
+      // its real `src` finishes navigating, so an early synchronous attach
+      // (see below) can end up observing that blank placeholder document
+      // instead. Rebinding unconditionally here, rather than skipping when
+      // `observer` is already set, is what replaces that stale observer
+      // once the real document exists.
+      function bind() {
+        let doc;
+        try {
+          doc = frame.contentDocument;
+        } catch (e) {
+          return; // cross-origin — leave the CSS fallback height in place
+        }
+        const pageEl = doc.querySelector('.page');
+        if (!doc.body || !pageEl) return;
+        if (observer) observer.disconnect();
+        if (pollTimer) clearInterval(pollTimer);
+
+        observer = new ResizeObserver(() => measure(doc, pageEl));
+        observer.observe(pageEl);
+
+        // Explicitly re-measure once this iframe's own local @font-face
+        // fonts (Jazmin Alt / GT America) finish loading — the single
+        // reflow most likely to land after the ResizeObserver's first
+        // callback and most likely to be the one an engine drops.
+        if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(() => measure(doc, pageEl));
+
+        let ticks = 0;
+        pollTimer = setInterval(() => {
+          measure(doc, pageEl);
+          if (++ticks >= 20) clearInterval(pollTimer); // ~6s, then rely on the observer alone
+        }, 300);
+      }
+
+      // The iframe may already be fully loaded (fast local file) by the
+      // time this script runs, in which case a `load` listener attached
+      // now would never fire — bind immediately in that case too.
+      if (frame.contentDocument && frame.contentDocument.readyState === 'complete') bind();
+      frame.addEventListener('load', bind);
+    }
+
+    document.querySelectorAll('iframe.embed-frame').forEach(watchFrameHeight);
+  </script>
 </body>
 </html>

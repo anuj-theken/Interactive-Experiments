@@ -6,19 +6,25 @@
 <title>The WhatsApp Life — Survey Findings</title>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 <style>
   :root{
-    --page:            #f9f9f7;
-    --surface:         #fcfcfb;
+    /* warm, boxy, minimal — cream ground, near-black ink borders, one warm
+       accent for UI chrome. Chart data-marks (charts.js) keep their own
+       separate red/yellow/blue emotion vocabulary — untouched by this. */
+    --page:            #f5ead7;
+    --surface:         #fdf8ee;
     --surface-raised:  #ffffff;
-    --text-primary:    #0b0b0b;
-    --text-secondary:  #52514e;
-    --text-muted:      #898781;
-    --gridline:        #e1e0d9;
-    --baseline:        #c3c2b7;
-    --border:          rgba(11,11,11,0.10);
-    --border-strong:   rgba(11,11,11,0.16);
+    --text-primary:    #201a12;
+    --text-secondary:  #5c5140;
+    --text-muted:      #978a72;
+    --gridline:        #ece0c7;
+    --baseline:        #d9cbac;
+    --border:          rgba(32,26,18,0.13);
+    --border-strong:   rgba(32,26,18,0.55);
+    --ink-border:      #8c8172;
+
+    --accent:      #e2812f;
+    --accent-ink:  #ffffff;
 
     --blue:    #2a78d6;
     --orange:  #eb6834;
@@ -35,10 +41,13 @@
 
     --seq-100: #cde2fb; --seq-200: #9ec5f4; --seq-300: #6da7ec;
     --seq-400: #3987e5; --seq-500: #256abf; --seq-600: #184f95; --seq-700: #0d366b;
+
+    --stories-w: 380px;
+    --stories-bg: #efe0bf;
+    --page-pad: 20px;
   }
 
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
   body{
     margin:0;
     background:var(--page);
@@ -47,851 +56,611 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  #progress{
-    position:fixed; top:0; left:0; height:3px; width:0%;
-    background:var(--blue); z-index:999; transition:none;
+  /* ---------- filter bar: a slim collapsed strip at the bottom of the chart
+     column (level with the stories panel's pagination strip on the right);
+     opening it overlays the controls on top of the chart instead of pushing
+     the chart down, so the charts keep their full height either way. ---------- */
+  .filter-bar{
+    flex:none; position:relative;
+    display:flex; align-items:center; gap:12px;
   }
-
-  .wrap{ max-width:1080px; margin:0 auto; padding:0 28px; }
-
-  header.hero{
-    padding:96px 0 64px;
-    border-bottom:1px solid var(--gridline);
+  .filter-toggle{
+    display:inline-flex; align-items:center; gap:7px; flex:none; height:38px;
+    font-size:13px; font-weight:700; padding:0 14px; border-radius:7px;
+    border:1.5px solid var(--ink-border); background:var(--surface-raised); color:var(--text-primary);
+    cursor:pointer; transition:background .15s ease, border-color .15s ease, color .15s ease;
   }
+  .filter-toggle:hover{ border-color:var(--accent); }
+  .filter-toggle.open{ background:var(--accent); border-color:var(--ink-border); color:var(--accent-ink); }
+  .filter-badge{
+    background:var(--ink-border); color:#fff; font-size:11px; font-weight:700; line-height:1;
+    padding:3px 7px; border-radius:999px;
+  }
+  .filter-toggle.open .filter-badge{ background:var(--surface-raised); color:var(--accent); }
+  .filter-caret{ font-size:9px; transition:transform .15s ease; }
+  .filter-toggle.open .filter-caret{ transform:rotate(180deg); }
+  .filter-overlay{
+    position:absolute; left:0; right:0; bottom:calc(100% + 10px);
+    background:var(--surface-raised); border:1.5px solid var(--ink-border); border-radius:10px;
+    padding:16px 18px; box-shadow:0 -10px 28px rgba(32,26,18,0.16);
+    z-index:30;
+  }
+  #filterHeader{ display:block; }
+  .fh-row{ display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap; margin:0; }
+  .fh-controls{ display:flex; flex-direction:column; gap:14px; flex:1; min-width:0; }
+  .fh-group{ display:flex; gap:22px; flex-wrap:wrap; align-items:flex-end; min-width:0; }
+  .fh-field{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .fh-group-label{
+    font-size:12px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+    color:var(--text-primary); flex:none; white-space:nowrap;
+  }
+  .chip-row{ display:flex; gap:7px; flex-wrap:wrap; min-width:0; }
+  .chip-row-scroll{
+    flex-wrap:nowrap; overflow-x:auto; scrollbar-width:thin; padding-bottom:3px;
+  }
+  .chip-row-scroll::-webkit-scrollbar{ height:5px; }
+  .chip-row-scroll::-webkit-scrollbar-thumb{ background:var(--border-strong); border-radius:3px; }
+  .chip{
+    --chip: var(--text-secondary);
+    font-size:13px; font-weight:600; padding:9px 16px; border-radius:7px; height:38px;
+    border:1.5px solid var(--ink-border);
+    background:var(--surface-raised);
+    color:var(--text-secondary);
+    cursor:pointer; white-space:nowrap; transition:background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
+  }
+  .chip:hover{ border-color:var(--chip); color:color-mix(in srgb, var(--chip) 80%, var(--text-secondary)); }
+  .chip.active{
+    background:var(--chip); border-color:var(--chip); color:#fff;
+    box-shadow:none;
+  }
+  .fh-select{
+    font-size:13px; padding:9px 14px; border-radius:7px; border:1.5px solid var(--ink-border); height:38px;
+    background:var(--surface-raised); color:var(--text-secondary); cursor:pointer;
+    min-width:170px;
+  }
+  .fh-select:hover{ border-color:var(--accent); }
+  .reset-btn{
+    font-size:13px; font-weight:700; padding:9px 18px; height:38px; border-radius:7px;
+    border:1.5px solid var(--ink-border); background:var(--accent); color:var(--accent-ink);
+    cursor:pointer; white-space:nowrap; margin-left:auto; flex:none;
+    transition:background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .reset-btn:hover{ background:color-mix(in srgb, var(--accent) 82%, black); }
+  .fh-summary{ margin:0; font-size:12.5px; color:var(--text-secondary); flex:1; min-width:0; }
+
+  /* ---------- tab bar: switches which of the 11 panels is visible ---------- */
+  .tab-bar{
+    display:flex; gap:5px; flex-wrap:nowrap; flex:none;
+    overflow-x:auto; scrollbar-width:thin; padding-bottom:2px;
+  }
+  .tab-bar::-webkit-scrollbar{ height:5px; }
+  .tab-bar::-webkit-scrollbar-thumb{ background:var(--border-strong); border-radius:3px; }
+  .tab-btn{
+    font-size:12px; font-weight:700; letter-spacing:.01em; padding:8px 12px; border-radius:6px;
+    border:1.5px solid var(--ink-border); background:var(--surface-raised); color:var(--text-secondary);
+    cursor:pointer; white-space:nowrap; flex:none; transition:background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .tab-btn:hover{ border-color:var(--accent); color:var(--text-primary); }
+  .tab-btn.active{ background:var(--accent); border-color:var(--ink-border); color:var(--accent-ink); }
+
+  /* ---------- content shell: charts column + stories column ---------- */
+  .content-shell{
+    max-width:1400px; margin:0 auto; padding:var(--page-pad) 28px;
+    height:calc(100vh - (2 * var(--page-pad)));
+    display:grid; grid-template-columns:1fr var(--stories-w); gap:28px; align-items:stretch;
+  }
+  .frames-col{ min-width:0; height:100%; display:flex; flex-direction:column; gap:14px; }
+
+  /* Frames: only one panel is visible at a time, switched instantly by the
+     tab bar (no scroll-linked pinning). Each one absolutely fills
+     .frames-pin. Chart frames stretch their card to fill whatever room is
+     left under the head (so the chart resizes to fit instead of the frame
+     needing to scroll); the short hero/closing frames just center instead. */
+  .frames-pin{ position:relative; flex:1; min-height:0; }
+  .frame{
+    position:absolute; inset:0; padding:0; overflow-y:auto; overscroll-behavior-y:contain;
+    display:flex; flex-direction:column;
+    opacity:0; pointer-events:none; transition:opacity .18s ease;
+  }
+  .frame.active{ opacity:1; pointer-events:auto; }
+  .frame.frame-center{ justify-content:center; }
+  .frame > .panel-head{ flex:none; }
+  .frame > .card{ flex:1; min-height:0; }
+  /* p7's top row (two simple 5-bar charts) needs much less room than the
+     category breakdown below it — anchor it to a fixed height instead of a
+     percentage-of-frame split, so the card below (flex:1) gets whatever's
+     actually left over rather than an even, too-small share. */
+  .frame > .two-col{ flex:0 0 170px; min-height:0; margin-bottom:14px; }
+
   .kicker{
     font-size:13px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
-    color:var(--blue); margin:0 0 14px;
+    color:var(--accent); margin:0 0 14px;
   }
   h1.title{
-    font-size:clamp(32px,5vw,52px); line-height:1.08; margin:0 0 20px; font-weight:700;
+    font-size:clamp(30px,4.4vw,46px); line-height:1.08; margin:0 0 18px; font-weight:700;
     max-width:14ch;
   }
   .lede{
-    font-size:18px; line-height:1.6; color:var(--text-secondary); max-width:62ch; margin:0 0 36px;
+    font-size:16.5px; line-height:1.55; color:var(--text-secondary); max-width:62ch; margin:0 0 28px;
   }
-  .hero-stats{ display:flex; gap:40px; flex-wrap:wrap; }
-  .hero-stat .num{ font-size:34px; font-weight:700; line-height:1; }
-  .hero-stat .lbl{ font-size:13px; color:var(--text-muted); margin-top:6px; }
+  .hero-stats{ display:flex; gap:36px; flex-wrap:wrap; }
+  .hero-stat .num{ font-size:30px; font-weight:700; line-height:1; }
+  .hero-stat .lbl{ font-size:12.5px; color:var(--text-muted); margin-top:6px; }
 
-  section.panel{
-    padding:76px 0;
-    border-bottom:1px solid var(--gridline);
-    opacity:0; transform:translateY(28px);
-  }
-  section.panel:last-of-type{ border-bottom:none; }
-
-  .panel-head{ max-width:74ch; margin-bottom:32px; }
+  .panel-head{ max-width:74ch; margin-bottom:14px; }
   .idea-num{
     font-size:13px; font-weight:700; letter-spacing:.08em; color:var(--text-muted);
     margin:0 0 10px;
   }
   h2.panel-title{
-    font-size:clamp(24px,3vw,32px); margin:0 0 14px; font-weight:700; line-height:1.2;
+    font-size:clamp(21px,2.4vw,28px); margin:0 0 10px; font-weight:700; line-height:1.2;
   }
   .qbox{
     display:flex; gap:9px; align-items:flex-start;
-    font-size:13.5px; font-style:italic; line-height:1.5; color:var(--text-secondary);
-    background:rgba(42,120,214,0.06); border-left:3px solid var(--blue);
-    padding:9px 14px; border-radius:0 8px 8px 0; margin:0 0 18px;
+    font-size:12.5px; font-style:italic; line-height:1.4; color:var(--text-secondary);
+    background:color-mix(in srgb, var(--accent) 8%, transparent); border-left:3px solid var(--accent);
+    padding:7px 12px; border-radius:0 6px 6px 0; margin:0 0 12px;
   }
   .qbox .qtag{
     flex:none; font-style:normal; font-weight:700; font-size:10.5px; letter-spacing:.06em;
-    color:var(--blue); text-transform:uppercase; margin-top:2px;
+    color:var(--accent); text-transform:uppercase; margin-top:2px;
   }
-  p.narrative{ font-size:16.5px; line-height:1.65; color:var(--text-secondary); margin:0; }
+  p.narrative{ font-size:14.5px; line-height:1.5; color:var(--text-secondary); margin:0; }
   p.narrative b{ color:var(--text-primary); font-weight:600; }
 
   .card{
     background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:14px;
-    padding:28px 26px 18px;
+    border:1.5px solid var(--ink-border);
+    border-radius:8px;
+    padding:18px 20px 12px;
+    position:relative;
+    display:flex; flex-direction:column;
   }
-  .chart{ width:100%; }
-  .chart.h360{ height:360px; }
-  .chart.h420{ height:420px; }
-  .chart.h460{ height:460px; }
-  .chart.h480{ height:480px; }
-  .chart.h520{ height:520px; }
-  .chart.h560{ height:560px; }
+  .chart{ width:100%; flex:1; min-height:0; }
 
-  .callout{
-    margin-top:18px; font-size:14.5px; color:var(--text-muted); line-height:1.55;
-  }
-  .callout b{ color:var(--text-secondary); }
+  .two-col{ display:grid; grid-template-columns:1.15fr .85fr; grid-template-rows:1fr; gap:24px; }
+  @media (max-width: 860px){ .two-col{ grid-template-columns:1fr; grid-template-rows:1fr 1fr; } }
 
-  .two-col{ display:grid; grid-template-columns:1.15fr .85fr; gap:24px; }
-  @media (max-width: 860px){ .two-col{ grid-template-columns:1fr; } }
-
-  .stack-col{ display:grid; grid-template-columns:1fr; gap:24px; }
-
-  /* stat tile section (idea 10) */
-  .stat-panel{ text-align:center; padding:88px 0 100px; }
+  /* stat tile frame (idea 10) */
+  .stat-panel{ text-align:center; }
   .stat-value{
-    font-size:clamp(72px,14vw,148px); font-weight:700; line-height:1; letter-spacing:-.02em;
-    color:var(--blue);
+    font-size:clamp(52px,9vw,100px); font-weight:700; line-height:1; letter-spacing:-.02em;
+    color:var(--accent);
   }
   .stat-caption{
-    font-size:18px; color:var(--text-secondary); margin-top:18px; max-width:48ch; margin-left:auto; margin-right:auto;
+    font-size:15.5px; color:var(--text-secondary); margin-top:14px; max-width:48ch; margin-left:auto; margin-right:auto;
   }
   .bar-track{
-    width:min(520px,100%); height:14px; border-radius:8px; background:var(--gridline);
-    margin:34px auto 0; overflow:hidden; position:relative;
+    width:min(480px,100%); height:14px; border-radius:8px; background:var(--gridline);
+    margin:22px auto 0; overflow:hidden; position:relative;
   }
-  .bar-fill{
-    height:100%; width:0%; background:var(--blue); border-radius:8px;
-  }
+  .bar-fill{ height:100%; width:0%; background:var(--accent); border-radius:8px; }
   .bar-legend{
-    display:flex; justify-content:space-between; width:min(520px,100%); margin:10px auto 0;
+    display:flex; justify-content:space-between; width:min(480px,100%); margin:10px auto 0;
     font-size:13px; color:var(--text-muted);
   }
   .bar-legend .swatch{ display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:6px; vertical-align:middle; }
 
+  /* ---------- stories column ---------- */
+  .stories-col{
+    height:100%;
+    display:flex; flex-direction:column;
+    background:var(--stories-bg); border:1.5px solid var(--ink-border); border-radius:8px;
+    padding:18px 18px 14px; overflow:hidden;
+  }
+  .stories-head{ flex:none; margin-bottom:10px; }
+  .stories-title{ font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
+  .stories-sub{ font-size:12px; color:var(--text-muted); line-height:1.5; }
+  .stories-sub b{ color:var(--text-secondary); }
+  .active-filters{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .active-pill{
+    display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600;
+    padding:4px 8px 4px 10px; border-radius:6px; border:1.5px solid var(--ink-border);
+    background:color-mix(in srgb, var(--accent) 16%, var(--surface-raised)); color:var(--text-primary);
+    cursor:pointer; white-space:nowrap;
+  }
+  .active-pill:hover{ background:color-mix(in srgb, var(--accent) 30%, var(--surface-raised)); }
+  .active-pill .pill-x{ font-weight:700; font-size:13px; line-height:1; }
+  .stories-scroll{ flex:1; overflow-y:auto; min-height:0; display:flex; flex-direction:column; gap:8px; }
+  .stories-empty{ color:var(--text-muted); font-size:13px; padding:16px 0; }
+  .story-card{
+    --cat: var(--text-secondary);
+    background:var(--surface-raised);
+    border:1.5px solid var(--ink-border);
+    border-left:4px solid var(--cat);
+    border-radius:6px;
+    padding:12px 13px;
+  }
+  .story-quote{
+    font-size:13px; font-style:italic; color:var(--text-primary); line-height:1.5; margin:0;
+  }
+  .story-meta{
+    display:flex; align-items:center; gap:6px; font-size:11px; font-weight:600;
+    color:color-mix(in srgb, var(--cat) 70%, #000); margin:0 0 6px;
+  }
+  .story-dot{ width:8px; height:8px; border-radius:50%; flex:none; background:var(--cat); }
+  .story-toggle{
+    background:none; border:none; padding:4px 0 0; font-size:11.5px; font-weight:600;
+    color:var(--cat); cursor:pointer;
+  }
+  .story-toggle:hover{ text-decoration:underline; }
+  .stories-pagination{
+    flex:none; display:flex; align-items:center; justify-content:space-between;
+    margin-top:10px; padding-top:10px; border-top:1px solid var(--gridline);
+    font-size:12px; color:var(--text-muted);
+  }
+  .page-btn{
+    background:var(--surface-raised); border:1.5px solid var(--ink-border); border-radius:6px; padding:5px 10px;
+    font-size:12px; color:var(--text-secondary); cursor:pointer;
+  }
+  .page-btn:hover:not(:disabled){ border-color:var(--accent); color:var(--text-primary); }
+  .page-btn:disabled{ opacity:.4; cursor:default; }
+
   footer{
     padding:48px 0 80px; color:var(--text-muted); font-size:13px; line-height:1.6;
+    max-width:1400px; margin:0 auto; padding-left:28px; padding-right:28px;
+  }
+
+  @media (max-width: 1080px){
+    .content-shell{ grid-template-columns:1fr; height:auto; }
+    .frames-col{ height:calc(100vh - (2 * var(--page-pad))); }
+    .stories-col{ margin-top:16px; height:70vh; }
   }
 
   @media (max-width: 640px){
-    header.hero{ padding:64px 0 44px; }
-    section.panel{ padding:52px 0; }
     .card{ padding:20px 16px 14px; }
+    .content-shell{ padding:var(--page-pad) 18px; }
+    .fh-select{ max-width:130px; }
   }
 </style>
 </head>
 <body>
 
-<div id="progress"></div>
+<div class="content-shell">
+  <div class="frames-col">
+    <nav class="tab-bar" id="tabBar"></nav>
+    <div id="framesPin" class="frames-pin">
 
-<div class="wrap">
-  <header class="hero">
-    <p class="kicker">Survey findings · The WhatsApp Life</p>
-    <h1 class="title">Where does everyday life actually hurt?</h1>
-    <p class="lede">
-      We asked people to scroll back through their own WhatsApp chats and point to the tasks
-      that felt frustrating, procrastinated, or repetitive. <b>469 respondents</b> tagged real
-      moments across 14 areas of life and wrote <b>1,291 short stories</b> about them. Ten charts
-      below walk through what the data says — what hurts most, why, who it hurts, and what
-      people are already trying (or not trying at all) to fix it.
-    </p>
-    <div class="hero-stats">
-      <div class="hero-stat"><div class="num" id="statRespondents">0</div><div class="lbl">Respondents</div></div>
-      <div class="hero-stat"><div class="num" id="statStories">0</div><div class="lbl">Free-text stories</div></div>
-      <div class="hero-stat"><div class="num" id="statCats">14</div><div class="lbl">Life areas surveyed</div></div>
-      <div class="hero-stat"><div class="num" id="statPilotPct">0%</div><div class="lbl">Want to pilot solutions</div></div>
-    </div>
-  </header>
+      <div class="frame frame-center" id="frame-hero">
+        <p class="kicker">Survey findings · The WhatsApp Life</p>
+        <h1 class="title">Where does everyday life actually hurt?</h1>
+        <p class="lede">
+          We asked people to scroll back through their own WhatsApp chats and point to the tasks
+          that felt frustrating, procrastinated, or repetitive. <b>469 respondents</b> tagged real
+          moments across 14 areas of life and wrote <b>1,291 short stories</b> about them. Ten charts
+          below walk through what the data says. Use the filters above to narrow both the charts and
+          the stories panel on the right — and click any circle, bar or cell to focus the stories on
+          that slice.
+        </p>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="num" id="statRespondents">0</div><div class="lbl">Respondents</div></div>
+          <div class="hero-stat"><div class="num" id="statStories">0</div><div class="lbl">Free-text stories</div></div>
+          <div class="hero-stat"><div class="num" id="statCats">14</div><div class="lbl">Life areas surveyed</div></div>
+          <div class="hero-stat"><div class="num" id="statPilotPct">0%</div><div class="lbl">Want to pilot solutions</div></div>
+        </div>
+      </div>
 
-  <!-- 01 — Category demand ranking -->
-  <section class="panel" id="p1">
-    <div class="panel-head">
-      <p class="idea-num">01 / Demand</p>
-      <h2 class="panel-title">Money is the headline pain point — by a wide margin</h2>
-      <p class="qbox"><span class="qtag">We asked</span>"Scroll back through your WhatsApp — which of these 14 areas of life turned up a task that felt frustrating, procrastinated, or repetitive? (pick all that apply)"</p>
-      <p class="narrative">
-        Ranked by how many people picked each life area as a pain point,
-        <b>money, investing and insurance leads at 225 selections</b> — nearly a third more than
-        second-place Groceries (165). Fitness (138) and Shopping (123) round out the top four.
-        This is where demand concentrates.
-      </p>
-    </div>
-    <div class="card"><div id="chart1" class="chart h480"></div></div>
-  </section>
+      <!-- 01 — Category demand ranking -->
+      <div class="frame" id="p1">
+        <div class="panel-head">
+          <p class="idea-num">01 / Demand</p>
+          <h2 class="panel-title">Money is the headline pain point — by a wide margin</h2>
+          <p class="qbox"><span class="qtag">We asked</span>"Scroll back through your WhatsApp — which of these 14 areas of life turned up a task that felt frustrating, procrastinated, or repetitive? (pick all that apply)"</p>
+          <p class="narrative">
+            Ranked by how many people picked each life area as a pain point,
+            <b>money, investing and insurance leads at 225 selections</b> — nearly a third more than
+            second-place Groceries (165). Fitness (138) and Shopping (123) round out the top four.
+            Each bar's color shows which feeling dominates that category — the same red / yellow /
+            blue vocabulary chart 02 introduces.
+          </p>
+        </div>
+        <div class="card"><div id="chart1" class="chart"></div></div>
+      </div>
 
-  <!-- 02 — Three emotions -->
-  <section class="panel" id="p2">
-    <div class="panel-head">
-      <p class="idea-num">02 / Vocabulary</p>
-      <h2 class="panel-title">Every pain point is one of three feelings</h2>
-      <p class="qbox"><span class="qtag">We asked</span>For every area you picked: "Which of these fits best — Frustrating, Procrastinate, or Repetitive?"</p>
-      <p class="narrative">
-        Respondents tagged each pain point as <b>Frustrating</b> (a fight every time),
-        <b>Procrastinate</b> (avoided, barely done) or <b>Repetitive</b> (mindless, recurring).
-        Frustration dominates — <b>602 of 1,295 tags</b>, well ahead of Procrastinate (385) and
-        Repetitive (308). This vocabulary carries through every chart below.
-      </p>
-    </div>
-    <div class="card"><div id="chart2" class="chart h420"></div></div>
-  </section>
+      <!-- 02 — Three emotions -->
+      <div class="frame" id="p2">
+        <div class="panel-head">
+          <p class="idea-num">02 / Vocabulary</p>
+          <h2 class="panel-title">Every pain point is one of three feelings</h2>
+          <p class="qbox"><span class="qtag">We asked</span>For every area you picked: "Which of these fits best — Frustrating, Procrastinate, or Repetitive?"</p>
+          <p class="narrative">
+            Respondents tagged each pain point as <b>Frustrating</b> (a fight every time),
+            <b>Procrastinate</b> (avoided, barely done) or <b>Repetitive</b> (mindless, recurring).
+            Frustration dominates — <b>602 of 1,295 tags</b>, well ahead of Procrastinate (385) and
+            Repetitive (308). This vocabulary carries through every chart below.
+          </p>
+        </div>
+        <div class="card"><div id="chart2" class="chart"></div></div>
+      </div>
 
-  <!-- 03 — Emotion x category heatmap -->
-  <section class="panel" id="p3">
-    <div class="panel-head">
-      <p class="idea-num">03 / The cross</p>
-      <h2 class="panel-title">Different categories need different kinds of fixes</h2>
-      <p class="qbox"><span class="qtag">Combining</span>Which areas people picked (chart 01) with which feeling they gave each one (chart 02) — every category crossed against Frustrating / Procrastinate / Repetitive.</p>
-      <p class="narrative">
-        Crossing emotion against category reveals what builders actually need to design for.
-        <b>Groceries is repetitive, not frustrating</b> (78 vs 77) — it needs automation, not
-        empathy. <b>Fitness and Learning are procrastination traps</b> (76 and 56) — they need
-        nudges, not tools. <b>Money splits across all three.</b> Getting-around and Travel are
-        almost purely frustrating — they need the friction removed, not softened.
-      </p>
-    </div>
-    <div class="card"><div id="chart3" class="chart h520"></div></div>
-  </section>
+      <!-- 03 — Emotion x category matrix -->
+      <div class="frame" id="p3">
+        <div class="panel-head">
+          <p class="idea-num">03 / The cross</p>
+          <h2 class="panel-title">Different categories need different kinds of fixes</h2>
+          <p class="qbox"><span class="qtag">Combining</span>Which areas people picked (chart 01) with which feeling they gave each one (chart 02) — every category crossed against Frustrating / Procrastinate / Repetitive.</p>
+          <p class="narrative">
+            Crossing emotion against category reveals what builders actually need to design for.
+            <b>Groceries is repetitive, not frustrating</b> — it needs automation, not
+            empathy. <b>Fitness and Learning are procrastination traps</b> — they need
+            nudges, not tools. <b>Money splits across all three.</b> Getting-around and Travel are
+            almost purely frustrating — they need the friction removed, not softened. Darker cells
+            mean more mentions.
+          </p>
+        </div>
+        <div class="card"><div id="chart3" class="chart"></div></div>
+      </div>
 
-  <!-- 04 — 2x2 opportunity map -->
-  <section class="panel" id="p4">
-    <div class="panel-head">
-      <p class="idea-num">04 / Opportunity</p>
-      <h2 class="panel-title">Popular isn't the same as painful</h2>
-      <p class="qbox"><span class="qtag">Combining</span>How often a category was picked (chart 01) against the share of its tags that came back Frustrating (chart 02/03) — every category plotted at once.</p>
-      <p class="narrative">
-        Plotting how often a category was picked against how frustrating it is finds the
-        categories big enough to matter — and the outliers. Color marks which quadrant each
-        category falls into against the sample average: <b>orange</b> is popular and painful,
-        <b>aqua</b> is niche but painful, <b>blue</b> is popular but more manageable, and
-        <b>grey</b> is both niche and mild. <b>Weddings is picked rarely (38 times) but rated
-        the most frustrating category on the page (71%)</b> — a small, sharp, underserved
-        pocket of pain sitting alone in the niche-but-painful corner.
-      </p>
-    </div>
-    <div class="card"><div id="chart4" class="chart h560"></div></div>
-  </section>
+      <!-- 04 — 2x2 opportunity map -->
+      <div class="frame" id="p4">
+        <div class="panel-head">
+          <p class="idea-num">04 / Opportunity</p>
+          <h2 class="panel-title">Popular isn't the same as painful</h2>
+          <p class="qbox"><span class="qtag">Combining</span>How often a category was picked (chart 01) against the share of its tags that came back Frustrating (chart 02/03) — every category plotted at once.</p>
+          <p class="narrative">
+            Plotting how often a category was picked against how frustrating it is finds the
+            categories big enough to matter — and the outliers. Color marks which quadrant each
+            category falls into against the current sample average: <b>orange</b> is popular and painful,
+            <b>aqua</b> is niche but painful, <b>blue</b> is popular but more manageable, and
+            <b>grey</b> is both niche and mild. <b>Weddings is picked rarely but rates among the
+            most frustrating categories on the page</b> — a small, sharp, underserved pocket of pain
+            sitting alone in the niche-but-painful corner.
+          </p>
+        </div>
+        <div class="card"><div id="chart4" class="chart"></div></div>
+      </div>
 
-  <!-- 05 — Word frequency -->
-  <section class="panel" id="p5">
-    <div class="panel-head">
-      <p class="idea-num">05 / In their own words</p>
-      <h2 class="panel-title">"Time" is the word people reach for</h2>
-      <p class="qbox"><span class="qtag">We asked</span>"Can you share an exact task behind that feeling? Where were you, what happened, what did you have to deal with?"</p>
-      <p class="narrative">
-        Across the 1,291 free-text stories, <b>"time" appears 263 times</b> — nearly twice as
-        often as any other word — followed by <i>need, find, different, order, want</i>: the
-        vocabulary of choice-overload and repetition, not of any single task going wrong. Split
-        each word by the category it came from and the picture sharpens further —
-        <b>"order" is a Groceries word</b> (56 of 105 mentions), while <b>"time" and "every"
-        lean hardest on Money</b>. The rest ("Other") is spread thinly across the remaining ten
-        categories.
-      </p>
-    </div>
-    <div class="card"><div id="chart5" class="chart h520"></div></div>
-  </section>
+      <!-- 05 — Word frequency -->
+      <div class="frame" id="p5">
+        <div class="panel-head">
+          <p class="idea-num">05 / In their own words</p>
+          <h2 class="panel-title">"Time" is the word people reach for</h2>
+          <p class="qbox"><span class="qtag">We asked</span>"Can you share an exact task behind that feeling? Where were you, what happened, what did you have to deal with?"</p>
+          <p class="narrative">
+            Across the free-text stories, <b>"time" appears far more often</b> than any other word,
+            followed by <i>need, find, different, order, want</i>: the vocabulary of choice-overload
+            and repetition, not of any single task going wrong. Split each word by the category it
+            came from and the picture sharpens further — each bar segment is colored by the
+            category it came from.
+          </p>
+        </div>
+        <div class="card"><div id="chart5" class="chart"></div></div>
+      </div>
 
-  <!-- 06 — Coping systems -->
-  <section class="panel" id="p6">
-    <div class="panel-head">
-      <p class="idea-num">06 / Status quo</p>
-      <h2 class="panel-title">Most people are duct-taping this together — or doing nothing</h2>
-      <p class="qbox"><span class="qtag">We asked</span>"What's the system you've adopted to handle this today? Is it people (you, family, house staff, a broker or agent), apps, the chats, or nothing at all?"</p>
-      <p class="narrative">
-        Asked what system they use today, apps lead the mentions — but <b>"nothing at all" is
-        the second most common answer</b>, ahead of family, chats, friends or a spreadsheet.
-        That gap between "apps" and "nothing" is the real opportunity signal: a large share of
-        this pain currently has no system at all.
-      </p>
-    </div>
-    <div class="card"><div id="chart6" class="chart h420"></div></div>
-  </section>
+      <!-- 06 — Coping systems -->
+      <div class="frame" id="p6">
+        <div class="panel-head">
+          <p class="idea-num">06 / Status quo</p>
+          <h2 class="panel-title">Most people are duct-taping this together — or doing nothing</h2>
+          <p class="qbox"><span class="qtag">We asked</span>"What's the system you've adopted to handle this today? Is it people (you, family, house staff, a broker or agent), apps, the chats, or nothing at all?"</p>
+          <p class="narrative">
+            Asked what system they use today, apps and "nothing at all" are consistently the two
+            largest answers — ahead of family, chats, friends or a spreadsheet. That gap is the real
+            opportunity signal: a large share of this pain currently has no system at all. Click a
+            bar to see which categories lean on that system most.
+          </p>
+        </div>
+        <div class="card"><div id="chart6" class="chart"></div></div>
+      </div>
 
-  <!-- 07 — Age -->
-  <section class="panel" id="p7">
-    <div class="panel-head">
-      <p class="idea-num">07 / Who answered — age</p>
-      <h2 class="panel-title">A young-adult sample, median age 33</h2>
-      <p class="qbox"><span class="qtag">We asked</span>"How old are you?" (a few junk entries like "937" and "12" were excluded)</p>
-      <p class="narrative">
-        The sample is concentrated in working-age adults — median age <b>33</b>. The 25–34s log
-        the most tags of any group by far, and frustration climbs steadily with age — the
-        youngest respondents split their feelings fairly evenly, while 45–54s report the
-        highest share of Frustrating tags of any band. Looking at the top categories by age,
-        money and groceries pain shows up early and stays high through the 25–44 range, while
-        younger respondents lean relatively more toward learning and shopping.
-      </p>
-    </div>
-    <div class="two-col">
-      <div class="card"><div id="chart7a" class="chart h360"></div></div>
-      <div class="card"><div id="chart7c" class="chart h360"></div></div>
-    </div>
-    <div class="card" style="margin-top:24px;"><div id="chart7b" class="chart h360"></div></div>
-  </section>
+      <!-- 07 — Age -->
+      <div class="frame" id="p7">
+        <div class="panel-head">
+          <p class="idea-num">07 / Who answered — age</p>
+          <h2 class="panel-title">A young-adult sample, median age in the low 30s</h2>
+          <p class="qbox"><span class="qtag">We asked</span>"How old are you?" (a few junk entries like "937" and "12" were excluded)</p>
+          <p class="narrative">
+            The sample is concentrated in working-age adults. The 25–34s log the most tags of any
+            group by far, and frustration climbs steadily with age. Looking at the top categories by
+            age (right), money and groceries pain shows up early and stays high through the 25–44
+            range, while younger respondents lean relatively more toward learning and shopping.
+          </p>
+        </div>
+        <div class="two-col">
+          <div class="card"><div id="chart7a" class="chart"></div></div>
+          <div class="card"><div id="chart7c" class="chart"></div></div>
+        </div>
+        <div class="card"><div id="chart7b" class="chart"></div></div>
+      </div>
 
-  <!-- 08 — Geography -->
-  <section class="panel" id="p8">
-    <div class="panel-head">
-      <p class="idea-num">08 / Who answered — geography</p>
-      <h2 class="panel-title">Strong reach across India's biggest metros</h2>
-      <p class="qbox"><span class="qtag">We asked</span>"Finally, which city do you live in?"</p>
-      <p class="narrative">
-        The survey reached deep into India's largest, most digitally-active cities —
-        <b>Bangalore (114) and Mumbai (99)</b> together account for nearly half the sample, with
-        Delhi, Hyderabad and Chennai making up most of the rest. That's exactly the audience
-        this research set out to reach: a tier-1, always-online population living the pain
-        points above in real time. Read every finding on this page as a tier-1 metro picture.
-      </p>
-    </div>
-    <div class="card"><div id="chart8" class="chart h420"></div></div>
-  </section>
+      <!-- 08 — Geography -->
+      <div class="frame" id="p8">
+        <div class="panel-head">
+          <p class="idea-num">08 / Who answered — geography</p>
+          <h2 class="panel-title">Strong reach across India's biggest metros</h2>
+          <p class="qbox"><span class="qtag">We asked</span>"Finally, which city do you live in?"</p>
+          <p class="narrative">
+            The survey reached deep into India's largest, most digitally-active cities —
+            <b>Bangalore and Mumbai</b> together account for nearly half the sample, with
+            Delhi, Hyderabad and Chennai making up most of the rest. That's exactly the audience
+            this research set out to reach: a tier-1, always-online population living the pain
+            points above in real time.
+          </p>
+        </div>
+        <div class="card"><div id="chart8" class="chart"></div></div>
+      </div>
 
-  <!-- 09 — Story length -->
-  <section class="panel" id="p9">
-    <div class="panel-head">
-      <p class="idea-num">09 / Intensity signal</p>
-      <h2 class="panel-title">Emotional pain makes people write more</h2>
-      <p class="qbox"><span class="qtag">We asked</span>"Can you share an exact task behind that feeling. Where were you, what happened, what did you have to deal with?" — measured here by how many words people wrote back (one-word non-answers like "N/A" excluded).</p>
-      <p class="narrative">
-        Stories tagged Frustrating or Procrastinate run a little longer on average than stories
-        tagged Repetitive — a small gap, but a consistent one: when something genuinely bothers
-        people, they explain it; repetitive drudgery gets a shorter shrug. The shortest and
-        longest answers make the same point more vividly — hover any bar below to read the
-        actual shortest and longest story behind each feeling.
-      </p>
-    </div>
-    <div class="card"><div id="chart9" class="chart h460"></div></div>
-  </section>
+      <!-- 09 — Story length -->
+      <div class="frame" id="p9">
+        <div class="panel-head">
+          <p class="idea-num">09 / Intensity signal</p>
+          <h2 class="panel-title">Emotional pain makes people write more</h2>
+          <p class="qbox"><span class="qtag">We asked</span>"Can you share an exact task behind that feeling. Where were you, what happened, what did you have to deal with?" — measured here by how many words people wrote back (junk non-answers like "N/A" excluded).</p>
+          <p class="narrative">
+            Stories tagged Frustrating or Procrastinate tend to run longer than stories tagged
+            Repetitive — a small gap, but a consistent one: when something genuinely bothers people,
+            they explain it; repetitive drudgery gets a shorter shrug. Hover any bar to read the
+            actual shortest and longest story behind each feeling.
+          </p>
+        </div>
+        <div class="card"><div id="chart9" class="chart"></div></div>
+      </div>
 
-  <!-- 10 — Pilot opt-in -->
-  <section class="panel stat-panel" id="p10">
-    <p class="idea-num" style="text-align:center;">10 / Closing signal</p>
-    <p class="qbox" style="max-width:52ch; margin-left:auto; margin-right:auto;"><span class="qtag">We asked</span>"As student teams build solutions to the pain points stated in this survey, we want a small group of readers to try them and tell us what works and what doesn't. Want to be one of them?"</p>
-    <div class="stat-value" id="pilotBig">0%</div>
-    <p class="stat-caption">
-      <b style="color:var(--text-primary)">379 of 469 respondents</b> — 81% — said
-      <i>"count me in"</i> to test solutions built for the pain points they described.
-      This isn't just a dataset. It's a ready pilot group.
-    </p>
-    <div class="bar-track"><div class="bar-fill" id="pilotBar"></div></div>
-    <div class="bar-legend">
-      <span><span class="swatch" style="background:var(--blue)"></span>Count me in — 379</span>
-      <span><span class="swatch" style="background:var(--gridline)"></span>No, thanks — 90</span>
-    </div>
-  </section>
+      <!-- 10 — Pilot opt-in -->
+      <div class="frame frame-center stat-panel" id="p10">
+        <p class="idea-num" style="text-align:center;">10 / Closing signal</p>
+        <p class="qbox" style="max-width:52ch; margin-left:auto; margin-right:auto;"><span class="qtag">We asked</span>"As student teams build solutions to the pain points stated in this survey, we want a small group of readers to try them and tell us what works and what doesn't. Want to be one of them?"</p>
+        <div class="stat-value" id="pilotBig">0%</div>
+        <p class="stat-caption">
+          <b style="color:var(--text-primary)">379 of 469 respondents</b> — 81% — said
+          <i>"count me in"</i> to test solutions built for the pain points they described.
+          This isn't just a dataset. It's a ready pilot group.
+        </p>
+        <div class="bar-track"><div class="bar-fill" id="pilotBar"></div></div>
+        <div class="bar-legend">
+          <span><span class="swatch" style="background:var(--accent)"></span>Count me in — 379</span>
+          <span><span class="swatch" style="background:var(--gridline)"></span>No, thanks — 90</span>
+        </div>
+      </div>
 
-  <footer>
-    Source: WhatsApp-life pain-point survey, 469 respondents, collected 2026. Percentages are
-    of respondents who tagged that category; free-text word counts exclude common stop words.
-  </footer>
+    </div>
+
+    <div class="filter-bar">
+      <button type="button" class="filter-toggle" id="filterToggle">
+        <span>Filters</span>
+        <span class="filter-badge" id="filterBadge" hidden>0</span>
+        <span class="filter-caret" id="filterCaret">&#9662;</span>
+      </button>
+      <div class="fh-summary" id="fhSummary"></div>
+      <div class="filter-overlay" id="filterOverlay" hidden>
+        <header id="filterHeader"></header>
+      </div>
+    </div>
+  </div>
+
+  <aside class="stories-col" id="storiesPanel"></aside>
 </div>
 
+<footer>
+  Source: WhatsApp-life pain-point survey, 469 respondents, collected 2026. Percentages are
+  of respondents who tagged that category; free-text word counts exclude common stop words.
+  Coping-system labels are assigned by keyword rule from free-text answers and are
+  approximate. Filters above and clicks on any chart recompute the charts and the stories
+  panel directly from the underlying respondent data.
+</footer>
+
+<script src="data.js"></script>
+<script src="aggregate.js"></script>
+<script src="charts.js"></script>
+<script src="sidebar.js"></script>
 <script>
-/* ============================= DATA ============================= */
-const DATA = {"demand": [{"cat": "Money & investing", "count": 225}, {"cat": "Groceries", "count": 165}, {"cat": "Fitness & wellness", "count": 138}, {"cat": "Shopping & deals", "count": 123}, {"cat": "Learning & hobbies", "count": 109}, {"cat": "Getting around", "count": 98}, {"cat": "Health & medical", "count": 91}, {"cat": "Food & eating out", "count": 85}, {"cat": "Travel & holidays", "count": 76}, {"cat": "Going out", "count": 52}, {"cat": "Kids & school", "count": 49}, {"cat": "Weddings", "count": 38}, {"cat": "Beauty & self-care", "count": 33}, {"cat": "Pets", "count": 13}], "emotionOverall": {"Repetitive": 308, "Procrastinate": 385, "Frustrating": 602}, "heatmap": {"Health & medical": {"Frustrating": 45, "Procrastinate": 35, "Repetitive": 11}, "Kids & school": {"Frustrating": 32, "Procrastinate": 8, "Repetitive": 9}, "Money & investing": {"Frustrating": 91, "Procrastinate": 95, "Repetitive": 39}, "Travel & holidays": {"Frustrating": 49, "Procrastinate": 15, "Repetitive": 12}, "Groceries": {"Frustrating": 77, "Procrastinate": 10, "Repetitive": 78}, "Food & eating out": {"Frustrating": 54, "Procrastinate": 8, "Repetitive": 23}, "Shopping & deals": {"Frustrating": 62, "Procrastinate": 34, "Repetitive": 27}, "Fitness & wellness": {"Frustrating": 38, "Procrastinate": 76, "Repetitive": 24}, "Going out": {"Frustrating": 22, "Procrastinate": 17, "Repetitive": 13}, "Weddings": {"Frustrating": 27, "Procrastinate": 9, "Repetitive": 2}, "Learning & hobbies": {"Frustrating": 30, "Procrastinate": 56, "Repetitive": 23}, "Getting around": {"Frustrating": 61, "Procrastinate": 6, "Repetitive": 31}, "Pets": {"Frustrating": 5, "Procrastinate": 2, "Repetitive": 6}, "Beauty & self-care": {"Frustrating": 9, "Procrastinate": 14, "Repetitive": 10}}, "heatmapOrderByDemand": ["Money & investing", "Groceries", "Fitness & wellness", "Shopping & deals", "Learning & hobbies", "Getting around", "Health & medical", "Food & eating out", "Travel & holidays", "Going out", "Kids & school", "Weddings", "Beauty & self-care", "Pets"], "quad": [{"cat": "Health & medical", "picked": 91, "frustShare": 49.5}, {"cat": "Kids & school", "picked": 49, "frustShare": 65.3}, {"cat": "Money & investing", "picked": 225, "frustShare": 40.4}, {"cat": "Travel & holidays", "picked": 76, "frustShare": 64.5}, {"cat": "Groceries", "picked": 165, "frustShare": 46.7}, {"cat": "Food & eating out", "picked": 85, "frustShare": 63.5}, {"cat": "Shopping & deals", "picked": 123, "frustShare": 50.4}, {"cat": "Fitness & wellness", "picked": 138, "frustShare": 27.5}, {"cat": "Going out", "picked": 52, "frustShare": 42.3}, {"cat": "Weddings", "picked": 38, "frustShare": 71.1}, {"cat": "Learning & hobbies", "picked": 109, "frustShare": 27.5}, {"cat": "Getting around", "picked": 98, "frustShare": 62.2}, {"cat": "Pets", "picked": 13, "frustShare": 38.5}, {"cat": "Beauty & self-care", "picked": 33, "frustShare": 27.3}], "topWords": [["time", 263], ["need", 147], ["find", 112], ["different", 107], ["order", 105], ["want", 103], ["every", 99], ["getting", 89], ["best", 88], ["keep", 82], ["finding", 81], ["insurance", 79], ["something", 79], ["work", 73], ["apps", 69], ["money", 69], ["know", 68], ["food", 65], ["multiple", 65], ["many", 64]], "systems": {"Apps": 306, "Nothing at all": 202, "Family": 92, "Chats": 66, "Friends": 60, "Broker/Agent": 45, "Excel/Spreadsheet": 30, "House staff": 9}, "ageBins": {"<25": 91, "25-34": 158, "35-44": 117, "45-54": 48, "55+": 33}, "medianAge": 33.0, "ageCatMatrix": {"<25": {"Money & investing": 39, "Groceries": 10, "Fitness & wellness": 25, "Shopping & deals": 26}, "25-34": {"Money & investing": 74, "Groceries": 63, "Fitness & wellness": 57, "Shopping & deals": 45}, "35-44": {"Money & investing": 57, "Groceries": 45, "Fitness & wellness": 32, "Shopping & deals": 27}, "45-54": {"Money & investing": 29, "Groceries": 22, "Fitness & wellness": 12, "Shopping & deals": 9}, "55+": {"Money & investing": 17, "Groceries": 15, "Fitness & wellness": 9, "Shopping & deals": 9}}, "ageCatCats": ["Money & investing", "Groceries", "Fitness & wellness", "Shopping & deals"], "cities": [["Bangalore", 114], ["Mumbai", 99], ["Delhi", 35], ["Hyderabad", 28], ["Gurugram", 24], ["Chennai", 23], ["Pune", 10], ["Ahmedabad", 9], ["Visakhapatnam", 4], ["Indore", 3], ["Mohali", 3], ["Bhopal", 3]], "storyAvg": {"Frustrating": 30.8, "Procrastinate": 31.0, "Repetitive": 28.3}, "pilot": {"yes": 379, "total": 469, "counts": {"Yes, count me in": 379, "No, thanks": 90}}, "totalRespondents": 469, "totalStories": 1291,
-"wordStack": [
-  {"word":"time","total":263,"Money & investing":42,"Groceries":21,"Fitness & wellness":33,"Shopping & deals":22,"Other":145},
-  {"word":"need","total":147,"Money & investing":28,"Groceries":41,"Fitness & wellness":7,"Shopping & deals":15,"Other":56},
-  {"word":"find","total":112,"Money & investing":10,"Groceries":6,"Fitness & wellness":9,"Shopping & deals":28,"Other":59},
-  {"word":"different","total":107,"Money & investing":23,"Groceries":11,"Fitness & wellness":2,"Shopping & deals":20,"Other":51},
-  {"word":"order","total":105,"Money & investing":3,"Groceries":56,"Fitness & wellness":0,"Shopping & deals":5,"Other":41},
-  {"word":"want","total":103,"Money & investing":12,"Groceries":9,"Fitness & wellness":12,"Shopping & deals":19,"Other":51},
-  {"word":"every","total":99,"Money & investing":27,"Groceries":25,"Fitness & wellness":3,"Shopping & deals":3,"Other":41},
-  {"word":"getting","total":89,"Money & investing":10,"Groceries":10,"Fitness & wellness":7,"Shopping & deals":5,"Other":57},
-  {"word":"best","total":88,"Money & investing":11,"Groceries":9,"Fitness & wellness":2,"Shopping & deals":33,"Other":33},
-  {"word":"keep","total":82,"Money & investing":20,"Groceries":11,"Fitness & wellness":10,"Shopping & deals":7,"Other":34}
-],
-"wordStackCats": ["Money & investing","Groceries","Fitness & wellness","Shopping & deals","Other"],
-"ageEmotionMatrix": {
-  "<25": {"Frustrating":96,"Procrastinate":86,"Repetitive":67},
-  "25-34": {"Frustrating":205,"Procrastinate":152,"Repetitive":97},
-  "35-44": {"Frustrating":161,"Procrastinate":90,"Repetitive":71},
-  "45-54": {"Frustrating":66,"Procrastinate":30,"Repetitive":32},
-  "55+": {"Frustrating":42,"Procrastinate":17,"Repetitive":26}
-},
-"storyExtremes": {"Frustrating": {"avg": 33.5, "n": 551, "shortest": {"words": 4, "text": "Hospital visits and appointments", "cat": "Health and medical"}, "longest": {"words": 193, "text": "This year has been unfortunate. Last month, it was me but in April, it was my spouse. She had to undergo a major surgery. The process was stressful and there is a ton of research which she had done and met multiple (7-8) doctors to get a solid opinion and the right kind of diagnosis and procedure as it was a planned surgery. The insurance process was scary, uncertain and painful while managing all of it. And, then I had to go through it for my own hospital admission last month. The documents, back and forth, process, follow ups are laborious. […]", "cat": "Money, investing and insurance"}}, "Procrastinate": {"avg": 33.5, "n": 352, "shortest": {"words": 4, "text": "Portfolio management and renewals", "cat": "Money, investing and insurance"}, "longest": {"words": 180, "text": "When it comes to money, investing, and insurance, I find it frustrating to choose the right option. There are so many insurance plans and investment products in the market, and every one of them has its own advantages and disadvantages. With insurance, I have to collect different quotations, compare coverage, exclusions, premiums, and benefits, and then make a decision. Having more choices gives us more opportunities, but it also creates more confusion and anxiety. […]", "cat": "Money, investing and insurance"}}, "Repetitive": {"avg": 32.2, "n": 268, "shortest": {"words": 4, "text": "monitoring it is painful", "cat": "Health and medical"}, "longest": {"words": 160, "text": "I have planned trips to 28 states. Every single one followed the same sequence. Open MakeMyTrip. Check trains. Check if tatkal is needed. Open RedBus as backup. Open Google Maps to figure out the last mile. Open Zostel or hostel websites. Screenshot everything into a WhatsApp chat with myself. Send the itinerary to my mother so someone else knows where I am. […]", "cat": "Travel and holidays"}}}
-};
-
-const C = {
-  blue: '#2a78d6', orange: '#eb6834', aqua: '#1baf7a', yellow: '#eda100',
-  magenta: '#e87ba4', green: '#008300', violet: '#4a3aa7', red: '#e34948',
-  ink: '#0b0b0b', inkSec: '#52514e', muted: '#898781', otherGray: '#c3c2b7',
-  grid: '#e1e0d9', baseline: '#c3c2b7', surface: '#fcfcfb',
-  seq: ['#cde2fb','#9ec5f4','#6da7ec','#3987e5','#256abf','#184f95','#0d366b']
-};
-const EMO_COLOR = { Frustrating: C.red, Procrastinate: C.yellow, Repetitive: C.blue };
-
-const baseTextStyle = { fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif' };
-const axisLabelStyle = { color: C.inkSec, fontSize: 12 };
-const axisLineStyle = { lineStyle: { color: C.baseline } };
-const splitLineStyle = { lineStyle: { color: C.grid, width: 1, type: 'solid' } };
-
-function tooltipBase(extra){
-  return Object.assign({
-    backgroundColor: '#ffffff',
-    borderColor: 'rgba(11,11,11,0.10)',
-    borderWidth: 1,
-    textStyle: { color: C.ink, fontSize: 13 },
-    extraCssText: 'box-shadow:0 6px 20px rgba(11,11,11,0.10); border-radius:8px; padding:10px 12px;'
-  }, extra||{});
-}
-
-/* ============================= HELPERS ============================= */
-function fmt(n){ return n.toLocaleString('en-IN'); }
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-function initChart(id){
-  const el = document.getElementById(id);
-  return echarts.init(el, null, { renderer: 'svg' });
-}
-
-const charts = [];
-function onResize(){ charts.forEach(c => c && c.resize()); }
-window.addEventListener('resize', onResize);
-
-/* ============================= CHART 1 — demand ranking ============================= */
-function buildChart1(){
-  const chart = initChart('chart1'); charts.push(chart);
-  const data = DATA.demand.slice().reverse();
-  chart.setOption({
-    textStyle: baseTextStyle,
-    grid: { left: 150, right: 60, top: 10, bottom: 10, containLabel: true },
-    tooltip: tooltipBase({ trigger: 'item', formatter: p => `<b>${p.name}</b><br/>${fmt(p.value)} people picked this` }),
-    xAxis: { type: 'value', axisLabel: axisLabelStyle, axisLine: { show:false }, splitLine: splitLineStyle, axisTick: {show:false} },
-    yAxis: { type: 'category', data: data.map(d=>d.cat), axisLabel: axisLabelStyle, axisLine: axisLineStyle, axisTick: {show:false} },
-    series: [{
-      type: 'bar',
-      data: data.map(d => d.count),
-      barMaxWidth: 22,
-      itemStyle: { color: C.blue, borderRadius: [0,4,4,0] },
-      label: { show: true, position: 'right', color: C.inkSec, fontSize: 12, formatter: p => fmt(p.value) },
-      emphasis: { itemStyle: { color: C.orange } },
-      animationDuration: 900, animationEasing: 'cubicOut'
-    }]
-  });
-}
-
-/* ============================= CHART 2 — emotion donut ============================= */
-function buildChart2(){
-  const chart = initChart('chart2'); charts.push(chart);
-  const order = ['Frustrating','Procrastinate','Repetitive'];
-  const total = order.reduce((s,k)=>s+DATA.emotionOverall[k],0);
-  chart.setOption({
-    textStyle: baseTextStyle,
-    tooltip: tooltipBase({ trigger: 'item', formatter: p => `<b>${p.name}</b><br/>${fmt(p.value)} tags (${p.percent}%)` }),
-    legend: {
-      bottom: 0, itemWidth: 12, itemHeight: 12, icon: 'circle',
-      textStyle: { color: C.inkSec, fontSize: 13 }
-    },
-    series: [{
-      type: 'pie',
-      radius: ['46%','72%'],
-      center: ['50%','44%'],
-      avoidLabelOverlap: true,
-      itemStyle: { borderColor: C.surface, borderWidth: 3 },
-      label: {
-        show: true, formatter: p => `${p.name}\n${fmt(p.value)}`, color: C.inkSec, fontSize: 12.5, lineHeight: 16
-      },
-      labelLine: { lineStyle: { color: C.baseline } },
-      data: order.map(k => ({ name: k, value: DATA.emotionOverall[k], itemStyle: { color: EMO_COLOR[k] } })),
-      animationDuration: 900
-    }],
-    graphic: [{
-      type: 'text', left: 'center', top: '38%',
-      style: { text: fmt(total), fontSize: 30, fontWeight: 700, fill: C.ink, textAlign: 'center' }
-    },{
-      type: 'text', left: 'center', top: '46%',
-      style: { text: 'pain points tagged', fontSize: 12.5, fill: C.muted, textAlign: 'center' }
-    }]
-  });
-}
-
-/* ============================= CHART 3 — heatmap ============================= */
-function buildChart3(){
-  const chart = initChart('chart3'); charts.push(chart);
-  const cats = DATA.heatmapOrderByDemand.slice().reverse();
-  const emotions = ['Frustrating','Procrastinate','Repetitive'];
-  let maxV = 0;
-  const points = [];
-  cats.forEach((cat, yi) => {
-    emotions.forEach((emo, xi) => {
-      const v = DATA.heatmap[cat][emo];
-      maxV = Math.max(maxV, v);
-      points.push([xi, yi, v]);
-    });
-  });
-  const data = points.map(p => {
-    const light = p[2] < maxV * 0.42;
-    return { value: p, label: { color: light ? C.ink : '#ffffff' } };
-  });
-
-  chart.setOption({
-    textStyle: baseTextStyle,
-    tooltip: tooltipBase({
-      position: 'top',
-      formatter: p => `<b>${cats[p.value[1]]}</b><br/>${emotions[p.value[0]]}: ${fmt(p.value[2])}`
-    }),
-    grid: { left: 150, right: 24, top: 40, bottom: 60, containLabel: false },
-    xAxis: {
-      type: 'category', data: emotions, position: 'top', splitArea: {show:false},
-      axisLabel: Object.assign({}, axisLabelStyle, { fontWeight: 600 }), axisLine: {show:false}, axisTick: {show:false}
-    },
-    yAxis: {
-      type: 'category', data: cats, splitArea: {show:false},
-      axisLabel: axisLabelStyle, axisLine: {show:false}, axisTick: {show:false}
-    },
-    visualMap: {
-      min: 0, max: maxV, calculable: false, show: true, orient: 'horizontal',
-      left: 'center', bottom: 8, itemWidth: 14, itemHeight: 160,
-      text: [fmt(maxV) + ' mentions', '0'], textGap: 10,
-      inRange: { color: C.seq }, textStyle: { color: C.muted, fontSize: 11 }
-    },
-    series: [{
-      type: 'heatmap',
-      data: data,
-      label: { show: true, fontSize: 12, formatter: p => fmt(p.value[2]) },
-      itemStyle: { borderColor: C.surface, borderWidth: 2 },
-      emphasis: { itemStyle: { borderColor: C.ink, borderWidth: 1.5 } },
-      animationDuration: 700
-    }]
-  });
-}
-
-/* ============================= CHART 4 — 2x2 quadrant ============================= */
-function buildChart4(){
-  const chart = initChart('chart4'); charts.push(chart);
-  const pts = DATA.quad;
-  const avgX = pts.reduce((s,p)=>s+p.picked,0)/pts.length;
-  const avgY = 50;
-
-  // hand-tuned per-point label offsets [dx,dy] in px — this is a fixed 14-point
-  // dataset, so exact placement beats a generic anti-collision heuristic.
-  const LABEL_OFFSET = {
-    'Pets':                 [0, -14],
-    'Beauty & self-care':   [0, 16],
-    'Weddings':             [-10, -12],
-    'Kids & school':        [16, 14],
-    'Going out':            [0, 16],
-    'Travel & holidays':    [-4, -14],
-    'Food & eating out':    [4, 18],
-    'Health & medical':     [-6, 18],
-    'Getting around':       [34, -8],
-    'Learning & hobbies':   [0, -14],
-    'Shopping & deals':     [0, -14],
-    'Fitness & wellness':   [0, 16],
-    'Groceries':            [0, -14],
-    'Money & investing':    [0, -14],
-  };
-
-  const QUADRANTS = [
-    { key: 'TR', name: 'Popular & painful',     color: C.orange,    test: p => p.picked >= avgX && p.frustShare >= avgY },
-    { key: 'TL', name: 'Niche but painful',      color: C.aqua,      test: p => p.picked <  avgX && p.frustShare >= avgY },
-    { key: 'BR', name: 'Popular, less painful',  color: C.blue,      test: p => p.picked >= avgX && p.frustShare <  avgY },
-    { key: 'BL', name: 'Niche & mild',           color: C.otherGray, test: p => p.picked <  avgX && p.frustShare <  avgY }
-  ];
-
-  const series = QUADRANTS.map(q => ({
-    name: q.name,
-    type: 'scatter',
-    symbolSize: 16,
-    itemStyle: { color: q.color, borderColor: C.surface, borderWidth: 2 },
-    data: pts.filter(q.test).map(p => ({
-      name: p.cat, value: [p.picked, p.frustShare],
-      itemStyle: { color: q.color, borderColor: C.surface, borderWidth: 2 },
-      label: {
-        show: true, formatter: p.cat,
-        position: LABEL_OFFSET[p.cat] || [0, -14],
-        color: C.ink, fontSize: 10.5, fontWeight: 600
-      }
-    })),
-    labelLayout: { hideOverlap: false },
-    markLine: q.key === 'TR' ? {
-      symbol: 'none', silent: true,
-      lineStyle: { color: C.baseline, type: 'dashed', width: 1 },
-      label: { show: false },
-      data: [{ xAxis: avgX }, { yAxis: avgY }]
-    } : undefined,
-    emphasis: { itemStyle: { borderColor: C.ink, borderWidth: 2.5 } },
-    animationDuration: 900
-  }));
-
-  chart.setOption({
-    textStyle: baseTextStyle,
-    tooltip: tooltipBase({
-      formatter: p => `<b>${p.data.name}</b><br/>Picked by ${fmt(p.data.value[0])} people<br/>${p.data.value[1]}% tagged Frustrating<br/><span style="color:${C.muted}">${p.seriesName}</span>`
-    }),
-    legend: {
-      bottom: 0, itemWidth: 10, itemHeight: 10, icon: 'circle',
-      textStyle: { color: C.inkSec, fontSize: 11.5 },
-      data: QUADRANTS.map(q => q.name)
-    },
-    grid: { left: 60, right: 60, top: 30, bottom: 70, containLabel: true },
-    xAxis: {
-      type: 'value', name: 'Times picked (popularity) →', nameLocation: 'middle', nameGap: 32,
-      nameTextStyle: { color: C.inkSec, fontSize: 12.5 },
-      axisLabel: axisLabelStyle, axisLine: { show:false }, splitLine: splitLineStyle, axisTick:{show:false}
-    },
-    yAxis: {
-      type: 'value', name: '% tagged Frustrating →', nameLocation: 'middle', nameGap: 46,
-      nameTextStyle: { color: C.inkSec, fontSize: 12.5 },
-      axisLabel: { formatter: '{value}%', color: C.inkSec, fontSize: 12 }, axisLine: { show:false },
-      splitLine: splitLineStyle, axisTick:{show:false}, min: 0, max: 85
-    },
-    series
-  });
-}
-
-/* ============================= CHART 5 — top words, stacked by category ============================= */
-function buildChart5(){
-  const chart = initChart('chart5'); charts.push(chart);
-  const rows = DATA.wordStack.slice().reverse();
-  const stackCats = DATA.wordStackCats;
-  const palette = { 'Money & investing': C.blue, 'Groceries': C.orange, 'Fitness & wellness': C.aqua, 'Shopping & deals': C.yellow, 'Other': C.otherGray };
-
-  const series = stackCats.map(cat => ({
-    name: cat,
-    type: 'bar',
-    stack: 'words',
-    barMaxWidth: 20,
-    itemStyle: { color: palette[cat] },
-    data: rows.map(r => r[cat]),
-    animationDuration: 900
-  }));
-  // total label at the end of each stacked bar
-  series.push({
-    name: 'total', type: 'bar', stack: 'words', barMaxWidth: 20,
-    itemStyle: { color: 'transparent' },
-    data: rows.map(() => 0),
-    label: {
-      show: true, position: 'right', color: C.inkSec, fontSize: 12,
-      formatter: (p) => fmt(rows[p.dataIndex].total)
-    },
-    tooltip: { show: false },
-    silent: true
-  });
-
-  chart.setOption({
-    textStyle: baseTextStyle,
-    grid: { left: 90, right: 60, top: 10, bottom: 40, containLabel: true },
-    tooltip: tooltipBase({
-      trigger: 'axis', axisPointer: { type: 'shadow' },
-      formatter: params => {
-        const idx = params[0].dataIndex;
-        const r = rows[idx];
-        let html = `<b>"${r.word}"</b> — ${fmt(r.total)} mentions total<br/>`;
-        stackCats.forEach(cat => { html += `${cat}: ${fmt(r[cat])}<br/>`; });
-        return html;
-      }
-    }),
-    legend: { bottom: 0, itemWidth: 10, itemHeight: 10, icon: 'circle', textStyle: { color: C.inkSec, fontSize: 11 }, data: stackCats },
-    xAxis: { type: 'value', axisLabel: axisLabelStyle, axisLine: {show:false}, splitLine: splitLineStyle, axisTick:{show:false} },
-    yAxis: { type: 'category', data: rows.map(r=>r.word), axisLabel: axisLabelStyle, axisLine: axisLineStyle, axisTick:{show:false} },
-    series
-  });
-}
-
-/* ============================= CHART 6 — coping systems ============================= */
-function buildChart6(){
-  const chart = initChart('chart6'); charts.push(chart);
-  const entries = Object.entries(DATA.systems).sort((a,b)=>b[1]-a[1]).reverse();
-  chart.setOption({
-    textStyle: baseTextStyle,
-    grid: { left: 130, right: 60, top: 10, bottom: 10, containLabel: true },
-    tooltip: tooltipBase({ formatter: p => `<b>${p.name}</b><br/>${fmt(p.value)} mentions` }),
-    xAxis: { type: 'value', axisLabel: axisLabelStyle, axisLine:{show:false}, splitLine: splitLineStyle, axisTick:{show:false} },
-    yAxis: { type: 'category', data: entries.map(e=>e[0]), axisLabel: axisLabelStyle, axisLine: axisLineStyle, axisTick:{show:false} },
-    series: [{
-      type: 'bar',
-      barMaxWidth: 20,
-      data: entries.map(e => ({
-        value: e[1],
-        itemStyle: { color: e[0] === 'Nothing at all' ? C.red : C.blue, borderRadius:[0,4,4,0] }
-      })),
-      label: { show: true, position: 'right', color: C.inkSec, fontSize: 12, formatter: p => fmt(p.value) },
-      animationDuration: 900
-    }]
-  });
-}
-
-/* ============================= CHART 7a — age histogram ============================= */
-function buildChart7a(){
-  const chart = initChart('chart7a'); charts.push(chart);
-  const bins = Object.entries(DATA.ageBins);
-  chart.setOption({
-    textStyle: baseTextStyle,
-    title: { text: 'Age distribution', left: 0, top: 0, textStyle: { fontSize: 13.5, color: C.ink, fontWeight:600 } },
-    grid: { left: 44, right: 20, top: 46, bottom: 30, containLabel: true },
-    tooltip: tooltipBase({ formatter: p => `<b>${p.name}</b><br/>${fmt(p.value)} respondents` }),
-    xAxis: { type: 'category', data: bins.map(b=>b[0]), axisLabel: axisLabelStyle, axisLine: axisLineStyle, axisTick:{show:false} },
-    yAxis: { type: 'value', axisLabel: axisLabelStyle, axisLine:{show:false}, splitLine: splitLineStyle, axisTick:{show:false} },
-    series: [{
-      type: 'bar',
-      data: bins.map(b=>b[1]),
-      barMaxWidth: 40,
-      itemStyle: { color: C.blue, borderRadius:[4,4,0,0] },
-      label: { show: true, position: 'top', color: C.inkSec, fontSize: 12 },
-      animationDuration: 900
-    }]
-  });
-}
-
-/* ============================= CHART 7c — age x emotion ============================= */
-function buildChart7c(){
-  const chart = initChart('chart7c'); charts.push(chart);
-  const bins = Object.keys(DATA.ageBins);
-  const order = ['Frustrating','Procrastinate','Repetitive'];
-  chart.setOption({
-    textStyle: baseTextStyle,
-    title: { text: 'Emotion mix by age', left: 0, top: 0, textStyle: { fontSize: 13.5, color: C.ink, fontWeight:600 } },
-    grid: { left: 44, right: 16, top: 46, bottom: 56, containLabel: true },
-    tooltip: tooltipBase({ trigger: 'axis', axisPointer: { type: 'shadow' } }),
-    legend: { bottom: 0, itemWidth: 10, itemHeight: 10, icon:'circle', textStyle: { color: C.inkSec, fontSize: 11 } },
-    xAxis: { type: 'category', data: bins, axisLabel: axisLabelStyle, axisLine: axisLineStyle, axisTick:{show:false} },
-    yAxis: { type: 'value', axisLabel: axisLabelStyle, axisLine:{show:false}, splitLine: splitLineStyle, axisTick:{show:false} },
-    series: order.map(emo => ({
-      name: emo, type: 'bar', barMaxWidth: 16,
-      itemStyle: { color: EMO_COLOR[emo], borderRadius:[3,3,0,0] },
-      data: bins.map(b => DATA.ageEmotionMatrix[b][emo]),
-      animationDuration: 900
-    }))
-  });
-}
-
-/* ============================= CHART 7b — age x category ============================= */
-function buildChart7b(){
-  const chart = initChart('chart7b'); charts.push(chart);
-  const bins = Object.keys(DATA.ageBins);
-  const cats = DATA.ageCatCats;
-  const palette = [C.blue, C.orange, C.aqua, C.yellow];
-  chart.setOption({
-    textStyle: baseTextStyle,
-    title: { text: 'Top categories by age', left: 0, top: 0, textStyle: { fontSize: 13.5, color: C.ink, fontWeight:600 } },
-    grid: { left: 44, right: 16, top: 46, bottom: 56, containLabel: true },
-    tooltip: tooltipBase({ trigger: 'axis', axisPointer: { type: 'shadow' } }),
-    legend: { bottom: 0, itemWidth: 10, itemHeight: 10, icon:'circle', textStyle: { color: C.inkSec, fontSize: 11 } },
-    xAxis: { type: 'category', data: bins, axisLabel: axisLabelStyle, axisLine: axisLineStyle, axisTick:{show:false} },
-    yAxis: { type: 'value', axisLabel: axisLabelStyle, axisLine:{show:false}, splitLine: splitLineStyle, axisTick:{show:false} },
-    series: cats.map((cat, i) => ({
-      name: cat, type: 'bar', barMaxWidth: 12,
-      itemStyle: { color: palette[i], borderRadius:[3,3,0,0] },
-      data: bins.map(b => DATA.ageCatMatrix[b][cat]),
-      animationDuration: 900
-    }))
-  });
-}
-
-/* ============================= CHART 8 — geography ============================= */
-function buildChart8(){
-  const chart = initChart('chart8'); charts.push(chart);
-  const data = DATA.cities.slice().reverse();
-  chart.setOption({
-    textStyle: baseTextStyle,
-    grid: { left: 110, right: 60, top: 10, bottom: 10, containLabel: true },
-    tooltip: tooltipBase({ formatter: p => `<b>${p.name}</b><br/>${fmt(p.value)} respondents` }),
-    xAxis: { type: 'value', axisLabel: axisLabelStyle, axisLine:{show:false}, splitLine: splitLineStyle, axisTick:{show:false} },
-    yAxis: { type: 'category', data: data.map(d=>d[0]), axisLabel: axisLabelStyle, axisLine: axisLineStyle, axisTick:{show:false} },
-    series: [{
-      type: 'bar',
-      data: data.map(d=>d[1]),
-      barMaxWidth: 16,
-      itemStyle: { color: C.blue, borderRadius:[0,4,4,0] },
-      label: { show: true, position: 'right', color: C.inkSec, fontSize: 12, formatter: p => fmt(p.value) },
-      animationDuration: 900
-    }]
-  });
-}
-
-/* ============================= CHART 9 — story length: shortest / average / longest ============================= */
-function truncateWords(text, maxWords){
-  const words = text.split(/\s+/);
-  if (words.length <= maxWords) return text;
-  return words.slice(0, maxWords).join(' ') + '…';
-}
-
-function buildChart9(){
-  const chart = initChart('chart9'); charts.push(chart);
-  const emotions = ['Frustrating','Procrastinate','Repetitive'];
-  const metrics = [
-    { key: 'Shortest', color: C.seq[1] },
-    { key: 'Average',  color: C.seq[3] },
-    { key: 'Longest',  color: C.seq[5] }
-  ];
-
-  const series = metrics.map(m => ({
-    name: m.key,
-    type: 'bar',
-    barMaxWidth: 30,
-    itemStyle: { color: m.color, borderRadius: [4,4,0,0] },
-    label: { show: true, position: 'top', color: C.inkSec, fontSize: 11.5, fontWeight: 600 },
-    data: emotions.map(emo => {
-      const ex = DATA.storyExtremes[emo];
-      const value = m.key === 'Average' ? ex.avg : (m.key === 'Shortest' ? ex.shortest.words : ex.longest.words);
-      return { value, emotion: emo, metric: m.key };
-    }),
-    animationDuration: 900
-  }));
-
-  chart.setOption({
-    textStyle: baseTextStyle,
-    grid: { left: 50, right: 30, top: 40, bottom: 56, containLabel: true },
-    tooltip: tooltipBase({
-      trigger: 'item',
-      extraCssText: 'box-shadow:0 6px 20px rgba(11,11,11,0.10); border-radius:8px; padding:12px 14px; max-width:320px; white-space:normal; line-height:1.5;',
-      formatter: p => {
-        const emo = p.data.emotion;
-        const ex = DATA.storyExtremes[emo];
-        if (p.data.metric === 'Average') {
-          return `<b>${emo} · Average</b><br/>${ex.avg} words per story, across ${fmt(ex.n)} stories`;
-        }
-        const detail = p.data.metric === 'Shortest' ? ex.shortest : ex.longest;
-        const quoteText = p.data.metric === 'Longest' ? truncateWords(detail.text, 55) : detail.text;
-        return `<b>${emo} · ${p.data.metric}</b> — ${detail.words} words<br/>
-          <span style="color:${C.muted}; font-size:11.5px;">from a ${detail.cat} story</span><br/>
-          <span style="font-style:italic; color:${C.ink};">"${escapeHtml(quoteText)}"</span>`;
-      }
-    }),
-    legend: { bottom: 0, itemWidth: 10, itemHeight: 10, icon: 'circle', textStyle: { color: C.inkSec, fontSize: 11.5 } },
-    xAxis: { type: 'category', data: emotions, axisLabel: Object.assign({}, axisLabelStyle, { fontWeight: 600 }), axisLine: axisLineStyle, axisTick: {show:false} },
-    yAxis: { type: 'value', name: 'words', nameLocation: 'end', nameGap: 16, nameTextStyle: { color: C.muted, fontSize: 11 }, axisLabel: axisLabelStyle, axisLine: {show:false}, splitLine: splitLineStyle, axisTick: {show:false} },
-    series
-  });
-}
-
-/* ============================= reveal + count-up ============================= */
-gsap.registerPlugin(ScrollTrigger);
-
-function countUp(el, target, opts){
-  opts = opts || {};
-  const obj = { v: 0 };
-  gsap.to(obj, {
-    v: target, duration: opts.duration || 1.6, ease: 'power2.out',
-    onUpdate: () => { el.textContent = (opts.fmt ? opts.fmt(obj.v) : Math.round(obj.v)); }
-  });
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-  // hero counters
-  ScrollTrigger.create({
-    trigger: '.hero', start: 'top 90%', once: true,
-    onEnter: () => {
-      countUp(document.getElementById('statRespondents'), DATA.totalRespondents, { fmt: v => fmt(Math.round(v)) });
-      countUp(document.getElementById('statStories'), DATA.totalStories, { fmt: v => fmt(Math.round(v)) });
-      countUp(document.getElementById('statPilotPct'), 81, { fmt: v => Math.round(v) + '%' });
-    }
-  });
 
-  // panel reveal + lazy chart init
-  const panelBuilders = {
-    p1: buildChart1, p2: buildChart2, p3: buildChart3, p4: buildChart4,
-    p5: buildChart5, p6: buildChart6,
-    p7: () => { buildChart7a(); buildChart7c(); buildChart7b(); },
-    p8: buildChart8, p9: buildChart9
-  };
-
-  document.querySelectorAll('section.panel').forEach(panel => {
-    ScrollTrigger.create({
-      trigger: panel, start: 'top 82%', once: true,
-      onEnter: () => {
-        gsap.to(panel, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' });
-        const fn = panelBuilders[panel.id];
-        if (fn) requestAnimationFrame(fn);
-      }
+  function countUp(el, target, opts) {
+    opts = opts || {};
+    const obj = { v: 0 };
+    gsap.to(obj, {
+      v: target, duration: opts.duration || 1.6, ease: 'power2.out',
+      onUpdate: () => { el.textContent = (opts.fmt ? opts.fmt(obj.v) : Math.round(obj.v)); }
     });
+  }
+  function fmt(n) { return Math.round(n).toLocaleString('en-IN'); }
+
+  // fixed, unfiltered totals — the hero and closing panel describe the
+  // whole dataset regardless of the active filters
+  const heroTotals = Aggregate.deriveAggregates(window.ROWS, Aggregate.defaultFilters());
+
+  function currentAggregates() {
+    return Aggregate.deriveAggregates(window.ROWS, SidebarUI.getFilters());
+  }
+
+  function renderEverything() {
+    const data = currentAggregates();
+    Charts.renderAll(data);
+    SidebarUI.refresh(data);
+    return data;
+  }
+
+  SidebarUI.mount({
+    headerEl: document.getElementById('filterHeader'),
+    storiesEl: document.getElementById('storiesPanel'),
+    onFilterChange: renderEverything
   });
 
-  // stat panel (idea 10) — count-up + bar fill
-  ScrollTrigger.create({
-    trigger: '#p10', start: 'top 75%', once: true,
-    onEnter: () => {
-      countUp(document.getElementById('pilotBig'), 81, { fmt: v => Math.round(v) + '%' });
-      gsap.to('#pilotBar', { width: '80.8%', duration: 1.4, ease: 'power2.out' });
-    }
+  renderEverything();
+
+  // ---------------------------------------------------------------------
+  // Collapsible filter overlay — collapsed by default so the charts get
+  // the full column height; opening it overlays the controls on top of
+  // the chart instead of pushing it down.
+  // ---------------------------------------------------------------------
+  const filterToggle = document.getElementById('filterToggle');
+  const filterOverlay = document.getElementById('filterOverlay');
+  function setFilterOpen(open) {
+    filterOverlay.hidden = !open;
+    filterToggle.classList.toggle('open', open);
+  }
+  filterToggle.addEventListener('click', () => setFilterOpen(filterOverlay.hidden));
+  document.addEventListener('click', e => {
+    if (!filterOverlay.hidden && !e.target.closest('.filter-bar')) setFilterOpen(false);
   });
 
-  // top progress bar
-  gsap.to('#progress', {
-    width: '100%', ease: 'none',
-    scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.3 }
-  });
+  // hero counters — hero is visible immediately at load, no scroll gate needed
+  countUp(document.getElementById('statRespondents'), heroTotals.totalRespondents, { fmt });
+  countUp(document.getElementById('statStories'), heroTotals.totalTags, { fmt });
+  countUp(document.getElementById('statPilotPct'), Math.round(heroTotals.pilot.yes / heroTotals.pilot.total * 100), { fmt: v => Math.round(v) + '%' });
 
-  ScrollTrigger.refresh();
+  // ---------------------------------------------------------------------
+  // Tabs: one panel visible at a time, switched instantly by the tab bar —
+  // replaces the old scroll-pinned crossfade. Each tab maps 1:1 to a
+  // .frame id; the closing pilot count-up fires the first time its tab
+  // (the last one) is opened, instead of on scroll-into-view.
+  // ---------------------------------------------------------------------
+  const TABS = [
+    { id: 'frame-hero', label: 'Overview', title: 'Overview' },
+    { id: 'p1',  label: '01', title: '01 · Demand' },
+    { id: 'p2',  label: '02', title: '02 · Vocabulary' },
+    { id: 'p3',  label: '03', title: '03 · The cross' },
+    { id: 'p4',  label: '04', title: '04 · Opportunity' },
+    { id: 'p5',  label: '05', title: '05 · Words' },
+    { id: 'p6',  label: '06', title: '06 · Status quo' },
+    { id: 'p7',  label: '07', title: '07 · Age' },
+    { id: 'p8',  label: '08', title: '08 · Geography' },
+    { id: 'p9',  label: '09', title: '09 · Intensity' },
+    { id: 'p10', label: '10', title: '10 · Closing' }
+  ];
+
+  const tabBar = document.getElementById('tabBar');
+  const frames = TABS.map(t => document.getElementById(t.id));
+  tabBar.innerHTML = TABS.map((t, i) => `<button type="button" class="tab-btn${i === 0 ? ' active' : ''}" data-idx="${i}" title="${t.title}">${t.label}</button>`).join('');
+  const tabBtns = Array.from(tabBar.querySelectorAll('.tab-btn'));
+
+  let pilotRevealed = false;
+  function revealPilotStat() {
+    if (pilotRevealed) return;
+    pilotRevealed = true;
+    const pct = Math.round(heroTotals.pilot.yes / heroTotals.pilot.total * 100);
+    countUp(document.getElementById('pilotBig'), pct, { fmt: v => Math.round(v) + '%' });
+    gsap.to('#pilotBar', { width: (heroTotals.pilot.yes / heroTotals.pilot.total * 100) + '%', duration: 1.4, ease: 'power2.out' });
+  }
+
+  function setActiveTab(idx) {
+    frames.forEach((f, i) => f.classList.toggle('active', i === idx));
+    tabBtns.forEach((btn, i) => btn.classList.toggle('active', i === idx));
+    frames[idx].scrollTop = 0;
+    if (TABS[idx].id === 'p10') revealPilotStat();
+    // charts are built once at load, before the flex layout above them has
+    // necessarily settled to its final size — re-measuring here keeps every
+    // chart matched to its actual container instead of a stale, taller size.
+    Charts.resize();
+  }
+  tabBar.addEventListener('click', e => {
+    const btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    setActiveTab(Number(btn.dataset.idx));
+  });
+  setActiveTab(0);
+  requestAnimationFrame(() => requestAnimationFrame(() => Charts.resize()));
+
+  // resize — re-layout charts
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      Charts.resize();
+      renderEverything();
+    }, 150);
+  });
 });
 </script>
 </body>

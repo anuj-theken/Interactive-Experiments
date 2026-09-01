@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bengaluru Rent Survey — Tenant Dashboard</title>
+
+  <!-- Apache ECharts -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+  <!-- Leaflet (this dashboard's own regional map) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Shared dashboard stylesheet: layout skeleton, card system, 5 themes,
+       and @font-face declarations for the local Jazmin Alt / GT America
+       font files sitting next to this file. Same file every standalone
+       dashboard and index.html load, so all 5 stay visually identical. -->
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+
+  <div class="page theme-tenant">
+
+    <header class="page-header">
+      <div class="title-block">
+        <h1>Tenant Dashboard</h1>
+        <p>Insights from 373 tenant responses on hikes, deposits, rent limits, and moving pressure</p>
+      </div>
+    </header>
+
+    <!-- ======================================================================
+         TENANT DASHBOARD  (id: panel-tenant, theme: theme-tenant)
+         Chart ids prefixed `tn-`. Charts + map defined in js/tenant.js.
+         LEFT COLUMN mirrors the other dashboards' pies-row-first pattern,
+         then adds a dot-matrix card and a treemap card. RIGHT COLUMN leads
+         with the rent-cap stacked bar using the exact shared spec as the
+         other dashboards' top-right chart, then a diverging bar, then a
+         pies-row.
+         ====================================================================== -->
+    <div class="dashboard-container theme-tenant" id="panel-tenant">
+      <div class="panel-body">
+
+      <!-- TOP ROW: filter card (age/career/area) + regional map. The filter
+           card is inserted here by js/tenant.js so the pill state it owns
+           and the map's own marker-click filtering stay in one place. A
+           sibling of .charts-view/.responses-view (NOT a row inside
+           .dashboard-grid) so it stays visible on both the Charts and
+           Responses tabs — see css/dashboard.css section 4. -->
+      <div class="top-row" id="tn-top-row">
+        <div class="card map-card">
+          <div class="card-title">Where Tenants Live in Bengaluru</div>
+          <div class="card-subtitle">Respondent home area — click a marker to filter, same as an Area pill</div>
+          <div id="tn-map" class="map-box"></div>
+        </div>
+      </div>
+
+      <div class="charts-view" id="tn-charts-view">
+      <div class="dashboard-grid">
+
+        <!-- LEFT COLUMN: 2 bar charts side-by-side, dot matrix, treemap. -->
+        <div class="left-column">
+          <div class="pies-row">
+            <div class="card">
+              <div class="card-title">Security Deposit Paid</div>
+              <div class="card-subtitle">The security deposit you paid was roughly&hellip;</div>
+              <div id="tn-chart-deposit" class="chart-box"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Monthly Rent Share</div>
+              <div class="card-subtitle">Share of take-home pay spent on rent</div>
+              <div id="tn-chart-pay-share" class="chart-box"></div>
+            </div>
+          </div>
+
+          <div class="card" style="flex: 0.85;">
+            <div class="card-title">Biggest Reason Rents Have Risen</div>
+            <div class="card-subtitle">What tenants think is driving Bengaluru rents up</div>
+            <div class="matrix-horizontal-wrapper">
+              <div id="tn-dot-matrix" class="dot-matrix-grid"></div>
+              <div id="tn-legend-reasons" class="right-legend"></div>
+            </div>
+          </div>
+
+          <div class="card" style="flex: 1.15;">
+            <div class="card-title">When Landlords Last Hiked Rent</div>
+            <div class="card-subtitle">What happened after the most recent rent hike</div>
+            <div id="tn-chart-treemap" class="chart-box"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: rent-cap stacked bar (fixed height, see .stat-bar-card),
+             diverging bar, 2 pies. -->
+        <div class="right-column">
+          <div class="card stat-bar-card">
+            <div class="card-title">Do you think Bengaluru should put a limit on how much rent can go up?</div>
+            <div class="card-subtitle">Rent cap support among tenants</div>
+            <div id="tn-chart-rent-limit" class="chart-box"></div>
+          </div>
+
+          <div class="card" style="flex: 0.65;">
+            <div class="card-title">Max Rent Before Leaving City</div>
+            <div class="card-subtitle">What tenants would pay before leaving Bengaluru</div>
+            <div id="tn-chart-leave-rent" class="chart-box"></div>
+          </div>
+
+          <div class="pies-row" style="flex: 1.9;">
+            <div class="card">
+              <div class="card-title">Last Renewal Hike</div>
+              <div class="card-subtitle">How much rent went up at last renewal</div>
+              <div id="tn-chart-hike-pie" class="chart-box"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Moving &amp; Coping Trade-offs</div>
+              <div class="card-subtitle">Hardest trade-offs made to keep up with rent</div>
+              <div id="tn-chart-coping-pie" class="chart-box"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      </div>
+
+      <!-- RESPONSES TAB: paginated grid of "What is the hardest part of
+           renting in Bengaluru today?" free-text answers, filtered by the
+           same Age/Career/Area pills as the Charts tab. See js/tenant.js. -->
+      <div class="responses-view" id="tn-responses-view" style="display:none;">
+        <div class="pagination" id="tn-pagination"></div>
+        <div class="responses-scroll" id="tn-responses"></div>
+      </div>
+      </div>
+
+      <footer class="site-footer">
+        <img src="logo.png" alt="The Ken" class="footer-logo" width="110" height="18">
+        <div class="footer-credit">Graphic by Anuj, 3 Sept '26</div>
+        <div class="footer-source">Source: Rent Survey, Aug '26</div>
+      </footer>
+    </div>
+
+  </div>
+
+  <!-- js/data.js (raw survey records) and js/chart-theme.js + js/filters.js
+       (shared design-system + filtering helpers) must load before
+       js/tenant.js. No js/main.js here — that only orchestrates the
+       cross-dashboard tab switch on index.html; a standalone dashboard just
+       initializes itself once its fonts are ready. -->
+  <script src="js/data.js"></script>
+  <script src="js/chart-theme.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/tenant.js"></script>
+  <script>
+    (document.fonts && document.fonts.ready || Promise.resolve()).then(() => {
+      window.initTenantCharts();
+      window.addEventListener('resize', () => {
+        Object.values(window.tenantCharts).forEach((c) => c && !c.isDisposed() && c.resize());
+        if (window.tenantMap) window.tenantMap.invalidateSize();
+      });
+    });
+  </script>
+</body>
+</html>

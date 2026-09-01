@@ -54,13 +54,19 @@
      hide-below-5% convention as pieOption's inside labels. Returns a fresh
      object each call; spread it into every series' `label` field.
 
-   window.ChartTheme.buildMapMarkers(map, locations, colorForCount, opts)
-     The one "numbered circle badge on a Leaflet map" implementation, used by
-     both the Landlord and Overview maps: a divIcon sized by count (18-40px),
-     showing the respondent count inside the badge, colored by
+   window.ChartTheme.buildMapMarkers(map, opts)
+     Returns a controller `{ render(locations, colorForCount), setSelected(name) }`
+     for the "numbered circle badge on a Leaflet map" pattern used by the
+     Landlord and Overview maps: a divIcon sized by count (18-40px), showing
+     the respondent count inside the badge, colored by
      `colorForCount(count, maxCount, minCount)`, with the place NAME shown in
-     a hover popup. `locations` is an array of {name, count, coords:[lat,lng]}.
-     opts.popupLabel customizes the popup's count line (default "Count").
+     a hover popup. `render()` clears and redraws all markers — cheap enough
+     at 6 markers to just call again on every filter change instead of
+     diffing. opts.popupLabel customizes the popup's count line (default
+     "Count"); opts.onClick(name), if given, fires when a marker is clicked
+     (used by the Landlord map to double as a region filter control) and the
+     clicked marker gets a `.pin-selected` ring via setSelected(name) — pass
+     null to clear the ring.
 
    window.ChartTheme.buildDotMatrix(gridEl, legendEl, data)
      The one dot-matrix implementation: plain DOM `.dot-item` divs in a
@@ -69,6 +75,8 @@
      {name, count, color, label?} — `count` is how many dots to draw;
      `label` (defaults to `count`) is the number shown in the legend, for
      cases where dots are a scaled-down stand-in for a larger raw count.
+     Clears both elements first, so it's safe to call again on every filter
+     change to redraw with a new `data` set.
    ========================================================================== */
 
 window.ChartTheme = (function () {
@@ -171,47 +179,85 @@ window.ChartTheme = (function () {
     };
   }
 
-  function buildMapMarkers(map, locations, colorForCount, opts) {
+  function buildMapMarkers(map, opts) {
     opts = opts || {};
     const popupLabel = opts.popupLabel || 'Count';
-    const counts = locations.map((loc) => loc.count);
-    const maxCount = Math.max(...counts);
-    const minCount = Math.min(...counts);
-    const span = maxCount - minCount || 1;
+    const onClick = opts.onClick || null;
+    let selectedName = null;
+    let current = [];
 
-    locations.forEach((loc) => {
-      const size = Math.round(18 + ((loc.count - minCount) / span) * 22);
-      const fontSize = Math.max(9, Math.round(size * 0.42));
-      const color = colorForCount(loc.count, maxCount, minCount);
+    function clear() {
+      current.forEach((m) => map.removeLayer(m.marker));
+      current = [];
+    }
 
-      const icon = L.divIcon({
-        className: '',
-        html: `<div class="dynamic-map-pin" style="
-          width: ${size}px;
-          height: ${size}px;
-          font-size: ${fontSize}px;
-          background-color: ${color};
-          border: 2px solid rgba(255, 255, 255, 0.9);
-        ">${loc.count}</div>`,
-        iconSize: [size, size],
-        iconAnchor: [size / 2, size / 2]
+    function render(locations, colorForCount) {
+      clear();
+      const counts = locations.map((loc) => loc.count);
+      const maxCount = Math.max(...counts, 1);
+      const minCount = Math.min(...counts, 0);
+      const span = maxCount - minCount || 1;
+
+      locations.forEach((loc) => {
+        const size = Math.round(18 + ((loc.count - minCount) / span) * 22);
+        const fontSize = Math.max(9, Math.round(size * 0.42));
+        const color = colorForCount(loc.count, maxCount, minCount);
+        const isSelected = onClick && loc.name === selectedName;
+        // Dim (not shrink/zero) every OTHER marker once one is selected —
+        // each marker's count/size always reflects the Age/Career filters
+        // only, never the Area selection itself (the caller deliberately
+        // excludes `region` when computing these counts), so picking a
+        // region no longer collapses every other marker to "0" and makes
+        // the map look broken. Dimming keeps the full geographic picture
+        // visible while still making the selected one pop.
+        const isDimmed = onClick && selectedName && !isSelected;
+
+        const icon = L.divIcon({
+          className: '',
+          html: `<div class="dynamic-map-pin${isSelected ? ' pin-selected' : ''}${isDimmed ? ' pin-dimmed' : ''}" style="
+            width: ${size}px;
+            height: ${size}px;
+            font-size: ${fontSize}px;
+            background-color: ${color};
+            border: 2px solid rgba(255, 255, 255, 0.9);
+          ">${loc.count}</div>`,
+          iconSize: [size, size],
+          iconAnchor: [size / 2, size / 2]
+        });
+
+        const marker = L.marker(loc.coords, { icon }).addTo(map);
+        const popupContent = `<b>${loc.name}</b><br>${popupLabel}: <b>${loc.count}</b>`;
+
+        marker.on('mouseover', (e) => {
+          L.popup({ offset: [0, -size / 4], closeButton: false })
+            .setLatLng(e.latlng)
+            .setContent(popupContent)
+            .openOn(map);
+        });
+
+        marker.on('mouseout', () => map.closePopup());
+        if (onClick) {
+          marker.getElement && marker.on('add', () => {
+            const el = marker.getElement();
+            if (el) el.style.cursor = 'pointer';
+          });
+          marker.on('click', () => onClick(loc.name));
+        }
+
+        current.push({ name: loc.name, marker });
       });
+    }
 
-      const marker = L.marker(loc.coords, { icon }).addTo(map);
-      const popupContent = `<b>${loc.name}</b><br>${popupLabel}: <b>${loc.count}</b>`;
-
-      marker.on('mouseover', (e) => {
-        L.popup({ offset: [0, -size / 4], closeButton: false })
-          .setLatLng(e.latlng)
-          .setContent(popupContent)
-          .openOn(map);
-      });
-
-      marker.on('mouseout', () => map.closePopup());
-    });
+    return {
+      render,
+      setSelected(name) {
+        selectedName = name;
+      }
+    };
   }
 
   function buildDotMatrix(gridEl, legendEl, data) {
+    gridEl.innerHTML = '';
     data.forEach((item) => {
       const shownCount = item.label !== undefined ? item.label : item.count;
       for (let i = 0; i < item.count; i++) {

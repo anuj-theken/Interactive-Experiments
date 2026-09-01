@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bengaluru Rent Survey — Non-Resident Dashboard</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+
+  <div class="page theme-nonresident">
+
+    <header class="page-header">
+      <div class="title-block">
+        <h1>Non-Resident Dashboard</h1>
+        <p>Data summary from respondents living outside Bengaluru who weighed Bengaluru's rents against a move or a job here</p>
+      </div>
+    </header>
+
+    <!-- ======================================================================
+         NON-RESIDENT DASHBOARD  (id: panel-nonresident, theme: theme-nonresident)
+         Chart ids prefixed `nr-`. Charts defined in js/nonresident.js.
+         Uses the same left-column / right-column / pies-row skeleton as
+         Homeowner so cards stay aligned across dashboards.
+         ====================================================================== -->
+    <div class="dashboard-container theme-nonresident" id="panel-nonresident">
+      <div class="panel-body">
+
+      <!-- TOP ROW: filter card (age/career — no Area, non-residents don't
+           live in Bengaluru). Inserted here by js/nonresident.js. A sibling
+           of .charts-view/.responses-view (NOT a row inside
+           .dashboard-grid) so it stays visible on both the Charts and
+           Responses tabs — see css/dashboard.css section 4. -->
+      <div class="top-row" id="nr-top-row"></div>
+
+      <div class="charts-view" id="nr-charts-view">
+      <div class="dashboard-grid">
+
+        <!-- LEFT COLUMN: grouped bar + dot matrix -->
+        <div class="left-column">
+          <div class="card">
+            <div class="card-title">Impact on Personal Choice vs. Advice to Others</div>
+            <div class="card-subtitle">Said no to move/job in BLR vs. Told someone not to move</div>
+            <div id="nr-chart-top-left" class="chart-box"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Would Lower Rent Make You Consider Moving?</div>
+            <div class="card-subtitle">Dot matrix representation (N = 69 non-residents)</div>
+            <div class="matrix-horizontal-wrapper">
+              <div id="nr-dot-matrix" class="dot-matrix-grid"></div>
+              <div id="nr-legend-matrix" class="right-legend"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: stacked bar (top) + 2 horizontal bar charts (pies-row) -->
+        <div class="right-column">
+          <div class="card stat-bar-card">
+            <div class="card-title">Frequency of Cost of Living Discussions</div>
+            <div class="card-subtitle">How often does Bengaluru's high cost of living come up?</div>
+            <div id="nr-chart-top-right" class="chart-box"></div>
+          </div>
+
+          <div class="pies-row">
+            <div class="card">
+              <div class="card-title">In your own city, is rent a big worry too?</div>
+              <div class="card-subtitle">Cost-of-living concern back home</div>
+              <div id="nr-chart-bottom-right-1" class="chart-box"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">How do Bengaluru's rents compare to your city?</div>
+              <div class="card-subtitle">Relative cost perception</div>
+              <div id="nr-chart-bottom-right-2" class="chart-box"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      </div>
+
+      <!-- RESPONSES TAB: paginated grid of "What comes to mind when you
+           think of renting in Bengaluru?" free-text answers, filtered by
+           the same Age/Career pills as the Charts tab. See
+           js/nonresident.js. -->
+      <div class="responses-view" id="nr-responses-view" style="display:none;">
+        <div class="pagination" id="nr-pagination"></div>
+        <div class="responses-scroll" id="nr-responses"></div>
+      </div>
+      </div>
+
+      <footer class="site-footer">
+        <img src="logo.png" alt="The Ken" class="footer-logo" width="110" height="18">
+        <div class="footer-credit">Graphic by Anuj, 3 Sept '26</div>
+        <div class="footer-source">Source: Rent Survey, Aug '26</div>
+      </footer>
+    </div>
+
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/chart-theme.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/nonresident.js"></script>
+  <script>
+    (document.fonts && document.fonts.ready || Promise.resolve()).then(() => {
+      window.initNonresidentCharts();
+      window.addEventListener('resize', () => {
+        Object.values(window.nonresidentCharts).forEach((c) => c && !c.isDisposed() && c.resize());
+      });
+    });
+  </script>
+</body>
+</html>

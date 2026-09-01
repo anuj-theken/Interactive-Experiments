@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bengaluru Rent Survey — Homeowner Dashboard</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+
+  <div class="page theme-homeowner">
+
+    <header class="page-header">
+      <div class="title-block">
+        <h1>Homeowner Dashboard</h1>
+        <p>Owner perspectives on rent limits, historical rent increases, and market feasibility for young buyers</p>
+      </div>
+    </header>
+
+    <!-- ======================================================================
+         HOMEOWNER DASHBOARD  (id: panel-homeowner, theme: theme-homeowner)
+         Chart ids prefixed `ho-`. Charts defined in js/homeowner.js.
+         ====================================================================== -->
+    <div class="dashboard-container theme-homeowner" id="panel-homeowner">
+      <div class="panel-body">
+
+      <!-- TOP ROW: filter card (age/career — no Area, homeowners weren't
+           asked which part of the city they're in). Inserted here by
+           js/homeowner.js. A sibling of .charts-view/.responses-view (NOT a
+           row inside .dashboard-grid) so it stays visible on both the
+           Charts and Suggestions tabs — see css/dashboard.css section 4. -->
+      <div class="top-row" id="ho-top-row"></div>
+
+      <div class="charts-view" id="ho-charts-view">
+      <div class="dashboard-grid">
+
+        <!-- LEFT COLUMN: 2 stacked vertical bar charts -->
+        <div class="left-column">
+          <div class="card">
+            <h2>Before you owned a home, did you rent in Bengaluru?</h2>
+            <div class="subtitle">Prior rental history of current home owners</div>
+            <div id="ho-chart-rented-before" class="chart-box"></div>
+          </div>
+
+          <div class="card">
+            <h2>How much did rising rent push you to buy a home?</h2>
+            <div class="subtitle">Impact of rent hikes on buying decision</div>
+            <div id="ho-chart-pushed-buy" class="chart-box"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: stacked bar (top) + 2 pie charts (pies-row) -->
+        <div class="right-column">
+          <div class="card stat-bar-card">
+            <h2>Do you think Bengaluru should put a limit on how much rent can go up?</h2>
+            <div class="subtitle">Support for rent control policies in the city</div>
+            <div id="ho-chart-rent-limit" class="chart-box"></div>
+          </div>
+
+          <div class="pies-row">
+            <div class="card">
+              <h2>Compared to what you once paid, how do today's rents look?</h2>
+              <div class="subtitle">Owner perception of current rental costs</div>
+              <div id="ho-chart-today-rents" class="chart-box"></div>
+            </div>
+
+            <div class="card">
+              <h2>Do you think buying a home is still possible for young renters today?</h2>
+              <div class="subtitle">Market feasibility for new buyers</div>
+              <div id="ho-chart-buying-possible" class="chart-box"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      </div>
+
+      <!-- SUGGESTIONS TAB: paginated grid of "What would you tell a young
+           renter in Bengaluru today?" free-text answers — labeled
+           "Suggestions" rather than "Responses" since this field is advice,
+           not a complaint. Filtered by the same Age/Career pills as the
+           Charts tab. See js/homeowner.js. -->
+      <div class="responses-view" id="ho-responses-view" style="display:none;">
+        <div class="pagination" id="ho-pagination"></div>
+        <div class="responses-scroll" id="ho-responses"></div>
+      </div>
+      </div>
+
+      <footer class="site-footer">
+        <img src="logo.png" alt="The Ken" class="footer-logo" width="110" height="18">
+        <div class="footer-credit">Graphic by Anuj, 3 Sept '26</div>
+        <div class="footer-source">Source: Rent Survey, Aug '26</div>
+      </footer>
+    </div>
+
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/chart-theme.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/homeowner.js"></script>
+  <script>
+    (document.fonts && document.fonts.ready || Promise.resolve()).then(() => {
+      window.initHomeownerCharts();
+      window.addEventListener('resize', () => {
+        Object.values(window.homeownerCharts).forEach((c) => c && !c.isDisposed() && c.resize());
+      });
+    });
+  </script>
+</body>
+</html>
