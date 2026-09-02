@@ -1129,26 +1129,18 @@ body {
   overflow: hidden;
 }
 
-.response-quote-label {
-  font-family: var(--font-body-bold);
-  font-size: 0.6rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--c2);
-  opacity: 0.85;
-  margin-top: 6px;
-}
-
-.response-quote-label:first-child {
-  margin-top: 0;
-}
-
-/* Landlord's cards carry 2 labeled quotes instead of 1 (see js/landlord.js)
-   — a shorter clamp per quote keeps their combined height in the same
-   budget as every other card's single longer quote. */
-.response-card:has(.response-quote-label) .response-quote {
+/* Landlord's cards carry 2 quotes instead of 1 (see js/landlord.js) — a
+   shorter clamp per quote keeps their combined height in the same budget
+   as every other card's single longer quote; the extra top margin on the
+   second quote stands in for the divider a per-quote label used to give,
+   now that the card itself no longer repeats the question each quote
+   answers (see .responses-header's own .response-question instead). */
+.response-card[data-multi-quote] .response-quote {
   -webkit-line-clamp: 3;
+}
+
+.response-card[data-multi-quote] .response-quote + .response-quote {
+  margin-top: 8px;
 }
 
 .response-meta {
@@ -1174,9 +1166,32 @@ body {
 }
 
 /* Above the card grid (see the responses-view markup in each dashboard
-   file) — the "Page X of Y" count reads more naturally as a header for
-   what's below it than a footer, and it means Prev/Next stays in the same
-   place regardless of how many cards the current page has, rather than
+   file) — pairs the literal survey question these cards are answers to
+   (static, set once per dashboard) with the "Page X of Y" pagination
+   controls on the same row, so a reader knows what they're reading before
+   they start scanning quotes instead of having to infer it from the
+   cards themselves. */
+.responses-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex: 0 0 auto;
+  padding-bottom: 12px;
+}
+
+.response-question {
+  font-family: var(--font-body-bold);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  opacity: 0.85;
+  line-height: 1.3;
+}
+
+/* The "Page X of Y" count reads more naturally as a header for what's
+   below it than a footer, and it means Prev/Next stays in the same place
+   regardless of how many cards the current page has, rather than
    drifting up and down the page. */
 .pagination {
   display: flex;
@@ -1184,7 +1199,6 @@ body {
   justify-content: center;
   gap: 16px;
   flex: 0 0 auto;
-  padding-bottom: 12px;
 }
 
 .page-btn {
@@ -1562,6 +1576,22 @@ body {
     grid-template-columns: 1fr;
   }
 
+  /* Stacked (question above, controls below) at phone widths — the iPad
+     range (700-1024px, section 12) overrides this back to the desktop row
+     so this only actually applies below 700px. Centered, not left-aligned
+     like the question above it: with nothing to its right to balance
+     against once the row breaks, a left-aligned pager reads as stranded
+     over near the question instead of like its own control. */
+  .responses-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .responses-header .pagination {
+    align-self: center;
+  }
+
   .kpi-sub-row {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
@@ -1640,5 +1670,19 @@ body {
 @media (min-width: 700px) and (max-width: 1024px) {
   .responses-scroll {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Undoes section 11's phone-width stacking — iPad has the width for the
+     question and the pagination bar to share one row like desktop does,
+     so the pager reads as right-aligned against the question instead of
+     centered underneath it. */
+  .responses-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .responses-header .pagination {
+    align-self: auto;
   }
 }

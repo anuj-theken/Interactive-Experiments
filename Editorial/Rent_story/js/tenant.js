@@ -121,7 +121,7 @@ window.initTenantCharts = function initTenantCharts() {
   const RENT_LIMIT_VALUES = ['Strongly agree', 'Agree', 'Not sure', 'Disagree', 'Strongly disagree'];
 
   const LEAVE_RENT_VALUES = ["I'm already past my limit", "Another 10% and I'm out", 'Another 25%', "I'd never leave over rent", "I'll pay whatever it takes to stay"];
-  const LEAVE_RENT_LABELS = ['Past limit', 'Another 10% out', 'Another 25%', 'Never leave', 'Pay whatever'];
+  const LEAVE_RENT_LABELS = ['Past limit', 'Another 10%', 'Another 25%', 'Never leave', 'Pay whatever'];
 
   const RENEWAL_HIKE_VALUES = ["It didn't go up", 'Up to 10%', '11–20%', '21–40%', 'More than 40%', "Haven't renewed / not applicable"];
   const RENEWAL_HIKE_LABELS = ["Didn't go up", '10% hike', '11–20%', '21–40%', 'More than 40%', 'Not renewed / N/A'];

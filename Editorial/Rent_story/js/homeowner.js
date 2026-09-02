@@ -50,10 +50,10 @@ window.initHomeownerCharts = function initHomeownerCharts() {
   const RENT_LIMIT_VALUES = ['Strongly agree', 'Agree', 'Not sure', 'Disagree', 'Strongly disagree'];
 
   const TODAY_RENTS_VALUES = ['It is worse now, but I would still manage', 'Honestly, I would not be able to rent my old life today', 'About the same as my time', 'I do not know what rents are like now'];
-  const TODAY_RENTS_LABELS = ['Worse, manage', 'Cannot afford', 'About same', 'Do not know'];
+  const TODAY_RENTS_LABELS = ['Worse', 'Cannot afford', 'About same', 'Do not know'];
 
   const BUYING_POSSIBLE_VALUES = ['Hard, but possible', 'Almost impossible now', 'Yes, but only with help from family/friends', 'Yes, if they plan and save', "No chance at today's prices"];
-  const BUYING_POSSIBLE_LABELS = ['Hard, possible', 'Impossible now', 'Family help', 'If plan/save', 'No chance'];
+  const BUYING_POSSIBLE_LABELS = ['Hard, possible', 'Impossible now', 'With family help', 'If plan/save', 'No chance'];
   const BUYING_POSSIBLE_COLORS = [PALETTE[1], PALETTE[0], PALETTE[2], PALETTE[3], PALETTE[4]];
 
   function render(records) {

@@ -61,12 +61,12 @@
         <div class="left-column">
           <div class="pies-row">
             <div class="card">
-              <div class="card-title">Security deposit paid</div>
+              <div class="card-title">Security deposit paid (months)</div>
               <div id="tn-chart-deposit" class="chart-box"></div>
             </div>
 
             <div class="card">
-              <div class="card-title">Monthly rent share</div>
+              <div class="card-title">Monthly rent share (% of income)</div>
               <div id="tn-chart-pay-share" class="chart-box"></div>
             </div>
           </div>
@@ -94,7 +94,7 @@
           </div>
 
           <div class="card" style="flex: 0.9;">
-            <div class="card-title">Rent that would make you leave</div>
+            <div class="card-title">Rent increase that would make you leave</div>
             <div id="tn-chart-leave-rent" class="chart-box"></div>
           </div>
 
@@ -118,7 +118,10 @@
            renting in Bengaluru today?" free-text answers, filtered by the
            same Age/Career/Area pills as the Charts tab. See js/tenant.js. -->
       <div class="responses-view" id="tn-responses-view" style="display:none;">
-        <div class="pagination" id="tn-pagination"></div>
+        <div class="responses-header">
+          <div class="response-question">What is the hardest part of renting in Bengaluru today?</div>
+          <div class="pagination" id="tn-pagination"></div>
+        </div>
         <div class="responses-scroll" id="tn-responses"></div>
       </div>
       </div>

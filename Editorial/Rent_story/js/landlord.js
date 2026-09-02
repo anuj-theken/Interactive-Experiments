@@ -98,7 +98,7 @@ window.initLandlordCharts = function initLandlordCharts() {
   const PRICING_LABELS = ['Matched nearby', 'Broker rate', 'Last rent + bit', 'Whatever possible', 'Covers costs'];
 
   const RENT_CAP_VALUES = ['Strongly disagree', 'Disagree', 'Agree', 'Not sure', 'Strongly agree'];
-  const RENT_CAP_LABELS = ['Strongly Disagree', 'Disagree', 'Agree', 'Not Sur', 'Strongly Agre'];
+  const RENT_CAP_LABELS = ['Strongly Disagree', 'Disagree', 'Agree', 'Not Sure', 'Strongly Agree'];
 
   const LAST_HIKE_GROUPS = [
     ['10% hike', ['Up to 10%']],

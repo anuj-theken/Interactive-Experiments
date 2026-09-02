@@ -1138,26 +1138,18 @@ body {
   overflow: hidden;
 }
 
-.response-quote-label {
-  font-family: var(--font-body-bold);
-  font-size: 0.6rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--c2);
-  opacity: 0.85;
-  margin-top: 6px;
-}
-
-.response-quote-label:first-child {
-  margin-top: 0;
-}
-
-/* Landlord's cards carry 2 labeled quotes instead of 1 (see js/landlord.js)
-   — a shorter clamp per quote keeps their combined height in the same
-   budget as every other card's single longer quote. */
-.response-card:has(.response-quote-label) .response-quote {
+/* Landlord's cards carry 2 quotes instead of 1 (see js/landlord.js) — a
+   shorter clamp per quote keeps their combined height in the same budget
+   as every other card's single longer quote; the extra top margin on the
+   second quote stands in for the divider a per-quote label used to give,
+   now that the card itself no longer repeats the question each quote
+   answers (see .responses-header's own .response-question instead). */
+.response-card[data-multi-quote] .response-quote {
   -webkit-line-clamp: 3;
+}
+
+.response-card[data-multi-quote] .response-quote + .response-quote {
+  margin-top: 8px;
 }
 
 .response-meta {
@@ -1183,9 +1175,32 @@ body {
 }
 
 /* Above the card grid (see the responses-view markup in each dashboard
-   file) — the "Page X of Y" count reads more naturally as a header for
-   what's below it than a footer, and it means Prev/Next stays in the same
-   place regardless of how many cards the current page has, rather than
+   file) — pairs the literal survey question these cards are answers to
+   (static, set once per dashboard) with the "Page X of Y" pagination
+   controls on the same row, so a reader knows what they're reading before
+   they start scanning quotes instead of having to infer it from the
+   cards themselves. */
+.responses-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex: 0 0 auto;
+  padding-bottom: 12px;
+}
+
+.response-question {
+  font-family: var(--font-body-bold);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  opacity: 0.85;
+  line-height: 1.3;
+}
+
+/* The "Page X of Y" count reads more naturally as a header for what's
+   below it than a footer, and it means Prev/Next stays in the same place
+   regardless of how many cards the current page has, rather than
    drifting up and down the page. */
 .pagination {
   display: flex;
@@ -1193,7 +1208,6 @@ body {
   justify-content: center;
   gap: 16px;
   flex: 0 0 auto;
-  padding-bottom: 12px;
 }
 
 .page-btn {
@@ -1571,6 +1585,22 @@ body {
     grid-template-columns: 1fr;
   }
 
+  /* Stacked (question above, controls below) at phone widths — the iPad
+     range (700-1024px, section 12) overrides this back to the desktop row
+     so this only actually applies below 700px. Centered, not left-aligned
+     like the question above it: with nothing to its right to balance
+     against once the row breaks, a left-aligned pager reads as stranded
+     over near the question instead of like its own control. */
+  .responses-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .responses-header .pagination {
+    align-self: center;
+  }
+
   .kpi-sub-row {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
@@ -1650,6 +1680,20 @@ body {
   .responses-scroll {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* Undoes section 11's phone-width stacking — iPad has the width for the
+     question and the pagination bar to share one row like desktop does,
+     so the pager reads as right-aligned against the question instead of
+     centered underneath it. */
+  .responses-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .responses-header .pagination {
+    align-self: auto;
+  }
 }
 
   </style>
@@ -1692,7 +1736,7 @@ body {
           </div>
 
           <div class="card">
-            <div class="card-title">Would lower rent make you consider moving?</div>
+            <div class="card-title">Would lower rent make you consider moving to Bengaluru?</div>
             <div class="matrix-horizontal-wrapper">
               <div id="nr-dot-matrix" class="dot-matrix-grid"></div>
               <div id="nr-legend-matrix" class="right-legend"></div>
@@ -1703,7 +1747,7 @@ body {
         <!-- RIGHT COLUMN: stacked bar (top) + 2 horizontal bar charts (pies-row) -->
         <div class="right-column">
           <div class="card stat-bar-card">
-            <div class="card-title">Frequency of cost of living discussions</div>
+            <div class="card-title">Frequency of cost-of-living discussions about Bengaluru</div>
             <div id="nr-chart-top-right" class="chart-box"></div>
           </div>
 
@@ -1728,7 +1772,10 @@ body {
            the same Age/Career pills as the Charts tab. See
            js/nonresident.js. -->
       <div class="responses-view" id="nr-responses-view" style="display:none;">
-        <div class="pagination" id="nr-pagination"></div>
+        <div class="responses-header">
+          <div class="response-question">What comes to mind when you think of renting in Bengaluru?</div>
+          <div class="pagination" id="nr-pagination"></div>
+        </div>
         <div class="responses-scroll" id="nr-responses"></div>
       </div>
       </div>
@@ -11448,14 +11495,18 @@ window.FilterUI = (function () {
       return;
     }
     container.innerHTML = items.map((item, i) => {
+      // No per-line .response-quote-label here (unlike the expanded modal
+      // below) — Landlord's 2-quote cards used to caption each quote with
+      // the question it answers, but that's redundant now that the
+      // Responses tab shows the underlying question once, up in
+      // .responses-header, instead of repeating it on every card.
       const body = item.lines
         ? item.lines.map((l) => `
-            <div class="response-quote-label">${escapeHtml(l.label)}</div>
             <div class="response-quote">&ldquo;${escapeHtml(truncateWords(l.quote, 12))}&rdquo;</div>
           `).join('')
         : `<div class="response-quote">&ldquo;${escapeHtml(truncateWords(item.quote, 26))}&rdquo;</div>`;
       return `
-        <div class="response-card" data-index="${i}" tabindex="0" role="button" aria-label="Expand full response">
+        <div class="response-card"${item.lines ? ' data-multi-quote="true"' : ''} data-index="${i}" tabindex="0" role="button" aria-label="Expand full response">
           ${body}
           <div class="response-meta">${escapeHtml(item.meta)}</div>
         </div>
@@ -11682,21 +11733,30 @@ window.initNonresidentCharts = function initNonresidentCharts() {
   charts.bottomRight1 = ChartTheme.init('nr-chart-bottom-right-1');
   charts.bottomRight2 = ChartTheme.init('nr-chart-bottom-right-2');
 
-  const TOP_LEFT_LABELS = ['Yes / Direct', 'Paused / Thought', 'No / Never', 'N/A / Encouraged'];
+  // 5 shared buckets (not 4) — Encouraged and N/A used to be folded into
+  // one shared slice, but they mean opposite things depending on which
+  // series you're looking at (nobody's raw answer to "did cost stop your
+  // OWN move" is ever "encouraged", and nobody's answer to "did you tell
+  // OTHERS to move" is ever "does not apply") — kept separate so each bar
+  // only fills the buckets its own question can actually produce, with the
+  // other left at 0 rather than the two meanings sharing a column.
+  const TOP_LEFT_LABELS = ['Encouraged', 'Yes', 'Thought about it', 'Never', 'N/A'];
 
   const SAID_NO_GROUPS = [
-    ['Yes — I turned down or avoided a Bengaluru move over cost'],
-    ['It made me pause, but was not the deciding factor'],
-    ['No, cost never came into it'],
-    ['Does not apply — I never had the chance']
-  ].map((raws, i) => [TOP_LEFT_LABELS[i], raws]);
+    [TOP_LEFT_LABELS[0], []],
+    [TOP_LEFT_LABELS[1], ['Yes — I turned down or avoided a Bengaluru move over cost']],
+    [TOP_LEFT_LABELS[2], ['It made me pause, but was not the deciding factor']],
+    [TOP_LEFT_LABELS[3], ['No, cost never came into it']],
+    [TOP_LEFT_LABELS[4], ['Does not apply — I never had the chance']]
+  ];
 
   const TOLD_OTHERS_GROUPS = [
-    ['Yes, more than once', 'Yes, once'],
-    ['No, but I have thought about it'],
-    ['No, never'],
-    ['I would actually tell them to go, rent or not']
-  ].map((raws, i) => [TOP_LEFT_LABELS[i], raws]);
+    [TOP_LEFT_LABELS[0], ['I would actually tell them to go, rent or not']],
+    [TOP_LEFT_LABELS[1], ['Yes, more than once', 'Yes, once']],
+    [TOP_LEFT_LABELS[2], ['No, but I have thought about it']],
+    [TOP_LEFT_LABELS[3], ['No, never']],
+    [TOP_LEFT_LABELS[4], []]
+  ];
 
   const OFTEN_VALUES = ['All the time — it is the first thing people mention', 'Fairly often', 'Once in a while', 'Rarely', 'I never hear about it'];
   const OFTEN_LABELS = ['All the time', 'Fairly often', 'Once in a while', 'Rarely', 'I never hear about it'];
@@ -11716,10 +11776,10 @@ window.initNonresidentCharts = function initNonresidentCharts() {
   ];
 
   const COMPARE_CITY_GROUPS = [
-    ['Unknown/Left BLR', ['I do not know how they compare', 'I used to live in Bengaluru — the rent is why I left']],
+    ['Unknown/Left Bengaluru', ['I do not know how they compare', 'I used to live in Bengaluru — the rent is why I left']],
     ['About the same', ['About the same']],
     ['My city is worse', ['My city is actually worse']],
-    ['BLR is much worse', ['Much worse than where I live']]
+    ['Bengaluru is much worse', ['Much worse than where I live']]
   ];
 
   function render(records) {
@@ -11729,8 +11789,8 @@ window.initNonresidentCharts = function initNonresidentCharts() {
     charts.topLeft.setOption({
       tooltip: {
         trigger: 'axis', axisPointer: { type: 'shadow' },
-        formatter: ChartTheme.allStatsTooltip(TOP_LEFT_LABELS.map((name, i) => [name, saidNo.counts[i], palette[0]]), { title: 'Said No to Move/Job' })
-          + ChartTheme.allStatsTooltip(TOP_LEFT_LABELS.map((name, i) => [name, toldOthers.counts[i], palette[2]]), { title: 'Told Others Not to Move' })
+        formatter: ChartTheme.allStatsTooltip(TOP_LEFT_LABELS.map((name, i) => [name, saidNo.counts[i], palette[0]]), { title: 'Moving to Bangalore' })
+          + ChartTheme.allStatsTooltip(TOP_LEFT_LABELS.map((name, i) => [name, toldOthers.counts[i], palette[2]]), { title: 'Told others to move to Bangalore' })
       },
       legend: { left: '0%', top: 0, orient: 'horizontal', textStyle: fontStyle, itemWidth: 10, itemHeight: 10 },
       grid: { left: '0%', right: '3%', bottom: '3%', top: '22%', containLabel: true },
@@ -11743,11 +11803,11 @@ window.initNonresidentCharts = function initNonresidentCharts() {
       yAxis: { type: 'value', splitLine: { lineStyle: { type: 'dashed', color: 'rgba(0,0,0,0.08)' } }, axisLabel: { fontSize: 10 } },
       series: [
         {
-          name: 'Said No to Move/Job', type: 'bar', itemStyle: { color: palette[0], borderRadius: [4, 4, 0, 0] }, data: saidNo.counts,
+          name: 'Moving to Bangalore', type: 'bar', itemStyle: { color: palette[0], borderRadius: [4, 4, 0, 0] }, data: saidNo.counts,
           label: { show: true, position: 'top', ...fontStyleBold, fontSize: 9, color: '#3d4128' }
         },
         {
-          name: 'Told Others Not to Move', type: 'bar', itemStyle: { color: palette[2], borderRadius: [4, 4, 0, 0] }, data: toldOthers.counts,
+          name: 'Told others to move to Bangalore', type: 'bar', itemStyle: { color: palette[2], borderRadius: [4, 4, 0, 0] }, data: toldOthers.counts,
           label: { show: true, position: 'top', ...fontStyleBold, fontSize: 9, color: '#3d4128' }
         }
       ]

@@ -356,14 +356,18 @@ window.FilterUI = (function () {
       return;
     }
     container.innerHTML = items.map((item, i) => {
+      // No per-line .response-quote-label here (unlike the expanded modal
+      // below) — Landlord's 2-quote cards used to caption each quote with
+      // the question it answers, but that's redundant now that the
+      // Responses tab shows the underlying question once, up in
+      // .responses-header, instead of repeating it on every card.
       const body = item.lines
         ? item.lines.map((l) => `
-            <div class="response-quote-label">${escapeHtml(l.label)}</div>
             <div class="response-quote">&ldquo;${escapeHtml(truncateWords(l.quote, 12))}&rdquo;</div>
           `).join('')
         : `<div class="response-quote">&ldquo;${escapeHtml(truncateWords(item.quote, 26))}&rdquo;</div>`;
       return `
-        <div class="response-card" data-index="${i}" tabindex="0" role="button" aria-label="Expand full response">
+        <div class="response-card"${item.lines ? ' data-multi-quote="true"' : ''} data-index="${i}" tabindex="0" role="button" aria-label="Expand full response">
           ${body}
           <div class="response-meta">${escapeHtml(item.meta)}</div>
         </div>

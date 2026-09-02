@@ -37,21 +37,30 @@ window.initNonresidentCharts = function initNonresidentCharts() {
   charts.bottomRight1 = ChartTheme.init('nr-chart-bottom-right-1');
   charts.bottomRight2 = ChartTheme.init('nr-chart-bottom-right-2');
 
-  const TOP_LEFT_LABELS = ['Yes / Direct', 'Paused / Thought', 'No / Never', 'N/A / Encouraged'];
+  // 5 shared buckets (not 4) — Encouraged and N/A used to be folded into
+  // one shared slice, but they mean opposite things depending on which
+  // series you're looking at (nobody's raw answer to "did cost stop your
+  // OWN move" is ever "encouraged", and nobody's answer to "did you tell
+  // OTHERS to move" is ever "does not apply") — kept separate so each bar
+  // only fills the buckets its own question can actually produce, with the
+  // other left at 0 rather than the two meanings sharing a column.
+  const TOP_LEFT_LABELS = ['Encouraged', 'Yes', 'Thought about it', 'Never', 'N/A'];
 
   const SAID_NO_GROUPS = [
-    ['Yes — I turned down or avoided a Bengaluru move over cost'],
-    ['It made me pause, but was not the deciding factor'],
-    ['No, cost never came into it'],
-    ['Does not apply — I never had the chance']
-  ].map((raws, i) => [TOP_LEFT_LABELS[i], raws]);
+    [TOP_LEFT_LABELS[0], []],
+    [TOP_LEFT_LABELS[1], ['Yes — I turned down or avoided a Bengaluru move over cost']],
+    [TOP_LEFT_LABELS[2], ['It made me pause, but was not the deciding factor']],
+    [TOP_LEFT_LABELS[3], ['No, cost never came into it']],
+    [TOP_LEFT_LABELS[4], ['Does not apply — I never had the chance']]
+  ];
 
   const TOLD_OTHERS_GROUPS = [
-    ['Yes, more than once', 'Yes, once'],
-    ['No, but I have thought about it'],
-    ['No, never'],
-    ['I would actually tell them to go, rent or not']
-  ].map((raws, i) => [TOP_LEFT_LABELS[i], raws]);
+    [TOP_LEFT_LABELS[0], ['I would actually tell them to go, rent or not']],
+    [TOP_LEFT_LABELS[1], ['Yes, more than once', 'Yes, once']],
+    [TOP_LEFT_LABELS[2], ['No, but I have thought about it']],
+    [TOP_LEFT_LABELS[3], ['No, never']],
+    [TOP_LEFT_LABELS[4], []]
+  ];
 
   const OFTEN_VALUES = ['All the time — it is the first thing people mention', 'Fairly often', 'Once in a while', 'Rarely', 'I never hear about it'];
   const OFTEN_LABELS = ['All the time', 'Fairly often', 'Once in a while', 'Rarely', 'I never hear about it'];
@@ -71,10 +80,10 @@ window.initNonresidentCharts = function initNonresidentCharts() {
   ];
 
   const COMPARE_CITY_GROUPS = [
-    ['Unknown/Left BLR', ['I do not know how they compare', 'I used to live in Bengaluru — the rent is why I left']],
+    ['Unknown/Left Bengaluru', ['I do not know how they compare', 'I used to live in Bengaluru — the rent is why I left']],
     ['About the same', ['About the same']],
     ['My city is worse', ['My city is actually worse']],
-    ['BLR is much worse', ['Much worse than where I live']]
+    ['Bengaluru is much worse', ['Much worse than where I live']]
   ];
 
   function render(records) {
@@ -84,8 +93,8 @@ window.initNonresidentCharts = function initNonresidentCharts() {
     charts.topLeft.setOption({
       tooltip: {
         trigger: 'axis', axisPointer: { type: 'shadow' },
-        formatter: ChartTheme.allStatsTooltip(TOP_LEFT_LABELS.map((name, i) => [name, saidNo.counts[i], palette[0]]), { title: 'Said No to Move/Job' })
-          + ChartTheme.allStatsTooltip(TOP_LEFT_LABELS.map((name, i) => [name, toldOthers.counts[i], palette[2]]), { title: 'Told Others Not to Move' })
+        formatter: ChartTheme.allStatsTooltip(TOP_LEFT_LABELS.map((name, i) => [name, saidNo.counts[i], palette[0]]), { title: 'Moving to Bangalore' })
+          + ChartTheme.allStatsTooltip(TOP_LEFT_LABELS.map((name, i) => [name, toldOthers.counts[i], palette[2]]), { title: 'Told others to move to Bangalore' })
       },
       legend: { left: '0%', top: 0, orient: 'horizontal', textStyle: fontStyle, itemWidth: 10, itemHeight: 10 },
       grid: { left: '0%', right: '3%', bottom: '3%', top: '22%', containLabel: true },
@@ -98,11 +107,11 @@ window.initNonresidentCharts = function initNonresidentCharts() {
       yAxis: { type: 'value', splitLine: { lineStyle: { type: 'dashed', color: 'rgba(0,0,0,0.08)' } }, axisLabel: { fontSize: 10 } },
       series: [
         {
-          name: 'Said No to Move/Job', type: 'bar', itemStyle: { color: palette[0], borderRadius: [4, 4, 0, 0] }, data: saidNo.counts,
+          name: 'Moving to Bangalore', type: 'bar', itemStyle: { color: palette[0], borderRadius: [4, 4, 0, 0] }, data: saidNo.counts,
           label: { show: true, position: 'top', ...fontStyleBold, fontSize: 9, color: '#3d4128' }
         },
         {
-          name: 'Told Others Not to Move', type: 'bar', itemStyle: { color: palette[2], borderRadius: [4, 4, 0, 0] }, data: toldOthers.counts,
+          name: 'Told others to move to Bangalore', type: 'bar', itemStyle: { color: palette[2], borderRadius: [4, 4, 0, 0] }, data: toldOthers.counts,
           label: { show: true, position: 'top', ...fontStyleBold, fontSize: 9, color: '#3d4128' }
         }
       ]
