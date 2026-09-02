@@ -1021,7 +1021,7 @@ body {
   transition: transform .32s cubic-bezier(0.22, 1, 0.36, 1), opacity .25s ease, filter .25s ease;
   /* drop-shadow (not box-shadow) since it follows the clip-path's actual
      trapezoid silhouette instead of the rectangular box behind it. */
-  filter: brightness(0.94) drop-shadow(0 3px 5px rgba(0, 0, 0, 0.20));
+  filter: brightness(0.94) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.30));
 }
 
 .section-tab-btn:not(:first-child) {
@@ -1031,7 +1031,7 @@ body {
 .section-tab-btn:hover {
   opacity: 0.97;
   transform: translateY(6px);
-  filter: brightness(0.98) drop-shadow(0 3px 5px rgba(0, 0, 0, 0.20));
+  filter: brightness(0.98) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.30));
 }
 
 .section-tab-btn.active {
@@ -1043,10 +1043,8 @@ body {
   transform: translateY(0);
   /* Casts down onto the dashboard-container's top edge on purpose — the
      active tab should read as floating just above the panel it controls,
-     not glued flush to it. Lighter than the old value (10px/22px/0.42)
-     so it still shows depth without cutting a hard seam across the
-     container underneath. */
-  filter: brightness(1) drop-shadow(0 5px 10px rgba(0, 0, 0, 0.22));
+     not glued flush to it. */
+  filter: brightness(1) drop-shadow(0 9px 16px rgba(0, 0, 0, 0.38));
   box-shadow: 0 -14px 30px rgba(0, 0, 0, 0.22);
 }
 

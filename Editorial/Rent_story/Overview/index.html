@@ -1034,7 +1034,7 @@ body {
   transition: transform .32s cubic-bezier(0.22, 1, 0.36, 1), opacity .25s ease, filter .25s ease;
   /* drop-shadow (not box-shadow) since it follows the clip-path's actual
      trapezoid silhouette instead of the rectangular box behind it. */
-  filter: brightness(0.94) drop-shadow(0 3px 5px rgba(0, 0, 0, 0.20));
+  filter: brightness(0.94) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.30));
 }
 
 .section-tab-btn:not(:first-child) {
@@ -1044,7 +1044,7 @@ body {
 .section-tab-btn:hover {
   opacity: 0.97;
   transform: translateY(6px);
-  filter: brightness(0.98) drop-shadow(0 3px 5px rgba(0, 0, 0, 0.20));
+  filter: brightness(0.98) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.30));
 }
 
 .section-tab-btn.active {
@@ -1056,10 +1056,8 @@ body {
   transform: translateY(0);
   /* Casts down onto the dashboard-container's top edge on purpose — the
      active tab should read as floating just above the panel it controls,
-     not glued flush to it. Lighter than the old value (10px/22px/0.42)
-     so it still shows depth without cutting a hard seam across the
-     container underneath. */
-  filter: brightness(1) drop-shadow(0 5px 10px rgba(0, 0, 0, 0.22));
+     not glued flush to it. */
+  filter: brightness(1) drop-shadow(0 9px 16px rgba(0, 0, 0, 0.38));
   box-shadow: 0 -14px 30px rgba(0, 0, 0, 0.22);
 }
 
@@ -1667,7 +1665,7 @@ body {
     <header class="page-header">
       <div class="title-block">
         <h1>Bengaluru Rent Overview</h1>
-        <p>What tenants, landlords, owner-occupiers, and non-residents said, each filterable by age and career.</p>
+        <p>Five views into the same survey — tenants, landlords, homeowners and non-residents — each filterable by age, career and (where asked) area of the city.</p>
       </div>
     </header>
 
@@ -1682,7 +1680,7 @@ body {
            css/dashboard.css section 4. -->
       <div class="top-row" id="ov-top-row">
         <div class="card map-card">
-          <div class="card-title">Tenant &amp; Landlord Regional Distribution</div>
+          <div class="card-title">Where tenants and landlords live</div>
           <div id="ov-map" class="map-box"></div>
         </div>
       </div>
@@ -1747,7 +1745,7 @@ body {
 
         <!-- Featured stacked bar (spans 2 cols) -->
         <div class="card stat-bar-card span-col-2">
-          <div class="card-title">Do you think Bengaluru should put a limit on rent hikes?</div>
+          <div class="card-title">Should rent hikes be capped?</div>
           <div id="ov-chart-bar" class="chart-box"></div>
         </div>
 
@@ -1759,12 +1757,12 @@ body {
              inside it. -->
         <div class="span-col-3 pies-row">
           <div class="card pie-fit-card">
-            <div class="card-title">Age Demographics</div>
+            <div class="card-title">Age demographics</div>
             <div id="ov-pie-age" class="chart-box"></div>
           </div>
 
           <div class="card pie-fit-card">
-            <div class="card-title">Career Position</div>
+            <div class="card-title">Career position</div>
             <div id="ov-pie-career" class="chart-box"></div>
           </div>
         </div>
@@ -11829,7 +11827,7 @@ window.initOverviewCharts = function initOverviewCharts() {
       },
       yAxis: {
         type: 'category',
-        data: ['Pay Rent', 'Own Home', 'Landlords'],
+        data: ['Tenants', 'Own Home', 'Landlords'],
         axisLine: { lineStyle: { color: BORDER_TONE } },
         axisTick: { show: false },
         axisLabel: { ...commonTextStyle, color: TEXT_DARK, fontSize: 10 }

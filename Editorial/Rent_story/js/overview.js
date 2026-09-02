@@ -145,7 +145,7 @@ window.initOverviewCharts = function initOverviewCharts() {
       },
       yAxis: {
         type: 'category',
-        data: ['Pay Rent', 'Own Home', 'Landlords'],
+        data: ['Tenants', 'Own Home', 'Landlords'],
         axisLine: { lineStyle: { color: BORDER_TONE } },
         axisTick: { show: false },
         axisLabel: { ...commonTextStyle, color: TEXT_DARK, fontSize: 10 }

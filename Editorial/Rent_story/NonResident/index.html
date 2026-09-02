@@ -1030,7 +1030,7 @@ body {
   transition: transform .32s cubic-bezier(0.22, 1, 0.36, 1), opacity .25s ease, filter .25s ease;
   /* drop-shadow (not box-shadow) since it follows the clip-path's actual
      trapezoid silhouette instead of the rectangular box behind it. */
-  filter: brightness(0.94) drop-shadow(0 3px 5px rgba(0, 0, 0, 0.20));
+  filter: brightness(0.94) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.30));
 }
 
 .section-tab-btn:not(:first-child) {
@@ -1040,7 +1040,7 @@ body {
 .section-tab-btn:hover {
   opacity: 0.97;
   transform: translateY(6px);
-  filter: brightness(0.98) drop-shadow(0 3px 5px rgba(0, 0, 0, 0.20));
+  filter: brightness(0.98) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.30));
 }
 
 .section-tab-btn.active {
@@ -1052,10 +1052,8 @@ body {
   transform: translateY(0);
   /* Casts down onto the dashboard-container's top edge on purpose — the
      active tab should read as floating just above the panel it controls,
-     not glued flush to it. Lighter than the old value (10px/22px/0.42)
-     so it still shows depth without cutting a hard seam across the
-     container underneath. */
-  filter: brightness(1) drop-shadow(0 5px 10px rgba(0, 0, 0, 0.22));
+     not glued flush to it. */
+  filter: brightness(1) drop-shadow(0 9px 16px rgba(0, 0, 0, 0.38));
   box-shadow: 0 -14px 30px rgba(0, 0, 0, 0.22);
 }
 
@@ -1663,7 +1661,7 @@ body {
     <header class="page-header">
       <div class="title-block">
         <h1>Non-residents' POV</h1>
-        <p>What non-residents said, filterable by age and career.</p>
+        <p>Data summary from respondents living outside Bengaluru who weighed Bengaluru's rents against a move or a job here</p>
       </div>
     </header>
 
@@ -1689,12 +1687,12 @@ body {
         <!-- LEFT COLUMN: grouped bar + dot matrix -->
         <div class="left-column">
           <div class="card">
-            <div class="card-title">Impact on Personal Choice vs. Advice to Others</div>
+            <div class="card-title">Impact on personal choice vs. advice to others</div>
             <div id="nr-chart-top-left" class="chart-box"></div>
           </div>
 
           <div class="card">
-            <div class="card-title">Would Lower Rent Make You Consider Moving?</div>
+            <div class="card-title">Would lower rent make you consider moving?</div>
             <div class="matrix-horizontal-wrapper">
               <div id="nr-dot-matrix" class="dot-matrix-grid"></div>
               <div id="nr-legend-matrix" class="right-legend"></div>
@@ -1705,7 +1703,7 @@ body {
         <!-- RIGHT COLUMN: stacked bar (top) + 2 horizontal bar charts (pies-row) -->
         <div class="right-column">
           <div class="card stat-bar-card">
-            <div class="card-title">Frequency of Cost of Living Discussions</div>
+            <div class="card-title">Frequency of cost of living discussions</div>
             <div id="nr-chart-top-right" class="chart-box"></div>
           </div>
 
