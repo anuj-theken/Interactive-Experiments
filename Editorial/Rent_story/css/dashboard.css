@@ -13,7 +13,8 @@
      8. Filter card + section tabs (Charts / Responses / Suggestions)
      9. Responses tab + pagination
      10. Site footer (logo / credit / source line)
-     11. Responsive breakpoint (<= 868px)
+     11. Responsive breakpoint (<= 1024px) + card carousel
+     12. iPad-width override (768px-1024px)
 
    STRUCTURE NOTE: Tenant/Landlord/Homeowner/Non-Resident now each live in
    their own standalone HTML file (tenant.html etc.) instead of as 5 tabs
@@ -39,16 +40,17 @@
    — Jazmin Alt only ships Bold, GT America ships Light + Black).
      --font-header (Jazmin Alt)     -> ONLY the page <h1> (the one dashboard
                                         title per file) — nothing else.
-     --font-body (GT America Light) -> all supporting/body text: subtitles,
-                                        chart chrome, legends, KPI labels.
+     --font-body (GT America Light) -> supporting/body text: the page
+                                        subtitle, chart chrome, legends,
+                                        KPI labels.
      --font-body-bold (GT America Black) -> everything else that needs
                                         headline weight: .card-title/h2, tab
                                         labels, KPI values, in-chart data
                                         labels.
    Each tier then gets its own `opacity` (full 1 for the primary line in a
    pair, ~0.55-0.7 for the line under it) on top of that size/family choice
-   — see .page-header h1/p and .card-title/.card-subtitle below for the
-   canonical pair.
+   — see .page-header h1/p for the canonical pair. Cards themselves are
+   title-only now (no .card-subtitle) — see section 5.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -79,7 +81,6 @@
 }
 
 :root {
-  --bg-outer: #f1eee5;
   --page-text-dark: #262620;
   --page-text-muted: #6b6a5f;
 
@@ -116,7 +117,7 @@ html, body {
 
 body {
   padding: 28px 16px;
-  background-color: var(--bg-outer);
+  background-color: #f7f2f2;
 }
 
 /* Paper texture: texture-tile.png is a processed version of the reference
@@ -155,13 +156,14 @@ body {
    body), landing behind ITS background instead — rendering as invisible,
    which is why the texture vanished once nothing else (like the tab-switch
    animation's momentary `opacity`, which forces a stacking context while
-   it's running) was incidentally forcing one into existence. `z-index: 0`
-   is the actual fix: it gives each of these elements a real stacking
-   context of their own, at rest, independent of any animation. */
+   it's running) was incidentally forcing one into existence. An explicit
+   z-index (0 here; `.section-tab-btn` sets its own further down, section 8,
+   since it needs a specific negative value for a different reason) is the
+   actual fix: it gives each of these elements a real stacking context of
+   their own, at rest, independent of any animation. */
 .dashboard-container,
 .card,
-.chart-box,
-.section-tab-btn {
+.chart-box {
   z-index: 0;
 }
 
@@ -181,6 +183,17 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  /* `.section-tabs` (section 8) sits behind `.dashboard-container` via a
+     negative z-index — same escaping-negative-z-index issue as the texture
+     overlay (section 1): without `.page` (their nearest common ancestor)
+     establishing its own stacking context, that negative z-index has
+     nothing of its OWN to be contained within, so it escapes past `.page`
+     entirely and ends up comparing against `.page`'s own ordinary in-flow
+     content instead — where it always loses (negative z-index sits below
+     normal content in painting order), which silently made `.page` itself
+     intercept every click meant for a tab underneath it. */
+  position: relative;
+  z-index: 0;
 }
 
 /* --------------------------------------------------------------------------
@@ -190,12 +203,12 @@ body {
    header naming its category; index.html's is the site-wide title. No more
    cross-dashboard tabs here (see the file-level note above). */
 .page-header {
-  text-align: left;
+  text-align: center;
 }
 
 .page-header h1 {
   font-family: var(--font-header);
-  font-size: 1.9rem;
+  font-size: 2rem;
   font-weight: 700;
   letter-spacing: -0.2px;
   color: var(--page-text-dark);
@@ -205,7 +218,7 @@ body {
 
 .page-header p {
   font-family: var(--font-body);
-  font-size: 1.05rem;
+  font-size: 1.125rem;
   font-weight: 300;
   line-height: 1.4;
   color: var(--page-text-dark);
@@ -233,10 +246,11 @@ body {
   background-color: var(--container-bg);
   border-radius: 24px;
   /* No border — separation from the page comes from this shadow instead
-     of an outline. */
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.05),
-    0 -4px 10px rgba(0, 0, 0, 0.08);
+     of an outline. Downward-only (no upward component at its own top
+     edge) — any shadow at the tab seam comes from the active tab's own
+     drop-shadow casting onto this container (.section-tab-btn.active,
+     below), not from this box-shadow. */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -269,18 +283,20 @@ body {
   z-index: 0;
 }
 
-/* Tenant and Landlord both add a `.top-row` (filter card + map, ~298px
-   measured) as an extra `auto`-sized row INSIDE `.dashboard-grid` (section
-   4) — same 900px floor as before, but now that floor has to cover
-   top-row's own height too, or `.dashboard-grid`'s remaining `1fr` row
-   (holding .left-column/.right-column) gets whatever's left over after
-   top-row, which starves their flex:1 cards exactly the way an external
-   sibling used to (see the .panel-body comment above) — just from inside
-   the grid instead of outside it. Homeowner/Non-Resident's `.top-row` has
-   no map (just the filter card, ~170px) and their `.dashboard-grid` is a
-   fixed `flex: 0 0 772px` anyway (section 4), so they don't need this. */
-.theme-tenant .panel-body,
-.theme-landlord .panel-body {
+/* Tenant adds a `.top-row` (filter card + map, ~298px measured) as an
+   extra `auto`-sized row INSIDE `.dashboard-grid` (section 4) — same
+   900px floor as before, but now that floor has to cover top-row's own
+   height too, or `.dashboard-grid`'s remaining `1fr` row (holding
+   .left-column/.right-column) gets whatever's left over after top-row,
+   which starves their flex:1 cards exactly the way an external sibling
+   used to (see the .panel-body comment above) — just from inside the grid
+   instead of outside it. Landlord uses the base 900px floor (below) —
+   its own left/right columns' content (dot-matrix + 3 short bar charts,
+   fixed-height per landlord.html's inline styles) needs less room than
+   Tenant's 3-row treemap/dot-matrix layout does, and the extra 320px this
+   rule used to force on it just left every card stretched around empty
+   space rather than fitting its own content. */
+.theme-tenant .panel-body {
   min-height: 1220px;
 }
 
@@ -526,17 +542,8 @@ body {
   font-weight: 700;
   color: var(--text-dark);
   opacity: 1;
-  margin-bottom: 4px;
+  margin-bottom: 10px;
   line-height: 1.25;
-}
-
-.card .subtitle, .card .card-subtitle {
-  font-family: var(--font-body);
-  font-size: 0.72rem;
-  font-weight: 300;
-  color: var(--text-dark);
-  opacity: 0.6;
-  margin-bottom: 8px;
 }
 
 .chart-box {
@@ -560,6 +567,14 @@ body {
   border-radius: 12px;
   border: 1px solid var(--border-color);
   z-index: 1;
+}
+
+/* Desaturate the OSM tiles to black-and-white — contrast+brightness on top
+   of grayscale so the road network fades to a light, simple backdrop
+   instead of the flat mid-gray grayscale(1) alone produces. Markers/pins
+   (not part of the tile pane) keep their own theme color. */
+.map-box .leaflet-tile-pane {
+  filter: grayscale(1) contrast(1.1) brightness(1.08);
 }
 
 .leaflet-popup-content-wrapper {
@@ -641,6 +656,17 @@ body {
   height: 100%;
 }
 
+/* Landlord's dot matrix now sits paired 2-up with a chart card (see
+   landlord.html) instead of alone at full card width — flex:1 (above)
+   would still greedily grow to fill most of that halved width, leaving
+   the legend beside it cramped into a sliver. A fixed, deliberately
+   narrower track (~8 dots per row) hands the rest of the row back to the
+   legend instead. */
+.theme-landlord .dot-matrix-grid {
+  flex: 0 0 140px;
+  min-width: 0;
+}
+
 .dot-item {
   width: 11px;
   height: 11px;
@@ -657,12 +683,18 @@ body {
    margin-left:auto — mirrors the dot grid's flush-left position, so the
    legend sits exactly as far from the right edge as the dots do from the
    left (both = the card's own 16px padding), with the gap between them
-   coming from .matrix-horizontal-wrapper's `gap`. */
+   coming from .matrix-horizontal-wrapper's `gap`. flex-shrink:1 (not the
+   0 it used to be) — a narrow card (e.g. this one paired 2-up in a
+   .pies-row rather than sitting full-width) needs its longer legend
+   labels to wrap onto a 2nd line instead of overflowing past the card's
+   own edge, uncut, once there's less room than their natural width; the
+   dot grid's own min-width floor (below) still gets first claim on
+   whatever space exists, this only gives up what's left over. */
 .right-legend {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   margin-left: auto;
   justify-content: center;
   min-width: 0;
@@ -710,7 +742,7 @@ body {
 .kpi-main-row {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.45);
+  background: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 10px 16px;
@@ -820,33 +852,30 @@ body {
    data cards around it — the individual pills stay on --card-bg (below),
    so they still pop against this tinted background. */
 .filter-card {
-  gap: 10px;
+  gap: 20px;
   background-color: var(--c5);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
 }
 
 /* Row, not column, and left-aligned (not centered) — Age/Career/Area sit
    side by side reading left to right like a toolbar, wrapping to a 2nd line
-   only if they don't fit. */
+   only if they don't fit. align-content:flex-start (not the "normal"
+   default, which a multi-line flex container with room to spare — this is
+   `flex:1`, stretched taller than its own 1-3 lines of content need —
+   resolves to something closer to evenly SPACING the wrapped lines apart
+   rather than packing them against the top) is what keeps Age/Career/Area
+   a normal `row-gap` apart instead of spread across the card's full
+   stretched height with growing gaps between them. */
 .filter-groups {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
+  align-content: flex-start;
   justify-content: flex-start;
   column-gap: 22px;
-  row-gap: 10px;
+  row-gap: 18px;
   flex: 1;
-}
-
-/* Overview has only Age + Career (no Area, so just 2 lines) — tighter than
-   the shared row-gap above. Its filter card is stretched to match the map
-   card's height regardless (`.top-row`'s default align-items:stretch,
-   section 4), not sized by its own content, so the 2 tightened rows simply
-   leave more empty space at the card's own bottom — left alone rather than
-   filled with anything. */
-.theme-overview .filter-groups {
-  row-gap: 4px;
 }
 
 .filter-group {
@@ -854,37 +883,6 @@ body {
   align-items: center;
   flex-wrap: wrap;
   gap: 5px;
-}
-
-/* Career/Area start hidden (js/filters.js's buildFilterCard toggles this
-   class) — only Age shows by default, so the filter card reads as compact
-   up front instead of the tallest card on the dashboard before a reader's
-   even looked at a chart. */
-.filter-group-collapsed {
-  display: none;
-}
-
-/* A text link, not a pill — visually distinct from the actual filter
-   controls so it doesn't read as one more option in the Age row it sits
-   next to. */
-.filter-toggle {
-  align-self: center;
-  border: none;
-  background: none;
-  padding: 0;
-  font-family: var(--font-body-bold);
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--c2);
-  opacity: 0.75;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  white-space: nowrap;
-}
-
-.filter-toggle:hover {
-  opacity: 1;
 }
 
 .filter-label {
@@ -942,14 +940,25 @@ body {
    used to switch between the 5 top-level dashboards (tab_Layour.png): one
    row, inserted by js/filters.js (mountSectionTabs) as a SIBLING of
    `.dashboard-container` — not nested inside it — so the tabs sit on the
-   page's own background (--bg-outer) and read as genuinely attached to the
-   top of the dashboard sheet, rather than boxed inside its padding.
+   page's own (transparent, section 1) background and read as genuinely
+   attached to the top of the dashboard sheet, rather than boxed inside its
+   padding.
    `.section-tabs` overlaps down into `.dashboard-container` (the "sheet"
-   below it) via a negative margin-bottom, `.dashboard-container`'s own
-   stacking context (section 3) painting over that overlap for inactive
-   tabs, and `.section-tab-btn.active` raising its own z-index to paint its
-   overlap on top instead — so it reads as pulled to the front, flush into
-   the sheet. Only 2 tabs now (vs. the old 5), and colored from the
+   below it) via a negative margin-bottom, and sits BEHIND the sheet on the
+   z-axis (`.section-tabs` itself is z-index:-1, below `.dashboard-
+   container`'s own 0, section 3 — put on the NAV, not the individual
+   buttons; a negative z-index directly on a button whose own parent has
+   no stacking context of its own paints, and hit-tests, behind that plain
+   parent too, which silently ate every click on the tabs) — so the
+   container's rounded top edge paints over that overlap, and the tabs
+   read as tucked in behind/underneath the sheet rather than a flap
+   layered on top of it. `.section-tab-btn.active` still needs its own,
+   slightly higher z-index than the resting sibling tab — ordinary
+   (non-negative) values now, since both are already scoped inside
+   `.section-tabs`'s own already-behind stacking context — just to paint
+   over that INACTIVE sibling where the two overlap horizontally (the
+   `margin-left:-14px` below). Only 2 tabs now (vs. the
+   old 5), and colored from the
    dashboard's own theme (--card-bg/--c2, now defined on `.theme-*` broadly
    rather than `.dashboard-container.theme-*` specifically — see section 3
    — so these vars still reach the tabs despite living outside the
@@ -958,6 +967,17 @@ body {
 .section-tabs {
   display: flex;
   flex-shrink: 0;
+  /* The stacking context (behind .dashboard-container's own z-index:0,
+     section 3) belongs HERE, on the group, not scattered as a negative
+     z-index on each .section-tab-btn individually — a negatively-stacked
+     child of a plain (position/z-index:auto) parent paints, and hit-tests,
+     BEHIND that parent's own box, which made this nav intercept clicks
+     meant for its own buttons before this moved up a level. Both buttons'
+     z-index (section 8, below) are ordinary positive numbers again, scoped
+     entirely within this nav's own (already-behind) local stacking
+     context — they don't need to fight .dashboard-container directly. */
+  position: relative;
+  z-index: -1;
   margin-bottom: -16px;
   /* .dashboard-container's rounded corner (24px, section 3) curves inward
      starting from its own left edge, but the first tab's bottom-left corner
@@ -980,6 +1000,13 @@ body {
    below. */
 .section-tab-btn {
   position: relative;
+  /* Ordinary (non-negative) — `.section-tabs` itself (above) already
+     carries the "behind .dashboard-container" z-index; this only needs to
+     order the 2 tabs relative to EACH OTHER within that local context. A
+     negative value here directly (instead of on the nav) put the button
+     behind its own plain parent for hit-testing, not just visually behind
+     the container. */
+  z-index: 0;
   border: none;
   padding: 11px 22px 22px;
   font-family: var(--font-body-bold);
@@ -1008,14 +1035,18 @@ body {
 }
 
 .section-tab-btn.active {
-  z-index: 5;
+  /* Only needs to clear its own resting sibling (0, just above) where the
+     two tabs overlap horizontally — both already sit behind the container
+     via `.section-tabs`'s own z-index. */
+  z-index: 1;
   opacity: 1;
   transform: translateY(0);
-  /* Noticeably heavier than the resting/hover shadow (not just a bump) —
-     now that the tabs sit on the page's own background rather than boxed
-     inside the dashboard, the active one needs its own shadow to read as
-     lifted above both the page AND its sibling tab, not just brighter. */
-  filter: brightness(1) drop-shadow(0 10px 22px rgba(0, 0, 0, 0.42));
+  /* Casts down onto the dashboard-container's top edge on purpose — the
+     active tab should read as floating just above the panel it controls,
+     not glued flush to it. Lighter than the old value (10px/22px/0.42)
+     so it still shows depth without cutting a hard seam across the
+     container underneath. */
+  filter: brightness(1) drop-shadow(0 5px 10px rgba(0, 0, 0, 0.22));
   box-shadow: 0 -14px 30px rgba(0, 0, 0, 0.22);
 }
 
@@ -1341,9 +1372,15 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   11. RESPONSIVE (<= 868px) — desktop grid collapses to a scrolling stack
+   11. RESPONSIVE (<= 1024px) — desktop grid collapses to a scrolling stack,
+       and every chart/data card becomes a swipeable one-at-a-time carousel
+       (js/filters.js's FilterUI.enableCardCarousel — see .card-carousel
+       below). Covers phones AND tablets/iPad at the same threshold: the
+       carousel reads just as cramped stretched across an iPad's width as
+       stacked full-height cards would, so there's no reason to give tablet
+       its own, wider-only, "still one column but no carousel" tier.
    -------------------------------------------------------------------------- */
-@media (max-width: 868px) {
+@media (max-width: 1024px) {
   body {
     padding: 16px 8px;
   }
@@ -1399,6 +1436,105 @@ body {
        there. */
     height: 380px !important;
     flex: none !important;
+  }
+
+  /* The treemap's smallest box (Tenant's "When Landlords Last Hiked Rent" —
+     currently the "Moved out over hike" slice, the lowest-value node) needs
+     real vertical room to fit its 2-line label without ECharts clipping the
+     overflow at the box's own bottom edge. At the standard 380px card
+     height, this box's aspect ratio at mobile/tablet width squeezes it into
+     too thin a sliver — wider on desktop, where the same 380px→264px auto
+     height comes with 2x the width, that same box is short but wide enough
+     for its label to fit fine. */
+  .treemap-card {
+    height: 540px !important;
+  }
+
+  /* .carousel-slide is also .card (js/filters.js moves the same element,
+     doesn't clone it) — this overrides the `flex: none !important` above
+     so each slide fills the track's full width instead of shrinking to its
+     content, and must win the specificity tie the normal way: declared
+     after .card in the cascade, same !important weight. */
+  .carousel-slide {
+    flex: 0 0 100% !important;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .card-carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .card-carousel::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Sits above the carousel track (js/filters.js inserts it there),
+     "← Back [dots] Next →" — the same shape as the Responses tab's own
+     pagination bar (.pagination/.page-btn, section 9) just below it on
+     this same dashboard, so the two paging controls read as one pattern
+     instead of two different UI languages. Dots in the middle rather than
+     a page count: the whole point of the carousel is that a reader isn't
+     meant to think in "pages" of a grid anymore, just one card at a time. */
+  .carousel-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+  .carousel-nav-btn {
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+    color: var(--text-dark);
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-family: var(--font-body-bold);
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity .18s ease, background-color .18s ease;
+    white-space: nowrap;
+  }
+
+  .carousel-nav-btn:hover:not(:disabled) {
+    background-color: var(--c2);
+    color: #fff;
+    border-color: var(--c2);
+  }
+
+  .carousel-nav-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .carousel-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    background-color: var(--border-color);
+    cursor: pointer;
+    transition: width .18s ease, border-radius .18s ease, background-color .18s ease;
+  }
+
+  .carousel-dot.active {
+    background-color: var(--c2);
+    width: 18px;
+    border-radius: 4px;
   }
 
   /* .top-row's own cards opt back out of the 380px mobile default above —
@@ -1459,7 +1595,13 @@ body {
 
   .section-tabs {
     width: 100%;
-    margin-bottom: -8px;
+    /* Bigger overlap than desktop's -16px (section 8), not smaller — the
+       active tab sits at `translateY(0)` while the inactive one sits 13px
+       lower (`translateY(13px)`, section 8's lifted/tucked-back pair), so
+       the row's overlap has to cover that 13px gap on top of actually
+       reaching the sheet below. -8px here left the active tab visibly
+       floating above the container with a gap under it. */
+    margin-bottom: -18px;
     margin-left: 0;
   }
 
@@ -1483,5 +1625,22 @@ body {
   .footer-logo, .footer-credit, .footer-source {
     justify-self: center;
     text-align: center;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   12. IPAD-WIDTH OVERRIDE (700px–1024px) — narrower than desktop's 3-up
+       Responses/Suggestions grid (section 9), but wide enough for 2 instead
+       of the single column every phone width in section 11 falls back to.
+       700px (not the "classic" 768px iPad width) as the floor — newer iPad
+       Minis report a 744px logical portrait width, which the 768px floor
+       this used to have would have missed entirely, silently dropping
+       those back to the 1-column phone layout. No real phone gets
+       anywhere near 700px CSS width, so there's no risk of catching one by
+       mistake here.
+   -------------------------------------------------------------------------- */
+@media (min-width: 700px) and (max-width: 1024px) {
+  .responses-scroll {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

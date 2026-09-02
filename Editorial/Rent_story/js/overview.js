@@ -54,15 +54,21 @@ window.initOverviewCharts = function initOverviewCharts() {
     boxZoom: false,
     touchZoom: false,
     keyboard: false
-  }).setView([12.9620, 77.6250], 11);
+  }).setView([12.9650, 77.6200], 10);
   window.overviewMap = map;
 
-  // Standard OSM tiles, not CARTO's Voyager style — CARTO's anonymous
-  // (no-API-key) tier now stamps every tile with a diagonal "API KEY
-  // REQUIRED" watermark, which was reading as a broken/unfinished map.
+  // Esri's free "World Street Map" — not full-detail OSM (every road, POI
+  // icon, and building outline — too busy for what's meant to be a plain
+  // backdrop for the region markers, not a navigable street map), not
+  // CARTO's Voyager/Positron (their anonymous no-API-key tier stamps every
+  // tile with a diagonal "API KEY REQUIRED" watermark), and not the flat
+  // gray Canvas basemap used before this (no color of its own at all, so
+  // every dashboard needed a CSS filter hack to tell them apart — read as
+  // muddy rather than "themed"). This one has real (if muted) color and
+  // place-name labels baked into the tiles themselves, at a road density
+  // well below plain OSM. No key needed.
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors',
-    subdomains: 'abc',
+    attribution: 'OpenStreetMap',
     maxZoom: 19
   }).addTo(map);
 
@@ -120,7 +126,10 @@ window.initOverviewCharts = function initOverviewCharts() {
       tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'shadow' },
-        valueFormatter: (value) => value + '%'
+        formatter: (params) => ChartTheme.allStatsTooltip(
+          params.map((p) => [p.seriesName, p.value, p.color]),
+          { suffix: '%', title: params[0] && params[0].axisValueLabel }
+        )
       },
       legend: {
         top: 0, left: 0, icon: 'rect', itemWidth: 10, itemHeight: 10,
@@ -132,21 +141,21 @@ window.initOverviewCharts = function initOverviewCharts() {
         max: 100,
         axisLine: { show: false },
         splitLine: { lineStyle: { type: 'dashed', color: BORDER_TONE } },
-        axisLabel: { ...commonTextStyle, formatter: '{value}%' }
+        axisLabel: { ...commonTextStyle, fontSize: 10, formatter: '{value}%' }
       },
       yAxis: {
         type: 'category',
         data: ['Pay Rent', 'Own Home', 'Landlords'],
         axisLine: { lineStyle: { color: BORDER_TONE } },
         axisTick: { show: false },
-        axisLabel: { ...commonTextStyle, fontFamily: 'GT America Bold, sans-serif', fontWeight: 700, color: TEXT_DARK }
+        axisLabel: { ...commonTextStyle, color: TEXT_DARK, fontSize: 10 }
       },
       series: RENT_LIMIT_VALUES.map((name, i) => ({
         name: ['Strongly Agree', 'Agree', 'Not Sure', 'Disagree', 'Strongly Disagree'][i],
         type: 'bar', stack: 'total',
         itemStyle: { color: PALETTE[i], ...(i === 0 ? { borderRadius: [4, 0, 0, 4] } : {}), ...(i === RENT_LIMIT_VALUES.length - 1 ? { borderRadius: [0, 4, 4, 0] } : {}) },
         data: rows.map((row) => row[i]),
-        label: ChartTheme.statBarLabel()
+        label: ChartTheme.statBarLabel(PALETTE[0])
       }))
     }, true);
 
@@ -213,8 +222,7 @@ window.initOverviewCharts = function initOverviewCharts() {
     hasRegion: false,
     ageOptions: Aggregate.optionsWithData(allRecords, 'age', Aggregate.AGE_OPTIONS),
     careerOptions: Aggregate.optionsWithData(allRecords, 'career', Aggregate.CAREER_OPTIONS),
-    title: 'Filter This Overview',
-    subtitle: 'Select an age group or career stage — the KPI counts and every chart below narrow to match.',
+    title: 'Filter this overview',
     onFilterChange: render
   });
   const ovTopRow = document.getElementById('ov-top-row');
@@ -226,6 +234,10 @@ window.initOverviewCharts = function initOverviewCharts() {
   // it keeps drawing tiles for the old, wider box: centered on the wrong
   // point and panned off Bengaluru entirely once the container narrowed.
   map.invalidateSize();
+
+  FilterUI.enableCardCarousel(document.querySelector('#panel-overview .dashboard-grid'), {
+    onLayoutChange: () => Object.values(charts).forEach((c) => c && !c.isDisposed() && c.resize())
+  });
 
   render({});
 };

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bengaluru Rent Survey — Non-Resident Dashboard</title>
+  <title>Bengaluru Rent — Non-residents' POV</title>
 
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
@@ -15,8 +15,8 @@
 
     <header class="page-header">
       <div class="title-block">
-        <h1>Non-Resident Dashboard</h1>
-        <p>Data summary from respondents living outside Bengaluru who weighed Bengaluru's rents against a move or a job here</p>
+        <h1>Non-residents' POV</h1>
+        <p>What non-residents said, filterable by age and career.</p>
       </div>
     </header>
 
@@ -43,13 +43,11 @@
         <div class="left-column">
           <div class="card">
             <div class="card-title">Impact on Personal Choice vs. Advice to Others</div>
-            <div class="card-subtitle">Said no to move/job in BLR vs. Told someone not to move</div>
             <div id="nr-chart-top-left" class="chart-box"></div>
           </div>
 
           <div class="card">
             <div class="card-title">Would Lower Rent Make You Consider Moving?</div>
-            <div class="card-subtitle">Dot matrix representation (N = 69 non-residents)</div>
             <div class="matrix-horizontal-wrapper">
               <div id="nr-dot-matrix" class="dot-matrix-grid"></div>
               <div id="nr-legend-matrix" class="right-legend"></div>
@@ -61,20 +59,17 @@
         <div class="right-column">
           <div class="card stat-bar-card">
             <div class="card-title">Frequency of Cost of Living Discussions</div>
-            <div class="card-subtitle">How often does Bengaluru's high cost of living come up?</div>
             <div id="nr-chart-top-right" class="chart-box"></div>
           </div>
 
           <div class="pies-row">
             <div class="card">
-              <div class="card-title">In your own city, is rent a big worry too?</div>
-              <div class="card-subtitle">Cost-of-living concern back home</div>
+              <div class="card-title">Is rent a big worry in your city too?</div>
               <div id="nr-chart-bottom-right-1" class="chart-box"></div>
             </div>
 
             <div class="card">
               <div class="card-title">How do Bengaluru's rents compare to your city?</div>
-              <div class="card-subtitle">Relative cost perception</div>
               <div id="nr-chart-bottom-right-2" class="chart-box"></div>
             </div>
           </div>

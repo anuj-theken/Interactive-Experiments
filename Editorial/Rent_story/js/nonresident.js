@@ -62,7 +62,7 @@ window.initNonresidentCharts = function initNonresidentCharts() {
     ['No, rent is not why I stay away', ['No, rent is not why I stay away']],
     ['Would never move there anyway', ['I would never move there anyway']]
   ];
-  const LOWER_RENT_COLORS = [palette[0], palette[1], palette[2], palette[4]];
+  const LOWER_RENT_COLORS = ChartTheme.contrastRamp(palette[0], LOWER_RENT_GROUPS.length);
 
   const OWN_CITY_GROUPS = [
     ['Manageable/Affordable', ['No, rent is manageable here', 'No, rent is affordable where I live']],
@@ -82,16 +82,20 @@ window.initNonresidentCharts = function initNonresidentCharts() {
     const saidNo = Aggregate.tallyGrouped(records, 'saidNo', SAID_NO_GROUPS);
     const toldOthers = Aggregate.tallyGrouped(records, 'toldOthers', TOLD_OTHERS_GROUPS);
     charts.topLeft.setOption({
-      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      tooltip: {
+        trigger: 'axis', axisPointer: { type: 'shadow' },
+        formatter: ChartTheme.allStatsTooltip(TOP_LEFT_LABELS.map((name, i) => [name, saidNo.counts[i], palette[0]]), { title: 'Said No to Move/Job' })
+          + ChartTheme.allStatsTooltip(TOP_LEFT_LABELS.map((name, i) => [name, toldOthers.counts[i], palette[2]]), { title: 'Told Others Not to Move' })
+      },
       legend: { left: '0%', top: 0, orient: 'horizontal', textStyle: fontStyle, itemWidth: 10, itemHeight: 10 },
       grid: { left: '0%', right: '3%', bottom: '3%', top: '22%', containLabel: true },
       xAxis: {
         type: 'category',
         data: TOP_LEFT_LABELS,
-        axisLabel: { ...fontStyleBold, fontSize: 9.5, color: '#3d4128', align: 'center' },
+        axisLabel: { ...fontStyle, align: 'center' },
         axisLine: { lineStyle: { color: '#a1a87e' } }
       },
-      yAxis: { type: 'value', splitLine: { lineStyle: { type: 'dashed', color: 'rgba(0,0,0,0.08)' } }, axisLabel: { fontSize: 9 } },
+      yAxis: { type: 'value', splitLine: { lineStyle: { type: 'dashed', color: 'rgba(0,0,0,0.08)' } }, axisLabel: { fontSize: 10 } },
       series: [
         {
           name: 'Said No to Move/Job', type: 'bar', itemStyle: { color: palette[0], borderRadius: [4, 4, 0, 0] }, data: saidNo.counts,
@@ -108,14 +112,14 @@ window.initNonresidentCharts = function initNonresidentCharts() {
     const often = Aggregate.tally(records, 'oftenComesUp', OFTEN_VALUES);
     const oftenPct = Aggregate.percentages(often.counts, often.total);
     charts.topRight.setOption({
-      tooltip: { trigger: 'item', formatter: '{b}: {c}%' },
+      tooltip: { formatter: ChartTheme.allStatsTooltip(OFTEN_LABELS.map((name, i) => [name, oftenPct[i], palette[i]]), { suffix: '%' }) },
       legend: {
         top: 0, left: 0, icon: 'rect', itemWidth: 10, itemHeight: 10,
         textStyle: { ...fontStyle, color: TEXT_MUTED }
       },
       ...ChartTheme.statBarAxes({ ...fontStyle, color: TEXT_MUTED }, BORDER_TONE, 'Mentions'),
       series: OFTEN_LABELS.map((name, i) => ({
-        name, type: 'bar', stack: 'total', itemStyle: { color: palette[i], ...(i === 0 ? { borderRadius: [4, 0, 0, 4] } : {}), ...(i === OFTEN_LABELS.length - 1 ? { borderRadius: [0, 4, 4, 0] } : {}) }, data: [oftenPct[i]], label: ChartTheme.statBarLabel()
+        name, type: 'bar', stack: 'total', itemStyle: { color: palette[i], ...(i === 0 ? { borderRadius: [4, 0, 0, 4] } : {}), ...(i === OFTEN_LABELS.length - 1 ? { borderRadius: [0, 4, 4, 0] } : {}) }, data: [oftenPct[i]], label: ChartTheme.statBarLabel(palette[0])
       }))
     }, true);
 
@@ -127,16 +131,19 @@ window.initNonresidentCharts = function initNonresidentCharts() {
       LOWER_RENT_GROUPS.map(([name], i) => ({ name, count: lowerRent.counts[i], color: LOWER_RENT_COLORS[i] }))
     );
 
-    // --- "In your own city, is rent a big worry too?" ---
+    // --- "Is rent a big worry in your city too?" ---
     const ownCity = Aggregate.tallyGrouped(records, 'ownCityWorry', OWN_CITY_GROUPS);
     charts.bottomRight1.setOption({
-      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      tooltip: {
+        trigger: 'axis', axisPointer: { type: 'shadow' },
+        formatter: ChartTheme.allStatsTooltip(OWN_CITY_GROUPS.map((g, i) => [g[0], ownCity.counts[i], palette[1]]))
+      },
       grid: { left: '0%', right: '10%', bottom: '5%', top: '5%', containLabel: true },
       xAxis: { type: 'value', show: false },
       yAxis: {
         type: 'category',
         data: OWN_CITY_GROUPS.map((g) => g[0]),
-        axisLabel: { ...fontStyleBold, fontSize: 9, color: '#3d4128', align: 'right' },
+        axisLabel: { ...fontStyle, align: 'right' },
         axisLine: { show: false }, axisTick: { show: false }
       },
       series: [{
@@ -148,13 +155,16 @@ window.initNonresidentCharts = function initNonresidentCharts() {
     // --- "How do Bengaluru's rents compare to your city?" ---
     const compareCity = Aggregate.tallyGrouped(records, 'compareCity', COMPARE_CITY_GROUPS);
     charts.bottomRight2.setOption({
-      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      tooltip: {
+        trigger: 'axis', axisPointer: { type: 'shadow' },
+        formatter: ChartTheme.allStatsTooltip(COMPARE_CITY_GROUPS.map((g, i) => [g[0], compareCity.counts[i], palette[2]]))
+      },
       grid: { left: '0%', right: '10%', bottom: '5%', top: '5%', containLabel: true },
       xAxis: { type: 'value', show: false },
       yAxis: {
         type: 'category',
         data: COMPARE_CITY_GROUPS.map((g) => g[0]),
-        axisLabel: { ...fontStyleBold, fontSize: 9, color: '#3d4128', align: 'right' },
+        axisLabel: { ...fontStyle, align: 'right' },
         axisLine: { show: false }, axisTick: { show: false }
       },
       series: [{
@@ -166,7 +176,7 @@ window.initNonresidentCharts = function initNonresidentCharts() {
 
   function renderResponses(records) {
     const items = records
-      .filter((r) => r.subjective)
+      .filter((r) => r.subjective && Aggregate.looksLikeSentence(r.subjective))
       .map((r) => ({
         quote: r.subjective,
         meta: (r.age || 'Age not specified') + ' • ' + (r.career ? Aggregate.shortCareer(r.career) : 'Career not specified')
@@ -202,13 +212,16 @@ window.initNonresidentCharts = function initNonresidentCharts() {
     hasRegion: false,
     ageOptions: Aggregate.optionsWithData(window.SURVEY_DATA.nonresident, 'age', Aggregate.AGE_OPTIONS),
     careerOptions: Aggregate.optionsWithData(window.SURVEY_DATA.nonresident, 'career', Aggregate.CAREER_OPTIONS),
-    title: 'Filter Non-Resident Responses',
-    subtitle: 'Select an age group or career stage — every chart and the Responses tab below both narrow to match.',
+    title: 'Filter non-resident responses',
     onFilterChange: applyFilters
   });
   document.getElementById('nr-top-row').appendChild(filterCard.el);
 
   FilterUI.mountSectionTabs(container, { onViewChange: toggleView });
+
+  FilterUI.enableCardCarousel(document.querySelector('#nr-charts-view .dashboard-grid'), {
+    onLayoutChange: () => Object.values(charts).forEach((c) => c && !c.isDisposed() && c.resize())
+  });
 
   applyFilters({});
 };

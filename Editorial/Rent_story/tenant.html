@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bengaluru Rent Survey — Tenant Dashboard</title>
+  <title>Bengaluru Rent — Tenants' POV</title>
 
   <!-- Apache ECharts -->
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -24,8 +24,8 @@
 
     <header class="page-header">
       <div class="title-block">
-        <h1>Tenant Dashboard</h1>
-        <p>Insights from 373 tenant responses on hikes, deposits, rent limits, and moving pressure</p>
+        <h1>Tenants' POV</h1>
+        <p>What tenants said, filterable by age, career, and area of the city.</p>
       </div>
     </header>
 
@@ -50,7 +50,6 @@
       <div class="top-row" id="tn-top-row">
         <div class="card map-card">
           <div class="card-title">Where Tenants Live in Bengaluru</div>
-          <div class="card-subtitle">Respondent home area — click a marker to filter, same as an Area pill</div>
           <div id="tn-map" class="map-box"></div>
         </div>
       </div>
@@ -63,29 +62,25 @@
           <div class="pies-row">
             <div class="card">
               <div class="card-title">Security Deposit Paid</div>
-              <div class="card-subtitle">The security deposit you paid was roughly&hellip;</div>
               <div id="tn-chart-deposit" class="chart-box"></div>
             </div>
 
             <div class="card">
               <div class="card-title">Monthly Rent Share</div>
-              <div class="card-subtitle">Share of take-home pay spent on rent</div>
               <div id="tn-chart-pay-share" class="chart-box"></div>
             </div>
           </div>
 
           <div class="card" style="flex: 0.85;">
-            <div class="card-title">Biggest Reason Rents Have Risen</div>
-            <div class="card-subtitle">What tenants think is driving Bengaluru rents up</div>
+            <div class="card-title">Main driver behind rising rents</div>
             <div class="matrix-horizontal-wrapper">
               <div id="tn-dot-matrix" class="dot-matrix-grid"></div>
               <div id="tn-legend-reasons" class="right-legend"></div>
             </div>
           </div>
 
-          <div class="card" style="flex: 1.15;">
-            <div class="card-title">When Landlords Last Hiked Rent</div>
-            <div class="card-subtitle">What happened after the most recent rent hike</div>
+          <div class="card treemap-card" style="flex: 1.15;">
+            <div class="card-title">Response to last rent hike</div>
             <div id="tn-chart-treemap" class="chart-box"></div>
           </div>
         </div>
@@ -95,26 +90,22 @@
         <div class="right-column">
           <div class="card stat-bar-card">
             <div class="card-title">Do you think Bengaluru should put a limit on how much rent can go up?</div>
-            <div class="card-subtitle">Rent cap support among tenants</div>
             <div id="tn-chart-rent-limit" class="chart-box"></div>
           </div>
 
-          <div class="card" style="flex: 0.65;">
-            <div class="card-title">Max Rent Before Leaving City</div>
-            <div class="card-subtitle">What tenants would pay before leaving Bengaluru</div>
+          <div class="card" style="flex: 0.9;">
+            <div class="card-title">Rent that would make you leave</div>
             <div id="tn-chart-leave-rent" class="chart-box"></div>
           </div>
 
           <div class="pies-row" style="flex: 1.9;">
             <div class="card">
-              <div class="card-title">Last Renewal Hike</div>
-              <div class="card-subtitle">How much rent went up at last renewal</div>
+              <div class="card-title">Last renewal hike</div>
               <div id="tn-chart-hike-pie" class="chart-box"></div>
             </div>
 
             <div class="card">
-              <div class="card-title">Moving &amp; Coping Trade-offs</div>
-              <div class="card-subtitle">Hardest trade-offs made to keep up with rent</div>
+              <div class="card-title">Choose your poison</div>
               <div id="tn-chart-coping-pie" class="chart-box"></div>
             </div>
           </div>

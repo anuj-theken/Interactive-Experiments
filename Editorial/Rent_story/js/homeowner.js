@@ -45,7 +45,7 @@ window.initHomeownerCharts = function initHomeownerCharts() {
   const RENTED_BEFORE_LABELS = ['Yes, many years', 'Yes, short time', 'Family property', 'Bought directly'];
 
   const PUSHED_BUY_VALUES = ['It was one of the reasons', 'Not much — I bought for other reasons', 'It was the main reason — I was tired of rent going up', 'Does not apply — I did not rent before buying'];
-  const PUSHED_BUY_LABELS = ['One of reasons', 'Other reasons', 'Tired of rent up', 'Did not rent'];
+  const PUSHED_BUY_LABELS = ['One of the reasons', 'Other reasons', 'Main reason', 'Did not rent'];
 
   const RENT_LIMIT_VALUES = ['Strongly agree', 'Agree', 'Not sure', 'Disagree', 'Strongly disagree'];
 
@@ -57,25 +57,24 @@ window.initHomeownerCharts = function initHomeownerCharts() {
   const BUYING_POSSIBLE_COLORS = [PALETTE[1], PALETTE[0], PALETTE[2], PALETTE[3], PALETTE[4]];
 
   function render(records) {
-    // --- "Before you owned a home, did you rent in Bengaluru?" ---
+    // --- "Did you rent before buying a house?" ---
     const rentedBefore = Aggregate.tally(records, 'rentedBefore', RENTED_BEFORE_VALUES);
     charts.rentedBefore.setOption({
-      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-      legend: {
-        top: 0, left: 0, icon: 'rect', itemWidth: 10, itemHeight: 10,
-        textStyle: commonTextStyle, data: [{ name: 'Respondents', itemStyle: { color: PALETTE[0] } }]
+      tooltip: {
+        trigger: 'axis', axisPointer: { type: 'shadow' },
+        formatter: ChartTheme.allStatsTooltip(RENTED_BEFORE_LABELS.map((name, i) => [name, rentedBefore.counts[i], PALETTE[i]]))
       },
-      grid: { left: '0%', right: '3%', bottom: '0%', top: '15%', containLabel: true },
+      grid: { left: '0%', right: '3%', bottom: '0%', top: '8%', containLabel: true },
       xAxis: {
         type: 'category', data: RENTED_BEFORE_LABELS,
         axisLine: { lineStyle: { color: BORDER_TONE } },
         axisTick: { show: false },
-        axisLabel: { ...commonTextStyle, interval: 0 }
+        axisLabel: { ...commonTextStyle, interval: 0, fontSize: 10 }
       },
       yAxis: {
         type: 'value', axisLine: { show: false }, axisTick: { show: false },
         splitLine: { lineStyle: { type: 'dashed', color: BORDER_TONE } },
-        axisLabel: commonTextStyle
+        axisLabel: { ...commonTextStyle, fontSize: 10 }
       },
       series: [{
         name: 'Respondents', type: 'bar', barWidth: '36%',
@@ -85,25 +84,24 @@ window.initHomeownerCharts = function initHomeownerCharts() {
       }]
     }, true);
 
-    // --- "How much did rising rent push you to buy a home?" ---
+    // --- "Did rising rent play a role in your decision to buy?" ---
     const pushedBuy = Aggregate.tally(records, 'pushedBuy', PUSHED_BUY_VALUES);
     charts.pushedBuy.setOption({
-      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-      legend: {
-        top: 0, left: 0, icon: 'rect', itemWidth: 10, itemHeight: 10,
-        textStyle: commonTextStyle, data: [{ name: 'Respondents', itemStyle: { color: PALETTE[0] } }]
+      tooltip: {
+        trigger: 'axis', axisPointer: { type: 'shadow' },
+        formatter: ChartTheme.allStatsTooltip(PUSHED_BUY_LABELS.map((name, i) => [name, pushedBuy.counts[i], PALETTE[i]]))
       },
-      grid: { left: '0%', right: '3%', bottom: '0%', top: '15%', containLabel: true },
+      grid: { left: '0%', right: '3%', bottom: '0%', top: '8%', containLabel: true },
       xAxis: {
         type: 'category', data: PUSHED_BUY_LABELS,
         axisLine: { lineStyle: { color: BORDER_TONE } },
         axisTick: { show: false },
-        axisLabel: { ...commonTextStyle, interval: 0 }
+        axisLabel: { ...commonTextStyle, interval: 0, fontSize: 10 }
       },
       yAxis: {
         type: 'value', axisLine: { show: false }, axisTick: { show: false },
         splitLine: { lineStyle: { type: 'dashed', color: BORDER_TONE } },
-        axisLabel: commonTextStyle
+        axisLabel: { ...commonTextStyle, fontSize: 10 }
       },
       series: [{
         name: 'Respondents', type: 'bar', barWidth: '36%',
@@ -117,7 +115,7 @@ window.initHomeownerCharts = function initHomeownerCharts() {
     const rentLimit = Aggregate.tally(records, 'rentLimit', RENT_LIMIT_VALUES);
     const rentLimitPct = Aggregate.percentages(rentLimit.counts, rentLimit.total);
     charts.rentLimit.setOption({
-      tooltip: { trigger: 'item', formatter: '{b}: {c}%' },
+      tooltip: { formatter: ChartTheme.allStatsTooltip(RENT_LIMIT_VALUES.map((name, i) => [name, rentLimitPct[i], PALETTE[i]]), { suffix: '%' }) },
       legend: {
         top: 0, left: 0, icon: 'rect', itemWidth: 10, itemHeight: 10,
         textStyle: commonTextStyle,
@@ -127,18 +125,18 @@ window.initHomeownerCharts = function initHomeownerCharts() {
       series: RENT_LIMIT_VALUES.map((name, i) => ({
         name, type: 'bar', stack: 'total', data: [rentLimitPct[i]],
         itemStyle: { color: PALETTE[i], ...(i === 0 ? { borderRadius: [4, 0, 0, 4] } : {}), ...(i === RENT_LIMIT_VALUES.length - 1 ? { borderRadius: [0, 4, 4, 0] } : {}) },
-        label: ChartTheme.statBarLabel()
+        label: ChartTheme.statBarLabel(PALETTE[0])
       }))
     }, true);
 
-    // --- "Compared to what you once paid, how do today's rents look?" ---
+    // --- "How does today's rent compare to what you used to pay?" ---
     const todayRents = Aggregate.tally(records, 'todayRents', TODAY_RENTS_VALUES);
     charts.todayRents.setOption(ChartTheme.pieOption(
       TODAY_RENTS_LABELS.map((name, i) => ({ value: todayRents.counts[i], name, itemStyle: { color: PALETTE[i] } })),
       commonTextStyle, { name: 'Today Rents', legendRows: 3 }
     ), true);
 
-    // --- "Do you think buying a home is still possible for young renters today?" ---
+    // --- "Do you think buying a home is possible for young renters today?" ---
     const buyingPossible = Aggregate.tally(records, 'buyingPossible', BUYING_POSSIBLE_VALUES);
     charts.buyingPossible.setOption(ChartTheme.pieOption(
       BUYING_POSSIBLE_LABELS.map((name, i) => ({ value: buyingPossible.counts[i], name, itemStyle: { color: BUYING_POSSIBLE_COLORS[i] } })),
@@ -148,7 +146,7 @@ window.initHomeownerCharts = function initHomeownerCharts() {
 
   function renderResponses(records) {
     const items = records
-      .filter((r) => r.subjective)
+      .filter((r) => r.subjective && Aggregate.looksLikeSentence(r.subjective))
       .map((r) => ({
         quote: r.subjective,
         meta: (r.age || 'Age not specified') + ' • ' + (r.career ? Aggregate.shortCareer(r.career) : 'Career not specified')
@@ -157,7 +155,7 @@ window.initHomeownerCharts = function initHomeownerCharts() {
       document.getElementById('ho-responses'),
       document.getElementById('ho-pagination'),
       items,
-      { emptyText: 'No homeowner responses match these filters.' }
+      { emptyText: 'No owner-occupier responses match these filters.' }
     );
   }
 
@@ -184,8 +182,7 @@ window.initHomeownerCharts = function initHomeownerCharts() {
     hasRegion: false,
     // No homeowner respondent is a Student — that pill would be a dead end.
     careerOptions: Aggregate.optionsWithData(window.SURVEY_DATA.homeowner, 'career', Aggregate.CAREER_OPTIONS),
-    title: 'Filter Homeowner Responses',
-    subtitle: 'Select an age group or career stage — every chart and the Suggestions tab below both narrow to match.',
+    title: 'Filter owner-occupier responses',
     onFilterChange: applyFilters
   });
   document.getElementById('ho-top-row').appendChild(filterCard.el);
@@ -194,6 +191,10 @@ window.initHomeownerCharts = function initHomeownerCharts() {
   // Bengaluru today?") is advice, not a complaint — "Suggestions" fits it
   // better than the generic "Responses" label the other 3 dashboards use.
   FilterUI.mountSectionTabs(container, { labels: ['Charts', 'Suggestions'], onViewChange: toggleView });
+
+  FilterUI.enableCardCarousel(document.querySelector('#ho-charts-view .dashboard-grid'), {
+    onLayoutChange: () => Object.values(charts).forEach((c) => c && !c.isDisposed() && c.resize())
+  });
 
   applyFilters({});
 };

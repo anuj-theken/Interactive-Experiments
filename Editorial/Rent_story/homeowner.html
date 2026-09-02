@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bengaluru Rent Survey — Homeowner Dashboard</title>
+  <title>Bengaluru Rent — Owner-occupiers' POV</title>
 
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
@@ -15,8 +15,8 @@
 
     <header class="page-header">
       <div class="title-block">
-        <h1>Homeowner Dashboard</h1>
-        <p>Owner perspectives on rent limits, historical rent increases, and market feasibility for young buyers</p>
+        <h1>Owner-occupiers' POV</h1>
+        <p>What occupiers said, filterable by age and career.</p>
       </div>
     </header>
 
@@ -40,14 +40,12 @@
         <!-- LEFT COLUMN: 2 stacked vertical bar charts -->
         <div class="left-column">
           <div class="card">
-            <h2>Before you owned a home, did you rent in Bengaluru?</h2>
-            <div class="subtitle">Prior rental history of current home owners</div>
+            <h2>Did you rent before buying a house?</h2>
             <div id="ho-chart-rented-before" class="chart-box"></div>
           </div>
 
           <div class="card">
-            <h2>How much did rising rent push you to buy a home?</h2>
-            <div class="subtitle">Impact of rent hikes on buying decision</div>
+            <h2>Did rising rent play a role in your decision to buy?</h2>
             <div id="ho-chart-pushed-buy" class="chart-box"></div>
           </div>
         </div>
@@ -56,20 +54,17 @@
         <div class="right-column">
           <div class="card stat-bar-card">
             <h2>Do you think Bengaluru should put a limit on how much rent can go up?</h2>
-            <div class="subtitle">Support for rent control policies in the city</div>
             <div id="ho-chart-rent-limit" class="chart-box"></div>
           </div>
 
           <div class="pies-row">
             <div class="card">
-              <h2>Compared to what you once paid, how do today's rents look?</h2>
-              <div class="subtitle">Owner perception of current rental costs</div>
+              <h2>How does today's rent compare to what you used to pay?</h2>
               <div id="ho-chart-today-rents" class="chart-box"></div>
             </div>
 
             <div class="card">
-              <h2>Do you think buying a home is still possible for young renters today?</h2>
-              <div class="subtitle">Market feasibility for new buyers</div>
+              <h2>Do you think buying a home is possible for young renters today?</h2>
               <div id="ho-chart-buying-possible" class="chart-box"></div>
             </div>
           </div>

@@ -46,13 +46,19 @@ window.initLandlordCharts = function initLandlordCharts() {
   }).setView([12.9650, 77.6200], 10);
   window.landlordMap = map;
 
-  // Standard OSM tiles, not CARTO's Voyager style — CARTO's anonymous
-  // (no-API-key) tier now stamps every tile with a diagonal "API KEY
-  // REQUIRED" watermark, which was reading as a broken/unfinished map.
+  // Esri's free "World Street Map" — not full-detail OSM (every road, POI
+  // icon, and building outline — too busy for what's meant to be a plain
+  // backdrop for the region markers, not a navigable street map), not
+  // CARTO's Voyager/Positron (their anonymous no-API-key tier stamps every
+  // tile with a diagonal "API KEY REQUIRED" watermark), and not the flat
+  // gray Canvas basemap used before this (no color of its own at all, so
+  // every dashboard needed a CSS filter hack to tell them apart — read as
+  // muddy rather than "themed"). This one has real (if muted) color and
+  // place-name labels baked into the tiles themselves, at a road density
+  // well below plain OSM. No key needed.
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
-    subdomains: 'abc',
-    attribution: '&copy; OpenStreetMap contributors'
+    attribution: 'OpenStreetMap'
   }).addTo(map);
 
   const REGION_COORDS = {
@@ -95,7 +101,7 @@ window.initLandlordCharts = function initLandlordCharts() {
   const RENT_CAP_LABELS = ['Strongly Disagree', 'Disagree', 'Agree', 'Not Sur', 'Strongly Agre'];
 
   const LAST_HIKE_GROUPS = [
-    ['Up to 10%', ['Up to 10%']],
+    ['10% hike', ['Up to 10%']],
     ['11–20%', ['11–20%']],
     ['No raise', ['I did not raise it']],
     ['Empty / NA', ['The house was empty/does not apply']],
@@ -107,7 +113,7 @@ window.initLandlordCharts = function initLandlordCharts() {
 
   const RAISE_REASON_VALUES = ['Rents in the area went up, so I did the same', 'Other reasons', 'I was charging low before, so I fixed it', 'People were ready to pay', 'My costs went up — tax, repairs, loan etc', 'I did not raise it', 'A new metro or office nearby raised demand'];
   const RAISE_REASON_LABELS = ['Rents in area went up', 'Other reasons', 'Charging low before / fixed', 'People ready to pay', 'Costs went up (tax/repairs)', 'Did not raise rent', 'Metro / office nearby'];
-  const RAISE_REASON_COLORS = [palette[0], palette[1], palette[2], palette[3], palette[4], '#7e5a3e', '#c8ab8f'];
+  const RAISE_REASON_COLORS = ChartTheme.contrastRamp(palette[0], RAISE_REASON_VALUES.length);
 
   function render(records, mapRecords) {
     // --- Map + portfolio bar ---
@@ -130,17 +136,17 @@ window.initLandlordCharts = function initLandlordCharts() {
 
     const portfolio = Aggregate.tally(records, 'portfolioSize', PORTFOLIO_VALUES);
     charts.portfolio.setOption({
-      tooltip: { trigger: 'axis' },
+      tooltip: { trigger: 'axis', formatter: ChartTheme.allStatsTooltip(PORTFOLIO_LABELS.map((name, i) => [name, portfolio.counts[i], palette[1]])) },
       grid: { top: 20, bottom: 25, left: 25, right: 10 },
       xAxis: {
         type: 'category', data: PORTFOLIO_LABELS,
         axisLine: { lineStyle: { color: palette[2] } },
-        axisLabel: { fontFamily: defaultFont, fontSize: 9, fontWeight: 600 }
+        axisLabel: { fontFamily: defaultFont, fontSize: 10 }
       },
       yAxis: {
         type: 'value',
         splitLine: { lineStyle: { type: 'dashed', color: borderTone } },
-        axisLabel: { fontFamily: defaultFont, fontSize: 9 }
+        axisLabel: { fontFamily: defaultFont, fontSize: 10 }
       },
       series: [{
         data: portfolio.counts, type: 'bar',
@@ -149,24 +155,24 @@ window.initLandlordCharts = function initLandlordCharts() {
       }]
     }, true);
 
-    // --- "Why become a landlord?" ---
+    // --- "Primary ownership motivations" ---
     // Horizontal, not vertical: these are full multi-word phrases, and a
     // narrow ~1/3-width card doesn't give 5 vertical columns enough room
     // for that much label text without it overlapping into its neighbors.
     // Laid on its side, each label gets a full-width row instead.
     const motivation = Aggregate.tally(records, 'motivation', MOTIVATION_VALUES);
     charts.motivation.setOption({
-      tooltip: { trigger: 'axis' },
+      tooltip: { trigger: 'axis', formatter: ChartTheme.allStatsTooltip(MOTIVATION_LABELS.map((name, i) => [name, motivation.counts[i], palette[1]])) },
       grid: { top: 8, bottom: 8, left: 8, right: 26, containLabel: true },
       xAxis: {
         type: 'value',
         splitLine: { lineStyle: { type: 'dashed', color: borderTone } },
-        axisLabel: { fontFamily: defaultFont, fontSize: 9 }
+        axisLabel: { fontFamily: defaultFont, fontSize: 10 }
       },
       yAxis: {
         type: 'category', data: MOTIVATION_LABELS,
         axisLine: { show: false }, axisTick: { show: false },
-        axisLabel: { fontFamily: defaultFont, fontSize: 9, fontWeight: 600, color: TEXT_DARK }
+        axisLabel: { fontFamily: defaultFont, fontSize: 10, color: TEXT_DARK }
       },
       series: [{
         data: motivation.counts, type: 'bar', barWidth: 12,
@@ -175,20 +181,20 @@ window.initLandlordCharts = function initLandlordCharts() {
       }]
     }, true);
 
-    // --- "Rent pricing logic?" (same reasoning as motivation, above) ---
+    // --- "How landlords set rent" (same reasoning as motivation, above) ---
     const pricing = Aggregate.tally(records, 'pricing', PRICING_VALUES);
     charts.pricing.setOption({
-      tooltip: { trigger: 'axis' },
+      tooltip: { trigger: 'axis', formatter: ChartTheme.allStatsTooltip(PRICING_LABELS.map((name, i) => [name, pricing.counts[i], palette[2]])) },
       grid: { top: 8, bottom: 8, left: 8, right: 26, containLabel: true },
       xAxis: {
         type: 'value',
         splitLine: { lineStyle: { type: 'dashed', color: borderTone } },
-        axisLabel: { fontFamily: defaultFont, fontSize: 9 }
+        axisLabel: { fontFamily: defaultFont, fontSize: 10 }
       },
       yAxis: {
         type: 'category', data: PRICING_LABELS,
         axisLine: { show: false }, axisTick: { show: false },
-        axisLabel: { fontFamily: defaultFont, fontSize: 9, fontWeight: 600, color: TEXT_DARK }
+        axisLabel: { fontFamily: defaultFont, fontSize: 10, color: TEXT_DARK }
       },
       series: [{
         data: pricing.counts, type: 'bar', barWidth: 12,
@@ -200,11 +206,9 @@ window.initLandlordCharts = function initLandlordCharts() {
     // --- "Do you think Bengaluru should put a limit on how much rent can go up?" ---
     const rentCap = Aggregate.tally(records, 'rentCap', RENT_CAP_VALUES);
     const rentCapPct = Aggregate.percentages(rentCap.counts, rentCap.total);
-    const rentCapTotal = rentCap.total;
     charts.rentCap.setOption({
       tooltip: {
-        trigger: 'item',
-        formatter: (params) => `${params.marker} ${params.seriesName.replace(/\s*\([^)]*\)/, '')}: <b>${params.value}%</b> (${Math.round(params.value * rentCapTotal / 100)} responses)`
+        formatter: ChartTheme.allStatsTooltip(RENT_CAP_LABELS.map((label, i) => [label, rentCapPct[i], palette[i]]), { suffix: '%' })
       },
       legend: {
         top: 0, left: 0, icon: 'rect', itemWidth: 10, itemHeight: 10,
@@ -214,15 +218,15 @@ window.initLandlordCharts = function initLandlordCharts() {
       series: RENT_CAP_LABELS.map((label, i) => ({
         name: RENT_CAP_LABELS[i], type: 'bar', stack: 'total', data: [rentCapPct[i]],
         itemStyle: { color: palette[i], ...(i === 0 ? { borderRadius: [4, 0, 0, 4] } : {}), ...(i === RENT_CAP_VALUES.length - 1 ? { borderRadius: [0, 4, 4, 0] } : {}) },
-        label: ChartTheme.statBarLabel()
+        label: ChartTheme.statBarLabel(palette[0])
       }))
     }, true);
 
-    // --- "Last renewal hike?" / "Time to find tenant?" ---
+    // --- "Last renewal hike" / "Time to find a tenant" ---
     const lastHike = Aggregate.tallyGrouped(records, 'lastHike', LAST_HIKE_GROUPS);
     charts.pieHike.setOption(ChartTheme.pieOption(
       LAST_HIKE_GROUPS.map(([name], i) => ({ value: lastHike.counts[i], name, itemStyle: { color: palette[i] } })),
-      pieTextStyle, { name: 'Last Hike' }
+      pieTextStyle, { name: 'Last Hike', showCount: true }
     ), true);
 
     const speed = Aggregate.tally(records, 'vacancySpeed', SPEED_VALUES);
@@ -231,7 +235,7 @@ window.initLandlordCharts = function initLandlordCharts() {
       pieTextStyle, { name: 'Vacancy Time' }
     ), true);
 
-    // --- "Why did you raise the rent last time?" (dot matrix + legend) ---
+    // --- "Why did you last raise the rent?" (dot matrix + legend) ---
     const raiseReason = Aggregate.tally(records, 'raiseReason', RAISE_REASON_VALUES);
     ChartTheme.buildDotMatrix(
       document.getElementById('ll-dot-matrix'),
@@ -242,13 +246,13 @@ window.initLandlordCharts = function initLandlordCharts() {
 
   function renderResponses(records) {
     const items = records
-      .filter((r) => r.cutEarnings || r.raiseReason)
       .map((r) => {
         const lines = [];
-        if (r.raiseReason) lines.push({ label: 'Why they raised the rent', quote: r.raiseReason });
-        if (r.cutEarnings) lines.push({ label: 'If a rent cap cut their earnings', quote: r.cutEarnings });
-        return { lines, meta: (r.age || 'Age not specified') + ' • ' + (r.career ? Aggregate.shortCareer(r.career) : 'Career not specified') };
-      });
+        if (r.raiseReason && Aggregate.looksLikeSentence(r.raiseReason)) lines.push({ label: 'Why they raised the rent', quote: r.raiseReason });
+        if (r.cutEarnings && Aggregate.looksLikeSentence(r.cutEarnings)) lines.push({ label: 'If a rent cap cut their earnings', quote: r.cutEarnings });
+        return lines.length ? { lines, meta: (r.age || 'Age not specified') + ' • ' + (r.career ? Aggregate.shortCareer(r.career) : 'Career not specified') } : null;
+      })
+      .filter(Boolean);
     FilterUI.mountResponses(
       document.getElementById('ll-responses'),
       document.getElementById('ll-pagination'),
@@ -287,8 +291,7 @@ window.initLandlordCharts = function initLandlordCharts() {
     // would just be dead ends here.
     ageOptions: Aggregate.optionsWithData(window.SURVEY_DATA.landlord, 'age', Aggregate.AGE_OPTIONS),
     careerOptions: Aggregate.optionsWithData(window.SURVEY_DATA.landlord, 'career', Aggregate.CAREER_OPTIONS),
-    title: 'Filter Landlord Responses',
-    subtitle: 'Select an age group, career stage or area — the map, every chart, and the Responses tab below all narrow to match.',
+    title: 'Filter landlord responses',
     onFilterChange: applyFilters
   });
   document.getElementById('ll-top-row').insertBefore(filterCard.el, document.getElementById('ll-top-row').firstChild);
@@ -301,6 +304,10 @@ window.initLandlordCharts = function initLandlordCharts() {
   map.invalidateSize();
 
   FilterUI.mountSectionTabs(container, { onViewChange: toggleView });
+
+  FilterUI.enableCardCarousel(document.querySelector('#ll-charts-view .dashboard-grid'), {
+    onLayoutChange: () => Object.values(charts).forEach((c) => c && !c.isDisposed() && c.resize())
+  });
 
   applyFilters({});
 };

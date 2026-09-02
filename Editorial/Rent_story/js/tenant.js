@@ -57,13 +57,19 @@ window.initTenantCharts = function initTenantCharts() {
   }).setView([12.9650, 77.6200], 10);
   window.tenantMap = map;
 
-  // Standard OSM tiles, not CARTO's Voyager style — CARTO's anonymous
-  // (no-API-key) tier now stamps every tile with a diagonal "API KEY
-  // REQUIRED" watermark, which was reading as a broken/unfinished map.
+  // Esri's free "World Street Map" — not full-detail OSM (every road, POI
+  // icon, and building outline — too busy for what's meant to be a plain
+  // backdrop for the region markers, not a navigable street map), not
+  // CARTO's Voyager/Positron (their anonymous no-API-key tier stamps every
+  // tile with a diagonal "API KEY REQUIRED" watermark), and not the flat
+  // gray Canvas basemap used before this (no color of its own at all, so
+  // every dashboard needed a CSS filter hack to tell them apart — read as
+  // muddy rather than "themed"). This one has real (if muted) color and
+  // place-name labels baked into the tiles themselves, at a road density
+  // well below plain OSM. No key needed.
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
-    subdomains: 'abc',
-    attribution: '&copy; OpenStreetMap contributors'
+    attribution: 'OpenStreetMap'
   }).addTo(map);
 
   const REGION_COORDS = {
@@ -107,6 +113,7 @@ window.initTenantCharts = function initTenantCharts() {
     ['Not enough housing', ['Not enough housing']],
     ['Brokers / Others', ['Brokers', 'Something else']]
   ];
+  const REASON_COLORS = ChartTheme.contrastRamp(PALETTE[0], REASON_GROUPS.length);
 
   const HIKE_LAST_VALUES = ['I paid it, no discussion', "I pushed back, and they didn't budge", 'I negotiated it down', "Haven't faced a rent hike", 'I walked/moved out over it'];
   const HIKE_LAST_LABELS = ['Paid, no discussion', 'Pushed back (no budge)', 'Negotiated down', 'No hike faced', 'Moved out over hike'];
@@ -117,7 +124,7 @@ window.initTenantCharts = function initTenantCharts() {
   const LEAVE_RENT_LABELS = ['Past limit', 'Another 10% out', 'Another 25%', 'Never leave', 'Pay whatever'];
 
   const RENEWAL_HIKE_VALUES = ["It didn't go up", 'Up to 10%', '11–20%', '21–40%', 'More than 40%', "Haven't renewed / not applicable"];
-  const RENEWAL_HIKE_LABELS = ["Didn't go up", 'Up to 10%', '11–20%', '21–40%', 'More than 40%', 'Not renewed / N/A'];
+  const RENEWAL_HIKE_LABELS = ["Didn't go up", '10% hike', '11–20%', '21–40%', 'More than 40%', 'Not renewed / N/A'];
 
   const COPING = ['commute', 'downgrade', 'flatmates', 'savings', 'delayed', 'none'];
   const COPING_LABELS = ['Longer commute', 'Downgraded place', "Flatmates I didn't want", 'Dipped into savings', 'Delayed financial goals', 'None of these'];
@@ -144,19 +151,22 @@ window.initTenantCharts = function initTenantCharts() {
     // --- Card: "Security Deposit Paid" ---
     const deposit = Aggregate.tally(records, 'deposit', DEPOSIT_VALUES);
     charts.deposit.setOption({
-      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      tooltip: {
+        trigger: 'axis', axisPointer: { type: 'shadow' },
+        formatter: ChartTheme.allStatsTooltip(DEPOSIT_LABELS.map((name, i) => [name, deposit.counts[i], PALETTE[i]]))
+      },
       grid: { left: '0%', right: '3%', bottom: '0%', top: '8%', containLabel: true },
       xAxis: {
         type: 'category',
         data: DEPOSIT_LABELS,
         axisLine: { lineStyle: { color: BORDER_TONE } },
         axisTick: { show: false },
-        axisLabel: { ...commonTextStyle, interval: 0, fontSize: 11, color: TEXT_DARK }
+        axisLabel: { ...commonTextStyle, interval: 0, fontSize: 10, color: TEXT_DARK }
       },
       yAxis: {
         type: 'value', axisLine: { show: false }, axisTick: { show: false },
         splitLine: { lineStyle: { type: 'dashed', color: BORDER_TONE } },
-        axisLabel: commonTextStyle
+        axisLabel: { ...commonTextStyle, fontSize: 10 }
       },
       series: [{
         name: 'Tenants', type: 'bar', barWidth: '50%',
@@ -169,19 +179,22 @@ window.initTenantCharts = function initTenantCharts() {
     // --- Card: "Monthly Rent Share" ---
     const payShare = Aggregate.tally(records, 'payShare', PAY_SHARE_VALUES);
     charts.payShare.setOption({
-      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      tooltip: {
+        trigger: 'axis', axisPointer: { type: 'shadow' },
+        formatter: ChartTheme.allStatsTooltip(PAY_SHARE_LABELS.map((name, i) => [name, payShare.counts[i], PALETTE[i]]))
+      },
       grid: { left: '0%', right: '3%', bottom: '0%', top: '8%', containLabel: true },
       xAxis: {
         type: 'category',
         data: PAY_SHARE_LABELS,
         axisLine: { lineStyle: { color: BORDER_TONE } },
         axisTick: { show: false },
-        axisLabel: { ...commonTextStyle, interval: 0, fontSize: 11, color: TEXT_DARK }
+        axisLabel: { ...commonTextStyle, interval: 0, fontSize: 10, color: TEXT_DARK }
       },
       yAxis: {
         type: 'value', axisLine: { show: false }, axisTick: { show: false },
         splitLine: { lineStyle: { type: 'dashed', color: BORDER_TONE } },
-        axisLabel: commonTextStyle
+        axisLabel: { ...commonTextStyle, fontSize: 10 }
       },
       series: [{
         name: 'Tenants', type: 'bar', barWidth: '50%',
@@ -191,7 +204,7 @@ window.initTenantCharts = function initTenantCharts() {
       }]
     }, true);
 
-    // --- Card: "Biggest Reason Rents Have Risen" (dot matrix + explicit legend) ---
+    // --- Card: "Main driver behind rising rents" (dot matrix + explicit legend) ---
     // Each dot stands in for a few raw responses so the grid stays legible;
     // `label` keeps the legend showing the true raw count. The scale factor
     // is derived from the filtered total (min 1) instead of a hardcoded
@@ -205,14 +218,14 @@ window.initTenantCharts = function initTenantCharts() {
         name,
         count: Math.max(reasons.counts[i] > 0 ? 1 : 0, Math.round(reasons.counts[i] / reasonScale)),
         label: reasons.counts[i],
-        color: PALETTE[i]
+        color: REASON_COLORS[i]
       }))
     );
 
-    // --- Card: "When Landlords Last Hiked Rent" (treemap) ---
+    // --- Card: "Response to last rent hike" (treemap) ---
     const hikeLast = Aggregate.tally(records, 'hikeLast', HIKE_LAST_VALUES);
     charts.treemap.setOption({
-      tooltip: { formatter: '{b}: <b>{c} tenants</b>' },
+      tooltip: { formatter: ChartTheme.allStatsTooltip(HIKE_LAST_LABELS.map((name, i) => [name, hikeLast.counts[i], PALETTE[i]])) },
       series: [{
         type: 'treemap',
         width: '100%',
@@ -239,7 +252,7 @@ window.initTenantCharts = function initTenantCharts() {
     const rentLimit = Aggregate.tally(records, 'rentLimit', RENT_LIMIT_VALUES);
     const rentLimitPct = Aggregate.percentages(rentLimit.counts, rentLimit.total);
     charts.rentLimit.setOption({
-      tooltip: { trigger: 'item', formatter: '{b}: {c}%' },
+      tooltip: { formatter: ChartTheme.allStatsTooltip(RENT_LIMIT_VALUES.map((name, i) => [name, rentLimitPct[i], PALETTE[i]]), { suffix: '%' }) },
       legend: {
         top: 0, left: 0, icon: 'rect', itemWidth: 10, itemHeight: 10,
         textStyle: commonTextStyle,
@@ -249,11 +262,11 @@ window.initTenantCharts = function initTenantCharts() {
       series: RENT_LIMIT_VALUES.map((name, i) => ({
         name, type: 'bar', stack: 'total', data: [rentLimitPct[i]],
         itemStyle: { color: PALETTE[i], ...(i === 0 ? { borderRadius: [4, 0, 0, 4] } : {}), ...(i === RENT_LIMIT_VALUES.length - 1 ? { borderRadius: [0, 4, 4, 0] } : {}) },
-        label: ChartTheme.statBarLabel()
+        label: ChartTheme.statBarLabel(PALETTE[0])
       }))
     }, true);
 
-    // --- Card: "Max Rent Before Leaving City" (diverging horizontal bar) ---
+    // --- Card: "Rent that would make you leave" (diverging horizontal bar) ---
     const leaveRent = Aggregate.tally(records, 'leaveRent', LEAVE_RENT_VALUES);
     const leaveColors = ['#7a8290', '#98a0ab', '#5b6272', PALETTE[1], PALETTE[0]];
     const leaveSign = [-1, -1, -1, 1, 1];
@@ -261,12 +274,12 @@ window.initTenantCharts = function initTenantCharts() {
       tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'shadow' },
-        formatter: (params) => `${params[0].name}: <b>${Math.abs(params[0].value)} tenants</b>`
+        formatter: ChartTheme.allStatsTooltip(LEAVE_RENT_LABELS.map((name, i) => [name, leaveRent.counts[i], leaveColors[i]]))
       },
       grid: { left: '0%', right: '4%', bottom: '0%', top: '4%', containLabel: true },
       xAxis: {
         type: 'value',
-        axisLabel: { formatter: (v) => Math.abs(v), ...commonTextStyle },
+        axisLabel: { formatter: (v) => Math.abs(v), ...commonTextStyle, fontSize: 10 },
         splitLine: { lineStyle: { type: 'dashed', color: BORDER_TONE } }
       },
       yAxis: {
@@ -274,7 +287,7 @@ window.initTenantCharts = function initTenantCharts() {
         data: LEAVE_RENT_LABELS,
         axisLine: { show: false },
         axisTick: { show: false },
-        axisLabel: { ...commonTextStyle, fontFamily: 'GT America Bold, sans-serif', fontWeight: 700, color: TEXT_DARK }
+        axisLabel: { ...commonTextStyle, color: TEXT_DARK, fontSize: 10 }
       },
       series: [{
         type: 'bar',
@@ -291,15 +304,15 @@ window.initTenantCharts = function initTenantCharts() {
       }]
     }, true);
 
-    // --- Card: "Last Renewal Hike" ---
+    // --- Card: "Last renewal hike" ---
     const renewalHike = Aggregate.tally(records, 'renewalHike', RENEWAL_HIKE_VALUES);
     const renewalColors = [PALETTE[4], PALETTE[3], PALETTE[2], PALETTE[1], PALETTE[0], PALETTE[5]];
     charts.hikePie.setOption(ChartTheme.pieOption(
       RENEWAL_HIKE_LABELS.map((name, i) => ({ value: renewalHike.counts[i], name, itemStyle: { color: renewalColors[i] } })),
-      commonTextStyle, { name: 'Renewal Hike', extraGap: 20 }
+      commonTextStyle, { name: 'Renewal Hike', extraGap: 20, showCount: true }
     ), true);
 
-    // --- Card: "Moving & Coping Trade-offs" ---
+    // --- Card: "Choose your poison" ---
     const copingCounts = COPING.map((code) => Aggregate.countFlag(records, 'coping', code));
     charts.copingPie.setOption(ChartTheme.pieOption(
       COPING_LABELS.map((name, i) => ({ value: copingCounts[i], name, itemStyle: { color: PALETTE[i] } })),
@@ -309,7 +322,7 @@ window.initTenantCharts = function initTenantCharts() {
 
   function renderResponses(records) {
     const items = records
-      .filter((r) => r.subjective)
+      .filter((r) => r.subjective && Aggregate.looksLikeSentence(r.subjective))
       .map((r) => ({
         quote: r.subjective,
         meta: (r.age || 'Age not specified') + ' • ' + (r.career ? Aggregate.shortCareer(r.career) : 'Career not specified')
@@ -350,8 +363,7 @@ window.initTenantCharts = function initTenantCharts() {
     hasRegion: true,
     ageOptions: Aggregate.optionsWithData(window.SURVEY_DATA.tenant, 'age', Aggregate.AGE_OPTIONS),
     careerOptions: Aggregate.optionsWithData(window.SURVEY_DATA.tenant, 'career', Aggregate.CAREER_OPTIONS),
-    title: 'Filter Tenant Responses',
-    subtitle: 'Select an age group, career stage or area — the map, every chart, and the Responses tab below all narrow to match.',
+    title: 'Filter tenant responses',
     onFilterChange: applyFilters
   });
   document.getElementById('tn-top-row').insertBefore(filterCard.el, document.getElementById('tn-top-row').firstChild);
@@ -364,6 +376,10 @@ window.initTenantCharts = function initTenantCharts() {
   map.invalidateSize();
 
   FilterUI.mountSectionTabs(container, { onViewChange: toggleView });
+
+  FilterUI.enableCardCarousel(document.querySelector('#tn-charts-view .dashboard-grid'), {
+    onLayoutChange: () => Object.values(charts).forEach((c) => c && !c.isDisposed() && c.resize())
+  });
 
   applyFilters({});
 };

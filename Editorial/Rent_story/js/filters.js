@@ -41,7 +41,7 @@
            default Aggregate.AGE_OPTIONS/CAREER_OPTIONS/REGION_OPTIONS pill
            lists — pass Aggregate.optionsWithData(records, field, options)
            to drop pills with zero matching respondents on that dashboard.
-         title / subtitle: strings for the card's own heading.
+         title: string for the card's own heading.
          onFilterChange(filters) — fired on every pill click.
        Returns { el, getState(), setRegion(value) } — setRegion() lets the
        Landlord/Tenant map's marker clicks drive the same "Area" pill group
@@ -150,9 +150,19 @@ window.Aggregate = (function () {
     return options.filter((opt) => records.some((r) => r[field] === opt));
   }
 
+  // A crude but effective filter for the free-text Responses/Suggestions
+  // tabs: real written answers ("Rents went up 30% and my landlord wouldn't
+  // budge.") almost always contain a period or comma somewhere; one- or
+  // two-word non-answers ("Good", "N/A", "ok", "-") almost never do. Used
+  // to drop the latter from every dashboard's response cards rather than
+  // padding out a page of quotes with near-blank ones.
+  function looksLikeSentence(text) {
+    return /[.,]/.test(text);
+  }
+
   return {
     AGE_OPTIONS, CAREER_OPTIONS, REGION_OPTIONS,
-    filterRecords, tally, tallyGrouped, countFlag, percentages, regionCounts, shortCareer, optionsWithData
+    filterRecords, tally, tallyGrouped, countFlag, percentages, regionCounts, shortCareer, optionsWithData, looksLikeSentence
   };
 })();
 
@@ -170,9 +180,7 @@ window.FilterUI = (function () {
     config = config || {};
     const hasRegion = !!config.hasRegion;
     const onChange = config.onFilterChange || function () {};
-    const title = config.title || 'Filter This Dashboard';
-    const subtitle = config.subtitle ||
-      ('Select an age group, career stage' + (hasRegion ? ' or area' : '') + ' to narrow every chart below to that group.');
+    const title = config.title || 'Filter this dashboard';
 
     const state = { age: '', career: '', region: '' };
 
@@ -180,7 +188,6 @@ window.FilterUI = (function () {
     card.className = 'card filter-card';
     card.innerHTML = `
       <div class="card-title">${escapeHtml(title)}</div>
-      <div class="card-subtitle">${escapeHtml(subtitle)}</div>
     `;
 
     const groups = document.createElement('div');
@@ -399,5 +406,146 @@ window.FilterUI = (function () {
     renderPage();
   }
 
-  return { buildFilterCard, mountSectionTabs, replayEnter, buildResponseCards, mountResponses };
+  // Below `opts.breakpoint` (matches css/dashboard.css section 11's own
+  // breakpoint — pass the same number), every `.card` inside `containerEl`
+  // (a dashboard's `.dashboard-grid` — regardless of how deep it's nested
+  // in left-column/right-column/pies-row, so this doesn't need to know a
+  // given dashboard's own column layout) is moved out into a flat,
+  // horizontally swipeable "one card at a time" track, with a Back/Next
+  // pill-button pair + dot strip above it — real charts stay live and
+  // rendering the whole time (a DOM reparent, not a remove/recreate), so
+  // nothing needs to be re-initialized, only resized (`opts.onLayoutChange`,
+  // for the ECharts instances that care about their container's exact
+  // pixel box). Reversible: resizing back past the breakpoint restores
+  // every card to its original parent and position via a same-spot marker
+  // comment left behind at capture time (a plain sibling-node reference
+  // would break here, since by the time a card in the MIDDLE of its
+  // original parent gets restored, an EARLIER card's own restore may have
+  // already re-parented that sibling out from under it). `containerEl`
+  // itself is never removed, just display:none'd while carouseled, so
+  // callers that still hold a reference to it (or its cards) don't need to
+  // know any of this happened.
+  function enableCardCarousel(containerEl, opts) {
+    if (!containerEl) return;
+    opts = opts || {};
+    const breakpoint = opts.breakpoint || 1024;
+    const onLayoutChange = opts.onLayoutChange || function () {};
+    const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
+
+    let slots = null; // [{ card, marker }], captured once, lazily
+    let controls = null, track = null, dots = null, prevBtn = null, nextBtn = null;
+    let active = false;
+    let scrollRaf = null;
+
+    function capture() {
+      if (slots) return;
+      slots = Array.from(containerEl.querySelectorAll('.card')).map((card) => {
+        const marker = document.createComment('carousel-slot');
+        card.parentNode.insertBefore(marker, card);
+        return { card, marker };
+      });
+    }
+
+    function trackWidth() {
+      return track.clientWidth || 1;
+    }
+
+    function currentIndex() {
+      return Math.max(0, Math.min(slots.length - 1, Math.round(track.scrollLeft / trackWidth())));
+    }
+
+    function goTo(i) {
+      i = Math.max(0, Math.min(slots.length - 1, i));
+      track.scrollTo({ left: i * trackWidth(), behavior: 'smooth' });
+    }
+
+    function onScroll() {
+      if (scrollRaf) return;
+      scrollRaf = requestAnimationFrame(() => {
+        scrollRaf = null;
+        const idx = currentIndex();
+        dots.querySelectorAll('.carousel-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+        prevBtn.disabled = idx === 0;
+        nextBtn.disabled = idx === slots.length - 1;
+      });
+    }
+
+    function activate() {
+      capture();
+      if (active || !slots.length) return;
+      active = true;
+
+      track = document.createElement('div');
+      track.className = 'card-carousel';
+
+      dots = document.createElement('div');
+      dots.className = 'carousel-dots';
+
+      slots.forEach((slot, i) => {
+        slot.card.classList.add('carousel-slide');
+        track.appendChild(slot.card);
+
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', `Go to card ${i + 1} of ${slots.length}`);
+        dot.addEventListener('click', () => goTo(i));
+        dots.appendChild(dot);
+      });
+
+      // Same "← Prev [label] Next →" shape as the Responses tab's own
+      // pagination bar (.pagination/.page-btn) — text pill buttons above
+      // the card, not icon buttons floating over it, so the two paging
+      // controls on a dashboard (Charts here, Responses below) read as one
+      // consistent pattern instead of two different UI languages.
+      prevBtn = document.createElement('button');
+      prevBtn.type = 'button';
+      prevBtn.className = 'carousel-nav-btn';
+      prevBtn.innerHTML = '&larr; Back';
+      prevBtn.disabled = true;
+      prevBtn.addEventListener('click', () => goTo(currentIndex() - 1));
+
+      nextBtn = document.createElement('button');
+      nextBtn.type = 'button';
+      nextBtn.className = 'carousel-nav-btn';
+      nextBtn.innerHTML = 'Next &rarr;';
+      nextBtn.addEventListener('click', () => goTo(currentIndex() + 1));
+
+      controls = document.createElement('div');
+      controls.className = 'carousel-controls';
+      controls.appendChild(prevBtn);
+      controls.appendChild(dots);
+      controls.appendChild(nextBtn);
+
+      containerEl.parentNode.insertBefore(controls, containerEl);
+      containerEl.parentNode.insertBefore(track, containerEl);
+      containerEl.style.display = 'none';
+
+      track.addEventListener('scroll', onScroll, { passive: true });
+      onLayoutChange();
+    }
+
+    function deactivate() {
+      if (!active) return;
+      active = false;
+      slots.forEach((slot) => {
+        slot.card.classList.remove('carousel-slide');
+        slot.marker.parentNode.insertBefore(slot.card, slot.marker);
+      });
+      controls.remove();
+      track.remove();
+      controls = track = dots = prevBtn = nextBtn = null;
+      containerEl.style.display = '';
+      onLayoutChange();
+    }
+
+    function sync() {
+      if (mq.matches) activate(); else deactivate();
+    }
+
+    sync();
+    (mq.addEventListener ? mq.addEventListener.bind(mq, 'change') : mq.addListener.bind(mq))(sync);
+  }
+
+  return { buildFilterCard, mountSectionTabs, replayEnter, buildResponseCards, mountResponses, enableCardCarousel };
 })();
