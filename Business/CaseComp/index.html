@@ -1,667 +1,513 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The WhatsApp Life — Survey Findings</title>
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Infinite Section → Optional Exploration</title>
 <style>
-  :root{
-    /* warm, boxy, minimal — cream ground, near-black ink borders, one warm
-       accent for UI chrome. Chart data-marks (charts.js) keep their own
-       separate red/yellow/blue emotion vocabulary — untouched by this. */
-    --page:            #f5ead7;
-    --surface:         #fdf8ee;
-    --surface-raised:  #ffffff;
-    --text-primary:    #201a12;
-    --text-secondary:  #5c5140;
-    --text-muted:      #978a72;
-    --gridline:        #ece0c7;
-    --baseline:        #d9cbac;
-    --border:          rgba(32,26,18,0.13);
-    --border-strong:   rgba(32,26,18,0.55);
-    --ink-border:      #8c8172;
+*{box-sizing:border-box}html,body{margin:0;background:#f4f1e9;color:#111;font-family:Arial,Helvetica,sans-serif}body{overflow-x:hidden}
+.section{position:relative;width:100%;min-height:100vh}.empty{height:100vh;display:grid;place-items:center;background:#f4f1e9}.empty small{letter-spacing:.18em;text-transform:uppercase;opacity:.32}
+#story{height:650vh;background:#f4f1e9;color:#161513}.sticky{position:sticky;top:0;width:100%;height:100vh;overflow:hidden;background:#090909}
+.worldWrap{position:absolute;inset:0;perspective:1200px;transform-style:preserve-3d}.world{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;will-change:transform}
+.tile{position:absolute;width:190px;height:125px;left:-95px;top:-62px;overflow:hidden;border-radius:7px;background:#222;box-shadow:0 18px 70px #0009;will-change:transform,opacity;backface-visibility:hidden}.tile img{width:100%;height:100%;object-fit:cover}
+.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 35%,#a79f8b18 100%)}
+.dialogue{position:absolute;left:50%;bottom:9vh;transform:translateX(-50%);width:min(850px,88vw);text-align:center;opacity:0;transition:opacity .45s;pointer-events:none;background:#111;border:1px solid #ffffff22;padding:24px 30px}.dialogue.show{opacity:1}.eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.65;margin-bottom:10px;color:#fff}.line{font-size:clamp(26px,4.6vw,62px);line-height:1.02;font-weight:600;color:#fff;text-shadow:none}
+.progress{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);width:min(450px,68vw);height:1px;background:#1112}.progress i{display:block;height:100%;width:0;background:#fff}
+.endScene{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .35s;background:#f4f1e9;color:#111;overflow:hidden}.endScene.show{opacity:1;pointer-events:auto}
+.endSurface{position:absolute;left:50%;top:50%;width:2400px;height:1700px;transform-origin:center;transform:translate(-50%,-50%);background:#f4f1e9}
+.endCard{position:absolute;width:190px;height:135px;overflow:hidden;background:#fff;box-shadow:0 15px 35px #0002}.endCard img{width:100%;height:100%;object-fit:cover}
+.choice{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;z-index:5}.choice p{font-size:11px;letter-spacing:.18em;text-transform:uppercase;opacity:.6;margin:0 0 15px}.choice button{border:1px solid #111;background:#f7f4ec;color:#111;padding:15px 22px;font-size:10px;letter-spacing:.17em;text-transform:uppercase;cursor:pointer}.choice button:hover{background:#111;color:#fff}
+.skipHint{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);font-size:10px;letter-spacing:.15em;text-transform:uppercase;opacity:.45;white-space:nowrap}
+.interactive{position:fixed;inset:0;display:none;background:#f4f1e9;overflow:hidden;touch-action:none;cursor:grab;z-index:20}.interactive.active{display:block}.interactive:active{cursor:grabbing}
+.surface{position:absolute;width:2400px;height:1700px;left:0;top:0;transform-origin:0 0;background:linear-gradient(90deg,#00000008 1px,transparent 1px),linear-gradient(#00000008 1px,transparent 1px),#e8e5dc;background-size:240px 240px}
+#exitExplore{position:absolute;right:22px;top:22px;z-index:25;border:1px solid #111;background:#f7f4ec;color:#111;padding:12px 16px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;box-shadow:0 6px 20px #0001}#exitExplore:hover{background:#111;color:#fff}.exit-explore{position:absolute;right:24px;top:24px;z-index:25;border:1px solid #111;background:#f7f4ec;color:#111;padding:12px 17px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;box-shadow:0 8px 24px #0002}.exit-explore:hover{background:#111;color:#fff}.caption{position:absolute;left:24px;top:22px;z-index:3;pointer-events:none}.caption h2{margin:0;font-size:clamp(30px,4vw,56px);line-height:.95}.caption p{font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.5}.card{position:absolute;width:18.5vw;height:18.5vw;min-width:180px;min-height:180px;max-width:320px;max-height:320px;overflow:hidden;background:#fff;box-shadow:0 15px 35px #0002;cursor:pointer;transition:transform .18s}.card:hover{transform:scale(1.04)!important}.card img{width:100%;height:100%;object-fit:cover}
+.modal{position:fixed;inset:0;display:none;place-items:center;pointer-events:auto;background:#f4f1e9e8;z-index:100}.modal.show{display:grid}.panel{width:min(900px,90vw);height:min(78vh,680px);background:#fff;position:relative}.panel img{width:100%;height:100%;object-fit:contain}.close{position:absolute;right:12px;top:12px;width:38px;height:38px;border:0;border-radius:50%;cursor:pointer;background:#fff;font-size:20px}
+.detail-image{position:absolute;inset:0 0 150px 0;background:#f7f4ec}.detail-image img{width:100%;height:100%;object-fit:contain}.detail-copy{position:absolute;left:0;right:0;bottom:0;min-height:150px;padding:22px 28px;background:#f7f4ec;border-top:1px solid #1111}.detail-kicker{font-size:9px;letter-spacing:.2em;text-transform:uppercase;opacity:.5;margin-bottom:8px}.detail-copy h3{margin:0 0 7px;font-size:24px;font-weight:500}.detail-copy p{margin:0;max-width:700px;font-size:13px;line-height:1.5;opacity:.65}@media(max-width:700px){.detail-image{inset:0 0 185px 0}.detail-copy{min-height:185px;padding:18px}.detail-copy h3{font-size:20px}}@media(max-width:700px){.tile{width:135px;height:94px;left:-67px;top:-47px}.dialogue{bottom:14vh}.endCard{width:135px;height:95px}}
+/* Side image detail overlay */
+.modal{
+  position:fixed;
+  inset:0;
+  display:block;
+  visibility:hidden;
+  pointer-events:none;
+  background:transparent;
+  z-index:100;
+}
+.modal.show{visibility:visible;pointer-events:auto}
+.modal-backdrop{
+  position:absolute;inset:0;
+  background:#1113;
+  opacity:0;
+  transition:opacity .35s ease;
+}
+.modal.show .modal-backdrop{opacity:1}
+.side-panel{
+  position:absolute!important;
+  top:0!important;
+  right:0!important;
+  left:auto!important;
+  bottom:0!important;
+  width:min(520px,94vw)!important;
+  height:100vh!important;
+  max-height:none!important;
+  min-height:0!important;
+  margin:0!important;
+  display:grid!important;
+  grid-template-rows:minmax(0,1fr) auto auto!important;
+  background:#f7f4ec!important;
+  transform:translate3d(105%,0,0)!important;
+  transition:transform .45s cubic-bezier(.2,.8,.2,1)!important;
+  box-shadow:-20px 0 60px #0003!important;
+  overflow:hidden!important;
+}
+.modal.show .side-panel{transform:translate3d(0,0,0)!important}
+.side-panel .detail-image{
+  position:relative!important;
+  inset:auto!important;
+  min-height:0;
+  background:#ede9df;
+}
+.side-panel .detail-image img{
+  width:100%;height:100%;object-fit:contain;
+}
+.side-panel .detail-copy{
+  position:relative!important;
+  inset:auto!important;
+  min-height:0!important;
+  padding:22px 28px!important;
+  background:#f7f4ec!important;
+  border-top:1px solid #1111;
+}
+.detail-nav{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:12px;
+  padding:16px 20px 20px;
+  border-top:1px solid #1111;
+  background:#f7f4ec;
+}
+.detail-nav button{
+  appearance:none;
+  border:1px solid #111;
+  background:transparent;
+  color:#111;
+  padding:10px 12px;
+  font:inherit;
+  font-size:10px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  cursor:pointer;
+}
+.detail-nav button:hover{background:#111;color:#fff}
+#imageCount{font-size:10px;letter-spacing:.1em;white-space:nowrap;opacity:.55}
+.side-panel .close{z-index:4}
 
-    --accent:      #e2812f;
-    --accent-ink:  #ffffff;
-
-    --blue:    #2a78d6;
-    --orange:  #eb6834;
-    --aqua:    #1baf7a;
-    --yellow:  #eda100;
-    --magenta: #e87ba4;
-    --green:   #008300;
-    --violet:  #4a3aa7;
-    --red:     #e34948;
-
-    --frustrating:  var(--red);
-    --procrastinate:var(--yellow);
-    --repetitive:   var(--blue);
-
-    --seq-100: #cde2fb; --seq-200: #9ec5f4; --seq-300: #6da7ec;
-    --seq-400: #3987e5; --seq-500: #256abf; --seq-600: #184f95; --seq-700: #0d366b;
-
-    --stories-w: 380px;
-    --stories-bg: #efe0bf;
-    --page-pad: 20px;
-  }
-
-  * { box-sizing: border-box; }
-  body{
-    margin:0;
-    background:var(--page);
-    color:var(--text-primary);
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* ---------- filter bar: a slim collapsed strip at the bottom of the chart
-     column (level with the stories panel's pagination strip on the right);
-     opening it overlays the controls on top of the chart instead of pushing
-     the chart down, so the charts keep their full height either way. ---------- */
-  .filter-bar{
-    flex:none; position:relative;
-    display:flex; align-items:center; gap:12px;
-  }
-  .filter-toggle{
-    display:inline-flex; align-items:center; gap:7px; flex:none; height:38px;
-    font-size:13px; font-weight:700; padding:0 14px; border-radius:7px;
-    border:1.5px solid var(--ink-border); background:var(--surface-raised); color:var(--text-primary);
-    cursor:pointer; transition:background .15s ease, border-color .15s ease, color .15s ease;
-  }
-  .filter-toggle:hover{ border-color:var(--accent); }
-  .filter-toggle.open{ background:var(--accent); border-color:var(--ink-border); color:var(--accent-ink); }
-  .filter-badge{
-    background:var(--ink-border); color:#fff; font-size:11px; font-weight:700; line-height:1;
-    padding:3px 7px; border-radius:999px;
-  }
-  .filter-toggle.open .filter-badge{ background:var(--surface-raised); color:var(--accent); }
-  .filter-caret{ font-size:9px; transition:transform .15s ease; }
-  .filter-toggle.open .filter-caret{ transform:rotate(180deg); }
-  .filter-overlay{
-    position:absolute; left:0; right:0; bottom:calc(100% + 10px);
-    background:var(--surface-raised); border:1.5px solid var(--ink-border); border-radius:10px;
-    padding:16px 18px; box-shadow:0 -10px 28px rgba(32,26,18,0.16);
-    z-index:30;
-  }
-  #filterHeader{ display:block; }
-  .fh-row{ display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap; margin:0; }
-  .fh-controls{ display:flex; flex-direction:column; gap:14px; flex:1; min-width:0; }
-  .fh-group{ display:flex; gap:22px; flex-wrap:wrap; align-items:flex-end; min-width:0; }
-  .fh-field{ display:flex; flex-direction:column; gap:6px; min-width:0; }
-  .fh-group-label{
-    font-size:12px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
-    color:var(--text-primary); flex:none; white-space:nowrap;
-  }
-  .chip-row{ display:flex; gap:7px; flex-wrap:wrap; min-width:0; }
-  .chip-row-scroll{
-    flex-wrap:nowrap; overflow-x:auto; scrollbar-width:thin; padding-bottom:3px;
-  }
-  .chip-row-scroll::-webkit-scrollbar{ height:5px; }
-  .chip-row-scroll::-webkit-scrollbar-thumb{ background:var(--border-strong); border-radius:3px; }
-  .chip{
-    --chip: var(--text-secondary);
-    font-size:13px; font-weight:600; padding:9px 16px; border-radius:7px; height:38px;
-    border:1.5px solid var(--ink-border);
-    background:var(--surface-raised);
-    color:var(--text-secondary);
-    cursor:pointer; white-space:nowrap; transition:background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
-  }
-  .chip:hover{ border-color:var(--chip); color:color-mix(in srgb, var(--chip) 80%, var(--text-secondary)); }
-  .chip.active{
-    background:var(--chip); border-color:var(--chip); color:#fff;
-    box-shadow:none;
-  }
-  .fh-select{
-    font-size:13px; padding:9px 14px; border-radius:7px; border:1.5px solid var(--ink-border); height:38px;
-    background:var(--surface-raised); color:var(--text-secondary); cursor:pointer;
-    min-width:170px;
-  }
-  .fh-select:hover{ border-color:var(--accent); }
-  .reset-btn{
-    font-size:13px; font-weight:700; padding:9px 18px; height:38px; border-radius:7px;
-    border:1.5px solid var(--ink-border); background:var(--accent); color:var(--accent-ink);
-    cursor:pointer; white-space:nowrap; margin-left:auto; flex:none;
-    transition:background .15s ease, border-color .15s ease, color .15s ease;
-  }
-  .reset-btn:hover{ background:color-mix(in srgb, var(--accent) 82%, black); }
-  .fh-summary{ margin:0; font-size:12.5px; color:var(--text-secondary); flex:1; min-width:0; }
-
-  /* ---------- tab bar: switches which of the 11 panels is visible ---------- */
-  .tab-bar{
-    display:flex; gap:5px; flex-wrap:nowrap; flex:none;
-    overflow-x:auto; scrollbar-width:thin; padding-bottom:2px;
-  }
-  .tab-bar::-webkit-scrollbar{ height:5px; }
-  .tab-bar::-webkit-scrollbar-thumb{ background:var(--border-strong); border-radius:3px; }
-  .tab-btn{
-    font-size:12px; font-weight:700; letter-spacing:.01em; padding:8px 12px; border-radius:6px;
-    border:1.5px solid var(--ink-border); background:var(--surface-raised); color:var(--text-secondary);
-    cursor:pointer; white-space:nowrap; flex:none; transition:background .15s ease, color .15s ease, border-color .15s ease;
-  }
-  .tab-btn:hover{ border-color:var(--accent); color:var(--text-primary); }
-  .tab-btn.active{ background:var(--accent); border-color:var(--ink-border); color:var(--accent-ink); }
-
-  /* ---------- content shell: charts column + stories column ---------- */
-  .content-shell{
-    max-width:1400px; margin:0 auto; padding:var(--page-pad) 28px;
-    height:calc(100vh - (2 * var(--page-pad)));
-    display:grid; grid-template-columns:1fr var(--stories-w); gap:28px; align-items:stretch;
-  }
-  .frames-col{ min-width:0; height:100%; display:flex; flex-direction:column; gap:14px; }
-
-  /* Frames: only one panel is visible at a time, switched instantly by the
-     tab bar (no scroll-linked pinning). Each one absolutely fills
-     .frames-pin. Chart frames stretch their card to fill whatever room is
-     left under the head (so the chart resizes to fit instead of the frame
-     needing to scroll); the short hero/closing frames just center instead. */
-  .frames-pin{ position:relative; flex:1; min-height:0; }
-  .frame{
-    position:absolute; inset:0; padding:0; overflow-y:auto; overscroll-behavior-y:contain;
-    display:flex; flex-direction:column;
-    opacity:0; pointer-events:none; transition:opacity .18s ease;
-  }
-  .frame.active{ opacity:1; pointer-events:auto; }
-  .frame.frame-center{ justify-content:center; }
-  .frame > .panel-head{ flex:none; }
-  .frame > .card{ flex:1; min-height:0; }
-  /* p7's top row (two simple 5-bar charts) needs much less room than the
-     category breakdown below it — anchor it to a fixed height instead of a
-     percentage-of-frame split, so the card below (flex:1) gets whatever's
-     actually left over rather than an even, too-small share. */
-  .frame > .two-col{ flex:0 0 170px; min-height:0; margin-bottom:14px; }
-
-  .kicker{
-    font-size:13px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
-    color:var(--accent); margin:0 0 14px;
-  }
-  h1.title{
-    font-size:clamp(30px,4.4vw,46px); line-height:1.08; margin:0 0 18px; font-weight:700;
-    max-width:14ch;
-  }
-  .lede{
-    font-size:16.5px; line-height:1.55; color:var(--text-secondary); max-width:62ch; margin:0 0 28px;
-  }
-  .hero-stats{ display:flex; gap:36px; flex-wrap:wrap; }
-  .hero-stat .num{ font-size:30px; font-weight:700; line-height:1; }
-  .hero-stat .lbl{ font-size:12.5px; color:var(--text-muted); margin-top:6px; }
-
-  .panel-head{ max-width:74ch; margin-bottom:14px; }
-  .idea-num{
-    font-size:13px; font-weight:700; letter-spacing:.08em; color:var(--text-muted);
-    margin:0 0 10px;
-  }
-  h2.panel-title{
-    font-size:clamp(21px,2.4vw,28px); margin:0 0 10px; font-weight:700; line-height:1.2;
-  }
-  .qbox{
-    display:flex; gap:9px; align-items:flex-start;
-    font-size:12.5px; font-style:italic; line-height:1.4; color:var(--text-secondary);
-    background:color-mix(in srgb, var(--accent) 8%, transparent); border-left:3px solid var(--accent);
-    padding:7px 12px; border-radius:0 6px 6px 0; margin:0 0 12px;
-  }
-  .qbox .qtag{
-    flex:none; font-style:normal; font-weight:700; font-size:10.5px; letter-spacing:.06em;
-    color:var(--accent); text-transform:uppercase; margin-top:2px;
-  }
-  p.narrative{ font-size:14.5px; line-height:1.5; color:var(--text-secondary); margin:0; }
-  p.narrative b{ color:var(--text-primary); font-weight:600; }
-
-  .card{
-    background:var(--surface);
-    border:1.5px solid var(--ink-border);
-    border-radius:8px;
-    padding:18px 20px 12px;
-    position:relative;
-    display:flex; flex-direction:column;
-  }
-  .chart{ width:100%; flex:1; min-height:0; }
-
-  .two-col{ display:grid; grid-template-columns:1.15fr .85fr; grid-template-rows:1fr; gap:24px; }
-  @media (max-width: 860px){ .two-col{ grid-template-columns:1fr; grid-template-rows:1fr 1fr; } }
-
-  /* stat tile frame (idea 10) */
-  .stat-panel{ text-align:center; }
-  .stat-value{
-    font-size:clamp(52px,9vw,100px); font-weight:700; line-height:1; letter-spacing:-.02em;
-    color:var(--accent);
-  }
-  .stat-caption{
-    font-size:15.5px; color:var(--text-secondary); margin-top:14px; max-width:48ch; margin-left:auto; margin-right:auto;
-  }
-  .bar-track{
-    width:min(480px,100%); height:14px; border-radius:8px; background:var(--gridline);
-    margin:22px auto 0; overflow:hidden; position:relative;
-  }
-  .bar-fill{ height:100%; width:0%; background:var(--accent); border-radius:8px; }
-  .bar-legend{
-    display:flex; justify-content:space-between; width:min(480px,100%); margin:10px auto 0;
-    font-size:13px; color:var(--text-muted);
-  }
-  .bar-legend .swatch{ display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:6px; vertical-align:middle; }
-
-  /* ---------- stories column ---------- */
-  .stories-col{
-    height:100%;
-    display:flex; flex-direction:column;
-    background:var(--stories-bg); border:1.5px solid var(--ink-border); border-radius:8px;
-    padding:18px 18px 14px; overflow:hidden;
-  }
-  .stories-head{ flex:none; margin-bottom:10px; }
-  .stories-title{ font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
-  .stories-sub{ font-size:12px; color:var(--text-muted); line-height:1.5; }
-  .stories-sub b{ color:var(--text-secondary); }
-  .active-filters{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
-  .active-pill{
-    display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600;
-    padding:4px 8px 4px 10px; border-radius:6px; border:1.5px solid var(--ink-border);
-    background:color-mix(in srgb, var(--accent) 16%, var(--surface-raised)); color:var(--text-primary);
-    cursor:pointer; white-space:nowrap;
-  }
-  .active-pill:hover{ background:color-mix(in srgb, var(--accent) 30%, var(--surface-raised)); }
-  .active-pill .pill-x{ font-weight:700; font-size:13px; line-height:1; }
-  .stories-scroll{ flex:1; overflow-y:auto; min-height:0; display:flex; flex-direction:column; gap:8px; }
-  .stories-empty{ color:var(--text-muted); font-size:13px; padding:16px 0; }
-  .story-card{
-    --cat: var(--text-secondary);
-    background:var(--surface-raised);
-    border:1.5px solid var(--ink-border);
-    border-left:4px solid var(--cat);
-    border-radius:6px;
-    padding:12px 13px;
-  }
-  .story-quote{
-    font-size:13px; font-style:italic; color:var(--text-primary); line-height:1.5; margin:0;
-  }
-  .story-meta{
-    display:flex; align-items:center; gap:6px; font-size:11px; font-weight:600;
-    color:color-mix(in srgb, var(--cat) 70%, #000); margin:0 0 6px;
-  }
-  .story-dot{ width:8px; height:8px; border-radius:50%; flex:none; background:var(--cat); }
-  .story-toggle{
-    background:none; border:none; padding:4px 0 0; font-size:11.5px; font-weight:600;
-    color:var(--cat); cursor:pointer;
-  }
-  .story-toggle:hover{ text-decoration:underline; }
-  .stories-pagination{
-    flex:none; display:flex; align-items:center; justify-content:space-between;
-    margin-top:10px; padding-top:10px; border-top:1px solid var(--gridline);
-    font-size:12px; color:var(--text-muted);
-  }
-  .page-btn{
-    background:var(--surface-raised); border:1.5px solid var(--ink-border); border-radius:6px; padding:5px 10px;
-    font-size:12px; color:var(--text-secondary); cursor:pointer;
-  }
-  .page-btn:hover:not(:disabled){ border-color:var(--accent); color:var(--text-primary); }
-  .page-btn:disabled{ opacity:.4; cursor:default; }
-
-  footer{
-    padding:48px 0 80px; color:var(--text-muted); font-size:13px; line-height:1.6;
-    max-width:1400px; margin:0 auto; padding-left:28px; padding-right:28px;
-  }
-
-  @media (max-width: 1080px){
-    .content-shell{ grid-template-columns:1fr; height:auto; }
-    .frames-col{ height:calc(100vh - (2 * var(--page-pad))); }
-    .stories-col{ margin-top:16px; height:70vh; }
-  }
-
-  @media (max-width: 640px){
-    .card{ padding:20px 16px 14px; }
-    .content-shell{ padding:var(--page-pad) 18px; }
-    .fh-select{ max-width:130px; }
-  }
+.modal.show .side-panel{pointer-events:auto}.modal.show .modal-backdrop{pointer-events:auto}
 </style>
 </head>
 <body>
+<section class="section empty"><small>Previous website section — empty space</small></section>
 
-<div class="content-shell">
-  <div class="frames-col">
-    <nav class="tab-bar" id="tabBar"></nav>
-    <div id="framesPin" class="frames-pin">
+<section id="story" class="section">
+  <div class="sticky">
+    <div class="worldWrap"><div id="world" class="world"></div><div class="vignette"></div></div>
+    <div id="dialogue" class="dialogue"><div id="eyebrow" class="eyebrow"></div><div id="line" class="line"></div></div>
+    <div class="progress"><i id="bar"></i></div>
 
-      <div class="frame frame-center" id="frame-hero">
-        <p class="kicker">Survey findings · The WhatsApp Life</p>
-        <h1 class="title">Where does everyday life actually hurt?</h1>
-        <p class="lede">
-          We asked people to scroll back through their own WhatsApp chats and point to the tasks
-          that felt frustrating, procrastinated, or repetitive. <b>469 respondents</b> tagged real
-          moments across 14 areas of life and wrote <b>1,291 short stories</b> about them. Ten charts
-          below walk through what the data says. Use the filters above to narrow both the charts and
-          the stories panel on the right — and click any circle, bar or cell to focus the stories on
-          that slice.
-        </p>
-        <div class="hero-stats">
-          <div class="hero-stat"><div class="num" id="statRespondents">0</div><div class="lbl">Respondents</div></div>
-          <div class="hero-stat"><div class="num" id="statStories">0</div><div class="lbl">Free-text stories</div></div>
-          <div class="hero-stat"><div class="num" id="statCats">14</div><div class="lbl">Life areas surveyed</div></div>
-          <div class="hero-stat"><div class="num" id="statPilotPct">0%</div><div class="lbl">Want to pilot solutions</div></div>
-        </div>
+    <div id="endScene" class="endScene">
+      <div id="endSurface" class="endSurface"></div>
+      <div class="choice">
+        <p>Everything is here now</p>
+        <button id="explore">Explore the surface</button>
       </div>
-
-      <!-- 01 — Category demand ranking -->
-      <div class="frame" id="p1">
-        <div class="panel-head">
-          <p class="idea-num">01 / Demand</p>
-          <h2 class="panel-title">Money is the headline pain point — by a wide margin</h2>
-          <p class="qbox"><span class="qtag">We asked</span>"Scroll back through your WhatsApp — which of these 14 areas of life turned up a task that felt frustrating, procrastinated, or repetitive? (pick all that apply)"</p>
-          <p class="narrative">
-            Ranked by how many people picked each life area as a pain point,
-            <b>money, investing and insurance leads at 225 selections</b> — nearly a third more than
-            second-place Groceries (165). Fitness (138) and Shopping (123) round out the top four.
-            Each bar's color shows which feeling dominates that category — the same red / yellow /
-            blue vocabulary chart 02 introduces.
-          </p>
-        </div>
-        <div class="card"><div id="chart1" class="chart"></div></div>
-      </div>
-
-      <!-- 02 — Three emotions -->
-      <div class="frame" id="p2">
-        <div class="panel-head">
-          <p class="idea-num">02 / Vocabulary</p>
-          <h2 class="panel-title">Every pain point is one of three feelings</h2>
-          <p class="qbox"><span class="qtag">We asked</span>For every area you picked: "Which of these fits best — Frustrating, Procrastinate, or Repetitive?"</p>
-          <p class="narrative">
-            Respondents tagged each pain point as <b>Frustrating</b> (a fight every time),
-            <b>Procrastinate</b> (avoided, barely done) or <b>Repetitive</b> (mindless, recurring).
-            Frustration dominates — <b>602 of 1,295 tags</b>, well ahead of Procrastinate (385) and
-            Repetitive (308). This vocabulary carries through every chart below.
-          </p>
-        </div>
-        <div class="card"><div id="chart2" class="chart"></div></div>
-      </div>
-
-      <!-- 03 — Emotion x category matrix -->
-      <div class="frame" id="p3">
-        <div class="panel-head">
-          <p class="idea-num">03 / The cross</p>
-          <h2 class="panel-title">Different categories need different kinds of fixes</h2>
-          <p class="qbox"><span class="qtag">Combining</span>Which areas people picked (chart 01) with which feeling they gave each one (chart 02) — every category crossed against Frustrating / Procrastinate / Repetitive.</p>
-          <p class="narrative">
-            Crossing emotion against category reveals what builders actually need to design for.
-            <b>Groceries is repetitive, not frustrating</b> — it needs automation, not
-            empathy. <b>Fitness and Learning are procrastination traps</b> — they need
-            nudges, not tools. <b>Money splits across all three.</b> Getting-around and Travel are
-            almost purely frustrating — they need the friction removed, not softened. Darker cells
-            mean more mentions.
-          </p>
-        </div>
-        <div class="card"><div id="chart3" class="chart"></div></div>
-      </div>
-
-      <!-- 04 — 2x2 opportunity map -->
-      <div class="frame" id="p4">
-        <div class="panel-head">
-          <p class="idea-num">04 / Opportunity</p>
-          <h2 class="panel-title">Popular isn't the same as painful</h2>
-          <p class="qbox"><span class="qtag">Combining</span>How often a category was picked (chart 01) against the share of its tags that came back Frustrating (chart 02/03) — every category plotted at once.</p>
-          <p class="narrative">
-            Plotting how often a category was picked against how frustrating it is finds the
-            categories big enough to matter — and the outliers. Color marks which quadrant each
-            category falls into against the current sample average: <b>orange</b> is popular and painful,
-            <b>aqua</b> is niche but painful, <b>blue</b> is popular but more manageable, and
-            <b>grey</b> is both niche and mild. <b>Weddings is picked rarely but rates among the
-            most frustrating categories on the page</b> — a small, sharp, underserved pocket of pain
-            sitting alone in the niche-but-painful corner.
-          </p>
-        </div>
-        <div class="card"><div id="chart4" class="chart"></div></div>
-      </div>
-
-      <!-- 05 — Word frequency -->
-      <div class="frame" id="p5">
-        <div class="panel-head">
-          <p class="idea-num">05 / In their own words</p>
-          <h2 class="panel-title">"Time" is the word people reach for</h2>
-          <p class="qbox"><span class="qtag">We asked</span>"Can you share an exact task behind that feeling? Where were you, what happened, what did you have to deal with?"</p>
-          <p class="narrative">
-            Across the free-text stories, <b>"time" appears far more often</b> than any other word,
-            followed by <i>need, find, different, order, want</i>: the vocabulary of choice-overload
-            and repetition, not of any single task going wrong. Split each word by the category it
-            came from and the picture sharpens further — each bar segment is colored by the
-            category it came from.
-          </p>
-        </div>
-        <div class="card"><div id="chart5" class="chart"></div></div>
-      </div>
-
-      <!-- 06 — Coping systems -->
-      <div class="frame" id="p6">
-        <div class="panel-head">
-          <p class="idea-num">06 / Status quo</p>
-          <h2 class="panel-title">Most people are duct-taping this together — or doing nothing</h2>
-          <p class="qbox"><span class="qtag">We asked</span>"What's the system you've adopted to handle this today? Is it people (you, family, house staff, a broker or agent), apps, the chats, or nothing at all?"</p>
-          <p class="narrative">
-            Asked what system they use today, apps and "nothing at all" are consistently the two
-            largest answers — ahead of family, chats, friends or a spreadsheet. That gap is the real
-            opportunity signal: a large share of this pain currently has no system at all. Click a
-            bar to see which categories lean on that system most.
-          </p>
-        </div>
-        <div class="card"><div id="chart6" class="chart"></div></div>
-      </div>
-
-      <!-- 07 — Age -->
-      <div class="frame" id="p7">
-        <div class="panel-head">
-          <p class="idea-num">07 / Who answered — age</p>
-          <h2 class="panel-title">A young-adult sample, median age in the low 30s</h2>
-          <p class="qbox"><span class="qtag">We asked</span>"How old are you?" (a few junk entries like "937" and "12" were excluded)</p>
-          <p class="narrative">
-            The sample is concentrated in working-age adults. The 25–34s log the most tags of any
-            group by far, and frustration climbs steadily with age. Looking at the top categories by
-            age (right), money and groceries pain shows up early and stays high through the 25–44
-            range, while younger respondents lean relatively more toward learning and shopping.
-          </p>
-        </div>
-        <div class="two-col">
-          <div class="card"><div id="chart7a" class="chart"></div></div>
-          <div class="card"><div id="chart7c" class="chart"></div></div>
-        </div>
-        <div class="card"><div id="chart7b" class="chart"></div></div>
-      </div>
-
-      <!-- 08 — Geography -->
-      <div class="frame" id="p8">
-        <div class="panel-head">
-          <p class="idea-num">08 / Who answered — geography</p>
-          <h2 class="panel-title">Strong reach across India's biggest metros</h2>
-          <p class="qbox"><span class="qtag">We asked</span>"Finally, which city do you live in?"</p>
-          <p class="narrative">
-            The survey reached deep into India's largest, most digitally-active cities —
-            <b>Bangalore and Mumbai</b> together account for nearly half the sample, with
-            Delhi, Hyderabad and Chennai making up most of the rest. That's exactly the audience
-            this research set out to reach: a tier-1, always-online population living the pain
-            points above in real time.
-          </p>
-        </div>
-        <div class="card"><div id="chart8" class="chart"></div></div>
-      </div>
-
-      <!-- 09 — Story length -->
-      <div class="frame" id="p9">
-        <div class="panel-head">
-          <p class="idea-num">09 / Intensity signal</p>
-          <h2 class="panel-title">Emotional pain makes people write more</h2>
-          <p class="qbox"><span class="qtag">We asked</span>"Can you share an exact task behind that feeling. Where were you, what happened, what did you have to deal with?" — measured here by how many words people wrote back (junk non-answers like "N/A" excluded).</p>
-          <p class="narrative">
-            Stories tagged Frustrating or Procrastinate tend to run longer than stories tagged
-            Repetitive — a small gap, but a consistent one: when something genuinely bothers people,
-            they explain it; repetitive drudgery gets a shorter shrug. Hover any bar to read the
-            actual shortest and longest story behind each feeling.
-          </p>
-        </div>
-        <div class="card"><div id="chart9" class="chart"></div></div>
-      </div>
-
-      <!-- 10 — Pilot opt-in -->
-      <div class="frame frame-center stat-panel" id="p10">
-        <p class="idea-num" style="text-align:center;">10 / Closing signal</p>
-        <p class="qbox" style="max-width:52ch; margin-left:auto; margin-right:auto;"><span class="qtag">We asked</span>"As student teams build solutions to the pain points stated in this survey, we want a small group of readers to try them and tell us what works and what doesn't. Want to be one of them?"</p>
-        <div class="stat-value" id="pilotBig">0%</div>
-        <p class="stat-caption">
-          <b style="color:var(--text-primary)">379 of 469 respondents</b> — 81% — said
-          <i>"count me in"</i> to test solutions built for the pain points they described.
-          This isn't just a dataset. It's a ready pilot group.
-        </p>
-        <div class="bar-track"><div class="bar-fill" id="pilotBar"></div></div>
-        <div class="bar-legend">
-          <span><span class="swatch" style="background:var(--accent)"></span>Count me in — 379</span>
-          <span><span class="swatch" style="background:var(--gridline)"></span>No, thanks — 90</span>
-        </div>
-      </div>
-
+      <div class="skipHint">or keep scrolling to continue</div>
     </div>
 
-    <div class="filter-bar">
-      <button type="button" class="filter-toggle" id="filterToggle">
-        <span>Filters</span>
-        <span class="filter-badge" id="filterBadge" hidden>0</span>
-        <span class="filter-caret" id="filterCaret">&#9662;</span>
-      </button>
-      <div class="fh-summary" id="fhSummary"></div>
-      <div class="filter-overlay" id="filterOverlay" hidden>
-        <header id="filterHeader"></header>
-      </div>
+    <div id="interactive" class="interactive"><button id="exitExplore" class="exit-explore">Exit exploration</button>
+      <div class="caption"><h2>The surface</h2><p>Drag · scroll/pinch to zoom · click images · zoom all the way out to exit</p></div>
+      <div id="surface" class="surface"></div>
     </div>
   </div>
+</section>
 
-  <aside class="stories-col" id="storiesPanel"></aside>
+<section class="section empty"><small>Next website section — the experience continues</small></section>
+<div id="modal" class="modal" aria-hidden="true">
+  <div class="modal-backdrop" id="modalBackdrop"></div>
+  <aside class="panel side-panel" role="dialog" aria-modal="true" aria-label="Image details">
+    <button id="close" class="close" aria-label="Close details">×</button>
+    <div class="detail-image"><img id="modalImg" alt=""></div>
+    <div class="detail-copy">
+      <div id="modalInfo" class="detail-kicker">Fragment 01</div>
+      <h3 id="modalTitle">A fragment of the journey</h3>
+      <p id="modalText">This image is one of the fragments collected along the journey.</p>
+    </div>
+    <div class="detail-nav">
+      <button id="prevImage" type="button">← Previous</button>
+      <span id="imageCount">1 / 100</span>
+      <button id="nextImage" type="button">Next →</button>
+    </div>
+  </aside>
 </div>
+    </div></div>
 
-<footer>
-  Source: WhatsApp-life pain-point survey, 469 respondents, collected 2026. Percentages are
-  of respondents who tagged that category; free-text word counts exclude common stop words.
-  Coping-system labels are assigned by keyword rule from free-text answers and are
-  approximate. Filters above and clicks on any chart recompute the charts and the stories
-  panel directly from the underlying respondent data.
-</footer>
-
-<script src="data.js"></script>
-<script src="aggregate.js"></script>
-<script src="charts.js"></script>
-<script src="sidebar.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+(()=>{
+const world=document.querySelector('#world'),story=document.querySelector('#story'),dialogue=document.querySelector('#dialogue'),eyebrow=document.querySelector('#eyebrow'),line=document.querySelector('#line'),bar=document.querySelector('#bar'),endScene=document.querySelector('#endScene'),endSurface=document.querySelector('#endSurface'),interactive=document.querySelector('#interactive'),surface=document.querySelector('#surface');
+const imgs=Array.from({length:150},(_,i)=>`https://picsum.photos/seed/story-surface-${i}/900/650`);
+const items=[], finalPositions=[];
+for(let i=0;i<120;i++){
+ const a=Math.random()*Math.PI*2,r=300+Math.random()*2200,x=Math.cos(a)*r,y=(Math.random()-.5)*1700,z=-100-Math.random()*5300,rot=(Math.random()-.5)*18;
+ const col=i%10,row=Math.floor(i/10),fx=(col-4.5)*220+(Math.random()-.5)*35,fy=(row-3.5)*170+(Math.random()-.5)*28;
+ const el=document.createElement('div');el.className='tile';el.innerHTML=`<img src="${imgs[i]}" alt="">`;world.appendChild(el);
+ items.push({el,x,y,z,rot,fx,fy});finalPositions.push({x:fx+1200,y:fy+850});
+}
+const beats=[
+ {at:.03,title:'01 / drifting',text:'There is no beginning here.'},
+ {at:.17,title:'02 / passing',text:'One image becomes a direction.'},
+ {at:.34,title:'03 / noticing',text:'The more you move, the more the space responds.'},
+ {at:.53,title:'04 / changing',text:'Distance is starting to lose its meaning.'},
+ {at:.70,title:'05 / gathering',text:'The fragments are finding each other.'}
+];
+let lastBeat=-1, explored=false;
+function smooth(x){return x*x*(3-2*x)}
+function render(){
+ const rect=story.getBoundingClientRect();
+ const progress=Math.max(0,Math.min(1,-rect.top/(rect.height-innerHeight)));
+ const arrange=smooth(Math.max(0,Math.min(1,(progress-.68)/.25)));
+ const overview=smooth(Math.max(0,Math.min(1,(progress-.83)/.17)));
+ bar.style.width=(progress*100)+'%';
 
-  function countUp(el, target, opts) {
-    opts = opts || {};
-    const obj = { v: 0 };
-    gsap.to(obj, {
-      v: target, duration: opts.duration || 1.6, ease: 'power2.out',
-      onUpdate: () => { el.textContent = (opts.fmt ? opts.fmt(obj.v) : Math.round(obj.v)); }
-    });
-  }
-  function fmt(n) { return Math.round(n).toLocaleString('en-IN'); }
+ let beat=-1;beats.forEach((b,i)=>{if(progress>=b.at)beat=i});
+ if(beat!==lastBeat&&beat>=0){lastBeat=beat;eyebrow.textContent=beats[beat].title;line.textContent=beats[beat].text;dialogue.classList.add('show');setTimeout(()=>{if(lastBeat===beat)dialogue.classList.remove('show')},1600)}
 
-  // fixed, unfiltered totals — the hero and closing panel describe the
-  // whole dataset regardless of the active filters
-  const heroTotals = Aggregate.deriveAggregates(window.ROWS, Aggregate.defaultFilters());
+ // The camera slows down as the images organize, then pulls back.
+ const travel=progress*3900*(1-arrange*.18);
+ const zoomOut=overview*2.2;
+ world.style.transform=`translate3d(0,0,${travel}px) scale(${1-overview*.46})`;
+ world.parentElement.style.perspective=(1200-550*arrange)+'px';
 
-  function currentAggregates() {
-    return Aggregate.deriveAggregates(window.ROWS, SidebarUI.getFilters());
-  }
+ items.forEach(it=>{
+   const x=it.x*(1-arrange)+it.fx*arrange;
+   const y=it.y*(1-arrange)+it.fy*arrange;
+   const z=it.z*(1-arrange)-420*arrange;
+   it.el.style.transform=`translate3d(${x}px,${y}px,${z}px) rotateZ(${it.rot*(1-arrange)}deg)`;
+ });
+ if(progress>.88 && !explored) endScene.classList.add('show');
+ else if(!explored) endScene.classList.remove('show');
+ requestAnimationFrame(render);
+}
+requestAnimationFrame(render);
 
-  function renderEverything() {
-    const data = currentAggregates();
-    Charts.renderAll(data);
-    SidebarUI.refresh(data);
-    return data;
-  }
+// Build identical arrangement for both the overview and the interactive surface.
+items.forEach((it,i)=>{
+ const c=document.createElement('div');c.className='endCard';c.style.left=(it.fx+1200-95)+'px';c.style.top=(it.fy+850-67)+'px';c.innerHTML=`<img src="${imgs[i]}">`;endSurface.appendChild(c);
 
-  SidebarUI.mount({
-    headerEl: document.getElementById('filterHeader'),
-    storiesEl: document.getElementById('storiesPanel'),
-    onFilterChange: renderEverything
-  });
-
-  renderEverything();
-
-  // ---------------------------------------------------------------------
-  // Collapsible filter overlay — collapsed by default so the charts get
-  // the full column height; opening it overlays the controls on top of
-  // the chart instead of pushing it down.
-  // ---------------------------------------------------------------------
-  const filterToggle = document.getElementById('filterToggle');
-  const filterOverlay = document.getElementById('filterOverlay');
-  function setFilterOpen(open) {
-    filterOverlay.hidden = !open;
-    filterToggle.classList.toggle('open', open);
-  }
-  filterToggle.addEventListener('click', () => setFilterOpen(filterOverlay.hidden));
-  document.addEventListener('click', e => {
-    if (!filterOverlay.hidden && !e.target.closest('.filter-bar')) setFilterOpen(false);
-  });
-
-  // hero counters — hero is visible immediately at load, no scroll gate needed
-  countUp(document.getElementById('statRespondents'), heroTotals.totalRespondents, { fmt });
-  countUp(document.getElementById('statStories'), heroTotals.totalTags, { fmt });
-  countUp(document.getElementById('statPilotPct'), Math.round(heroTotals.pilot.yes / heroTotals.pilot.total * 100), { fmt: v => Math.round(v) + '%' });
-
-  // ---------------------------------------------------------------------
-  // Tabs: one panel visible at a time, switched instantly by the tab bar —
-  // replaces the old scroll-pinned crossfade. Each tab maps 1:1 to a
-  // .frame id; the closing pilot count-up fires the first time its tab
-  // (the last one) is opened, instead of on scroll-into-view.
-  // ---------------------------------------------------------------------
-  const TABS = [
-    { id: 'frame-hero', label: 'Overview', title: 'Overview' },
-    { id: 'p1',  label: '01', title: '01 · Demand' },
-    { id: 'p2',  label: '02', title: '02 · Vocabulary' },
-    { id: 'p3',  label: '03', title: '03 · The cross' },
-    { id: 'p4',  label: '04', title: '04 · Opportunity' },
-    { id: 'p5',  label: '05', title: '05 · Words' },
-    { id: 'p6',  label: '06', title: '06 · Status quo' },
-    { id: 'p7',  label: '07', title: '07 · Age' },
-    { id: 'p8',  label: '08', title: '08 · Geography' },
-    { id: 'p9',  label: '09', title: '09 · Intensity' },
-    { id: 'p10', label: '10', title: '10 · Closing' }
-  ];
-
-  const tabBar = document.getElementById('tabBar');
-  const frames = TABS.map(t => document.getElementById(t.id));
-  tabBar.innerHTML = TABS.map((t, i) => `<button type="button" class="tab-btn${i === 0 ? ' active' : ''}" data-idx="${i}" title="${t.title}">${t.label}</button>`).join('');
-  const tabBtns = Array.from(tabBar.querySelectorAll('.tab-btn'));
-
-  let pilotRevealed = false;
-  function revealPilotStat() {
-    if (pilotRevealed) return;
-    pilotRevealed = true;
-    const pct = Math.round(heroTotals.pilot.yes / heroTotals.pilot.total * 100);
-    countUp(document.getElementById('pilotBig'), pct, { fmt: v => Math.round(v) + '%' });
-    gsap.to('#pilotBar', { width: (heroTotals.pilot.yes / heroTotals.pilot.total * 100) + '%', duration: 1.4, ease: 'power2.out' });
-  }
-
-  function setActiveTab(idx) {
-    frames.forEach((f, i) => f.classList.toggle('active', i === idx));
-    tabBtns.forEach((btn, i) => btn.classList.toggle('active', i === idx));
-    frames[idx].scrollTop = 0;
-    if (TABS[idx].id === 'p10') revealPilotStat();
-    // charts are built once at load, before the flex layout above them has
-    // necessarily settled to its final size — re-measuring here keeps every
-    // chart matched to its actual container instead of a stale, taller size.
-    Charts.resize();
-  }
-  tabBar.addEventListener('click', e => {
-    const btn = e.target.closest('.tab-btn');
-    if (!btn) return;
-    setActiveTab(Number(btn.dataset.idx));
-  });
-  setActiveTab(0);
-  requestAnimationFrame(() => requestAnimationFrame(() => Charts.resize()));
-
-  // resize — re-layout charts
-  let resizeTimer;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      Charts.resize();
-      renderEverything();
-    }, 150);
-  });
+ const cols=10, gap=85, size=250, col=i%cols, row=Math.floor(i/cols);
+ const d=document.createElement('div');d.className='card';
+ d.style.left=(320+col*(size+gap))+'px';
+ d.style.top=(260+row*(size+gap)+(col%2?150:0))+'px';
+ d.style.opacity='0'; d.style.transform='scale(.55)';
+ d.dataset.index=i;
+ d.innerHTML=`<img src="${imgs[i]}">`;
+ surface.appendChild(d);
 });
+
+document.addEventListener('keydown',e=>{
+  const modal=document.querySelector('#modal');
+  if(!modal.classList.contains('show')) return;
+  if(e.key==='Escape') closeDetails();
+  if(e.key==='ArrowRight') showDetail(activeImageIndex+1);
+  if(e.key==='ArrowLeft') showDetail(activeImageIndex-1);
+});
+document.querySelector('#explore').onclick=()=>{
+ explored=true;endScene.style.display='none';interactive.classList.add('active');
+ // Freeze the exact final arrangement; this frame is now the interactive one.
+ const scale=.42;state.scale=scale;state.x=innerWidth/2-1200*scale;state.y=innerHeight/2-850*scale;apply();
+};
+const state={
+  x:0,y:0,tx:0,ty:0,
+  scale:.48,ts:.48,
+  down:false,lastX:0,lastY:0,
+  vx:0,vy:0,drag:0,pointerId:null
+};
+
+const WORLD_W=4400, WORLD_H=3200;
+const MIN_SCALE=.34, MAX_SCALE=1.85;
+const EASE=.12, OVERSCROLL=.08;
+
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+
+function bounds(scale){
+  const scaledW=WORLD_W*scale, scaledH=WORLD_H*scale;
+  // Center a dimension if it is smaller than the viewport.
+  const minX=scaledW<=innerWidth ? (innerWidth-scaledW)/2 : innerWidth-scaledW;
+  const maxX=scaledW<=innerWidth ? minX : 0;
+  const minY=scaledH<=innerHeight ? (innerHeight-scaledH)/2 : innerHeight-scaledH;
+  const maxY=scaledH<=innerHeight ? minY : 0;
+  return {minX,maxX,minY,maxY};
+}
+
+function clampCamera(){
+  const b=bounds(state.ts);
+  const extraX=innerWidth*OVERSCROLL, extraY=innerHeight*OVERSCROLL;
+  state.tx=clamp(state.tx,b.minX-extraX,b.maxX+extraX);
+  state.ty=clamp(state.ty,b.minY-extraY,b.maxY+extraY);
+}
+
+function hardClampCamera(){
+  const b=bounds(state.scale);
+  state.x=clamp(state.x,b.minX,b.maxX);
+  state.y=clamp(state.y,b.minY,b.maxY);
+}
+
+function apply(){
+  surface.style.transform=`translate3d(${state.x}px,${state.y}px,0) scale(${state.scale})`;
+}
+
+function animate(){
+  state.x+=(state.tx-state.x)*EASE;
+  state.y+=(state.ty-state.y)*EASE;
+  state.scale+=(state.ts-state.scale)*EASE;
+
+  if(!state.down && (Math.abs(state.vx)>.02 || Math.abs(state.vy)>.02)){
+    state.tx+=state.vx;
+    state.ty+=state.vy;
+    state.vx*=.90;
+    state.vy*=.90;
+    clampCamera();
+  }
+
+  // Elastic edge while interacting, then settle exactly into the draggable area.
+  if(!state.down && Math.abs(state.vx)<.08 && Math.abs(state.vy)<.08){
+    const b=bounds(state.ts);
+    state.tx=clamp(state.tx,b.minX,b.maxX);
+    state.ty=clamp(state.ty,b.minY,b.maxY);
+  }
+
+  hardClampCamera();
+  apply();
+  requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+
+function centerGrid(){
+  const s=MIN_SCALE;
+  state.scale=state.ts=s;
+  const b=bounds(s);
+  state.x=state.tx=clamp((innerWidth-WORLD_W*s)/2,b.minX,b.maxX);
+  state.y=state.ty=clamp((innerHeight-WORLD_H*s)/2,b.minY,b.maxY);
+  state.vx=state.vy=0;
+}
+
+function zoomAt(clientX,clientY,nextScale){
+  const old=state.ts;
+  const next=clamp(nextScale,MIN_SCALE,MAX_SCALE);
+  const ratio=next/old;
+  state.tx=clientX-(clientX-state.tx)*ratio;
+  state.ty=clientY-(clientY-state.ty)*ratio;
+  state.ts=next;
+  clampCamera();
+}
+
+let activeImageIndex=0;
+
+const detailTitles=[
+  'A place between moments',
+  'Something left behind',
+  'Light across the surface',
+  'A fragment worth keeping',
+  'Where the journey changes direction',
+  'A quiet detail',
+  'Seen while passing through',
+  'The shape of a memory'
+];
+
+const detailTexts=[
+  'This fragment was encountered while moving through the larger field of images. Its meaning is deliberately open — a small detail that becomes clearer when you stop and look closer.',
+  'Part of the visual trail gathered during the journey, this image sits somewhere between documentation and memory.',
+  'Pulled from the larger collection, this fragment changes when it is isolated from the surrounding images. Look closely at the details, texture, and light.',
+  'The surface is made from many small moments like this one. Click through the collection to find the connections between them.',
+  'This image marks one of the places where the visual journey begins to reorganize itself — from scattered fragments into a larger picture.'
+];
+
+function focusImageInWorld(index, instant=false){
+  const card=surface.querySelector(`.card[data-index="${index}"]`);
+  if(!card) return;
+
+  const cardX=parseFloat(card.style.left)||0;
+  const cardY=parseFloat(card.style.top)||0;
+  const cardW=card.offsetWidth;
+  const cardH=card.offsetHeight;
+
+  // Keep the image comfortably visible in the part of the screen that is
+  // not covered by the side panel.
+  const panelW=Math.min(520,innerWidth*.94);
+  const visibleW=Math.max(1,innerWidth-panelW);
+  const targetScale=clamp(Math.max(state.ts,.72),MIN_SCALE,MAX_SCALE);
+
+  const targetCenterX=visibleW*.52;
+  const targetCenterY=innerHeight*.5;
+
+  state.ts=targetScale;
+  state.tx=targetCenterX-(cardX+cardW/2)*targetScale;
+  state.ty=targetCenterY-(cardY+cardH/2)*targetScale;
+  clampCamera();
+
+  if(instant){
+    state.scale=state.ts;
+    state.x=state.tx;
+    state.y=state.ty;
+  }
+}
+
+function showDetail(index){
+  activeImageIndex=(index+imgs.length)%imgs.length;
+  const i=activeImageIndex;
+  const modal=document.querySelector('#modal');
+  const img=document.querySelector('#modalImg');
+
+  // Move the underlying exploration world to the same image.
+  focusImageInWorld(i);
+
+  img.src=imgs[i];
+  img.alt='Fragment '+String(i+1).padStart(2,'0');
+  document.querySelector('#modalInfo').textContent='Fragment '+String(i+1).padStart(2,'0');
+  document.querySelector('#modalTitle').textContent=detailTitles[i%detailTitles.length];
+  document.querySelector('#modalText').textContent=detailTexts[i%detailTexts.length];
+  document.querySelector('#imageCount').textContent=(i+1)+' / '+imgs.length;
+
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+}
+
+function openDetails(card){
+  showDetail(Number(card.dataset.index));
+}
+
+function closeDetails(){
+  const modal=document.querySelector('#modal');
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden','true');
+}
+
+document.querySelector('#nextImage').onclick=()=>showDetail(activeImageIndex+1);
+document.querySelector('#prevImage').onclick=()=>showDetail(activeImageIndex-1);
+document.querySelector('#close').onclick=closeDetails;
+document.querySelector('#modalBackdrop').onclick=closeDetails;
+
+let gestureCard=null;
+let gestureStartX=0, gestureStartY=0;
+const CLICK_THRESHOLD=12;
+
+interactive.addEventListener('pointerdown',e=>{
+  if(e.target.closest('button')) return;
+  gestureCard=e.target.closest('.card');
+  gestureStartX=e.clientX;
+  gestureStartY=e.clientY;
+
+  state.down=true;
+  state.pointerId=e.pointerId;
+  state.lastX=e.clientX;
+  state.lastY=e.clientY;
+  state.vx=state.vy=0;
+  state.drag=0;
+
+  // Capture on the full-screen interaction layer so the gesture remains stable.
+  interactive.setPointerCapture(e.pointerId);
+});
+
+interactive.addEventListener('pointermove',e=>{
+  if(!state.down || e.pointerId!==state.pointerId) return;
+
+  const dx=e.clientX-state.lastX;
+  const dy=e.clientY-state.lastY;
+  const total=Math.hypot(e.clientX-gestureStartX,e.clientY-gestureStartY);
+  state.drag=total;
+
+  // Only pan once this is clearly a drag. A normal click leaves the grid still.
+  if(total>CLICK_THRESHOLD){
+    state.tx+=dx;
+    state.ty+=dy;
+    clampCamera();
+    state.vx=dx;
+    state.vy=dy;
+  }
+
+  state.lastX=e.clientX;
+  state.lastY=e.clientY;
+});
+
+interactive.addEventListener('pointerup',e=>{
+  if(e.pointerId!==state.pointerId) return;
+
+  const card=gestureCard;
+  const distance=Math.hypot(e.clientX-gestureStartX,e.clientY-gestureStartY);
+
+  state.down=false;
+  state.pointerId=null;
+  gestureCard=null;
+
+  // This is the important change: open directly on pointer-up instead of
+  // waiting for a browser click event that may be swallowed by the drag layer.
+  if(card && distance<=CLICK_THRESHOLD && card.isConnected){
+    openDetails(card);
+  }
+});
+
+interactive.addEventListener('pointercancel',()=>{
+  state.down=false;
+  state.pointerId=null;
+  gestureCard=null;
+});
+
+interactive.addEventListener('wheel',e=>{
+  e.preventDefault();
+
+  // Scroll up/down controls zoom. No Ctrl/pinch gesture is required.
+  if(Math.abs(e.deltaY)>0){
+    zoomAt(
+      e.clientX,
+      e.clientY,
+      state.ts*Math.exp(-e.deltaY*.007)
+    );
+  }
+
+  // Optional horizontal trackpad movement pans the world.
+  if(Math.abs(e.deltaX)>0){
+    state.tx-=e.deltaX*1.15;
+    clampCamera();
+  }
+},{passive:false});
+document.querySelector('#explore').onclick=()=>{
+  explored=true;
+  endScene.style.display='none';
+  interactive.classList.add('active');
+  centerGrid();
+  const cards=[...surface.querySelectorAll('.card')];
+  cards.forEach(card=>{
+    card.animate(
+      [{opacity:0,transform:'scale(.55)'},{opacity:1,transform:'scale(1)'}],
+      {duration:650,delay:Math.random()*900,easing:'cubic-bezier(.2,.8,.2,1)',fill:'forwards'}
+    );
+  });
+};
+
+document.querySelector('#exitExplore').onclick=()=>exitExploration();
+function exitExploration(){
+  explored=false;
+  interactive.classList.remove('active');
+  endScene.style.display='';
+  requestAnimationFrame(()=>endScene.classList.add('show'));
+  centerGrid();
+}
+
+window.addEventListener('resize',()=>{
+  if(interactive.classList.contains('active')){
+    clampCamera();
+    hardClampCamera();
+  }
+});
+document.querySelector('#modal').onclick=e=>{if(e.target.id==='modal')e.currentTarget.classList.remove('show')};
+})();
 </script>
-</body>
-</html>
+</body></html>
