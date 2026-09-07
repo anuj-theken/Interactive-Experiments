@@ -2,135 +2,111 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Infinite Section → Optional Exploration</title>
+<title>Camera storytelling</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;background:#f4f1e9;color:#111;font-family:Arial,Helvetica,sans-serif}body{overflow-x:hidden}
-.section{position:relative;width:100%;min-height:100vh}.empty{height:100vh;display:grid;place-items:center;background:#f4f1e9}.empty small{letter-spacing:.18em;text-transform:uppercase;opacity:.32}
-#story{height:650vh;background:#f4f1e9;color:#161513}.sticky{position:sticky;top:0;width:100%;height:100vh;overflow:hidden;background:#090909}
-.worldWrap{position:absolute;inset:0;perspective:1200px;transform-style:preserve-3d}.world{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;will-change:transform}
-.tile{position:absolute;width:190px;height:125px;left:-95px;top:-62px;overflow:hidden;border-radius:7px;background:#222;box-shadow:0 18px 70px #0009;will-change:transform,opacity;backface-visibility:hidden}.tile img{width:100%;height:100%;object-fit:cover}
-.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 35%,#a79f8b18 100%)}
-.dialogue{position:absolute;left:50%;bottom:9vh;transform:translateX(-50%);width:min(850px,88vw);text-align:center;opacity:0;transition:opacity .45s;pointer-events:none;background:#111;border:1px solid #ffffff22;padding:24px 30px}.dialogue.show{opacity:1}.eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.65;margin-bottom:10px;color:#fff}.line{font-size:clamp(26px,4.6vw,62px);line-height:1.02;font-weight:600;color:#fff;text-shadow:none}
-.progress{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);width:min(450px,68vw);height:1px;background:#1112}.progress i{display:block;height:100%;width:0;background:#fff}
-.endScene{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .35s;background:#f4f1e9;color:#111;overflow:hidden}.endScene.show{opacity:1;pointer-events:auto}
-.endSurface{position:absolute;left:50%;top:50%;width:2400px;height:1700px;transform-origin:center;transform:translate(-50%,-50%);background:#f4f1e9}
-.endCard{position:absolute;width:190px;height:135px;overflow:hidden;background:#fff;box-shadow:0 15px 35px #0002}.endCard img{width:100%;height:100%;object-fit:cover}
-.choice{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;z-index:5}.choice p{font-size:11px;letter-spacing:.18em;text-transform:uppercase;opacity:.6;margin:0 0 15px}.choice button{border:1px solid #111;background:#f7f4ec;color:#111;padding:15px 22px;font-size:10px;letter-spacing:.17em;text-transform:uppercase;cursor:pointer}.choice button:hover{background:#111;color:#fff}
-.skipHint{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);font-size:10px;letter-spacing:.15em;text-transform:uppercase;opacity:.45;white-space:nowrap}
-.interactive{position:fixed;inset:0;display:none;background:#f4f1e9;overflow:hidden;touch-action:none;cursor:grab;z-index:20}.interactive.active{display:block}.interactive:active{cursor:grabbing}
-.surface{position:absolute;width:2400px;height:1700px;left:0;top:0;transform-origin:0 0;background:linear-gradient(90deg,#00000008 1px,transparent 1px),linear-gradient(#00000008 1px,transparent 1px),#e8e5dc;background-size:240px 240px}
-#exitExplore{position:absolute;right:22px;top:22px;z-index:25;border:1px solid #111;background:#f7f4ec;color:#111;padding:12px 16px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;box-shadow:0 6px 20px #0001}#exitExplore:hover{background:#111;color:#fff}.exit-explore{position:absolute;right:24px;top:24px;z-index:25;border:1px solid #111;background:#f7f4ec;color:#111;padding:12px 17px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;box-shadow:0 8px 24px #0002}.exit-explore:hover{background:#111;color:#fff}.caption{position:absolute;left:24px;top:22px;z-index:3;pointer-events:none}.caption h2{margin:0;font-size:clamp(30px,4vw,56px);line-height:.95}.caption p{font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.5}.card{position:absolute;width:18.5vw;height:18.5vw;min-width:180px;min-height:180px;max-width:320px;max-height:320px;overflow:hidden;background:#fff;box-shadow:0 15px 35px #0002;cursor:pointer;transition:transform .18s}.card:hover{transform:scale(1.04)!important}.card img{width:100%;height:100%;object-fit:cover}
-.modal{position:fixed;inset:0;display:none;place-items:center;pointer-events:auto;background:#f4f1e9e8;z-index:100}.modal.show{display:grid}.panel{width:min(900px,90vw);height:min(78vh,680px);background:#fff;position:relative}.panel img{width:100%;height:100%;object-fit:contain}.close{position:absolute;right:12px;top:12px;width:38px;height:38px;border:0;border-radius:50%;cursor:pointer;background:#fff;font-size:20px}
-.detail-image{position:absolute;inset:0 0 150px 0;background:#f7f4ec}.detail-image img{width:100%;height:100%;object-fit:contain}.detail-copy{position:absolute;left:0;right:0;bottom:0;min-height:150px;padding:22px 28px;background:#f7f4ec;border-top:1px solid #1111}.detail-kicker{font-size:9px;letter-spacing:.2em;text-transform:uppercase;opacity:.5;margin-bottom:8px}.detail-copy h3{margin:0 0 7px;font-size:24px;font-weight:500}.detail-copy p{margin:0;max-width:700px;font-size:13px;line-height:1.5;opacity:.65}@media(max-width:700px){.detail-image{inset:0 0 185px 0}.detail-copy{min-height:185px;padding:18px}.detail-copy h3{font-size:20px}}@media(max-width:700px){.tile{width:135px;height:94px;left:-67px;top:-47px}.dialogue{bottom:14vh}.endCard{width:135px;height:95px}}
-/* Side image detail overlay */
-.modal{
-  position:fixed;
-  inset:0;
-  display:block;
-  visibility:hidden;
-  pointer-events:none;
-  background:transparent;
-  z-index:100;
-}
+*{box-sizing:border-box}html,body{margin:0;background:#f4f1e9;color:#111;font-family:Arial,Helvetica,sans-serif;overflow:hidden}
+
+.interactive{position:fixed;inset:0;display:block;background:#f4f1e9;overflow:hidden;touch-action:none;cursor:grab;z-index:5}
+.interactive:active{cursor:grabbing}
+.interactive.locked{cursor:default}
+.surface{position:absolute;left:0;top:0;transform-origin:0 0}
+
+/* -- mosaic / treemap grid -- */
+.card{overflow:hidden;background:#fff;border-radius:5px;box-shadow:0 10px 26px #0002;cursor:pointer;transition:transform .25s ease,opacity .25s ease,box-shadow .25s ease}
+.card img{width:100%;height:100%;object-fit:cover;display:block}
+.interactive.locked .card{cursor:default}
+
+/* Hovering one card highlights it and recedes every other card, so the
+   hovered image reads as the single focal point of the mosaic. */
+.interactive:not(.locked) .surface:hover .card{transform:scale(.9);opacity:.4}
+.interactive:not(.locked) .surface:hover .card:hover{transform:scale(1.12);opacity:1;box-shadow:0 26px 60px #0004;z-index:5}
+
+/* -- cluster overlays: painted ON TOP of the images -- */
+.overlaysLayer{position:absolute;inset:0;pointer-events:none;z-index:6;transition:opacity .35s ease,visibility .35s}
+.overlaysLayer.hidden{opacity:0;visibility:hidden}
+.clusterOverlay{position:absolute;border-radius:26px;border:2px solid transparent;opacity:.85;transition:opacity .4s ease}
+.clusterOverlay.dim{opacity:.22}
+.clusterOverlay.active{opacity:1}
+.clusterChip{position:absolute;left:20px;top:20px;display:inline-flex;align-items:center;gap:8px;background:#f7f4ecf2;border:1px solid #1111;padding:7px 14px 7px 9px;border-radius:999px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#111;white-space:nowrap;box-shadow:0 6px 16px #0001}
+.clusterChip .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.clusterChip b{font-weight:700}
+.clusterChip span{opacity:.55;margin-left:2px}
+
+/* -- overlay toggle -- */
+.overlayToggle{position:fixed;right:24px;top:22px;z-index:40;border:1px solid #111;background:#f7f4ecf2;color:#111;padding:11px 16px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;box-shadow:0 8px 20px #0001}
+.overlayToggle:hover{background:#111;color:#fff}
+.overlayToggle.off{opacity:.55}
+
+/* -- page header (always visible) + free-exploration hint -- */
+.caption{position:absolute;left:24px;top:22px;z-index:15;pointer-events:none}
+.captionBadge{display:inline-block;background:#f7f4ecf2;border:1px solid #1112;padding:11px 20px;box-shadow:0 8px 24px #0002}
+.captionBadge h2{margin:0;font-size:clamp(18px,2.2vw,26px);line-height:1;letter-spacing:.01em}
+.captionHint{display:inline-block;margin:8px 0 0;background:#f7f4ecf2;border:1px solid #1112;padding:7px 14px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#111;opacity:0;transition:opacity .5s ease}
+.captionHint.show{opacity:.7}
+
+/* -- story popup / camera HUD -- */
+.storyPopup{position:fixed;right:5%;top:50%;transform:translateY(calc(-50% + 10px));width:min(380px,88vw);max-height:80vh;overflow:auto;background:#f7f4ec;border:1px solid #1112;box-shadow:0 25px 70px #0003;padding:26px 28px 22px;z-index:30;opacity:0;pointer-events:none;transition:opacity .4s ease,transform .4s ease}
+.storyPopup.show{opacity:1;pointer-events:auto;transform:translateY(-50%)}
+.storyKicker{font-size:9px;letter-spacing:.2em;text-transform:uppercase;opacity:.5;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.storyKicker .dot{width:8px;height:8px;border-radius:50%;background:#111}
+.storyTitle{margin:0 0 10px;font-size:22px;font-weight:600;line-height:1.15}
+.storyText{margin:0 0 20px;font-size:13px;line-height:1.6;opacity:.68}
+.storyDots{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.storyDots i{width:14px;height:3px;background:#1112;display:block}
+.storyDots i.done{background:#111a}
+.storyDots i.on{background:#111}
+.storyNav{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.storyNav button{appearance:none;border:1px solid #111;background:transparent;color:#111;padding:12px 10px;font:inherit;font-size:10px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.storyNav button:hover{background:#111;color:#fff}
+.storyNav button:disabled{opacity:.25;cursor:default;pointer-events:none}
+.storyNav button.primary{grid-column:1/-1;background:#111;color:#fff}
+.storyNav button.primary:hover{background:#000}
+@media(max-width:640px){.storyPopup{right:50%;left:50%;transform:translate(50%,calc(100% - 190px));top:auto;bottom:14px;width:92vw;max-height:44vh}
+.storyPopup.show{transform:translate(50%,0)}}
+
+/* -- detail modal (free exploration) -- */
+.modal{position:fixed;inset:0;display:block;visibility:hidden;pointer-events:none;background:transparent;z-index:100}
 .modal.show{visibility:visible;pointer-events:auto}
-.modal-backdrop{
-  position:absolute;inset:0;
-  background:#1113;
-  opacity:0;
-  transition:opacity .35s ease;
-}
+.modal-backdrop{position:absolute;inset:0;background:#1113;opacity:0;transition:opacity .35s ease}
 .modal.show .modal-backdrop{opacity:1}
-.side-panel{
-  position:absolute!important;
-  top:0!important;
-  right:0!important;
-  left:auto!important;
-  bottom:0!important;
-  width:min(520px,94vw)!important;
-  height:100vh!important;
-  max-height:none!important;
-  min-height:0!important;
-  margin:0!important;
-  display:grid!important;
-  grid-template-rows:minmax(0,1fr) auto auto!important;
-  background:#f7f4ec!important;
-  transform:translate3d(105%,0,0)!important;
-  transition:transform .45s cubic-bezier(.2,.8,.2,1)!important;
-  box-shadow:-20px 0 60px #0003!important;
-  overflow:hidden!important;
-}
+.side-panel{position:absolute!important;top:0!important;right:0!important;left:auto!important;bottom:0!important;width:min(520px,94vw)!important;height:100vh!important;max-height:none!important;min-height:0!important;margin:0!important;display:grid!important;grid-template-rows:minmax(0,1fr) auto auto!important;background:#f7f4ec!important;transform:translate3d(105%,0,0)!important;transition:transform .45s cubic-bezier(.2,.8,.2,1)!important;box-shadow:-20px 0 60px #0003!important;overflow:hidden!important}
 .modal.show .side-panel{transform:translate3d(0,0,0)!important}
-.side-panel .detail-image{
-  position:relative!important;
-  inset:auto!important;
-  min-height:0;
-  background:#ede9df;
-}
-.side-panel .detail-image img{
-  width:100%;height:100%;object-fit:contain;
-}
-.side-panel .detail-copy{
-  position:relative!important;
-  inset:auto!important;
-  min-height:0!important;
-  padding:22px 28px!important;
-  background:#f7f4ec!important;
-  border-top:1px solid #1111;
-}
-.detail-nav{
-  display:grid;
-  grid-template-columns:1fr auto 1fr;
-  align-items:center;
-  gap:12px;
-  padding:16px 20px 20px;
-  border-top:1px solid #1111;
-  background:#f7f4ec;
-}
-.detail-nav button{
-  appearance:none;
-  border:1px solid #111;
-  background:transparent;
-  color:#111;
-  padding:10px 12px;
-  font:inherit;
-  font-size:10px;
-  letter-spacing:.1em;
-  text-transform:uppercase;
-  cursor:pointer;
-}
+.side-panel .detail-image{position:relative!important;inset:auto!important;min-height:0;background:#ede9df}
+.side-panel .detail-image img{width:100%;height:100%;object-fit:contain}
+.side-panel .detail-copy{position:relative!important;inset:auto!important;min-height:0!important;padding:22px 28px!important;background:#f7f4ec!important;border-top:1px solid #1111}
+.detail-kicker{font-size:9px;letter-spacing:.2em;text-transform:uppercase;opacity:.5;margin-bottom:8px}
+.detail-copy h3{margin:0 0 7px;font-size:24px;font-weight:500}
+.detail-copy p{margin:0;max-width:700px;font-size:13px;line-height:1.5;opacity:.65}
+.detail-nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:16px 20px 20px;border-top:1px solid #1111;background:#f7f4ec}
+.detail-nav button{appearance:none;border:1px solid #111;background:transparent;color:#111;padding:10px 12px;font:inherit;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
 .detail-nav button:hover{background:#111;color:#fff}
 #imageCount{font-size:10px;letter-spacing:.1em;white-space:nowrap;opacity:.55}
-.side-panel .close{z-index:4}
-
-.modal.show .side-panel{pointer-events:auto}.modal.show .modal-backdrop{pointer-events:auto}
+.close{position:absolute;right:12px;top:12px;width:38px;height:38px;border:0;border-radius:50%;cursor:pointer;background:#fff;font-size:20px;z-index:4}
 </style>
 </head>
 <body>
-<section class="section empty"><small>Previous website section — empty space</small></section>
 
-<section id="story" class="section">
-  <div class="sticky">
-    <div class="worldWrap"><div id="world" class="world"></div><div class="vignette"></div></div>
-    <div id="dialogue" class="dialogue"><div id="eyebrow" class="eyebrow"></div><div id="line" class="line"></div></div>
-    <div class="progress"><i id="bar"></i></div>
-
-    <div id="endScene" class="endScene">
-      <div id="endSurface" class="endSurface"></div>
-      <div class="choice">
-        <p>Everything is here now</p>
-        <button id="explore">Explore the surface</button>
-      </div>
-      <div class="skipHint">or keep scrolling to continue</div>
-    </div>
-
-    <div id="interactive" class="interactive"><button id="exitExplore" class="exit-explore">Exit exploration</button>
-      <div class="caption"><h2>The surface</h2><p>Drag · scroll/pinch to zoom · click images · zoom all the way out to exit</p></div>
-      <div id="surface" class="surface"></div>
-    </div>
+<div id="interactive" class="interactive locked">
+  <div class="caption" id="caption">
+    <div class="captionBadge"><h2>Case Comp 2026</h2></div>
+    <p class="captionHint" id="captionHint">Drag · scroll/pinch to zoom · click images</p>
   </div>
-</section>
+  <div id="surface" class="surface"></div>
+</div>
 
-<section class="section empty"><small>Next website section — the experience continues</small></section>
+<button id="overlayToggle" class="overlayToggle" type="button">Hide cluster overlays</button>
+
+<div id="storyPopup" class="storyPopup">
+  <div class="storyKicker"><span class="dot" id="storyDot"></span><span id="storyKickerText">Scene 01 / 10</span></div>
+  <h3 class="storyTitle" id="storyTitle">[Placeholder title]</h3>
+  <p class="storyText" id="storyText">[Placeholder copy about this image or cluster]</p>
+  <div class="storyDots" id="storyDots"></div>
+  <div class="storyNav">
+    <button id="backBtn" type="button">← Back</button>
+    <button id="nextBtn" type="button">Next →</button>
+  </div>
+</div>
+
 <div id="modal" class="modal" aria-hidden="true">
   <div class="modal-backdrop" id="modalBackdrop"></div>
   <aside class="panel side-panel" role="dialog" aria-modal="true" aria-label="Image details">
@@ -148,180 +124,399 @@
     </div>
   </aside>
 </div>
-    </div></div>
 
 <script>
 (()=>{
-const world=document.querySelector('#world'),story=document.querySelector('#story'),dialogue=document.querySelector('#dialogue'),eyebrow=document.querySelector('#eyebrow'),line=document.querySelector('#line'),bar=document.querySelector('#bar'),endScene=document.querySelector('#endScene'),endSurface=document.querySelector('#endSurface'),interactive=document.querySelector('#interactive'),surface=document.querySelector('#surface');
-const imgs=Array.from({length:150},(_,i)=>`https://picsum.photos/seed/story-surface-${i}/900/650`);
-const items=[], finalPositions=[];
-for(let i=0;i<120;i++){
- const a=Math.random()*Math.PI*2,r=300+Math.random()*2200,x=Math.cos(a)*r,y=(Math.random()-.5)*1700,z=-100-Math.random()*5300,rot=(Math.random()-.5)*18;
- const col=i%10,row=Math.floor(i/10),fx=(col-4.5)*220+(Math.random()-.5)*35,fy=(row-3.5)*170+(Math.random()-.5)*28;
- const el=document.createElement('div');el.className='tile';el.innerHTML=`<img src="${imgs[i]}" alt="">`;world.appendChild(el);
- items.push({el,x,y,z,rot,fx,fy});finalPositions.push({x:fx+1200,y:fy+850});
-}
-const beats=[
- {at:.03,title:'01 / drifting',text:'There is no beginning here.'},
- {at:.17,title:'02 / passing',text:'One image becomes a direction.'},
- {at:.34,title:'03 / noticing',text:'The more you move, the more the space responds.'},
- {at:.53,title:'04 / changing',text:'Distance is starting to lose its meaning.'},
- {at:.70,title:'05 / gathering',text:'The fragments are finding each other.'}
-];
-let lastBeat=-1, explored=false;
-function smooth(x){return x*x*(3-2*x)}
-function render(){
- const rect=story.getBoundingClientRect();
- const progress=Math.max(0,Math.min(1,-rect.top/(rect.height-innerHeight)));
- const arrange=smooth(Math.max(0,Math.min(1,(progress-.68)/.25)));
- const overview=smooth(Math.max(0,Math.min(1,(progress-.83)/.17)));
- bar.style.width=(progress*100)+'%';
-
- let beat=-1;beats.forEach((b,i)=>{if(progress>=b.at)beat=i});
- if(beat!==lastBeat&&beat>=0){lastBeat=beat;eyebrow.textContent=beats[beat].title;line.textContent=beats[beat].text;dialogue.classList.add('show');setTimeout(()=>{if(lastBeat===beat)dialogue.classList.remove('show')},1600)}
-
- // The camera slows down as the images organize, then pulls back.
- const travel=progress*3900*(1-arrange*.18);
- const zoomOut=overview*2.2;
- world.style.transform=`translate3d(0,0,${travel}px) scale(${1-overview*.46})`;
- world.parentElement.style.perspective=(1200-550*arrange)+'px';
-
- items.forEach(it=>{
-   const x=it.x*(1-arrange)+it.fx*arrange;
-   const y=it.y*(1-arrange)+it.fy*arrange;
-   const z=it.z*(1-arrange)-420*arrange;
-   it.el.style.transform=`translate3d(${x}px,${y}px,${z}px) rotateZ(${it.rot*(1-arrange)}deg)`;
- });
- if(progress>.88 && !explored) endScene.classList.add('show');
- else if(!explored) endScene.classList.remove('show');
- requestAnimationFrame(render);
-}
-requestAnimationFrame(render);
-
-// Build identical arrangement for both the overview and the interactive surface.
-items.forEach((it,i)=>{
- const c=document.createElement('div');c.className='endCard';c.style.left=(it.fx+1200-95)+'px';c.style.top=(it.fy+850-67)+'px';c.innerHTML=`<img src="${imgs[i]}">`;endSurface.appendChild(c);
-
- const cols=10, gap=85, size=250, col=i%cols, row=Math.floor(i/cols);
- const d=document.createElement('div');d.className='card';
- d.style.left=(320+col*(size+gap))+'px';
- d.style.top=(260+row*(size+gap)+(col%2?150:0))+'px';
- d.style.opacity='0'; d.style.transform='scale(.55)';
- d.dataset.index=i;
- d.innerHTML=`<img src="${imgs[i]}">`;
- surface.appendChild(d);
-});
-
-document.addEventListener('keydown',e=>{
-  const modal=document.querySelector('#modal');
-  if(!modal.classList.contains('show')) return;
-  if(e.key==='Escape') closeDetails();
-  if(e.key==='ArrowRight') showDetail(activeImageIndex+1);
-  if(e.key==='ArrowLeft') showDetail(activeImageIndex-1);
-});
-document.querySelector('#explore').onclick=()=>{
- explored=true;endScene.style.display='none';interactive.classList.add('active');
- // Freeze the exact final arrangement; this frame is now the interactive one.
- const scale=.42;state.scale=scale;state.x=innerWidth/2-1200*scale;state.y=innerHeight/2-850*scale;apply();
-};
-const state={
-  x:0,y:0,tx:0,ty:0,
-  scale:.48,ts:.48,
-  down:false,lastX:0,lastY:0,
-  vx:0,vy:0,drag:0,pointerId:null
-};
-
-const WORLD_W=4400, WORLD_H=3200;
-const MIN_SCALE=.34, MAX_SCALE=1.85;
-const EASE=.12, OVERSCROLL=.08;
+const interactive=document.querySelector('#interactive'),surface=document.querySelector('#surface');
 
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function hexToRgba(hex,a){
+  const n=parseInt(hex.slice(1),16);
+  return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`;
+}
+
+/* ---------------------------------------------------------------------
+   MOSAIC / TREEMAP GRID
+   Each cluster is its own CSS grid using grid-auto-flow:dense, mixing
+   1x1 (square), 2x1 (landscape) and 1x2 (portrait) tiles — plus an
+   occasional 2x2 feature tile — so the packing looks like a treemap
+   rather than a uniform grid. The four clusters sit in a 2x2 layout so
+   they stay spatially distinct groups of images.
+--------------------------------------------------------------------- */
+const PER_QUADRANT=50, TOTAL=PER_QUADRANT*4;   // <- more images than before
+const UNIT=108, GAP=8;                          // <- tight gap for a treemap feel
+const QCOLS=12;
+const QUADRANT_GAP=20;                          // <- clusters sit tight around the centre
+
+// Top-row clusters (A, B) are flipped so their packing starts at the seam
+// where all four quadrants meet and grows outward — any incomplete trailing
+// row from the dense-packing algorithm ends up at the outer top edge
+// instead of next to the other quadrants, so the mosaic reads as one block
+// clustered around the centre with no gap in the middle.
+const clusters=[
+  {id:'A',name:'[Placeholder] Cluster 01 — Origins',     color:'#2a78d6', blurb:'[Placeholder] The earliest fragments in the set — where the story begins.', flip:true},
+  {id:'B',name:'[Placeholder] Cluster 02 — Momentum',     color:'#eb6834', blurb:'[Placeholder] Images gathered as the pace of the journey picks up.', flip:true},
+  {id:'C',name:'[Placeholder] Cluster 03 — Undercurrent', color:'#1baf7a', blurb:'[Placeholder] A quieter group, running beneath the main thread.'},
+  {id:'D',name:'[Placeholder] Cluster 04 — Resolution',   color:'#4a3aa7', blurb:'[Placeholder] Where the separate threads start to come together.'}
+];
+
+function pickShape(){
+  const r=Math.random();
+  if(r<.10) return {w:2,h:2};   // big feature tile
+  if(r<.35) return {w:2,h:1};   // landscape
+  if(r<.55) return {w:1,h:2};   // portrait
+  return {w:1,h:1};             // square
+}
+function imgSrc(i,w,h){
+  if(w===h) return `https://picsum.photos/seed/mosaic-${i}/820/820`;
+  if(w>h)   return `https://picsum.photos/seed/mosaic-${i}/1000/620`;
+  return `https://picsum.photos/seed/mosaic-${i}/620/1000`;
+}
+
+const quadrantsGrid=document.createElement('div');
+quadrantsGrid.style.display='grid';
+quadrantsGrid.style.gridTemplateColumns='max-content max-content';
+quadrantsGrid.style.gridTemplateRows='max-content max-content';
+quadrantsGrid.style.gap=QUADRANT_GAP+'px';
+quadrantsGrid.style.alignItems='start';
+quadrantsGrid.style.justifyItems='start';
+surface.appendChild(quadrantsGrid);
+
+// Every cluster reuses the *same* sequence of tile shapes. Dense packing is
+// deterministic for a given (column count, shape sequence), so all four
+// quadrants come out exactly the same height — no mismatched-row gaps
+// between them, and the whole mosaic reads as one tight, centred block.
+const shapeSequence=Array.from({length:PER_QUADRANT},()=>pickShape());
+
+const quadrantEls={}, quadrantCards={};
+let globalIndex=0;
+clusters.forEach(c=>{
+  const q=document.createElement('div');
+  q.className='quadrant';
+  q.dataset.cluster=c.id;
+  q.style.display='grid';
+  q.style.alignContent='start';
+  q.style.gridAutoFlow='dense';
+  q.style.gridTemplateColumns=`repeat(${QCOLS},${UNIT}px)`;
+  q.style.gridAutoRows=UNIT+'px';
+  q.style.gap=GAP+'px';
+  if(c.flip) q.style.transform='scaleY(-1)';
+  quadrantsGrid.appendChild(q);
+  quadrantEls[c.id]=q;
+
+  const cards=[];
+  for(let k=0;k<PER_QUADRANT;k++){
+    const idx=globalIndex++;
+    const shape=shapeSequence[k];
+    const card=document.createElement('div');
+    card.className='card';
+    card.dataset.index=idx;
+    card.style.gridColumn=`span ${shape.w}`;
+    card.style.gridRow=`span ${shape.h}`;
+    card.style.opacity='0'; card.style.transform='scale(.6)';
+    // Counter-flip only the photo, not the card box, so the parent
+    // quadrant's positional flip doesn't leave the image upside down.
+    const img=`<img src="${imgSrc(idx,shape.w,shape.h)}" alt=""${c.flip?' style="transform:scaleY(-1)"':''}>`;
+    card.innerHTML=img;
+    q.appendChild(card);
+    cards.push(card);
+  }
+  quadrantCards[c.id]=cards;
+});
+
+const imgs=Array.from({length:globalIndex},(_,i)=>`https://picsum.photos/seed/mosaic-${i}/900/650`);
+
+const allCards=[...surface.querySelectorAll('.card')];
+allCards.forEach(card=>{
+  const anim=card.animate(
+    [{opacity:0,transform:'scale(.6)'},{opacity:1,transform:'scale(1)'}],
+    {duration:600,delay:Math.random()*700,easing:'cubic-bezier(.2,.8,.2,1)',fill:'forwards'}
+  );
+  // Hand control back to plain CSS once the intro pop finishes, so the
+  // hover highlight rules below aren't blocked by the finished animation
+  // (or a leftover inline style) still holding transform/opacity.
+  anim.onfinish=()=>{ card.style.opacity=''; card.style.transform=''; anim.cancel(); };
+});
+
+/* ---------------------------------------------------------------------
+   OVERLAYS — painted on top of the images (higher stacking layer),
+   sized from the actual rendered quadrant boxes, with a show/hide toggle.
+--------------------------------------------------------------------- */
+const overlaysLayer=document.createElement('div');
+overlaysLayer.className='overlaysLayer';
+surface.appendChild(overlaysLayer);
+
+const clusterBox={}, clusterEls={};
+clusters.forEach(c=>{
+  const q=quadrantEls[c.id];
+  const box={left:q.offsetLeft,top:q.offsetTop,width:q.offsetWidth,height:q.offsetHeight};
+  box.cx=box.left+box.width/2; box.cy=box.top+box.height/2;
+  clusterBox[c.id]=box;
+
+  const el=document.createElement('div');
+  el.className='clusterOverlay';
+  el.dataset.cluster=c.id;
+  el.style.left=box.left+'px'; el.style.top=box.top+'px';
+  el.style.width=box.width+'px'; el.style.height=box.height+'px';
+  el.style.background=hexToRgba(c.color,.14);
+  el.style.borderColor=hexToRgba(c.color,.6);
+  el.innerHTML=`<div class="clusterChip"><span class="dot" style="background:${c.color}"></span><b>${c.name}</b><span>${PER_QUADRANT} fragments</span></div>`;
+  overlaysLayer.appendChild(el);
+  clusterEls[c.id]=el;
+});
+
+function highlightCluster(activeId){
+  clusters.forEach(c=>{
+    const el=clusterEls[c.id];
+    el.classList.remove('active','dim');
+    if(activeId==null) return;
+    el.classList.add(c.id===activeId?'active':'dim');
+  });
+}
+
+let overlaysOn=true;
+const overlayToggleBtn=document.querySelector('#overlayToggle');
+overlayToggleBtn.addEventListener('click',()=>{
+  overlaysOn=!overlaysOn;
+  overlaysLayer.classList.toggle('hidden',!overlaysOn);
+  overlayToggleBtn.textContent=overlaysOn?'Hide cluster overlays':'Show cluster overlays';
+  overlayToggleBtn.classList.toggle('off',!overlaysOn);
+});
+
+/* ---------------------------------------------------------------------
+   CAMERA ENGINE
+   - state.ts / state.tx / state.ty are the target camera values;
+     state.scale / state.x / state.y ease toward them every frame.
+   - setCamera() is the only thing scenes need to call: a world point +
+     a defined zoom level. MIN_SCALE is computed so the whole mosaic
+     fills the landscape frame of the browser at the overview / free-
+     exploration zoom level.
+--------------------------------------------------------------------- */
+const WORLD_W=surface.offsetWidth, WORLD_H=surface.offsetHeight;
+function fitScale(){return clamp(Math.min(innerWidth/WORLD_W,innerHeight/WORLD_H)*.96,.05,1.4)}
+let MIN_SCALE=fitScale();
+const MAX_SCALE=2.4;
+
+const state={x:0,y:0,tx:0,ty:0,scale:MIN_SCALE,ts:MIN_SCALE,down:false,lastX:0,lastY:0,vx:0,vy:0,drag:0,pointerId:null};
+const EASE=.11, OVERSCROLL=.08;
+let locked=true;      // true while the scripted camera story is driving
+let focusActive=false; // true while a detail image is focused — world-bounds clamp is lifted
 
 function bounds(scale){
   const scaledW=WORLD_W*scale, scaledH=WORLD_H*scale;
-  // Center a dimension if it is smaller than the viewport.
   const minX=scaledW<=innerWidth ? (innerWidth-scaledW)/2 : innerWidth-scaledW;
   const maxX=scaledW<=innerWidth ? minX : 0;
   const minY=scaledH<=innerHeight ? (innerHeight-scaledH)/2 : innerHeight-scaledH;
   const maxY=scaledH<=innerHeight ? minY : 0;
   return {minX,maxX,minY,maxY};
 }
-
 function clampCamera(){
   const b=bounds(state.ts);
   const extraX=innerWidth*OVERSCROLL, extraY=innerHeight*OVERSCROLL;
   state.tx=clamp(state.tx,b.minX-extraX,b.maxX+extraX);
   state.ty=clamp(state.ty,b.minY-extraY,b.maxY+extraY);
 }
-
 function hardClampCamera(){
   const b=bounds(state.scale);
   state.x=clamp(state.x,b.minX,b.maxX);
   state.y=clamp(state.y,b.minY,b.maxY);
 }
+function apply(){surface.style.transform=`translate3d(${state.x}px,${state.y}px,0) scale(${state.scale})`}
+apply(); // sync the transform once up front so rect-based measurements below are accurate
 
-function apply(){
-  surface.style.transform=`translate3d(${state.x}px,${state.y}px,0) scale(${state.scale})`;
+// True world-space box of a card, found by reversing the camera's current
+// transform on its live rendered rect. This is robust to any nesting —
+// including the flipped top-row quadrants — instead of trusting
+// offsetLeft/offsetTop, which only reports a position relative to the
+// nearest positioned/transformed ancestor (the quadrant, not the surface).
+function cardWorldRect(card){
+  const r=card.getBoundingClientRect();
+  const w=r.width/state.scale, h=r.height/state.scale;
+  const x=(r.left-state.x)/state.scale, y=(r.top-state.y)/state.scale;
+  return {x,y,w,h,cx:x+w/2,cy:y+h/2};
 }
 
 function animate(){
   state.x+=(state.tx-state.x)*EASE;
   state.y+=(state.ty-state.y)*EASE;
   state.scale+=(state.ts-state.scale)*EASE;
-
-  if(!state.down && (Math.abs(state.vx)>.02 || Math.abs(state.vy)>.02)){
-    state.tx+=state.vx;
-    state.ty+=state.vy;
-    state.vx*=.90;
-    state.vy*=.90;
-    clampCamera();
+  if(!state.down && !locked && !focusActive && (Math.abs(state.vx)>.02||Math.abs(state.vy)>.02)){
+    state.tx+=state.vx; state.ty+=state.vy; state.vx*=.90; state.vy*=.90; clampCamera();
   }
-
-  // Elastic edge while interacting, then settle exactly into the draggable area.
-  if(!state.down && Math.abs(state.vx)<.08 && Math.abs(state.vy)<.08){
+  if(!state.down && !locked && !focusActive && Math.abs(state.vx)<.08 && Math.abs(state.vy)<.08){
     const b=bounds(state.ts);
-    state.tx=clamp(state.tx,b.minX,b.maxX);
-    state.ty=clamp(state.ty,b.minY,b.maxY);
+    state.tx=clamp(state.tx,b.minX,b.maxX); state.ty=clamp(state.ty,b.minY,b.maxY);
   }
-
-  hardClampCamera();
+  if(!focusActive) hardClampCamera();
   apply();
   requestAnimationFrame(animate);
 }
 requestAnimationFrame(animate);
 
-function centerGrid(){
-  const s=MIN_SCALE;
-  state.scale=state.ts=s;
-  const b=bounds(s);
-  state.x=state.tx=clamp((innerWidth-WORLD_W*s)/2,b.minX,b.maxX);
-  state.y=state.ty=clamp((innerHeight-WORLD_H*s)/2,b.minY,b.maxY);
-  state.vx=state.vy=0;
-}
-
 function zoomAt(clientX,clientY,nextScale){
-  const old=state.ts;
-  const next=clamp(nextScale,MIN_SCALE,MAX_SCALE);
-  const ratio=next/old;
+  const old=state.ts, next=clamp(nextScale,MIN_SCALE,MAX_SCALE), ratio=next/old;
   state.tx=clientX-(clientX-state.tx)*ratio;
   state.ty=clientY-(clientY-state.ty)*ratio;
-  state.ts=next;
+  state.ts=next; clampCamera();
+}
+
+// Frame a world point at a defined zoom level, offset left so the story
+// popup on the right never covers the subject.
+function setCamera(worldX,worldY,zoom,focusXRatio=.36){
+  state.ts=zoom;
+  state.tx=innerWidth*focusXRatio-worldX*zoom;
+  state.ty=innerHeight*.5-worldY*zoom;
   clampCamera();
 }
 
-let activeImageIndex=0;
+/* ---------------------------------------------------------------------
+   STORY SCENES  (placeholders — swap camera targets & copy for real ones)
+   Exactly 5 scenes: an overview, then one stop per cluster — the last
+   cluster's "Next" becomes the "Start exploring" hand-off.
+--------------------------------------------------------------------- */
+function clusterZoomFor(c){ return clamp(innerWidth*.6/clusterBox[c.id].width, MIN_SCALE, MAX_SCALE) }
 
-const detailTitles=[
-  'A place between moments',
-  'Something left behind',
-  'Light across the surface',
-  'A fragment worth keeping',
-  'Where the journey changes direction',
-  'A quiet detail',
-  'Seen while passing through',
-  'The shape of a memory'
+// For a "detail" scene, zoom in tight enough that a single representative
+// card fills a large share of the screen — the image is highlighted purely
+// by how close the camera sits, no dimming or overlay involved.
+function detailTarget(c){
+  const card=quadrantCards[c.id][Math.floor(PER_QUADRANT/2)];
+  const r=cardWorldRect(card);
+  return {x:r.cx,y:r.cy,zoom:clamp(innerWidth*.42/r.w,1,MAX_SCALE),index:Number(card.dataset.index)};
+}
+
+// Only the first 3 clusters get an individual story beat, so the 5-scene
+// budget can still bookend with an opening AND a closing overview — the
+// closing one pulls all the way back out (including the 4th cluster,
+// never visited up close) right before free exploration opens up.
+const storyClusters=clusters.slice(0,3);
+
+const scenes=[
+  {
+    kicker:'Overview', clusterId:null,
+    camera:{zoom:'fit', focus:.5, get x(){return WORLD_W/2}, get y(){return WORLD_H/2}},
+    title:'[Placeholder] The full picture',
+    text:'[Placeholder] Every fragment collected during the project sits somewhere on this surface — four clusters, one story. The camera will walk through each of them.'
+  },
+  // The middle cluster zooms all the way into one image instead of framing
+  // the whole group — swap which cluster gets this treatment, or the
+  // picked card, once real images/copy are in.
+  ...storyClusters.map((c,i)=>{
+    const useDetail=i===1;
+    if(useDetail){
+      const d=detailTarget(c);
+      return {
+        kicker:c.name.replace('[Placeholder] ','')+' — detail', clusterId:c.id,
+        camera:{x:d.x,y:d.y,zoom:d.zoom},
+        title:'[Placeholder] Fragment '+String(d.index+1).padStart(3,'0'),
+        text:'[Placeholder] One image from this cluster, held close by the camera instead of framing the whole group — swap in the real subject and caption.'
+      };
+    }
+    return {
+      kicker:c.name.replace('[Placeholder] ',''), clusterId:c.id,
+      camera:{x:clusterBox[c.id].cx,y:clusterBox[c.id].cy,zoom:clusterZoomFor(c)},
+      title:c.name,
+      text:c.blurb
+    };
+  }),
+  // The story's last beat holds close on one final image (the 4th cluster,
+  // never visited up close) — clicking through then zooms all the way back
+  // out as free exploration opens up, instead of the story just ending flat.
+  (()=>{
+    const d=detailTarget(clusters[3]);
+    return {
+      kicker:'Free exploration', clusterId:clusters[3].id, end:true,
+      camera:{x:d.x,y:d.y,zoom:d.zoom},
+      title:'[Placeholder] Fragment '+String(d.index+1).padStart(3,'0'),
+      text:'[Placeholder] One last image, held close. Step through and the camera pulls all the way back out — then you can drag, zoom, and click through everything yourself.'
+    };
+  })()
 ];
 
+let sceneIndex=0;
+
+const storyPopup=document.querySelector('#storyPopup');
+const storyKickerText=document.querySelector('#storyKickerText');
+const storyTitle=document.querySelector('#storyTitle');
+const storyText=document.querySelector('#storyText');
+const storyDots=document.querySelector('#storyDots');
+const backBtn=document.querySelector('#backBtn');
+const nextBtn=document.querySelector('#nextBtn');
+const captionHint=document.querySelector('#captionHint');
+
+scenes.forEach((_,i)=>{
+  const dot=document.createElement('i');
+  dot.dataset.i=i;
+  storyDots.appendChild(dot);
+});
+
+function renderDots(){
+  [...storyDots.children].forEach((d,i)=>{
+    d.classList.toggle('on',i===sceneIndex);
+    d.classList.toggle('done',i<sceneIndex);
+  });
+}
+
+function goToScene(i){
+  sceneIndex=clamp(i,0,scenes.length-1);
+  const s=scenes[sceneIndex];
+  const zoom=s.camera.zoom==='fit'?fitScale():s.camera.zoom;
+  setCamera(s.camera.x,s.camera.y,zoom,s.camera.focus??.36);
+  highlightCluster(s.clusterId);
+
+  storyPopup.classList.remove('show');
+  setTimeout(()=>{
+    storyKickerText.textContent=`Scene ${String(sceneIndex+1).padStart(2,'0')} / ${scenes.length} — ${s.kicker}`;
+    storyTitle.textContent=s.title;
+    storyText.textContent=s.text;
+    renderDots();
+    backBtn.disabled=sceneIndex===0;
+    nextBtn.textContent=s.end?'Start exploring →':'Next →';
+    nextBtn.classList.toggle('primary',!!s.end);
+    storyPopup.classList.add('show');
+  },s.end?0:180);
+}
+
+function unlockExploration(){
+  locked=false;
+  interactive.classList.remove('locked');
+  storyPopup.classList.remove('show');
+  highlightCluster(null);
+  captionHint.classList.add('show');
+  state.vx=state.vy=0;
+  // The story ends zoomed in — pull back out to the full overview as
+  // exploration opens up, rather than dropping the user in wherever the
+  // last scene happened to be framed.
+  setCamera(WORLD_W/2,WORLD_H/2,fitScale(),.5);
+}
+
+backBtn.addEventListener('click',()=>{ if(sceneIndex>0) goToScene(sceneIndex-1) });
+nextBtn.addEventListener('click',()=>{
+  const s=scenes[sceneIndex];
+  if(s.end){ unlockExploration(); return }
+  goToScene(sceneIndex+1);
+});
+
+document.addEventListener('keydown',e=>{
+  if(locked){
+    if(e.key==='ArrowRight') nextBtn.click();
+    if(e.key==='ArrowLeft' && sceneIndex>0) goToScene(sceneIndex-1);
+    return;
+  }
+  const modal=document.querySelector('#modal');
+  if(!modal.classList.contains('show')) return;
+  if(e.key==='Escape') closeDetails();
+  if(e.key==='ArrowRight') showDetail(activeImageIndex+1);
+  if(e.key==='ArrowLeft') showDetail(activeImageIndex-1);
+});
+
+goToScene(0);
+
+/* ---------------------------------------------------------------------
+   FREE EXPLORATION  (unlocked after the last story scene)
+--------------------------------------------------------------------- */
+let activeImageIndex=0;
+const detailTitles=['A place between moments','Something left behind','Light across the surface','A fragment worth keeping','Where the journey changes direction','A quiet detail','Seen while passing through','The shape of a memory'];
 const detailTexts=[
   'This fragment was encountered while moving through the larger field of images. Its meaning is deliberately open — a small detail that becomes clearer when you stop and look closer.',
   'Part of the visual trail gathered during the journey, this image sits somewhere between documentation and memory.',
@@ -330,64 +525,50 @@ const detailTexts=[
   'This image marks one of the places where the visual journey begins to reorganize itself — from scattered fragments into a larger picture.'
 ];
 
-function focusImageInWorld(index, instant=false){
+function focusImageInWorld(index,instant=false){
   const card=surface.querySelector(`.card[data-index="${index}"]`);
   if(!card) return;
-
-  const cardX=parseFloat(card.style.left)||0;
-  const cardY=parseFloat(card.style.top)||0;
-  const cardW=card.offsetWidth;
-  const cardH=card.offsetHeight;
-
-  // Keep the image comfortably visible in the part of the screen that is
-  // not covered by the side panel.
+  const r=cardWorldRect(card);
   const panelW=Math.min(520,innerWidth*.94);
-  const visibleW=Math.max(1,innerWidth-panelW);
-  const targetScale=clamp(Math.max(state.ts,.72),MIN_SCALE,MAX_SCALE);
+  const visibleW=Math.max(120,innerWidth-panelW);
 
-  const targetCenterX=visibleW*.52;
-  const targetCenterY=innerHeight*.5;
+  // Pick a comfortable close-up zoom, but never one that would make the
+  // card wider/taller than the strip actually left visible beside the
+  // detail panel — so the focused image can never end up hidden behind it.
+  const MARGIN=.72, DESIRED=1.15;
+  const fitW=(visibleW*MARGIN)/r.w, fitH=(innerHeight*MARGIN)/r.h;
+  const targetScale=clamp(Math.min(DESIRED,fitW,fitH),MIN_SCALE,MAX_SCALE);
 
+  const targetCenterX=visibleW/2, targetCenterY=innerHeight/2;
   state.ts=targetScale;
-  state.tx=targetCenterX-(cardX+cardW/2)*targetScale;
-  state.ty=targetCenterY-(cardY+cardH/2)*targetScale;
-  clampCamera();
-
-  if(instant){
-    state.scale=state.ts;
-    state.x=state.tx;
-    state.y=state.ty;
-  }
+  state.tx=targetCenterX-r.cx*targetScale;
+  state.ty=targetCenterY-r.cy*targetScale;
+  // No clampCamera() here on purpose — while an image is focused the normal
+  // world-bounds restriction is lifted (see `focusActive` in animate()) so
+  // this exact framing is never fought/overridden by the generic clamp.
+  if(instant){state.scale=state.ts;state.x=state.tx;state.y=state.ty}
 }
 
 function showDetail(index){
   activeImageIndex=(index+imgs.length)%imgs.length;
   const i=activeImageIndex;
-  const modal=document.querySelector('#modal');
-  const img=document.querySelector('#modalImg');
-
-  // Move the underlying exploration world to the same image.
+  const modal=document.querySelector('#modal'), img=document.querySelector('#modalImg');
+  focusActive=true; // lift the world-bounds clamp for as long as an image is focused
   focusImageInWorld(i);
-
-  img.src=imgs[i];
-  img.alt='Fragment '+String(i+1).padStart(2,'0');
-  document.querySelector('#modalInfo').textContent='Fragment '+String(i+1).padStart(2,'0');
+  img.src=imgs[i]; img.alt='Fragment '+String(i+1).padStart(3,'0');
+  document.querySelector('#modalInfo').textContent='Fragment '+String(i+1).padStart(3,'0');
   document.querySelector('#modalTitle').textContent=detailTitles[i%detailTitles.length];
   document.querySelector('#modalText').textContent=detailTexts[i%detailTexts.length];
   document.querySelector('#imageCount').textContent=(i+1)+' / '+imgs.length;
-
-  modal.classList.add('show');
-  modal.setAttribute('aria-hidden','false');
+  modal.classList.add('show'); modal.setAttribute('aria-hidden','false');
 }
-
-function openDetails(card){
-  showDetail(Number(card.dataset.index));
-}
-
+function openDetails(card){showDetail(Number(card.dataset.index))}
 function closeDetails(){
   const modal=document.querySelector('#modal');
   modal.classList.remove('show');
   modal.setAttribute('aria-hidden','true');
+  focusActive=false; // restore the normal world-bounds constraint
+  clampCamera();
 }
 
 document.querySelector('#nextImage').onclick=()=>showDetail(activeImageIndex+1);
@@ -395,117 +576,45 @@ document.querySelector('#prevImage').onclick=()=>showDetail(activeImageIndex-1);
 document.querySelector('#close').onclick=closeDetails;
 document.querySelector('#modalBackdrop').onclick=closeDetails;
 
-let gestureCard=null;
-let gestureStartX=0, gestureStartY=0;
+let gestureCard=null, gestureStartX=0, gestureStartY=0;
 const CLICK_THRESHOLD=12;
 
 interactive.addEventListener('pointerdown',e=>{
-  if(e.target.closest('button')) return;
+  if(locked || e.target.closest('button')) return;
   gestureCard=e.target.closest('.card');
-  gestureStartX=e.clientX;
-  gestureStartY=e.clientY;
-
-  state.down=true;
-  state.pointerId=e.pointerId;
-  state.lastX=e.clientX;
-  state.lastY=e.clientY;
-  state.vx=state.vy=0;
-  state.drag=0;
-
-  // Capture on the full-screen interaction layer so the gesture remains stable.
+  gestureStartX=e.clientX; gestureStartY=e.clientY;
+  state.down=true; state.pointerId=e.pointerId;
+  state.lastX=e.clientX; state.lastY=e.clientY;
+  state.vx=state.vy=0; state.drag=0;
   interactive.setPointerCapture(e.pointerId);
 });
-
 interactive.addEventListener('pointermove',e=>{
-  if(!state.down || e.pointerId!==state.pointerId) return;
-
-  const dx=e.clientX-state.lastX;
-  const dy=e.clientY-state.lastY;
+  if(locked || !state.down || e.pointerId!==state.pointerId) return;
+  const dx=e.clientX-state.lastX, dy=e.clientY-state.lastY;
   const total=Math.hypot(e.clientX-gestureStartX,e.clientY-gestureStartY);
   state.drag=total;
-
-  // Only pan once this is clearly a drag. A normal click leaves the grid still.
-  if(total>CLICK_THRESHOLD){
-    state.tx+=dx;
-    state.ty+=dy;
-    clampCamera();
-    state.vx=dx;
-    state.vy=dy;
-  }
-
-  state.lastX=e.clientX;
-  state.lastY=e.clientY;
+  if(total>CLICK_THRESHOLD){state.tx+=dx;state.ty+=dy;clampCamera();state.vx=dx;state.vy=dy}
+  state.lastX=e.clientX; state.lastY=e.clientY;
 });
-
 interactive.addEventListener('pointerup',e=>{
-  if(e.pointerId!==state.pointerId) return;
-
+  if(locked || e.pointerId!==state.pointerId) return;
   const card=gestureCard;
   const distance=Math.hypot(e.clientX-gestureStartX,e.clientY-gestureStartY);
-
-  state.down=false;
-  state.pointerId=null;
-  gestureCard=null;
-
-  // This is the important change: open directly on pointer-up instead of
-  // waiting for a browser click event that may be swallowed by the drag layer.
-  if(card && distance<=CLICK_THRESHOLD && card.isConnected){
-    openDetails(card);
-  }
+  state.down=false; state.pointerId=null; gestureCard=null;
+  if(card && distance<=CLICK_THRESHOLD && card.isConnected) openDetails(card);
 });
-
-interactive.addEventListener('pointercancel',()=>{
-  state.down=false;
-  state.pointerId=null;
-  gestureCard=null;
-});
-
+interactive.addEventListener('pointercancel',()=>{state.down=false;state.pointerId=null;gestureCard=null});
 interactive.addEventListener('wheel',e=>{
+  if(locked) return;
   e.preventDefault();
-
-  // Scroll up/down controls zoom. No Ctrl/pinch gesture is required.
-  if(Math.abs(e.deltaY)>0){
-    zoomAt(
-      e.clientX,
-      e.clientY,
-      state.ts*Math.exp(-e.deltaY*.007)
-    );
-  }
-
-  // Optional horizontal trackpad movement pans the world.
-  if(Math.abs(e.deltaX)>0){
-    state.tx-=e.deltaX*1.15;
-    clampCamera();
-  }
+  if(Math.abs(e.deltaY)>0) zoomAt(e.clientX,e.clientY,state.ts*Math.exp(-e.deltaY*.007));
+  if(Math.abs(e.deltaX)>0){state.tx-=e.deltaX*1.15;clampCamera()}
 },{passive:false});
-document.querySelector('#explore').onclick=()=>{
-  explored=true;
-  endScene.style.display='none';
-  interactive.classList.add('active');
-  centerGrid();
-  const cards=[...surface.querySelectorAll('.card')];
-  cards.forEach(card=>{
-    card.animate(
-      [{opacity:0,transform:'scale(.55)'},{opacity:1,transform:'scale(1)'}],
-      {duration:650,delay:Math.random()*900,easing:'cubic-bezier(.2,.8,.2,1)',fill:'forwards'}
-    );
-  });
-};
-
-document.querySelector('#exitExplore').onclick=()=>exitExploration();
-function exitExploration(){
-  explored=false;
-  interactive.classList.remove('active');
-  endScene.style.display='';
-  requestAnimationFrame(()=>endScene.classList.add('show'));
-  centerGrid();
-}
 
 window.addEventListener('resize',()=>{
-  if(interactive.classList.contains('active')){
-    clampCamera();
-    hardClampCamera();
-  }
+  MIN_SCALE=fitScale();
+  if(locked) goToScene(sceneIndex);
+  else { clampCamera(); hardClampCamera() }
 });
 document.querySelector('#modal').onclick=e=>{if(e.target.id==='modal')e.currentTarget.classList.remove('show')};
 })();

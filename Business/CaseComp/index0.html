@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Infinite Section → Optional Exploration</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;background:#f4f1e9;color:#111;font-family:Arial,Helvetica,sans-serif}body{overflow-x:hidden}
+.section{position:relative;width:100%;min-height:100vh}.empty{height:100vh;display:grid;place-items:center;background:#f4f1e9}.empty small{letter-spacing:.18em;text-transform:uppercase;opacity:.32}
+#story{height:650vh;background:#f4f1e9;color:#161513}.sticky{position:sticky;top:0;width:100%;height:100vh;overflow:hidden;background:#090909}
+.worldWrap{position:absolute;inset:0;perspective:1200px;transform-style:preserve-3d}.world{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;will-change:transform}
+.tile{position:absolute;width:190px;height:125px;left:-95px;top:-62px;overflow:hidden;border-radius:7px;background:#222;box-shadow:0 18px 70px #0009;will-change:transform,opacity;backface-visibility:hidden}.tile img{width:100%;height:100%;object-fit:cover}
+.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 35%,#a79f8b18 100%)}
+.dialogue{position:absolute;left:50%;bottom:9vh;transform:translateX(-50%);width:min(850px,88vw);text-align:center;opacity:0;transition:opacity .45s;pointer-events:none;background:#111;border:1px solid #ffffff22;padding:24px 30px}.dialogue.show{opacity:1}.eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.65;margin-bottom:10px;color:#fff}.line{font-size:clamp(26px,4.6vw,62px);line-height:1.02;font-weight:600;color:#fff;text-shadow:none}
+.progress{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);width:min(450px,68vw);height:1px;background:#1112}.progress i{display:block;height:100%;width:0;background:#fff}
+.endScene{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .35s;background:#f4f1e9;color:#111;overflow:hidden}.endScene.show{opacity:1;pointer-events:auto}
+.endSurface{position:absolute;left:50%;top:50%;width:2400px;height:1700px;transform-origin:center;transform:translate(-50%,-50%);background:#f4f1e9}
+.endCard{position:absolute;width:190px;height:135px;overflow:hidden;background:#fff;box-shadow:0 15px 35px #0002}.endCard img{width:100%;height:100%;object-fit:cover}
+.choice{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;z-index:5}.choice p{font-size:11px;letter-spacing:.18em;text-transform:uppercase;opacity:.6;margin:0 0 15px}.choice button{border:1px solid #111;background:#f7f4ec;color:#111;padding:15px 22px;font-size:10px;letter-spacing:.17em;text-transform:uppercase;cursor:pointer}.choice button:hover{background:#111;color:#fff}
+.skipHint{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);font-size:10px;letter-spacing:.15em;text-transform:uppercase;opacity:.45;white-space:nowrap}
+.interactive{position:fixed;inset:0;display:none;background:#f4f1e9;overflow:hidden;touch-action:none;cursor:grab;z-index:20}.interactive.active{display:block}.interactive:active{cursor:grabbing}
+.surface{position:absolute;width:2400px;height:1700px;left:0;top:0;transform-origin:0 0;background:linear-gradient(90deg,#00000008 1px,transparent 1px),linear-gradient(#00000008 1px,transparent 1px),#e8e5dc;background-size:240px 240px}
+#exitExplore{position:absolute;right:22px;top:22px;z-index:25;border:1px solid #111;background:#f7f4ec;color:#111;padding:12px 16px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;box-shadow:0 6px 20px #0001}#exitExplore:hover{background:#111;color:#fff}.exit-explore{position:absolute;right:24px;top:24px;z-index:25;border:1px solid #111;background:#f7f4ec;color:#111;padding:12px 17px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;box-shadow:0 8px 24px #0002}.exit-explore:hover{background:#111;color:#fff}.caption{position:absolute;left:24px;top:22px;z-index:3;pointer-events:none}.caption h2{margin:0;font-size:clamp(30px,4vw,56px);line-height:.95}.caption p{font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.5}.card{position:absolute;width:18.5vw;height:18.5vw;min-width:180px;min-height:180px;max-width:320px;max-height:320px;overflow:hidden;background:#fff;box-shadow:0 15px 35px #0002;cursor:pointer;transition:transform .18s}.card:hover{transform:scale(1.04)!important}.card img{width:100%;height:100%;object-fit:cover}
+.modal{position:fixed;inset:0;display:none;place-items:center;pointer-events:auto;background:#f4f1e9e8;z-index:100}.modal.show{display:grid}.panel{width:min(900px,90vw);height:min(78vh,680px);background:#fff;position:relative}.panel img{width:100%;height:100%;object-fit:contain}.close{position:absolute;right:12px;top:12px;width:38px;height:38px;border:0;border-radius:50%;cursor:pointer;background:#fff;font-size:20px}
+.detail-image{position:absolute;inset:0 0 150px 0;background:#f7f4ec}.detail-image img{width:100%;height:100%;object-fit:contain}.detail-copy{position:absolute;left:0;right:0;bottom:0;min-height:150px;padding:22px 28px;background:#f7f4ec;border-top:1px solid #1111}.detail-kicker{font-size:9px;letter-spacing:.2em;text-transform:uppercase;opacity:.5;margin-bottom:8px}.detail-copy h3{margin:0 0 7px;font-size:24px;font-weight:500}.detail-copy p{margin:0;max-width:700px;font-size:13px;line-height:1.5;opacity:.65}@media(max-width:700px){.detail-image{inset:0 0 185px 0}.detail-copy{min-height:185px;padding:18px}.detail-copy h3{font-size:20px}}@media(max-width:700px){.tile{width:135px;height:94px;left:-67px;top:-47px}.dialogue{bottom:14vh}.endCard{width:135px;height:95px}}
+/* Side image detail overlay */
+.modal{
+  position:fixed;
+  inset:0;
+  display:block;
+  visibility:hidden;
+  pointer-events:none;
+  background:transparent;
+  z-index:100;
+}
+.modal.show{visibility:visible;pointer-events:auto}
+.modal-backdrop{
+  position:absolute;inset:0;
+  background:#1113;
+  opacity:0;
+  transition:opacity .35s ease;
+}
+.modal.show .modal-backdrop{opacity:1}
+.side-panel{
+  position:absolute!important;
+  top:0!important;
+  right:0!important;
+  left:auto!important;
+  bottom:0!important;
+  width:min(520px,94vw)!important;
+  height:100vh!important;
+  max-height:none!important;
+  min-height:0!important;
+  margin:0!important;
+  display:grid!important;
+  grid-template-rows:minmax(0,1fr) auto auto!important;
+  background:#f7f4ec!important;
+  transform:translate3d(105%,0,0)!important;
+  transition:transform .45s cubic-bezier(.2,.8,.2,1)!important;
+  box-shadow:-20px 0 60px #0003!important;
+  overflow:hidden!important;
+}
+.modal.show .side-panel{transform:translate3d(0,0,0)!important}
+.side-panel .detail-image{
+  position:relative!important;
+  inset:auto!important;
+  min-height:0;
+  background:#ede9df;
+}
+.side-panel .detail-image img{
+  width:100%;height:100%;object-fit:contain;
+}
+.side-panel .detail-copy{
+  position:relative!important;
+  inset:auto!important;
+  min-height:0!important;
+  padding:22px 28px!important;
+  background:#f7f4ec!important;
+  border-top:1px solid #1111;
+}
+.detail-nav{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:12px;
+  padding:16px 20px 20px;
+  border-top:1px solid #1111;
+  background:#f7f4ec;
+}
+.detail-nav button{
+  appearance:none;
+  border:1px solid #111;
+  background:transparent;
+  color:#111;
+  padding:10px 12px;
+  font:inherit;
+  font-size:10px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  cursor:pointer;
+}
+.detail-nav button:hover{background:#111;color:#fff}
+#imageCount{font-size:10px;letter-spacing:.1em;white-space:nowrap;opacity:.55}
+.side-panel .close{z-index:4}
+
+.modal.show .side-panel{pointer-events:auto}.modal.show .modal-backdrop{pointer-events:auto}
+</style>
+</head>
+<body>
+<section class="section empty"><small>Previous website section — empty space</small></section>
+
+<section id="story" class="section">
+  <div class="sticky">
+    <div class="worldWrap"><div id="world" class="world"></div><div class="vignette"></div></div>
+    <div id="dialogue" class="dialogue"><div id="eyebrow" class="eyebrow"></div><div id="line" class="line"></div></div>
+    <div class="progress"><i id="bar"></i></div>
+
+    <div id="endScene" class="endScene">
+      <div id="endSurface" class="endSurface"></div>
+      <div class="choice">
+        <p>Everything is here now</p>
+        <button id="explore">Explore the surface</button>
+      </div>
+      <div class="skipHint">or keep scrolling to continue</div>
+    </div>
+
+    <div id="interactive" class="interactive"><button id="exitExplore" class="exit-explore">Exit exploration</button>
+      <div class="caption"><h2>The surface</h2><p>Drag · scroll/pinch to zoom · click images · zoom all the way out to exit</p></div>
+      <div id="surface" class="surface"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section empty"><small>Next website section — the experience continues</small></section>
+<div id="modal" class="modal" aria-hidden="true">
+  <div class="modal-backdrop" id="modalBackdrop"></div>
+  <aside class="panel side-panel" role="dialog" aria-modal="true" aria-label="Image details">
+    <button id="close" class="close" aria-label="Close details">×</button>
+    <div class="detail-image"><img id="modalImg" alt=""></div>
+    <div class="detail-copy">
+      <div id="modalInfo" class="detail-kicker">Fragment 01</div>
+      <h3 id="modalTitle">A fragment of the journey</h3>
+      <p id="modalText">This image is one of the fragments collected along the journey.</p>
+    </div>
+    <div class="detail-nav">
+      <button id="prevImage" type="button">← Previous</button>
+      <span id="imageCount">1 / 100</span>
+      <button id="nextImage" type="button">Next →</button>
+    </div>
+  </aside>
+</div>
+    </div></div>
+
+<script>
+(()=>{
+const world=document.querySelector('#world'),story=document.querySelector('#story'),dialogue=document.querySelector('#dialogue'),eyebrow=document.querySelector('#eyebrow'),line=document.querySelector('#line'),bar=document.querySelector('#bar'),endScene=document.querySelector('#endScene'),endSurface=document.querySelector('#endSurface'),interactive=document.querySelector('#interactive'),surface=document.querySelector('#surface');
+const imgs=Array.from({length:150},(_,i)=>`https://picsum.photos/seed/story-surface-${i}/900/650`);
+const items=[], finalPositions=[];
+for(let i=0;i<120;i++){
+ const a=Math.random()*Math.PI*2,r=300+Math.random()*2200,x=Math.cos(a)*r,y=(Math.random()-.5)*1700,z=-100-Math.random()*5300,rot=(Math.random()-.5)*18;
+ const col=i%10,row=Math.floor(i/10),fx=(col-4.5)*220+(Math.random()-.5)*35,fy=(row-3.5)*170+(Math.random()-.5)*28;
+ const el=document.createElement('div');el.className='tile';el.innerHTML=`<img src="${imgs[i]}" alt="">`;world.appendChild(el);
+ items.push({el,x,y,z,rot,fx,fy});finalPositions.push({x:fx+1200,y:fy+850});
+}
+const beats=[
+ {at:.03,title:'01 / drifting',text:'There is no beginning here.'},
+ {at:.17,title:'02 / passing',text:'One image becomes a direction.'},
+ {at:.34,title:'03 / noticing',text:'The more you move, the more the space responds.'},
+ {at:.53,title:'04 / changing',text:'Distance is starting to lose its meaning.'},
+ {at:.70,title:'05 / gathering',text:'The fragments are finding each other.'}
+];
+let lastBeat=-1, explored=false;
+function smooth(x){return x*x*(3-2*x)}
+function render(){
+ const rect=story.getBoundingClientRect();
+ const progress=Math.max(0,Math.min(1,-rect.top/(rect.height-innerHeight)));
+ const arrange=smooth(Math.max(0,Math.min(1,(progress-.68)/.25)));
+ const overview=smooth(Math.max(0,Math.min(1,(progress-.83)/.17)));
+ bar.style.width=(progress*100)+'%';
+
+ let beat=-1;beats.forEach((b,i)=>{if(progress>=b.at)beat=i});
+ if(beat!==lastBeat&&beat>=0){lastBeat=beat;eyebrow.textContent=beats[beat].title;line.textContent=beats[beat].text;dialogue.classList.add('show');setTimeout(()=>{if(lastBeat===beat)dialogue.classList.remove('show')},1600)}
+
+ // The camera slows down as the images organize, then pulls back.
+ const travel=progress*3900*(1-arrange*.18);
+ const zoomOut=overview*2.2;
+ world.style.transform=`translate3d(0,0,${travel}px) scale(${1-overview*.46})`;
+ world.parentElement.style.perspective=(1200-550*arrange)+'px';
+
+ items.forEach(it=>{
+   const x=it.x*(1-arrange)+it.fx*arrange;
+   const y=it.y*(1-arrange)+it.fy*arrange;
+   const z=it.z*(1-arrange)-420*arrange;
+   it.el.style.transform=`translate3d(${x}px,${y}px,${z}px) rotateZ(${it.rot*(1-arrange)}deg)`;
+ });
+ if(progress>.88 && !explored) endScene.classList.add('show');
+ else if(!explored) endScene.classList.remove('show');
+ requestAnimationFrame(render);
+}
+requestAnimationFrame(render);
+
+// Build identical arrangement for both the overview and the interactive surface.
+items.forEach((it,i)=>{
+ const c=document.createElement('div');c.className='endCard';c.style.left=(it.fx+1200-95)+'px';c.style.top=(it.fy+850-67)+'px';c.innerHTML=`<img src="${imgs[i]}">`;endSurface.appendChild(c);
+
+ const cols=10, gap=85, size=250, col=i%cols, row=Math.floor(i/cols);
+ const d=document.createElement('div');d.className='card';
+ d.style.left=(320+col*(size+gap))+'px';
+ d.style.top=(260+row*(size+gap)+(col%2?150:0))+'px';
+ d.style.opacity='0'; d.style.transform='scale(.55)';
+ d.dataset.index=i;
+ d.innerHTML=`<img src="${imgs[i]}">`;
+ surface.appendChild(d);
+});
+
+document.addEventListener('keydown',e=>{
+  const modal=document.querySelector('#modal');
+  if(!modal.classList.contains('show')) return;
+  if(e.key==='Escape') closeDetails();
+  if(e.key==='ArrowRight') showDetail(activeImageIndex+1);
+  if(e.key==='ArrowLeft') showDetail(activeImageIndex-1);
+});
+document.querySelector('#explore').onclick=()=>{
+ explored=true;endScene.style.display='none';interactive.classList.add('active');
+ // Freeze the exact final arrangement; this frame is now the interactive one.
+ const scale=.42;state.scale=scale;state.x=innerWidth/2-1200*scale;state.y=innerHeight/2-850*scale;apply();
+};
+const state={
+  x:0,y:0,tx:0,ty:0,
+  scale:.48,ts:.48,
+  down:false,lastX:0,lastY:0,
+  vx:0,vy:0,drag:0,pointerId:null
+};
+
+const WORLD_W=4400, WORLD_H=3200;
+const MIN_SCALE=.34, MAX_SCALE=1.85;
+const EASE=.12, OVERSCROLL=.08;
+
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+
+function bounds(scale){
+  const scaledW=WORLD_W*scale, scaledH=WORLD_H*scale;
+  // Center a dimension if it is smaller than the viewport.
+  const minX=scaledW<=innerWidth ? (innerWidth-scaledW)/2 : innerWidth-scaledW;
+  const maxX=scaledW<=innerWidth ? minX : 0;
+  const minY=scaledH<=innerHeight ? (innerHeight-scaledH)/2 : innerHeight-scaledH;
+  const maxY=scaledH<=innerHeight ? minY : 0;
+  return {minX,maxX,minY,maxY};
+}
+
+function clampCamera(){
+  const b=bounds(state.ts);
+  const extraX=innerWidth*OVERSCROLL, extraY=innerHeight*OVERSCROLL;
+  state.tx=clamp(state.tx,b.minX-extraX,b.maxX+extraX);
+  state.ty=clamp(state.ty,b.minY-extraY,b.maxY+extraY);
+}
+
+function hardClampCamera(){
+  const b=bounds(state.scale);
+  state.x=clamp(state.x,b.minX,b.maxX);
+  state.y=clamp(state.y,b.minY,b.maxY);
+}
+
+function apply(){
+  surface.style.transform=`translate3d(${state.x}px,${state.y}px,0) scale(${state.scale})`;
+}
+
+function animate(){
+  state.x+=(state.tx-state.x)*EASE;
+  state.y+=(state.ty-state.y)*EASE;
+  state.scale+=(state.ts-state.scale)*EASE;
+
+  if(!state.down && (Math.abs(state.vx)>.02 || Math.abs(state.vy)>.02)){
+    state.tx+=state.vx;
+    state.ty+=state.vy;
+    state.vx*=.90;
+    state.vy*=.90;
+    clampCamera();
+  }
+
+  // Elastic edge while interacting, then settle exactly into the draggable area.
+  if(!state.down && Math.abs(state.vx)<.08 && Math.abs(state.vy)<.08){
+    const b=bounds(state.ts);
+    state.tx=clamp(state.tx,b.minX,b.maxX);
+    state.ty=clamp(state.ty,b.minY,b.maxY);
+  }
+
+  hardClampCamera();
+  apply();
+  requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+
+function centerGrid(){
+  const s=MIN_SCALE;
+  state.scale=state.ts=s;
+  const b=bounds(s);
+  state.x=state.tx=clamp((innerWidth-WORLD_W*s)/2,b.minX,b.maxX);
+  state.y=state.ty=clamp((innerHeight-WORLD_H*s)/2,b.minY,b.maxY);
+  state.vx=state.vy=0;
+}
+
+function zoomAt(clientX,clientY,nextScale){
+  const old=state.ts;
+  const next=clamp(nextScale,MIN_SCALE,MAX_SCALE);
+  const ratio=next/old;
+  state.tx=clientX-(clientX-state.tx)*ratio;
+  state.ty=clientY-(clientY-state.ty)*ratio;
+  state.ts=next;
+  clampCamera();
+}
+
+let activeImageIndex=0;
+
+const detailTitles=[
+  'A place between moments',
+  'Something left behind',
+  'Light across the surface',
+  'A fragment worth keeping',
+  'Where the journey changes direction',
+  'A quiet detail',
+  'Seen while passing through',
+  'The shape of a memory'
+];
+
+const detailTexts=[
+  'This fragment was encountered while moving through the larger field of images. Its meaning is deliberately open — a small detail that becomes clearer when you stop and look closer.',
+  'Part of the visual trail gathered during the journey, this image sits somewhere between documentation and memory.',
+  'Pulled from the larger collection, this fragment changes when it is isolated from the surrounding images. Look closely at the details, texture, and light.',
+  'The surface is made from many small moments like this one. Click through the collection to find the connections between them.',
+  'This image marks one of the places where the visual journey begins to reorganize itself — from scattered fragments into a larger picture.'
+];
+
+function focusImageInWorld(index, instant=false){
+  const card=surface.querySelector(`.card[data-index="${index}"]`);
+  if(!card) return;
+
+  const cardX=parseFloat(card.style.left)||0;
+  const cardY=parseFloat(card.style.top)||0;
+  const cardW=card.offsetWidth;
+  const cardH=card.offsetHeight;
+
+  // Keep the image comfortably visible in the part of the screen that is
+  // not covered by the side panel.
+  const panelW=Math.min(520,innerWidth*.94);
+  const visibleW=Math.max(1,innerWidth-panelW);
+  const targetScale=clamp(Math.max(state.ts,.72),MIN_SCALE,MAX_SCALE);
+
+  const targetCenterX=visibleW*.52;
+  const targetCenterY=innerHeight*.5;
+
+  state.ts=targetScale;
+  state.tx=targetCenterX-(cardX+cardW/2)*targetScale;
+  state.ty=targetCenterY-(cardY+cardH/2)*targetScale;
+  clampCamera();
+
+  if(instant){
+    state.scale=state.ts;
+    state.x=state.tx;
+    state.y=state.ty;
+  }
+}
+
+function showDetail(index){
+  activeImageIndex=(index+imgs.length)%imgs.length;
+  const i=activeImageIndex;
+  const modal=document.querySelector('#modal');
+  const img=document.querySelector('#modalImg');
+
+  // Move the underlying exploration world to the same image.
+  focusImageInWorld(i);
+
+  img.src=imgs[i];
+  img.alt='Fragment '+String(i+1).padStart(2,'0');
+  document.querySelector('#modalInfo').textContent='Fragment '+String(i+1).padStart(2,'0');
+  document.querySelector('#modalTitle').textContent=detailTitles[i%detailTitles.length];
+  document.querySelector('#modalText').textContent=detailTexts[i%detailTexts.length];
+  document.querySelector('#imageCount').textContent=(i+1)+' / '+imgs.length;
+
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+}
+
+function openDetails(card){
+  showDetail(Number(card.dataset.index));
+}
+
+function closeDetails(){
+  const modal=document.querySelector('#modal');
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden','true');
+}
+
+document.querySelector('#nextImage').onclick=()=>showDetail(activeImageIndex+1);
+document.querySelector('#prevImage').onclick=()=>showDetail(activeImageIndex-1);
+document.querySelector('#close').onclick=closeDetails;
+document.querySelector('#modalBackdrop').onclick=closeDetails;
+
+let gestureCard=null;
+let gestureStartX=0, gestureStartY=0;
+const CLICK_THRESHOLD=12;
+
+interactive.addEventListener('pointerdown',e=>{
+  if(e.target.closest('button')) return;
+  gestureCard=e.target.closest('.card');
+  gestureStartX=e.clientX;
+  gestureStartY=e.clientY;
+
+  state.down=true;
+  state.pointerId=e.pointerId;
+  state.lastX=e.clientX;
+  state.lastY=e.clientY;
+  state.vx=state.vy=0;
+  state.drag=0;
+
+  // Capture on the full-screen interaction layer so the gesture remains stable.
+  interactive.setPointerCapture(e.pointerId);
+});
+
+interactive.addEventListener('pointermove',e=>{
+  if(!state.down || e.pointerId!==state.pointerId) return;
+
+  const dx=e.clientX-state.lastX;
+  const dy=e.clientY-state.lastY;
+  const total=Math.hypot(e.clientX-gestureStartX,e.clientY-gestureStartY);
+  state.drag=total;
+
+  // Only pan once this is clearly a drag. A normal click leaves the grid still.
+  if(total>CLICK_THRESHOLD){
+    state.tx+=dx;
+    state.ty+=dy;
+    clampCamera();
+    state.vx=dx;
+    state.vy=dy;
+  }
+
+  state.lastX=e.clientX;
+  state.lastY=e.clientY;
+});
+
+interactive.addEventListener('pointerup',e=>{
+  if(e.pointerId!==state.pointerId) return;
+
+  const card=gestureCard;
+  const distance=Math.hypot(e.clientX-gestureStartX,e.clientY-gestureStartY);
+
+  state.down=false;
+  state.pointerId=null;
+  gestureCard=null;
+
+  // This is the important change: open directly on pointer-up instead of
+  // waiting for a browser click event that may be swallowed by the drag layer.
+  if(card && distance<=CLICK_THRESHOLD && card.isConnected){
+    openDetails(card);
+  }
+});
+
+interactive.addEventListener('pointercancel',()=>{
+  state.down=false;
+  state.pointerId=null;
+  gestureCard=null;
+});
+
+interactive.addEventListener('wheel',e=>{
+  e.preventDefault();
+
+  // Scroll up/down controls zoom. No Ctrl/pinch gesture is required.
+  if(Math.abs(e.deltaY)>0){
+    zoomAt(
+      e.clientX,
+      e.clientY,
+      state.ts*Math.exp(-e.deltaY*.007)
+    );
+  }
+
+  // Optional horizontal trackpad movement pans the world.
+  if(Math.abs(e.deltaX)>0){
+    state.tx-=e.deltaX*1.15;
+    clampCamera();
+  }
+},{passive:false});
+document.querySelector('#explore').onclick=()=>{
+  explored=true;
+  endScene.style.display='none';
+  interactive.classList.add('active');
+  centerGrid();
+  const cards=[...surface.querySelectorAll('.card')];
+  cards.forEach(card=>{
+    card.animate(
+      [{opacity:0,transform:'scale(.55)'},{opacity:1,transform:'scale(1)'}],
+      {duration:650,delay:Math.random()*900,easing:'cubic-bezier(.2,.8,.2,1)',fill:'forwards'}
+    );
+  });
+};
+
+document.querySelector('#exitExplore').onclick=()=>exitExploration();
+function exitExploration(){
+  explored=false;
+  interactive.classList.remove('active');
+  endScene.style.display='';
+  requestAnimationFrame(()=>endScene.classList.add('show'));
+  centerGrid();
+}
+
+window.addEventListener('resize',()=>{
+  if(interactive.classList.contains('active')){
+    clampCamera();
+    hardClampCamera();
+  }
+});
+document.querySelector('#modal').onclick=e=>{if(e.target.id==='modal')e.currentTarget.classList.remove('show')};
+})();
+</script>
+</body></html>
