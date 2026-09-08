@@ -15,32 +15,25 @@
 /* -- clusters (opportunity spaces) — no colour, no box; every cluster's
    posters merge into one contiguous mass, and the only cue to where one
    opportunity space ends and the next begins is its centred label -- */
-.clusterLabel{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;font-size:24px;font-weight:800;letter-spacing:-.01em;text-transform:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none;
-  background:#f7f4ecf2;border:1px solid #1112;padding:14px 22px;border-radius:8px;box-shadow:0 10px 28px #0002;pointer-events:none;z-index:3;transition:opacity .3s ease}
+.clusterLabel{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none;
+  background:#f7f4ecf0;padding:7px 14px 7px 10px;border-radius:20px;box-shadow:0 6px 16px #0002;pointer-events:none;z-index:3;transition:opacity .3s ease}
 .clusterLabel.hidden{opacity:0}
-.clusterLabel .dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto}
-.clusterLabel b{font-weight:800;overflow:hidden;text-overflow:ellipsis}
-.clusterLabel span{font-size:15px;font-weight:400;opacity:.45;flex:0 0 auto}
+.clusterLabel .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.clusterLabel b{font-weight:700;overflow:hidden;text-overflow:ellipsis}
+.clusterLabel span{opacity:.5;flex:0 0 auto}
 
 /* -- poster cards — absolutely positioned, edge-to-edge, no gap -- */
-.card{position:absolute;overflow:hidden;background:#fff;cursor:pointer;transition:box-shadow .18s ease,opacity .25s ease,border-color .3s ease;z-index:2}
+.card{position:absolute;overflow:hidden;background:#fff;cursor:pointer;transition:box-shadow .18s ease,opacity .25s ease;z-index:2}
 .card:hover{box-shadow:inset 0 0 0 2px #111,0 16px 34px #0004;z-index:6}
 .card img{width:100%;height:100%;object-fit:cover;display:block}
 .card.empty{background:repeating-linear-gradient(135deg,#dcd8cd,#dcd8cd 6px,#d3cfc3 6px,#d3cfc3 12px);display:flex;align-items:center;justify-content:center}
 .card.empty .emptyNo{font-size:10px;letter-spacing:.06em;color:#8b8677;background:#f4f1e9cc;padding:3px 7px;border-radius:20px}
 .card{--hs:4px}
-.catTint{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;background:var(--cc);opacity:.25;transition:opacity .3s ease}
+.card .catTint{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;background:var(--cc);opacity:.25;transition:opacity .3s ease}
 .surface.labelsHidden .catTint{opacity:0}
-.filler{position:absolute;overflow:hidden;pointer-events:none;background:repeating-linear-gradient(135deg,#dcd8cd,#dcd8cd 6px,#d3cfc3 6px,#d3cfc3 12px);transition:border-color .3s ease}
-.surface.labelsHidden .card,.surface.labelsHidden .filler{border-color:transparent!important}
 .card .halo{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s ease;mix-blend-mode:multiply;
   background-image:radial-gradient(circle,var(--hc) 0 calc(var(--hs) * .22),transparent calc(var(--hs) * .24));background-size:var(--hs) var(--hs);background-color:color-mix(in srgb,var(--hc) 30%,transparent)}
-/* emotion match must read unmistakably at every zoom level, regardless of
-   the cluster tint (which fades) — a solid saturated ring plus a fully
-   opaque, denser halo, neither tied to the labelsHidden/zoom toggle */
-.card.emotionMatch .halo{opacity:1;background-image:radial-gradient(circle,var(--hc) 0 calc(var(--hs) * .42),transparent calc(var(--hs) * .44));background-color:color-mix(in srgb,var(--hc) 55%,transparent)}
-.card.emotionMatch{box-shadow:inset 0 0 0 3px var(--hc),inset 0 0 0 6px #fff,0 4px 16px #0004;z-index:7}
-.card.emotionMatch:hover{box-shadow:inset 0 0 0 3px var(--hc),inset 0 0 0 6px #fff,0 16px 34px #0005;z-index:8}
+.card.emotionMatch .halo{opacity:.9}
 .card.filteredOut{opacity:.07;pointer-events:none}
 .interactive.panelOpen .card{opacity:.12}
 .interactive.panelOpen .card.filteredOut{opacity:.03}
@@ -52,7 +45,7 @@
 .captionBadge h2{margin:0;font-size:clamp(17px,2vw,24px);line-height:1;letter-spacing:.01em}
 .captionBadge p{margin:6px 0 0;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.5}
 .minimap{margin-top:10px;width:210px;height:132px;background:#f7f4ecf2;border:1px solid #1112;box-shadow:0 8px 24px #0002;position:relative;overflow:hidden;pointer-events:auto;cursor:crosshair}
-.minimap .mmShape{position:absolute;background:#111;opacity:.4}
+.minimap .mmCluster{position:absolute;border-radius:2px}
 .minimap .mmViewport{position:absolute;border:1.5px solid #111;background:#1111;pointer-events:none}
 
 /* -- filters panel -- */
@@ -82,7 +75,7 @@
 
 /* -- story dialogue bubble — one respondent, one quote, always over a
    zoomed-in poster (reused camera engine, never pulls back to overview) -- */
-.storyPopup{position:fixed;left:50%;top:8%;transform:translateX(-50%) translateY(-6px);width:min(440px,88vw);background:#1c140f;color:#f3ece2;border-radius:16px;box-shadow:0 30px 80px #0005;padding:24px 26px 20px;z-index:60;opacity:0;pointer-events:none;transition:opacity .4s ease,transform .4s ease,top .3s ease}
+.storyPopup{position:fixed;left:50%;top:11%;transform:translateX(-50%) translateY(-6px);width:min(440px,88vw);max-height:70vh;overflow:auto;background:#1c140f;color:#f3ece2;border-radius:16px;box-shadow:0 30px 80px #0005;padding:24px 26px 20px;z-index:60;opacity:0;pointer-events:none;transition:opacity .4s ease,transform .4s ease}
 .storyPopup.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
 .storyPopup::after{content:'';position:absolute;left:50%;bottom:-13px;transform:translateX(-50%);width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:15px solid #1c140f}
 .storyTitle{margin:0 0 16px;font-size:18px;font-weight:500;font-style:italic;line-height:1.5}
@@ -212,276 +205,126 @@ opportunitySpaces.forEach((name,i)=>{
 });
 
 /* ---------------------------------------------------------------------
-   SEEDED REGION GROWTH — one solid diamond made of a single uniform
-   grid. Every grid cell inside the diamond mask gets claimed by exactly
-   one opportunity space via flood-fill growth from a seed cell, so the
-   whole diamond fills edge to edge with no internal voids, and every
-   cluster is a contiguous, organically-edged region rather than a rigid
-   rectangle. Posters stay upright throughout — nothing here rotates the
-   surface, and the camera/pan/zoom math below is untouched.
+   BLOBS-IN-A-DIAMOND — two levels of the same idea:
+     1. Each opportunity space is first packed into its own compact,
+        near-square "blob" of uniform poster cells (row-major, cols =
+        ceil(sqrt(count))) — a chunky island, never a thin line.
+     2. Those 19 blobs are then treated as units and placed onto a small
+        coarse diamond grid (generated by the same ring-by-ring, anti-
+        diagonal walk outward from the centre used for the fine grid),
+        largest blob first so it lands at the centre ring and smaller
+        ones land in progressively outer rings/corners. Coarse rows and
+        columns auto-size to their largest occupant (like CSS grid
+        tracks) and get a fixed BLOB_GAP between them, so every cluster
+        reads as its own separated island while the overall silhouette —
+        big in the middle, tapering outward — still reads as one diamond.
+   Posters stay upright throughout; nothing here rotates the surface.
 --------------------------------------------------------------------- */
-const CARD_GAP=5, CELL_W=80, CELL_H=120;
+function diamondCells(radius){
+  const cells=[{x:0,y:0}];
+  const dirs=[[1,1],[-1,1],[-1,-1],[1,-1]];
+  for(let k=1;k<=radius;k++){
+    let x=0,y=-k;
+    dirs.forEach(([dx,dy])=>{
+      for(let s=0;s<k;s++){ cells.push({x,y}); x+=dx; y+=dy; }
+    });
+  }
+  return cells;
+}
+
+const CARD_GAP=5, CELL_W=116, CELL_H=116, BLOB_GAP=34;
 const byCluster={};
 opportunitySpaces.forEach(name=>byCluster[name]=[]);
 posters.forEach(p=>byCluster[p.opportunitySpace].push(p));
+
 const sortedNames=[...opportunitySpaces].sort((a,b)=>byCluster[b].length-byCluster[a].length);
-const targetCount={};
-sortedNames.forEach(name=>{ targetCount[name]=byCluster[name].length; });
 
-function cellKey(c,r){ return c+','+r; }
-const NEI4=[[1,0],[-1,0],[0,1],[0,-1]];
-
-// -- 1. diamond mask: grow halfW/halfH (slightly taller than wide, like
-//    the reference) until the inside-cell count covers every poster --
-const DIAMOND_ASPECT=1.08;
-let gcx=0, gcy=0, gridCols=0, gridRows=0;
-const insideCells=[];
-for(let hw=4; hw<80; hw++){
-  const hh=hw*DIAMOND_ASPECT;
-  const gc=Math.ceil(hw), gr=Math.ceil(hh);
-  const cols=2*gc+1, rows=2*gr+1;
-  const cells=[];
-  for(let r=0;r<rows;r++){
-    for(let c=0;c<cols;c++){
-      if(Math.abs(c-gc)/hw+Math.abs(r-gr)/hh<=1) cells.push({col:c,row:r});
-    }
-  }
-  if(cells.length>=posters.length){
-    gcx=gc; gcy=gr; gridCols=cols; gridRows=rows;
-    insideCells.push(...cells);
-    break;
-  }
-}
-const coordOf=new Map(insideCells.map(c=>[cellKey(c.col,c.row),c]));
-const freeCells=new Set(coordOf.keys());
-const cellOwner=new Map();
-
-// -- 2. one seed per cluster: biggest cluster seeds at the centre; every
-//    later seed is the free cell that maximises its distance from all
-//    earlier seeds (farthest-point sampling), so seeds start spread out
-//    and their regions grow into each other rather than one swallowing
-//    the rest --
-const seeds=[];
-sortedNames.forEach((name,i)=>{
-  let bestKey=null;
-  if(i===0){
-    bestKey=cellKey(gcx,gcy);
-  } else {
-    let bestScore=-Infinity;
-    freeCells.forEach(key=>{
-      const {col,row}=coordOf.get(key);
-      let minD=Infinity;
-      seeds.forEach(s=>{ const d=Math.abs(col-s.col)+Math.abs(row-s.row); if(d<minD) minD=d; });
-      if(minD>bestScore){ bestScore=minD; bestKey=key; }
-    });
-  }
-  const c=coordOf.get(bestKey);
-  seeds.push({name,col:c.col,row:c.row});
-  cellOwner.set(bestKey,name);
-  freeCells.delete(bestKey);
+// -- level 1: one compact near-square blob per cluster (in cell units) --
+const blobs={};
+sortedNames.forEach(name=>{
+  const list=[...byCluster[name]].sort((a,b)=>a.feeling.localeCompare(b.feeling));
+  const bcols=Math.max(1,Math.ceil(Math.sqrt(list.length)));
+  const brows=Math.ceil(list.length/bcols);
+  blobs[name]={list, bcols, brows, w:bcols*CELL_W, h:brows*CELL_H};
 });
 
-// -- 3. round-robin BFS growth: each cluster claims its nearest free cell
-//    one at a time (not all at once), so every region grows in lockstep
-//    and they meet each other with an organic, interleaved edge instead
-//    of one finishing its whole shape before the next starts --
-const regionQueue={}, regionCells={};
-sortedNames.forEach(name=>{ regionQueue[name]=[]; regionCells[name]=[]; });
-function enqueueNeighbors(name,key){
-  const {col,row}=coordOf.get(key);
-  NEI4.forEach(([dx,dy])=>{
-    const nk=cellKey(col+dx,row+dy);
-    if(coordOf.has(nk) && freeCells.has(nk)) regionQueue[name].push(nk);
-  });
-}
-seeds.forEach(s=>{ regionCells[s.name].push(cellKey(s.col,s.row)); enqueueNeighbors(s.name,cellKey(s.col,s.row)); });
+// -- level 2: place blobs on a coarse diamond grid, biggest first --
+let bradius=0;
+while(2*bradius*bradius+2*bradius+1<sortedNames.length) bradius++;
+const blobCells=diamondCells(bradius);
+const bcolsTotal=2*bradius+1;
+sortedNames.forEach((name,i)=>{
+  const cell=blobCells[i];
+  blobs[name].col=cell.x+bradius;
+  blobs[name].row=cell.y+bradius;
+});
 
-function nearestFreeCellToRegion(name){
-  const visited=new Set(regionCells[name]);
-  let frontier=regionCells[name].slice();
-  while(frontier.length){
-    const next=[];
-    for(const key of frontier){
-      const {col,row}=coordOf.get(key);
-      for(const [dx,dy] of NEI4){
-        const nk=cellKey(col+dx,row+dy);
-        if(!coordOf.has(nk) || visited.has(nk)) continue;
-        visited.add(nk);
-        if(freeCells.has(nk)) return nk;
-        next.push(nk);
-      }
-    }
-    frontier=next;
-  }
-  return null;
-}
-
-let remaining=sortedNames.filter(name=>regionCells[name].length<targetCount[name]);
-let guard=insideCells.length*4;
-while(remaining.length && freeCells.size>0 && guard-->0){
-  for(const name of remaining){
-    if(regionCells[name].length>=targetCount[name]) continue;
-    let claimed=null;
-    while(regionQueue[name].length){
-      const cand=regionQueue[name].shift();
-      if(freeCells.has(cand)){ claimed=cand; break; }
-    }
-    if(!claimed) claimed=nearestFreeCellToRegion(name);
-    if(claimed){
-      cellOwner.set(claimed,name);
-      freeCells.delete(claimed);
-      regionCells[name].push(claimed);
-      enqueueNeighbors(name,claimed);
-    }
-  }
-  remaining=sortedNames.filter(name=>regionCells[name].length<targetCount[name]);
-}
-
-// -- 4. a handful of inside-cells can be left over once every region hit
-//    its target count (the diamond mask is sized >= total posters) —
-//    hand each to whichever neighbouring region borders it most, so the
-//    diamond stays solid with no unclaimed holes --
-guard=200;
-while(freeCells.size>0 && guard-->0){
-  let progressed=false;
-  [...freeCells].forEach(key=>{
-    const {col,row}=coordOf.get(key);
-    const votes={};
-    NEI4.forEach(([dx,dy])=>{
-      const owner=cellOwner.get(cellKey(col+dx,row+dy));
-      if(owner) votes[owner]=(votes[owner]||0)+1;
-    });
-    const entries=Object.entries(votes);
-    if(entries.length){
-      entries.sort((a,b)=>b[1]-a[1]);
-      const owner=entries[0][0];
-      cellOwner.set(key,owner);
-      regionCells[owner].push(key);
-      freeCells.delete(key);
-      progressed=true;
-    }
-  });
-  if(!progressed) break;
-}
-
-// -- 5. render: each region's first targetCount cells (claim order, so
-//    nearest the seed first) get an actual poster — sorted by feeling
-//    for internal colour coherence; any cells past that (the leftover
-//    hand-outs above) are undated filler so the diamond still reads as
-//    fully solid without inventing posters that don't exist --
-
-// a gutter is carved only on edges that face a DIFFERENT cluster (or the
-// outside of the diamond) — same-cluster neighbours stay flush, so the
-// packing/cell grid itself is untouched; only the rendered card box
-// shrinks on the sides that border another region. cardRects keeps the
-// full, un-inset cell rect so camera/zoom targeting is unaffected. The
-// same "faces a different cluster" test also draws a region-perimeter
-// outline on that edge only — never on an edge shared with the same
-// cluster — so the stroke traces each region's true boundary instead of
-// the internal cell grid.
-const REGION_GAP=7, OUTLINE_W=3, OUTLINE_COLOR='rgba(17,17,17,.6)';
-function neighborOwner(col,row){
-  const key=cellKey(col,row);
-  return coordOf.has(key) ? cellOwner.get(key) : null;
-}
-function regionEdges(col,row,name){
-  const same={
-    top:    neighborOwner(col,row-1)===name,
-    bottom: neighborOwner(col,row+1)===name,
-    left:   neighborOwner(col-1,row)===name,
-    right:  neighborOwner(col+1,row)===name,
-  };
-  const insets={
-    top:    same.top?0:REGION_GAP,
-    bottom: same.bottom?0:REGION_GAP,
-    left:   same.left?0:REGION_GAP,
-    right:  same.right?0:REGION_GAP,
-  };
-  return {same,insets};
-}
-function applyRegionEdges(el,col,row,name){
-  const {same}=regionEdges(col,row,name);
-  el.style.borderTop=same.top?'none':`${OUTLINE_W}px solid ${OUTLINE_COLOR}`;
-  el.style.borderBottom=same.bottom?'none':`${OUTLINE_W}px solid ${OUTLINE_COLOR}`;
-  el.style.borderLeft=same.left?'none':`${OUTLINE_W}px solid ${OUTLINE_COLOR}`;
-  el.style.borderRight=same.right?'none':`${OUTLINE_W}px solid ${OUTLINE_COLOR}`;
-}
+// coarse tracks auto-size to their largest occupant, like CSS grid
+const colW=new Array(bcolsTotal).fill(0), rowH=new Array(bcolsTotal).fill(0);
+sortedNames.forEach(name=>{
+  const b=blobs[name];
+  colW[b.col]=Math.max(colW[b.col], b.w);
+  rowH[b.row]=Math.max(rowH[b.row], b.h);
+});
+const colX=new Array(bcolsTotal), rowY=new Array(bcolsTotal);
+{ let acc=0; for(let c=0;c<bcolsTotal;c++){ colX[c]=acc; acc+=colW[c]+(colW[c]>0?BLOB_GAP:0); } }
+{ let acc=0; for(let r=0;r<bcolsTotal;r++){ rowY[r]=acc; acc+=rowH[r]+(rowH[r]>0?BLOB_GAP:0); } }
+sortedNames.forEach(name=>{
+  const b=blobs[name];
+  b.x=colX[b.col]+(colW[b.col]-b.w)/2;
+  b.y=rowY[b.row]+(rowH[b.row]-b.h)/2;
+});
 
 const clusterBox={}, cardsByCluster={}, cardEls=new Map(), cardRects=new Map();
 const labelEls=[];
 
 sortedNames.forEach(name=>{
-  const list=[...byCluster[name]].sort((a,b)=>a.feeling.localeCompare(b.feeling));
-  const cells=regionCells[name];
-  const mainCells=cells.slice(0,targetCount[name]);
-  const extraCells=cells.slice(targetCount[name]);
+  const b=blobs[name];
   cardsByCluster[name]=[];
-  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity,sx=0,sy=0,n=0;
-  const color=CLUSTER_COLORS[name];
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity,sx=0,sy=0;
 
-  function accumulate(wx,wy,w,h){
-    minX=Math.min(minX,wx); minY=Math.min(minY,wy);
-    maxX=Math.max(maxX,wx+w); maxY=Math.max(maxY,wy+h);
-    sx+=wx+w/2; sy+=wy+h/2; n++;
-  }
-
-  mainCells.forEach((key,idx)=>{
-    const p=list[idx];
-    const {col,row}=coordOf.get(key);
+  b.list.forEach((p,idx)=>{
+    const c=idx%b.bcols, r=Math.floor(idx/b.bcols);
+    const cx=b.x+c*CELL_W, cy=b.y+r*CELL_H;
     const g=CARD_GAP;
-    const wx=col*CELL_W+g/2, wy=row*CELL_H+g/2, w=CELL_W-g, h=CELL_H-g;
-    const {insets:ins}=regionEdges(col,row,name);
-    const rx=wx+ins.left, ry=wy+ins.top, rw=Math.max(2,w-ins.left-ins.right), rh=Math.max(2,h-ins.top-ins.bottom);
+    const wx=cx+g/2, wy=cy+g/2, w=CELL_W-g, h=CELL_H-g;
 
     const card=document.createElement('div');
     card.className='card'+(p.file?'':' empty');
     card.dataset.no=p.no;
     card.dataset.feeling=p.feeling;
-    card.style.left=rx+'px'; card.style.top=ry+'px'; card.style.width=rw+'px'; card.style.height=rh+'px';
-    card.style.setProperty('--hs', clamp(Math.round(Math.min(rw,rh)/26),2,5)+'px');
-    card.style.setProperty('--hc', feelingColor(p.feeling));
-    applyRegionEdges(card,col,row,name);
+    card.style.left=wx+'px'; card.style.top=wy+'px'; card.style.width=w+'px'; card.style.height=h+'px';
+    card.style.setProperty('--hs', clamp(Math.round(Math.min(w,h)/26),2,5)+'px');
     if(p.file){
       card.innerHTML=`<img src="${posterImgSrc(p.file)}" alt="" loading="lazy">`;
     } else {
       card.innerHTML=`<span class="emptyNo">#${p.no}</span>`;
     }
     card.insertAdjacentHTML('beforeend',
-      `<span class="catTint" style="--cc:${color}"></span><span class="halo"></span>`);
+      `<span class="catTint" style="--cc:${CLUSTER_COLORS[name]}"></span><span class="halo" style="--hc:${feelingColor(p.feeling)}"></span>`);
     surface.appendChild(card);
     cardEls.set(p.no, card);
     cardsByCluster[name].push(card);
     cardRects.set(p.no, {x:wx,y:wy,w,h,cx:wx+w/2,cy:wy+h/2});
-    accumulate(wx,wy,w,h);
-  });
 
-  extraCells.forEach(key=>{
-    const {col,row}=coordOf.get(key);
-    const g=CARD_GAP;
-    const wx=col*CELL_W+g/2, wy=row*CELL_H+g/2, w=CELL_W-g, h=CELL_H-g;
-    const {insets:ins}=regionEdges(col,row,name);
-    const rx=wx+ins.left, ry=wy+ins.top, rw=Math.max(2,w-ins.left-ins.right), rh=Math.max(2,h-ins.top-ins.bottom);
-    const filler=document.createElement('div');
-    filler.className='filler';
-    filler.style.left=rx+'px'; filler.style.top=ry+'px'; filler.style.width=rw+'px'; filler.style.height=rh+'px';
-    applyRegionEdges(filler,col,row,name);
-    filler.insertAdjacentHTML('beforeend', `<span class="catTint" style="--cc:${color}"></span>`);
-    surface.appendChild(filler);
-    accumulate(wx,wy,w,h);
+    minX=Math.min(minX,wx); minY=Math.min(minY,wy);
+    maxX=Math.max(maxX,wx+w); maxY=Math.max(maxY,wy+h);
+    sx+=wx+w/2; sy+=wy+h/2;
   });
 
   clusterBox[name]={left:minX, top:minY, width:maxX-minX, height:maxY-minY};
 
+  const color=CLUSTER_COLORS[name];
   const label=document.createElement('div');
   label.className='clusterLabel';
-  label.style.left=(sx/n)+'px'; label.style.top=(sy/n)+'px';
-  label.innerHTML=`<span class="dot" style="background:${color}"></span><b>${esc(name)}</b><span>${targetCount[name]}</span>`;
+  label.style.left=(sx/b.list.length)+'px'; label.style.top=(sy/b.list.length)+'px';
+  label.innerHTML=`<span class="dot" style="background:${color}"></span><b>${esc(name)}</b><span>${b.list.length}</span>`;
   surface.appendChild(label);
   labelEls.push(label);
 });
 
-const WORLD_W=gridCols*CELL_W;
-const WORLD_H=gridRows*CELL_H;
+const WORLD_W=colX[bcolsTotal-1]+colW[bcolsTotal-1];
+const WORLD_H=rowY[bcolsTotal-1]+rowH[bcolsTotal-1];
 
 // pop-in entrance animation, staggered per card
 requestAnimationFrame(()=>{
@@ -615,21 +458,8 @@ function goToScene(i){
     backBtn.disabled=sceneIndex===0;
     nextBtn.textContent=s.end?'Start exploring →':'Next →';
     nextBtn.classList.toggle('primary',!!s.end);
-    fitStoryPopupPosition();
     storyPopup.classList.add('show');
   }, 180);
-}
-// the popup grows to fit its quote (no inner scrollbar) — if a quote is
-// ever tall enough that the default top offset would push it past the
-// bottom of the viewport, nudge it up (never clip, never scroll).
-function fitStoryPopupPosition(){
-  storyPopup.style.top='';
-  const margin=16;
-  const rect=storyPopup.getBoundingClientRect();
-  if(rect.bottom>innerHeight-margin){
-    const newTop=Math.max(margin, rect.top-(rect.bottom-(innerHeight-margin)));
-    storyPopup.style.top=newTop+'px';
-  }
 }
 function unlockExploration(){
   locked=false;
@@ -664,24 +494,15 @@ const MM_W=210, MM_H=132;
 const mmScale=Math.min(MM_W/WORLD_W, MM_H/WORLD_H);
 const mmOffX=(MM_W-WORLD_W*mmScale)/2, mmOffY=(MM_H-WORLD_H*mmScale)/2;
 
-// one flat-colour silhouette of the whole diamond — not per-cluster —
-// built as one thin strip per grid row spanning that row's filled
-// columns (rows of a diamond mask are always a single contiguous run of
-// columns), so the stack of strips reproduces the exact diamond outline
-// without needing per-cluster colour or a separate shape/clip-path.
-const mmRowSpans=new Map();
-insideCells.forEach(c=>{
-  const s=mmRowSpans.get(c.row);
-  if(!s) mmRowSpans.set(c.row,{minCol:c.col,maxCol:c.col});
-  else { s.minCol=Math.min(s.minCol,c.col); s.maxCol=Math.max(s.maxCol,c.col); }
-});
-mmRowSpans.forEach((s,row)=>{
-  const el=document.createElement('div');
-  el.className='mmShape';
-  el.style.left=(mmOffX+s.minCol*CELL_W*mmScale)+'px';
-  el.style.top=(mmOffY+row*CELL_H*mmScale)+'px';
-  el.style.width=Math.max(1,(s.maxCol-s.minCol+1)*CELL_W*mmScale)+'px';
-  el.style.height=Math.max(1,CELL_H*mmScale)+'px';
+opportunitySpaces.forEach(name=>{
+  const b=clusterBox[name], el=document.createElement('div');
+  el.className='mmCluster';
+  el.style.left=(mmOffX+b.left*mmScale)+'px';
+  el.style.top=(mmOffY+b.top*mmScale)+'px';
+  el.style.width=Math.max(2,b.width*mmScale)+'px';
+  el.style.height=Math.max(2,b.height*mmScale)+'px';
+  el.style.background=CLUSTER_COLORS[name];
+  el.style.opacity='.6';
   mmClusters.appendChild(el);
 });
 
