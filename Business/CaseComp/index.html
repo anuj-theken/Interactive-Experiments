@@ -15,12 +15,13 @@
 /* -- clusters (opportunity spaces) — no colour, no box; every cluster's
    posters merge into one contiguous mass, and the only cue to where one
    opportunity space ends and the next begins is its centred label -- */
-.clusterLabel{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;font-size:24px;font-weight:800;letter-spacing:-.01em;text-transform:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none;
-  background:#f7f4ecf2;border:1px solid #1112;padding:14px 22px;border-radius:8px;box-shadow:0 10px 28px #0002;pointer-events:none;z-index:3;transition:opacity .3s ease}
+.clusterLabel{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:800;letter-spacing:-.01em;text-transform:none;text-align:center;
+  background:#f7f4ecf2;border:1px solid #1112;padding:8px 12px;border-radius:8px;box-shadow:0 10px 28px #0002;pointer-events:none;z-index:3;transition:opacity .3s ease}
 .clusterLabel.hidden{opacity:0}
-.clusterLabel .dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto}
-.clusterLabel b{font-weight:800;overflow:hidden;text-overflow:ellipsis}
-.clusterLabel span{font-size:15px;font-weight:400;opacity:.45;flex:0 0 auto}
+.clusterLabel .clHead{display:flex;align-items:center;gap:6px}
+.clusterLabel .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.clusterLabel b{font-weight:800;min-width:0;overflow-wrap:break-word;word-break:break-word;line-height:1.18}
+.clusterLabel .count{font-size:12px;font-weight:400;opacity:.5}
 
 /* -- poster cards — absolutely positioned, edge-to-edge, no gap -- */
 .card{position:absolute;overflow:hidden;background:#fff;cursor:pointer;transition:box-shadow .18s ease,opacity .25s ease,border-color .3s ease;z-index:2}
@@ -28,23 +29,30 @@
 .card img{width:100%;height:100%;object-fit:cover;display:block}
 .card.empty{background:repeating-linear-gradient(135deg,#dcd8cd,#dcd8cd 6px,#d3cfc3 6px,#d3cfc3 12px);display:flex;align-items:center;justify-content:center}
 .card.empty .emptyNo{font-size:10px;letter-spacing:.06em;color:#8b8677;background:#f4f1e9cc;padding:3px 7px;border-radius:20px}
-.card{--hs:4px}
-.catTint{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;background:var(--cc);opacity:.25;transition:opacity .3s ease}
+.catTint{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;background:var(--cc);opacity:.34;transition:opacity .3s ease}
 .surface.labelsHidden .catTint{opacity:0}
-.filler{position:absolute;overflow:hidden;pointer-events:none;background:repeating-linear-gradient(135deg,#dcd8cd,#dcd8cd 6px,#d3cfc3 6px,#d3cfc3 12px);transition:border-color .3s ease}
-.surface.labelsHidden .card,.surface.labelsHidden .filler{border-color:transparent!important}
-.card .halo{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s ease;mix-blend-mode:multiply;
-  background-image:radial-gradient(circle,var(--hc) 0 calc(var(--hs) * .22),transparent calc(var(--hs) * .24));background-size:var(--hs) var(--hs);background-color:color-mix(in srgb,var(--hc) 30%,transparent)}
-/* emotion match must read unmistakably at every zoom level, regardless of
-   the cluster tint (which fades) — a solid saturated ring plus a fully
-   opaque, denser halo, neither tied to the labelsHidden/zoom toggle */
-.card.emotionMatch .halo{opacity:1;background-image:radial-gradient(circle,var(--hc) 0 calc(var(--hs) * .42),transparent calc(var(--hs) * .44));background-color:color-mix(in srgb,var(--hc) 55%,transparent)}
-.card.emotionMatch{box-shadow:inset 0 0 0 3px var(--hc),inset 0 0 0 6px #fff,0 4px 16px #0004;z-index:7}
-.card.emotionMatch:hover{box-shadow:inset 0 0 0 3px var(--hc),inset 0 0 0 6px #fff,0 16px 34px #0005;z-index:8}
+/* an emotion filter is active — the cluster colour scheme is switched
+   off everywhere (not just on matched cards), at every zoom level, so
+   it never competes with the emotion overlay */
+.surface.emotionFilterActive .catTint{opacity:0!important}
+.filler{position:absolute;overflow:hidden;pointer-events:none;background:repeating-linear-gradient(135deg,#dcd8cd,#dcd8cd 6px,#d3cfc3 6px,#d3cfc3 12px)}
+/* emotion match — a solid colour wash plus a slim inset ring, entirely
+   inside the card's own box (no outward glow/spread), so a matched
+   card never reads as bigger than its neighbours */
+.card .halo{position:absolute;inset:0;pointer-events:none;opacity:0;mix-blend-mode:multiply;transition:opacity .3s ease;
+  background-color:color-mix(in srgb,var(--hc) 48%,transparent)}
+.card.emotionMatch .halo{opacity:1}
+.card.emotionMatch{box-shadow:inset 0 0 0 5px var(--hc),inset 0 0 0 7px #fff,0 4px 16px #0004;z-index:7}
+.card.emotionMatch:hover{box-shadow:inset 0 0 0 5px var(--hc),inset 0 0 0 7px #fff,0 16px 34px #0005;z-index:8}
 .card.filteredOut{opacity:.07;pointer-events:none}
 .interactive.panelOpen .card{opacity:.12}
 .interactive.panelOpen .card.filteredOut{opacity:.03}
 .interactive.panelOpen .card.selected{opacity:1;box-shadow:0 0 0 3px #f7f4ec,0 22px 50px #0006;z-index:9}
+.card.selected .catTint{opacity:0!important}
+/* the poster the story is currently talking about — unmistakable among
+   its similarly-sized neighbours regardless of zoom or tint state */
+.card.storyTarget{box-shadow:0 0 0 3px #f7f4ec,0 0 0 5px #1c140f,0 14px 34px #0006;z-index:9}
+.card.storyTarget .catTint{opacity:0!important}
 
 /* -- header / minimap -- */
 .hud{position:absolute;left:22px;top:20px;z-index:15;pointer-events:none}
@@ -82,26 +90,29 @@
 
 /* -- story dialogue bubble — one respondent, one quote, always over a
    zoomed-in poster (reused camera engine, never pulls back to overview) -- */
-.storyPopup{position:fixed;left:50%;top:8%;transform:translateX(-50%) translateY(-6px);width:min(440px,88vw);background:#1c140f;color:#f3ece2;border-radius:16px;box-shadow:0 30px 80px #0005;padding:24px 26px 20px;z-index:60;opacity:0;pointer-events:none;transition:opacity .4s ease,transform .4s ease,top .3s ease}
+.storyPopup{position:fixed;left:50%;top:6%;transform:translateX(-50%) translateY(-6px);width:min(300px,80vw);background:#1c140f;color:#f3ece2;border-radius:12px;box-shadow:0 20px 50px #0005;padding:15px 17px 13px;z-index:60;opacity:0;pointer-events:none;transition:opacity .4s ease,transform .4s ease,top .3s ease}
 .storyPopup.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
-.storyPopup::after{content:'';position:absolute;left:50%;bottom:-13px;transform:translateX(-50%);width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:15px solid #1c140f}
-.storyTitle{margin:0 0 16px;font-size:18px;font-weight:500;font-style:italic;line-height:1.5}
+.storyPopup::after{content:'';position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid #1c140f}
+.storyTitle{margin:0 0 10px;font-size:12.5px;font-weight:500;font-style:italic;line-height:1.42}
 .storyTitle::before{content:'\201C'}
 .storyTitle::after{content:'\201D'}
-.storyText{display:flex;align-items:baseline;justify-content:space-between;gap:14px;margin:0 0 18px;font-size:11.5px;letter-spacing:.02em;opacity:.68}
-.storyNav{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.storyNav button{appearance:none;border:1px solid #f3ece255;background:transparent;color:#f3ece2;padding:12px 10px;font:inherit;font-size:10px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:4px}
+.storyText{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 12px;font-size:9px;letter-spacing:.02em;opacity:.68}
+.storyNav{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.storyNav button{appearance:none;border:1px solid #f3ece255;background:transparent;color:#f3ece2;padding:8px 7px;font:inherit;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:4px}
 .storyNav button:hover{background:#f3ece2;color:#1c140f}
 .storyNav button:disabled{opacity:.25;cursor:default;pointer-events:none}
 .storyNav button.primary{grid-column:1/-1;background:#f3ece2;color:#1c140f}
 .storyNav button.primary:hover{background:#fff}
-@media(max-width:640px){.storyPopup{width:92vw;top:8%}}
+@media(max-width:640px){.storyPopup{width:78vw;top:6%}}
 
 /* -- side panel (responses) -- */
+/* the canvas already dims itself when the panel is open (every card but
+   the selected one drops to low opacity, above) — this backdrop is only
+   a click target to close the panel, not a second dimming layer, so it
+   stays fully transparent and never darkens the selected poster */
 .modal{position:fixed;inset:0;display:block;visibility:hidden;pointer-events:none;background:transparent;z-index:100}
 .modal.show{visibility:visible;pointer-events:auto}
-.modal-backdrop{position:absolute;inset:0;background:#1113;opacity:0;transition:opacity .35s ease}
-.modal.show .modal-backdrop{opacity:1}
+.modal-backdrop{position:absolute;inset:0;background:transparent}
 .side-panel{position:absolute;top:0;right:0;bottom:0;width:min(460px,94vw);height:100vh;display:flex;flex-direction:column;background:#f7f4ec;transform:translate3d(105%,0,0);transition:transform .45s cubic-bezier(.2,.8,.2,1);box-shadow:-20px 0 60px #0003;overflow:hidden}
 .modal.show .side-panel{transform:translate3d(0,0,0)}
 .panel-scroll{flex:1 1 auto;overflow-y:auto;padding:56px 26px 30px}
@@ -187,7 +198,7 @@
   </aside>
 </div>
 
-<script src="poster_data.js"></script>
+<script src="poster_data.js?v=20260909b"></script>
 <script>
 (()=>{
 const interactive=document.querySelector('#interactive'), surface=document.querySelector('#surface');
@@ -206,10 +217,6 @@ const FEELING_COLORS={
 function feelingColor(f){return FEELING_COLORS[f]||'#9a9284'}
 
 const opportunitySpaces=meta.opportunitySpaces.map(o=>o.name);
-const CLUSTER_COLORS={};
-opportunitySpaces.forEach((name,i)=>{
-  CLUSTER_COLORS[name]=`hsl(${Math.round(i*(360/opportunitySpaces.length))} 58% 46%)`;
-});
 
 /* ---------------------------------------------------------------------
    SEEDED REGION GROWTH — one solid diamond made of a single uniform
@@ -364,48 +371,57 @@ while(freeCells.size>0 && guard-->0){
   if(!progressed) break;
 }
 
+// -- 4b. colour assignment — adjacency-aware, not list-order. With this
+//    many opportunity spaces, evenly spacing hues by array order can hand
+//    two hues that are close on the wheel to two regions that happen to
+//    sit right next to each other on the diamond, so the seam between
+//    them barely reads. Build the actual region-adjacency graph from the
+//    grid, then greedily hand each region the remaining hue that is
+//    farthest (in hue-circle degrees) from its already-coloured
+//    neighbours — regions with the most neighbours go first, since they
+//    have the least room to manoeuvre. Lightness/saturation is also
+//    cycled across three bands so even a same-family hue pair (unavoidable
+//    once neighbour count exceeds the wheel can comfortably split) still
+//    differs on a second channel.
+const clusterAdj={};
+opportunitySpaces.forEach(n=>clusterAdj[n]=new Set());
+coordOf.forEach((c,key)=>{
+  const owner=cellOwner.get(key);
+  if(!owner) return;
+  NEI4.forEach(([dx,dy])=>{
+    const nk=cellKey(c.col+dx,c.row+dy);
+    if(!coordOf.has(nk)) return;
+    const nOwner=cellOwner.get(nk);
+    if(nOwner && nOwner!==owner) clusterAdj[owner].add(nOwner);
+  });
+});
+const N_SPACES=opportunitySpaces.length, HUE_STEP=360/N_SPACES;
+const BANDS=[{s:78,l:38},{s:64,l:50},{s:88,l:29}];
+function hueDist(a,b){ const d=Math.abs(a-b)%360; return Math.min(d,360-d); }
+const colorOrder=[...opportunitySpaces].sort((a,b)=>clusterAdj[b].size-clusterAdj[a].size);
+const usedHueSlots=new Set(), CLUSTER_HUE={}, CLUSTER_COLORS={};
+colorOrder.forEach((name,idx)=>{
+  const neighborHues=[...clusterAdj[name]].map(nb=>CLUSTER_HUE[nb]).filter(h=>h!==undefined);
+  const compareHues=neighborHues.length?neighborHues:Object.values(CLUSTER_HUE);
+  let bestSlot=0,bestScore=-Infinity;
+  for(let slot=0;slot<N_SPACES;slot++){
+    if(usedHueSlots.has(slot)) continue;
+    const hue=slot*HUE_STEP;
+    const score=compareHues.length?Math.min(...compareHues.map(h=>hueDist(h,hue))):0;
+    if(score>bestScore){ bestScore=score; bestSlot=slot; }
+  }
+  usedHueSlots.add(bestSlot);
+  const hue=bestSlot*HUE_STEP;
+  CLUSTER_HUE[name]=hue;
+  const band=BANDS[idx%BANDS.length];
+  CLUSTER_COLORS[name]=`hsl(${Math.round(hue)} ${band.s}% ${band.l}%)`;
+});
+
 // -- 5. render: each region's first targetCount cells (claim order, so
 //    nearest the seed first) get an actual poster — sorted by feeling
 //    for internal colour coherence; any cells past that (the leftover
 //    hand-outs above) are undated filler so the diamond still reads as
 //    fully solid without inventing posters that don't exist --
-
-// a gutter is carved only on edges that face a DIFFERENT cluster (or the
-// outside of the diamond) — same-cluster neighbours stay flush, so the
-// packing/cell grid itself is untouched; only the rendered card box
-// shrinks on the sides that border another region. cardRects keeps the
-// full, un-inset cell rect so camera/zoom targeting is unaffected. The
-// same "faces a different cluster" test also draws a region-perimeter
-// outline on that edge only — never on an edge shared with the same
-// cluster — so the stroke traces each region's true boundary instead of
-// the internal cell grid.
-const REGION_GAP=7, OUTLINE_W=3, OUTLINE_COLOR='rgba(17,17,17,.6)';
-function neighborOwner(col,row){
-  const key=cellKey(col,row);
-  return coordOf.has(key) ? cellOwner.get(key) : null;
-}
-function regionEdges(col,row,name){
-  const same={
-    top:    neighborOwner(col,row-1)===name,
-    bottom: neighborOwner(col,row+1)===name,
-    left:   neighborOwner(col-1,row)===name,
-    right:  neighborOwner(col+1,row)===name,
-  };
-  const insets={
-    top:    same.top?0:REGION_GAP,
-    bottom: same.bottom?0:REGION_GAP,
-    left:   same.left?0:REGION_GAP,
-    right:  same.right?0:REGION_GAP,
-  };
-  return {same,insets};
-}
-function applyRegionEdges(el,col,row,name){
-  const {same}=regionEdges(col,row,name);
-  el.style.borderTop=same.top?'none':`${OUTLINE_W}px solid ${OUTLINE_COLOR}`;
-  el.style.borderBottom=same.bottom?'none':`${OUTLINE_W}px solid ${OUTLINE_COLOR}`;
-  el.style.borderLeft=same.left?'none':`${OUTLINE_W}px solid ${OUTLINE_COLOR}`;
-  el.style.borderRight=same.right?'none':`${OUTLINE_W}px solid ${OUTLINE_COLOR}`;
-}
 
 const clusterBox={}, cardsByCluster={}, cardEls=new Map(), cardRects=new Map();
 const labelEls=[];
@@ -430,24 +446,19 @@ sortedNames.forEach(name=>{
     const {col,row}=coordOf.get(key);
     const g=CARD_GAP;
     const wx=col*CELL_W+g/2, wy=row*CELL_H+g/2, w=CELL_W-g, h=CELL_H-g;
-    const {insets:ins}=regionEdges(col,row,name);
-    const rx=wx+ins.left, ry=wy+ins.top, rw=Math.max(2,w-ins.left-ins.right), rh=Math.max(2,h-ins.top-ins.bottom);
 
     const card=document.createElement('div');
     card.className='card'+(p.file?'':' empty');
     card.dataset.no=p.no;
     card.dataset.feeling=p.feeling;
-    card.style.left=rx+'px'; card.style.top=ry+'px'; card.style.width=rw+'px'; card.style.height=rh+'px';
-    card.style.setProperty('--hs', clamp(Math.round(Math.min(rw,rh)/26),2,5)+'px');
+    card.style.left=wx+'px'; card.style.top=wy+'px'; card.style.width=w+'px'; card.style.height=h+'px';
     card.style.setProperty('--hc', feelingColor(p.feeling));
-    applyRegionEdges(card,col,row,name);
     if(p.file){
       card.innerHTML=`<img src="${posterImgSrc(p.file)}" alt="" loading="lazy">`;
     } else {
       card.innerHTML=`<span class="emptyNo">#${p.no}</span>`;
     }
-    card.insertAdjacentHTML('beforeend',
-      `<span class="catTint" style="--cc:${color}"></span><span class="halo"></span>`);
+    card.insertAdjacentHTML('beforeend', `<span class="catTint" style="--cc:${color}"></span><span class="halo"></span>`);
     surface.appendChild(card);
     cardEls.set(p.no, card);
     cardsByCluster[name].push(card);
@@ -459,12 +470,9 @@ sortedNames.forEach(name=>{
     const {col,row}=coordOf.get(key);
     const g=CARD_GAP;
     const wx=col*CELL_W+g/2, wy=row*CELL_H+g/2, w=CELL_W-g, h=CELL_H-g;
-    const {insets:ins}=regionEdges(col,row,name);
-    const rx=wx+ins.left, ry=wy+ins.top, rw=Math.max(2,w-ins.left-ins.right), rh=Math.max(2,h-ins.top-ins.bottom);
     const filler=document.createElement('div');
     filler.className='filler';
-    filler.style.left=rx+'px'; filler.style.top=ry+'px'; filler.style.width=rw+'px'; filler.style.height=rh+'px';
-    applyRegionEdges(filler,col,row,name);
+    filler.style.left=wx+'px'; filler.style.top=wy+'px'; filler.style.width=w+'px'; filler.style.height=h+'px';
     filler.insertAdjacentHTML('beforeend', `<span class="catTint" style="--cc:${color}"></span>`);
     surface.appendChild(filler);
     accumulate(wx,wy,w,h);
@@ -472,16 +480,60 @@ sortedNames.forEach(name=>{
 
   clusterBox[name]={left:minX, top:minY, width:maxX-minX, height:maxY-minY};
 
+  // anchor the label to the region's own widest CONTIGUOUS row, rather
+  // than its pixel centroid — many of these regions are narrow, organic
+  // strips, and the centroid row can land on a pinch point too thin for
+  // any label. Using the widest row for *both* position and width
+  // guarantees the label sits fully inside the region (it's the same row
+  // its width came from) instead of spilling into a neighbour.
+  const rowSpans=new Map();
+  regionCells[name].forEach(key=>{
+    const c=coordOf.get(key);
+    const s=rowSpans.get(c.row);
+    if(!s) rowSpans.set(c.row,{min:c.col,max:c.col,count:1});
+    else { s.min=Math.min(s.min,c.col); s.max=Math.max(s.max,c.col); s.count++; }
+  });
+  let bestRow=null,bestSpan=null,bestWidth=-1;
+  rowSpans.forEach((s,row)=>{
+    if(s.count!==s.max-s.min+1) return; // skip rows with a hole (not truly contiguous)
+    const width=s.max-s.min+1;
+    if(width>bestWidth){ bestWidth=width; bestRow=row; bestSpan=s; }
+  });
+  let labelX=sx/n, labelY=sy/n, rowWidthPx=maxX-minX;
+  if(bestSpan){
+    labelX=((bestSpan.min+bestSpan.max+1)/2)*CELL_W;
+    labelY=bestRow*CELL_H+CELL_H/2;
+    rowWidthPx=(bestSpan.max-bestSpan.min+1)*CELL_W-CARD_GAP*2;
+  }
+
+  // narrow, single-card-wide regions can't fit a 24px label without
+  // wrapping mid-word — shrink the font to whatever the longest word in
+  // the name actually needs for this row's width, rather than force a
+  // fixed size that breaks every couple of characters.
+  const maxW=Math.max(90,rowWidthPx*.96);
+  const longestWord=Math.max(...name.split(' ').map(w=>w.length));
+  const availTextPx=Math.max(28, maxW-28);
+  const fontSize=clamp(availTextPx/(longestWord*.6),11,24);
+
   const label=document.createElement('div');
   label.className='clusterLabel';
-  label.style.left=(sx/n)+'px'; label.style.top=(sy/n)+'px';
-  label.innerHTML=`<span class="dot" style="background:${color}"></span><b>${esc(name)}</b><span>${targetCount[name]}</span>`;
+  label.style.left=labelX+'px'; label.style.top=labelY+'px';
+  label.style.maxWidth=maxW+'px';
+  label.style.fontSize=fontSize.toFixed(1)+'px';
+  label.innerHTML=`<span class="clHead"><span class="dot" style="background:${color}"></span><span class="count">${targetCount[name]}</span></span><b>${esc(name)}</b>`;
   surface.appendChild(label);
   labelEls.push(label);
 });
 
 const WORLD_W=gridCols*CELL_W;
 const WORLD_H=gridRows*CELL_H;
+// every child of #surface is position:absolute, so without an explicit
+// size #surface has no content-derived width — and an auto-width
+// descendant (the wrapping cluster labels) resolves its shrink-to-fit
+// width against that near-zero containing block instead of its own
+// max-width, wrapping one character per line. Give it its real size.
+surface.style.width=WORLD_W+'px';
+surface.style.height=WORLD_H+'px';
 
 // pop-in entrance animation, staggered per card
 requestAnimationFrame(()=>{
@@ -501,7 +553,7 @@ requestAnimationFrame(()=>{
 --------------------------------------------------------------------- */
 function fitScale(){return clamp(Math.min(innerWidth/WORLD_W,innerHeight/WORLD_H)*.94,.04,1.6)}
 let MIN_SCALE=fitScale();
-const MAX_SCALE=2.8;
+const MAX_SCALE=4.6;
 const state={x:0,y:0,tx:0,ty:0,scale:MIN_SCALE,ts:MIN_SCALE,down:false,lastX:0,lastY:0,vx:0,vy:0,drag:0,pointerId:null};
 const EASE=.13, OVERSCROLL=.06;
 let locked=true;
@@ -525,10 +577,10 @@ function hardClampCamera(){
 }
 function apply(){surface.style.transform=`translate3d(${state.x}px,${state.y}px,0) scale(${state.scale})`}
 
-function setCamera(worldX,worldY,zoom,focusXRatio=.5){
+function setCamera(worldX,worldY,zoom,focusXRatio=.5,focusYRatio=.5){
   state.ts=zoom;
   state.tx=innerWidth*focusXRatio-worldX*zoom;
-  state.ty=innerHeight/2-worldY*zoom;
+  state.ty=innerHeight*focusYRatio-worldY*zoom;
   clampCamera();
 }
 setCamera(WORLD_W/2,WORLD_H/2,MIN_SCALE);
@@ -575,17 +627,29 @@ function zoomAt(clientX,clientY,nextScale){
    only the respondent number is a synthesised stand-in.
 --------------------------------------------------------------------- */
 const byCount=[...opportunitySpaces].sort((a,b)=>byCluster[b].length-byCluster[a].length);
-function posterDetailTarget(no){
+// contain-fit: pick the zoom that keeps the poster within a target W×H
+// box (never exceeding either dimension), rather than a single target
+// width — with posters now aspect-fit to their own ratio (cardRects
+// stores the real, possibly narrow, rendered size), sizing off width
+// alone could blow a tall/narrow poster's on-screen height way up.
+function posterDetailTarget(no,targetW,targetH){
   const r=cardRects.get(no);
-  return {x:r.cx, y:r.cy, zoom:clamp(innerWidth*.34/r.w,1.2,MAX_SCALE)};
+  const zoom=clamp(Math.min(targetW/r.w, targetH/r.h), 1, MAX_SCALE);
+  return {x:r.cx, y:r.cy, zoom};
 }
 function pickFiled(name){ return byCluster[name].find(p=>p.file) || posters.find(p=>p.file); }
 const storyPosters=[byCount[0],byCount[1],byCount[2],byCount[3]].map(pickFiled);
 
+// a gentle, grid-scale framing like the reference — the poster reads as
+// one tile among its neighbours, not a giant blown-up cutout — with a
+// little size variety scene to scene rather than every one identical
+const STORY_FRAME_SIZES=[[135,180],[150,200],[165,220],[145,195]];
 const scenes=storyPosters.map((p,i)=>{
-  const t=posterDetailTarget(p.no);
+  const [tw,th]=STORY_FRAME_SIZES[i%STORY_FRAME_SIZES.length];
+  const t=posterDetailTarget(p.no, tw, th);
   const top=p.responses[0];
   return {
+    no:p.no,
     camera:{x:t.x, y:t.y, zoom:t.zoom},
     quote:top.text,
     respondent:'Respondent #'+p.no,
@@ -603,21 +667,41 @@ const backBtn=document.querySelector('#backBtn');
 const nextBtn=document.querySelector('#nextBtn');
 const hudHint=document.querySelector('#hudHint');
 
-function goToScene(i){
+function goToScene(i,instant=false){
   sceneIndex=clamp(i,0,scenes.length-1);
   const s=scenes[sceneIndex];
-  setCamera(s.camera.x,s.camera.y,s.camera.zoom,.5);
   storyPopup.classList.remove('show');
-  setTimeout(()=>{
+  const drive=()=>{
+    storyPopup.style.top=''; // reset to the CSS default before measuring
     storyTitleEl.textContent=s.quote;
     storyRespondentEl.textContent=s.respondent;
     storyDemoEl.textContent=s.demo;
     backBtn.disabled=sceneIndex===0;
     nextBtn.textContent=s.end?'Start exploring →':'Next →';
     nextBtn.classList.toggle('primary',!!s.end);
+
+    // keep the popup (pinned near the top of the screen) clear of the
+    // poster it's describing — push the poster down until it sits below
+    // the popup's actual, content-dependent height, rather than always
+    // centring it on screen behind the text.
+    const popupBottom=storyPopup.getBoundingClientRect().bottom;
+    const r=cardRects.get(s.no);
+    const onScreenH=r ? r.h*s.camera.zoom : 0;
+    const margin=28;
+    const focusY=clamp((popupBottom+margin+onScreenH/2)/innerHeight, .5, .82);
+    setCamera(s.camera.x,s.camera.y,s.camera.zoom,.5,focusY);
+    if(instant){ state.scale=state.ts; state.x=state.tx; state.y=state.ty; apply(); }
+
+    // make the poster the quote is about unmistakable among its
+    // similarly-sized neighbours, regardless of zoom or tint state
+    cardEls.forEach(c=>c.classList.remove('storyTarget'));
+    const targetCard=cardEls.get(s.no);
+    if(targetCard) targetCard.classList.add('storyTarget');
+
     fitStoryPopupPosition();
     storyPopup.classList.add('show');
-  }, 180);
+  };
+  if(instant) drive(); else setTimeout(drive,180);
 }
 // the popup grows to fit its quote (no inner scrollbar) — if a quote is
 // ever tall enough that the default top offset would push it past the
@@ -635,6 +719,7 @@ function unlockExploration(){
   locked=false;
   interactive.classList.remove('locked');
   storyPopup.classList.remove('show');
+  cardEls.forEach(c=>c.classList.remove('storyTarget'));
   hudHint.textContent='Scroll to move · ⌘/ctrl+scroll to zoom · click a poster';
   state.vx=state.vy=0;
   setCamera(WORLD_W/2,WORLD_H/2,fitScale(),.5);
@@ -653,8 +738,7 @@ document.addEventListener('keydown',e=>{
   }
   if(e.key==='Escape') closeDetails();
 });
-goToScene(0);
-state.scale=state.ts; state.x=state.tx; state.y=state.ty; apply(); // open already zoomed in, no pull-in on first paint
+goToScene(0,true); // instant: open already zoomed in, no pull-in on first paint
 
 /* ---------------------------------------------------------------------
    MINIMAP
@@ -758,6 +842,7 @@ document.querySelector('#resetFilters').addEventListener('click',()=>{
 });
 
 function applyFilters(){
+  surface.classList.toggle('emotionFilterActive', state_f.emotions.size>0);
   posters.forEach(p=>{
     const card=cardEls.get(p.no);
     card.classList.toggle('emotionMatch', state_f.emotions.has(p.feeling));
@@ -785,7 +870,10 @@ function zoomToPoster(no){
   if(!r) return;
   const panelW=sidePanelEl.getBoundingClientRect().width||460;
   const visibleW=Math.max(200, innerWidth-panelW);
-  const targetScale=clamp(340/r.w, MIN_SCALE, MAX_SCALE);
+  // contain-fit within a target box, not a target width alone — a narrow
+  // aspect-fit poster (small r.w) would otherwise blow its on-screen
+  // height way up if sized off width only.
+  const targetScale=clamp(Math.min(480/r.w, 560/r.h), MIN_SCALE, MAX_SCALE);
   setCamera(r.cx, r.cy, targetScale, (visibleW/2)/innerWidth);
 }
 
