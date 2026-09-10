@@ -17,16 +17,20 @@
    opportunity space ends and the next begins is its centred label -- */
 .clusterLabel{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:800;letter-spacing:-.01em;text-transform:none;text-align:center;
   background:#f7f4ecf2;border:1px solid #1112;padding:8px 12px;border-radius:8px;box-shadow:0 10px 28px #0002;pointer-events:none;z-index:3;transition:opacity .3s ease}
-.clusterLabel.hidden{opacity:0}
+.clusterLabel.hidden,.clusterLabel.hoverHidden{opacity:0}
 .clusterLabel .clHead{display:flex;align-items:center;gap:6px}
 .clusterLabel .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
 .clusterLabel b{font-weight:800;min-width:0;overflow-wrap:break-word;word-break:break-word;line-height:1.18}
 .clusterLabel .count{font-size:12px;font-weight:400;opacity:.5}
 
 /* -- poster cards — absolutely positioned, edge-to-edge, no gap -- */
-.card{position:absolute;overflow:hidden;background:#fff;cursor:pointer;transition:box-shadow .18s ease,opacity .25s ease,border-color .3s ease;z-index:2}
+.card{position:absolute;overflow:hidden;background:#f4f1e9;cursor:pointer;transition:box-shadow .18s ease,opacity .25s ease,border-color .3s ease;z-index:2}
 .card:hover{box-shadow:inset 0 0 0 2px #111,0 16px 34px #0004;z-index:6}
-.card img{width:100%;height:100%;object-fit:cover;display:block}
+.card img{width:100%;height:100%;object-fit:contain;display:block;transform:scale(var(--zoomCover,1));transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+/* selecting/highlighting a poster reveals the full, un-cropped image —
+   scaling its already-contained image back down to 1 instead of an
+   instant, non-animatable object-fit swap */
+.card.selected img,.card.emotionMatch img,.card.storyTarget img{transform:scale(1)}
 .card.empty{background:repeating-linear-gradient(135deg,#dcd8cd,#dcd8cd 6px,#d3cfc3 6px,#d3cfc3 12px);display:flex;align-items:center;justify-content:center}
 .card.empty .emptyNo{font-size:10px;letter-spacing:.06em;color:#8b8677;background:#f4f1e9cc;padding:3px 7px;border-radius:20px}
 .catTint{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;background:var(--cc);opacity:.34;transition:opacity .3s ease}
@@ -105,6 +109,22 @@
 .storyNav button.primary:hover{background:#fff}
 @media(max-width:640px){.storyPopup{width:78vw;top:6%}}
 
+/* -- intro/narrator dialogue — a second bubble (a narrator/host voice,
+   not a respondent) that appears TOGETHER with the story quote above,
+   pinned to the bottom-left corner of the viewport regardless of where
+   the quote bubble or poster sit; it alone carries the Next/Back nav
+   for the whole sequence -- */
+.introPopup{position:fixed;left:24px;bottom:24px;width:min(300px,80vw);background:#f7f4ec;color:#1c140f;border-radius:12px;box-shadow:0 20px 50px #0004;padding:15px 17px 13px;z-index:60;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .4s ease,transform .4s ease;border:1px solid #1112}
+.introPopup.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+.introTitle{margin:0 0 12px;font-size:14.5px;font-weight:700;letter-spacing:-.005em;line-height:1.35}
+.introNav{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.introNav button{appearance:none;border:1px solid #1c140f33;background:transparent;color:#1c140f;padding:9px 7px;font:inherit;font-size:9px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:4px}
+.introNav button:hover{background:#1c140f;color:#f7f4ec}
+.introNav button:disabled{opacity:.25;cursor:default;pointer-events:none}
+.introNav button.primary{grid-column:1/-1;background:#1c140f;color:#f7f4ec}
+.introNav button.primary:hover{background:#000}
+@media(max-width:640px){.introPopup{width:82vw}}
+
 /* -- side panel (responses) -- */
 /* the canvas already dims itself when the panel is open (every card but
    the selected one drops to low opacity, above) — this backdrop is only
@@ -173,15 +193,19 @@
   </div>
 </div>
 
+<div id="introPopup" class="introPopup">
+  <p class="introTitle" id="introTitle">Hi there!</p>
+  <div class="introNav">
+    <button id="introBackBtn" type="button">← Back</button>
+    <button id="introNextBtn" type="button">Next →</button>
+  </div>
+</div>
+
 <div id="storyPopup" class="storyPopup">
   <p class="storyTitle" id="storyTitle">Quote</p>
   <div class="storyText">
     <span id="storyRespondent"></span>
     <span id="storyDemo"></span>
-  </div>
-  <div class="storyNav">
-    <button id="backBtn" type="button">← Back</button>
-    <button id="nextBtn" type="button">Next →</button>
   </div>
 </div>
 
@@ -423,7 +447,7 @@ colorOrder.forEach((name,idx)=>{
 //    hand-outs above) are undated filler so the diamond still reads as
 //    fully solid without inventing posters that don't exist --
 
-const clusterBox={}, cardsByCluster={}, cardEls=new Map(), cardRects=new Map();
+const clusterBox={}, cardsByCluster={}, cardEls=new Map(), cardRects=new Map(), labelByName=new Map();
 const labelEls=[];
 
 sortedNames.forEach(name=>{
@@ -455,6 +479,14 @@ sortedNames.forEach(name=>{
     card.style.setProperty('--hc', feelingColor(p.feeling));
     if(p.file){
       card.innerHTML=`<img src="${posterImgSrc(p.file)}" alt="" loading="lazy">`;
+      // the <img> itself is always object-fit:contain (the whole image,
+      // never cropped) and scaled up by --zoomCover to LOOK exactly like
+      // a cover-crop by default; selecting/highlighting the poster just
+      // animates that scale back to 1, smoothly revealing the full
+      // image, instead of an instant, non-animatable object-fit swap.
+      const boxAR=w/h, imgAR=p.ratio||boxAR;
+      const zoomCover=Math.max(imgAR,boxAR)/Math.min(imgAR,boxAR);
+      card.querySelector('img').style.setProperty('--zoomCover', zoomCover.toFixed(4));
     } else {
       card.innerHTML=`<span class="emptyNo">#${p.no}</span>`;
     }
@@ -523,6 +555,7 @@ sortedNames.forEach(name=>{
   label.innerHTML=`<span class="clHead"><span class="dot" style="background:${color}"></span><span class="count">${targetCount[name]}</span></span><b>${esc(name)}</b>`;
   surface.appendChild(label);
   labelEls.push(label);
+  labelByName.set(name,label);
 });
 
 const WORLD_W=gridCols*CELL_W;
@@ -558,12 +591,17 @@ const state={x:0,y:0,tx:0,ty:0,scale:MIN_SCALE,ts:MIN_SCALE,down:false,lastX:0,l
 const EASE=.13, OVERSCROLL=.06;
 let locked=true;
 
+// breathing room: once zoomed in past the fit-to-screen size, let the
+// camera pan a bit further than the exact edge of the diamond so there's
+// always some background visible around the cluster, instead of the
+// content's edge landing flush against the viewport edge.
+const PAN_MARGIN=280;
 function bounds(scale){
-  const scaledW=WORLD_W*scale, scaledH=WORLD_H*scale;
-  const minX=scaledW<=innerWidth?(innerWidth-scaledW)/2:innerWidth-scaledW;
-  const maxX=scaledW<=innerWidth?minX:0;
-  const minY=scaledH<=innerHeight?(innerHeight-scaledH)/2:innerHeight-scaledH;
-  const maxY=scaledH<=innerHeight?minY:0;
+  const scaledW=WORLD_W*scale, scaledH=WORLD_H*scale, m=PAN_MARGIN*scale;
+  const minX=scaledW<=innerWidth?(innerWidth-scaledW)/2:innerWidth-scaledW-m;
+  const maxX=scaledW<=innerWidth?minX:m;
+  const minY=scaledH<=innerHeight?(innerHeight-scaledH)/2:innerHeight-scaledH-m;
+  const maxY=scaledH<=innerHeight?minY:m;
   return {minX,maxX,minY,maxY};
 }
 function clampCamera(){
@@ -663,27 +701,44 @@ const storyPopup=document.querySelector('#storyPopup');
 const storyTitleEl=document.querySelector('#storyTitle');
 const storyRespondentEl=document.querySelector('#storyRespondent');
 const storyDemoEl=document.querySelector('#storyDemo');
-const backBtn=document.querySelector('#backBtn');
-const nextBtn=document.querySelector('#nextBtn');
 const hudHint=document.querySelector('#hudHint');
+
+// the narrator/host bubble — shown TOGETHER with the quote bubble above
+// on every scene, pinned to the bottom-left corner of the viewport, and
+// the only one of the two carrying the Next/Back nav. Placeholder copy
+// for now, cycled one line per scene; swap in real lines later without
+// touching the mechanics.
+const INTRO_SCENES=['Hi there!','This is a story about AI','Agents of AI'];
+const introPopup=document.querySelector('#introPopup');
+const introTitleEl=document.querySelector('#introTitle');
+const introBackBtn=document.querySelector('#introBackBtn');
+const introNextBtn=document.querySelector('#introNextBtn');
 
 function goToScene(i,instant=false){
   sceneIndex=clamp(i,0,scenes.length-1);
   const s=scenes[sceneIndex];
   storyPopup.classList.remove('show');
+  introPopup.classList.remove('show');
   const drive=()=>{
     storyPopup.style.top=''; // reset to the CSS default before measuring
     storyTitleEl.textContent=s.quote;
     storyRespondentEl.textContent=s.respondent;
     storyDemoEl.textContent=s.demo;
-    backBtn.disabled=sceneIndex===0;
-    nextBtn.textContent=s.end?'Start exploring →':'Next →';
-    nextBtn.classList.toggle('primary',!!s.end);
 
-    // keep the popup (pinned near the top of the screen) clear of the
-    // poster it's describing — push the poster down until it sits below
-    // the popup's actual, content-dependent height, rather than always
-    // centring it on screen behind the text.
+    introTitleEl.textContent=INTRO_SCENES[sceneIndex%INTRO_SCENES.length];
+    introBackBtn.disabled=sceneIndex===0;
+    introNextBtn.textContent=s.end?'Start exploring →':'Next →';
+    introNextBtn.classList.toggle('primary',!!s.end);
+
+    // the narrator box is pinned to the bottom-left corner independent
+    // of the poster, so only the quote bubble (pinned near the top)
+    // needs to stay clear of the poster it's describing — push the
+    // poster down until it sits below the quote bubble's actual,
+    // content-dependent height, rather than centring it behind the text.
+    storyPopup.classList.add('show');
+    fitStoryPopupPosition();
+    introPopup.classList.add('show');
+
     const popupBottom=storyPopup.getBoundingClientRect().bottom;
     const r=cardRects.get(s.no);
     const onScreenH=r ? r.h*s.camera.zoom : 0;
@@ -697,9 +752,6 @@ function goToScene(i,instant=false){
     cardEls.forEach(c=>c.classList.remove('storyTarget'));
     const targetCard=cardEls.get(s.no);
     if(targetCard) targetCard.classList.add('storyTarget');
-
-    fitStoryPopupPosition();
-    storyPopup.classList.add('show');
   };
   if(instant) drive(); else setTimeout(drive,180);
 }
@@ -719,21 +771,22 @@ function unlockExploration(){
   locked=false;
   interactive.classList.remove('locked');
   storyPopup.classList.remove('show');
+  introPopup.classList.remove('show');
   cardEls.forEach(c=>c.classList.remove('storyTarget'));
   hudHint.textContent='Scroll to move · ⌘/ctrl+scroll to zoom · click a poster';
   state.vx=state.vy=0;
   setCamera(WORLD_W/2,WORLD_H/2,fitScale(),.5);
 }
-backBtn.addEventListener('click',()=>{ if(sceneIndex>0) goToScene(sceneIndex-1); });
-nextBtn.addEventListener('click',()=>{
+introBackBtn.addEventListener('click',()=>{ if(sceneIndex>0) goToScene(sceneIndex-1); });
+introNextBtn.addEventListener('click',()=>{
   const s=scenes[sceneIndex];
   if(s.end){ unlockExploration(); return; }
   goToScene(sceneIndex+1);
 });
 document.addEventListener('keydown',e=>{
   if(locked){
-    if(e.key==='ArrowRight') nextBtn.click();
-    if(e.key==='ArrowLeft' && sceneIndex>0) goToScene(sceneIndex-1);
+    if(e.key==='ArrowRight') introNextBtn.click();
+    if(e.key==='ArrowLeft' && !introBackBtn.disabled) introBackBtn.click();
     return;
   }
   if(e.key==='Escape') closeDetails();
@@ -914,12 +967,19 @@ document.querySelector('#modalBackdrop').onclick=closeDetails;
    full side panel.
 --------------------------------------------------------------------- */
 const hoverPreview=document.querySelector('#hoverPreview');
-let hoverNo=null;
+let hoverNo=null, hoverHiddenLabel=null;
+function setHoverHiddenLabel(label){
+  if(label===hoverHiddenLabel) return;
+  if(hoverHiddenLabel) hoverHiddenLabel.classList.remove('hoverHidden');
+  hoverHiddenLabel=label;
+  if(label) label.classList.add('hoverHidden');
+}
 interactive.addEventListener('pointermove',e=>{
-  if(locked || state.down || modal.classList.contains('show')){ hoverPreview.classList.remove('show'); hoverNo=null; return; }
+  if(locked || state.down || modal.classList.contains('show')){ hoverPreview.classList.remove('show'); hoverNo=null; setHoverHiddenLabel(null); return; }
   const card=e.target.closest('.card');
   if(!card || card.classList.contains('filteredOut')){
     if(hoverNo!==null){ hoverPreview.classList.remove('show'); hoverNo=null; }
+    setHoverHiddenLabel(null);
     return;
   }
   if(card.dataset.no!==hoverNo){
@@ -929,12 +989,13 @@ interactive.addEventListener('pointermove',e=>{
     const fc=feelingColor(p.feeling);
     const metaBits=[first.ageBin, first.city].filter(Boolean).join(' · ');
     hoverPreview.innerHTML=`<div class="hp-meta"><span class="dot" style="background:${fc}"></span><span>${esc(p.feeling)} · ${esc(p.opportunitySpace)}</span>${metaBits?`<span>· ${esc(metaBits)}</span>`:''}</div><div>${esc(truncate(first.text,190))}</div>`;
+    setHoverHiddenLabel(labelByName.get(p.opportunitySpace)||null);
   }
   hoverPreview.style.left=Math.min(e.clientX+18, innerWidth-286)+'px';
   hoverPreview.style.top=Math.min(e.clientY+18, innerHeight-90)+'px';
   hoverPreview.classList.add('show');
 });
-interactive.addEventListener('pointerleave',()=>{ hoverPreview.classList.remove('show'); hoverNo=null; });
+interactive.addEventListener('pointerleave',()=>{ hoverPreview.classList.remove('show'); hoverNo=null; setHoverHiddenLabel(null); });
 
 /* ---------------------------------------------------------------------
    POINTER / WHEEL — pan, pinch/scroll zoom, click-to-open (drag != click)
