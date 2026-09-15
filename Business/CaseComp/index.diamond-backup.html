@@ -2,63 +2,64 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Case Comp 2026 — Poster boards</title>
+<title>Case Comp 2026 — Poster surface</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;background:#f4f1e9;color:#111;font-family:Arial,Helvetica,sans-serif;overflow:hidden}
 
 .interactive{position:fixed;inset:0;display:block;background:#f4f1e9;overflow:hidden;touch-action:none;cursor:grab;z-index:5}
 .interactive:active{cursor:grabbing}
 .interactive.locked{cursor:default}
-.surface{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;
+.surface{position:absolute;left:0;top:0;transform-origin:0 0;
   background:linear-gradient(90deg,#00000007 1px,transparent 1px),linear-gradient(#00000007 1px,transparent 1px);background-size:120px 120px}
 
-/* -- opportunity-space boards — one real ad image per space (not a
-   cluster of posters), sized by how many response-clusters it carries.
-   #surface alone carries will-change:transform — it's the one element
-   that's actually continuously repositioned/rescaled by the camera, so
-   promoting IT to its own compositor layer is what makes panning/zooming
-   cheap. Promoting all 230 boards+notes too (an earlier attempt at this)
-   over-allocates compositor layers/GPU memory and was the actual cause
-   of the flicker/pop-in glitching — will-change is meant to be used
-   sparingly, not stamped on every child. -- */
-.board{position:absolute;overflow:hidden;background:#ddd6c4;box-shadow:0 14px 32px #0003;border-radius:3px;z-index:1}
-.board img.boardImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.board.empty{background:repeating-linear-gradient(135deg,#dcd8cd,#dcd8cd 8px,#d3cfc3 8px,#d3cfc3 16px)}
-.board .boardShade{position:absolute;inset:0;background:#00000018;pointer-events:none}
+/* -- clusters (opportunity spaces) — no colour, no box; every cluster's
+   posters merge into one contiguous mass, and the only cue to where one
+   opportunity space ends and the next begins is its centred label -- */
+.clusterLabel{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:800;letter-spacing:-.01em;text-transform:none;text-align:center;
+  background:#f7f4ecf2;border:1px solid #1112;padding:8px 12px;border-radius:8px;box-shadow:0 10px 28px #0002;pointer-events:none;z-index:3;transition:opacity .3s ease}
+.clusterLabel.hidden,.clusterLabel.hoverHidden{opacity:0}
+.clusterLabel .clHead{display:flex;align-items:center;gap:6px}
+.clusterLabel .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.clusterLabel b{font-weight:800;min-width:0;overflow-wrap:break-word;word-break:break-word;line-height:1.18}
+.clusterLabel .count{font-size:12px;font-weight:400;opacity:.5}
 
-.boardLabel{position:absolute;transform:translate(-50%,-100%);display:flex;align-items:baseline;gap:6px;
-  background:#f7f4ecf2;border:1px solid #1112;padding:6px 11px;border-radius:7px;box-shadow:0 8px 20px #0002;
-  pointer-events:none;z-index:3;font-weight:800;letter-spacing:-.005em;white-space:nowrap;transition:opacity .3s ease}
-.boardLabel .count{font-size:11px;font-weight:400;opacity:.5}
-.boardLabel.hidden,.boardLabel.hoverHidden{opacity:0}
-
-/* -- post-it notes — one per response-cluster (what used to be its own
-   poster tile), pinned onto its board. Every note is the same fixed
-   size regardless of board size or response count, and its text is
-   clamped to the same number of lines everywhere, so the notes always
-   read as one consistent, repeated element. -- */
-.postit{position:absolute;background:#fbe35e;box-shadow:0 1px 0 #ffffff80 inset,0 4px 10px #0003;
-  border-radius:1px;cursor:pointer;padding:8px 9px;overflow:hidden;transform:rotate(var(--rot,0deg));
-  transition:transform .15s ease,box-shadow .15s ease,opacity .25s ease;z-index:4}
-.postit::before{content:'';position:absolute;left:50%;top:-7px;transform:translateX(-50%) rotate(-3deg);
-  width:26px;height:14px;background:#f2e9c9cc;box-shadow:0 1px 2px #0002}
-.postit p{margin:0;font-size:10.5px;line-height:1.32;color:#3a3320;font-weight:600;
-  display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
-/* mix-blend-mode forces the browser to isolate and blend against the
-   backdrop — expensive if it's on all 192 notes at once, so it only
-   ever applies to the (usually small) currently emotion-matched subset,
-   not the base .halo rule that every note carries. */
-.postit .halo{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s ease;
+/* -- poster cards — absolutely positioned, edge-to-edge, no gap -- */
+.card{position:absolute;overflow:hidden;background:#f4f1e9;cursor:pointer;transition:box-shadow .18s ease,opacity .25s ease,border-color .3s ease;z-index:2}
+.card:hover{box-shadow:inset 0 0 0 2px #111,0 16px 34px #0004;z-index:6}
+.card img{width:100%;height:100%;object-fit:contain;display:block;transform:scale(var(--zoomCover,1));transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+/* selecting/highlighting a poster reveals the full, un-cropped image —
+   scaling its already-contained image back down to 1 instead of an
+   instant, non-animatable object-fit swap */
+.card.selected img,.card.emotionMatch img,.card.storyTarget img{transform:scale(1)}
+.card.empty{background:repeating-linear-gradient(135deg,#dcd8cd,#dcd8cd 6px,#d3cfc3 6px,#d3cfc3 12px);display:flex;align-items:center;justify-content:center}
+.card.empty .emptyNo{font-size:10px;letter-spacing:.06em;color:#8b8677;background:#f4f1e9cc;padding:3px 7px;border-radius:20px}
+.catTint{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;background:var(--cc);opacity:.34;transition:opacity .3s ease}
+.surface.labelsHidden .catTint{opacity:0}
+/* an emotion filter is active — the cluster colour scheme is switched
+   off everywhere (not just on matched cards), at every zoom level, so
+   it never competes with the emotion overlay */
+.surface.emotionFilterActive .catTint{opacity:0!important}
+/* fillers are pure layout padding (they keep each cluster's region solid
+   and correctly shaped on the grid) — flat like a real card, not striped
+   like .card.empty, so they never read as an unsourced poster */
+.filler{position:absolute;overflow:hidden;pointer-events:none;background:#f4f1e9}
+/* emotion match — a solid colour wash plus a slim inset ring, entirely
+   inside the card's own box (no outward glow/spread), so a matched
+   card never reads as bigger than its neighbours */
+.card .halo{position:absolute;inset:0;pointer-events:none;opacity:0;mix-blend-mode:multiply;transition:opacity .3s ease;
   background-color:color-mix(in srgb,var(--hc) 62%,transparent)}
-.postit:hover{transform:rotate(0deg) scale(1.15);box-shadow:0 10px 24px #0004;z-index:25}
-.postit.emotionMatch{box-shadow:0 0 0 3px var(--hc),0 1px 0 #ffffff80 inset,0 8px 20px #0004;z-index:12}
-.postit.emotionMatch .halo{opacity:.35;mix-blend-mode:multiply}
-.postit.filteredOut{opacity:.12;pointer-events:none}
-.postit.storyTarget{box-shadow:0 0 0 3px #1c140f,0 0 0 5px #f7f4ec,0 10px 24px #0004;z-index:20;transform:rotate(0deg) scale(1.12)}
-.surface.notesHidden .postit{opacity:0;pointer-events:none}
-.interactive.panelOpen .postit{opacity:.12}
-.interactive.panelOpen .postit.filteredOut{opacity:.03}
-.interactive.panelOpen .postit.selected{opacity:1;transform:rotate(0deg) scale(1.3);box-shadow:0 0 0 3px #f7f4ec,0 22px 50px #0006;z-index:30}
+.card.emotionMatch .halo{opacity:1}
+.card.emotionMatch{box-shadow:inset 0 0 0 5px var(--hc),inset 0 0 0 7px #fff,0 4px 16px #0004;z-index:7}
+.card.emotionMatch:hover{box-shadow:inset 0 0 0 5px var(--hc),inset 0 0 0 7px #fff,0 16px 34px #0005;z-index:8}
+.card.filteredOut{opacity:.07;pointer-events:none}
+.interactive.panelOpen .card{opacity:.12}
+.interactive.panelOpen .card.filteredOut{opacity:.03}
+.interactive.panelOpen .card.selected{opacity:1;box-shadow:0 0 0 3px #f7f4ec,0 22px 50px #0006;z-index:9}
+.card.selected .catTint{opacity:0!important}
+/* the poster the story is currently talking about — unmistakable among
+   its similarly-sized neighbours regardless of zoom or tint state */
+.card.storyTarget{box-shadow:0 0 0 3px #f7f4ec,0 0 0 5px #1c140f,0 14px 34px #0006;z-index:9}
+.card.storyTarget .catTint{opacity:0!important}
 
 /* -- header / minimap -- */
 .hud{position:absolute;left:22px;top:20px;z-index:15;pointer-events:none}
@@ -95,7 +96,7 @@
 .hoverPreview .hp-meta .dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto}
 
 /* -- story dialogue bubble — one respondent, one quote, always over a
-   zoomed-in note (reused camera engine, never pulls back to overview) -- */
+   zoomed-in poster (reused camera engine, never pulls back to overview) -- */
 .storyPopup{position:fixed;left:50%;top:6%;transform:translateX(-50%) translateY(-6px);width:min(300px,80vw);background:#1c140f;color:#f3ece2;border-radius:12px;box-shadow:0 20px 50px #0005;padding:15px 17px 13px;z-index:60;opacity:0;pointer-events:none;transition:opacity .4s ease,transform .4s ease,top .3s ease}
 .storyPopup.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
 .storyPopup::after{content:'';position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid #1c140f}
@@ -114,7 +115,7 @@
 /* -- intro/narrator dialogue — a second bubble (a narrator/host voice,
    not a respondent) that appears TOGETHER with the story quote above,
    pinned to the bottom-left corner of the viewport regardless of where
-   the quote bubble or note sit; it alone carries the Next/Back nav
+   the quote bubble or poster sit; it alone carries the Next/Back nav
    for the whole sequence -- */
 .introPopup{position:fixed;left:24px;bottom:24px;width:min(300px,80vw);background:#f7f4ec;color:#1c140f;border-radius:12px;box-shadow:0 20px 50px #0004;padding:15px 17px 13px;z-index:60;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .4s ease,transform .4s ease;border:1px solid #1112}
 .introPopup.show{opacity:1;pointer-events:auto;transform:translateY(0)}
@@ -128,10 +129,10 @@
 @media(max-width:640px){.introPopup{width:82vw}}
 
 /* -- side panel (responses) -- */
-/* the canvas already dims itself when the panel is open (every note but
+/* the canvas already dims itself when the panel is open (every card but
    the selected one drops to low opacity, above) — this backdrop is only
    a click target to close the panel, not a second dimming layer, so it
-   stays fully transparent and never darkens the selected note */
+   stays fully transparent and never darkens the selected poster */
 .modal{position:fixed;inset:0;display:block;visibility:hidden;pointer-events:none;background:transparent;z-index:100}
 .modal.show{visibility:visible;pointer-events:auto}
 .modal-backdrop{position:absolute;inset:0;background:transparent}
@@ -166,7 +167,7 @@
 <div class="hud">
   <div class="captionBadge">
     <h2>Case Comp 2026</h2>
-    <p id="hudHint">Scroll to move · ⌘/ctrl+scroll to zoom · zoom in for notes</p>
+    <p id="hudHint">Scroll to move · ⌘/ctrl+scroll to zoom · click a poster</p>
   </div>
   <div id="minimap" class="minimap">
     <div id="mmClusters"></div>
@@ -178,13 +179,6 @@
 
 <div class="filters">
   <div class="filtersTop"><h3>Filters</h3><button id="resetFilters" type="button">Reset</button></div>
-
-  <div class="filterGroup">
-    <div class="label">View</div>
-    <div class="chips" id="viewChips">
-      <div class="chip" id="notesToggle" data-view="notes">Show all notes</div>
-    </div>
-  </div>
 
   <div class="filterGroup">
     <div class="label">Emotion</div>
@@ -220,7 +214,7 @@
 
 <div id="modal" class="modal" aria-hidden="true">
   <div class="modal-backdrop" id="modalBackdrop"></div>
-  <aside class="side-panel" role="dialog" aria-modal="true" aria-label="Cluster responses">
+  <aside class="side-panel" role="dialog" aria-modal="true" aria-label="Poster responses">
     <button id="close" class="close" aria-label="Close">×</button>
     <div class="panel-scroll">
       <div class="panel-kicker" id="panelKicker"></div>
@@ -252,154 +246,349 @@ function feelingColor(f){return FEELING_COLORS[f]||'#9a9284'}
 const opportunitySpaces=meta.opportunitySpaces.map(o=>o.name);
 
 /* ---------------------------------------------------------------------
-   BOARDS — one board per opportunity space (not a cluster of posters).
-   Each board's background is a real ad image, picked from its biggest
-   response-cluster; its area is directly proportional to how many
-   clusters (post-it notes) it carries, so a space with 30 clusters gets
-   a visibly bigger board than one with 3. Every note pinned to it is
-   the same fixed size, arranged on a light grid across the board's own
-   area with a little jitter and rotation so it reads as pinned rather
-   than tiled, while always leaving a visible margin of poster underneath.
+   SEEDED REGION GROWTH — one solid diamond made of a single uniform
+   grid. Every grid cell inside the diamond mask gets claimed by exactly
+   one opportunity space via flood-fill growth from a seed cell, so the
+   whole diamond fills edge to edge with no internal voids, and every
+   cluster is a contiguous, organically-edged region rather than a rigid
+   rectangle. Posters stay upright throughout — nothing here rotates the
+   surface, and the camera/pan/zoom math below is untouched.
 --------------------------------------------------------------------- */
-const BOARD_GAP=46, NOTE_SIZE=88, NOTE_COVERAGE=.42, DEFAULT_ASPECT=.75;
-const AREA_PER_NOTE=(NOTE_SIZE*NOTE_SIZE)/NOTE_COVERAGE;
-
+const CARD_GAP=5, CELL_W=80, CELL_H=120;
 const byCluster={};
 opportunitySpaces.forEach(name=>byCluster[name]=[]);
 posters.forEach(p=>byCluster[p.opportunitySpace].push(p));
+const sortedNames=[...opportunitySpaces].sort((a,b)=>byCluster[b].length-byCluster[a].length);
+const targetCount={};
+sortedNames.forEach(name=>{ targetCount[name]=byCluster[name].length; });
 
-const boardsData=opportunitySpaces.map(name=>{
-  const notes=byCluster[name];
-  const withFile=notes.filter(p=>p.file);
-  const rep=withFile.length ? withFile.reduce((a,b)=>b.groupSize>a.groupSize?b:a) : null;
-  const aspect=clamp(rep?rep.ratio:DEFAULT_ASPECT, .45, 1.8);
-  const count=notes.length;
-  const area=AREA_PER_NOTE*count;
-  const w=Math.sqrt(area*aspect), h=Math.sqrt(area/aspect);
-  return {key:name, name, notes, rep, aspect, count, w, h};
+function cellKey(c,r){ return c+','+r; }
+const NEI4=[[1,0],[-1,0],[0,1],[0,-1]];
+
+// -- 1. diamond mask: grow halfW/halfH (slightly taller than wide, like
+//    the reference) until the inside-cell count covers every poster --
+const DIAMOND_ASPECT=1.08;
+let gcx=0, gcy=0, gridCols=0, gridRows=0;
+const insideCells=[];
+for(let hw=4; hw<80; hw++){
+  const hh=hw*DIAMOND_ASPECT;
+  const gc=Math.ceil(hw), gr=Math.ceil(hh);
+  const cols=2*gc+1, rows=2*gr+1;
+  const cells=[];
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const d=Math.abs(c-gc)/hw+Math.abs(r-gr)/hh;
+      if(d<=1) cells.push({col:c,row:r,d});
+    }
+  }
+  if(cells.length>=posters.length){
+    gcx=gc; gcy=gr; gridCols=cols; gridRows=rows;
+    // the diamond mask overshoots posters.length by a handful of cells
+    // (the next size down is always too small) — trim to exactly
+    // posters.length by dropping the cells closest to the boundary
+    // first, so every inside-cell gets a real poster and there's no
+    // filler left to invent. d only grows moving outward from centre
+    // within a row, so this always trims from each row's ends inward —
+    // rows stay a single contiguous run of columns (relied on below by
+    // the minimap silhouette).
+    cells.sort((a,b)=>a.d-b.d);
+    insideCells.push(...cells.slice(0,posters.length));
+    break;
+  }
+}
+const coordOf=new Map(insideCells.map(c=>[cellKey(c.col,c.row),c]));
+const freeCells=new Set(coordOf.keys());
+const cellOwner=new Map();
+
+// -- 2. one seed per cluster: biggest cluster seeds at the centre; every
+//    later seed is the free cell that maximises its distance from all
+//    earlier seeds (farthest-point sampling), so seeds start spread out
+//    and their regions grow into each other rather than one swallowing
+//    the rest --
+const seeds=[];
+sortedNames.forEach((name,i)=>{
+  let bestKey=null;
+  if(i===0){
+    bestKey=cellKey(gcx,gcy);
+  } else {
+    let bestScore=-Infinity;
+    freeCells.forEach(key=>{
+      const {col,row}=coordOf.get(key);
+      let minD=Infinity;
+      seeds.forEach(s=>{ const d=Math.abs(col-s.col)+Math.abs(row-s.row); if(d<minD) minD=d; });
+      if(minD>bestScore){ bestScore=minD; bestKey=key; }
+    });
+  }
+  const c=coordOf.get(bestKey);
+  seeds.push({name,col:c.col,row:c.row});
+  cellOwner.set(bestKey,name);
+  freeCells.delete(bestKey);
 });
 
-// -- justified rows (the classic photo-gallery layout): group boards
-//    into rows by their own ideal width, then RESCALE every board in a
-//    row to one shared row height. That's what makes the gap perfectly
-//    equal in every direction — every board in a row now has the exact
-//    same top and bottom edge, so the vertical gap to the next row is
-//    identical for all of them (no per-board centering slop), and every
-//    row lands on the exact same total width, so nothing needs to be
-//    forced to a common grid to still look evenly, symmetrically spaced --
-function packBoards(list, gap){
-  const totalArea=list.reduce((s,b)=>s+b.w*b.h,0);
-  const targetRowW=Math.sqrt(totalArea*1.75);
-  // a row left with too few boards (typically just the last one) would
-  // otherwise have to stretch to an absurd height to still reach
-  // targetRowW on its own — cap how far any row can grow, so a sparse
-  // row simply falls short of the target width instead of ballooning
-  // one board into a giant. Gaps stay exactly equal either way; only
-  // the row's total width varies when this cap kicks in.
-  const MAX_ROW_H=Math.max(...list.map(b=>b.h))*1.15;
-  const sorted=[...list].sort((a,b)=>b.h-a.h);
-  const rows=[]; let row=[], rowW=0;
-  sorted.forEach(b=>{
-    const nextW=rowW===0 ? b.w : rowW+gap+b.w;
-    if(rowW>0 && nextW>targetRowW){ rows.push(row); row=[]; rowW=0; }
-    row.push(b);
-    rowW=rowW===0 ? b.w : rowW+gap+b.w;
+// -- 3. round-robin BFS growth: each cluster claims its nearest free cell
+//    one at a time (not all at once), so every region grows in lockstep
+//    and they meet each other with an organic, interleaved edge instead
+//    of one finishing its whole shape before the next starts --
+const regionQueue={}, regionCells={};
+sortedNames.forEach(name=>{ regionQueue[name]=[]; regionCells[name]=[]; });
+function enqueueNeighbors(name,key){
+  const {col,row}=coordOf.get(key);
+  NEI4.forEach(([dx,dy])=>{
+    const nk=cellKey(col+dx,row+dy);
+    if(coordOf.has(nk) && freeCells.has(nk)) regionQueue[name].push(nk);
   });
-  if(row.length) rows.push(row);
-
-  let y=0, maxRowW=0;
-  const rects=new Map();
-  rows.forEach(row=>{
-    const n=row.length;
-    const aspectSum=row.reduce((s,b)=>s+b.w/b.h,0);
-    const rowH=clamp((targetRowW-gap*(n-1))/aspectSum, NOTE_SIZE+40, MAX_ROW_H);
-    let x=0;
-    row.forEach(b=>{
-      const w=(b.w/b.h)*rowH;
-      rects.set(b.key,{x,y,w,h:rowH,cx:x+w/2,cy:y+rowH/2});
-      x+=w+gap;
-    });
-    maxRowW=Math.max(maxRowW,x-gap);
-    y+=rowH+gap;
-  });
-  return {rects, worldW:maxRowW, worldH:Math.max(0,y-gap)};
 }
-const {rects:boardRects, worldW:WORLD_W, worldH:WORLD_H}=packBoards(boardsData, BOARD_GAP);
+seeds.forEach(s=>{ regionCells[s.name].push(cellKey(s.col,s.row)); enqueueNeighbors(s.name,cellKey(s.col,s.row)); });
 
-const boardEls=new Map(), noteEls=new Map(), noteRects=new Map(), labelByName=new Map(), labelEls=[];
-
-boardsData.forEach(b=>{
-  const r=boardRects.get(b.key);
-
-  const board=document.createElement('div');
-  board.className='board'+(b.rep?'':' empty');
-  board.style.left=r.x+'px'; board.style.top=r.y+'px'; board.style.width=r.w+'px'; board.style.height=r.h+'px';
-  if(b.rep){
-    board.innerHTML=`<img class="boardImg" src="${posterImgSrc(b.rep.file)}" alt="" loading="lazy"><span class="boardShade"></span>`;
+function nearestFreeCellToRegion(name){
+  const visited=new Set(regionCells[name]);
+  let frontier=regionCells[name].slice();
+  while(frontier.length){
+    const next=[];
+    for(const key of frontier){
+      const {col,row}=coordOf.get(key);
+      for(const [dx,dy] of NEI4){
+        const nk=cellKey(col+dx,row+dy);
+        if(!coordOf.has(nk) || visited.has(nk)) continue;
+        visited.add(nk);
+        if(freeCells.has(nk)) return nk;
+        next.push(nk);
+      }
+    }
+    frontier=next;
   }
-  surface.appendChild(board);
-  boardEls.set(b.key, board);
+  return null;
+}
+
+let remaining=sortedNames.filter(name=>regionCells[name].length<targetCount[name]);
+let guard=insideCells.length*4;
+while(remaining.length && freeCells.size>0 && guard-->0){
+  for(const name of remaining){
+    if(regionCells[name].length>=targetCount[name]) continue;
+    let claimed=null;
+    while(regionQueue[name].length){
+      const cand=regionQueue[name].shift();
+      if(freeCells.has(cand)){ claimed=cand; break; }
+    }
+    if(!claimed) claimed=nearestFreeCellToRegion(name);
+    if(claimed){
+      cellOwner.set(claimed,name);
+      freeCells.delete(claimed);
+      regionCells[name].push(claimed);
+      enqueueNeighbors(name,claimed);
+    }
+  }
+  remaining=sortedNames.filter(name=>regionCells[name].length<targetCount[name]);
+}
+
+// -- 4. a handful of inside-cells can be left over once every region hit
+//    its target count (the diamond mask is sized >= total posters) —
+//    hand each to whichever neighbouring region borders it most, so the
+//    diamond stays solid with no unclaimed holes --
+guard=200;
+while(freeCells.size>0 && guard-->0){
+  let progressed=false;
+  [...freeCells].forEach(key=>{
+    const {col,row}=coordOf.get(key);
+    const votes={};
+    NEI4.forEach(([dx,dy])=>{
+      const owner=cellOwner.get(cellKey(col+dx,row+dy));
+      if(owner) votes[owner]=(votes[owner]||0)+1;
+    });
+    const entries=Object.entries(votes);
+    if(entries.length){
+      entries.sort((a,b)=>b[1]-a[1]);
+      const owner=entries[0][0];
+      cellOwner.set(key,owner);
+      regionCells[owner].push(key);
+      freeCells.delete(key);
+      progressed=true;
+    }
+  });
+  if(!progressed) break;
+}
+
+// -- 4b. colour assignment — adjacency-aware, not list-order. With this
+//    many opportunity spaces, evenly spacing hues by array order can hand
+//    two hues that are close on the wheel to two regions that happen to
+//    sit right next to each other on the diamond, so the seam between
+//    them barely reads. Build the actual region-adjacency graph from the
+//    grid, then greedily hand each region the remaining hue that is
+//    farthest (in hue-circle degrees) from its already-coloured
+//    neighbours — regions with the most neighbours go first, since they
+//    have the least room to manoeuvre. Lightness/saturation is also
+//    cycled across three bands so even a same-family hue pair (unavoidable
+//    once neighbour count exceeds the wheel can comfortably split) still
+//    differs on a second channel.
+const clusterAdj={};
+opportunitySpaces.forEach(n=>clusterAdj[n]=new Set());
+coordOf.forEach((c,key)=>{
+  const owner=cellOwner.get(key);
+  if(!owner) return;
+  NEI4.forEach(([dx,dy])=>{
+    const nk=cellKey(c.col+dx,c.row+dy);
+    if(!coordOf.has(nk)) return;
+    const nOwner=cellOwner.get(nk);
+    if(nOwner && nOwner!==owner) clusterAdj[owner].add(nOwner);
+  });
+});
+const N_SPACES=opportunitySpaces.length, HUE_STEP=360/N_SPACES;
+const BANDS=[{s:78,l:38},{s:64,l:50},{s:88,l:29}];
+function hueDist(a,b){ const d=Math.abs(a-b)%360; return Math.min(d,360-d); }
+const colorOrder=[...opportunitySpaces].sort((a,b)=>clusterAdj[b].size-clusterAdj[a].size);
+const usedHueSlots=new Set(), CLUSTER_HUE={}, CLUSTER_COLORS={};
+colorOrder.forEach((name,idx)=>{
+  const neighborHues=[...clusterAdj[name]].map(nb=>CLUSTER_HUE[nb]).filter(h=>h!==undefined);
+  const compareHues=neighborHues.length?neighborHues:Object.values(CLUSTER_HUE);
+  let bestSlot=0,bestScore=-Infinity;
+  for(let slot=0;slot<N_SPACES;slot++){
+    if(usedHueSlots.has(slot)) continue;
+    const hue=slot*HUE_STEP;
+    const score=compareHues.length?Math.min(...compareHues.map(h=>hueDist(h,hue))):0;
+    if(score>bestScore){ bestScore=score; bestSlot=slot; }
+  }
+  usedHueSlots.add(bestSlot);
+  const hue=bestSlot*HUE_STEP;
+  CLUSTER_HUE[name]=hue;
+  const band=BANDS[idx%BANDS.length];
+  CLUSTER_COLORS[name]=`hsl(${Math.round(hue)} ${band.s}% ${band.l}%)`;
+});
+
+// -- 5. render: each region's first targetCount cells (claim order, so
+//    nearest the seed first) get an actual poster — sorted by feeling
+//    for internal colour coherence; any cells past that (the leftover
+//    hand-outs above) are undated filler so the diamond still reads as
+//    fully solid without inventing posters that don't exist --
+
+const clusterBox={}, cardsByCluster={}, cardEls=new Map(), cardRects=new Map(), labelByName=new Map();
+const labelEls=[];
+
+sortedNames.forEach(name=>{
+  const list=[...byCluster[name]].sort((a,b)=>a.feeling.localeCompare(b.feeling));
+  const cells=regionCells[name];
+  const mainCells=cells.slice(0,targetCount[name]);
+  const extraCells=cells.slice(targetCount[name]);
+  cardsByCluster[name]=[];
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity,sx=0,sy=0,n=0;
+  const color=CLUSTER_COLORS[name];
+
+  function accumulate(wx,wy,w,h){
+    minX=Math.min(minX,wx); minY=Math.min(minY,wy);
+    maxX=Math.max(maxX,wx+w); maxY=Math.max(maxY,wy+h);
+    sx+=wx+w/2; sy+=wy+h/2; n++;
+  }
+
+  mainCells.forEach((key,idx)=>{
+    const p=list[idx];
+    const {col,row}=coordOf.get(key);
+    const g=CARD_GAP;
+    const wx=col*CELL_W+g/2, wy=row*CELL_H+g/2, w=CELL_W-g, h=CELL_H-g;
+
+    const card=document.createElement('div');
+    card.className='card'+(p.file?'':' empty');
+    card.dataset.no=p.no;
+    card.dataset.feeling=p.feeling;
+    card.style.left=wx+'px'; card.style.top=wy+'px'; card.style.width=w+'px'; card.style.height=h+'px';
+    card.style.setProperty('--hc', feelingColor(p.feeling));
+    if(p.file){
+      card.innerHTML=`<img src="${posterImgSrc(p.file)}" alt="" loading="lazy">`;
+      // the <img> itself is always object-fit:contain (the whole image,
+      // never cropped) and scaled up by --zoomCover to LOOK exactly like
+      // a cover-crop by default; selecting/highlighting the poster just
+      // animates that scale back to 1, smoothly revealing the full
+      // image, instead of an instant, non-animatable object-fit swap.
+      const boxAR=w/h, imgAR=p.ratio||boxAR;
+      const zoomCover=Math.max(imgAR,boxAR)/Math.min(imgAR,boxAR);
+      card.querySelector('img').style.setProperty('--zoomCover', zoomCover.toFixed(4));
+    } else {
+      card.innerHTML=`<span class="emptyNo">#${p.no}</span>`;
+    }
+    card.insertAdjacentHTML('beforeend', `<span class="catTint" style="--cc:${color}"></span><span class="halo"></span>`);
+    surface.appendChild(card);
+    cardEls.set(p.no, card);
+    cardsByCluster[name].push(card);
+    cardRects.set(p.no, {x:wx,y:wy,w,h,cx:wx+w/2,cy:wy+h/2});
+    accumulate(wx,wy,w,h);
+  });
+
+  extraCells.forEach(key=>{
+    const {col,row}=coordOf.get(key);
+    const g=CARD_GAP;
+    const wx=col*CELL_W+g/2, wy=row*CELL_H+g/2, w=CELL_W-g, h=CELL_H-g;
+    const filler=document.createElement('div');
+    filler.className='filler';
+    filler.style.left=wx+'px'; filler.style.top=wy+'px'; filler.style.width=w+'px'; filler.style.height=h+'px';
+    filler.insertAdjacentHTML('beforeend', `<span class="catTint" style="--cc:${color}"></span>`);
+    surface.appendChild(filler);
+    accumulate(wx,wy,w,h);
+  });
+
+  clusterBox[name]={left:minX, top:minY, width:maxX-minX, height:maxY-minY};
+
+  // anchor the label to the region's own widest CONTIGUOUS row, rather
+  // than its pixel centroid — many of these regions are narrow, organic
+  // strips, and the centroid row can land on a pinch point too thin for
+  // any label. Using the widest row for *both* position and width
+  // guarantees the label sits fully inside the region (it's the same row
+  // its width came from) instead of spilling into a neighbour.
+  const rowSpans=new Map();
+  regionCells[name].forEach(key=>{
+    const c=coordOf.get(key);
+    const s=rowSpans.get(c.row);
+    if(!s) rowSpans.set(c.row,{min:c.col,max:c.col,count:1});
+    else { s.min=Math.min(s.min,c.col); s.max=Math.max(s.max,c.col); s.count++; }
+  });
+  let bestRow=null,bestSpan=null,bestWidth=-1;
+  rowSpans.forEach((s,row)=>{
+    if(s.count!==s.max-s.min+1) return; // skip rows with a hole (not truly contiguous)
+    const width=s.max-s.min+1;
+    if(width>bestWidth){ bestWidth=width; bestRow=row; bestSpan=s; }
+  });
+  let labelX=sx/n, labelY=sy/n, rowWidthPx=maxX-minX;
+  if(bestSpan){
+    labelX=((bestSpan.min+bestSpan.max+1)/2)*CELL_W;
+    labelY=bestRow*CELL_H+CELL_H/2;
+    rowWidthPx=(bestSpan.max-bestSpan.min+1)*CELL_W-CARD_GAP*2;
+  }
+
+  // narrow, single-card-wide regions can't fit a 24px label without
+  // wrapping mid-word — shrink the font to whatever the longest word in
+  // the name actually needs for this row's width, rather than force a
+  // fixed size that breaks every couple of characters.
+  const maxW=Math.max(90,rowWidthPx*.96);
+  const longestWord=Math.max(...name.split(' ').map(w=>w.length));
+  const availTextPx=Math.max(28, maxW-28);
+  const fontSize=clamp(availTextPx/(longestWord*.6),11,24);
 
   const label=document.createElement('div');
-  label.className='boardLabel';
-  label.style.left=(r.x+r.w/2)+'px';
-  label.style.top=(r.y-10)+'px';
-  label.innerHTML=`<span class="count">${b.count}</span><b>${esc(b.name)}</b>`;
+  label.className='clusterLabel';
+  label.style.left=labelX+'px'; label.style.top=labelY+'px';
+  label.style.maxWidth=maxW+'px';
+  label.style.fontSize=fontSize.toFixed(1)+'px';
+  label.innerHTML=`<span class="clHead"><span class="dot" style="background:${color}"></span><span class="count">${targetCount[name]}</span></span><b>${esc(name)}</b>`;
   surface.appendChild(label);
   labelEls.push(label);
-  labelByName.set(b.name,label);
-
-  // light grid across the board's own footprint, one cell per note —
-  // cols follow the board's actual rendered aspect (post-justification,
-  // which can differ a little from its ideal pre-packing aspect) so the
-  // grid always matches the shape it's really being drawn into
-  const cols=Math.max(1,Math.round(Math.sqrt(b.count*(r.w/r.h))));
-  const rowsN=Math.ceil(b.count/cols);
-  const cellW=r.w/cols, cellH=r.h/rowsN;
-  b.notes.forEach((p,i)=>{
-    const col=i%cols, row=Math.floor(i/cols);
-    const jitterX=(Math.random()-.5)*Math.max(0,cellW-NOTE_SIZE)*.7;
-    const jitterY=(Math.random()-.5)*Math.max(0,cellH-NOTE_SIZE)*.7;
-    const nx=clamp(r.x+col*cellW+cellW/2-NOTE_SIZE/2+jitterX, r.x, r.x+r.w-NOTE_SIZE);
-    const ny=clamp(r.y+row*cellH+cellH/2-NOTE_SIZE/2+jitterY, r.y, r.y+r.h-NOTE_SIZE);
-    const rot=(Math.random()-.5)*11;
-
-    const note=document.createElement('div');
-    note.className='postit';
-    note.dataset.no=p.no;
-    note.dataset.feeling=p.feeling;
-    note.style.left=nx+'px'; note.style.top=ny+'px';
-    note.style.width=NOTE_SIZE+'px'; note.style.height=NOTE_SIZE+'px';
-    note.style.setProperty('--rot', rot.toFixed(1)+'deg');
-    note.style.setProperty('--hc', feelingColor(p.feeling));
-    const top=p.responses[0];
-    note.innerHTML=`<p>${esc(truncate(top?top.text:'', 140))}</p><span class="halo"></span>`;
-    surface.appendChild(note);
-    noteEls.set(p.no, note);
-    noteRects.set(p.no, {x:nx,y:ny,w:NOTE_SIZE,h:NOTE_SIZE,cx:nx+NOTE_SIZE/2,cy:ny+NOTE_SIZE/2});
-  });
+  labelByName.set(name,label);
 });
 
+const WORLD_W=gridCols*CELL_W;
+const WORLD_H=gridRows*CELL_H;
+// every child of #surface is position:absolute, so without an explicit
+// size #surface has no content-derived width — and an auto-width
+// descendant (the wrapping cluster labels) resolves its shrink-to-fit
+// width against that near-zero containing block instead of its own
+// max-width, wrapping one character per line. Give it its real size.
 surface.style.width=WORLD_W+'px';
 surface.style.height=WORLD_H+'px';
 
-// pop-in entrance animation — boards scale in, notes just fade (their
-// resting transform already carries a per-note rotation, and animating
-// transform here would otherwise briefly clobber that CSS value)
+// pop-in entrance animation, staggered per card
 requestAnimationFrame(()=>{
-  boardEls.forEach(el=>{
-    const anim=el.animate(
-      [{opacity:0,transform:'scale(.92)'},{opacity:1,transform:'scale(1)'}],
-      {duration:480,delay:Math.random()*300,easing:'cubic-bezier(.2,.8,.2,1)',fill:'both'}
+  cardEls.forEach(card=>{
+    const anim=card.animate(
+      [{opacity:0,transform:'scale(.5)'},{opacity:1,transform:'scale(1)'}],
+      {duration:520,delay:Math.random()*700,easing:'cubic-bezier(.2,.8,.2,1)',fill:'both'}
     );
-    anim.onfinish=()=>{ el.style.opacity=''; el.style.transform=''; anim.cancel(); };
-  });
-  noteEls.forEach(note=>{
-    const anim=note.animate(
-      [{opacity:0},{opacity:1}],
-      {duration:380,delay:300+Math.random()*900,easing:'ease-out',fill:'both'}
-    );
-    anim.onfinish=()=>{ note.style.opacity=''; anim.cancel(); };
+    anim.onfinish=()=>{ card.style.opacity=''; card.style.transform=''; anim.cancel(); };
   });
 });
 
@@ -416,8 +605,8 @@ const EASE=.13, OVERSCROLL=.06;
 let locked=true;
 
 // breathing room: once zoomed in past the fit-to-screen size, let the
-// camera pan a bit further than the exact edge of the layout so there's
-// always some background visible around the boards, instead of the
+// camera pan a bit further than the exact edge of the diamond so there's
+// always some background visible around the cluster, instead of the
 // content's edge landing flush against the viewport edge.
 const PAN_MARGIN=280;
 function bounds(scale){
@@ -439,62 +628,19 @@ function hardClampCamera(){
 }
 function apply(){surface.style.transform=`translate3d(${state.x}px,${state.y}px,0) scale(${state.scale})`}
 
-// the rAF loop used to run forever, unconditionally, even at a dead
-// stop — meaning the browser kept repainting the whole (shadow- and
-// blend-mode-heavy) surface every frame for no reason. It now only
-// runs while the camera is actually easing/inertia-coasting/dragging,
-// and stops itself the instant it settles; every place that nudges the
-// camera (zoom, pan, click-to-open, story scenes, the minimap, resize)
-// calls requestTick() to wake it back up. Declared before setCamera
-// below, which calls requestTick() on its very first, page-load use.
-let rafId=null;
-function requestTick(){ if(rafId===null) rafId=requestAnimationFrame(animate); }
-function settled(){
-  return !state.down &&
-    Math.abs(state.tx-state.x)<.05 && Math.abs(state.ty-state.y)<.05 &&
-    Math.abs(state.ts-state.scale)<.0006 &&
-    Math.abs(state.vx)<.02 && Math.abs(state.vy)<.02;
-}
-
 function setCamera(worldX,worldY,zoom,focusXRatio=.5,focusYRatio=.5){
   state.ts=zoom;
   state.tx=innerWidth*focusXRatio-worldX*zoom;
   state.ty=innerHeight*focusYRatio-worldY*zoom;
   clampCamera();
-  requestTick();
 }
 setCamera(WORLD_W/2,WORLD_H/2,MIN_SCALE);
 state.scale=state.ts; state.x=state.tx; state.y=state.ty; // instant first frame, no ease-in
 apply();
 
-// one shared threshold: zoomed out, you see boards + labels only;
-// zoomed in past it, labels fade and the pinned notes fade in — so the
-// notes only ever appear "at a certain zoom level", as asked. This is
-// the camera's own scale factor (1 = world pixels shown 1:1), not a
-// percentage of the min/max zoom range.
-const ZOOM_DETAIL=.30;
-let detailVisible=false;
-
-// manual override for the zoom-driven reveal — a toggle button forces
-// notes on/off regardless of scale, for anyone who'd rather not rely on
-// hitting the right zoom level at all.
-let forceNotes=false;
-function updateDetailVisibility(){
-  const showDetail=forceNotes || state.scale>=ZOOM_DETAIL;
-  if(showDetail!==detailVisible){
-    detailVisible=showDetail;
-    labelEls.forEach(el=>el.classList.toggle('hidden',showDetail));
-    surface.classList.toggle('notesHidden',!showDetail);
-  }
-}
-
+const LABEL_HIDE_ZOOM=.85;
+let labelsVisible=true;
 function animate(){
-  rafId=null;
-  if(settled()){
-    state.x=state.tx; state.y=state.ty; state.scale=state.ts; state.vx=0; state.vy=0;
-    apply(); updateMinimapViewport(); updateDetailVisibility();
-    return; // converged — no more frames until something moves the camera again
-  }
   state.x+=(state.tx-state.x)*EASE;
   state.y+=(state.ty-state.y)*EASE;
   state.scale+=(state.ts-state.scale)*EASE;
@@ -508,42 +654,50 @@ function animate(){
   if(!locked) hardClampCamera();
   apply();
   updateMinimapViewport();
-  updateDetailVisibility();
-  requestTick();
+  const showLabels=state.scale<LABEL_HIDE_ZOOM;
+  if(showLabels!==labelsVisible){
+    labelsVisible=showLabels;
+    labelEls.forEach(el=>el.classList.toggle('hidden',!showLabels));
+    surface.classList.toggle('labelsHidden',!showLabels);
+  }
+  requestAnimationFrame(animate);
 }
-requestTick();
+requestAnimationFrame(animate);
 
 function zoomAt(clientX,clientY,nextScale){
   const old=state.ts, next=clamp(nextScale,MIN_SCALE,MAX_SCALE), ratio=next/old;
   state.tx=clientX-(clientX-state.tx)*ratio;
   state.ty=clientY-(clientY-state.ty)*ratio;
   state.ts=next; clampCamera();
-  requestTick();
 }
 
 /* ---------------------------------------------------------------------
    STORY SCENES — one respondent, one real response per beat, always
-   framed on a zoomed-in note (never the overview) using the camera
+   framed on a zoomed-in poster (never the overview) using the camera
    engine above. Content is real (pulled from the actual response data);
    only the respondent number is a synthesised stand-in.
 --------------------------------------------------------------------- */
-const byCountDesc=[...boardsData].sort((a,b)=>b.count-a.count);
-function pickStoryPoster(b){ return b.rep || b.notes.find(p=>p.file) || b.notes[0]; }
-const storyBoards=[byCountDesc[0],byCountDesc[1],byCountDesc[2],byCountDesc[3]];
-
-// contain-fit: pick the zoom that keeps the note within a target W×H
-// box (never exceeding either dimension) — notes are all the same
-// fixed size, so this always lands on roughly the same on-screen size.
-function noteDetailTarget(no,targetW,targetH){
-  const r=noteRects.get(no);
+const byCount=[...opportunitySpaces].sort((a,b)=>byCluster[b].length-byCluster[a].length);
+// contain-fit: pick the zoom that keeps the poster within a target W×H
+// box (never exceeding either dimension), rather than a single target
+// width — with posters now aspect-fit to their own ratio (cardRects
+// stores the real, possibly narrow, rendered size), sizing off width
+// alone could blow a tall/narrow poster's on-screen height way up.
+function posterDetailTarget(no,targetW,targetH){
+  const r=cardRects.get(no);
   const zoom=clamp(Math.min(targetW/r.w, targetH/r.h), 1, MAX_SCALE);
   return {x:r.cx, y:r.cy, zoom};
 }
-const STORY_FRAME_SIZES=[[190,150],[210,165],[230,180],[200,158]];
-const scenes=storyBoards.map((b,i)=>{
-  const p=pickStoryPoster(b);
+function pickFiled(name){ return byCluster[name].find(p=>p.file) || posters.find(p=>p.file); }
+const storyPosters=[byCount[0],byCount[1],byCount[2],byCount[3]].map(pickFiled);
+
+// a gentle, grid-scale framing like the reference — the poster reads as
+// one tile among its neighbours, not a giant blown-up cutout — with a
+// little size variety scene to scene rather than every one identical
+const STORY_FRAME_SIZES=[[135,180],[150,200],[165,220],[145,195]];
+const scenes=storyPosters.map((p,i)=>{
   const [tw,th]=STORY_FRAME_SIZES[i%STORY_FRAME_SIZES.length];
-  const t=noteDetailTarget(p.no, tw, th);
+  const t=posterDetailTarget(p.no, tw, th);
   const top=p.responses[0];
   return {
     no:p.no,
@@ -551,7 +705,7 @@ const scenes=storyBoards.map((b,i)=>{
     quote:top.text,
     respondent:'Respondent #'+p.no,
     demo:[top.ageBin, top.city].filter(Boolean).join(', '),
-    end:i===storyBoards.length-1
+    end:i===storyPosters.length-1
   };
 });
 
@@ -590,27 +744,27 @@ function goToScene(i,instant=false){
     introNextBtn.classList.toggle('primary',!!s.end);
 
     // the narrator box is pinned to the bottom-left corner independent
-    // of the note, so only the quote bubble (pinned near the top)
-    // needs to stay clear of the note it's describing — push the
-    // note down until it sits below the quote bubble's actual,
+    // of the poster, so only the quote bubble (pinned near the top)
+    // needs to stay clear of the poster it's describing — push the
+    // poster down until it sits below the quote bubble's actual,
     // content-dependent height, rather than centring it behind the text.
     storyPopup.classList.add('show');
     fitStoryPopupPosition();
     introPopup.classList.add('show');
 
     const popupBottom=storyPopup.getBoundingClientRect().bottom;
-    const r=noteRects.get(s.no);
+    const r=cardRects.get(s.no);
     const onScreenH=r ? r.h*s.camera.zoom : 0;
     const margin=28;
     const focusY=clamp((popupBottom+margin+onScreenH/2)/innerHeight, .5, .82);
     setCamera(s.camera.x,s.camera.y,s.camera.zoom,.5,focusY);
     if(instant){ state.scale=state.ts; state.x=state.tx; state.y=state.ty; apply(); }
 
-    // make the note the quote is about unmistakable among its
-    // similarly-sized neighbours, regardless of zoom or filter state
-    noteEls.forEach(c=>c.classList.remove('storyTarget'));
-    const targetNote=noteEls.get(s.no);
-    if(targetNote) targetNote.classList.add('storyTarget');
+    // make the poster the quote is about unmistakable among its
+    // similarly-sized neighbours, regardless of zoom or tint state
+    cardEls.forEach(c=>c.classList.remove('storyTarget'));
+    const targetCard=cardEls.get(s.no);
+    if(targetCard) targetCard.classList.add('storyTarget');
   };
   if(instant) drive(); else setTimeout(drive,180);
 }
@@ -631,8 +785,8 @@ function unlockExploration(){
   interactive.classList.remove('locked');
   storyPopup.classList.remove('show');
   introPopup.classList.remove('show');
-  noteEls.forEach(c=>c.classList.remove('storyTarget'));
-  hudHint.textContent='Scroll to move · ⌘/ctrl+scroll to zoom · zoom in for notes';
+  cardEls.forEach(c=>c.classList.remove('storyTarget'));
+  hudHint.textContent='Scroll to move · ⌘/ctrl+scroll to zoom · click a poster';
   state.vx=state.vy=0;
   setCamera(WORLD_W/2,WORLD_H/2,fitScale(),.5);
 }
@@ -660,14 +814,24 @@ const MM_W=210, MM_H=132;
 const mmScale=Math.min(MM_W/WORLD_W, MM_H/WORLD_H);
 const mmOffX=(MM_W-WORLD_W*mmScale)/2, mmOffY=(MM_H-WORLD_H*mmScale)/2;
 
-boardsData.forEach(b=>{
-  const r=boardRects.get(b.key);
+// one flat-colour silhouette of the whole diamond — not per-cluster —
+// built as one thin strip per grid row spanning that row's filled
+// columns (rows of a diamond mask are always a single contiguous run of
+// columns), so the stack of strips reproduces the exact diamond outline
+// without needing per-cluster colour or a separate shape/clip-path.
+const mmRowSpans=new Map();
+insideCells.forEach(c=>{
+  const s=mmRowSpans.get(c.row);
+  if(!s) mmRowSpans.set(c.row,{minCol:c.col,maxCol:c.col});
+  else { s.minCol=Math.min(s.minCol,c.col); s.maxCol=Math.max(s.maxCol,c.col); }
+});
+mmRowSpans.forEach((s,row)=>{
   const el=document.createElement('div');
   el.className='mmShape';
-  el.style.left=(mmOffX+r.x*mmScale)+'px';
-  el.style.top=(mmOffY+r.y*mmScale)+'px';
-  el.style.width=Math.max(1,r.w*mmScale)+'px';
-  el.style.height=Math.max(1,r.h*mmScale)+'px';
+  el.style.left=(mmOffX+s.minCol*CELL_W*mmScale)+'px';
+  el.style.top=(mmOffY+row*CELL_H*mmScale)+'px';
+  el.style.width=Math.max(1,(s.maxCol-s.minCol+1)*CELL_W*mmScale)+'px';
+  el.style.height=Math.max(1,CELL_H*mmScale)+'px';
   mmClusters.appendChild(el);
 });
 
@@ -687,26 +851,15 @@ minimap.addEventListener('click',e=>{
   state.tx=innerWidth/2-worldX*state.ts;
   state.ty=innerHeight/2-worldY*state.ts;
   clampCamera();
-  requestTick();
 });
 
 /* ---------------------------------------------------------------------
-   FILTERS — emotion (ring + colour wash, no hiding), age + location
-   (visibility). A note with no demographic match on a response is
-   never hidden by age/location — only notes that positively fail to
+   FILTERS — emotion (halftone overlay, no hiding), age + location
+   (visibility). A poster with no demographic match on a response is
+   never hidden by age/location — only posters that positively fail to
    match a chosen bucket disappear. "No feeling" has no filter chip.
 --------------------------------------------------------------------- */
 const state_f={emotions:new Set(), ages:new Set(), cities:new Set()};
-
-// manual override for the zoom-driven note reveal — bypasses ZOOM_DETAIL
-// entirely rather than requiring the camera to be at a particular scale.
-const notesToggle=document.querySelector('#notesToggle');
-notesToggle.addEventListener('click',()=>{
-  forceNotes=!forceNotes;
-  notesToggle.classList.toggle('on',forceNotes);
-  notesToggle.textContent=forceNotes?'Hide all notes':'Show all notes';
-  updateDetailVisibility();
-});
 
 const emotionChips=document.querySelector('#emotionChips');
 meta.feelings.filter(f=>f!=='No feeling').forEach(f=>{
@@ -751,18 +904,18 @@ function renderChipStates(){
 document.querySelector('#resetFilters').addEventListener('click',()=>{
   state_f.emotions.clear(); state_f.ages.clear(); state_f.cities.clear();
   cityList.querySelectorAll('input').forEach(i=>i.checked=false);
-  if(forceNotes){ forceNotes=false; notesToggle.classList.remove('on'); notesToggle.textContent='Show all notes'; updateDetailVisibility(); }
   renderChipStates(); applyFilters();
 });
 
 function applyFilters(){
+  surface.classList.toggle('emotionFilterActive', state_f.emotions.size>0);
   posters.forEach(p=>{
-    const note=noteEls.get(p.no);
-    note.classList.toggle('emotionMatch', state_f.emotions.has(p.feeling));
+    const card=cardEls.get(p.no);
+    card.classList.toggle('emotionMatch', state_f.emotions.has(p.feeling));
 
     const ageOK=state_f.ages.size===0 || p.ageBins.length===0 || p.ageBins.some(b=>state_f.ages.has(b));
     const cityOK=state_f.cities.size===0 || p.cities.length===0 || p.cities.some(c=>state_f.cities.has(c));
-    note.classList.toggle('filteredOut', !(ageOK && cityOK));
+    card.classList.toggle('filteredOut', !(ageOK && cityOK));
   });
 }
 
@@ -779,11 +932,13 @@ function tierFor(i){return i===0?'t0':(i<=2?'t1':'t2')}
 
 const sidePanelEl=document.querySelector('.side-panel');
 function zoomToPoster(no){
-  const r=noteRects.get(no);
+  const r=cardRects.get(no);
   if(!r) return;
   const panelW=sidePanelEl.getBoundingClientRect().width||460;
   const visibleW=Math.max(200, innerWidth-panelW);
-  // contain-fit within a target box, not a target width alone
+  // contain-fit within a target box, not a target width alone — a narrow
+  // aspect-fit poster (small r.w) would otherwise blow its on-screen
+  // height way up if sized off width only.
   const targetScale=clamp(Math.min(480/r.w, 560/r.h), MIN_SCALE, MAX_SCALE);
   setCamera(r.cx, r.cy, targetScale, (visibleW/2)/innerWidth);
 }
@@ -792,7 +947,7 @@ function openPoster(p){
   zoomToPoster(p.no);
 
   const fc=feelingColor(p.feeling);
-  panelKicker.innerHTML=`<span class="dot" style="background:${fc}"></span><span>${esc(p.feeling)}</span><span>·</span><span>Note #${esc(p.no)}</span>`;
+  panelKicker.innerHTML=`<span class="dot" style="background:${fc}"></span><span>${esc(p.feeling)}</span><span>·</span><span>Poster #${esc(p.no)}</span>`;
   panelTitle.textContent=p.opportunitySpace;
   panelSub.textContent=`${p.responses.length} response${p.responses.length===1?'':'s'}`;
 
@@ -805,9 +960,9 @@ function openPoster(p){
     respList.appendChild(el);
   });
 
-  noteEls.forEach(c=>c.classList.remove('selected'));
-  const selNote=noteEls.get(p.no);
-  if(selNote) selNote.classList.add('selected');
+  cardEls.forEach(c=>c.classList.remove('selected'));
+  const selCard=cardEls.get(p.no);
+  if(selCard) selCard.classList.add('selected');
   interactive.classList.add('panelOpen');
 
   modal.classList.add('show'); modal.setAttribute('aria-hidden','false');
@@ -815,7 +970,7 @@ function openPoster(p){
 function closeDetails(){
   modal.classList.remove('show'); modal.setAttribute('aria-hidden','true');
   interactive.classList.remove('panelOpen');
-  noteEls.forEach(c=>c.classList.remove('selected'));
+  cardEls.forEach(c=>c.classList.remove('selected'));
 }
 document.querySelector('#close').onclick=closeDetails;
 document.querySelector('#modalBackdrop').onclick=closeDetails;
@@ -834,14 +989,14 @@ function setHoverHiddenLabel(label){
 }
 interactive.addEventListener('pointermove',e=>{
   if(locked || state.down || modal.classList.contains('show')){ hoverPreview.classList.remove('show'); hoverNo=null; setHoverHiddenLabel(null); return; }
-  const note=e.target.closest('.postit');
-  if(!note || note.classList.contains('filteredOut')){
+  const card=e.target.closest('.card');
+  if(!card || card.classList.contains('filteredOut')){
     if(hoverNo!==null){ hoverPreview.classList.remove('show'); hoverNo=null; }
     setHoverHiddenLabel(null);
     return;
   }
-  if(note.dataset.no!==hoverNo){
-    hoverNo=note.dataset.no;
+  if(card.dataset.no!==hoverNo){
+    hoverNo=card.dataset.no;
     const p=postersByNo.get(hoverNo);
     const first=p.responses[0];
     const fc=feelingColor(p.feeling);
@@ -858,12 +1013,12 @@ interactive.addEventListener('pointerleave',()=>{ hoverPreview.classList.remove(
 /* ---------------------------------------------------------------------
    POINTER / WHEEL — pan, pinch/scroll zoom, click-to-open (drag != click)
 --------------------------------------------------------------------- */
-let gestureNote=null, gestureStartX=0, gestureStartY=0;
+let gestureCard=null, gestureStartX=0, gestureStartY=0;
 const CLICK_THRESHOLD=10;
 
 interactive.addEventListener('pointerdown',e=>{
   if(locked) return;
-  gestureNote=e.target.closest('.postit');
+  gestureCard=e.target.closest('.card');
   gestureStartX=e.clientX; gestureStartY=e.clientY;
   state.down=true; state.pointerId=e.pointerId;
   state.lastX=e.clientX; state.lastY=e.clientY;
@@ -875,20 +1030,20 @@ interactive.addEventListener('pointermove',e=>{
   const dx=e.clientX-state.lastX, dy=e.clientY-state.lastY;
   const total=Math.hypot(e.clientX-gestureStartX,e.clientY-gestureStartY);
   state.drag=total;
-  if(total>CLICK_THRESHOLD){state.tx+=dx;state.ty+=dy;clampCamera();state.vx=dx;state.vy=dy;requestTick()}
+  if(total>CLICK_THRESHOLD){state.tx+=dx;state.ty+=dy;clampCamera();state.vx=dx;state.vy=dy}
   state.lastX=e.clientX; state.lastY=e.clientY;
 });
 interactive.addEventListener('pointerup',e=>{
   if(locked || e.pointerId!==state.pointerId) return;
-  const note=gestureNote;
+  const card=gestureCard;
   const distance=Math.hypot(e.clientX-gestureStartX,e.clientY-gestureStartY);
-  state.down=false; state.pointerId=null; gestureNote=null;
-  if(note && distance<=CLICK_THRESHOLD && note.isConnected && !note.classList.contains('filteredOut')){
-    const p=postersByNo.get(note.dataset.no);
+  state.down=false; state.pointerId=null; gestureCard=null;
+  if(card && distance<=CLICK_THRESHOLD && card.isConnected && !card.classList.contains('filteredOut')){
+    const p=postersByNo.get(card.dataset.no);
     if(p) openPoster(p);
   }
 });
-interactive.addEventListener('pointercancel',()=>{state.down=false;state.pointerId=null;gestureNote=null});
+interactive.addEventListener('pointercancel',()=>{state.down=false;state.pointerId=null;gestureCard=null});
 interactive.addEventListener('wheel',e=>{
   if(locked) return;
   e.preventDefault();
@@ -899,14 +1054,13 @@ interactive.addEventListener('wheel',e=>{
     state.tx-=e.deltaX*1.1; state.ty-=e.deltaY*1.1;
     state.vx=state.vy=0;
     clampCamera();
-    requestTick();
   }
 },{passive:false});
 
 window.addEventListener('resize',()=>{
   MIN_SCALE=fitScale();
   if(locked) goToScene(sceneIndex);
-  else { clampCamera(); hardClampCamera(); requestTick(); }
+  else { clampCamera(); hardClampCamera(); }
 });
 })();
 </script>
