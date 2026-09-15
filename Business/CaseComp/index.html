@@ -39,12 +39,15 @@
    off everywhere (not just on matched cards), at every zoom level, so
    it never competes with the emotion overlay */
 .surface.emotionFilterActive .catTint{opacity:0!important}
-.filler{position:absolute;overflow:hidden;pointer-events:none;background:repeating-linear-gradient(135deg,#dcd8cd,#dcd8cd 6px,#d3cfc3 6px,#d3cfc3 12px)}
+/* fillers are pure layout padding (they keep each cluster's region solid
+   and correctly shaped on the grid) — flat like a real card, not striped
+   like .card.empty, so they never read as an unsourced poster */
+.filler{position:absolute;overflow:hidden;pointer-events:none;background:#f4f1e9}
 /* emotion match — a solid colour wash plus a slim inset ring, entirely
    inside the card's own box (no outward glow/spread), so a matched
    card never reads as bigger than its neighbours */
 .card .halo{position:absolute;inset:0;pointer-events:none;opacity:0;mix-blend-mode:multiply;transition:opacity .3s ease;
-  background-color:color-mix(in srgb,var(--hc) 48%,transparent)}
+  background-color:color-mix(in srgb,var(--hc) 62%,transparent)}
 .card.emotionMatch .halo{opacity:1}
 .card.emotionMatch{box-shadow:inset 0 0 0 5px var(--hc),inset 0 0 0 7px #fff,0 4px 16px #0004;z-index:7}
 .card.emotionMatch:hover{box-shadow:inset 0 0 0 5px var(--hc),inset 0 0 0 7px #fff,0 16px 34px #0005;z-index:8}
@@ -222,7 +225,7 @@
   </aside>
 </div>
 
-<script src="poster_data.js?v=20260909b"></script>
+<script src="poster_data.js?v=20260915"></script>
 <script>
 (()=>{
 const interactive=document.querySelector('#interactive'), surface=document.querySelector('#surface');
@@ -235,8 +238,8 @@ function esc(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>
 function posterImgSrc(file){return encodeURI('case comp ad posters/'+file)}
 
 const FEELING_COLORS={
-  'Frustration':'#d64545','Overwhelm':'#8b5cf6','Procrastinate':'#2a78d6',
-  'Repetitive':'#1baf7a','No feeling':'#9a9284'
+  'Frustration':'#b91c1c','Overwhelm':'#6d28d9','Procrastinate':'#1d4ed8',
+  'Repetitive':'#047857','No feeling':'#9a9284'
 };
 function feelingColor(f){return FEELING_COLORS[f]||'#9a9284'}
 
@@ -274,12 +277,22 @@ for(let hw=4; hw<80; hw++){
   const cells=[];
   for(let r=0;r<rows;r++){
     for(let c=0;c<cols;c++){
-      if(Math.abs(c-gc)/hw+Math.abs(r-gr)/hh<=1) cells.push({col:c,row:r});
+      const d=Math.abs(c-gc)/hw+Math.abs(r-gr)/hh;
+      if(d<=1) cells.push({col:c,row:r,d});
     }
   }
   if(cells.length>=posters.length){
     gcx=gc; gcy=gr; gridCols=cols; gridRows=rows;
-    insideCells.push(...cells);
+    // the diamond mask overshoots posters.length by a handful of cells
+    // (the next size down is always too small) — trim to exactly
+    // posters.length by dropping the cells closest to the boundary
+    // first, so every inside-cell gets a real poster and there's no
+    // filler left to invent. d only grows moving outward from centre
+    // within a row, so this always trims from each row's ends inward —
+    // rows stay a single contiguous run of columns (relied on below by
+    // the minimap silhouette).
+    cells.sort((a,b)=>a.d-b.d);
+    insideCells.push(...cells.slice(0,posters.length));
     break;
   }
 }
