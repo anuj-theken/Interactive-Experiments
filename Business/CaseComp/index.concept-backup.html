@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Case Comp 2026 — Poster boards</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;background:#f4f1e9;color:#111;font-family:Arial,Helvetica,sans-serif;overflow:hidden}
+
+.interactive{position:fixed;inset:0;display:block;background:#f4f1e9;overflow:hidden;touch-action:none;cursor:grab;z-index:5}
+.interactive:active{cursor:grabbing}
+.interactive.locked{cursor:default}
+.surface{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;
+  background:linear-gradient(90deg,#00000007 1px,transparent 1px),linear-gradient(#00000007 1px,transparent 1px);background-size:120px 120px}
+
+/* -- opportunity-space boards — one real ad image per space (not a
+   cluster of posters), sized by how many response-clusters it carries.
+   #surface alone carries will-change:transform — it's the one element
+   that's actually continuously repositioned/rescaled by the camera, so
+   promoting IT to its own compositor layer is what makes panning/zooming
+   cheap. Promoting all 230 boards+notes too (an earlier attempt at this)
+   over-allocates compositor layers/GPU memory and was the actual cause
+   of the flicker/pop-in glitching — will-change is meant to be used
+   sparingly, not stamped on every child. -- */
+.board{position:absolute;overflow:hidden;background:#ddd6c4;box-shadow:0 14px 32px #0003;border-radius:3px;z-index:1}
+.board img.boardImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.board.empty{background:repeating-linear-gradient(135deg,#dcd8cd,#dcd8cd 8px,#d3cfc3 8px,#d3cfc3 16px)}
+.board .boardShade{position:absolute;inset:0;background:#00000018;pointer-events:none}
+
+.boardLabel{position:absolute;transform:translate(-50%,-100%);display:flex;align-items:baseline;gap:6px;
+  background:#f7f4ecf2;border:1px solid #1112;padding:6px 11px;border-radius:7px;box-shadow:0 8px 20px #0002;
+  pointer-events:none;z-index:3;font-weight:800;letter-spacing:-.005em;white-space:nowrap;transition:opacity .3s ease}
+.boardLabel .count{font-size:11px;font-weight:400;opacity:.5}
+.boardLabel.hidden,.boardLabel.hoverHidden{opacity:0}
+
+/* -- post-it notes — one per response-cluster (what used to be its own
+   poster tile), pinned onto its board. Every note is the same fixed
+   size regardless of board size or response count, and its text is
+   clamped to the same number of lines everywhere, so the notes always
+   read as one consistent, repeated element. -- */
+.postit{position:absolute;background:#fbe35e;box-shadow:0 1px 0 #ffffff80 inset,0 4px 10px #0003;
+  border-radius:1px;cursor:pointer;padding:8px 9px;overflow:hidden;transform:rotate(var(--rot,0deg));
+  transition:transform .15s ease,box-shadow .15s ease,opacity .25s ease;z-index:4}
+.postit::before{content:'';position:absolute;left:50%;top:-7px;transform:translateX(-50%) rotate(-3deg);
+  width:26px;height:14px;background:#f2e9c9cc;box-shadow:0 1px 2px #0002}
+.postit p{margin:0;font-size:10.5px;line-height:1.32;color:#3a3320;font-weight:600;
+  display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+/* mix-blend-mode forces the browser to isolate and blend against the
+   backdrop — expensive if it's on all 192 notes at once, so it only
+   ever applies to the (usually small) currently emotion-matched subset,
+   not the base .halo rule that every note carries. */
+.postit .halo{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s ease;
+  background-color:color-mix(in srgb,var(--hc) 62%,transparent)}
+.postit:hover{transform:rotate(0deg) scale(1.15);box-shadow:0 10px 24px #0004;z-index:25}
+.postit.emotionMatch{box-shadow:0 0 0 3px var(--hc),0 1px 0 #ffffff80 inset,0 8px 20px #0004;z-index:12}
+.postit.emotionMatch .halo{opacity:.35;mix-blend-mode:multiply}
+.postit.filteredOut{opacity:.12;pointer-events:none}
+.postit.storyTarget{box-shadow:0 0 0 3px #1c140f,0 0 0 5px #f7f4ec,0 10px 24px #0004;z-index:20;transform:rotate(0deg) scale(1.12)}
+.surface.notesHidden .postit{opacity:0;pointer-events:none}
+.interactive.panelOpen .postit{opacity:.12}
+.interactive.panelOpen .postit.filteredOut{opacity:.03}
+.interactive.panelOpen .postit.selected{opacity:1;transform:rotate(0deg) scale(1.3);box-shadow:0 0 0 3px #f7f4ec,0 22px 50px #0006;z-index:30}
+
+/* -- header / minimap -- */
+.hud{position:absolute;left:22px;top:20px;z-index:15;pointer-events:none}
+.captionBadge{display:inline-block;background:#f7f4ecf2;border:1px solid #1112;padding:11px 20px;box-shadow:0 8px 24px #0002;pointer-events:auto}
+.captionBadge h2{margin:0;font-size:clamp(17px,2vw,24px);line-height:1;letter-spacing:.01em}
+.captionBadge p{margin:6px 0 0;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.5}
+.minimap{margin-top:10px;width:210px;height:132px;background:#f7f4ecf2;border:1px solid #1112;box-shadow:0 8px 24px #0002;position:relative;overflow:hidden;pointer-events:auto;cursor:crosshair}
+.minimap .mmShape{position:absolute;background:#111;opacity:.4}
+.minimap .mmViewport{position:absolute;border:1.5px solid #111;background:#1111;pointer-events:none}
+
+/* -- filters panel -- */
+.filters{position:fixed;right:20px;top:20px;z-index:40;width:236px;background:#f7f4ecf2;border:1px solid #1112;box-shadow:0 8px 24px #0002;padding:16px 16px 14px;max-height:calc(100vh - 40px);overflow-y:auto}
+.filters h3{margin:0 0 2px;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.filtersTop{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.filtersTop button{appearance:none;border:1px solid #1113;background:transparent;color:#111;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:5px 8px;cursor:pointer}
+.filtersTop button:hover{background:#111;color:#fff}
+.filterGroup{margin-bottom:14px}
+.filterGroup .label{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.55;margin-bottom:7px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid #1113;background:#fff9;padding:5px 9px;border-radius:20px;font-size:11px;cursor:pointer;user-select:none;transition:background .15s,color .15s,border-color .15s}
+.chip .dot{width:7px;height:7px;border-radius:50%}
+.chip.on{background:#111;color:#fff;border-color:#111}
+.chip.on .dot{box-shadow:0 0 0 1.5px #fff}
+.cityList{max-height:150px;overflow-y:auto;border:1px solid #1111;background:#fff8;padding:4px}
+.cityRow{display:flex;align-items:center;gap:7px;font-size:11.5px;padding:4px 5px;cursor:pointer;border-radius:3px}
+.cityRow:hover{background:#1111}
+.cityRow input{margin:0}
+.cityRow span.n{margin-left:auto;opacity:.45;font-size:10px}
+
+/* -- hover preview (first response, quick peek) -- */
+.hoverPreview{position:fixed;z-index:50;max-width:270px;background:#111;color:#f7f4ec;padding:11px 14px;font-size:12px;line-height:1.45;border-radius:7px;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .12s ease,transform .12s ease;box-shadow:0 12px 30px #0004}
+.hoverPreview.show{opacity:1;transform:translateY(0)}
+.hoverPreview .hp-meta{font-size:9px;letter-spacing:.1em;text-transform:uppercase;opacity:.6;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.hoverPreview .hp-meta .dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto}
+
+/* -- story dialogue bubble — one respondent, one quote, always over a
+   zoomed-in note (reused camera engine, never pulls back to overview) -- */
+.storyPopup{position:fixed;left:50%;top:6%;transform:translateX(-50%) translateY(-6px);width:min(300px,80vw);background:#1c140f;color:#f3ece2;border-radius:12px;box-shadow:0 20px 50px #0005;padding:15px 17px 13px;z-index:60;opacity:0;pointer-events:none;transition:opacity .4s ease,transform .4s ease,top .3s ease}
+.storyPopup.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.storyPopup::after{content:'';position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid #1c140f}
+.storyTitle{margin:0 0 10px;font-size:12.5px;font-weight:500;font-style:italic;line-height:1.42}
+.storyTitle::before{content:'\201C'}
+.storyTitle::after{content:'\201D'}
+.storyText{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 12px;font-size:9px;letter-spacing:.02em;opacity:.68}
+.storyNav{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.storyNav button{appearance:none;border:1px solid #f3ece255;background:transparent;color:#f3ece2;padding:8px 7px;font:inherit;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:4px}
+.storyNav button:hover{background:#f3ece2;color:#1c140f}
+.storyNav button:disabled{opacity:.25;cursor:default;pointer-events:none}
+.storyNav button.primary{grid-column:1/-1;background:#f3ece2;color:#1c140f}
+.storyNav button.primary:hover{background:#fff}
+@media(max-width:640px){.storyPopup{width:78vw;top:6%}}
+
+/* -- intro/narrator dialogue — a second bubble (a narrator/host voice,
+   not a respondent) that appears TOGETHER with the story quote above,
+   pinned to the bottom-left corner of the viewport regardless of where
+   the quote bubble or note sit; it alone carries the Next/Back nav
+   for the whole sequence -- */
+.introPopup{position:fixed;left:24px;bottom:24px;width:min(300px,80vw);background:#f7f4ec;color:#1c140f;border-radius:12px;box-shadow:0 20px 50px #0004;padding:15px 17px 13px;z-index:60;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .4s ease,transform .4s ease;border:1px solid #1112}
+.introPopup.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+.introTitle{margin:0 0 12px;font-size:14.5px;font-weight:700;letter-spacing:-.005em;line-height:1.35}
+.introNav{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.introNav button{appearance:none;border:1px solid #1c140f33;background:transparent;color:#1c140f;padding:9px 7px;font:inherit;font-size:9px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:4px}
+.introNav button:hover{background:#1c140f;color:#f7f4ec}
+.introNav button:disabled{opacity:.25;cursor:default;pointer-events:none}
+.introNav button.primary{grid-column:1/-1;background:#1c140f;color:#f7f4ec}
+.introNav button.primary:hover{background:#000}
+@media(max-width:640px){.introPopup{width:82vw}}
+
+/* -- side panel (responses) -- */
+/* the canvas already dims itself when the panel is open (every note but
+   the selected one drops to low opacity, above) — this backdrop is only
+   a click target to close the panel, not a second dimming layer, so it
+   stays fully transparent and never darkens the selected note */
+.modal{position:fixed;inset:0;display:block;visibility:hidden;pointer-events:none;background:transparent;z-index:100}
+.modal.show{visibility:visible;pointer-events:auto}
+.modal-backdrop{position:absolute;inset:0;background:transparent}
+.side-panel{position:absolute;top:0;right:0;bottom:0;width:min(460px,94vw);height:100vh;display:flex;flex-direction:column;background:#f7f4ec;transform:translate3d(105%,0,0);transition:transform .45s cubic-bezier(.2,.8,.2,1);box-shadow:-20px 0 60px #0003;overflow:hidden}
+.modal.show .side-panel{transform:translate3d(0,0,0)}
+.panel-scroll{flex:1 1 auto;overflow-y:auto;padding:56px 26px 30px}
+.panel-kicker{display:flex;align-items:center;gap:7px;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;opacity:.55;margin-bottom:8px}
+.panel-kicker .dot{width:8px;height:8px;border-radius:50%}
+.panel h3{margin:0 0 4px;font-size:21px;font-weight:600;line-height:1.15}
+.panel .sub{margin:0 0 18px;font-size:11.5px;opacity:.5}
+.respList{display:flex;flex-direction:column;gap:12px}
+.resp{background:#fff;border-radius:11px;padding:15px 17px;box-shadow:0 3px 12px #0001}
+.resp .meta{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;opacity:.45;margin-bottom:4px}
+.resp p{margin:0;line-height:1.5}
+.resp.t0{background:#111;color:#f7f4ec;padding:19px 21px;border-radius:13px;box-shadow:0 14px 30px #0002;margin-bottom:2px}
+.resp.t0 .meta{opacity:.55;color:#f7f4ec}
+.resp.t0 p{font-size:16.5px;font-weight:600;line-height:1.46}
+.resp.t1{background:#fdfcf8}
+.resp.t1 p{font-size:13.5px;opacity:.82}
+.resp.t2{background:#f2efe6;box-shadow:none}
+.resp.t2 p{font-size:12px;opacity:.62}
+.close{position:absolute;right:12px;top:12px;width:36px;height:36px;border:0;border-radius:50%;cursor:pointer;background:#fff;font-size:19px;z-index:4;box-shadow:0 4px 10px #0002}
+@media(max-width:640px){.filters{left:12px;right:12px;top:auto;bottom:12px;width:auto;max-height:40vh}.hud{top:12px;left:12px}.minimap{width:150px;height:96px}}
+</style>
+</head>
+<body>
+
+<div id="interactive" class="interactive locked">
+  <div id="surface" class="surface"></div>
+</div>
+
+<div class="hud">
+  <div class="captionBadge">
+    <h2>Case Comp 2026</h2>
+    <p id="hudHint">Scroll to move · ⌘/ctrl+scroll to zoom · zoom in for notes</p>
+  </div>
+  <div id="minimap" class="minimap">
+    <div id="mmClusters"></div>
+    <div id="mmViewport" class="mmViewport"></div>
+  </div>
+</div>
+
+<div id="hoverPreview" class="hoverPreview"></div>
+
+<div class="filters">
+  <div class="filtersTop"><h3>Filters</h3><button id="resetFilters" type="button">Reset</button></div>
+
+  <div class="filterGroup">
+    <div class="label">View</div>
+    <div class="chips" id="viewChips">
+      <div class="chip" id="notesToggle" data-view="notes">Show all notes</div>
+    </div>
+  </div>
+
+  <div class="filterGroup">
+    <div class="label">Emotion</div>
+    <div class="chips" id="emotionChips"></div>
+  </div>
+
+  <div class="filterGroup">
+    <div class="label">Age</div>
+    <div class="chips" id="ageChips"></div>
+  </div>
+
+  <div class="filterGroup">
+    <div class="label">Location</div>
+    <div class="cityList" id="cityList"></div>
+  </div>
+</div>
+
+<div id="introPopup" class="introPopup">
+  <p class="introTitle" id="introTitle">Hi there!</p>
+  <div class="introNav">
+    <button id="introBackBtn" type="button">← Back</button>
+    <button id="introNextBtn" type="button">Next →</button>
+  </div>
+</div>
+
+<div id="storyPopup" class="storyPopup">
+  <p class="storyTitle" id="storyTitle">Quote</p>
+  <div class="storyText">
+    <span id="storyRespondent"></span>
+    <span id="storyDemo"></span>
+  </div>
+</div>
+
+<div id="modal" class="modal" aria-hidden="true">
+  <div class="modal-backdrop" id="modalBackdrop"></div>
+  <aside class="side-panel" role="dialog" aria-modal="true" aria-label="Cluster responses">
+    <button id="close" class="close" aria-label="Close">×</button>
+    <div class="panel-scroll">
+      <div class="panel-kicker" id="panelKicker"></div>
+      <h3 id="panelTitle"></h3>
+      <p class="sub" id="panelSub"></p>
+      <div class="respList" id="respList"></div>
+    </div>
+  </aside>
+</div>
+
+<script src="poster_data.js?v=20260915"></script>
+<script>
+(()=>{
+const interactive=document.querySelector('#interactive'), surface=document.querySelector('#surface');
+const {posters, meta}=window.POSTER_DATA;
+const postersByNo=new Map(posters.map(p=>[p.no,p]));
+function truncate(s,n){ s=s||''; return s.length>n ? s.slice(0,n).trimEnd()+'…' : s; }
+
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function esc(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function posterImgSrc(file){return encodeURI('case comp ad posters/'+file)}
+
+const FEELING_COLORS={
+  'Frustration':'#b91c1c','Overwhelm':'#6d28d9','Procrastinate':'#1d4ed8',
+  'Repetitive':'#047857','No feeling':'#9a9284'
+};
+function feelingColor(f){return FEELING_COLORS[f]||'#9a9284'}
+
+const opportunitySpaces=meta.opportunitySpaces.map(o=>o.name);
+
+/* ---------------------------------------------------------------------
+   BOARDS — one board per opportunity space (not a cluster of posters).
+   Each board's background is a real ad image, picked from its biggest
+   response-cluster; its area is directly proportional to how many
+   clusters (post-it notes) it carries, so a space with 30 clusters gets
+   a visibly bigger board than one with 3. Every note pinned to it is
+   the same fixed size, arranged on a light grid across the board's own
+   area with a little jitter and rotation so it reads as pinned rather
+   than tiled, while always leaving a visible margin of poster underneath.
+--------------------------------------------------------------------- */
+const BOARD_GAP=46, NOTE_SIZE=88, NOTE_COVERAGE=.42, DEFAULT_ASPECT=.75;
+const AREA_PER_NOTE=(NOTE_SIZE*NOTE_SIZE)/NOTE_COVERAGE;
+
+const byCluster={};
+opportunitySpaces.forEach(name=>byCluster[name]=[]);
+posters.forEach(p=>byCluster[p.opportunitySpace].push(p));
+
+const boardsData=opportunitySpaces.map(name=>{
+  const notes=byCluster[name];
+  const withFile=notes.filter(p=>p.file);
+  const rep=withFile.length ? withFile.reduce((a,b)=>b.groupSize>a.groupSize?b:a) : null;
+  const aspect=clamp(rep?rep.ratio:DEFAULT_ASPECT, .45, 1.8);
+  const count=notes.length;
+  const area=AREA_PER_NOTE*count;
+  const w=Math.sqrt(area*aspect), h=Math.sqrt(area/aspect);
+  return {key:name, name, notes, rep, aspect, count, w, h};
+});
+
+// -- justified rows (the classic photo-gallery layout): group boards
+//    into rows by their own ideal width, then RESCALE every board in a
+//    row to one shared row height. That's what makes the gap perfectly
+//    equal in every direction — every board in a row now has the exact
+//    same top and bottom edge, so the vertical gap to the next row is
+//    identical for all of them (no per-board centering slop), and every
+//    row lands on the exact same total width, so nothing needs to be
+//    forced to a common grid to still look evenly, symmetrically spaced --
+function packBoards(list, gap){
+  const totalArea=list.reduce((s,b)=>s+b.w*b.h,0);
+  const targetRowW=Math.sqrt(totalArea*1.75);
+  // a row left with too few boards (typically just the last one) would
+  // otherwise have to stretch to an absurd height to still reach
+  // targetRowW on its own — cap how far any row can grow, so a sparse
+  // row simply falls short of the target width instead of ballooning
+  // one board into a giant. Gaps stay exactly equal either way; only
+  // the row's total width varies when this cap kicks in.
+  const MAX_ROW_H=Math.max(...list.map(b=>b.h))*1.15;
+  const sorted=[...list].sort((a,b)=>b.h-a.h);
+  const rows=[]; let row=[], rowW=0;
+  sorted.forEach(b=>{
+    const nextW=rowW===0 ? b.w : rowW+gap+b.w;
+    if(rowW>0 && nextW>targetRowW){ rows.push(row); row=[]; rowW=0; }
+    row.push(b);
+    rowW=rowW===0 ? b.w : rowW+gap+b.w;
+  });
+  if(row.length) rows.push(row);
+
+  let y=0, maxRowW=0;
+  const rects=new Map();
+  rows.forEach(row=>{
+    const n=row.length;
+    const aspectSum=row.reduce((s,b)=>s+b.w/b.h,0);
+    const rowH=clamp((targetRowW-gap*(n-1))/aspectSum, NOTE_SIZE+40, MAX_ROW_H);
+    let x=0;
+    row.forEach(b=>{
+      const w=(b.w/b.h)*rowH;
+      rects.set(b.key,{x,y,w,h:rowH,cx:x+w/2,cy:y+rowH/2});
+      x+=w+gap;
+    });
+    maxRowW=Math.max(maxRowW,x-gap);
+    y+=rowH+gap;
+  });
+  return {rects, worldW:maxRowW, worldH:Math.max(0,y-gap)};
+}
+const {rects:boardRects, worldW:WORLD_W, worldH:WORLD_H}=packBoards(boardsData, BOARD_GAP);
+
+const boardEls=new Map(), noteEls=new Map(), noteRects=new Map(), labelByName=new Map(), labelEls=[];
+
+boardsData.forEach(b=>{
+  const r=boardRects.get(b.key);
+
+  const board=document.createElement('div');
+  board.className='board'+(b.rep?'':' empty');
+  board.style.left=r.x+'px'; board.style.top=r.y+'px'; board.style.width=r.w+'px'; board.style.height=r.h+'px';
+  if(b.rep){
+    board.innerHTML=`<img class="boardImg" src="${posterImgSrc(b.rep.file)}" alt="" loading="lazy"><span class="boardShade"></span>`;
+  }
+  surface.appendChild(board);
+  boardEls.set(b.key, board);
+
+  const label=document.createElement('div');
+  label.className='boardLabel';
+  label.style.left=(r.x+r.w/2)+'px';
+  label.style.top=(r.y-10)+'px';
+  label.innerHTML=`<span class="count">${b.count}</span><b>${esc(b.name)}</b>`;
+  surface.appendChild(label);
+  labelEls.push(label);
+  labelByName.set(b.name,label);
+
+  // light grid across the board's own footprint, one cell per note —
+  // cols follow the board's actual rendered aspect (post-justification,
+  // which can differ a little from its ideal pre-packing aspect) so the
+  // grid always matches the shape it's really being drawn into
+  const cols=Math.max(1,Math.round(Math.sqrt(b.count*(r.w/r.h))));
+  const rowsN=Math.ceil(b.count/cols);
+  const cellW=r.w/cols, cellH=r.h/rowsN;
+  b.notes.forEach((p,i)=>{
+    const col=i%cols, row=Math.floor(i/cols);
+    const jitterX=(Math.random()-.5)*Math.max(0,cellW-NOTE_SIZE)*.7;
+    const jitterY=(Math.random()-.5)*Math.max(0,cellH-NOTE_SIZE)*.7;
+    const nx=clamp(r.x+col*cellW+cellW/2-NOTE_SIZE/2+jitterX, r.x, r.x+r.w-NOTE_SIZE);
+    const ny=clamp(r.y+row*cellH+cellH/2-NOTE_SIZE/2+jitterY, r.y, r.y+r.h-NOTE_SIZE);
+    const rot=(Math.random()-.5)*11;
+
+    const note=document.createElement('div');
+    note.className='postit';
+    note.dataset.no=p.no;
+    note.dataset.feeling=p.feeling;
+    note.style.left=nx+'px'; note.style.top=ny+'px';
+    note.style.width=NOTE_SIZE+'px'; note.style.height=NOTE_SIZE+'px';
+    note.style.setProperty('--rot', rot.toFixed(1)+'deg');
+    note.style.setProperty('--hc', feelingColor(p.feeling));
+    const top=p.responses[0];
+    note.innerHTML=`<p>${esc(truncate(top?top.text:'', 140))}</p><span class="halo"></span>`;
+    surface.appendChild(note);
+    noteEls.set(p.no, note);
+    noteRects.set(p.no, {x:nx,y:ny,w:NOTE_SIZE,h:NOTE_SIZE,cx:nx+NOTE_SIZE/2,cy:ny+NOTE_SIZE/2});
+  });
+});
+
+surface.style.width=WORLD_W+'px';
+surface.style.height=WORLD_H+'px';
+
+// pop-in entrance animation — boards scale in, notes just fade (their
+// resting transform already carries a per-note rotation, and animating
+// transform here would otherwise briefly clobber that CSS value)
+requestAnimationFrame(()=>{
+  boardEls.forEach(el=>{
+    const anim=el.animate(
+      [{opacity:0,transform:'scale(.92)'},{opacity:1,transform:'scale(1)'}],
+      {duration:480,delay:Math.random()*300,easing:'cubic-bezier(.2,.8,.2,1)',fill:'both'}
+    );
+    anim.onfinish=()=>{ el.style.opacity=''; el.style.transform=''; anim.cancel(); };
+  });
+  noteEls.forEach(note=>{
+    const anim=note.animate(
+      [{opacity:0},{opacity:1}],
+      {duration:380,delay:300+Math.random()*900,easing:'ease-out',fill:'both'}
+    );
+    anim.onfinish=()=>{ note.style.opacity=''; anim.cancel(); };
+  });
+});
+
+/* ---------------------------------------------------------------------
+   CAMERA — pan/zoom/inertia engine, plus the scripted scene-to-scene
+   story mode from the previous iteration (locked while the story plays,
+   free exploration once it ends).
+--------------------------------------------------------------------- */
+function fitScale(){return clamp(Math.min(innerWidth/WORLD_W,innerHeight/WORLD_H)*.94,.04,1.6)}
+let MIN_SCALE=fitScale();
+const MAX_SCALE=4.6;
+const state={x:0,y:0,tx:0,ty:0,scale:MIN_SCALE,ts:MIN_SCALE,down:false,lastX:0,lastY:0,vx:0,vy:0,drag:0,pointerId:null};
+const EASE=.13, OVERSCROLL=.06;
+let locked=true;
+
+// breathing room: once zoomed in past the fit-to-screen size, let the
+// camera pan a bit further than the exact edge of the layout so there's
+// always some background visible around the boards, instead of the
+// content's edge landing flush against the viewport edge.
+const PAN_MARGIN=280;
+function bounds(scale){
+  const scaledW=WORLD_W*scale, scaledH=WORLD_H*scale, m=PAN_MARGIN*scale;
+  const minX=scaledW<=innerWidth?(innerWidth-scaledW)/2:innerWidth-scaledW-m;
+  const maxX=scaledW<=innerWidth?minX:m;
+  const minY=scaledH<=innerHeight?(innerHeight-scaledH)/2:innerHeight-scaledH-m;
+  const maxY=scaledH<=innerHeight?minY:m;
+  return {minX,maxX,minY,maxY};
+}
+function clampCamera(){
+  const b=bounds(state.ts), ex=innerWidth*OVERSCROLL, ey=innerHeight*OVERSCROLL;
+  state.tx=clamp(state.tx,b.minX-ex,b.maxX+ex);
+  state.ty=clamp(state.ty,b.minY-ey,b.maxY+ey);
+}
+function hardClampCamera(){
+  const b=bounds(state.scale);
+  state.x=clamp(state.x,b.minX,b.maxX); state.y=clamp(state.y,b.minY,b.maxY);
+}
+function apply(){surface.style.transform=`translate3d(${state.x}px,${state.y}px,0) scale(${state.scale})`}
+
+// the rAF loop used to run forever, unconditionally, even at a dead
+// stop — meaning the browser kept repainting the whole (shadow- and
+// blend-mode-heavy) surface every frame for no reason. It now only
+// runs while the camera is actually easing/inertia-coasting/dragging,
+// and stops itself the instant it settles; every place that nudges the
+// camera (zoom, pan, click-to-open, story scenes, the minimap, resize)
+// calls requestTick() to wake it back up. Declared before setCamera
+// below, which calls requestTick() on its very first, page-load use.
+let rafId=null;
+function requestTick(){ if(rafId===null) rafId=requestAnimationFrame(animate); }
+function settled(){
+  return !state.down &&
+    Math.abs(state.tx-state.x)<.05 && Math.abs(state.ty-state.y)<.05 &&
+    Math.abs(state.ts-state.scale)<.0006 &&
+    Math.abs(state.vx)<.02 && Math.abs(state.vy)<.02;
+}
+
+function setCamera(worldX,worldY,zoom,focusXRatio=.5,focusYRatio=.5){
+  state.ts=zoom;
+  state.tx=innerWidth*focusXRatio-worldX*zoom;
+  state.ty=innerHeight*focusYRatio-worldY*zoom;
+  clampCamera();
+  requestTick();
+}
+setCamera(WORLD_W/2,WORLD_H/2,MIN_SCALE);
+state.scale=state.ts; state.x=state.tx; state.y=state.ty; // instant first frame, no ease-in
+apply();
+
+// one shared threshold: zoomed out, you see boards + labels only;
+// zoomed in past it, labels fade and the pinned notes fade in — so the
+// notes only ever appear "at a certain zoom level", as asked. This is
+// the camera's own scale factor (1 = world pixels shown 1:1), not a
+// percentage of the min/max zoom range.
+const ZOOM_DETAIL=.30;
+let detailVisible=false;
+
+// manual override for the zoom-driven reveal — a toggle button forces
+// notes on/off regardless of scale, for anyone who'd rather not rely on
+// hitting the right zoom level at all.
+let forceNotes=false;
+function updateDetailVisibility(){
+  const showDetail=forceNotes || state.scale>=ZOOM_DETAIL;
+  if(showDetail!==detailVisible){
+    detailVisible=showDetail;
+    labelEls.forEach(el=>el.classList.toggle('hidden',showDetail));
+    surface.classList.toggle('notesHidden',!showDetail);
+  }
+}
+
+function animate(){
+  rafId=null;
+  if(settled()){
+    state.x=state.tx; state.y=state.ty; state.scale=state.ts; state.vx=0; state.vy=0;
+    apply(); updateMinimapViewport(); updateDetailVisibility();
+    return; // converged — no more frames until something moves the camera again
+  }
+  state.x+=(state.tx-state.x)*EASE;
+  state.y+=(state.ty-state.y)*EASE;
+  state.scale+=(state.ts-state.scale)*EASE;
+  if(!state.down && !locked && (Math.abs(state.vx)>.02||Math.abs(state.vy)>.02)){
+    state.tx+=state.vx; state.ty+=state.vy; state.vx*=.90; state.vy*=.90; clampCamera();
+  }
+  if(!state.down && !locked && Math.abs(state.vx)<.08 && Math.abs(state.vy)<.08){
+    const b=bounds(state.ts);
+    state.tx=clamp(state.tx,b.minX,b.maxX); state.ty=clamp(state.ty,b.minY,b.maxY);
+  }
+  if(!locked) hardClampCamera();
+  apply();
+  updateMinimapViewport();
+  updateDetailVisibility();
+  requestTick();
+}
+requestTick();
+
+function zoomAt(clientX,clientY,nextScale){
+  const old=state.ts, next=clamp(nextScale,MIN_SCALE,MAX_SCALE), ratio=next/old;
+  state.tx=clientX-(clientX-state.tx)*ratio;
+  state.ty=clientY-(clientY-state.ty)*ratio;
+  state.ts=next; clampCamera();
+  requestTick();
+}
+
+/* ---------------------------------------------------------------------
+   STORY SCENES — one respondent, one real response per beat, always
+   framed on a zoomed-in note (never the overview) using the camera
+   engine above. Content is real (pulled from the actual response data);
+   only the respondent number is a synthesised stand-in.
+--------------------------------------------------------------------- */
+const byCountDesc=[...boardsData].sort((a,b)=>b.count-a.count);
+function pickStoryPoster(b){ return b.rep || b.notes.find(p=>p.file) || b.notes[0]; }
+const storyBoards=[byCountDesc[0],byCountDesc[1],byCountDesc[2],byCountDesc[3]];
+
+// contain-fit: pick the zoom that keeps the note within a target W×H
+// box (never exceeding either dimension) — notes are all the same
+// fixed size, so this always lands on roughly the same on-screen size.
+function noteDetailTarget(no,targetW,targetH){
+  const r=noteRects.get(no);
+  const zoom=clamp(Math.min(targetW/r.w, targetH/r.h), 1, MAX_SCALE);
+  return {x:r.cx, y:r.cy, zoom};
+}
+const STORY_FRAME_SIZES=[[190,150],[210,165],[230,180],[200,158]];
+const scenes=storyBoards.map((b,i)=>{
+  const p=pickStoryPoster(b);
+  const [tw,th]=STORY_FRAME_SIZES[i%STORY_FRAME_SIZES.length];
+  const t=noteDetailTarget(p.no, tw, th);
+  const top=p.responses[0];
+  return {
+    no:p.no,
+    camera:{x:t.x, y:t.y, zoom:t.zoom},
+    quote:top.text,
+    respondent:'Respondent #'+p.no,
+    demo:[top.ageBin, top.city].filter(Boolean).join(', '),
+    end:i===storyBoards.length-1
+  };
+});
+
+let sceneIndex=0;
+const storyPopup=document.querySelector('#storyPopup');
+const storyTitleEl=document.querySelector('#storyTitle');
+const storyRespondentEl=document.querySelector('#storyRespondent');
+const storyDemoEl=document.querySelector('#storyDemo');
+const hudHint=document.querySelector('#hudHint');
+
+// the narrator/host bubble — shown TOGETHER with the quote bubble above
+// on every scene, pinned to the bottom-left corner of the viewport, and
+// the only one of the two carrying the Next/Back nav. Placeholder copy
+// for now, cycled one line per scene; swap in real lines later without
+// touching the mechanics.
+const INTRO_SCENES=['Hi there!','This is a story about AI','Agents of AI'];
+const introPopup=document.querySelector('#introPopup');
+const introTitleEl=document.querySelector('#introTitle');
+const introBackBtn=document.querySelector('#introBackBtn');
+const introNextBtn=document.querySelector('#introNextBtn');
+
+function goToScene(i,instant=false){
+  sceneIndex=clamp(i,0,scenes.length-1);
+  const s=scenes[sceneIndex];
+  storyPopup.classList.remove('show');
+  introPopup.classList.remove('show');
+  const drive=()=>{
+    storyPopup.style.top=''; // reset to the CSS default before measuring
+    storyTitleEl.textContent=s.quote;
+    storyRespondentEl.textContent=s.respondent;
+    storyDemoEl.textContent=s.demo;
+
+    introTitleEl.textContent=INTRO_SCENES[sceneIndex%INTRO_SCENES.length];
+    introBackBtn.disabled=sceneIndex===0;
+    introNextBtn.textContent=s.end?'Start exploring →':'Next →';
+    introNextBtn.classList.toggle('primary',!!s.end);
+
+    // the narrator box is pinned to the bottom-left corner independent
+    // of the note, so only the quote bubble (pinned near the top)
+    // needs to stay clear of the note it's describing — push the
+    // note down until it sits below the quote bubble's actual,
+    // content-dependent height, rather than centring it behind the text.
+    storyPopup.classList.add('show');
+    fitStoryPopupPosition();
+    introPopup.classList.add('show');
+
+    const popupBottom=storyPopup.getBoundingClientRect().bottom;
+    const r=noteRects.get(s.no);
+    const onScreenH=r ? r.h*s.camera.zoom : 0;
+    const margin=28;
+    const focusY=clamp((popupBottom+margin+onScreenH/2)/innerHeight, .5, .82);
+    setCamera(s.camera.x,s.camera.y,s.camera.zoom,.5,focusY);
+    if(instant){ state.scale=state.ts; state.x=state.tx; state.y=state.ty; apply(); }
+
+    // make the note the quote is about unmistakable among its
+    // similarly-sized neighbours, regardless of zoom or filter state
+    noteEls.forEach(c=>c.classList.remove('storyTarget'));
+    const targetNote=noteEls.get(s.no);
+    if(targetNote) targetNote.classList.add('storyTarget');
+  };
+  if(instant) drive(); else setTimeout(drive,180);
+}
+// the popup grows to fit its quote (no inner scrollbar) — if a quote is
+// ever tall enough that the default top offset would push it past the
+// bottom of the viewport, nudge it up (never clip, never scroll).
+function fitStoryPopupPosition(){
+  storyPopup.style.top='';
+  const margin=16;
+  const rect=storyPopup.getBoundingClientRect();
+  if(rect.bottom>innerHeight-margin){
+    const newTop=Math.max(margin, rect.top-(rect.bottom-(innerHeight-margin)));
+    storyPopup.style.top=newTop+'px';
+  }
+}
+function unlockExploration(){
+  locked=false;
+  interactive.classList.remove('locked');
+  storyPopup.classList.remove('show');
+  introPopup.classList.remove('show');
+  noteEls.forEach(c=>c.classList.remove('storyTarget'));
+  hudHint.textContent='Scroll to move · ⌘/ctrl+scroll to zoom · zoom in for notes';
+  state.vx=state.vy=0;
+  setCamera(WORLD_W/2,WORLD_H/2,fitScale(),.5);
+}
+introBackBtn.addEventListener('click',()=>{ if(sceneIndex>0) goToScene(sceneIndex-1); });
+introNextBtn.addEventListener('click',()=>{
+  const s=scenes[sceneIndex];
+  if(s.end){ unlockExploration(); return; }
+  goToScene(sceneIndex+1);
+});
+document.addEventListener('keydown',e=>{
+  if(locked){
+    if(e.key==='ArrowRight') introNextBtn.click();
+    if(e.key==='ArrowLeft' && !introBackBtn.disabled) introBackBtn.click();
+    return;
+  }
+  if(e.key==='Escape') closeDetails();
+});
+goToScene(0,true); // instant: open already zoomed in, no pull-in on first paint
+
+/* ---------------------------------------------------------------------
+   MINIMAP
+--------------------------------------------------------------------- */
+const minimap=document.querySelector('#minimap'), mmClusters=document.querySelector('#mmClusters'), mmViewport=document.querySelector('#mmViewport');
+const MM_W=210, MM_H=132;
+const mmScale=Math.min(MM_W/WORLD_W, MM_H/WORLD_H);
+const mmOffX=(MM_W-WORLD_W*mmScale)/2, mmOffY=(MM_H-WORLD_H*mmScale)/2;
+
+boardsData.forEach(b=>{
+  const r=boardRects.get(b.key);
+  const el=document.createElement('div');
+  el.className='mmShape';
+  el.style.left=(mmOffX+r.x*mmScale)+'px';
+  el.style.top=(mmOffY+r.y*mmScale)+'px';
+  el.style.width=Math.max(1,r.w*mmScale)+'px';
+  el.style.height=Math.max(1,r.h*mmScale)+'px';
+  mmClusters.appendChild(el);
+});
+
+function updateMinimapViewport(){
+  const wLeft=(-state.x)/state.scale, wTop=(-state.y)/state.scale;
+  const wW=innerWidth/state.scale, wH=innerHeight/state.scale;
+  mmViewport.style.left=(mmOffX+wLeft*mmScale)+'px';
+  mmViewport.style.top=(mmOffY+wTop*mmScale)+'px';
+  mmViewport.style.width=(wW*mmScale)+'px';
+  mmViewport.style.height=(wH*mmScale)+'px';
+}
+minimap.addEventListener('click',e=>{
+  if(locked) return;
+  const r=minimap.getBoundingClientRect();
+  const mx=e.clientX-r.left, my=e.clientY-r.top;
+  const worldX=(mx-mmOffX)/mmScale, worldY=(my-mmOffY)/mmScale;
+  state.tx=innerWidth/2-worldX*state.ts;
+  state.ty=innerHeight/2-worldY*state.ts;
+  clampCamera();
+  requestTick();
+});
+
+/* ---------------------------------------------------------------------
+   FILTERS — emotion (ring + colour wash, no hiding), age + location
+   (visibility). A note with no demographic match on a response is
+   never hidden by age/location — only notes that positively fail to
+   match a chosen bucket disappear. "No feeling" has no filter chip.
+--------------------------------------------------------------------- */
+const state_f={emotions:new Set(), ages:new Set(), cities:new Set()};
+
+// manual override for the zoom-driven note reveal — bypasses ZOOM_DETAIL
+// entirely rather than requiring the camera to be at a particular scale.
+const notesToggle=document.querySelector('#notesToggle');
+notesToggle.addEventListener('click',()=>{
+  forceNotes=!forceNotes;
+  notesToggle.classList.toggle('on',forceNotes);
+  notesToggle.textContent=forceNotes?'Hide all notes':'Show all notes';
+  updateDetailVisibility();
+});
+
+const emotionChips=document.querySelector('#emotionChips');
+meta.feelings.filter(f=>f!=='No feeling').forEach(f=>{
+  const c=document.createElement('div');
+  c.className='chip'; c.dataset.f=f;
+  c.innerHTML=`<span class="dot" style="background:${feelingColor(f)}"></span>${esc(f)}`;
+  c.addEventListener('click',()=>{
+    state_f.emotions.has(f)?state_f.emotions.delete(f):state_f.emotions.add(f);
+    renderChipStates(); applyFilters();
+  });
+  emotionChips.appendChild(c);
+});
+
+const ageChips=document.querySelector('#ageChips');
+meta.ageBins.forEach(b=>{
+  const c=document.createElement('div');
+  c.className='chip'; c.dataset.age=b; c.textContent=b;
+  c.addEventListener('click',()=>{
+    state_f.ages.has(b)?state_f.ages.delete(b):state_f.ages.add(b);
+    renderChipStates(); applyFilters();
+  });
+  ageChips.appendChild(c);
+});
+
+const cityList=document.querySelector('#cityList');
+meta.cities.forEach(([name,count])=>{
+  const row=document.createElement('label');
+  row.className='cityRow';
+  row.innerHTML=`<input type="checkbox" data-city="${esc(name)}"><span>${esc(name)}</span><span class="n">${count}</span>`;
+  row.querySelector('input').addEventListener('change',e=>{
+    e.target.checked?state_f.cities.add(name):state_f.cities.delete(name);
+    applyFilters();
+  });
+  cityList.appendChild(row);
+});
+
+function renderChipStates(){
+  emotionChips.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on', state_f.emotions.has(c.dataset.f)));
+  ageChips.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on', state_f.ages.has(c.dataset.age)));
+}
+
+document.querySelector('#resetFilters').addEventListener('click',()=>{
+  state_f.emotions.clear(); state_f.ages.clear(); state_f.cities.clear();
+  cityList.querySelectorAll('input').forEach(i=>i.checked=false);
+  if(forceNotes){ forceNotes=false; notesToggle.classList.remove('on'); notesToggle.textContent='Show all notes'; updateDetailVisibility(); }
+  renderChipStates(); applyFilters();
+});
+
+function applyFilters(){
+  posters.forEach(p=>{
+    const note=noteEls.get(p.no);
+    note.classList.toggle('emotionMatch', state_f.emotions.has(p.feeling));
+
+    const ageOK=state_f.ages.size===0 || p.ageBins.length===0 || p.ageBins.some(b=>state_f.ages.has(b));
+    const cityOK=state_f.cities.size===0 || p.cities.length===0 || p.cities.some(c=>state_f.cities.has(c));
+    note.classList.toggle('filteredOut', !(ageOK && cityOK));
+  });
+}
+
+/* ---------------------------------------------------------------------
+   RESPONSE SIDE PANEL
+--------------------------------------------------------------------- */
+const modal=document.querySelector('#modal');
+const panelKicker=document.querySelector('#panelKicker');
+const panelTitle=document.querySelector('#panelTitle');
+const panelSub=document.querySelector('#panelSub');
+const respList=document.querySelector('#respList');
+
+function tierFor(i){return i===0?'t0':(i<=2?'t1':'t2')}
+
+const sidePanelEl=document.querySelector('.side-panel');
+function zoomToPoster(no){
+  const r=noteRects.get(no);
+  if(!r) return;
+  const panelW=sidePanelEl.getBoundingClientRect().width||460;
+  const visibleW=Math.max(200, innerWidth-panelW);
+  // contain-fit within a target box, not a target width alone
+  const targetScale=clamp(Math.min(480/r.w, 560/r.h), MIN_SCALE, MAX_SCALE);
+  setCamera(r.cx, r.cy, targetScale, (visibleW/2)/innerWidth);
+}
+
+function openPoster(p){
+  zoomToPoster(p.no);
+
+  const fc=feelingColor(p.feeling);
+  panelKicker.innerHTML=`<span class="dot" style="background:${fc}"></span><span>${esc(p.feeling)}</span><span>·</span><span>Note #${esc(p.no)}</span>`;
+  panelTitle.textContent=p.opportunitySpace;
+  panelSub.textContent=`${p.responses.length} response${p.responses.length===1?'':'s'}`;
+
+  respList.innerHTML='';
+  p.responses.forEach((r,i)=>{
+    const el=document.createElement('div');
+    el.className='resp '+tierFor(i);
+    const metaBits=[i===0?'Top response':null, r.ageBin, r.city].filter(Boolean).join(' · ');
+    el.innerHTML=`${metaBits?`<div class="meta">${esc(metaBits)}</div>`:''}<p>${esc(r.text)}</p>`;
+    respList.appendChild(el);
+  });
+
+  noteEls.forEach(c=>c.classList.remove('selected'));
+  const selNote=noteEls.get(p.no);
+  if(selNote) selNote.classList.add('selected');
+  interactive.classList.add('panelOpen');
+
+  modal.classList.add('show'); modal.setAttribute('aria-hidden','false');
+}
+function closeDetails(){
+  modal.classList.remove('show'); modal.setAttribute('aria-hidden','true');
+  interactive.classList.remove('panelOpen');
+  noteEls.forEach(c=>c.classList.remove('selected'));
+}
+document.querySelector('#close').onclick=closeDetails;
+document.querySelector('#modalBackdrop').onclick=closeDetails;
+
+/* ---------------------------------------------------------------------
+   HOVER PREVIEW — quick peek at the top response without opening the
+   full side panel.
+--------------------------------------------------------------------- */
+const hoverPreview=document.querySelector('#hoverPreview');
+let hoverNo=null, hoverHiddenLabel=null;
+function setHoverHiddenLabel(label){
+  if(label===hoverHiddenLabel) return;
+  if(hoverHiddenLabel) hoverHiddenLabel.classList.remove('hoverHidden');
+  hoverHiddenLabel=label;
+  if(label) label.classList.add('hoverHidden');
+}
+interactive.addEventListener('pointermove',e=>{
+  if(locked || state.down || modal.classList.contains('show')){ hoverPreview.classList.remove('show'); hoverNo=null; setHoverHiddenLabel(null); return; }
+  const note=e.target.closest('.postit');
+  if(!note || note.classList.contains('filteredOut')){
+    if(hoverNo!==null){ hoverPreview.classList.remove('show'); hoverNo=null; }
+    setHoverHiddenLabel(null);
+    return;
+  }
+  if(note.dataset.no!==hoverNo){
+    hoverNo=note.dataset.no;
+    const p=postersByNo.get(hoverNo);
+    const first=p.responses[0];
+    const fc=feelingColor(p.feeling);
+    const metaBits=[first.ageBin, first.city].filter(Boolean).join(' · ');
+    hoverPreview.innerHTML=`<div class="hp-meta"><span class="dot" style="background:${fc}"></span><span>${esc(p.feeling)} · ${esc(p.opportunitySpace)}</span>${metaBits?`<span>· ${esc(metaBits)}</span>`:''}</div><div>${esc(truncate(first.text,190))}</div>`;
+    setHoverHiddenLabel(labelByName.get(p.opportunitySpace)||null);
+  }
+  hoverPreview.style.left=Math.min(e.clientX+18, innerWidth-286)+'px';
+  hoverPreview.style.top=Math.min(e.clientY+18, innerHeight-90)+'px';
+  hoverPreview.classList.add('show');
+});
+interactive.addEventListener('pointerleave',()=>{ hoverPreview.classList.remove('show'); hoverNo=null; setHoverHiddenLabel(null); });
+
+/* ---------------------------------------------------------------------
+   POINTER / WHEEL — pan, pinch/scroll zoom, click-to-open (drag != click)
+--------------------------------------------------------------------- */
+let gestureNote=null, gestureStartX=0, gestureStartY=0;
+const CLICK_THRESHOLD=10;
+
+interactive.addEventListener('pointerdown',e=>{
+  if(locked) return;
+  gestureNote=e.target.closest('.postit');
+  gestureStartX=e.clientX; gestureStartY=e.clientY;
+  state.down=true; state.pointerId=e.pointerId;
+  state.lastX=e.clientX; state.lastY=e.clientY;
+  state.vx=state.vy=0; state.drag=0;
+  interactive.setPointerCapture(e.pointerId);
+});
+interactive.addEventListener('pointermove',e=>{
+  if(locked || !state.down || e.pointerId!==state.pointerId) return;
+  const dx=e.clientX-state.lastX, dy=e.clientY-state.lastY;
+  const total=Math.hypot(e.clientX-gestureStartX,e.clientY-gestureStartY);
+  state.drag=total;
+  if(total>CLICK_THRESHOLD){state.tx+=dx;state.ty+=dy;clampCamera();state.vx=dx;state.vy=dy;requestTick()}
+  state.lastX=e.clientX; state.lastY=e.clientY;
+});
+interactive.addEventListener('pointerup',e=>{
+  if(locked || e.pointerId!==state.pointerId) return;
+  const note=gestureNote;
+  const distance=Math.hypot(e.clientX-gestureStartX,e.clientY-gestureStartY);
+  state.down=false; state.pointerId=null; gestureNote=null;
+  if(note && distance<=CLICK_THRESHOLD && note.isConnected && !note.classList.contains('filteredOut')){
+    const p=postersByNo.get(note.dataset.no);
+    if(p) openPoster(p);
+  }
+});
+interactive.addEventListener('pointercancel',()=>{state.down=false;state.pointerId=null;gestureNote=null});
+interactive.addEventListener('wheel',e=>{
+  if(locked) return;
+  e.preventDefault();
+  if(e.ctrlKey || e.metaKey){
+    // pinch-to-zoom on trackpads (and ctrl/cmd+scroll) — everything else pans
+    zoomAt(e.clientX,e.clientY,state.ts*Math.exp(-e.deltaY*.006));
+  } else {
+    state.tx-=e.deltaX*1.1; state.ty-=e.deltaY*1.1;
+    state.vx=state.vy=0;
+    clampCamera();
+    requestTick();
+  }
+},{passive:false});
+
+window.addEventListener('resize',()=>{
+  MIN_SCALE=fitScale();
+  if(locked) goToScene(sceneIndex);
+  else { clampCamera(); hardClampCamera(); requestTick(); }
+});
+})();
+</script>
+</body></html>
