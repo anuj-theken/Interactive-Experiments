@@ -27,7 +27,10 @@
 .clusterLabel .count{font-size:12px;font-weight:400;opacity:.5}
 
 /* -- poster cards — absolutely positioned, edge-to-edge, no gap -- */
-.card{position:absolute;overflow:hidden;background:#f4f1e9;cursor:pointer;transition:box-shadow .18s ease,opacity .25s ease,border-color .3s ease;z-index:2}
+/* BACKUP VARIANT — whole-card opacity by match ratio instead of the
+   main file's per-poster clip-path reveal (see MATCH_OPACITY / the
+   filters JS below for the three thresholds: 0, up to 60%, above 60%) */
+.card{position:absolute;overflow:hidden;background:#f4f1e9;cursor:pointer;opacity:var(--matchOpacity,1);transition:box-shadow .18s ease,opacity .25s ease,border-color .3s ease;z-index:2}
 .card:hover{box-shadow:inset 0 0 0 2px #111,0 16px 34px #0004;z-index:6}
 /* each poster is pre-converted (see build_halftone_masks.py) to a
    single-colour halftone dot mask — drawn into a <canvas> and recoloured
@@ -48,26 +51,6 @@
    instant, non-animatable object-fit swap */
 .card.selected .poster,.card.emotionMatch .poster,.card.storyTarget .poster,
 .card.selected .posterPhoto,.card.emotionMatch .posterPhoto,.card.storyTarget .posterPhoto{transform:scale(1)}
-/* --matchReveal (set per-card by applyFilters(), a percentage) sizes a
-   transparent "window" — a centred rectangle growing from the card's
-   centre out to its edges as the match ratio rises — through a giant
-   spread box-shadow the same colour as the card's own idle background,
-   which the card's own overflow:hidden then clips to its bounds. The
-   poster/photo underneath is never touched (always full opacity, never
-   clipped): everywhere outside the window just reads as ~20% opacity
-   because that's what a translucent same-colour overlay (alpha .8 —
-   the inverse of the 20% target) over a fully opaque layer on a
-   matching background is mathematically equivalent to, while the
-   window itself lets the untouched poster show through at full
-   strength. At 100% reveal the window covers the whole card, so
-   nothing is dimmed. Plain CSS geometry, not an image URL, so it isn't
-   subject to the file:// asset-loading restrictions that rule out
-   mask-image:url(...) on this page (see build_halftone_masks.py). */
-.matchSpotlight{position:absolute;inset:calc((100% - var(--matchReveal,100%))/2);pointer-events:none;
-  box-shadow:0 0 0 9999px rgba(244,241,233,.8);transition:inset .3s ease,opacity .3s ease}
-/* opening/highlighting a poster clears the dimming outright, same as it
-   already un-crops/un-scales above, so the whole poster reads clearly */
-.card.selected .matchSpotlight,.card.emotionMatch .matchSpotlight,.card.storyTarget .matchSpotlight{opacity:0}
 /* at the same zoom level the opportunity-space labels disappear at
    (surface.labelsHidden — see LABEL_HIDE_ZOOM in animate()), the
    halftone crossfades out and the real photo (lazy-loaded, only fetched
@@ -91,14 +74,24 @@
 .card.emotionMatch .halo{opacity:1}
 .card.emotionMatch{box-shadow:inset 0 0 0 5px var(--hc),inset 0 0 0 7px #fff,0 4px 16px #0004;z-index:7}
 .card.emotionMatch:hover{box-shadow:inset 0 0 0 5px var(--hc),inset 0 0 0 7px #fff,0 16px 34px #0005;z-index:8}
-/* a poster with zero matching responses (or a failed location filter)
-   is hidden outright — visible/hidden is binary, not faded; how much
-   OF a still-visible poster reads as "matched" is instead shown by the
-   --matchReveal-driven .matchSpotlight overlay below */
-.card.filteredOut{opacity:0;pointer-events:none}
+/* --matchOpacity (set per-card by applyFilters(), see MATCH_OPACITY) —
+   0 for no matching responses (also unclickable, below), .5 for a
+   match ratio up to 60%, 1 above that (or unfiltered) */
+.card.filteredOut{pointer-events:none}
 .interactive.panelOpen .card{opacity:.12}
 .interactive.panelOpen .card.filteredOut{opacity:0}
 .interactive.panelOpen .card.selected{opacity:1;box-shadow:0 0 0 3px #f7f4ec,0 22px 50px #0006;z-index:9}
+/* "N of M" match-count badge — shown on real (non-empty) posters only
+   while an age filter is active (see applyFilters()); sits above the
+   poster/photo layers, ignores clicks so it never blocks opening one */
+.matchBadge{position:absolute;top:5px;right:5px;background:#111;color:#f7f4ec;font-size:9px;font-weight:700;
+  letter-spacing:.02em;padding:2.5px 7px;border-radius:20px;pointer-events:none;box-shadow:0 2px 6px #0003;z-index:1}
+/* a card's own zoom scale (set via zoomToPoster) blows the badge's px
+   font-size up along with everything else once a poster is opened — the
+   panel's own subtitle already states the same "N of M" count there, so
+   just hide the on-card badge rather than have it loom, oversized, in
+   the background */
+.interactive.panelOpen .matchBadge{opacity:0}
 /* the poster the story is currently talking about — unmistakable among
    its similarly-sized neighbours regardless of zoom or tint state */
 .card.storyTarget{box-shadow:0 0 0 3px #f7f4ec,0 0 0 5px #1c140f,0 14px 34px #0006;z-index:9}
@@ -584,7 +577,7 @@ sortedNames.forEach(name=>{
       // itself so both the canvas and the photo inherit it.
       const zoomCover=Math.max(imgAR,boxAR)/Math.min(imgAR,boxAR);
       card.style.setProperty('--zoomCover', zoomCover.toFixed(4));
-      card.insertAdjacentHTML('beforeend', `<span class="matchSpotlight"></span>`);
+      card.insertAdjacentHTML('beforeend', `<span class="matchBadge" hidden></span>`);
     } else {
       card.innerHTML=`<span class="emptyNo">#${p.no}</span><span class="fillerTint" style="--cc:${color}"></span>`;
     }
@@ -974,17 +967,20 @@ const CITY_CATEGORIES=['Metro','Non-metro','International'];
    - Age: gated in combination with Emotion — a poster's every response
      shares its one feeling, so "does this poster's feeling pass" is a
      single yes/no that then applies to all of that poster's responses;
-     matchCount is how many of them also fall in a selected age band.
-     A poster with 0 matches is hidden outright (binary — see
-     .card.filteredOut); a poster with 1+ matches stays fully visible
-     and clickable, with matchCount/total driving how large a fully-
-     clear window the .matchSpotlight overlay leaves at its centre
-     (everywhere outside it dims to ~20%). Opening a poster filters its
-     response list down to just the matching age band(s).
+     matchCount/total (the match ratio) then places the poster into one
+     of three whole-card opacity buckets (see MATCH_OPACITY below): 0%
+     match -> hidden and unclickable, up to 60% match -> half-opacity,
+     above 60% -> full opacity. Every poster carries a "N of M" badge;
+     opening one filters its response list down to just the matching
+     age band(s).
    - Location (metro/non-metro/international): unchanged, simpler
      visibility gate — a poster with no city data on any response is
      never hidden by it, only one that positively fails a chosen bucket.
 --------------------------------------------------------------------- */
+// match-ratio thresholds driving the three-state --matchOpacity: 0 at
+// no matches, .5 up to (and including) 60% matching, 1 above that
+const MATCH_MID_THRESHOLD=0.6;
+const MATCH_OPACITY={NONE:0, SOME:.5, MOST:1};
 const state_f={emotions:new Set(), ages:new Set(), cities:new Set()};
 
 const emotionChips=document.querySelector('#emotionChips');
@@ -1053,30 +1049,32 @@ function applyFilters(){
   posters.forEach(p=>{
     const card=cardEls.get(p.no);
     card.classList.toggle('emotionMatch', state_f.emotions.has(p.feeling));
-    if(!p.file) return; // fillers/empty posters have no responses to count
+    if(!p.file) return; // fillers/empty posters have no responses to count or badge
 
     total+=p.responses.length;
     const cityOK=state_f.cities.size===0 || p.cities.length===0 || p.cities.some(c=>state_f.cities.has(cityCategory(c)));
+    const badge=card.querySelector('.matchBadge');
 
-    // visible: binary hidden/shown (a failed location filter, or zero
-    // matching responses under an active age filter, hides the poster
-    // outright — a hard AND, same as it always gated visibility before
-    // this change). reveal: how much of a still-visible poster's own
-    // image the --matchReveal mask uncovers, proportional to how much
-    // of it matches — 100% when unfiltered or fully matching.
-    let visible, reveal;
+    // matchState: which of the three opacity buckets this poster falls
+    // into (see MATCH_OPACITY) — NONE (hidden + unclickable) at a match
+    // ratio of 0, SOME (half-opacity) up to MATCH_MID_THRESHOLD, MOST
+    // (full opacity) above it. A failed location filter forces NONE
+    // outright (a hard AND), same as it always gated visibility before.
+    let matchState;
     if(ageActive){
       const {matchCount,total:posterTotal}=posterAgeMatch(p);
-      visible=cityOK && matchCount>0;
-      reveal=posterTotal>0 ? matchCount/posterTotal : 0;
+      const ratio=posterTotal>0 ? matchCount/posterTotal : 0;
+      matchState=!cityOK||matchCount===0 ? 'NONE' : ratio<=MATCH_MID_THRESHOLD ? 'SOME' : 'MOST';
+      badge.textContent=`${matchCount} of ${posterTotal}`;
+      badge.hidden=false;
       shown+=matchCount;
     } else {
-      visible=cityOK;
-      reveal=1;
+      matchState=cityOK ? 'MOST' : 'NONE';
+      badge.hidden=true;
       shown+=cityOK ? p.responses.length : 0;
     }
-    card.classList.toggle('filteredOut', !visible);
-    card.style.setProperty('--matchReveal', `${Math.round((visible?reveal:0)*100)}%`);
+    card.classList.toggle('filteredOut', matchState==='NONE');
+    card.style.setProperty('--matchOpacity', MATCH_OPACITY[matchState]);
   });
 
   filterStatusEl.textContent=`Showing ${shown.toLocaleString()} of ${total.toLocaleString()} responses`;
