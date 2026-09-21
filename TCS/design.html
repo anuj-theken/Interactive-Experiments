@@ -1,0 +1,1226 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TCS — Design System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            /* ── Moodboard literals — the six swatches off the top of the board ── */
+            --bone:      #f3efe9;
+            --greige:    #e6e0d4;
+            --aqua:      #8dd7d6;
+            --sky:       #5ba9d1;
+            --cobalt:    #2540b4;
+            --ink:       #001647;
+
+            /* ── Semantic ── */
+            --bg:        var(--bone);
+            --bg-warm:   var(--greige);
+            --surface:   #ffffff;
+            --bg-dark:   var(--ink);
+            --text:      var(--ink);
+            --muted:     #5a6580;
+            --rule:      #d9d3c6;
+            --grid:      #cfe3e3;
+            --text-inv:  var(--bone);
+            --muted-inv: #9fb0d4;
+
+            /* ── Moodboard accents ── */
+            --signal:    #ff6900;
+            --amber:     #f3ad3d;
+            --green:     #7abc72;
+            --forest:    #10371a;
+            --mint:      #a7d7bc;
+            --plum:      #7927af;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Archivo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            font-feature-settings: "tnum" 0;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 72px 32px 120px;
+        }
+
+        /* ── Header ── */
+        .header {
+            border-bottom: 2px solid var(--ink);
+            padding-bottom: 28px;
+            margin-bottom: 18px;
+        }
+
+        .eyebrow {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--cobalt);
+            margin-bottom: 14px;
+        }
+
+        .header-title {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 52px;
+            font-weight: 400;
+            line-height: 1.02;
+            letter-spacing: -0.01em;
+        }
+
+        .header-sub {
+            margin-top: 14px;
+            font-size: 16px;
+            line-height: 1.55;
+            color: var(--muted);
+            max-width: 60ch;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 28px;
+            margin-bottom: 76px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        /* ── Section chrome ── */
+        section { margin-bottom: 84px; }
+
+        .sec-head {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            border-bottom: 1px solid var(--ink);
+            padding-bottom: 10px;
+            margin-bottom: 28px;
+        }
+
+        .sec-num {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--cobalt);
+            letter-spacing: 0.06em;
+        }
+
+        .sec-title {
+            font-family: Georgia, serif;
+            font-size: 26px;
+            font-weight: 400;
+        }
+
+        .sec-note {
+            margin-left: auto;
+            font-size: 12px;
+            color: var(--muted);
+            letter-spacing: 0.02em;
+        }
+
+        .lede {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--muted);
+            max-width: 74ch;
+            margin-bottom: 26px;
+        }
+
+        .lede strong { color: var(--text); font-weight: 600; }
+
+        .sublabel {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin: 34px 0 14px;
+        }
+
+        code, .mono {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        code {
+            background: var(--greige);
+            padding: 1px 5px;
+            border-radius: 3px;
+        }
+
+        /* ── Moodboard strip ── */
+        .strip {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            border: 1px solid var(--rule);
+        }
+
+        .strip-cell { position: relative; }
+
+        /* inset hairline so the palest swatches still read as objects on the paper ground */
+        .strip-block {
+            height: 132px;
+            box-shadow: inset 0 0 0 1px rgba(0, 22, 71, 0.07);
+        }
+
+        .strip-info {
+            padding: 12px 12px 14px;
+            background: var(--surface);
+            border-top: 1px solid var(--rule);
+            border-left: 1px solid var(--rule);
+        }
+
+        .strip-cell:first-child .strip-info { border-left: none; }
+
+        .strip-name {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .strip-hex {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .strip-role {
+            margin-top: 7px;
+            font-size: 11px;
+            line-height: 1.45;
+            color: var(--muted);
+        }
+
+        /* ── Token table ── */
+        .tbl {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .tbl th {
+            text-align: left;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 0 14px 9px 0;
+            border-bottom: 1px solid var(--ink);
+            white-space: nowrap;
+        }
+
+        .tbl td {
+            padding: 11px 14px 11px 0;
+            border-bottom: 1px solid var(--rule);
+            vertical-align: middle;
+        }
+
+        .tbl tr:last-child td { border-bottom: none; }
+
+        .tbl .num {
+            font-family: 'IBM Plex Mono', monospace;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        .chip {
+            display: inline-block;
+            width: 30px;
+            height: 18px;
+            border-radius: 3px;
+            border: 1px solid rgba(0,0,0,0.14);
+            vertical-align: -4px;
+            margin-right: 9px;
+        }
+
+        .tag {
+            display: inline-block;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.04em;
+            padding: 2px 7px;
+            border-radius: 3px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .tag-ok   { background: #dce8dd; color: #235c26; }
+        .tag-fill { background: var(--greige); color: #6b5f45; }
+        .tag-warn { background: #f6e3cf; color: #8a4a08; }
+
+        /* ── Chart palette ── */
+        .slots {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+        }
+
+        .slot { text-align: left; }
+
+        .slot-bar {
+            height: 62px;
+            border-radius: 4px;
+            box-shadow: inset 0 0 0 1px rgba(0, 22, 71, 0.07);
+        }
+
+        .slot-n {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            margin: 8px 0 3px;
+            letter-spacing: 0.06em;
+        }
+
+        .slot-name { font-size: 12px; font-weight: 600; }
+
+        .slot-hex {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10.5px;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .ramp {
+            display: flex;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .ramp-step {
+            flex: 1;
+            height: 54px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 7px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9.5px;
+            letter-spacing: 0.04em;
+        }
+
+        .panel-dark {
+            background: var(--bg-dark);
+            border-radius: 4px;
+            padding: 26px 24px 22px;
+        }
+
+        .panel-dark .slot-n,
+        .panel-dark .slot-hex { color: var(--muted-inv); }
+
+        .panel-dark .slot-name { color: var(--text-inv); }
+
+        .panel-dark .sublabel { color: var(--muted-inv); margin-top: 0; }
+
+        .verdict {
+            margin-top: 16px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            line-height: 1.7;
+            color: var(--muted);
+            border-left: 2px solid var(--green);
+            padding: 4px 0 4px 13px;
+        }
+
+        .verdict b { color: var(--text); font-weight: 500; }
+
+        .panel-dark .verdict { color: var(--muted-inv); }
+        .panel-dark .verdict b { color: var(--text-inv); }
+
+        /* ── Typography specimens ── */
+        .type-row {
+            display: flex;
+            gap: 34px;
+            align-items: baseline;
+            padding: 26px 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .type-row:first-of-type { border-top: 1px solid var(--ink); }
+
+        .type-meta { width: 194px; flex-shrink: 0; }
+
+        .type-role { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+
+        .type-spec {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10.5px;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        .sp-display {
+            font-family: Georgia, serif;
+            font-size: 36px;
+            line-height: 1.1;
+        }
+
+        .sp-stat {
+            font-family: Georgia, serif;
+            font-size: 72px;
+            line-height: 0.92;
+            letter-spacing: -0.02em;
+            color: var(--cobalt);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .sp-sub { font-size: 22px; line-height: 1.25; }
+        .sp-body { font-size: 18px; line-height: 1.6; }
+        .sp-legend { font-size: 14px; color: var(--text); }
+        .sp-foot { font-size: 13px; line-height: 1.5; color: var(--muted); }
+
+        .sp-eyebrow {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--cobalt);
+        }
+
+        .sp-marker {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            font-variant-numeric: tabular-nums;
+            color: var(--cobalt);
+        }
+
+        .note {
+            margin-top: 18px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        /* ── Motifs ── */
+        .motifs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .motif {
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .motif-demo {
+            height: 168px;
+            padding: 18px;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .motif-text { padding: 15px 17px 17px; }
+
+        .motif-name { font-size: 12.5px; font-weight: 600; margin-bottom: 6px; }
+
+        .motif-desc { font-size: 11.5px; line-height: 1.55; color: var(--muted); }
+
+        /* motif: timeline spine */
+        .m-spine { padding-left: 34px; }
+        .m-spine::before {
+            content: "";
+            position: absolute;
+            left: 22px; top: 18px; bottom: 18px;
+            width: 1px;
+            background: var(--rule);
+        }
+        .m-node {
+            position: relative;
+            margin-bottom: 17px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--cobalt);
+        }
+        .m-node::before {
+            content: "";
+            position: absolute;
+            left: -16px; top: 4px;
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--cobalt);
+        }
+        .m-node span {
+            display: block;
+            font-family: 'Archivo', sans-serif;
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        /* motif: hero stat */
+        .m-stat {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .m-stat b {
+            font-family: Georgia, serif;
+            font-size: 64px;
+            font-weight: 400;
+            line-height: 0.9;
+            color: var(--cobalt);
+            letter-spacing: -0.02em;
+        }
+        .m-stat i {
+            font-style: normal;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--muted);
+            margin-top: 12px;
+            max-width: 24ch;
+        }
+
+        /* motif: isotype grid */
+        .m-iso {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 4px;
+            align-content: center;
+        }
+        .m-iso i {
+            aspect-ratio: 1;
+            background: var(--greige);
+            border-radius: 2px;
+        }
+        .m-iso i.on { background: var(--cobalt); }
+        .m-iso i.hl { background: var(--signal); }
+
+        /* motif: duotone */
+        .m-duo {
+            background:
+                linear-gradient(140deg, rgba(37,64,180,0.88), rgba(0,22,71,0.94)),
+                repeating-linear-gradient(58deg, #b9b2a4 0 9px, #8e887c 9px 18px, #d6d0c2 18px 27px);
+            background-blend-mode: multiply, normal;
+        }
+        .m-duo em {
+            position: absolute;
+            left: 18px; bottom: 16px;
+            font-style: normal;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10.5px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--aqua);
+        }
+
+        /* motif: graph paper */
+        .m-graph {
+            background-color: var(--bone);
+            background-image:
+                linear-gradient(var(--grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+            background-size: 22px 22px;
+        }
+        .m-graph svg { position: absolute; inset: 18px; width: calc(100% - 36px); height: calc(100% - 36px); }
+
+        /* motif: navy chapter panel */
+        .m-navy {
+            background: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .m-navy b {
+            font-family: Georgia, serif;
+            font-size: 25px;
+            font-weight: 400;
+            color: var(--text-inv);
+            line-height: 1.15;
+        }
+        .m-navy i {
+            font-style: normal;
+            font-size: 10.5px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--aqua);
+            margin-bottom: 11px;
+            font-weight: 600;
+        }
+
+        /* ── Spacing & breakpoints ── */
+        .sp-demo { display: flex; gap: 20px; align-items: stretch; }
+
+        .sp-bar {
+            width: 4px;
+            background: var(--cobalt);
+            border-radius: 2px;
+        }
+
+        .sp-figure {
+            font-family: Georgia, serif;
+            font-size: 30px;
+            line-height: 1;
+            margin-bottom: 7px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .sp-caption { font-size: 13px; line-height: 1.55; color: var(--muted); max-width: 62ch; }
+
+        .bp-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+        .bp {
+            border: 1px solid var(--rule);
+            border-top: 3px solid var(--cobalt);
+            border-radius: 3px;
+            padding: 17px 18px 19px;
+            background: var(--surface);
+        }
+
+        .bp b {
+            display: block;
+            font-family: Georgia, serif;
+            font-size: 21px;
+            font-weight: 400;
+            margin-bottom: 5px;
+        }
+
+        .bp span {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+
+        .bp em {
+            display: block;
+            font-style: normal;
+            font-size: 11.5px;
+            color: var(--muted);
+            margin-top: 9px;
+            line-height: 1.5;
+        }
+
+        .footer {
+            border-top: 1px solid var(--ink);
+            padding-top: 20px;
+            font-size: 12px;
+            line-height: 1.65;
+            color: var(--muted);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1023px) {
+            .page { padding: 56px 24px 90px; }
+            .header-title { font-size: 42px; }
+            .strip { grid-template-columns: repeat(3, 1fr); }
+            .strip-info { border-left: 1px solid var(--rule); }
+            .slots { grid-template-columns: repeat(3, 1fr); }
+            .motifs { grid-template-columns: repeat(2, 1fr); }
+            .sp-stat { font-size: 56px; }
+            .sp-display { font-size: 32px; }
+            .sp-sub { font-size: 20px; }
+            .sp-body { font-size: 16px; }
+            .sp-legend { font-size: 12px; }
+        }
+
+        @media (max-width: 768px) {
+            .page { padding: 44px 18px 72px; }
+            .header-title { font-size: 32px; }
+            .strip { grid-template-columns: repeat(2, 1fr); }
+            .slots { grid-template-columns: repeat(2, 1fr); }
+            .motifs { grid-template-columns: 1fr; }
+            .type-row { flex-direction: column; gap: 14px; }
+            .type-meta { width: 100%; }
+            .bp-row { grid-template-columns: 1fr; }
+            .sec-note { margin-left: 0; flex-basis: 100%; }
+            .sec-head { flex-wrap: wrap; }
+            .sp-stat { font-size: 44px; }
+            .sp-display { font-size: 28px; }
+            .sp-sub { font-size: 17px; }
+            .sp-body { font-size: 14px; }
+            .sp-legend { font-size: 11px; }
+            .tbl-scroll { overflow-x: auto; }
+            .tbl { min-width: 560px; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <header class="header">
+        <div class="eyebrow">Design System</div>
+        <h1 class="header-title">TCS Interactives</h1>
+        <p class="header-sub">
+            Derived from <em>TCS Mood Board.png</em>. A cream-paper editorial system —
+            blue-dominant, archival, timeline-led — with one hot accent held in reserve.
+            Every chart colour below has been run through the palette validator, not eyeballed.
+        </p>
+    </header>
+
+    <div class="header-meta">
+        <div>Source · TCS Mood Board</div>
+        <div>Ground · Cream paper</div>
+        <div>Dominant · Cobalt / Navy</div>
+        <div>Rev · 2026-09-11</div>
+    </div>
+
+    <!-- 01 ───────────────────────────────── -->
+    <section>
+        <div class="sec-head">
+            <span class="sec-num">01</span>
+            <h2 class="sec-title">Moodboard palette</h2>
+            <span class="sec-note">The six swatches off the top of the board, verbatim</span>
+        </div>
+        <p class="lede">
+            These six are the board's own strip, unmodified. Read left to right they form a
+            <strong>sequential ramp</strong> — warm paper into cyan into blue into ink — which is
+            exactly why they cannot serve as a categorical chart palette (§04 covers what replaces them).
+            Use them for surfaces, type and ornament.
+        </p>
+        <div class="strip">
+            <div class="strip-cell">
+                <div class="strip-block" style="background:#f3efe9"></div>
+                <div class="strip-info">
+                    <div class="strip-name">Bone</div>
+                    <div class="strip-hex">#f3efe9</div>
+                    <div class="strip-role">Page ground. The default background — never stark white.</div>
+                </div>
+            </div>
+            <div class="strip-cell">
+                <div class="strip-block" style="background:#e6e0d4"></div>
+                <div class="strip-info">
+                    <div class="strip-name">Greige</div>
+                    <div class="strip-hex">#e6e0d4</div>
+                    <div class="strip-role">Secondary ground, table zebra, inactive fill.</div>
+                </div>
+            </div>
+            <div class="strip-cell">
+                <div class="strip-block" style="background:#8dd7d6"></div>
+                <div class="strip-info">
+                    <div class="strip-name">Aqua</div>
+                    <div class="strip-hex">#8dd7d6</div>
+                    <div class="strip-role">Ornament, grid lines, labels on navy. Fill only.</div>
+                </div>
+            </div>
+            <div class="strip-cell">
+                <div class="strip-block" style="background:#5ba9d1"></div>
+                <div class="strip-info">
+                    <div class="strip-name">Sky</div>
+                    <div class="strip-hex">#5ba9d1</div>
+                    <div class="strip-role">Mid-tone fill, duotone highlight, type on navy.</div>
+                </div>
+            </div>
+            <div class="strip-cell">
+                <div class="strip-block" style="background:#2540b4"></div>
+                <div class="strip-info">
+                    <div class="strip-name">Cobalt</div>
+                    <div class="strip-hex">#2540b4</div>
+                    <div class="strip-role">Primary. Links, year markers, hero figures, rules.</div>
+                </div>
+            </div>
+            <div class="strip-cell">
+                <div class="strip-block" style="background:#001647"></div>
+                <div class="strip-info">
+                    <div class="strip-name">Ink Navy</div>
+                    <div class="strip-hex">#001647</div>
+                    <div class="strip-role">Body text and the dark chapter ground.</div>
+                </div>
+            </div>
+        </div>
+
+        <p class="sublabel">Accents found across the board</p>
+        <div class="slots">
+            <div class="slot">
+                <div class="slot-bar" style="background:#ff6900"></div>
+                <div class="slot-n">SIGNAL</div>
+                <div class="slot-name">Orange</div>
+                <div class="slot-hex">#ff6900</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#f3ad3d"></div>
+                <div class="slot-n">WARM</div>
+                <div class="slot-name">Amber</div>
+                <div class="slot-hex">#f3ad3d</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#7abc72"></div>
+                <div class="slot-n">GROWTH</div>
+                <div class="slot-name">Green</div>
+                <div class="slot-hex">#7abc72</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#a7d7bc"></div>
+                <div class="slot-n">SOFT</div>
+                <div class="slot-name">Mint</div>
+                <div class="slot-hex">#a7d7bc</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#10371a"></div>
+                <div class="slot-n">DEEP</div>
+                <div class="slot-name">Forest</div>
+                <div class="slot-hex">#10371a</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#7927af"></div>
+                <div class="slot-n">RARE</div>
+                <div class="slot-name">Plum</div>
+                <div class="slot-hex">#7927af</div>
+            </div>
+        </div>
+        <p class="note">
+            Orange is the board's one hot colour and behaves like one — a single emphasised
+            series, a highlighted year, an outlier. Never a background, never two oranges in a view.
+        </p>
+    </section>
+
+    <!-- 02 ───────────────────────────────── -->
+    <section>
+        <div class="sec-head">
+            <span class="sec-num">02</span>
+            <h2 class="sec-title">Tokens</h2>
+            <span class="sec-note">What goes in <code>globals.css</code></span>
+        </div>
+        <div class="tbl-scroll">
+        <table class="tbl">
+            <thead>
+                <tr><th>Variable</th><th>Value</th><th>Role</th></tr>
+            </thead>
+            <tbody>
+                <tr><td class="num">--color-bg</td><td class="num"><span class="chip" style="background:#f3efe9"></span>#f3efe9</td><td>Page ground — Bone</td></tr>
+                <tr><td class="num">--color-bg-warm</td><td class="num"><span class="chip" style="background:#e6e0d4"></span>#e6e0d4</td><td>Secondary ground, zebra, inactive</td></tr>
+                <tr><td class="num">--color-surface</td><td class="num"><span class="chip" style="background:#ffffff"></span>#ffffff</td><td>Card face lifted off the paper</td></tr>
+                <tr><td class="num">--color-bg-dark</td><td class="num"><span class="chip" style="background:#001647"></span>#001647</td><td>Dark chapter panel &amp; dark-mode surface</td></tr>
+                <tr><td class="num">--color-primary</td><td class="num"><span class="chip" style="background:#2540b4"></span>#2540b4</td><td>Cobalt — links, markers, hero figures</td></tr>
+                <tr><td class="num">--color-secondary</td><td class="num"><span class="chip" style="background:#001647"></span>#001647</td><td>Ink Navy — headings, rules</td></tr>
+                <tr><td class="num">--color-accent</td><td class="num"><span class="chip" style="background:#8dd7d6"></span>#8dd7d6</td><td>Aqua — ornament &amp; fills only</td></tr>
+                <tr><td class="num">--color-sky</td><td class="num"><span class="chip" style="background:#5ba9d1"></span>#5ba9d1</td><td>Mid fill, duotone highlight</td></tr>
+                <tr><td class="num">--color-signal</td><td class="num"><span class="chip" style="background:#ff6900"></span>#ff6900</td><td>The one hot accent — emphasis only</td></tr>
+                <tr><td class="num">--color-text</td><td class="num"><span class="chip" style="background:#001647"></span>#001647</td><td>Body copy on Bone</td></tr>
+                <tr><td class="num">--color-muted</td><td class="num"><span class="chip" style="background:#5a6580"></span>#5a6580</td><td>Slate — footnotes, sources, axes</td></tr>
+                <tr><td class="num">--color-rule</td><td class="num"><span class="chip" style="background:#d9d3c6"></span>#d9d3c6</td><td>Hairline borders &amp; dividers</td></tr>
+                <tr><td class="num">--color-grid</td><td class="num"><span class="chip" style="background:#cfe3e3"></span>#cfe3e3</td><td>Graph-paper &amp; chart gridlines</td></tr>
+                <tr><td class="num">--color-text-invert</td><td class="num"><span class="chip" style="background:#f3efe9"></span>#f3efe9</td><td>Copy on the navy panel</td></tr>
+                <tr><td class="num">--color-muted-invert</td><td class="num"><span class="chip" style="background:#9fb0d4"></span>#9fb0d4</td><td>Muted copy on the navy panel</td></tr>
+            </tbody>
+        </table>
+        </div>
+
+        <p class="sublabel">Ink contrast — measured, WCAG</p>
+        <div class="tbl-scroll">
+        <table class="tbl">
+            <thead>
+                <tr><th>Colour</th><th>On Bone</th><th>On Navy</th><th>Cleared for</th></tr>
+            </thead>
+            <tbody>
+                <tr><td class="num"><span class="chip" style="background:#001647"></span>Ink Navy #001647</td><td class="num">15.21</td><td class="num">—</td><td><span class="tag tag-ok">Body text</span></td></tr>
+                <tr><td class="num"><span class="chip" style="background:#2540b4"></span>Cobalt #2540b4</td><td class="num">7.42</td><td class="num">2.05</td><td><span class="tag tag-ok">Text on Bone</span></td></tr>
+                <tr><td class="num"><span class="chip" style="background:#5a6580"></span>Slate #5a6580</td><td class="num">5.08</td><td class="num">2.99</td><td><span class="tag tag-ok">Footnotes on Bone</span></td></tr>
+                <tr><td class="num"><span class="chip" style="background:#9fb0d4"></span>Periwinkle #9fb0d4</td><td class="num">1.90</td><td class="num">7.99</td><td><span class="tag tag-ok">Muted on Navy</span></td></tr>
+                <tr><td class="num"><span class="chip" style="background:#5ba9d1"></span>Sky #5ba9d1</td><td class="num">2.28</td><td class="num">6.67</td><td><span class="tag tag-fill">Fill · text on Navy</span></td></tr>
+                <tr><td class="num"><span class="chip" style="background:#8dd7d6"></span>Aqua #8dd7d6</td><td class="num">1.43</td><td class="num">10.64</td><td><span class="tag tag-fill">Fill · label on Navy</span></td></tr>
+            </tbody>
+        </table>
+        </div>
+        <p class="note">
+            Aqua and Sky never carry body copy on Bone — they fail text contrast there by a wide
+            margin. On the navy panel both are legitimate type colours. This is the single most
+            common way the moodboard's palette gets misused.
+        </p>
+    </section>
+
+    <!-- 03 ───────────────────────────────── -->
+    <section>
+        <div class="sec-head">
+            <span class="sec-num">03</span>
+            <h2 class="sec-title">Typography</h2>
+            <span class="sec-note">Reckless display · Archivo text · Plex Mono figures</span>
+        </div>
+        <p class="lede">
+            The display/text pairing and the four core sizes are unchanged from the house system.
+            The moodboard adds two roles it leans on constantly: a <strong>tracked eyebrow</strong>
+            and an <strong>oversized stat figure</strong>. Monospace is new too — the board's
+            timelines set years as tabular figures.
+        </p>
+
+        <div class="type-row">
+            <div class="type-meta">
+                <div class="type-role">Eyebrow / kicker</div>
+                <div class="type-spec">Archivo 600 · 11 / 11 / 10px<br>0.14em tracking, uppercase<br>--type-eyebrow</div>
+            </div>
+            <div class="sp-eyebrow">The Y2K Decade</div>
+        </div>
+
+        <div class="type-row">
+            <div class="type-meta">
+                <div class="type-role">Stat figure</div>
+                <div class="type-spec">Reckless · 72 / 56 / 44px<br>tabular, -0.02em<br>--type-stat</div>
+            </div>
+            <div class="sp-stat">92%</div>
+        </div>
+
+        <div class="type-row">
+            <div class="type-meta">
+                <div class="type-role">Heading / chart title</div>
+                <div class="type-spec">Reckless · 36 / 32 / 28px<br>pc / iPad / mobile<br>--type-heading</div>
+            </div>
+            <div class="sp-display">How TCS billed the world by the hour</div>
+        </div>
+
+        <div class="type-row">
+            <div class="type-meta">
+                <div class="type-role">Subheading</div>
+                <div class="type-spec">Archivo · 22 / 20 / 17px<br>pc / iPad / mobile<br>--type-subheading</div>
+            </div>
+            <div class="sp-sub">Onsite to offshore, 1996–2004</div>
+        </div>
+
+        <div class="type-row">
+            <div class="type-meta">
+                <div class="type-role">Body / annotation</div>
+                <div class="type-spec">Archivo · 18 / 16 / 14px<br>pc / iPad / mobile<br>--type-body</div>
+            </div>
+            <div class="sp-body">By 2000 more than half of every TCS contract was being delivered from India — the offshore share had doubled in four years.</div>
+        </div>
+
+        <div class="type-row">
+            <div class="type-meta">
+                <div class="type-role">Year / data marker</div>
+                <div class="type-spec">IBM Plex Mono 500 · 15px<br>tabular figures<br>--font-mono</div>
+            </div>
+            <div class="sp-marker">1968 &nbsp; 1974 &nbsp; 1999 &nbsp; 2004</div>
+        </div>
+
+        <div class="type-row">
+            <div class="type-meta">
+                <div class="type-role">Legend / chip</div>
+                <div class="type-spec">Archivo · 14 / 12 / 11px<br>pc / iPad / mobile<br>--type-legend</div>
+            </div>
+            <div class="sp-legend">Onsite &nbsp;·&nbsp; Offshore &nbsp;·&nbsp; Global delivery</div>
+        </div>
+
+        <div class="type-row">
+            <div class="type-meta">
+                <div class="type-role">Footnote / source</div>
+                <div class="type-spec">Archivo · 13px<br>all breakpoints<br>--type-legend · muted</div>
+            </div>
+            <div class="sp-foot">Source: TCS Annual Reports; NASSCOM Strategic Review. Figures in US$ million.</div>
+        </div>
+
+        <p class="note">
+            * Reckless is licensed — the specimens above fall back to a serif. Heading, subheading
+            and legend scale at the same ratio as body copy at each breakpoint; never move one alone.
+        </p>
+    </section>
+
+    <!-- 04 ───────────────────────────────── -->
+    <section>
+        <div class="sec-head">
+            <span class="sec-num">04</span>
+            <h2 class="sec-title">Chart palette</h2>
+            <span class="sec-note">Validated — fixed order, never cycled</span>
+        </div>
+        <p class="lede">
+            The moodboard's strip is a ramp, so it fails as a series palette: its ends are too pale,
+            too low in chroma, and aqua sits too close to green to be told apart. These six slots keep
+            the board's hues but are stepped into the legible band. Assign them
+            <strong>in order</strong> — series 1 takes slot 1 — and never generate a seventh.
+        </p>
+
+        <p class="sublabel">Categorical — light, on Bone</p>
+        <div class="slots">
+            <div class="slot">
+                <div class="slot-bar" style="background:#2946ba"></div>
+                <div class="slot-n">SLOT 1</div><div class="slot-name">Cobalt</div><div class="slot-hex">#2946ba</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#fe6906"></div>
+                <div class="slot-n">SLOT 2</div><div class="slot-name">Orange</div><div class="slot-hex">#fe6906</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#41c5c5"></div>
+                <div class="slot-n">SLOT 3</div><div class="slot-name">Teal</div><div class="slot-hex">#41c5c5</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#e5a02c"></div>
+                <div class="slot-n">SLOT 4</div><div class="slot-name">Amber</div><div class="slot-hex">#e5a02c</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#7827ae"></div>
+                <div class="slot-n">SLOT 5</div><div class="slot-name">Plum</div><div class="slot-hex">#7827ae</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#7abd72"></div>
+                <div class="slot-n">SLOT 6</div><div class="slot-name">Green</div><div class="slot-hex">#7abd72</div>
+            </div>
+        </div>
+        <div class="verdict">
+            <b>All six checks pass.</b> Lightness band ✓ · chroma floor ✓ · CVD separation worst
+            adjacent pair ΔE <b>17.8</b> (target 8) · normal-vision floor <b>22.4</b> (floor 15).<br>
+            Contrast warns below 3:1 on Orange, Teal, Amber and Green — so those series
+            <b>must</b> carry a direct label or a table view. That is not optional.
+        </div>
+
+        <div class="panel-dark" style="margin-top:28px">
+            <p class="sublabel">Categorical — dark, on Ink Navy</p>
+            <div class="slots">
+                <div class="slot">
+                    <div class="slot-bar" style="background:#648bff"></div>
+                    <div class="slot-n">SLOT 1</div><div class="slot-name">Cobalt</div><div class="slot-hex">#648bff</div>
+                </div>
+                <div class="slot">
+                    <div class="slot-bar" style="background:#ee6200"></div>
+                    <div class="slot-n">SLOT 2</div><div class="slot-name">Orange</div><div class="slot-hex">#ee6200</div>
+                </div>
+                <div class="slot">
+                    <div class="slot-bar" style="background:#2ca7a7"></div>
+                    <div class="slot-n">SLOT 3</div><div class="slot-name">Teal</div><div class="slot-hex">#2ca7a7</div>
+                </div>
+                <div class="slot">
+                    <div class="slot-bar" style="background:#c58502"></div>
+                    <div class="slot-n">SLOT 4</div><div class="slot-name">Amber</div><div class="slot-hex">#c58502</div>
+                </div>
+                <div class="slot">
+                    <div class="slot-bar" style="background:#b569f2"></div>
+                    <div class="slot-n">SLOT 5</div><div class="slot-name">Plum</div><div class="slot-hex">#b569f2</div>
+                </div>
+                <div class="slot">
+                    <div class="slot-bar" style="background:#65a75e"></div>
+                    <div class="slot-n">SLOT 6</div><div class="slot-name">Green</div><div class="slot-hex">#65a75e</div>
+                </div>
+            </div>
+            <div class="verdict">
+                <b>All six checks pass, contrast included.</b> Same slot order as light — a series
+                keeps its identity across modes. Worst adjacent ΔE <b>16.1</b> · normal-vision
+                <b>21.1</b> · every slot ≥ 3:1 on navy. These are <b>selected</b> steps, not a
+                lightened flip of the light set.
+            </div>
+        </div>
+
+        <p class="sublabel">Sequential — magnitude, single hue</p>
+        <div class="ramp">
+            <div class="ramp-step" style="background:#90a8e3;color:#001647">100</div>
+            <div class="ramp-step" style="background:#6c8bde;color:#001647">200</div>
+            <div class="ramp-step" style="background:#4a6dd7;color:#ffffff">300</div>
+            <div class="ramp-step" style="background:#3150c5;color:#ffffff">400</div>
+            <div class="ramp-step" style="background:#223a9c;color:#ffffff">500</div>
+            <div class="ramp-step" style="background:#182a6b;color:#ffffff">600</div>
+        </div>
+        <div class="verdict">
+            Monotone lightness ✓ · every adjacent step ΔL ≥ 0.083 ✓ · light end 2.06:1 on Bone ✓ ·
+            single hue (spread 0°) ✓. For choropleths, heatmaps and waffle density.
+            <b>Dark mode flips the anchor</b> —
+            <span class="mono">#2b49be · #4265d7 · #6082e6 · #82a0ee · #a6bdf5 · #cad9fb</span>,
+            low to high, each ≥ 2:1 on navy.
+        </div>
+
+        <p class="sublabel">Diverging — polarity, neutral midpoint</p>
+        <div class="ramp">
+            <div class="ramp-step" style="background:#3150c5;color:#ffffff">−3</div>
+            <div class="ramp-step" style="background:#5a7ad6;color:#ffffff">−2</div>
+            <div class="ramp-step" style="background:#89a1df;color:#001647">−1</div>
+            <div class="ramp-step" style="background:#dcd7cb;color:#001647">0</div>
+            <div class="ramp-step" style="background:#d59071;color:#001647">+1</div>
+            <div class="ramp-step" style="background:#d46935;color:#ffffff">+2</div>
+            <div class="ramp-step" style="background:#c04d00;color:#ffffff">+3</div>
+        </div>
+        <div class="verdict">
+            Cobalt against Orange — the board's two poles — over a <b>neutral greige midpoint</b>,
+            never a hue at zero. Equal steps per arm. Use only where the data has a real
+            baseline to sit either side of.
+        </div>
+
+        <p class="sublabel">Status — reserved meaning, never a series colour</p>
+        <div class="slots">
+            <div class="slot">
+                <div class="slot-bar" style="background:#2f7d32;height:44px"></div>
+                <div class="slot-n">GOOD</div><div class="slot-hex">#2f7d32 · 4.47</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#b07503;height:44px"></div>
+                <div class="slot-n">WARNING</div><div class="slot-hex">#b07503 · 3.40</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#c04d00;height:44px"></div>
+                <div class="slot-n">SERIOUS</div><div class="slot-hex">#c04d00 · 4.26</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#a31f1f;height:44px"></div>
+                <div class="slot-n">CRITICAL</div><div class="slot-hex">#a31f1f · 6.61</div>
+            </div>
+        </div>
+        <div class="verdict">
+            Held at ΔE ≥ 13.8 from the nearest categorical slot so a status colour can never
+            read as "series 4". Always shipped with an icon <em>and</em> a label — never colour alone.
+        </div>
+
+        <p class="sublabel">Rules that travel with this palette</p>
+        <p class="lede" style="margin-bottom:0">
+            One y-axis, always — two measures of different scale become two charts, never a second
+            axis. Colour follows the entity, not its rank: a filter that drops series must not
+            repaint the survivors. Values, labels and legends wear the ink tokens
+            (<code>--color-text</code> / <code>--color-muted</code>), never the series colour.
+            Scatter, bubble, choropleth and small-multiple forms cap at
+            <strong>three series</strong> — beyond that, facet or fold into "Other".
+            Keep a 2px surface gap between adjacent fills and stacked segments.
+        </p>
+    </section>
+
+    <!-- 05 ───────────────────────────────── -->
+    <section>
+        <div class="sec-head">
+            <span class="sec-num">05</span>
+            <h2 class="sec-title">Motifs</h2>
+            <span class="sec-note">The six devices the board repeats</span>
+        </div>
+        <p class="lede">
+            The board is not a colour brief so much as a set of recurring devices. These are the
+            ones that showed up often enough to be system, not decoration.
+        </p>
+        <div class="motifs">
+
+            <div class="motif">
+                <div class="motif-demo m-spine">
+                    <div class="m-node">1968<span>Tata Computer Centre opens</span></div>
+                    <div class="m-node">1974<span>First offshore contract</span></div>
+                    <div class="m-node">1999<span>Y2K remediation peak</span></div>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Timeline spine</div>
+                    <div class="motif-desc">A 1px rule with cobalt nodes; years in mono, event copy in Archivo beneath. The board's most-used structure — five separate pieces use it.</div>
+                </div>
+            </div>
+
+            <div class="motif">
+                <div class="motif-demo m-stat">
+                    <b>+98%</b>
+                    <i>growth in offshore headcount over six years</i>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Hero stat</div>
+                    <div class="motif-desc">One figure at display scale in cobalt, with a short caption under it. Replaces a chart whenever the story is a single number.</div>
+                </div>
+            </div>
+
+            <div class="motif">
+                <div class="motif-demo m-iso">
+                    <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
+                    <i class="on"></i><i class="on"></i><i class="hl"></i><i></i><i></i>
+                    <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
+                    <i class="on"></i><i class="hl"></i><i></i><i></i><i></i>
+                    <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+                    <i></i><i></i><i></i><i></i><i></i>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Isotype / waffle grid</div>
+                    <div class="motif-desc">Unit squares or figures, one per quantum, 10 to a row. Greige for the remainder, cobalt for the count, orange for the part being called out.</div>
+                </div>
+            </div>
+
+            <div class="motif">
+                <div class="motif-demo m-duo">
+                    <em>Archive · 1981</em>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Duotone archival photo</div>
+                    <div class="motif-desc">Black-and-white archive imagery under a cobalt-to-navy multiply. Aqua caption sits on top. Keeps decades of mixed-quality photography looking like one set.</div>
+                </div>
+            </div>
+
+            <div class="motif">
+                <div class="motif-demo m-graph">
+                    <svg viewBox="0 0 200 120" preserveAspectRatio="none">
+                        <polyline points="0,104 34,92 68,74 102,52 136,34 170,16 200,8"
+                                  fill="none" stroke="#2540b4" stroke-width="2.5" />
+                        <circle cx="136" cy="34" r="4.5" fill="#ff6900" />
+                    </svg>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Graph paper ground</div>
+                    <div class="motif-desc">A 22px aqua grid on Bone, standing in for chart gridlines. Recessive — the grid never competes with the mark drawn over it.</div>
+                </div>
+            </div>
+
+            <div class="motif">
+                <div class="motif-demo m-navy">
+                    <i>Chapter 03</i>
+                    <b>The bug that paid for a decade</b>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Navy chapter panel</div>
+                    <div class="motif-desc">Full-bleed Ink Navy to break the cream run and mark a new act. Aqua eyebrow, Bone heading. Charts inside switch to the dark palette.</div>
+                </div>
+            </div>
+
+        </div>
+        <p class="note">
+            Cards are <strong>flat</strong> in this system — a hairline <code>--color-rule</code>
+            border on white over the Bone ground. The board's references are printed pieces; the
+            heavy 30px drop shadow from the previous house style does not belong here. Keep the
+            frame wrapper anyway (see the prompt guide) — it owns the card's padding, and any
+            module that does opt into a shadow still needs it.
+        </p>
+    </section>
+
+    <!-- 06 ───────────────────────────────── -->
+    <section>
+        <div class="sec-head">
+            <span class="sec-num">06</span>
+            <h2 class="sec-title">Spacing &amp; breakpoints</h2>
+            <span class="sec-note">Unchanged from the house system</span>
+        </div>
+        <div class="sp-demo">
+            <div class="sp-bar"></div>
+            <div>
+                <div class="sp-figure">120 / 110 / 100px</div>
+                <div class="sp-caption">
+                    Gap between every visualisation section, via <code>--spacing</code> on
+                    <code>.TK4R-spacer</code> — pc (≥1024px) / iPad (769–1023px) / mobile (≤768px).
+                </div>
+            </div>
+        </div>
+
+        <p class="sublabel">Breakpoints</p>
+        <div class="bp-row">
+            <div class="bp">
+                <b>PC</b>
+                <span>≥ 1024px</span>
+                <em>Full type scale. Legend sits top-right of the chart header.</em>
+            </div>
+            <div class="bp">
+                <b>iPad</b>
+                <span>769 – 1023px</span>
+                <em>One step down. Watch flex children overflowing the card.</em>
+            </div>
+            <div class="bp">
+                <b>Mobile</b>
+                <span>≤ 768px</span>
+                <em>Legend centres and stacks under the title. Frame padding drops to ~20px 12px.</em>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        Derived from <em>TCS Mood Board.png</em> (6251 × 7114). Surface, ink and accent values are
+        sampled from the board directly; the chart palettes in §04 are stepped from those same hues
+        and verified with the palette validator in both modes. Update
+        <code>styles/globals.css</code> from §02 — nothing else in the house system changes.
+    </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,12 @@
+**V0.2** — Line charts — 3 Indian companies by market cap (2017–2026), with TCS "popping" more via color choice. Add annotation of Claude release in 2024.
+- **V2.3** — Viz — Animated migration map: Tamil Brahmins moving from the Kaveri delta to Bombay/Bangalore/Chennai + Parsis from Persia to Gujarat to Bombay. _Notes: "Vectors animating on static background" — sketch shows figures (chenna/Chennai) with flags moving along a path toward Gujarat_
+- **V5.1** — Viz/Illustration — Burroughs deal. Stacking images with narrative written as text, next to the images.
+- **V6.2** — Viz — "Follow the sun". _Notes: "3D globe that rotates," "use the same globe in 6.3"
+- **V6.3**(v6.2 continuation[same <section>]) — Map — Countries where TCS has clients. _Notes: "3D globe that rotates"_
+- **V7.1** — Viz/illustration — The Y2K bug. _Notes: "devices aligned" — sketch of screens/monitors, one showing "00:00," "some turns red," "press to see impact"_ (3D Models)
+- **V7.2** — Line chart — TCS revenue growth (1995–2002). (Data only available from 2011 - 2026)
+- **V7.3**(v7.2 continuation[same <section>]) — line chart — Same chart from V8.2 (Stocks chart), plus a secondary axis showing Nasdaq's 77% collapse by 2002.
+- **V8.2** — Line graphs — Stock prices (rebased at 100) of Infosys, Wipro, HCL, TCS since respective IPO dates.
+- **V9.3** — Map — TCS's training campuses + when they were built. _Notes: "haven't gotten data?"_
+- **V10.1** — Viz — Power and conflict. Network Graph with nodes and lines linking them.
+- **V11.2** — Bar chart (horizontal) — TCS's historical capex-to-revenue ratio against a projected bar showing HyperVault’s capex commitment

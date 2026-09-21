@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCS Revenue vs NASDAQ</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- Apache ECharts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+        body {
+            background-color: #f0eee9;
+            color: #12192c;
+            font-family: 'Lora', Georgia, serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .sans-font {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .serif-font {
+            font-family: 'Lora', Georgia, serif;
+        }
+
+        /* -------------------------------------------------------------
+           1. STRICT FIXED / STATIC CHART FRAME (NO SCALING/ZOOMING)
+        ------------------------------------------------------------- */
+        .fixed-chart-viewport {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            pointer-events: none;
+            transform: none !important;
+        }
+
+        .chart-static-box {
+            width: 100%;
+            max-width: 1050px;
+            height: 75vh;
+            max-height: 620px;
+            background-color: rgba(240, 238, 233, 0.94);
+            border: 1px solid rgba(18, 25, 44, 0.12);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transform: none !important;
+        }
+
+        #echart-container {
+            width: 100%;
+            flex-grow: 1;
+            min-height: 300px;
+        }
+
+        /* -------------------------------------------------------------
+           2. OVERLAY SCROLLING NARRATIVE LAYER
+        ------------------------------------------------------------- */
+        .scrolly-narrative-layer {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            padding-bottom: 25vh;
+        }
+
+        /* Each step positions its card at a different point along the
+           x-axis (via margin-left, see the data-position attribute below)
+           instead of every card sitting dead-center over the chart. Step 1
+           sits at the right, the last step at the left, stepping across in
+           between — since the chart line draws in left-to-right, this
+           keeps the card off whatever part of the line is currently being
+           revealed instead of covering it up every time. */
+        .narrative-step {
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 1.5rem 5vw;
+            opacity: 0.25;
+            transition: opacity 0.4s ease-out;
+        }
+
+        .narrative-step.active {
+            opacity: 1;
+        }
+
+        .narrative-card {
+            background-color: rgba(247, 245, 240, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(18, 25, 44, 0.15);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 480px;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Step 1 sits at the right (clear of the line just starting to
+           draw on the left); steps 2-4 all share the same left position —
+           the same base inset (this step's own 5vw padding, no extra
+           margin) so they sit at one consistent, symmetric spot rather
+           than each drifting further left. */
+        .narrative-step[data-position="right"] .narrative-card { margin-left: 48%; }
+        .narrative-step[data-position="left"] .narrative-card { margin-left: 0; }
+
+        /* Stat Circles Styling */
+        .circle-stat-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1.5rem 0;
+            gap: 1rem;
+        }
+
+        .circle-blue {
+            width: 110px;
+            height: 110px;
+            border: 1.5px solid #1e3a8a;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(240, 238, 233, 0.9);
+            box-shadow: 0 6px 16px rgba(30, 58, 138, 0.08);
+        }
+
+        .circle-amber {
+            width: 110px;
+            height: 110px;
+            border: 1.5px solid #b45309;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(254, 243, 199, 0.6);
+            margin-left: -1.25rem;
+            box-shadow: 0 6px 16px rgba(180, 83, 9, 0.08);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f0eee9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- FIXED / STATIC BACKGROUND CHART CONTAINER -->
+    <div class="fixed-chart-viewport">
+        <div class="chart-static-box" id="chartBox">
+            
+            <!-- Clean Header & Legend -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2 pb-3 border-b border-slate-300/60">
+                <div>
+                    <h1 class="serif-font text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
+                        A steady rise in TCS's revenue
+                    </h1>
+                </div>
+
+                <!-- Legend -->
+                <div class="flex items-center gap-3 sans-font text-xs font-semibold">
+                    <div class="flex items-center gap-2 bg-amber-100/80 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300/60">
+                        <span class="w-3 h-3 rounded-full bg-[#edd13e] shadow-sm"></span>
+                        <span>Revenue <span class="text-amber-700 font-normal">(Rs million)</span></span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-blue-100/80 text-blue-900 px-3 py-1.5 rounded-full border border-blue-300/60">
+                        <span class="w-3 h-3 rounded-full bg-[#2563eb] shadow-sm"></span>
+                        <span>NASDAQ Composite</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ECharts Target Canvas Container -->
+            <div id="echart-container"></div>
+
+            <!-- Bottom Context Bar -->
+            <div class="flex items-center justify-between sans-font text-xs text-slate-500 pt-2 border-t border-slate-300/40">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-circle-dot text-amber-600"></i>
+                    <span id="chart-timeline-status">1992 – 1995</span>
+                </div>
+                <div class="hidden sm:flex items-center gap-1 text-slate-400">
+                    Scroll to continue <i class="fa-solid fa-arrow-down text-xs ml-1"></i>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- OVERLAY SCROLLING NARRATIVE CARDS -->
+    <div class="scrolly-narrative-layer">
+
+        <!-- Top Buffer Spacer -->
+        <div class="h-[20vh]"></div>
+
+        <!-- STEP 1 -->
+        <div class="narrative-step" id="step-1" data-cutoff="3" data-status="1992 – 1995" data-position="right">
+            <div class="narrative-card">
+                <p class="text-base text-slate-700 leading-relaxed mb-4">
+                    Between 1992 and 1995, TCS expanded its software services footprint incrementally from <strong>Rs 2,175 million</strong> to <strong>Rs 5,206 million</strong>. 
+                </p>
+                <p class="text-base text-slate-700 leading-relaxed">
+                    During this timeframe, international markets like the NASDAQ remained steady near 1,000 points, laying the groundwork for the upcoming tech boom.
+                </p>
+            </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="narrative-step" id="step-2" data-cutoff="7" data-status="1996 – 1999" data-position="left">
+            <div class="narrative-card">
+                <p class="text-base text-slate-700 leading-relaxed mb-4">
+                    As a result, the Y2K disaster was averted. With no exaggeration, Indian firms, led by TCS, played a major role in facilitating humankind’s technological transition from the second to third millennium without major disruptions.
+                </p>
+                <p class="text-base text-slate-700 leading-relaxed font-semibold text-slate-900 border-l-4 border-amber-500 pl-3">
+                    By 1999, TCS revenue reached Rs 21,146 million, while NASDAQ surged to 4,069 during the peak of the dot-com rally.
+                </p>
+            </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="narrative-step" id="step-3" data-cutoff="9" data-status="2000 – 2001" data-position="left">
+            <div class="narrative-card">
+                <div class="sans-font font-semibold text-slate-800 text-sm mb-3 bg-slate-100 p-3 rounded-lg border-l-4 border-slate-700">
+                    TCS then missed the dot-com boom. Some of its rivals built flashy websites and e-commerce applications while TCS was buried in mainframe code.
+                </div>
+                <p class="text-base text-slate-700 leading-relaxed mb-3">
+                    This made it perfectly positioned for the bust that followed in 2001, when internet companies' valuations collapsed and turned to India to cut costs.
+                </p>
+                <p class="serif-font italic text-blue-900 font-semibold border-t border-slate-200 pt-3">
+                    "Trust built during Y2K converted into long-term maintenance contracts."
+                </p>
+            </div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="narrative-step" id="step-4" data-cutoff="10" data-status="2002" data-position="left">
+            <div class="narrative-card">
+                <!-- Stat Circles Visual -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-2 my-4 sans-font">
+                    <div class="text-right text-xs font-bold text-slate-600 uppercase tracking-wider max-w-[120px] hidden sm:block">
+                        Between 1992 and 2002, TCS grew &rarr;
+                    </div>
+
+                    <div class="flex items-center justify-center">
+                        <div class="circle-blue z-10">
+                            <span class="serif-font text-3xl font-bold italic text-blue-950">40X</span>
+                            <span class="text-[9px] font-bold text-blue-900 uppercase tracking-tight text-center mt-0.5">Profits Surged</span>
+                        </div>
+                        <div class="circle-amber z-0">
+                            <span class="serif-font text-3xl font-bold italic text-amber-950">40%</span>
+                            <span class="text-[9px] font-bold text-amber-900 uppercase tracking-tight text-center mt-0.5">Tata Group's<br>Total Profits</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-base text-slate-700 leading-relaxed">
+                    By 2002, TCS revenue crested <strong>Rs 50,124 million</strong>, defying the global tech downturn and becoming the premier cash engine for the Tata Group.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Data sets (1992 - 2002)
+        const timelineYears = ['1992', '1993', '1994', '1995', '1996', '1997', '1998', '1999', '2000', '2001', '2002'];
+        const tcsRevenueData = [2175, 2537, 3523, 5206, 7209, 10836, 16904, 21146, 31424, 41714, 50124];
+        const nasdaqIndexData = [670, 775, 752, 1052, 1291, 1570, 2192, 4069, 2470, 1950, 1335];
+
+        // Initialize Apache ECharts
+        const chartDom = document.getElementById('echart-container');
+        const myChart = echarts.init(chartDom);
+
+        // Generate options with dynamic slice index for line animation
+        function getChartOption(cutoffIndex = 3) {
+            const visibleTCS = tcsRevenueData.map((val, idx) => idx <= cutoffIndex ? val : null);
+            const visibleNASDAQ = nasdaqIndexData.map((val, idx) => idx <= cutoffIndex ? val : null);
+
+            return {
+                animationDuration: 800,
+                animationEasing: 'cubicOut',
+                backgroundColor: 'transparent',
+                grid: {
+                    top: '15%',
+                    left: '2%',
+                    right: '2%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: '#12192c',
+                    borderColor: '#12192c',
+                    textStyle: { color: '#ffffff', fontFamily: 'Plus Jakarta Sans', fontSize: 12 },
+                    formatter: function (params) {
+                        if (!params || !params.length) return '';
+                        let year = params[0].name;
+                        let html = `<div style="font-weight:bold; margin-bottom:4px; font-family:Lora;">Year ${year}</div>`;
+                        params.forEach(p => {
+                            if (p.value !== null && p.value !== undefined) {
+                                let formatted = Number(p.value).toLocaleString('en-IN');
+                                let prefix = p.seriesName === 'TCS Revenue' ? 'Rs ' : '^';
+                                let suffix = p.seriesName === 'TCS Revenue' ? ' M' : ' pts';
+                                html += `<div style="color:${p.color}; font-size:11px;">
+                                    ${p.seriesName}: <b>${prefix}${formatted}${suffix}</b>
+                                </div>`;
+                            }
+                        });
+                        return html;
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    data: timelineYears,
+                    boundaryGap: false,
+                    axisLine: { lineStyle: { color: '#94a3b8', width: 1.5 } },
+                    axisTick: { show: false },
+                    axisLabel: {
+                        color: '#475569',
+                        fontFamily: 'Plus Jakarta Sans',
+                        fontSize: 11,
+                        fontWeight: '600'
+                    }
+                },
+                yAxis: [
+                    // Left Y-Axis: TCS Revenue
+                    {
+                        type: 'value',
+                        name: 'TCS (Rs Million)',
+                        // Fixed to the full dataset's range (not just what's
+                        // currently revealed) so the axis — and therefore
+                        // the chart's scale — never shifts as more of the
+                        // line is drawn in while scrolling.
+                        min: 0,
+                        max: 55000,
+                        nameTextStyle: { color: '#b45309', fontFamily: 'Plus Jakarta Sans', fontWeight: 'bold', fontSize: 11 },
+                        position: 'left',
+                        axisLine: { show: true, lineStyle: { color: '#edd13e', width: 2 } },
+                        axisTick: { show: false },
+                        splitLine: { lineStyle: { type: 'dashed', color: 'rgba(148, 163, 184, 0.25)' } },
+                        axisLabel: {
+                            color: '#854d0e',
+                            fontFamily: 'Plus Jakarta Sans',
+                            fontSize: 11,
+                            formatter: (val) => val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val
+                        }
+                    },
+                    // Right Y-Axis: NASDAQ Index
+                    {
+                        type: 'value',
+                        name: 'NASDAQ Composite',
+                        // Same fix as the TCS axis above — fixed to the
+                        // full series range.
+                        min: 0,
+                        max: 4500,
+                        nameTextStyle: { color: '#1e40af', fontFamily: 'Plus Jakarta Sans', fontWeight: 'bold', fontSize: 11 },
+                        position: 'right',
+                        axisLine: { show: true, lineStyle: { color: '#2563eb', width: 2 } },
+                        axisTick: { show: false },
+                        splitLine: { show: false },
+                        axisLabel: {
+                            color: '#1e40af',
+                            fontFamily: 'Plus Jakarta Sans',
+                            fontSize: 11,
+                            formatter: (val) => val.toLocaleString()
+                        }
+                    }
+                ],
+                series: [
+                    {
+                        name: 'TCS Revenue',
+                        type: 'line',
+                        yAxisIndex: 0,
+                        smooth: 0.35,
+                        symbol: 'circle',
+                        symbolSize: 8,
+                        itemStyle: { color: '#edd13e', borderWidth: 2, borderColor: '#12192c' },
+                        lineStyle: { width: 3.5, color: '#edd13e' },
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(237, 209, 62, 0.28)' },
+                                { offset: 1, color: 'rgba(237, 209, 62, 0.02)' }
+                            ])
+                        },
+                        data: visibleTCS
+                    },
+                    {
+                        name: 'NASDAQ Composite',
+                        type: 'line',
+                        yAxisIndex: 1,
+                        smooth: 0.35,
+                        symbol: 'diamond',
+                        symbolSize: 8,
+                        itemStyle: { color: '#2563eb', borderWidth: 2, borderColor: '#ffffff' },
+                        lineStyle: { width: 2.5, color: '#2563eb', type: 'dashed' },
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(37, 99, 235, 0.15)' },
+                                { offset: 1, color: 'rgba(37, 99, 235, 0.01)' }
+                            ])
+                        },
+                        data: visibleNASDAQ
+                    }
+                ]
+            };
+        }
+
+        // Render Initial Chart State
+        myChart.setOption(getChartOption(3));
+
+        // GSAP ScrollTrigger Setup
+        gsap.registerPlugin(ScrollTrigger);
+
+        const steps = document.querySelectorAll('.narrative-step');
+        const statusTextDom = document.getElementById('chart-timeline-status');
+
+        steps.forEach((step) => {
+            const cutoffIndex = parseInt(step.getAttribute('data-cutoff'), 10);
+            const statusMsg = step.getAttribute('data-status');
+
+            ScrollTrigger.create({
+                trigger: step,
+                start: "top 60%",
+                end: "bottom 40%",
+                onEnter: () => activateStep(step, cutoffIndex, statusMsg),
+                onEnterBack: () => activateStep(step, cutoffIndex, statusMsg)
+            });
+        });
+
+        function activateStep(activeStepDom, cutoffIndex, statusMsg) {
+            steps.forEach(s => s.classList.remove('active'));
+            activeStepDom.classList.add('active');
+
+            // Draw line up to current step's year
+            myChart.setOption(getChartOption(cutoffIndex));
+
+            if (statusTextDom && statusMsg) {
+                statusTextDom.textContent = statusMsg;
+            }
+        }
+
+        // Resize Chart on Window Resize (Preserves 100% static frame layout)
+        window.addEventListener('resize', () => {
+            myChart.resize();
+        });
+    </script>
+</body>
+</html>

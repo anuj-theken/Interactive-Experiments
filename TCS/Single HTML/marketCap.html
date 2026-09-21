@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Indian IT Companies Market Capitalization (1999–2026)</title>
+  <!-- ECharts Library -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --type-heading: 28px;
+      --type-subheading: 16px;
+      --type-body: 14px;
+      --type-legend: 12px;
+      --type-eyebrow: 11px;
+
+      --font-display: Georgia, serif;
+      --font-body: 'Archivo', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+
+      --color-bg: #f8f7f4;
+      --color-surface: #ffffff;
+      --color-text: #1a202c;
+      --color-muted: #718096;
+      --color-rule: #e2e8f0;
+      --color-grid: #edf2f7;
+      --color-primary: #1d4ed8;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      font-family: var(--font-body);
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .TK4R1-chart-frame {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .TK4R1-chart-container {
+      width: 100%;
+      background: var(--color-surface);
+      border: 1px solid var(--color-rule);
+      border-radius: 6px;
+      padding: 28px 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .TK4R1-chart-header {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (min-width: 769px) {
+      .TK4R1-chart-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+    }
+
+    .TK4R1-eyebrow {
+      font-size: var(--type-eyebrow);
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: 6px;
+    }
+
+    .TK4R1-chart-title {
+      font-family: var(--font-display);
+      font-size: var(--type-heading);
+      font-weight: 400;
+      line-height: 1.2;
+      color: var(--color-text);
+    }
+
+    .TK4R1-chart-subtitle {
+      font-size: var(--type-subheading);
+      color: var(--color-muted);
+      margin-top: 4px;
+    }
+
+    .TK4R1-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 18px;
+      max-width: 500px;
+    }
+
+    .TK4R1-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: var(--type-legend);
+      color: var(--color-text);
+      cursor: pointer;
+      user-select: none;
+      transition: opacity 0.15s ease;
+    }
+
+    .TK4R1-legend-item.is-inactive {
+      opacity: 0.35;
+    }
+
+    .TK4R1-legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    #TK4R1-chart {
+      width: 100%;
+      height: 540px;
+    }
+
+    .TK4R1-source {
+      font-size: 12px;
+      color: var(--color-muted);
+      margin-top: 16px;
+      border-top: 1px solid var(--color-rule);
+      padding-top: 12px;
+    }
+
+    .TK4R1-source a {
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+
+    .TK4R1-source a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="TK4R1-chart-frame">
+    <div class="TK4R1-chart-container">
+      <div class="TK4R1-chart-header">
+        <div class="TK4R1-chart-header-text">
+          <p class="TK4R1-eyebrow">Market Capitalization Comparison</p>
+          <h2 class="TK4R1-chart-title">TCS vs. Indian IT Peers (1999–2026)</h2>
+          <p class="TK4R1-chart-subtitle">Market capitalization trajectory in ₹ Trillion (Entry points marked by solid dots)</p>
+        </div>
+        <div class="TK4R1-legend" id="TK4R1-legend"></div>
+      </div>
+      <div id="TK4R1-chart"></div>
+      <p class="TK4R1-source">Data Source: <a href="https://companiesmarketcap.com/inr/tata-consultancy-services/marketcap/" target="_blank">CompaniesMarketCap</a></p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const years = ["1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"];
+
+      const rawData = {
+        "TCS": [0.949, 0.570, 0.396, 0.442, 0.575, 0.809, 0.999, 1.202, 1.054, 0.468, 1.468, 2.281, 2.267, 2.457, 4.254, 5.010, 4.773, 4.662, 5.153, 7.103, 8.111, 10.742, 13.828, 11.917, 13.737, 15.138, 11.859, 8.394],
+        "Infosys": [null, 0.544, 0.410, 0.374, 0.511, 0.750, 0.764, 1.348, 1.006, 0.631, 1.481, 1.965, 1.576, 1.324, 1.990, 2.253, 2.525, 2.310, 2.268, 2.864, 3.089, 5.305, 7.911, 6.278, 6.403, 7.987, 6.823, 4.627],
+        "Wipro": [null, null, null, null, null, null, 0.172, 1.029, 0.764, 0.337, 0.993, 1.201, 0.976, 0.971, 1.376, 1.365, 1.373, 1.145, 1.405, 1.486, 1.400, 2.189, 3.908, 2.139, 2.447, 3.274, 2.765, 1.682],
+        "HCLTech": [null, null, null, null, null, null, null, 0.209, 0.219, 0.077, 0.249, 0.310, 0.267, 0.429, 0.880, 1.121, 1.202, 1.168, 1.235, 1.307, 1.541, 2.567, 3.579, 2.820, 3.973, 5.148, 4.496, 3.392],
+        "Tech Mahindra": [null, null, null, null, null, null, null, 0.188, 0.137, 0.030, 0.121, 0.086, 0.072, 0.119, 0.429, 0.622, 0.502, 0.473, 0.493, 0.708, 0.736, 0.941, 1.737, 0.990, 1.122, 1.508, 1.409, 1.377],
+        "LTIMindtree": [null, null, null, null, null, null, null, 0.012, 0.014, 0.004, 0.011, 0.017, 0.013, 0.020, 0.039, 0.067, 0.051, 0.115, 0.191, 0.299, 0.304, 0.639, 1.284, 1.289, 1.864, 1.689, 1.787, 1.335],
+        "Persistent Systems": [null, null, null, null, null, null, null, null, 0.051, 0.033, 0.152, 0.012, 0.011, 0.014, 0.022, 0.023, 0.035, 0.049, 0.057, 0.050, 0.052, 0.116, 0.375, 0.296, 0.558, 0.984, 0.980, 0.853],
+        "Coforge": [null, null, null, null, null, null, null, null, null, null, null, 0.141, 0.063, 0.081, 0.092, 0.081, 0.105, 0.119, 0.140, 0.189, 0.172, 0.288, 0.358, 0.237, 0.387, 0.635, 0.560, 0.793],
+        "Mphasis": [null, null, null, null, null, null, null, 0.049, 0.040, 0.026, 0.105, 0.081, 0.092, 0.081, 0.063, 0.141, 0.152, 0.033, 0.051, 0.049, 0.035, 0.023, 0.022, 0.014, 0.011, 0.012, 0.011, 0.441]
+      };
+
+      // TCS stands out with vibrant primary color, others receive muted pastel tones
+      const companyColors = {
+        "TCS": "#1d4ed8",               // Vibrant Standout Blue
+        "Infosys": "#fda4af",           // Pastel Rose
+        "Wipro": "#cbd5e1",             // Pastel Slate / Grey
+        "HCLTech": "#fde047",           // Pastel Soft Yellow
+        "Tech Mahindra": "#c084fc",     // Pastel Soft Purple
+        "LTIMindtree": "#86efac",       // Pastel Soft Mint
+        "Persistent Systems": "#f9a8d4", // Pastel Soft Pink
+        "Coforge": "#93c5fd",            // Pastel Light Blue
+        "Mphasis": "#d9f99d"            // Pastel Lime
+      };
+
+      const companies = Object.keys(rawData);
+      const legendDom = document.getElementById('TK4R1-legend');
+      const chartDom = document.getElementById('TK4R1-chart');
+      const myChart = echarts.init(chartDom);
+
+      const series = companies.map((comp) => {
+        const seriesData = rawData[comp];
+        const firstValidIndex = seriesData.findIndex(val => val !== null);
+        const color = companyColors[comp];
+        const isTCS = comp === "TCS";
+
+        const seriesObj = {
+          name: comp,
+          type: 'line',
+          smooth: 0.2,
+          symbol: 'circle',
+          symbolSize: 6,
+          showSymbol: false,
+          z: isTCS ? 10 : 2, // Ensure TCS draws on top of all other lines
+          lineStyle: { 
+            width: isTCS ? 4 : 2,
+            opacity: isTCS ? 1 : 0.85
+          },
+          data: seriesData,
+          color: color
+        };
+
+        // Add a clean solid circle marker at the starting data point (if starting after 1999)
+        if (firstValidIndex > 0) {
+          const startYear = years[firstValidIndex];
+          const startVal = seriesData[firstValidIndex];
+
+          seriesObj.markPoint = {
+            symbol: 'circle',
+            symbolSize: 10,
+            silent: true,
+            itemStyle: {
+              color: color,
+              borderColor: '#ffffff',
+              borderWidth: 1.5,
+              shadowBlur: 2,
+              shadowColor: 'rgba(0,0,0,0.1)'
+            },
+            label: {
+              show: false // No text label/number inside
+            },
+            data: [
+              {
+                coord: [startYear, startVal]
+              }
+            ]
+          };
+        }
+
+        return seriesObj;
+      });
+
+      const option = {
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: '#ffffff',
+          borderColor: '#e2e8f0',
+          borderWidth: 1,
+          textStyle: { color: '#1a202c', fontFamily: 'Archivo', fontSize: 12 },
+          valueFormatter: (value) => value !== null && value !== undefined ? `₹ ${value.toFixed(3)} Trillion` : '-'
+        },
+        grid: {
+          left: '0%',
+          right: '3%',
+          bottom: '0%',
+          top: '5%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'category',
+          data: years,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#94a3b8' } },
+          axisTick: { alignWithLabel: true },
+          axisLabel: {
+            fontFamily: 'IBM Plex Mono',
+            fontSize: 11,
+            color: '#64748b'
+          }
+        },
+        yAxis: {
+          type: 'value',
+          name: '₹ Trillion',
+          nameTextStyle: {
+            fontFamily: 'Archivo',
+            color: '#64748b',
+            align: 'right'
+          },
+          splitLine: { lineStyle: { color: '#edf2f7', type: 'dashed' } },
+          axisLabel: {
+            fontFamily: 'IBM Plex Mono',
+            fontSize: 11,
+            color: '#64748b',
+            formatter: '{value}'
+          }
+        },
+        legend: {
+          data: companies,
+          show: false
+        },
+        series: series
+      };
+
+      myChart.setOption(option);
+
+      // Custom Legend Setup
+      function buildCustomLegend() {
+        legendDom.innerHTML = '';
+        companies.forEach((comp) => {
+          const item = document.createElement('div');
+          item.className = 'TK4R1-legend-item';
+          
+          const dot = document.createElement('span');
+          dot.className = 'TK4R1-legend-dot';
+          dot.style.backgroundColor = companyColors[comp];
+
+          const label = document.createElement('span');
+          label.innerText = comp;
+          if (comp === "TCS") {
+            label.style.fontWeight = "600";
+          }
+
+          item.appendChild(dot);
+          item.appendChild(label);
+
+          item.addEventListener('click', () => {
+            myChart.dispatchAction({
+              type: 'legendToggleSelect',
+              name: comp
+            });
+          });
+
+          legendDom.appendChild(item);
+        });
+      }
+
+      buildCustomLegend();
+
+      myChart.on('legendselectchanged', function (params) {
+        const items = legendDom.querySelectorAll('.TK4R1-legend-item');
+        companies.forEach((comp, idx) => {
+          if (items[idx]) {
+            items[idx].classList.toggle('is-inactive', !params.selected[comp]);
+          }
+        });
+      });
+
+      window.addEventListener('resize', () => {
+        myChart.resize();
+      });
+    });
+  </script>
+</body>
+</html>

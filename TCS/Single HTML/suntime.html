@@ -1,0 +1,2099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCS Global Expansion Story</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            /* Warm paper tones — the backdrop gradient. Kept light and
+               desaturated across all beats so dark ink text always reads. */
+            --mood-1: #f7f2e8;
+            --mood-2: #efe7d7;
+            --mood-3: #e6dcc7;
+            --ink:        #211e19;   /* headlines */
+            --ink-soft:   #4a453c;   /* body copy */
+            --ink-muted:  #8a8172;   /* kickers, captions */
+            --rule:       #d8cebb;   /* hairlines */
+            --accent:     #a8631f;   /* editorial rust/gold */
+        }
+
+        body {
+            font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
+            background-color: #efe7d7;
+            color: var(--ink-soft);
+            overflow-x: hidden;
+        }
+
+        /* Fixed atmosphere layer behind the pinned scene — its gradient stops
+           are CSS variables animated per-story-beat (see the GSAP timeline) so
+           the whole page's mood shifts in sync with the globe and lighting. */
+        .mood-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: radial-gradient(140% 120% at 78% 20%, var(--mood-1) 0%, var(--mood-2) 55%, var(--mood-3) 100%);
+        }
+
+        /* Fixed Viewport Pin */
+        .pin-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Fixed 3D Canvas Container */
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Text Boxes Container */
+        .text-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* No card — the copy sits straight on the paper, like a print spread.
+           A hairline rule above the kicker does the framing instead. */
+        .content-box {
+            position: absolute;
+            padding: 0;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .content-box::before {
+            content: '';
+            display: block;
+            width: 56px;
+            height: 1px;
+            background: var(--ink);
+            margin-bottom: 22px;
+            opacity: 0.8;
+        }
+
+        #box-3::before { margin-left: auto; margin-right: auto; }
+
+        /* Dialogue 1 on the left, Dialogue 2 on the right — the globe swaps
+           sides between them (see the GSAP timeline), so the composition
+           mirrors itself instead of the card and globe overlapping. */
+        #box-1, #box-2 {
+            top: 50%;
+            transform: translateY(-50%);
+            max-width: 430px;
+        }
+
+        #box-1 { left: 7%; }
+        #box-2 { right: 7%; }
+
+        /* Closing beat, set at the bottom like a pull-quote / standfirst */
+        #box-3 {
+            bottom: 6vh;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 720px;
+            text-align: center;
+        }
+
+        /* Kicker / section marker — small-caps sans, the one bit of sans-serif */
+        .eyebrow {
+            display: block;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            color: var(--ink-muted);
+            margin-bottom: 18px;
+        }
+
+        h2 {
+            font-family: 'Fraunces', Georgia, serif;
+            font-optical-sizing: auto;
+            font-size: clamp(2.2rem, 3.4vw, 3.1rem);
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            line-height: 1.06;
+            color: var(--ink);
+            margin-bottom: 1.1rem;
+        }
+
+        .word-mask {
+            display: inline-block;
+            overflow: hidden;
+            vertical-align: top;
+            padding-bottom: 0.1em;
+            margin-bottom: -0.1em;
+        }
+
+        .word {
+            display: inline-block;
+            will-change: transform;
+        }
+
+        p {
+            font-family: 'Newsreader', Georgia, serif;
+            font-size: 1.16rem;
+            font-weight: 400;
+            line-height: 1.62;
+            color: var(--ink-soft);
+            max-width: 42ch;
+        }
+
+        #box-3 p { max-width: 60ch; margin: 0 auto; }
+
+        /* Quiet, print-style prompt — no button, just tracked caps with a rule */
+        .drag-hint {
+            display: inline-block;
+            margin-top: 26px;
+            padding-top: 14px;
+            border-top: 1px solid var(--rule);
+            color: var(--ink-muted);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+        .drag-hint::after {
+            content: ' \2192';
+            color: var(--accent);
+        }
+
+        /* Map annotations styled like print captions: tracked small-caps ink
+           on a barely-there paper halo, with a small accent tick as the marker. */
+        .city-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(243, 238, 228, 0.7);
+            backdrop-filter: blur(2px);
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 2px;
+            border: none;
+            box-shadow: none;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.45s ease, transform 0.45s cubic-bezier(.2, .9, .3, 1.3), color 0.25s ease;
+            transform: translateY(6px);
+        }
+
+        .city-label .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: none;
+            flex: none;
+        }
+
+        .city-label.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Suppressed when the marker's screen position would fall behind the
+           active copy column, so it can't read as overlapping text
+           (see updateLabelOcclusion in the script). */
+        .city-label.behind-panel {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(6px);
+        }
+
+        .city-label.red .dot {
+            background: #b5451f;
+        }
+
+        .city-label.clickable {
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .city-label.clickable:hover {
+            color: var(--accent);
+        }
+
+        .city-label.red.clickable:hover {
+            color: #b5451f;
+        }
+
+        /* Office markers (added TCS location data) get a distinct teal dot
+           so they read as a different layer from the narrative rust/red pins. */
+        .city-label.office .dot {
+            background: #3d7a63;
+        }
+
+        .city-label.office.clickable:hover {
+            color: #3d7a63;
+        }
+
+        /* Hover-to-reveal markers: once a label is both revealed for this
+           story beat AND free exploration has unlocked (".clickable"), its
+           name text collapses away by default — only the accent dot stays
+           on screen — and expands back in on hover. The dot needs a bit of
+           surrounding padding so it stays an easy, generous hover target
+           even while collapsed. */
+        .city-label.hover-reveal {
+            padding: 4px;
+            gap: 0;
+        }
+
+        .city-label.hover-reveal .label-text {
+            display: inline-block;
+            max-width: 0;
+            opacity: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            transition: max-width 0.28s ease, opacity 0.18s ease, margin 0.28s ease;
+        }
+
+        .city-label.hover-reveal.clickable:hover {
+            background: rgba(243, 238, 228, 0.85);
+            padding: 4px 10px;
+            gap: 8px;
+        }
+
+        .city-label.hover-reveal.clickable:hover .label-text {
+            max-width: 240px;
+            opacity: 1;
+        }
+
+        /* Final-stage layout: once free exploration unlocks, the globe's
+           canvas hands over its right-hand portion of the viewport to the
+           always-on office directory sidebar (see #office-sidebar below and
+           the ScrollTrigger onUpdate in the script, which toggles this class
+           on <body> at the same moment markers become clickable). */
+        #canvas-container {
+            transition: width 0.6s cubic-bezier(.2, .9, .3, 1);
+        }
+
+        body.stage-final #canvas-container {
+            width: calc(100% - 400px);
+        }
+
+        body.stage-final #box-3 {
+            left: calc((100% - 400px) / 2);
+        }
+
+        @media (max-width: 860px) {
+            body.stage-final #canvas-container {
+                width: 100%;
+                height: 58vh;
+            }
+            body.stage-final #box-3 {
+                left: 50%;
+            }
+        }
+
+        /* Office directory sidebar — a persistent right-hand column shown
+           only during the final, freely-explorable stage. It always keeps
+           its shape; only its contents change as different country markers
+           are clicked. */
+        .office-sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 400px;
+            max-width: 100vw;
+            height: 100vh;
+            background: rgba(247, 242, 232, 0.98);
+            border-left: 1px solid var(--rule);
+            box-shadow: -18px 0 40px rgba(33, 30, 25, 0.08);
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(24px);
+            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(.2, .9, .3, 1.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 860px) {
+            .office-sidebar {
+                top: auto;
+                bottom: 0;
+                width: 100%;
+                max-width: 100%;
+                height: 42vh;
+                border-left: none;
+                border-top: 1px solid var(--rule);
+                box-shadow: 0 -18px 40px rgba(33, 30, 25, 0.08);
+                transform: translateY(24px);
+            }
+        }
+
+        body.stage-final .office-sidebar {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0);
+        }
+
+        @media (max-width: 860px) {
+            body.stage-final .office-sidebar {
+                transform: translateY(0);
+            }
+        }
+
+        .sidebar-header {
+            flex: none;
+            padding: 40px 32px 22px;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .sidebar-eyebrow {
+            display: block;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.66rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--ink-muted);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-country {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 1.55rem;
+            font-weight: 600;
+            color: var(--ink);
+            letter-spacing: -0.01em;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-badge {
+            display: inline-block;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #3d7a63;
+            background: rgba(61, 122, 99, 0.12);
+            padding: 3px 8px;
+            border-radius: 2px;
+        }
+
+        .sidebar-badge.warn {
+            color: var(--accent);
+            background: rgba(168, 99, 31, 0.12);
+        }
+
+        .sidebar-badge.empty {
+            display: none;
+        }
+
+        .sidebar-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 32px 40px;
+        }
+
+        .sidebar-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-list::-webkit-scrollbar-thumb {
+            background: var(--rule);
+            border-radius: 3px;
+        }
+
+        .sidebar-empty {
+            font-family: 'Newsreader', Georgia, serif;
+            font-style: italic;
+            font-size: 0.98rem;
+            color: var(--ink-muted);
+            padding-top: 28px;
+            max-width: none;
+        }
+
+        .sidebar-office-item {
+            padding: 18px 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .sidebar-office-item:last-child {
+            border-bottom: none;
+        }
+
+        .sidebar-office-city {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.64rem;
+            font-weight: 600;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--ink-muted);
+            margin-bottom: 5px;
+        }
+
+        .sidebar-office-name {
+            font-family: 'Newsreader', Georgia, serif;
+            font-size: 1.02rem;
+            font-weight: 500;
+            color: var(--ink);
+            line-height: 1.32;
+            margin-bottom: 5px;
+            max-width: none;
+        }
+
+        .sidebar-office-address {
+            font-family: 'Newsreader', Georgia, serif;
+            font-size: 0.88rem;
+            color: var(--ink-soft);
+            line-height: 1.5;
+            max-width: none;
+        }
+
+        /* ---------------------------------------------------------------
+           Directory rework: every city is a plain dot on the globe with a
+           hover/active label ("City, Country"), mirrored by a scrollable
+           directory list. Hover and selection stay in sync both ways.
+           --------------------------------------------------------------- */
+
+        /* Hover/active label anchored to a city dot. The CSS2D renderer
+           positions the zero-size .pin-anchor exactly at the dot; the pill
+           itself is absolutely placed just above it, so it always floats
+           over the dot regardless of camera angle. */
+        .pin-anchor {
+            position: relative;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+        }
+
+        .pin-label {
+            position: absolute;
+            left: 0;
+            bottom: 11px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            white-space: nowrap;
+            background: rgba(247, 242, 232, 0.96);
+            backdrop-filter: blur(3px);
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.66rem;
+            font-weight: 600;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+            padding: 5px 10px;
+            border-radius: 3px;
+            border: 1px solid var(--rule);
+            box-shadow: 0 8px 20px rgba(33, 30, 25, 0.16);
+            opacity: 0;
+            transform: translate(-50%, 6px);
+            transition: opacity 0.18s ease, transform 0.18s cubic-bezier(.2, .9, .3, 1.3);
+        }
+
+        .pin-label.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
+        .pin-label .pin-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex: none;
+        }
+
+        .pin-label.active .pin-dot {
+            background: #b5451f;
+        }
+
+        /* Header extras */
+        .sidebar-title {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--ink);
+            letter-spacing: -0.01em;
+            line-height: 1.1;
+            margin-bottom: 6px;
+        }
+
+        .sidebar-sub {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            color: var(--ink-muted);
+            margin-bottom: 16px;
+        }
+
+        .sidebar-search {
+            width: 100%;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.82rem;
+            color: var(--ink);
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--rule);
+            border-radius: 4px;
+            padding: 9px 12px;
+            outline: none;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .sidebar-search::placeholder { color: var(--ink-muted); }
+
+        .sidebar-search:focus {
+            border-color: var(--accent);
+            background: #fff;
+        }
+
+        /* Region filter chips — sit under the search box, narrow the same
+           directory list down to one continent at a time (combined with
+           whatever text is in the search box). */
+        .sidebar-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .filter-chip {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.64rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            background: rgba(255, 255, 255, 0.55);
+            border: 1px solid var(--rule);
+            border-radius: 999px;
+            padding: 5px 11px;
+            cursor: pointer;
+            user-select: none;
+            transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+        }
+
+        .filter-chip:hover {
+            border-color: var(--accent);
+            color: var(--ink);
+        }
+
+        .filter-chip.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fdf9f0;
+        }
+
+        /* Directory groups + city rows */
+        .dir-group { margin-bottom: 6px; }
+
+        .dir-group.hidden { display: none; }
+
+        .dir-country {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: rgba(247, 242, 232, 0.98);
+            padding: 14px 0 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--ink-muted);
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .dir-country .dir-count {
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: var(--ink-muted);
+            opacity: 0.8;
+        }
+
+        .dir-city {
+            display: block;
+            width: 100%;
+            text-align: left;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            padding: 12px 12px;
+            margin: 4px 0;
+            border-radius: 6px;
+            border-left: 2px solid transparent;
+            transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+        }
+
+        .dir-city.hidden { display: none; }
+
+        .dir-city:hover,
+        .dir-city.is-hover {
+            background: rgba(168, 99, 31, 0.07);
+            border-left-color: var(--accent);
+        }
+
+        .dir-city.is-active {
+            background: rgba(181, 69, 31, 0.10);
+            border-left-color: #b5451f;
+        }
+
+        .dir-city-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .dir-city-name {
+            font-family: 'Newsreader', Georgia, serif;
+            font-size: 1.06rem;
+            font-weight: 500;
+            color: var(--ink);
+            line-height: 1.25;
+        }
+
+        .dir-city-meta {
+            flex: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--ink-muted);
+        }
+
+        /* Office details collapse; expand when the city row is active */
+        .dir-offices {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .dir-city.is-active .dir-offices {
+            max-height: 600px;
+        }
+
+        .dir-office {
+            padding: 10px 0 2px;
+            border-top: 1px solid var(--rule);
+            margin-top: 10px;
+        }
+
+        .dir-office:first-child { border-top: none; margin-top: 8px; }
+
+        .dir-office-name {
+            display: block;
+            font-family: 'Newsreader', Georgia, serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--ink);
+            line-height: 1.3;
+            margin-bottom: 3px;
+        }
+
+        .dir-office-addr {
+            display: block;
+            font-family: 'Newsreader', Georgia, serif;
+            font-size: 0.84rem;
+            color: var(--ink-soft);
+            line-height: 1.45;
+        }
+
+        .dir-empty {
+            font-family: 'Newsreader', Georgia, serif;
+            font-style: italic;
+            font-size: 0.98rem;
+            color: var(--ink-muted);
+            padding-top: 24px;
+        }
+
+        #canvas-container { cursor: grab; }
+        body.stage-final #canvas-container.dot-hover { cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="mood-bg"></div>
+
+    <div class="pin-wrapper">
+        <div id="canvas-container"></div>
+
+        <div class="text-overlay">
+            <div class="content-box" id="box-1">
+                <div class="eyebrow">Part One &middot; New York</div>
+                <h2><span class="word-mask"><span class="word">The</span></span> <span class="word-mask"><span class="word">24/7</span></span> <span class="word-mask"><span class="word">Advantage</span></span></h2>
+                <p>With clients in New York, S Ramadorai and TCS realised that the time zone difference was an advantage. It was possible to work 24 hours a day, 7 days a week.</p>
+            </div>
+
+            <div class="content-box" id="box-2">
+                <div class="eyebrow">Part Two &middot; Bombay</div>
+                <h2><span class="word-mask"><span class="word">Follow</span></span> <span class="word-mask"><span class="word">the</span></span> <span class="word-mask"><span class="word">Sun</span></span></h2>
+                <p>This led to the offshore-onshore method: TCS engineers in India work while the US sleeps. The team could &ldquo;follow the sun&rdquo; and work round the clock, like a mainframe that never shuts down.</p>
+            </div>
+
+            <div class="content-box" id="box-3">
+                <div class="eyebrow">Part Three &middot; The World</div>
+                <h2><span class="word-mask"><span class="word">A</span></span> <span class="word-mask"><span class="word">Global</span></span> <span class="word-mask"><span class="word">Footprint</span></span></h2>
+                <p>TCS&rsquo;s team on the IGIC contract grew to 300&ndash;400 over ten years. Its way of working was to build close, long-term relationships with clients &mdash; learning their countries, cultures, markets and products. Its work for American Express alone took TCS to Arizona, Florida, Argentina, the United Kingdom, Australia and Yugoslavia.</p>
+                <div class="drag-hint">Drag or tap a marker to explore</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Office directory sidebar — always present during the final,
+         freely-explorable stage (toggled via body.stage-final in the
+         script). It lists every city once and stays in sync with the globe:
+         hovering/clicking a row highlights and flies to the matching dot, and
+         hovering/clicking a dot highlights (and scrolls to) its row. A search
+         box filters the list. Sits outside the pinned wrapper since it's a
+         fixed overlay, not part of the scroll. -->
+    <div class="office-sidebar" id="office-sidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-eyebrow">Global Office Directory</span>
+            <div class="sidebar-title">Explore every location</div>
+            <div class="sidebar-sub" id="sidebar-sub">Loading&hellip;</div>
+            <input id="sidebar-search" class="sidebar-search" type="text" placeholder="Search city, country or office&hellip;" autocomplete="off" spellcheck="false">
+            <div class="sidebar-filters" id="sidebar-filters">
+                <span class="filter-chip active" data-region="all">All</span>
+                <span class="filter-chip" data-region="asia">Asia</span>
+                <span class="filter-chip" data-region="north-america">North America</span>
+                <span class="filter-chip" data-region="south-america">South America</span>
+                <span class="filter-chip" data-region="europe">Europe</span>
+                <span class="filter-chip" data-region="oceania">Oceania</span>
+            </div>
+        </div>
+        <div class="sidebar-list" id="sidebar-list"></div>
+    </div>
+
+    <!-- Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS2DRenderer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- Precomputed land-dot coordinates (lat*10, lon*10 int pairs),
+         generated from a real land/ocean mask so continents line up
+         with the city pins. -->
+    <script>
+        const LAND_DOTS = [-840,-1800,-840,-1700,-840,-1600,-840,-1500,-840,-1400,-840,-1300,-840,-1200,-840,-1100,-840,-1000,-840,-900,-840,-800,-840,-700,-840,-600,-840,-500,-840,-400,-840,-300,-840,-200,-840,-100,-840,0,-840,100,-840,200,-840,300,-840,400,-840,500,-840,600,-840,700,-840,800,-840,900,-840,1000,-840,1100,-840,1200,-840,1300,-840,1400,-840,1500,-840,1600,-840,1700,-828,-1753,-828,-1658,-828,-1563,-828,-1468,-828,-1374,-828,-1279,-828,-1184,-828,-1089,-828,-995,-828,-900,-828,-805,-828,-711,-828,-616,-828,-521,-828,-426,-828,-332,-828,-237,-828,-142,-828,-47,-828,47,-828,142,-828,237,-828,332,-828,426,-828,521,-828,616,-828,711,-828,805,-828,900,-828,995,-828,1089,-828,1184,-828,1279,-828,1374,-828,1468,-828,1563,-828,1658,-828,1753,-816,-1800,-816,-1718,-816,-1636,-816,-1555,-816,-1473,-816,-1391,-816,-1309,-816,-1227,-816,-1145,-816,-1064,-816,-982,-816,-900,-816,-818,-816,-736,-816,-655,-816,-573,-816,-491,-816,-409,-816,-327,-816,-245,-816,-164,-816,-82,-816,0,-816,82,-816,164,-816,245,-816,327,-816,409,-816,491,-816,573,-816,655,-816,736,-816,818,-816,900,-816,982,-816,1064,-816,1145,-816,1227,-816,1309,-816,1391,-816,1473,-816,1555,-816,1636,-816,1718,-804,-1764,-804,-1692,-804,-1620,-804,-1548,-804,-1476,-804,-1404,-804,-1332,-804,-1260,-804,-1188,-804,-1116,-804,-1044,-804,-972,-804,-900,-804,-828,-804,-756,-804,-684,-804,-612,-804,-540,-804,-468,-804,-396,-804,-324,-804,-252,-804,-180,-804,-108,-804,-36,-804,36,-804,108,-804,180,-804,252,-804,324,-804,396,-804,468,-804,540,-804,612,-804,684,-804,756,-804,828,-804,900,-804,972,-804,1044,-804,1116,-804,1188,-804,1260,-804,1332,-804,1404,-804,1476,-804,1548,-804,1620,-804,1692,-804,1764,-792,-1800,-792,-1736,-792,-1671,-792,-1607,-792,-1543,-792,-1479,-792,-1414,-792,-1350,-792,-1286,-792,-1221,-792,-1157,-792,-1093,-792,-1029,-792,-964,-792,-900,-792,-836,-792,-771,-792,-707,-792,-643,-792,-579,-792,-514,-792,-450,-792,-386,-792,-321,-792,-257,-792,-193,-792,-129,-792,-64,-792,0,-792,64,-792,129,-792,193,-792,257,-792,321,-792,386,-792,450,-792,514,-792,579,-792,643,-792,707,-792,771,-792,836,-792,900,-792,964,-792,1029,-792,1093,-792,1157,-792,1221,-792,1286,-792,1350,-792,1414,-792,1479,-792,1543,-792,1607,-792,1671,-792,1736,-780,-1597,-780,-1539,-780,-1481,-780,-1423,-780,-1365,-780,-1306,-780,-1248,-780,-1190,-780,-1132,-780,-1074,-780,-1016,-780,-958,-780,-900,-780,-842,-780,-784,-780,-726,-780,-668,-780,-610,-780,-552,-780,-494,-780,-435,-780,-377,-780,-319,-780,-261,-780,-203,-780,-145,-780,-87,-780,-29,-780,29,-780,87,-780,145,-780,203,-780,261,-780,319,-780,377,-780,435,-780,494,-780,552,-780,610,-780,668,-780,726,-780,784,-780,842,-780,900,-780,958,-780,1016,-780,1074,-780,1132,-780,1190,-780,1248,-780,1306,-780,1365,-780,1423,-780,1481,-780,1539,-780,1597,-780,1655,-780,1713,-780,1771,-768,-1487,-768,-1435,-768,-1383,-768,-1330,-768,-1278,-768,-1226,-768,-1174,-768,-1122,-768,-1070,-768,-1017,-768,-965,-768,-913,-768,-861,-768,-809,-768,-757,-768,-704,-768,-652,-768,-600,-768,-548,-768,-287,-768,-235,-768,-183,-768,-130,-768,-78,-768,-26,-768,26,-768,78,-768,130,-768,183,-768,235,-768,287,-768,339,-768,391,-768,443,-768,496,-768,548,-768,600,-768,652,-768,704,-768,757,-768,809,-768,861,-768,913,-768,965,-768,1017,-768,1070,-768,1122,-768,1174,-768,1226,-768,1278,-768,1330,-768,1383,-768,1435,-768,1487,-768,1539,-768,1591,-756,-1440,-756,-1392,-756,-1344,-756,-1296,-756,-1248,-756,-1200,-756,-1152,-756,-1104,-756,-1056,-756,-1008,-756,-960,-756,-912,-756,-864,-756,-816,-756,-768,-756,-720,-756,-672,-756,-624,-756,-240,-756,-192,-756,-144,-756,-96,-756,-48,-756,0,-756,48,-756,96,-756,144,-756,192,-756,240,-756,288,-756,336,-756,384,-756,432,-756,480,-756,528,-756,576,-756,624,-756,672,-756,720,-756,768,-756,816,-756,864,-756,912,-756,960,-756,1008,-756,1056,-756,1104,-756,1152,-756,1200,-756,1248,-756,1296,-756,1344,-756,1392,-756,1440,-756,1488,-756,1536,-756,1584,-756,1632,-744,-1311,-744,-1267,-744,-1222,-744,-1178,-744,-1133,-744,-1000,-744,-956,-744,-911,-744,-867,-744,-822,-744,-778,-744,-733,-744,-689,-744,-644,-744,-200,-744,-156,-744,-111,-744,-67,-744,-22,-744,22,-744,67,-744,111,-744,156,-744,200,-744,244,-744,289,-744,333,-744,378,-744,422,-744,467,-744,511,-744,556,-744,600,-744,644,-744,689,-744,733,-744,778,-744,822,-744,867,-744,911,-744,956,-744,1000,-744,1044,-744,1089,-744,1133,-744,1178,-744,1222,-744,1267,-744,1311,-744,1356,-744,1400,-744,1444,-744,1489,-744,1533,-744,1578,-744,1622,-732,-1034,-732,-993,-732,-952,-732,-910,-732,-869,-732,-786,-732,-745,-732,-703,-732,-662,-732,-621,-732,-166,-732,-124,-732,-83,-732,-41,-732,0,-732,41,-732,83,-732,124,-732,166,-732,207,-732,248,-732,290,-732,331,-732,372,-732,414,-732,455,-732,497,-732,538,-732,579,-732,621,-732,662,-732,703,-732,745,-732,786,-732,828,-732,869,-732,910,-732,952,-732,993,-732,1034,-732,1076,-732,1117,-732,1159,-732,1200,-732,1241,-732,1283,-732,1324,-732,1366,-732,1407,-732,1448,-732,1490,-732,1531,-732,1572,-732,1614,-732,1655,-732,1697,-720,-987,-720,-716,-720,-677,-720,-639,-720,-135,-720,-97,-720,-58,-720,-19,-720,19,-720,58,-720,97,-720,135,-720,174,-720,213,-720,252,-720,290,-720,329,-720,368,-720,406,-720,445,-720,484,-720,523,-720,561,-720,600,-720,639,-720,677,-720,716,-720,755,-720,794,-720,832,-720,871,-720,910,-720,948,-720,987,-720,1026,-720,1065,-720,1103,-720,1142,-720,1181,-720,1219,-720,1258,-720,1297,-720,1335,-720,1374,-720,1413,-720,1452,-720,1490,-720,1529,-720,1568,-720,1606,-720,1645,-720,1684,-708,-727,-708,-691,-708,-655,-708,-618,-708,-109,-708,-73,-708,-36,-708,0,-708,36,-708,73,-708,109,-708,145,-708,182,-708,218,-708,255,-708,291,-708,327,-708,364,-708,400,-708,436,-708,473,-708,509,-708,545,-708,582,-708,618,-708,655,-708,691,-708,727,-708,764,-708,800,-708,836,-708,873,-708,909,-708,945,-708,982,-708,1018,-708,1055,-708,1091,-708,1127,-708,1164,-708,1200,-708,1236,-708,1273,-708,1309,-708,1345,-708,1382,-708,1418,-708,1455,-708,1491,-708,1527,-708,1564,-708,1600,-708,1636,-708,1673,-696,-703,-696,-669,-696,-634,-696,154,-696,326,-696,429,-696,463,-696,497,-696,531,-696,566,-696,600,-696,634,-696,669,-696,703,-696,737,-696,771,-696,806,-696,840,-696,874,-696,909,-696,943,-696,977,-696,1011,-696,1046,-696,1080,-696,1114,-696,1149,-696,1183,-696,1217,-696,1251,-696,1286,-696,1320,-696,1354,-696,1389,-696,1423,-696,1457,-696,1491,-696,1526,-696,1560,-696,1594,-684,-671,-684,-638,-684,442,-684,475,-684,507,-684,540,-684,573,-684,605,-684,638,-684,671,-684,704,-684,802,-684,835,-684,867,-684,900,-684,933,-684,965,-684,998,-684,1031,-684,1064,-684,1096,-684,1129,-684,1162,-684,1195,-684,1227,-684,1260,-684,1293,-684,1325,-684,1358,-684,1391,-684,1424,-684,1456,-684,1489,-684,1522,-672,-683,-672,-652,-672,-621,-672,466,-672,497,-672,528,-672,559,-672,590,-672,838,-672,869,-672,900,-672,931,-672,962,-672,993,-672,1024,-672,1055,-672,1086,-672,1117,-672,1148,-672,1179,-672,1210,-672,1241,-672,1272,-672,1303,-672,1334,-672,1366,-672,1397,-672,1428,-660,-634,-660,546,-660,959,-660,989,-660,1018,-660,1136,-648,-619,-636,-568,-624,-583,-552,-705,-552,-684,-540,-726,-540,-706,-540,-685,-528,-726,-528,-706,-528,-686,-516,-726,-516,-706,-516,-590,-504,-745,-504,-726,-504,-707,-504,-688,-492,-744,-492,-726,-492,-707,-492,-689,-492,689,-480,-743,-480,-725,-480,-707,-480,-690,-480,-672,-468,-755,-468,-738,-468,-720,-468,-702,-468,-685,-468,1686,-456,-737,-456,-720,-456,-703,-456,-686,-456,1680,-456,1697,-444,-732,-444,-715,-444,-698,-444,-681,-444,-664,-444,1691,-444,1707,-432,-732,-432,-715,-432,-699,-432,-682,-432,-666,-432,-649,-432,1471,-432,1718,-420,-743,-420,-726,-420,-710,-420,-694,-420,-678,-420,-662,-420,1453,-420,1469,-420,1485,-420,1727,-408,-737,-408,-722,-408,-706,-408,-690,-408,-674,-408,-658,-408,-642,-408,-626,-408,1451,-408,1483,-408,1721,-408,1752,-396,-732,-396,-717,-396,-701,-396,-686,-396,-670,-396,-655,-396,-639,-396,-623,-396,1745,-396,1761,-384,-728,-384,-712,-384,-697,-384,-682,-384,-666,-384,-651,-384,-636,-384,-620,-384,-605,-384,-590,-384,1417,-384,1432,-384,1448,-384,1463,-384,1754,-384,1769,-384,1785,-372,-738,-372,-723,-372,-708,-372,-693,-372,-678,-372,-663,-372,-648,-372,-633,-372,-618,-372,-603,-372,-587,-372,-572,-372,1401,-372,1416,-372,1431,-372,1446,-372,1461,-372,1476,-372,1491,-372,1747,-372,1762,-360,-719,-360,-704,-360,-689,-360,-674,-360,-659,-360,-644,-360,-630,-360,-615,-360,-600,-360,-585,-360,1370,-360,1400,-360,1415,-360,1430,-360,1444,-360,1459,-360,1474,-360,1489,-360,1504,-360,1741,-348,-710,-348,-695,-348,-680,-348,-666,-348,-651,-348,-637,-348,-622,-348,-607,-348,-593,-348,-578,-348,-563,-348,-549,-348,198,-348,1163,-348,1178,-348,1354,-348,1398,-348,1412,-348,1427,-348,1441,-348,1456,-348,1471,-348,1485,-348,1500,-348,1734,-336,-706,-336,-691,-336,-677,-336,-662,-336,-648,-336,-634,-336,-619,-336,-605,-336,-590,-336,-576,-336,-562,-336,-547,-336,-533,-336,187,-336,202,-336,216,-336,230,-336,245,-336,259,-336,1152,-336,1166,-336,1181,-336,1195,-336,1210,-336,1224,-336,1238,-336,1354,-336,1368,-336,1382,-336,1397,-336,1411,-336,1426,-336,1440,-336,1454,-336,1469,-336,1483,-336,1498,-336,1512,-324,-711,-324,-697,-324,-683,-324,-669,-324,-655,-324,-640,-324,-626,-324,-612,-324,-598,-324,-583,-324,-569,-324,-555,-324,-541,-324,-526,-324,185,-324,199,-324,213,-324,228,-324,242,-324,256,-324,270,-324,285,-324,1167,-324,1181,-324,1195,-324,1209,-324,1224,-324,1238,-324,1252,-324,1266,-324,1338,-324,1352,-324,1366,-324,1380,-324,1394,-324,1409,-324,1423,-324,1437,-324,1451,-324,1466,-324,1480,-324,1494,-324,1508,-324,1523,-312,-707,-312,-693,-312,-679,-312,-665,-312,-651,-312,-637,-312,-623,-312,-609,-312,-595,-312,-581,-312,-567,-312,-553,-312,-539,-312,-525,-312,-511,-312,189,-312,203,-312,217,-312,231,-312,245,-312,259,-312,273,-312,287,-312,301,-312,1156,-312,1170,-312,1184,-312,1198,-312,1212,-312,1226,-312,1240,-312,1254,-312,1268,-312,1282,-312,1296,-312,1310,-312,1324,-312,1338,-312,1352,-312,1366,-312,1380,-312,1394,-312,1408,-312,1422,-312,1436,-312,1450,-312,1464,-312,1478,-312,1492,-312,1506,-312,1520,-300,-713,-300,-699,-300,-685,-300,-672,-300,-658,-300,-644,-300,-630,-300,-616,-300,-602,-300,-588,-300,-575,-300,-561,-300,-547,-300,-533,-300,-519,-300,-505,-300,173,-300,187,-300,201,-300,215,-300,228,-300,242,-300,256,-300,270,-300,284,-300,298,-300,1156,-300,1170,-300,1184,-300,1198,-300,1212,-300,1225,-300,1239,-300,1253,-300,1267,-300,1281,-300,1295,-300,1308,-300,1322,-300,1336,-300,1350,-300,1364,-300,1378,-300,1392,-300,1405,-300,1419,-300,1433,-300,1447,-300,1461,-300,1475,-300,1488,-300,1502,-300,1516,-300,1530,-288,-705,-288,-691,-288,-678,-288,-664,-288,-650,-288,-637,-288,-623,-288,-609,-288,-595,-288,-582,-288,-568,-288,-554,-288,-541,-288,-527,-288,-513,-288,-500,-288,171,-288,185,-288,198,-288,212,-288,226,-288,240,-288,253,-288,267,-288,281,-288,294,-288,308,-288,322,-288,1157,-288,1170,-288,1184,-288,1198,-288,1211,-288,1225,-288,1239,-288,1252,-288,1266,-288,1280,-288,1294,-288,1307,-288,1321,-288,1335,-288,1348,-288,1362,-288,1376,-288,1389,-288,1403,-288,1417,-288,1430,-288,1444,-288,1458,-288,1471,-288,1485,-288,1499,-288,1513,-288,1526,-288,1540,-276,-711,-276,-697,-276,-683,-276,-670,-276,-656,-276,-643,-276,-629,-276,-616,-276,-602,-276,-589,-276,-575,-276,-562,-276,-548,-276,-535,-276,-521,-276,-508,-276,-494,-276,156,-276,169,-276,183,-276,196,-276,210,-276,223,-276,237,-276,250,-276,264,-276,277,-276,291,-276,305,-276,318,-276,1144,-276,1157,-276,1171,-276,1184,-276,1198,-276,1211,-276,1225,-276,1238,-276,1252,-276,1265,-276,1279,-276,1292,-276,1306,-276,1320,-276,1333,-276,1347,-276,1360,-276,1374,-276,1387,-276,1401,-276,1414,-276,1428,-276,1441,-276,1455,-276,1468,-276,1482,-276,1495,-276,1509,-276,1523,-276,1536,-264,-703,-264,-689,-264,-676,-264,-662,-264,-649,-264,-636,-264,-622,-264,-609,-264,-596,-264,-582,-264,-569,-264,-555,-264,-542,-264,-529,-264,-515,-264,-502,-264,-488,-264,154,-264,167,-264,181,-264,194,-264,207,-264,221,-264,234,-264,248,-264,261,-264,274,-264,288,-264,301,-264,314,-264,328,-264,1144,-264,1158,-264,1171,-264,1184,-264,1198,-264,1211,-264,1225,-264,1238,-264,1251,-264,1265,-264,1278,-264,1291,-264,1305,-264,1318,-264,1332,-264,1345,-264,1358,-264,1372,-264,1385,-264,1399,-264,1412,-264,1425,-264,1439,-264,1452,-264,1465,-264,1479,-264,1492,-264,1506,-264,1519,-264,1532,-252,-704,-252,-691,-252,-677,-252,-664,-252,-651,-252,-638,-252,-624,-252,-611,-252,-598,-252,-585,-252,-571,-252,-558,-252,-545,-252,-531,-252,-518,-252,-505,-252,-492,-252,-478,-252,159,-252,173,-252,186,-252,199,-252,213,-252,226,-252,239,-252,252,-252,266,-252,279,-252,292,-252,306,-252,319,-252,332,-252,452,-252,465,-252,1142,-252,1156,-252,1169,-252,1182,-252,1196,-252,1209,-252,1222,-252,1235,-252,1249,-252,1262,-252,1275,-252,1289,-252,1302,-252,1315,-252,1328,-252,1342,-252,1355,-252,1368,-252,1382,-252,1395,-252,1408,-252,1421,-252,1435,-252,1448,-252,1461,-252,1475,-252,1488,-252,1501,-252,1514,-252,1528,-240,-696,-240,-683,-240,-670,-240,-657,-240,-644,-240,-631,-240,-618,-240,-604,-240,-591,-240,-578,-240,-565,-240,-552,-240,-539,-240,-526,-240,-512,-240,-499,-240,-486,-240,-473,-240,-460,-240,145,-240,158,-240,171,-240,184,-240,197,-240,210,-240,223,-240,236,-240,250,-240,263,-240,276,-240,289,-240,302,-240,315,-240,328,-240,342,-240,355,-240,447,-240,460,-240,473,-240,1143,-240,1156,-240,1169,-240,1182,-240,1196,-240,1209,-240,1222,-240,1235,-240,1248,-240,1261,-240,1274,-240,1288,-240,1301,-240,1314,-240,1327,-240,1340,-240,1353,-240,1366,-240,1380,-240,1393,-240,1406,-240,1419,-240,1432,-240,1445,-240,1458,-240,1472,-240,1485,-240,1498,-240,1511,-228,-702,-228,-689,-228,-676,-228,-663,-228,-650,-228,-637,-228,-624,-228,-611,-228,-598,-228,-585,-228,-572,-228,-559,-228,-546,-228,-533,-228,-520,-228,-507,-228,-494,-228,-481,-228,-468,-228,-455,-228,-442,-228,-429,-228,156,-228,169,-228,182,-228,195,-228,208,-228,221,-228,234,-228,247,-228,260,-228,273,-228,286,-228,299,-228,312,-228,325,-228,338,-228,351,-228,442,-228,455,-228,468,-228,1144,-228,1157,-228,1170,-228,1183,-228,1196,-228,1209,-228,1222,-228,1235,-228,1248,-228,1261,-228,1274,-228,1287,-228,1300,-228,1313,-228,1326,-228,1339,-228,1352,-228,1365,-228,1378,-228,1391,-228,1404,-228,1417,-228,1430,-228,1443,-228,1456,-228,1469,-228,1482,-228,1495,-228,1508,-216,-690,-216,-677,-216,-665,-216,-652,-216,-639,-216,-626,-216,-613,-216,-600,-216,-587,-216,-574,-216,-561,-216,-548,-216,-535,-216,-523,-216,-510,-216,-497,-216,-484,-216,-471,-216,-458,-216,-445,-216,-432,-216,-419,-216,148,-216,161,-216,174,-216,187,-216,200,-216,213,-216,226,-216,239,-216,252,-216,265,-216,277,-216,290,-216,303,-216,316,-216,329,-216,342,-216,445,-216,458,-216,471,-216,484,-216,1155,-216,1168,-216,1181,-216,1194,-216,1206,-216,1219,-216,1232,-216,1245,-216,1258,-216,1271,-216,1284,-216,1297,-216,1310,-216,1323,-216,1335,-216,1348,-216,1361,-216,1374,-216,1387,-216,1400,-216,1413,-216,1426,-216,1439,-216,1452,-216,1465,-216,1477,-216,1490,-216,1658,-216,1684,-204,-705,-204,-692,-204,-679,-204,-666,-204,-653,-204,-641,-204,-628,-204,-615,-204,-602,-204,-589,-204,-577,-204,-564,-204,-551,-204,-538,-204,-525,-204,-512,-204,-500,-204,-487,-204,-474,-204,-461,-204,-448,-204,-436,-204,-423,-204,-410,-204,141,-204,154,-204,167,-204,179,-204,192,-204,205,-204,218,-204,231,-204,243,-204,256,-204,269,-204,282,-204,295,-204,307,-204,320,-204,333,-204,346,-204,448,-204,461,-204,474,-204,487,-204,577,-204,1191,-204,1204,-204,1217,-204,1230,-204,1243,-204,1256,-204,1268,-204,1281,-204,1294,-204,1307,-204,1320,-204,1332,-204,1345,-204,1358,-204,1371,-204,1384,-204,1396,-204,1409,-204,1422,-204,1435,-204,1448,-204,1460,-204,1473,-204,1486,-192,-693,-192,-681,-192,-668,-192,-655,-192,-642,-192,-630,-192,-617,-192,-604,-192,-592,-192,-579,-192,-566,-192,-553,-192,-541,-192,-528,-192,-515,-192,-502,-192,-490,-192,-477,-192,-464,-192,-452,-192,-439,-192,-426,-192,-413,-192,-401,-192,134,-192,146,-192,159,-192,172,-192,184,-192,197,-192,210,-192,223,-192,235,-192,248,-192,261,-192,273,-192,286,-192,299,-192,312,-192,324,-192,337,-192,350,-192,452,-192,464,-192,477,-192,490,-192,1215,-192,1228,-192,1240,-192,1253,-192,1266,-192,1278,-192,1291,-192,1304,-192,1317,-192,1329,-192,1342,-192,1355,-192,1367,-192,1380,-192,1393,-192,1406,-192,1418,-192,1431,-192,1444,-192,1457,-192,1469,-180,-707,-180,-695,-180,-682,-180,-669,-180,-657,-180,-644,-180,-632,-180,-619,-180,-606,-180,-594,-180,-581,-180,-568,-180,-556,-180,-543,-180,-531,-180,-518,-180,-505,-180,-493,-180,-480,-180,-467,-180,-455,-180,-442,-180,-429,-180,-417,-180,-404,-180,126,-180,139,-180,152,-180,164,-180,177,-180,189,-180,202,-180,215,-180,227,-180,240,-180,253,-180,265,-180,278,-180,291,-180,303,-180,316,-180,328,-180,341,-180,354,-180,366,-180,442,-180,455,-180,467,-180,480,-180,493,-180,1225,-180,1238,-180,1251,-180,1263,-180,1276,-180,1288,-180,1301,-180,1314,-180,1326,-180,1339,-180,1352,-180,1364,-180,1377,-180,1389,-180,1402,-180,1415,-180,1427,-180,1440,-180,1453,-180,1781,-168,-1800,-168,-721,-168,-709,-168,-696,-168,-684,-168,-671,-168,-659,-168,-646,-168,-633,-168,-621,-168,-608,-168,-596,-168,-583,-168,-571,-168,-558,-168,-546,-168,-533,-168,-521,-168,-508,-168,-495,-168,-483,-168,-470,-168,-458,-168,-445,-168,-433,-168,-420,-168,-408,-168,-395,-168,119,-168,132,-168,144,-168,157,-168,169,-168,182,-168,194,-168,207,-168,220,-168,232,-168,245,-168,257,-168,270,-168,282,-168,295,-168,307,-168,320,-168,332,-168,345,-168,357,-168,370,-168,383,-168,395,-168,445,-168,458,-168,470,-168,483,-168,495,-168,1248,-168,1261,-168,1273,-168,1286,-168,1298,-168,1311,-168,1323,-168,1336,-168,1348,-168,1361,-168,1374,-168,1386,-168,1411,-168,1424,-168,1436,-168,1449,-168,1787,-156,-747,-156,-735,-156,-722,-156,-710,-156,-685,-156,-673,-156,-660,-156,-648,-156,-635,-156,-623,-156,-610,-156,-598,-156,-585,-156,-573,-156,-561,-156,-548,-156,-536,-156,-523,-156,-511,-156,-498,-156,-486,-156,-473,-156,-461,-156,-448,-156,-436,-156,-424,-156,-411,-156,-399,-156,125,-156,137,-156,149,-156,162,-156,174,-156,187,-156,199,-156,212,-156,224,-156,237,-156,249,-156,262,-156,274,-156,287,-156,299,-156,311,-156,324,-156,336,-156,349,-156,361,-156,374,-156,386,-156,399,-156,461,-156,473,-156,486,-156,498,-156,1246,-156,1258,-156,1271,-156,1283,-156,1296,-156,1308,-156,1320,-156,1333,-156,1345,-156,1358,-156,1420,-156,1433,-156,1445,-156,1669,-144,-761,-144,-748,-144,-736,-144,-724,-144,-711,-144,-699,-144,-687,-144,-674,-144,-662,-144,-649,-144,-637,-144,-625,-144,-612,-144,-600,-144,-588,-144,-575,-144,-563,-144,-551,-144,-538,-144,-526,-144,-513,-144,-501,-144,-489,-144,-476,-144,-464,-144,-452,-144,-439,-144,-427,-144,-414,-144,-402,-144,-390,-144,130,-144,142,-144,155,-144,167,-144,179,-144,192,-144,204,-144,216,-144,229,-144,241,-144,254,-144,266,-144,278,-144,291,-144,303,-144,315,-144,328,-144,340,-144,353,-144,365,-144,377,-144,390,-144,402,-144,476,-144,489,-144,501,-144,1268,-144,1280,-144,1293,-144,1305,-144,1318,-144,1330,-144,1342,-144,1355,-144,1367,-144,1416,-144,1429,-144,1441,-132,-758,-132,-746,-132,-734,-132,-721,-132,-709,-132,-697,-132,-684,-132,-672,-132,-660,-132,-647,-132,-635,-132,-623,-132,-610,-132,-598,-132,-586,-132,-573,-132,-561,-132,-549,-132,-536,-132,-524,-132,-512,-132,-499,-132,-487,-132,-475,-132,-462,-132,-450,-132,-438,-132,-425,-132,-413,-132,-401,-132,-388,-132,129,-132,142,-132,154,-132,166,-132,179,-132,191,-132,203,-132,216,-132,228,-132,240,-132,253,-132,265,-132,277,-132,290,-132,302,-132,314,-132,327,-132,339,-132,351,-132,364,-132,376,-132,388,-132,401,-132,487,-132,499,-132,1313,-132,1325,-132,1338,-132,1350,-132,1362,-132,1424,-132,1436,-120,-768,-120,-756,-120,-743,-120,-731,-120,-719,-120,-706,-120,-694,-120,-682,-120,-670,-120,-657,-120,-645,-120,-633,-120,-620,-120,-608,-120,-596,-120,-584,-120,-571,-120,-559,-120,-547,-120,-534,-120,-522,-120,-510,-120,-498,-120,-485,-120,-473,-120,-461,-120,-448,-120,-436,-120,-424,-120,-412,-120,-399,-120,-387,-120,141,-120,154,-120,166,-120,178,-120,190,-120,203,-120,215,-120,227,-120,240,-120,252,-120,264,-120,276,-120,289,-120,301,-120,313,-120,326,-120,338,-120,350,-120,362,-120,375,-120,387,-120,399,-120,1333,-120,1345,-120,1358,-120,1419,-120,1431,-108,-781,-108,-769,-108,-757,-108,-744,-108,-732,-108,-720,-108,-708,-108,-696,-108,-683,-108,-671,-108,-659,-108,-647,-108,-635,-108,-622,-108,-610,-108,-598,-108,-586,-108,-574,-108,-561,-108,-549,-108,-537,-108,-525,-108,-513,-108,-500,-108,-488,-108,-476,-108,-464,-108,-452,-108,-439,-108,-427,-108,-415,-108,-403,-108,-391,-108,-378,-108,-366,-108,146,-108,159,-108,171,-108,183,-108,195,-108,207,-108,220,-108,232,-108,244,-108,256,-108,268,-108,281,-108,293,-108,305,-108,317,-108,329,-108,342,-108,354,-108,366,-108,378,-108,391,-108,403,-108,1233,-108,1501,-108,1623,-108,1660,-96,-778,-96,-766,-96,-754,-96,-742,-96,-730,-96,-718,-96,-705,-96,-693,-96,-681,-96,-669,-96,-657,-96,-645,-96,-632,-96,-620,-96,-608,-96,-596,-96,-584,-96,-572,-96,-559,-96,-547,-96,-535,-96,-523,-96,-511,-96,-499,-96,-486,-96,-474,-96,-462,-96,-450,-96,-438,-96,-426,-96,-414,-96,-401,-96,-389,-96,-377,-96,-365,-96,134,-96,146,-96,158,-96,170,-96,182,-96,195,-96,207,-96,219,-96,231,-96,243,-96,255,-96,268,-96,280,-96,292,-96,304,-96,316,-96,328,-96,341,-96,353,-96,365,-96,377,-96,389,-96,1192,-96,1204,-96,1241,-96,1484,-96,1496,-96,1508,-96,1605,-96,1618,-84,-788,-84,-776,-84,-764,-84,-752,-84,-739,-84,-727,-84,-715,-84,-703,-84,-691,-84,-679,-84,-667,-84,-655,-84,-642,-84,-630,-84,-618,-84,-606,-84,-594,-84,-582,-84,-570,-84,-558,-84,-545,-84,-533,-84,-521,-84,-509,-84,-497,-84,-485,-84,-473,-84,-461,-84,-448,-84,-436,-84,-424,-84,-412,-84,-400,-84,-388,-84,-376,-84,-364,-84,-352,-84,133,-84,145,-84,158,-84,170,-84,182,-84,194,-84,206,-84,218,-84,230,-84,242,-84,255,-84,267,-84,279,-84,291,-84,303,-84,315,-84,327,-84,339,-84,352,-84,364,-84,376,-84,388,-84,1115,-84,1127,-84,1139,-84,1152,-84,1164,-84,1176,-84,1188,-84,1200,-84,1212,-84,1236,-84,1248,-84,1261,-84,1273,-84,1382,-84,1406,-84,1418,-84,1430,-84,1467,-84,1479,-84,1576,-72,-797,-72,-785,-72,-773,-72,-761,-72,-749,-72,-737,-72,-725,-72,-713,-72,-701,-72,-689,-72,-677,-72,-664,-72,-652,-72,-640,-72,-628,-72,-616,-72,-604,-72,-592,-72,-580,-72,-568,-72,-556,-72,-544,-72,-532,-72,-519,-72,-507,-72,-495,-72,-483,-72,-471,-72,-459,-72,-447,-72,-435,-72,-423,-72,-411,-72,-399,-72,-387,-72,-374,-72,-362,-72,-350,-72,133,-72,145,-72,157,-72,169,-72,181,-72,193,-72,205,-72,217,-72,230,-72,242,-72,254,-72,266,-72,278,-72,290,-72,314,-72,326,-72,338,-72,350,-72,362,-72,374,-72,387,-72,1063,-72,1075,-72,1087,-72,1099,-72,1111,-72,1123,-72,1136,-72,1317,-72,1389,-72,1401,-72,1413,-72,1426,-72,1438,-72,1450,-72,1462,-72,1570,-60,-803,-60,-791,-60,-779,-60,-767,-60,-755,-60,-743,-60,-731,-60,-719,-60,-707,-60,-695,-60,-683,-60,-670,-60,-658,-60,-646,-60,-634,-60,-622,-60,-610,-60,-598,-60,-586,-60,-574,-60,-562,-60,-550,-60,-538,-60,-526,-60,-513,-60,-501,-60,-489,-60,-477,-60,-465,-60,-453,-60,-441,-60,-429,-60,-417,-60,-405,-60,-393,-60,-381,-60,-368,-60,-356,-60,127,-60,139,-60,151,-60,163,-60,175,-60,187,-60,199,-60,211,-60,223,-60,236,-60,248,-60,260,-60,272,-60,284,-60,308,-60,320,-60,332,-60,344,-60,356,-60,368,-60,381,-60,393,-60,1045,-60,1057,-60,1069,-60,1347,-60,1383,-60,1395,-60,1407,-60,1419,-60,1432,-60,1444,-60,1456,-60,1468,-60,1492,-60,1504,-60,1552,-48,-813,-48,-801,-48,-789,-48,-777,-48,-765,-48,-753,-48,-740,-48,-728,-48,-716,-48,-704,-48,-692,-48,-680,-48,-668,-48,-656,-48,-644,-48,-632,-48,-620,-48,-608,-48,-596,-48,-584,-48,-572,-48,-560,-48,-548,-48,-536,-48,-524,-48,-512,-48,-500,-48,-488,-48,-476,-48,-464,-48,-452,-48,-439,-48,-427,-48,-415,-48,-403,-48,-391,-48,-379,-48,-367,-48,126,-48,138,-48,151,-48,163,-48,175,-48,187,-48,199,-48,211,-48,223,-48,235,-48,247,-48,259,-48,271,-48,283,-48,295,-48,307,-48,319,-48,331,-48,343,-48,355,-48,367,-48,379,-48,391,-48,1041,-48,1054,-48,1198,-48,1367,-48,1379,-48,1391,-48,1403,-48,1415,-48,1427,-48,1439,-48,1451,-48,1523,-36,-807,-36,-795,-36,-783,-36,-771,-36,-759,-36,-746,-36,-734,-36,-722,-36,-710,-36,-698,-36,-686,-36,-674,-36,-662,-36,-650,-36,-638,-36,-626,-36,-614,-36,-602,-36,-590,-36,-578,-36,-566,-36,-554,-36,-542,-36,-530,-36,-518,-36,-506,-36,-494,-36,-482,-36,-470,-36,-458,-36,-445,-36,-433,-36,-421,-36,-409,-36,-397,-36,-385,-36,108,-36,120,-36,132,-36,144,-36,157,-36,169,-36,181,-36,193,-36,205,-36,217,-36,229,-36,241,-36,253,-36,265,-36,277,-36,289,-36,301,-36,313,-36,325,-36,337,-36,349,-36,361,-36,373,-36,385,-36,397,-36,1023,-36,1035,-36,1047,-36,1060,-36,1120,-36,1144,-36,1156,-36,1192,-36,1204,-36,1216,-36,1264,-36,1288,-36,1300,-36,1336,-36,1348,-36,1361,-36,1373,-36,1385,-36,1397,-36,1409,-36,1421,-36,1433,-24,-804,-24,-792,-24,-780,-24,-768,-24,-756,-24,-744,-24,-732,-24,-720,-24,-708,-24,-696,-24,-684,-24,-672,-24,-660,-24,-648,-24,-636,-24,-624,-24,-612,-24,-600,-24,-588,-24,-576,-24,-564,-24,-552,-24,-540,-24,-528,-24,-516,-24,-504,-24,-492,-24,-480,-24,-468,-24,-456,-24,-444,-24,-432,-24,96,-24,108,-24,120,-24,132,-24,144,-24,156,-24,168,-24,180,-24,192,-24,204,-24,216,-24,228,-24,240,-24,252,-24,264,-24,276,-24,288,-24,300,-24,312,-24,324,-24,336,-24,348,-24,360,-24,372,-24,384,-24,396,-24,408,-24,1020,-24,1032,-24,1044,-24,1080,-24,1104,-24,1116,-24,1128,-24,1140,-24,1152,-24,1164,-24,1200,-24,1212,-24,1332,-24,1344,-24,1368,-24,1380,-24,1392,-24,1404,-12,-810,-12,-798,-12,-786,-12,-774,-12,-762,-12,-750,-12,-738,-12,-726,-12,-714,-12,-702,-12,-690,-12,-678,-12,-666,-12,-654,-12,-642,-12,-630,-12,-618,-12,-606,-12,-594,-12,-582,-12,-570,-12,-558,-12,-546,-12,-534,-12,-522,-12,-510,-12,-498,-12,-486,-12,-474,-12,-462,-12,90,-12,102,-12,114,-12,126,-12,138,-12,150,-12,162,-12,174,-12,186,-12,198,-12,210,-12,222,-12,234,-12,246,-12,258,-12,270,-12,282,-12,294,-12,306,-12,318,-12,342,-12,354,-12,366,-12,378,-12,390,-12,402,-12,414,-12,990,-12,1014,-12,1026,-12,1038,-12,1098,-12,1110,-12,1122,-12,1134,-12,1146,-12,1158,-12,1170,-12,1194,-12,1206,-12,1218,-12,1230,-12,1278,-12,1314,-12,1326,-12,1338,-12,1362,0,-912,0,-792,0,-780,0,-768,0,-756,0,-744,0,-732,0,-720,0,-708,0,-696,0,-684,0,-672,0,-660,0,-648,0,-636,0,-624,0,-612,0,-600,0,-588,0,-576,0,-564,0,-552,0,-540,0,-528,0,-516,0,-504,0,96,0,108,0,120,0,132,0,144,0,156,0,168,0,180,0,192,0,204,0,216,0,228,0,240,0,252,0,264,0,276,0,288,0,300,0,312,0,324,0,336,0,348,0,360,0,372,0,384,0,396,0,408,0,420,0,432,0,996,0,1008,0,1020,0,1032,0,1092,0,1104,0,1116,0,1128,0,1140,0,1152,0,1164,0,1176,0,1200,0,1308,12,-786,12,-774,12,-762,12,-750,12,-738,12,-726,12,-714,12,-702,12,-690,12,-678,12,-666,12,-654,12,-642,12,-630,12,-618,12,-606,12,-594,12,-582,12,-570,12,-558,12,-546,12,-534,12,-522,12,-510,12,-498,12,102,12,114,12,126,12,138,12,150,12,162,12,174,12,186,12,198,12,210,12,222,12,234,12,246,12,258,12,270,12,282,12,294,12,306,12,318,12,330,12,342,12,354,12,366,12,378,12,390,12,402,12,414,12,426,12,438,12,978,12,990,12,1002,12,1014,12,1026,12,1038,12,1098,12,1110,12,1122,12,1134,12,1146,12,1158,12,1170,12,1182,12,1218,12,1254,12,1278,12,1290,24,-780,24,-768,24,-756,24,-744,24,-732,24,-720,24,-708,24,-696,24,-684,24,-672,24,-660,24,-648,24,-636,24,-624,24,-612,24,-600,24,-588,24,-576,24,-564,24,-552,24,-540,24,-528,24,-516,24,108,24,120,24,132,24,144,24,156,24,168,24,180,24,192,24,204,24,216,24,228,24,240,24,252,24,264,24,276,24,288,24,300,24,312,24,324,24,336,24,348,24,360,24,372,24,384,24,396,24,408,24,420,24,432,24,444,24,456,24,984,24,996,24,1020,24,1032,24,1116,24,1128,24,1140,24,1152,24,1164,24,1176,24,1284,36,-771,36,-759,36,-746,36,-734,36,-722,36,-710,36,-698,36,-686,36,-674,36,-662,36,-650,36,-638,36,-626,36,-614,36,-602,36,-590,36,-578,36,-566,36,-554,36,-542,36,-530,36,-518,36,84,36,108,36,120,36,132,36,144,36,157,36,169,36,181,36,193,36,205,36,217,36,229,36,241,36,253,36,265,36,277,36,289,36,301,36,313,36,325,36,337,36,349,36,361,36,373,36,385,36,397,36,409,36,421,36,433,36,445,36,458,36,470,36,975,36,987,36,1011,36,1023,36,1035,36,1132,36,1144,36,1156,36,1168,48,-777,48,-765,48,-753,48,-740,48,-728,48,-716,48,-704,48,-692,48,-680,48,-668,48,-656,48,-644,48,-632,48,-620,48,-608,48,-596,48,-584,48,-572,48,-560,48,-548,48,-536,48,-524,48,-78,48,-66,48,-18,48,54,48,66,48,78,48,90,48,102,48,114,48,126,48,138,48,151,48,163,48,175,48,187,48,199,48,211,48,223,48,235,48,247,48,259,48,271,48,283,48,295,48,307,48,319,48,331,48,343,48,355,48,367,48,379,48,391,48,403,48,415,48,427,48,439,48,452,48,464,48,476,48,957,48,969,48,981,48,1005,48,1017,48,1029,48,1150,48,1162,48,1174,48,1186,60,-767,60,-755,60,-743,60,-731,60,-719,60,-707,60,-695,60,-683,60,-670,60,-658,60,-646,60,-634,60,-622,60,-610,60,-598,60,-586,60,-574,60,-562,60,-550,60,-103,60,-91,60,-79,60,-66,60,-54,60,-42,60,-30,60,-18,60,-6,60,6,60,54,60,66,60,79,60,91,60,103,60,115,60,127,60,139,60,151,60,163,60,175,60,187,60,199,60,211,60,223,60,236,60,248,60,260,60,272,60,284,60,296,60,308,60,320,60,332,60,344,60,356,60,368,60,381,60,393,60,405,60,417,60,429,60,441,60,453,60,465,60,477,60,489,60,803,60,1009,60,1021,60,1166,60,1178,60,1214,60,1250,72,-773,72,-761,72,-749,72,-737,72,-725,72,-713,72,-701,72,-689,72,-677,72,-664,72,-652,72,-640,72,-628,72,-616,72,-604,72,-592,72,-121,72,-109,72,-97,72,-85,72,-72,72,-60,72,-48,72,-36,72,-24,72,-12,72,0,72,12,72,24,72,36,72,48,72,60,72,72,72,85,72,97,72,109,72,121,72,133,72,145,72,157,72,169,72,181,72,193,72,205,72,217,72,230,72,242,72,254,72,266,72,278,72,290,72,302,72,314,72,326,72,338,72,350,72,362,72,374,72,387,72,399,72,411,72,423,72,435,72,447,72,459,72,471,72,483,72,495,72,797,72,809,72,821,72,1003,72,1015,72,1172,72,1220,72,1244,72,1256,84,-836,84,-824,84,-812,84,-800,84,-776,84,-764,84,-752,84,-739,84,-727,84,-715,84,-703,84,-691,84,-679,84,-667,84,-655,84,-642,84,-630,84,-618,84,-606,84,-133,84,-121,84,-109,84,-97,84,-85,84,-73,84,-61,84,-48,84,-36,84,-24,84,-12,84,0,84,12,84,24,84,36,84,48,84,61,84,73,84,85,84,97,84,109,84,121,84,133,84,145,84,158,84,170,84,182,84,194,84,206,84,218,84,230,84,242,84,255,84,267,84,279,84,291,84,303,84,315,84,327,84,339,84,352,84,364,84,376,84,388,84,400,84,412,84,424,84,436,84,448,84,461,84,473,84,485,84,497,84,776,84,800,84,812,84,982,84,994,84,1236,84,1248,84,1261,96,-851,96,-839,96,-827,96,-791,96,-754,96,-742,96,-730,96,-705,96,-693,96,-681,96,-669,96,-657,96,-645,96,-632,96,-620,96,-608,96,-134,96,-122,96,-109,96,-97,96,-85,96,-73,96,-61,96,-49,96,-36,96,-24,96,-12,96,0,96,12,96,24,96,36,96,49,96,61,96,73,96,85,96,97,96,109,96,122,96,134,96,146,96,158,96,170,96,182,96,195,96,207,96,219,96,231,96,243,96,255,96,268,96,280,96,292,96,304,96,316,96,328,96,341,96,353,96,365,96,377,96,389,96,401,96,414,96,426,96,438,96,450,96,462,96,474,96,486,96,499,96,511,96,766,96,778,96,791,96,803,96,985,96,1058,96,1228,96,1241,108,-854,108,-842,108,-744,108,-732,108,-720,108,-708,108,-696,108,-683,108,-671,108,-635,108,-622,108,-610,108,-146,108,-134,108,-122,108,-110,108,-98,108,-85,108,-73,108,-61,108,-49,108,-37,108,-24,108,-12,108,0,108,12,108,24,108,37,108,49,108,61,108,73,108,85,108,98,108,110,108,122,108,134,108,146,108,159,108,171,108,183,108,195,108,207,108,220,108,232,108,244,108,256,108,268,108,281,108,293,108,305,108,317,108,329,108,342,108,354,108,366,108,378,108,391,108,403,108,415,108,427,108,439,108,452,108,464,108,476,108,488,108,500,108,513,108,769,108,781,108,793,108,988,108,1037,108,1049,108,1062,108,1074,108,1196,108,1220,108,1233,120,-866,120,-854,120,-842,120,-719,120,-154,120,-141,120,-129,120,-117,120,-104,120,-92,120,-80,120,-68,120,-55,120,-43,120,-31,120,-18,120,-6,120,6,120,18,120,31,120,43,120,55,120,68,120,80,120,92,120,104,120,117,120,129,120,141,120,154,120,166,120,178,120,190,120,203,120,215,120,227,120,240,120,252,120,264,120,276,120,289,120,301,120,313,120,326,120,338,120,350,120,362,120,375,120,387,120,399,120,412,120,424,120,510,120,756,120,768,120,780,120,792,120,928,120,989,120,1001,120,1026,120,1038,120,1051,120,1063,120,1075,120,1087,120,1198,120,1235,120,1247,132,-882,132,-869,132,-857,132,-845,132,-166,132,-154,132,-142,132,-129,132,-117,132,-105,132,-92,132,-80,132,-68,132,-55,132,-43,132,-31,132,-18,132,-6,132,6,132,18,132,31,132,43,132,55,132,68,132,80,132,92,132,105,132,117,132,129,132,142,132,154,132,166,132,179,132,191,132,203,132,216,132,228,132,240,132,253,132,265,132,277,132,290,132,302,132,314,132,327,132,339,132,351,132,364,132,376,132,388,132,401,132,413,132,425,132,438,132,450,132,746,132,758,132,771,132,783,132,795,132,931,132,992,132,1017,132,1029,132,1042,132,1054,132,1066,132,1079,132,1091,132,1214,132,1239,144,-909,144,-897,144,-885,144,-872,144,-860,144,-847,144,-835,144,-167,144,-155,144,-142,144,-130,144,-118,144,-105,144,-93,144,-80,144,-68,144,-56,144,-43,144,-31,144,-19,144,-6,144,6,144,19,144,31,144,43,144,56,144,68,144,80,144,93,144,105,144,118,144,130,144,142,144,155,144,167,144,179,144,192,144,204,144,216,144,229,144,241,144,254,144,266,144,278,144,291,144,303,144,315,144,328,144,340,144,353,144,365,144,377,144,390,144,402,144,414,144,439,144,452,144,464,144,476,144,489,144,748,144,761,144,773,144,786,144,798,144,984,144,996,144,1008,144,1021,144,1033,144,1045,144,1058,144,1070,144,1082,144,1206,144,1219,144,1231,156,-934,156,-922,156,-909,156,-897,156,-884,156,-872,156,-860,156,-847,156,-162,156,-149,156,-137,156,-125,156,-112,156,-100,156,-87,156,-75,156,-62,156,-50,156,-37,156,-25,156,-12,156,0,156,12,156,25,156,37,156,50,156,62,156,75,156,87,156,100,156,112,156,125,156,137,156,149,156,162,156,174,156,187,156,199,156,212,156,224,156,237,156,249,156,262,156,274,156,287,156,299,156,311,156,324,156,336,156,349,156,361,156,374,156,386,156,399,156,436,156,448,156,461,156,473,156,486,156,498,156,511,156,747,156,760,156,772,156,785,156,797,156,810,156,984,156,997,156,1009,156,1021,156,1034,156,1046,156,1059,156,1071,156,1084,156,1208,168,-997,168,-985,168,-972,168,-960,168,-947,168,-934,168,-922,168,-909,168,-897,168,-884,168,-157,168,-144,168,-132,168,-119,168,-107,168,-94,168,-82,168,-69,168,-56,168,-44,168,-31,168,-19,168,-6,168,6,168,19,168,31,168,44,168,56,168,69,168,82,168,94,168,107,168,119,168,132,168,144,168,157,168,169,168,182,168,194,168,207,168,220,168,232,168,245,168,257,168,270,168,282,168,295,168,307,168,320,168,332,168,345,168,357,168,370,168,383,168,433,168,445,168,458,168,470,168,483,168,495,168,508,168,521,168,533,168,734,168,746,168,759,168,771,168,784,168,797,168,809,168,822,168,947,168,960,168,972,168,985,168,997,168,1010,168,1022,168,1035,168,1047,168,1060,168,1072,168,1210,168,1223,180,-1023,180,-1011,180,-998,180,-985,180,-973,180,-960,180,-947,180,-935,180,-922,180,-909,180,-897,180,-884,180,-771,180,-669,180,-152,180,-139,180,-126,180,-114,180,-101,180,-88,180,-76,180,-63,180,-51,180,-38,180,-25,180,-13,180,0,180,13,180,25,180,38,180,51,180,63,180,76,180,88,180,101,180,114,180,126,180,139,180,152,180,164,180,177,180,189,180,202,180,215,180,227,180,240,180,253,180,265,180,278,180,291,180,303,180,316,180,328,180,341,180,354,180,366,180,379,180,417,180,429,180,442,180,455,180,467,180,480,180,493,180,505,180,518,180,531,180,543,180,556,180,733,180,745,180,758,180,771,180,783,180,796,180,808,180,821,180,834,180,947,180,960,180,973,180,985,180,998,180,1011,180,1023,180,1036,180,1048,180,1061,180,1213,192,-1558,192,-1049,192,-1037,192,-1024,192,-1011,192,-999,192,-986,192,-973,192,-910,192,-897,192,-884,192,-719,192,-706,192,-159,192,-146,192,-134,192,-121,192,-108,192,-95,192,-83,192,-70,192,-57,192,-45,192,-32,192,-19,192,-6,192,6,192,19,192,32,192,45,192,57,192,70,192,83,192,95,192,108,192,121,192,134,192,146,192,159,192,172,192,184,192,197,192,210,192,223,192,235,192,248,192,261,192,273,192,286,192,299,192,312,192,324,192,337,192,350,192,363,192,375,192,413,192,426,192,439,192,452,192,464,192,477,192,490,192,502,192,515,192,528,192,541,192,553,192,566,192,579,192,731,192,744,192,757,192,770,192,782,192,795,192,808,192,820,192,833,192,846,192,935,192,948,192,960,192,973,192,986,192,999,192,1011,192,1024,192,1037,192,1049,192,1088,192,1100,204,-1051,204,-1038,204,-1025,204,-1012,204,-999,204,-986,204,-974,204,-897,204,-884,204,-769,204,-756,204,-743,204,-154,204,-141,204,-128,204,-115,204,-102,204,-90,204,-77,204,-64,204,-51,204,-38,204,-26,204,-13,204,0,204,13,204,26,204,38,204,51,204,64,204,77,204,90,204,102,204,115,204,128,204,141,204,154,204,167,204,179,204,192,204,205,204,218,204,231,204,243,204,256,204,269,204,282,204,295,204,307,204,320,204,333,204,346,204,359,204,372,204,397,204,410,204,423,204,436,204,448,204,461,204,474,204,487,204,500,204,512,204,525,204,538,204,551,204,564,204,577,204,730,204,743,204,756,204,769,204,781,204,794,204,807,204,820,204,833,204,846,204,858,204,935,204,948,204,961,204,974,204,986,204,999,204,1012,204,1025,204,1038,204,1051,204,1063,204,1102,216,-1581,216,-1052,216,-1039,216,-1026,216,-1013,216,-1000,216,-987,216,-897,216,-884,216,-871,216,-794,216,-781,216,-768,216,-161,216,-148,216,-135,216,-123,216,-110,216,-97,216,-84,216,-71,216,-58,216,-45,216,-32,216,-19,216,-6,216,6,216,19,216,32,216,45,216,58,216,71,216,84,216,97,216,110,216,123,216,135,216,148,216,161,216,174,216,187,216,200,216,213,216,226,216,239,216,252,216,265,216,277,216,290,216,303,216,316,216,329,216,342,216,355,216,368,216,394,216,406,216,419,216,432,216,445,216,458,216,471,216,484,216,497,216,510,216,523,216,535,216,548,216,561,216,574,216,587,216,703,216,716,216,729,216,742,216,755,216,768,216,781,216,794,216,806,216,819,216,832,216,845,216,858,216,871,216,884,216,923,216,935,216,948,216,961,216,974,216,987,216,1000,216,1013,216,1026,216,1039,216,1052,216,1065,216,1077,216,1090,216,1103,216,1116,228,-1053,228,-1040,228,-1027,228,-1014,228,-1001,228,-988,228,-832,228,-819,228,-806,228,-156,228,-143,228,-130,228,-117,228,-104,228,-91,228,-78,228,-65,228,-52,228,-39,228,-26,228,-13,228,0,228,13,228,26,228,39,228,52,228,65,228,78,228,91,228,104,228,117,228,130,228,143,228,156,228,169,228,182,228,195,228,208,228,221,228,234,228,247,228,260,228,273,228,286,228,299,228,312,228,325,228,338,228,351,228,390,228,403,228,416,228,429,228,442,228,455,228,468,228,481,228,494,228,507,228,520,228,533,228,546,228,559,228,572,228,585,228,702,228,715,228,728,228,741,228,754,228,767,228,780,228,793,228,806,228,819,228,832,228,845,228,858,228,871,228,884,228,897,228,910,228,923,228,936,228,949,228,962,228,975,228,988,228,1001,228,1014,228,1027,228,1040,228,1053,228,1066,228,1079,228,1092,228,1105,228,1118,228,1131,228,1144,228,1157,228,1209,240,-1104,240,-1064,240,-1051,240,-1038,240,-1025,240,-1012,240,-999,240,-985,240,-775,240,-158,240,-145,240,-131,240,-118,240,-105,240,-92,240,-79,240,-66,240,-53,240,-39,240,-26,240,-13,240,0,240,13,240,26,240,39,240,53,240,66,240,79,240,92,240,105,240,118,240,131,240,145,240,158,240,171,240,184,240,197,240,210,240,223,240,236,240,250,240,263,240,276,240,289,240,302,240,315,240,328,240,342,240,355,240,381,240,394,240,407,240,420,240,434,240,447,240,460,240,473,240,486,240,499,240,512,240,526,240,539,240,552,240,565,240,578,240,683,240,696,240,709,240,723,240,736,240,749,240,762,240,775,240,788,240,801,240,815,240,828,240,841,240,854,240,867,240,880,240,893,240,907,240,920,240,933,240,946,240,959,240,972,240,985,240,999,240,1012,240,1025,240,1038,240,1051,240,1064,240,1077,240,1091,240,1104,240,1117,240,1130,240,1143,240,1156,240,1169,240,1209,252,-1116,252,-1076,252,-1063,252,-1049,252,-1036,252,-1023,252,-1010,252,-996,252,-983,252,-810,252,-146,252,-133,252,-120,252,-106,252,-93,252,-80,252,-66,252,-53,252,-40,252,-27,252,-13,252,0,252,13,252,27,252,40,252,53,252,66,252,80,252,93,252,106,252,120,252,133,252,146,252,159,252,173,252,186,252,199,252,213,252,226,252,239,252,252,252,266,252,279,252,292,252,306,252,319,252,332,252,345,252,372,252,385,252,399,252,412,252,425,252,438,252,452,252,465,252,478,252,492,252,505,252,558,252,611,252,624,252,677,252,691,252,704,252,717,252,731,252,744,252,757,252,770,252,784,252,797,252,810,252,824,252,837,252,850,252,863,252,877,252,890,252,903,252,917,252,930,252,943,252,956,252,970,252,983,252,996,252,1010,252,1023,252,1036,252,1049,252,1063,252,1076,252,1089,252,1103,252,1116,252,1129,252,1142,252,1156,252,1169,252,1182,252,1222,264,-1131,264,-1117,264,-1091,264,-1077,264,-1064,264,-1051,264,-1037,264,-1024,264,-1010,264,-997,264,-984,264,-810,264,-141,264,-127,264,-114,264,-100,264,-87,264,-74,264,-60,264,-47,264,-33,264,-20,264,-7,264,7,264,20,264,33,264,47,264,60,264,74,264,87,264,100,264,114,264,127,264,141,264,154,264,167,264,181,264,194,264,207,264,221,264,234,264,248,264,261,264,274,264,288,264,301,264,314,264,328,264,341,264,368,264,381,264,395,264,408,264,422,264,435,264,448,264,462,264,475,264,488,264,502,264,582,264,596,264,609,264,622,264,636,264,649,264,662,264,676,264,689,264,703,264,716,264,729,264,743,264,756,264,770,264,783,264,796,264,810,264,823,264,836,264,850,264,863,264,877,264,890,264,903,264,917,264,930,264,943,264,957,264,970,264,984,264,997,264,1010,264,1024,264,1037,264,1051,264,1064,264,1077,264,1091,264,1104,264,1117,264,1131,264,1144,264,1158,264,1171,264,1184,264,1198,276,-1144,276,-1130,276,-1103,276,-1089,276,-1076,276,-1062,276,-1049,276,-1035,276,-1022,276,-1008,276,-995,276,-981,276,-819,276,-805,276,-129,276,-115,276,-102,276,-88,276,-74,276,-61,276,-47,276,-34,276,-20,276,-7,276,7,276,20,276,34,276,47,276,61,276,74,276,88,276,102,276,115,276,129,276,142,276,156,276,169,276,183,276,196,276,210,276,223,276,237,276,250,276,264,276,277,276,291,276,305,276,318,276,332,276,359,276,372,276,386,276,399,276,413,276,426,276,440,276,453,276,467,276,480,276,535,276,548,276,562,276,575,276,589,276,602,276,616,276,629,276,643,276,656,276,670,276,683,276,697,276,711,276,724,276,738,276,751,276,765,276,778,276,792,276,805,276,819,276,832,276,846,276,859,276,873,276,886,276,900,276,914,276,927,276,941,276,954,276,968,276,981,276,995,276,1008,276,1022,276,1035,276,1049,276,1062,276,1076,276,1089,276,1103,276,1117,276,1130,276,1144,276,1157,276,1171,276,1184,276,1198,288,-1143,288,-1116,288,-1102,288,-1088,288,-1075,288,-1061,288,-1047,288,-1033,288,-1020,288,-1006,288,-992,288,-979,288,-965,288,-828,288,-814,288,-103,288,-89,288,-75,288,-62,288,-48,288,-34,288,-21,288,-7,288,7,288,21,288,34,288,48,288,62,288,75,288,89,288,103,288,116,288,130,288,144,288,157,288,171,288,185,288,198,288,212,288,226,288,240,288,253,288,267,288,281,288,294,288,308,288,322,288,335,288,349,288,363,288,376,288,390,288,404,288,417,288,431,288,445,288,459,288,472,288,486,288,513,288,527,288,541,288,554,288,568,288,582,288,595,288,609,288,623,288,637,288,650,288,664,288,678,288,691,288,705,288,719,288,732,288,746,288,760,288,773,288,787,288,801,288,814,288,828,288,842,288,856,288,869,288,883,288,897,288,910,288,924,288,938,288,951,288,965,288,979,288,992,288,1006,288,1020,288,1033,288,1047,288,1061,288,1075,288,1088,288,1102,288,1116,288,1129,288,1143,288,1157,288,1170,288,1184,288,1198,288,1211,300,-1156,300,-1128,300,-1115,300,-1101,300,-1087,300,-1073,300,-1059,300,-1045,300,-1032,300,-1018,300,-1004,300,-990,300,-976,300,-962,300,-948,300,-935,300,-921,300,-907,300,-852,300,-838,300,-824,300,-90,300,-76,300,-62,300,-48,300,-35,300,-21,300,-7,300,7,300,21,300,35,300,48,300,62,300,76,300,90,300,104,300,118,300,132,300,145,300,159,300,173,300,187,300,201,300,215,300,228,300,242,300,256,300,270,300,284,300,298,300,312,300,325,300,339,300,353,300,367,300,381,300,395,300,408,300,422,300,436,300,450,300,464,300,478,300,505,300,519,300,533,300,547,300,561,300,575,300,588,300,602,300,616,300,630,300,644,300,658,300,672,300,685,300,699,300,713,300,727,300,741,300,755,300,768,300,782,300,796,300,810,300,824,300,838,300,852,300,865,300,879,300,893,300,907,300,921,300,935,300,948,300,962,300,976,300,990,300,1004,300,1018,300,1032,300,1045,300,1059,300,1073,300,1087,300,1101,300,1115,300,1128,300,1142,300,1156,300,1170,300,1184,300,1198,300,1212,312,-1156,312,-1128,312,-1114,312,-1100,312,-1086,312,-1072,312,-1058,312,-1044,312,-1030,312,-1016,312,-1002,312,-988,312,-974,312,-960,312,-946,312,-932,312,-918,312,-904,312,-889,312,-875,312,-861,312,-847,312,-833,312,-819,312,-91,312,-77,312,-63,312,-49,312,-35,312,-21,312,-7,312,7,312,21,312,35,312,49,312,63,312,77,312,91,312,105,312,119,312,133,312,147,312,161,312,175,312,203,312,217,312,231,312,245,312,259,312,273,312,287,312,301,312,315,312,329,312,343,312,357,312,371,312,385,312,399,312,413,312,427,312,441,312,455,312,469,312,483,312,497,312,511,312,525,312,539,312,553,312,567,312,581,312,595,312,609,312,623,312,637,312,651,312,665,312,679,312,693,312,707,312,721,312,735,312,749,312,763,312,777,312,791,312,805,312,819,312,833,312,847,312,861,312,875,312,889,312,904,312,918,312,932,312,946,312,960,312,974,312,988,312,1002,312,1016,312,1030,312,1044,312,1058,312,1072,312,1086,312,1100,312,1114,312,1128,312,1142,312,1156,312,1170,312,1184,312,1198,312,1212,312,1310,324,-1167,324,-1153,324,-1138,324,-1124,324,-1110,324,-1096,324,-1081,324,-1067,324,-1053,324,-1039,324,-1025,324,-1010,324,-996,324,-982,324,-968,324,-953,324,-939,324,-925,324,-911,324,-896,324,-882,324,-868,324,-854,324,-840,324,-825,324,-811,324,-85,324,-71,324,-57,324,-43,324,-28,324,-14,324,0,324,14,324,28,324,43,324,57,324,71,324,85,324,100,324,114,324,128,324,142,324,213,324,228,324,356,324,370,324,384,324,398,324,413,324,427,324,441,324,455,324,470,324,484,324,498,324,512,324,526,324,541,324,555,324,569,324,583,324,598,324,612,324,626,324,640,324,655,324,669,324,683,324,697,324,711,324,726,324,740,324,754,324,768,324,783,324,797,324,811,324,825,324,840,324,854,324,868,324,882,324,896,324,911,324,925,324,939,324,953,324,968,324,982,324,996,324,1010,324,1025,324,1039,324,1053,324,1067,324,1081,324,1096,324,1110,324,1124,324,1138,324,1153,324,1167,324,1181,324,1195,324,1209,324,1309,336,-1181,336,-1166,336,-1152,336,-1138,336,-1123,336,-1109,336,-1094,336,-1080,336,-1066,336,-1051,336,-1037,336,-1022,336,-1008,336,-994,336,-979,336,-965,336,-950,336,-936,336,-922,336,-907,336,-893,336,-878,336,-864,336,-850,336,-835,336,-821,336,-806,336,-792,336,-72,336,-58,336,-43,336,-29,336,-14,336,0,336,14,336,29,336,43,336,58,336,72,336,86,336,101,336,360,336,374,336,389,336,403,336,418,336,432,336,446,336,461,336,475,336,490,336,504,336,518,336,533,336,547,336,562,336,576,336,590,336,605,336,619,336,634,336,648,336,662,336,677,336,691,336,706,336,720,336,734,336,749,336,763,336,778,336,792,336,806,336,821,336,835,336,850,336,864,336,878,336,893,336,907,336,922,336,936,336,950,336,965,336,979,336,994,336,1008,336,1022,336,1037,336,1051,336,1066,336,1080,336,1094,336,1109,336,1123,336,1138,336,1152,336,1166,336,1181,336,1195,336,1267,336,1310,336,1325,336,1339,336,1354,348,-1207,348,-1193,348,-1178,348,-1163,348,-1149,348,-1134,348,-1120,348,-1105,348,-1090,348,-1076,348,-1061,348,-1046,348,-1032,348,-1017,348,-1002,348,-988,348,-973,348,-959,348,-944,348,-929,348,-915,348,-900,348,-885,348,-871,348,-856,348,-841,348,-827,348,-812,348,-798,348,-783,348,-768,348,-51,348,-37,348,-22,348,-7,348,7,348,22,348,37,348,51,348,66,348,80,348,95,348,110,348,329,348,359,348,373,348,388,348,402,348,417,348,432,348,446,348,461,348,476,348,490,348,505,348,520,348,534,348,549,348,563,348,578,348,593,348,607,348,622,348,637,348,651,348,666,348,680,348,695,348,710,348,724,348,739,348,754,348,768,348,783,348,798,348,812,348,827,348,841,348,856,348,871,348,885,348,900,348,915,348,929,348,944,348,959,348,973,348,988,348,1002,348,1017,348,1032,348,1046,348,1061,348,1076,348,1090,348,1105,348,1120,348,1134,348,1149,348,1163,348,1178,348,1193,348,1266,348,1280,348,1324,348,1339,348,1354,348,1368,348,1383,360,-1207,360,-1193,360,-1178,360,-1163,360,-1148,360,-1133,360,-1119,360,-1104,360,-1089,360,-1074,360,-1059,360,-1044,360,-1030,360,-1015,360,-1000,360,-985,360,-970,360,-956,360,-941,360,-926,360,-911,360,-896,360,-881,360,-867,360,-852,360,-837,360,-822,360,-807,360,-793,360,-778,360,-763,360,-7,360,7,360,22,360,37,360,52,360,67,360,81,360,96,360,363,360,378,360,393,360,407,360,422,360,437,360,452,360,467,360,481,360,496,360,511,360,526,360,541,360,556,360,570,360,585,360,600,360,615,360,630,360,644,360,659,360,674,360,689,360,704,360,719,360,733,360,748,360,763,360,778,360,793,360,807,360,822,360,837,360,852,360,867,360,881,360,896,360,911,360,926,360,941,360,956,360,970,360,985,360,1000,360,1015,360,1030,360,1044,360,1059,360,1074,360,1089,360,1104,360,1119,360,1133,360,1148,360,1163,360,1178,360,1193,360,1267,360,1281,360,1296,360,1370,360,1385,360,1400,372,-1220,372,-1205,372,-1190,372,-1175,372,-1160,372,-1145,372,-1130,372,-1115,372,-1100,372,-1085,372,-1069,372,-1054,372,-1039,372,-1024,372,-1009,372,-994,372,-979,372,-964,372,-949,372,-934,372,-919,372,-904,372,-889,372,-874,372,-859,372,-844,372,-828,372,-813,372,-798,372,-783,372,-768,372,-75,372,-60,372,-45,372,-30,372,90,372,136,372,151,372,226,372,286,372,301,372,316,372,331,372,346,372,362,372,377,372,392,372,407,372,422,372,437,372,452,372,467,372,482,372,497,372,542,372,557,372,572,372,587,372,603,372,618,372,633,372,648,372,663,372,678,372,693,372,708,372,723,372,738,372,753,372,768,372,783,372,798,372,813,372,828,372,844,372,859,372,874,372,889,372,904,372,919,372,934,372,949,372,964,372,979,372,994,372,1009,372,1024,372,1039,372,1054,372,1069,372,1085,372,1100,372,1115,372,1130,372,1145,372,1160,372,1175,372,1190,372,1205,372,1220,372,1280,372,1295,372,1371,372,1386,372,1401,384,-1233,384,-1218,384,-1203,384,-1187,384,-1172,384,-1157,384,-1141,384,-1126,384,-1111,384,-1095,384,-1080,384,-1065,384,-1049,384,-1034,384,-1019,384,-1003,384,-988,384,-973,384,-957,384,-942,384,-927,384,-911,384,-896,384,-881,384,-866,384,-850,384,-835,384,-820,384,-804,384,-789,384,-774,384,-758,384,-84,384,-69,384,-54,384,-38,384,-23,384,-8,384,161,384,207,384,222,384,237,384,268,384,283,384,299,384,314,384,329,384,345,384,360,384,375,384,391,384,406,384,421,384,437,384,452,384,467,384,483,384,544,384,559,384,574,384,590,384,605,384,620,384,636,384,651,384,666,384,682,384,697,384,712,384,728,384,743,384,758,384,774,384,789,384,804,384,820,384,835,384,850,384,866,384,881,384,896,384,911,384,927,384,942,384,957,384,973,384,988,384,1003,384,1019,384,1034,384,1049,384,1065,384,1080,384,1095,384,1111,384,1126,384,1141,384,1157,384,1172,384,1187,384,1249,384,1264,384,1279,384,1402,396,-1231,396,-1216,396,-1200,396,-1184,396,-1169,396,-1153,396,-1138,396,-1122,396,-1106,396,-1091,396,-1075,396,-1060,396,-1044,396,-1029,396,-1013,396,-997,396,-982,396,-966,396,-951,396,-935,396,-919,396,-904,396,-888,396,-873,396,-857,396,-842,396,-826,396,-810,396,-795,396,-779,396,-764,396,-748,396,-94,396,-78,396,-62,396,-47,396,-31,396,-16,396,31,396,94,396,203,396,218,396,234,396,265,396,281,396,296,396,312,396,327,396,343,396,358,396,374,396,390,396,405,396,421,396,436,396,452,396,468,396,483,396,530,396,545,396,561,396,577,396,592,396,608,396,623,396,639,396,655,396,670,396,686,396,701,396,717,396,732,396,748,396,764,396,779,396,795,396,810,396,826,396,842,396,857,396,873,396,888,396,904,396,919,396,935,396,951,396,966,396,982,396,997,396,1013,396,1029,396,1044,396,1060,396,1075,396,1091,396,1106,396,1122,396,1138,396,1153,396,1169,396,1184,396,1216,396,1231,396,1262,396,1278,396,1403,396,1418,408,-1245,408,-1229,408,-1213,408,-1197,408,-1181,408,-1166,408,-1150,408,-1134,408,-1118,408,-1102,408,-1086,408,-1070,408,-1055,408,-1039,408,-1023,408,-1007,408,-991,408,-975,408,-959,408,-944,408,-928,408,-912,408,-896,408,-880,408,-864,408,-848,408,-833,408,-817,408,-801,408,-785,408,-769,408,-753,408,-737,408,-87,408,-71,408,-56,408,-40,408,-24,408,-8,408,8,408,87,408,151,408,167,408,198,408,214,408,230,408,246,408,262,408,293,408,309,408,325,408,341,408,357,408,373,408,389,408,404,408,420,408,436,408,452,408,468,408,484,408,531,408,547,408,563,408,579,408,595,408,611,408,626,408,642,408,658,408,674,408,690,408,706,408,722,408,737,408,753,408,769,408,785,408,801,408,817,408,833,408,848,408,864,408,880,408,896,408,912,408,928,408,944,408,959,408,975,408,991,408,1007,408,1023,408,1039,408,1055,408,1070,408,1086,408,1102,408,1118,408,1134,408,1150,408,1166,408,1181,408,1197,408,1213,408,1229,408,1245,408,1261,408,1277,408,1293,408,1404,420,-1243,420,-1227,420,-1211,420,-1195,420,-1178,420,-1162,420,-1146,420,-1130,420,-1114,420,-1098,420,-1082,420,-1065,420,-1049,420,-1033,420,-1017,420,-1001,420,-985,420,-969,420,-952,420,-936,420,-920,420,-904,420,-888,420,-856,420,-839,420,-807,420,-791,420,-775,420,-759,420,-743,420,-726,420,-710,420,-81,420,-65,420,-48,420,-32,420,-16,420,0,420,16,420,32,420,129,420,145,420,194,420,210,420,226,420,242,420,258,420,274,420,339,420,420,420,436,420,452,420,468,420,484,420,533,420,549,420,565,420,581,420,597,420,613,420,630,420,646,420,662,420,678,420,694,420,710,420,726,420,743,420,759,420,775,420,791,420,807,420,823,420,839,420,856,420,872,420,888,420,904,420,920,420,936,420,952,420,969,420,985,420,1001,420,1017,420,1033,420,1049,420,1065,420,1082,420,1098,420,1114,420,1130,420,1146,420,1162,420,1178,420,1195,420,1211,420,1227,420,1243,420,1259,420,1275,420,1291,420,1404,432,-1241,432,-1225,432,-1208,432,-1192,432,-1175,432,-1159,432,-1142,432,-1126,432,-1110,432,-1093,432,-1077,432,-1060,432,-1044,432,-1027,432,-1011,432,-995,432,-978,432,-962,432,-945,432,-929,432,-912,432,-896,432,-879,432,-863,432,-847,432,-830,432,-814,432,-797,432,-781,432,-764,432,-748,432,-732,432,-715,432,-90,432,-74,432,-58,432,-41,432,-25,432,-8,432,8,432,25,432,58,432,107,432,123,432,173,432,189,432,205,432,222,432,238,432,255,432,271,432,419,432,436,432,452,432,468,432,518,432,534,432,551,432,567,432,584,432,600,432,616,432,633,432,649,432,666,432,682,432,699,432,715,432,732,432,748,432,764,432,781,432,797,432,814,432,830,432,847,432,863,432,879,432,896,432,912,432,929,432,945,432,962,432,978,432,995,432,1011,432,1027,432,1044,432,1060,432,1077,432,1093,432,1110,432,1126,432,1142,432,1159,432,1175,432,1192,432,1208,432,1225,432,1241,432,1258,432,1274,432,1290,432,1307,432,1323,432,1340,432,1405,432,1422,432,1438,444,-1236,444,-1220,444,-1203,444,-1186,444,-1169,444,-1152,444,-1136,444,-1119,444,-1102,444,-1085,444,-1068,444,-1051,444,-1035,444,-1018,444,-1001,444,-984,444,-967,444,-950,444,-934,444,-917,444,-900,444,-883,444,-850,444,-816,444,-799,444,-782,444,-765,444,-749,444,-732,444,-715,444,-698,444,-681,444,-648,444,-8,444,8,444,25,444,42,444,59,444,76,444,93,444,109,444,160,444,177,444,193,444,210,444,227,444,244,444,261,444,278,444,395,444,412,444,429,444,446,444,463,444,513,444,530,444,547,444,564,444,580,444,614,444,631,444,648,444,664,444,681,444,698,444,715,444,732,444,749,444,765,444,782,444,799,444,816,444,833,444,850,444,866,444,883,444,900,444,917,444,934,444,950,444,967,444,984,444,1001,444,1018,444,1035,444,1051,444,1068,444,1085,444,1102,444,1119,444,1136,444,1152,444,1169,444,1186,444,1203,444,1220,444,1236,444,1253,444,1270,444,1287,444,1304,444,1321,444,1337,444,1354,444,1421,456,-1234,456,-1217,456,-1200,456,-1183,456,-1166,456,-1149,456,-1131,456,-1114,456,-1097,456,-1080,456,-1063,456,-1046,456,-1029,456,-1011,456,-994,456,-977,456,-960,456,-943,456,-926,456,-909,456,-891,456,-874,456,-840,456,-823,456,-806,456,-789,456,-771,456,-754,456,-737,456,-720,456,-703,456,-686,456,-669,456,-651,456,-634,456,-617,456,0,456,17,456,34,456,51,456,69,456,86,456,103,456,120,456,137,456,154,456,171,456,189,456,206,456,223,456,240,456,257,456,274,456,291,456,343,456,360,456,377,456,394,456,411,456,429,456,446,456,463,456,531,456,549,456,566,456,583,456,600,456,617,456,634,456,651,456,669,456,686,456,703,456,720,456,737,456,754,456,771,456,789,456,806,456,823,456,840,456,857,456,874,456,891,456,909,456,926,456,943,456,960,456,977,456,994,456,1011,456,1029,456,1046,456,1063,456,1080,456,1097,456,1114,456,1131,456,1149,456,1166,456,1183,456,1200,456,1217,456,1234,456,1251,456,1269,456,1286,456,1303,456,1320,456,1337,456,1354,456,1371,456,1423,468,-1229,468,-1212,468,-1194,468,-1177,468,-1159,468,-1141,468,-1124,468,-1106,468,-1089,468,-1071,468,-1054,468,-1036,468,-1019,468,-1001,468,-983,468,-966,468,-948,468,-931,468,-913,468,-896,468,-878,468,-860,468,-843,468,-825,468,-808,468,-790,468,-773,468,-755,468,-738,468,-720,468,-702,468,-685,468,-667,468,-650,468,-18,468,0,468,18,468,35,468,53,468,70,468,88,468,105,468,123,468,140,468,158,468,176,468,193,468,211,468,228,468,246,468,263,468,281,468,299,468,316,468,334,468,351,468,369,468,386,468,404,468,421,468,439,468,457,468,474,468,492,468,527,468,544,468,562,468,580,468,597,468,615,468,632,468,650,468,667,468,685,468,702,468,720,468,738,468,755,468,773,468,790,468,808,468,825,468,843,468,860,468,878,468,896,468,913,468,931,468,948,468,966,468,983,468,1001,468,1019,468,1036,468,1054,468,1071,468,1089,468,1106,468,1124,468,1141,468,1159,468,1177,468,1194,468,1212,468,1229,468,1247,468,1264,468,1282,468,1300,468,1317,468,1335,468,1352,468,1370,468,1422,480,-1245,480,-1209,480,-1191,480,-1173,480,-1155,480,-1137,480,-1119,480,-1101,480,-1084,480,-1066,480,-1048,480,-1030,480,-1012,480,-994,480,-976,480,-958,480,-940,480,-922,480,-904,480,-851,480,-833,480,-815,480,-797,480,-779,480,-761,480,-743,480,-725,480,-707,480,-690,480,-672,480,-654,480,-582,480,-564,480,-546,480,-45,480,-27,480,-9,480,9,480,27,480,45,480,63,480,81,480,99,480,116,480,134,480,152,480,170,480,188,480,206,480,224,480,242,480,260,480,278,480,296,480,313,480,331,480,349,480,367,480,385,480,403,480,421,480,439,480,457,480,475,480,493,480,510,480,528,480,546,480,564,480,582,480,600,480,618,480,636,480,654,480,672,480,690,480,707,480,725,480,743,480,761,480,779,480,797,480,815,480,833,480,851,480,869,480,887,480,904,480,922,480,940,480,958,480,976,480,994,480,1012,480,1030,480,1048,480,1066,480,1084,480,1101,480,1119,480,1137,480,1155,480,1173,480,1191,480,1209,480,1227,480,1245,480,1263,480,1281,480,1299,480,1316,480,1334,480,1352,480,1370,480,1388,480,1424,492,-1258,492,-1240,492,-1221,492,-1203,492,-1185,492,-1166,492,-1148,492,-1130,492,-1111,492,-1093,492,-1074,492,-1056,492,-1038,492,-1019,492,-1001,492,-983,492,-964,492,-946,492,-928,492,-909,492,-891,492,-872,492,-854,492,-836,492,-817,492,-799,492,-781,492,-762,492,-744,492,-726,492,-707,492,-689,492,-670,492,-652,492,-634,492,-579,492,-560,492,-542,492,-9,492,9,492,28,492,46,492,64,492,83,492,101,492,119,492,138,492,156,492,174,492,193,492,211,492,230,492,248,492,266,492,285,492,303,492,321,492,340,492,358,492,377,492,395,492,413,492,432,492,450,492,468,492,487,492,505,492,523,492,542,492,560,492,579,492,597,492,615,492,634,492,652,492,670,492,689,492,707,492,726,492,744,492,762,492,781,492,799,492,817,492,836,492,854,492,872,492,891,492,909,492,928,492,946,492,964,492,983,492,1001,492,1019,492,1038,492,1056,492,1074,492,1093,492,1111,492,1130,492,1148,492,1166,492,1185,492,1203,492,1221,492,1240,492,1258,492,1277,492,1295,492,1313,492,1332,492,1350,492,1368,492,1387,492,1405,492,1423,492,1442,504,-1272,504,-1253,504,-1235,504,-1216,504,-1197,504,-1178,504,-1159,504,-1140,504,-1121,504,-1103,504,-1084,504,-1065,504,-1046,504,-1027,504,-1008,504,-990,504,-971,504,-952,504,-933,504,-914,504,-895,504,-876,504,-858,504,-839,504,-820,504,-801,504,-782,504,-763,504,-745,504,-726,504,-707,504,-688,504,-669,504,-650,504,-631,504,-613,504,-575,504,-47,504,28,504,47,504,66,504,85,504,104,504,123,504,141,504,160,504,179,504,198,504,217,504,236,504,254,504,273,504,292,504,311,504,330,504,349,504,368,504,386,504,405,504,424,504,443,504,462,504,481,504,499,504,518,504,537,504,556,504,575,504,594,504,613,504,631,504,650,504,669,504,688,504,707,504,726,504,745,504,763,504,782,504,801,504,820,504,839,504,858,504,876,504,895,504,914,504,933,504,952,504,971,504,990,504,1008,504,1027,504,1046,504,1065,504,1084,504,1103,504,1121,504,1140,504,1159,504,1178,504,1197,504,1216,504,1235,504,1253,504,1272,504,1291,504,1310,504,1329,504,1348,504,1366,504,1385,504,1404,504,1423,504,1555,516,-1268,516,-1248,516,-1229,516,-1210,516,-1190,516,-1171,516,-1152,516,-1132,516,-1113,516,-1094,516,-1074,516,-1055,516,-1035,516,-1016,516,-997,516,-977,516,-958,516,-939,516,-919,516,-900,516,-881,516,-861,516,-842,516,-823,516,-784,516,-765,516,-745,516,-726,516,-706,516,-687,516,-668,516,-648,516,-629,516,-610,516,-590,516,-571,516,-87,516,-48,516,-29,516,-10,516,10,516,48,516,68,516,87,516,106,516,126,516,145,516,165,516,184,516,203,516,223,516,242,516,261,516,281,516,300,516,319,516,339,516,358,516,377,516,397,516,416,516,435,516,455,516,474,516,494,516,513,516,532,516,552,516,571,516,590,516,610,516,629,516,648,516,668,516,687,516,706,516,726,516,745,516,765,516,784,516,803,516,823,516,842,516,861,516,881,516,900,516,919,516,939,516,958,516,977,516,997,516,1016,516,1035,516,1055,516,1074,516,1094,516,1113,516,1132,516,1152,516,1171,516,1190,516,1210,516,1229,516,1248,516,1268,516,1287,516,1306,516,1326,516,1345,516,1365,516,1384,516,1403,516,1423,516,1577,528,-1323,528,-1283,528,-1263,528,-1243,528,-1223,528,-1203,528,-1183,528,-1164,528,-1144,528,-1124,528,-1104,528,-1084,528,-1064,528,-1044,528,-1024,528,-1004,528,-965,528,-945,528,-925,528,-905,528,-885,528,-865,528,-845,528,-825,528,-786,528,-766,528,-746,528,-726,528,-706,528,-686,528,-666,528,-646,528,-627,528,-607,528,-587,528,-567,528,-90,528,-70,528,-30,528,-10,528,10,528,50,528,70,528,90,528,109,528,129,528,149,528,169,528,189,528,209,528,229,528,249,528,269,528,288,528,308,528,328,528,348,528,368,528,388,528,408,528,428,528,448,528,467,528,487,528,507,528,527,528,547,528,567,528,587,528,607,528,627,528,646,528,666,528,686,528,706,528,726,528,746,528,766,528,786,528,806,528,825,528,845,528,865,528,885,528,905,528,925,528,945,528,965,528,985,528,1004,528,1024,528,1044,528,1064,528,1084,528,1104,528,1124,528,1144,528,1164,528,1183,528,1203,528,1223,528,1243,528,1263,528,1283,528,1303,528,1323,528,1343,528,1362,528,1382,528,1402,528,1422,528,1561,528,1581,540,-1667,540,-1319,540,-1299,540,-1278,540,-1258,540,-1238,540,-1217,540,-1197,540,-1176,540,-1156,540,-1135,540,-1115,540,-1094,540,-1074,540,-1053,540,-1033,540,-1012,540,-992,540,-972,540,-951,540,-931,540,-910,540,-890,540,-869,540,-849,540,-828,540,-788,540,-767,540,-747,540,-726,540,-706,540,-685,540,-665,540,-644,540,-624,540,-603,540,-583,540,-92,540,-72,540,-31,540,-10,540,92,540,112,540,133,540,153,540,174,540,194,540,215,540,235,540,256,540,276,540,297,540,317,540,338,540,358,540,378,540,399,540,419,540,440,540,460,540,481,540,501,540,522,540,542,540,562,540,583,540,603,540,624,540,644,540,665,540,685,540,706,540,726,540,747,540,767,540,788,540,808,540,828,540,849,540,869,540,890,540,910,540,931,540,951,540,972,540,992,540,1012,540,1033,540,1053,540,1074,540,1094,540,1115,540,1135,540,1156,540,1176,540,1197,540,1217,540,1238,540,1258,540,1278,540,1299,540,1319,540,1340,540,1360,540,1401,540,1565,540,1585,552,-1632,552,-1337,552,-1316,552,-1295,552,-1274,552,-1253,552,-1232,552,-1211,552,-1189,552,-1168,552,-1147,552,-1126,552,-1105,552,-1084,552,-1063,552,-1042,552,-1021,552,-1000,552,-979,552,-958,552,-937,552,-916,552,-895,552,-874,552,-853,552,-832,552,-768,552,-747,552,-726,552,-705,552,-684,552,-663,552,-642,552,-621,552,-600,552,-74,552,-32,552,95,552,116,552,221,552,242,552,263,552,284,552,305,552,326,552,347,552,368,552,389,552,411,552,432,552,453,552,474,552,495,552,516,552,537,552,558,552,579,552,600,552,621,552,642,552,663,552,684,552,705,552,726,552,747,552,768,552,789,552,811,552,832,552,853,552,874,552,895,552,916,552,937,552,958,552,979,552,1000,552,1021,552,1042,552,1063,552,1084,552,1105,552,1126,552,1147,552,1168,552,1189,552,1211,552,1232,552,1253,552,1274,552,1295,552,1316,552,1337,552,1358,552,1379,552,1568,552,1589,552,1611,564,-1594,564,-1334,564,-1312,564,-1290,564,-1269,564,-1247,564,-1225,564,-1204,564,-1182,564,-1160,564,-1139,564,-1117,564,-1095,564,-1073,564,-1052,564,-1030,564,-1008,564,-987,564,-965,564,-943,564,-922,564,-900,564,-878,564,-792,564,-748,564,-727,564,-705,564,-683,564,-661,564,-640,564,-618,564,-54,564,-33,564,98,564,141,564,228,564,249,564,271,564,293,564,314,564,336,564,358,564,380,564,401,564,423,564,445,564,466,564,488,564,510,564,531,564,553,564,575,564,596,564,618,564,640,564,661,564,683,564,705,564,727,564,748,564,770,564,792,564,813,564,835,564,857,564,878,564,900,564,922,564,943,564,965,564,987,564,1008,564,1030,564,1052,564,1073,564,1095,564,1117,564,1139,564,1160,564,1182,564,1204,564,1225,564,1247,564,1269,564,1290,564,1312,564,1334,564,1355,564,1377,564,1572,564,1594,564,1616,576,-1576,576,-1532,576,-1353,576,-1330,576,-1308,576,-1286,576,-1263,576,-1241,576,-1219,576,-1196,576,-1174,576,-1152,576,-1129,576,-1107,576,-1084,576,-1062,576,-1040,576,-1017,576,-995,576,-973,576,-950,576,-928,576,-749,576,-727,576,-704,576,-682,576,-660,576,-637,576,-615,576,-56,576,-34,576,101,576,123,576,145,576,168,576,257,576,280,576,302,576,324,576,347,576,369,576,391,576,414,576,436,576,458,576,481,576,503,576,525,576,548,576,570,576,593,576,615,576,637,576,660,576,682,576,704,576,727,576,749,576,771,576,794,576,816,576,839,576,861,576,883,576,906,576,928,576,950,576,973,576,995,576,1017,576,1040,576,1062,576,1084,576,1107,576,1129,576,1152,576,1174,576,1196,576,1219,576,1241,576,1263,576,1286,576,1308,576,1330,576,1353,576,1375,576,1398,576,1576,576,1599,576,1621,588,-1603,588,-1579,588,-1556,588,-1370,588,-1347,588,-1324,588,-1301,588,-1277,588,-1254,588,-1231,588,-1208,588,-1185,588,-1161,588,-1138,588,-1115,588,-1092,588,-1068,588,-1045,588,-1022,588,-999,588,-975,588,-952,588,-766,588,-743,588,-720,588,-697,588,-650,588,70,588,93,588,116,588,139,588,163,588,232,588,255,588,279,588,302,588,325,588,348,588,372,588,395,588,418,588,441,588,465,588,488,588,511,588,534,588,557,588,581,588,604,588,627,588,650,588,674,588,697,588,720,588,743,588,766,588,790,588,813,588,836,588,859,588,883,588,906,588,929,588,952,588,975,588,999,588,1022,588,1045,588,1068,588,1092,588,1115,588,1138,588,1161,588,1185,588,1208,588,1231,588,1254,588,1277,588,1301,588,1324,588,1347,588,1370,588,1394,588,1417,588,1603,588,1626,600,-1632,600,-1608,600,-1584,600,-1560,600,-1536,600,-1512,600,-1488,600,-1440,600,-1416,600,-1392,600,-1368,600,-1344,600,-1320,600,-1296,600,-1272,600,-1248,600,-1224,600,-1200,600,-1176,600,-1152,600,-1128,600,-1104,600,-1080,600,-1056,600,-1032,600,-1008,600,-984,600,-960,600,-768,600,-744,600,-720,600,-696,600,-648,600,72,600,96,600,120,600,144,600,168,600,240,600,288,600,312,600,336,600,360,600,384,600,408,600,432,600,456,600,480,600,504,600,528,600,552,600,576,600,600,600,624,600,648,600,672,600,696,600,720,600,744,600,768,600,792,600,816,600,840,600,864,600,888,600,912,600,936,600,960,600,984,600,1008,600,1032,600,1056,600,1080,600,1104,600,1128,600,1152,600,1176,600,1200,600,1224,600,1248,600,1272,600,1296,600,1320,600,1344,600,1368,600,1392,600,1416,600,1440,600,1464,600,1488,600,1512,600,1536,600,1632,600,1704,612,-1639,612,-1614,612,-1589,612,-1564,612,-1539,612,-1514,612,-1490,612,-1465,612,-1440,612,-1415,612,-1390,612,-1366,612,-1341,612,-1316,612,-1291,612,-1266,612,-1241,612,-1217,612,-1192,612,-1167,612,-1142,612,-1117,612,-1092,612,-1068,612,-1043,612,-1018,612,-993,612,-968,612,-943,612,-770,612,-745,612,-720,612,-472,612,-447,612,50,612,74,612,99,612,124,612,149,612,223,612,248,612,273,612,298,612,323,612,348,612,372,612,397,612,422,612,447,612,472,612,497,612,521,612,546,612,571,612,596,612,621,612,646,612,670,612,695,612,720,612,745,612,770,612,794,612,819,612,844,612,869,612,894,612,919,612,943,612,968,612,993,612,1018,612,1043,612,1068,612,1092,612,1117,612,1142,612,1167,612,1192,612,1217,612,1241,612,1266,612,1291,612,1316,612,1341,612,1366,612,1390,612,1415,612,1440,612,1465,612,1490,612,1514,612,1539,612,1564,612,1614,612,1639,612,1663,612,1688,612,1713,624,-1645,624,-1619,624,-1593,624,-1567,624,-1541,624,-1515,624,-1489,624,-1463,624,-1437,624,-1412,624,-1386,624,-1360,624,-1334,624,-1308,624,-1282,624,-1256,624,-1230,624,-1204,624,-1178,624,-1153,624,-1127,624,-1101,624,-1075,624,-1049,624,-1023,624,-997,624,-971,624,-945,624,-764,624,-738,624,-686,624,-660,624,-479,624,-453,624,-427,624,-65,624,65,624,91,624,117,624,142,624,168,624,220,624,246,624,272,624,298,624,324,624,350,624,376,624,401,624,427,624,453,624,479,624,505,624,531,624,557,624,583,624,609,624,635,624,660,624,686,624,712,624,738,624,764,624,790,624,816,624,842,624,868,624,894,624,919,624,945,624,971,624,997,624,1023,624,1049,624,1075,624,1101,624,1127,624,1153,624,1178,624,1204,624,1230,624,1256,624,1282,624,1308,624,1334,624,1360,624,1386,624,1412,624,1437,624,1463,624,1489,624,1515,624,1541,624,1567,624,1593,624,1619,624,1645,624,1671,624,1696,624,1722,624,1748,636,-1705,636,-1624,636,-1597,636,-1570,636,-1543,636,-1516,636,-1489,636,-1462,636,-1435,636,-1408,636,-1380,636,-1353,636,-1326,636,-1299,636,-1272,636,-1245,636,-1218,636,-1191,636,-1164,636,-1137,636,-1110,636,-1083,636,-1056,636,-1029,636,-1002,636,-974,636,-947,636,-920,636,-866,636,-812,636,-704,636,-677,636,-650,636,-514,636,-487,636,-460,636,-433,636,-189,636,81,636,108,636,135,636,162,636,189,636,244,636,271,636,298,636,325,636,352,636,379,636,406,636,433,636,460,636,487,636,514,636,541,636,568,636,595,636,623,636,650,636,677,636,704,636,731,636,758,636,785,636,812,636,839,636,866,636,893,636,920,636,947,636,974,636,1002,636,1029,636,1056,636,1083,636,1110,636,1137,636,1164,636,1191,636,1218,636,1245,636,1272,636,1299,636,1326,636,1353,636,1380,636,1408,636,1435,636,1462,636,1489,636,1516,636,1543,636,1570,636,1597,636,1624,636,1651,636,1678,636,1705,636,1732,636,1759,636,1786,648,-1744,648,-1659,648,-1631,648,-1603,648,-1575,648,-1547,648,-1519,648,-1491,648,-1462,648,-1434,648,-1406,648,-1378,648,-1350,648,-1322,648,-1294,648,-1266,648,-1238,648,-1209,648,-1181,648,-1153,648,-1125,648,-1097,648,-1069,648,-1041,648,-1012,648,-984,648,-956,648,-928,648,-900,648,-844,648,-759,648,-731,648,-703,648,-675,648,-506,648,-478,648,-450,648,-422,648,-225,648,-197,648,-169,648,-141,648,112,648,141,648,169,648,197,648,253,648,281,648,309,648,338,648,366,648,394,648,422,648,450,648,478,648,506,648,534,648,562,648,591,648,619,648,647,648,675,648,703,648,731,648,759,648,788,648,816,648,844,648,872,648,900,648,928,648,956,648,984,648,1012,648,1041,648,1069,648,1097,648,1125,648,1153,648,1181,648,1209,648,1238,648,1266,648,1294,648,1322,648,1350,648,1378,648,1406,648,1434,648,1462,648,1491,648,1519,648,1547,648,1575,648,1603,648,1631,648,1659,648,1688,648,1716,648,1744,648,1772,660,-1785,660,-1756,660,-1726,660,-1667,660,-1638,660,-1608,660,-1579,660,-1549,660,-1520,660,-1490,660,-1461,660,-1431,660,-1402,660,-1372,660,-1343,660,-1313,660,-1284,660,-1254,660,-1225,660,-1195,660,-1166,660,-1136,660,-1107,660,-1077,660,-1048,660,-1018,660,-989,660,-959,660,-930,660,-900,660,-870,660,-841,660,-723,660,-693,660,-634,660,-516,660,-487,660,-457,660,-428,660,-398,660,-369,660,-221,660,-192,660,-162,660,133,660,162,660,192,660,221,660,251,660,280,660,310,660,339,660,428,660,457,660,487,660,516,660,546,660,575,660,605,660,634,660,664,660,693,660,723,660,752,660,782,660,811,660,841,660,870,660,900,660,930,660,959,660,989,660,1018,660,1048,660,1077,660,1107,660,1136,660,1166,660,1195,660,1225,660,1254,660,1284,660,1313,660,1343,660,1372,660,1402,660,1431,660,1461,660,1490,660,1520,660,1549,660,1579,660,1608,660,1638,660,1667,660,1697,660,1726,660,1756,660,1785,672,-1800,672,-1769,672,-1738,672,-1614,672,-1583,672,-1552,672,-1521,672,-1490,672,-1459,672,-1428,672,-1397,672,-1366,672,-1334,672,-1303,672,-1272,672,-1241,672,-1210,672,-1179,672,-1148,672,-1117,672,-1086,672,-1055,672,-1024,672,-993,672,-962,672,-931,672,-900,672,-869,672,-838,672,-714,672,-683,672,-652,672,-621,672,-528,672,-497,672,-466,672,-434,672,-403,672,-372,672,-341,672,155,672,186,672,217,672,248,672,279,672,310,672,341,672,372,672,403,672,497,672,528,672,559,672,590,672,621,672,652,672,683,672,714,672,745,672,776,672,807,672,838,672,869,672,900,672,931,672,962,672,993,672,1024,672,1055,672,1086,672,1117,672,1148,672,1179,672,1210,672,1241,672,1272,672,1303,672,1334,672,1366,672,1397,672,1428,672,1459,672,1490,672,1521,672,1552,672,1583,672,1614,672,1645,672,1676,672,1707,672,1738,672,1769,684,-1784,684,-1653,684,-1620,684,-1587,684,-1555,684,-1522,684,-1489,684,-1456,684,-1424,684,-1391,684,-1358,684,-1325,684,-1293,684,-1260,684,-1227,684,-1195,684,-1162,684,-1064,684,-965,684,-933,684,-900,684,-867,684,-835,684,-769,684,-736,684,-704,684,-671,684,-507,684,-475,684,-442,684,-409,684,-376,684,-344,684,-311,684,147,684,180,684,213,684,245,684,278,684,311,684,344,684,376,684,442,684,507,684,540,684,573,684,605,684,638,684,671,684,704,684,769,684,802,684,835,684,867,684,900,684,933,684,965,684,998,684,1031,684,1064,684,1096,684,1129,684,1162,684,1195,684,1227,684,1260,684,1293,684,1325,684,1358,684,1391,684,1424,684,1456,684,1489,684,1522,684,1555,684,1587,684,1620,684,1653,684,1685,684,1718,684,1751,684,1784,696,-1629,696,-1594,696,-1560,696,-1526,696,-1491,696,-1457,696,-1423,696,-1389,696,-1354,696,-1320,696,-1286,696,-1251,696,-1217,696,-1149,696,-1114,696,-1080,696,-1046,696,-977,696,-943,696,-909,696,-840,696,-771,696,-737,696,-703,696,-531,696,-497,696,-463,696,-429,696,-394,696,-360,696,-326,696,-291,696,-257,696,189,696,223,696,257,696,291,696,326,696,497,696,634,696,703,696,737,696,771,696,806,696,840,696,874,696,909,696,943,696,977,696,1011,696,1046,696,1080,696,1114,696,1149,696,1183,696,1217,696,1251,696,1286,696,1320,696,1354,696,1389,696,1423,696,1457,696,1491,696,1526,696,1560,696,1594,696,1629,696,1663,696,1731,696,1766,708,-1600,708,-1564,708,-1527,708,-1164,708,-1127,708,-1091,708,-1055,708,-945,708,-873,708,-836,708,-800,708,-764,708,-727,708,-691,708,-545,708,-509,708,-473,708,-436,708,-400,708,-364,708,-327,708,-291,708,-255,708,-218,708,255,708,291,708,545,708,691,708,727,708,764,708,800,708,836,708,873,708,909,708,945,708,982,708,1018,708,1055,708,1091,708,1127,708,1164,708,1200,708,1236,708,1273,708,1309,708,1345,708,1382,708,1418,708,1455,708,1491,708,1527,708,1564,708,1600,720,-1258,720,-1219,720,-1181,720,-1142,720,-1103,720,-1065,720,-987,720,-948,720,-871,720,-832,720,-794,720,-755,720,-523,720,-484,720,-445,720,-406,720,-368,720,-329,720,-290,720,-252,720,523,720,716,720,794,720,832,720,871,720,910,720,948,720,987,720,1026,720,1065,720,1103,720,1142,720,1181,720,1219,720,1258,720,1413,720,1452,720,1490,732,-1241,732,-1200,732,-1159,732,-1117,732,-1076,732,-993,732,-952,732,-869,732,-828,732,-786,732,-538,732,-497,732,-455,732,-414,732,-372,732,-331,732,-290,732,-248,732,538,732,703,732,745,732,828,732,869,732,910,732,952,732,993,732,1034,732,1076,732,1117,732,1159,732,1200,732,1241,732,1283,744,-1222,744,-1178,744,-1133,744,-867,744,-822,744,-556,744,-511,744,-467,744,-422,744,-378,744,-333,744,-289,744,-244,744,-200,744,556,744,867,744,911,744,956,744,1000,744,1044,744,1089,744,1133,756,-1152,756,-1104,756,-1056,756,-1008,756,-960,756,-912,756,-864,756,-816,756,-576,756,-528,756,-480,756,-432,756,-384,756,-336,756,-288,756,-240,756,-192,756,576,756,624,756,912,756,960,756,1008,756,1056,756,1104,756,1392,756,1440,768,-1174,768,-1017,768,-965,768,-913,768,-861,768,-809,768,-652,768,-600,768,-548,768,-496,768,-443,768,-391,768,-339,768,-287,768,-235,768,652,768,1017,768,1070,768,1122,780,-1132,780,-958,780,-842,780,-784,780,-726,780,-668,780,-610,780,-552,780,-494,780,-435,780,-377,780,-319,780,-261,780,-203,780,145,792,-1029,792,-900,792,-836,792,-771,792,-643,792,-579,792,-514,792,-450,792,-386,792,-321,792,-257,792,-193,792,129,792,193,792,964,792,1029,804,-900,804,-828,804,-756,804,-612,804,-540,804,-468,804,-396,804,-324,804,-252,804,-180,804,252,804,324,804,972,816,-900,816,-818,816,-736,816,-655,816,-573,816,-491,816,-409,816,-327,816,-245,816,-164,816,573,828,-805,828,-711,828,-616,828,-426,828,-332,828,-237,840,-300];
+    </script>
+
+    <script>
+        // 1. THREE.JS & CSS2D RENDERER SETUP
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5.2; // Fixed camera distance (No zoom!)
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        // CSS2D Renderer for city label overlays
+        const labelRenderer = new THREE.CSS2DRenderer();
+        labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.appendChild(labelRenderer.domElement);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(5, 5, 4);
+        scene.add(dirLight);
+
+        // Controls (Locked until Section 3)
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enableZoom = false;
+        controls.enabled = false;
+
+        const globeGroup = new THREE.Group();
+        scene.add(globeGroup);
+        globeGroup.position.set(1.4, 0, 0); // Position globe on the right
+
+        // Scaling the whole group (rather than shrinking globeRadius itself)
+        // shrinks the globe, its atmosphere, and every marker/pin together
+        // proportionally, since they're all defined in the group's local
+        // space — no other geometry needs to change.
+        const globeScale = 0.6; // 40% smaller
+        globeGroup.scale.setScalar(globeScale);
+
+        // 2. GLOBE MODEL — translucent wireframe (graticule) + dotted land map.
+        // Instead of a photo-textured sphere, the globe is drawn as a faint
+        // lat/long grid you can see through, with land rendered as a field of
+        // small dots. Everything is transparent and depth-sorted so the far
+        // hemisphere reads as a whisper behind the near one.
+        const globeRadius = 2.0;
+
+        // Shared lat/lon -> position helper. Defined up here (before the globe
+        // is built) so the land dots use the EXACT same convention as the city
+        // pins — that's what keeps continents aligned under New York, Bombay,
+        // etc.
+        function latLongToVector3(lat, lon, radius) {
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lon + 180) * (Math.PI / 180);
+            return new THREE.Vector3(
+                -(radius * Math.sin(phi) * Math.cos(theta)),
+                radius * Math.cos(phi),
+                radius * Math.sin(phi) * Math.sin(theta)
+            );
+        }
+
+        // --- Graticule: the "outline" — thin meridian/parallel lines that give
+        //     the sphere its shape while staying almost see-through. ---
+        const graticuleMat = new THREE.LineBasicMaterial({
+            color: new THREE.Color('#c4b9a5'),
+            transparent: true,
+            opacity: 0.16,
+            depthWrite: false
+        });
+        (function buildGraticule() {
+            const verts = [];
+            const R = globeRadius * 1.002;
+            const SEG = 96;
+            // Parallels (lines of latitude)
+            for (let lat = -80; lat <= 80; lat += 20) {
+                for (let i = 0; i < SEG; i++) {
+                    const a = (i / SEG) * 360 - 180;
+                    const b = ((i + 1) / SEG) * 360 - 180;
+                    const p1 = latLongToVector3(lat, a, R);
+                    const p2 = latLongToVector3(lat, b, R);
+                    verts.push(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
+                }
+            }
+            // Meridians (lines of longitude)
+            for (let lon = -180; lon < 180; lon += 20) {
+                for (let i = 0; i < SEG; i++) {
+                    const a = (i / SEG) * 180 - 90;
+                    const b = ((i + 1) / SEG) * 180 - 90;
+                    const p1 = latLongToVector3(a, lon, R);
+                    const p2 = latLongToVector3(b, lon, R);
+                    verts.push(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
+                }
+            }
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+            globeGroup.add(new THREE.LineSegments(geo, graticuleMat));
+        })();
+
+        // --- Dotted land: positions precomputed from a real land/ocean mask
+        //     (embedded as LAND_DOTS, stored as lat*10, lon*10 int pairs). ---
+        const dotPositions = [];
+        for (let i = 0; i < LAND_DOTS.length; i += 2) {
+            const v = latLongToVector3(LAND_DOTS[i] / 10, LAND_DOTS[i + 1] / 10, globeRadius);
+            dotPositions.push(v.x, v.y, v.z);
+        }
+        const dotsGeo = new THREE.BufferGeometry();
+        dotsGeo.setAttribute('position', new THREE.Float32BufferAttribute(dotPositions, 3));
+
+        // Dot colour is animated across the three story beats (see the timeline):
+        // cool slate at night -> warm bronze at "sunrise" -> deep teal for the
+        // global overview. Each reads clearly against that beat's backdrop.
+        const DOT_NIGHT  = new THREE.Color('#463f34');  // warm charcoal engraving
+        const DOT_DAY    = new THREE.Color('#b07d1e');  // sunrise gold
+        const DOT_GLOBAL = new THREE.Color('#33685c');  // deep teal for the world
+
+        const dotUniforms = {
+            uColor: { value: DOT_NIGHT.clone() },
+            uSize:  { value: 4.3 },
+            uDpr:   { value: renderer.getPixelRatio() },
+            uFront: { value: 0.95 },
+            uBack:  { value: 0.13 }
+        };
+        // Custom point shader: soft round dots, faded on the far hemisphere so
+        // the globe stays legibly transparent (front dots crisp, back dots ghosted).
+        const dotsMat = new THREE.ShaderMaterial({
+            uniforms: dotUniforms,
+            transparent: true,
+            depthWrite: false,
+            vertexShader: `
+                uniform float uSize;
+                uniform float uDpr;
+                varying float vFacing;
+                void main() {
+                    // On a sphere at the origin the surface normal is just the
+                    // normalized position; its view-space z tells us if the dot
+                    // faces the camera (>0) or is on the back (<0).
+                    vec3 n = normalize(normalMatrix * normalize(position));
+                    vFacing = n.z;
+                    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+                    gl_PointSize = uSize * uDpr * (2.6 / -mv.z);
+                    gl_Position = projectionMatrix * mv;
+                }
+            `,
+            fragmentShader: `
+                uniform vec3 uColor;
+                uniform float uFront;
+                uniform float uBack;
+                varying float vFacing;
+                void main() {
+                    vec2 uv = gl_PointCoord - 0.5;
+                    float circle = smoothstep(0.5, 0.32, length(uv));
+                    if (circle <= 0.001) discard;
+                    float facing = smoothstep(-0.18, 0.30, vFacing);
+                    gl_FragColor = vec4(uColor, mix(uBack, uFront, facing) * circle);
+                }
+            `
+        });
+        const dotsMesh = new THREE.Points(dotsGeo, dotsMat);
+        globeGroup.add(dotsMesh);
+
+        // --- Faint atmosphere aura (kept very light so it reads as a soft rim,
+        //     not a filled disc behind the wireframe). Its colour/opacity still
+        //     shift per story beat via the timeline. ---
+        const atmosGeo = new THREE.SphereGeometry(globeRadius + 0.02, 64, 64);
+        const atmosMat = new THREE.MeshBasicMaterial({
+            color: 0xcdbb9c,
+            transparent: true,
+            opacity: 0.05,
+            side: THREE.BackSide,
+            depthWrite: false
+        });
+        globeGroup.add(new THREE.Mesh(atmosGeo, atmosMat));
+
+        // 3. EXACT COORDINATES & MARKERS WITH ANNOTATIONS
+
+        // A marker is now just a dot: a small solid sphere (reads as a round
+        // dot from every angle and never vanishes at grazing angles the way a
+        // flat disc would) plus an invisible larger hit sphere for forgiving
+        // hover/click, and a soft halo that fades in when hovered/selected.
+        function createSurfaceMarker(color = 0xef4444, radius = 0.03) {
+            const group = new THREE.Group();
+
+            const core = new THREE.Mesh(
+                new THREE.SphereGeometry(radius, 16, 16),
+                new THREE.MeshBasicMaterial({ color: color })
+            );
+            group.add(core);
+
+            const halo = new THREE.Mesh(
+                new THREE.SphereGeometry(radius * 2.2, 20, 20),
+                new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0, depthWrite: false })
+            );
+            group.add(halo);
+
+            // Generous, invisible pick target (still raycastable while hidden).
+            const hit = new THREE.Mesh(
+                new THREE.SphereGeometry(radius * 3.2, 12, 12),
+                new THREE.MeshBasicMaterial({ visible: false })
+            );
+            hit.visible = false;
+            group.add(hit);
+
+            group.userData.core = core;
+            group.userData.halo = halo;
+            group.userData.hit = hit;
+            group.userData.baseColor = new THREE.Color(color);
+            return group;
+        }
+
+        function placeMarkerOnSurface(marker, lat, lon) {
+            const pos = latLongToVector3(lat, lon, globeRadius + 0.005);
+            marker.position.copy(pos);
+            marker.lookAt(pos.clone().multiplyScalar(2));
+        }
+
+        // Solve for the globeGroup Euler rotation that brings a given lat/lon to
+        // screen-center for the CURRENT camera (position + look direction) —
+        // via exact ray/sphere intersection, so it stays correct whether the
+        // camera is still at its fixed scripted position or has been dragged
+        // anywhere by OrbitControls — accounting for the group's own offset
+        // (so the target city lands mid-globe instead of hugging the silhouette
+        // edge), while keeping the north pole upright.
+        function computeGlobeRotation(lat, lon, groupPos, radius, cameraPos, cameraForward) {
+            const local = latLongToVector3(lat, lon, 1);
+
+            // Ray from the camera toward its look direction; the near
+            // intersection with the globe's sphere is the point that will sit
+            // exactly on the camera's optical axis (i.e. screen-center) once
+            // rotated there.
+            const C = new THREE.Vector3().subVectors(cameraPos, groupPos);
+            const F = cameraForward.clone().normalize();
+            const b = C.dot(F);
+            const c = C.lengthSq() - radius * radius;
+            const disc = Math.max(b * b - c, 0);
+            const t = -b - Math.sqrt(disc);
+            const target = C.clone().addScaledVector(F, t).divideScalar(radius).normalize();
+
+            const alignQuat = new THREE.Quaternion().setFromUnitVectors(local, target);
+
+            // Correct roll so the pole stays vertical instead of drifting sideways.
+            const poleRotated = new THREE.Vector3(0, 1, 0).applyQuaternion(alignQuat);
+            const worldUp = new THREE.Vector3(0, 1, 0);
+            const desiredUp = worldUp.clone().sub(target.clone().multiplyScalar(worldUp.dot(target))).normalize();
+            const currentUp = poleRotated.clone().sub(target.clone().multiplyScalar(poleRotated.dot(target))).normalize();
+            const rollQuat = new THREE.Quaternion().setFromUnitVectors(currentUp, desiredUp);
+
+            const finalQuat = rollQuat.multiply(alignQuat);
+            const euler = new THREE.Euler().setFromQuaternion(finalQuat, 'XYZ');
+            return { x: euler.x, y: euler.y, z: euler.z };
+        }
+
+        // Create City Annotation Label
+        function createCityAnnotation(text, isRed = false) {
+            const div = document.createElement('div');
+            div.className = `city-label ${isRed ? 'red' : ''}`;
+            div.innerHTML = `<span class="dot"></span><span class="label-text">${text}</span>`;
+            return new THREE.CSS2DObject(div);
+        }
+
+        // Marker 1: New York (40.7128° N, 74.0060° W)
+        const nyMarker = createSurfaceMarker(0xa8631f);
+        placeMarkerOnSurface(nyMarker, 40.7128, -74.0060);
+        const nyLabel = createCityAnnotation("New York, USA");
+        nyLabel.position.set(0, 0.1, 0);
+        nyMarker.add(nyLabel);
+        globeGroup.add(nyMarker);
+
+        // Marker 2: Bombay / Mumbai (19.0760° N, 72.8777° E)
+        const indiaMarker = createSurfaceMarker(0xb5451f);
+        placeMarkerOnSurface(indiaMarker, 19.0760, 72.8777);
+        const indiaLabel = createCityAnnotation("Bombay, India", true);
+        indiaLabel.position.set(0, 0.1, 0);
+        indiaMarker.add(indiaLabel);
+        indiaMarker.scale.set(0, 0, 0);
+        globeGroup.add(indiaMarker);
+
+        // Section 3 Markers
+        const sec3Locations = [
+            { name: "Arizona", lat: 34.0489, lon: -111.0937 },
+            { name: "Florida", lat: 27.6648, lon: -81.5158 },
+            { name: "Argentina", lat: -38.4161, lon: -63.6167 },
+            { name: "UK", lat: 55.3781, lon: -3.4360 },
+            { name: "Australia", lat: -25.2744, lon: 133.7751 },
+            { name: "Yugoslavia", lat: 44.0165, lon: 21.0059 }
+        ];
+
+        const sec3MarkersGroup = new THREE.Group();
+        sec3MarkersGroup.scale.set(0, 0, 0);
+        globeGroup.add(sec3MarkersGroup);
+
+        const sec3Labels = [];
+        const sec3Markers = [];
+        sec3Locations.forEach(loc => {
+            const marker = createSurfaceMarker(0xa8631f);
+            placeMarkerOnSurface(marker, loc.lat, loc.lon);
+            const label = createCityAnnotation(loc.name);
+            label.position.set(0, 0.1, 0);
+            marker.add(label);
+            sec3Labels.push(label);
+            sec3Markers.push(marker);
+            sec3MarkersGroup.add(marker);
+        });
+
+        // TCS office locations (supplied location list), grouped by country.
+        // Each country gets ONE marker on the globe; clicking it opens the
+        // info panel, which pages through every office in that country
+        // rather than needing a separate pin per building. Coordinates are
+        // an approximate representative point per country (a major listed
+        // office city), not a precise geocode of every address.
+        const officeCountries = [
+            {
+                name: "India", lat: 19.0760, lon: 72.8777, verified: true,
+                offices: [
+                    { city: "Mumbai", office: "TCS House (Registered HQ)", address: "Raveline Street, Fort, Mumbai 400001, Maharashtra" },
+                    { city: "Mumbai", office: "TCS Banyan Park", address: "Adi Shankaracharya Marg, Powai, Andheri East, Mumbai" },
+                    { city: "Thane", office: "TCS Olympus Centre", address: "Hiranandani Business Park, Thane West, Maharashtra" },
+                    { city: "Navi Mumbai", office: "TCS Yantra Park", address: "Thane-Belapur Road, Mahape, Navi Mumbai 400710" },
+                    { city: "Pune", office: "TCS Sahyadri Park", address: "Plot 2 & 3, Phase III, Hinjewadi Rajiv Gandhi Infotech Park, Pune 411057" },
+                    { city: "Pune", office: "TCS Kharadi (EON IT Park)", address: "EON IT Park, Kharadi, Pune 411014" },
+                    { city: "Chennai", office: "TCS Siruseri (Peepul Park)", address: "SIPCOT IT Park, Navalur Post, Siruseri, Chennai 603103" },
+                    { city: "Chennai", office: "TCS TIDEL Park", address: "No. 4, Rajiv Gandhi Salai, Taramani, Chennai 600113" },
+                    { city: "Chennai", office: "TCS DLF IT Park", address: "Ambattur Industrial Estate, Chennai 600058" },
+                    { city: "Chennai", office: "TCS IIT Research Park", address: "Kanagam Road, Taramani, Chennai 600113" },
+                    { city: "Hyderabad", office: "TCS Deccan Park", address: "Plot 1, Software Units Layout, Madhapur, Hyderabad 500081" },
+                    { city: "Hyderabad", office: "TCS Synergy Park", address: "Gachibowli, Hyderabad 500032" },
+                    { city: "Hyderabad", office: "TCS WaveRock", address: "Financial District, Nanakramguda, Hyderabad 500032" },
+                    { city: "Kolkata", office: "TCS Gitanjali Park", address: "New Town, Rajarhat, Kolkata 700156" },
+                    { city: "Kolkata", office: "TCS Ecospace", address: "Ecospace Business Park, New Town, Rajarhat, Kolkata 700156" },
+                    { city: "New Delhi", office: "PTI Building", address: "4 Parliament Street, New Delhi 110001" },
+                    { city: "Gurugram", office: "TCS Cyber City", address: "DLF Cyber City, Gurugram, Haryana 122002" },
+                    { city: "Noida", office: "TCS Noida", address: "A-48, Sector 62, Noida, UP 201307" },
+                    { city: "Gandhinagar", office: "TCS Garima Park", address: "DA-IICT Road, Infocity, Gandhinagar 382007" },
+                    { city: "Bhubaneswar", office: "TCS Kalinga Park SEZ", address: "Chandaka Industrial Estate, Patia, Bhubaneswar 751024" },
+                    { city: "Nagpur", office: "TCS MIHAN Campus", address: "Village Telhara-Dahegaon, Khapri, Nagpur 441108" },
+                    { city: "Indore", office: "TCS Indore SEZ", address: "Tigariya Badshah, Super Corridor, Indore 452018" },
+                    { city: "Lucknow", office: "TCS Awadh Park", address: "1/1, Vibhuti Khand, Gomti Nagar, Lucknow 226010" },
+                    { city: "Thiruvananthapuram", office: "TCS Peepul Park", address: "Technopark Campus, Kariyavattom, Thiruvananthapuram 695581" },
+                    { city: "Kochi", office: "TCS Infopark", address: "Vismaya Building, Kakkanad, Kochi 682042" },
+                    { city: "Jaipur", office: "TCS Mahindra World City", address: "Ajmer Road, Kalwara, Jaipur 302037" },
+                    { city: "Ahmedabad", office: "TCS Sakar II", address: "Ellis Bridge, Ahmedabad 380006" },
+                    { city: "Vadodara", office: "TCS Eureka Center", address: "Om Business Park, Subhanpura, Vadodara 390023" },
+                    { city: "Patna", office: "TCS Vedshree Arcade", address: "Mauja Durja, PS Buddha Colony, Patna 800001" },
+                    { city: "Bengaluru", office: "Manyata Tech Park", address: "Nagawara, Bengaluru (area only)" },
+                    { city: "Bengaluru", office: "Electronic City", address: "Electronic City, Bengaluru (area only)" },
+                    { city: "Bengaluru", office: "Whitefield", address: "Whitefield, Bengaluru (area only)" },
+                    { city: "Bengaluru", office: "Sarjapur Road", address: "Sarjapur Road, Bengaluru (area only)" }
+                ]
+            },
+            {
+                name: "USA", lat: 39.8283, lon: -98.5795, verified: false,
+                offices: [
+                    { city: "Atlanta, GA", office: "Atlanta", address: "Galleria Office, Tower 400, Galleria Parkway, Suite 1060, GA 30339" },
+                    { city: "Bellevue, WA", office: "Bellevue", address: "14335 NE 24th St, Bldg B, Suite 100 & 200, Bellevue, WA 98007" },
+                    { city: "Bentonville, AR", office: "Bentonville", address: "609 SW 8th St, Bentonville, AR 72712" },
+                    { city: "Bloomington, MN", office: "Bloomington", address: "Bloomington, MN (area only)" },
+                    { city: "Charlotte, NC", office: "Charlotte", address: "Charlotte, NC (area only)" },
+                    { city: "Dallas, TX", office: "Dallas", address: "3010 LBJ Freeway, Suite 400, Dallas, TX 75234" },
+                    { city: "Denver, CO", office: "Denver", address: "7979 E Tufts Ave, Suite 1200, Denver, CO 80237" },
+                    { city: "Edison, NJ", office: "Edison", address: "379 Thornall St, Edison, NJ 08837" },
+                    { city: "Glendale, CA", office: "Glendale", address: "500 N Brand Blvd, Ste 1120, Glendale, CA 91203" },
+                    { city: "Houston, TX", office: "Houston", address: "3050 Post Oak Blvd, Suite 1625, TX 77056" },
+                    { city: "Cincinnati, OH", office: "Ivy Pointe", address: "4270 Ivy Pointe Blvd, Suite 400, Cincinnati, OH 45245" },
+                    { city: "Minneapolis, MN", office: "Minneapolis", address: "2716 Hennepin Ave, Minneapolis, MN 55408" },
+                    { city: "Naperville, IL", office: "Naperville", address: "Naperville, IL (area only)" },
+                    { city: "New York, NY", office: "New York – 1", address: "101 Park Avenue, 26th Floor, NY 10178" },
+                    { city: "New York, NY", office: "New York – 2", address: "Brookfield Place, 200 Liberty Street, 21st Fl, NY 10281" },
+                    { city: "Phoenix, AZ", office: "Arizona Development Center", address: "Phoenix, AZ (area only)" },
+                    { city: "Rockville, MD", office: "Rockville", address: "9201 Corporate Blvd, Suite 320, Rockville, MD 20850" },
+                    { city: "Santa Clara, CA", office: "Santa Clara", address: "Santa Clara, CA (area only)" },
+                    { city: "Milford, OH", office: "Seven Hills Park", address: "1000 Summit Dr, Milford, OH 45150" },
+                    { city: "Sharonville, OH", office: "Sharonville", address: "Crowne Point 1, Crowne Point Court, Sharonville, OH 45241" },
+                    { city: "Wilmington, DE", office: "Wilmington", address: "4250 Lancaster Pike, Suite 220, Wilmington, DE 19805" }
+                ]
+            },
+            {
+                name: "Canada", lat: 43.6532, lon: -79.3832, verified: false,
+                offices: [
+                    { city: "Calgary", office: "Calgary", address: "Calgary, Alberta (area only)" },
+                    { city: "Montreal", office: "Montreal", address: "Montreal, Quebec (area only)" },
+                    { city: "Toronto", office: "Toronto", address: "Toronto, Ontario (area only)" },
+                    { city: "Toronto", office: "Toronto Solution Center", address: "25th Floor, 400 University Ave, Toronto" }
+                ]
+            },
+            {
+                name: "Argentina", lat: -34.6037, lon: -58.3816, verified: false,
+                offices: [
+                    { city: "Buenos Aires", office: "Buenos Aires", address: "Uspallata 3046, Parque Patricios C1437JCJ" }
+                ]
+            },
+            {
+                name: "Brazil", lat: -23.5505, lon: -46.6333, verified: false,
+                offices: [
+                    { city: "São Paulo", office: "São Paulo", address: "Alameda Madeira 328, 13° andar, Alphaville Industrial, Barueri SP 06453-020" }
+                ]
+            },
+            {
+                name: "Chile", lat: -33.4489, lon: -70.6693, verified: false,
+                offices: [
+                    { city: "Santiago", office: "Santiago", address: "Curico 18, Santiago de Chile" }
+                ]
+            },
+            {
+                name: "Colombia", lat: 4.7110, lon: -74.0721, verified: false,
+                offices: [
+                    { city: "Bogotá", office: "Bogotá", address: "Calle 100 #9-A-45, Torre 2, Piso 7, Bogotá" },
+                    { city: "Medellín", office: "Medellín", address: "Carrera 52 No. 14-30, Centro Empresarial Olaya Herrera, Of. 331" }
+                ]
+            },
+            {
+                name: "Ecuador", lat: -0.1807, lon: -78.4678, verified: false,
+                offices: [
+                    { city: "Quito", office: "Quito", address: "Av. Antonio José de Sucre y Cárdenas, Quito" }
+                ]
+            },
+            {
+                name: "Mexico", lat: 19.4326, lon: -99.1332, verified: false,
+                offices: [
+                    { city: "Guadalajara", office: "Guadalajara – Tata 1", address: "Ave. Tizoc #97, Colonia Ciudad del Sol, Zapopan, Jalisco 45050" },
+                    { city: "Guadalajara", office: "Guadalajara – Tata 2", address: "Av. Camino al ITESO #8699, Col. El Mante, Tlaquepaque, Jalisco 45609" },
+                    { city: "Mexico City", office: "Mexico City", address: "Insurgentes Sur 664, Piso 2, Col. Del Valle, 03100" },
+                    { city: "Querétaro", office: "Querétaro – Tata 1", address: "Hacienda Chintepec 110-18, Col. El Jacal, 76180, Santiago de Querétaro" }
+                ]
+            },
+            {
+                name: "Peru", lat: -12.0464, lon: -77.0428, verified: false,
+                offices: [
+                    { city: "Lima", office: "Lima", address: "Av. Nicolás Ayllón 2941, Piso 3, Lima 10" }
+                ]
+            },
+            {
+                name: "Uruguay", lat: -34.9011, lon: -56.1645, verified: false,
+                offices: [
+                    { city: "Montevideo", office: "Montevideo", address: "Monte Caseros 2600, CP 11600" }
+                ]
+            },
+            {
+                name: "Japan", lat: 35.6762, lon: 139.6503, verified: false,
+                offices: [
+                    { city: "Nagoya", office: "Chubu Branch", address: "JR Central Towers 49F, 1-1-4 Meieki, Nakamura-ku, Nagoya 450-6049" },
+                    { city: "Osaka", office: "West Japan Regional Office", address: "Dojima Avanza 14F, 1-6-20 Dojima, Kita-ku, Osaka 530-0003" },
+                    { city: "Tokyo", office: "Head Office", address: "38 MT Building, 4-1-4 Shibakoen, Minato-ku, Tokyo 105-8508" }
+                ]
+            },
+            {
+                name: "Australia (Offices)", lat: -33.8688, lon: 151.2093, verified: false,
+                offices: [
+                    { city: "Brisbane", office: "Brisbane", address: "Suite 1, Lv 22, 69 Ann St, Brisbane QLD 4000" },
+                    { city: "Melbourne", office: "Melbourne", address: "Level 8, 479 St Kilda Road, VIC 3004" },
+                    { city: "Perth", office: "Perth", address: "The Executive Centre, Level 25, 108 St Georges Terrace, Perth WA 6000" },
+                    { city: "Sydney", office: "Sydney", address: "Level 6, 76 Berry Street, North Sydney NSW 2060" }
+                ]
+            },
+            {
+                name: "New Zealand", lat: -36.8485, lon: 174.7633, verified: false,
+                offices: [
+                    { city: "Auckland", office: "Auckland", address: "6 Clayton Street, Newmarket 1023" }
+                ]
+            },
+            {
+                name: "Ireland", lat: 53.3498, lon: -6.2603, verified: false,
+                offices: [
+                    { city: "Dublin", office: "Dublin", address: "Fitzwilliam Hall, Fitzwilliam Place, Dublin 2" }
+                ]
+            },
+            {
+                name: "Austria", lat: 48.2082, lon: 16.3738, verified: false,
+                offices: [
+                    { city: "Vienna", office: "Vienna", address: "Vienna Twin Towers, Wienerbergstr. 11, 1100" }
+                ]
+            },
+            {
+                name: "Belgium", lat: 50.8503, lon: 4.3517, verified: false,
+                offices: [
+                    { city: "Brussels", office: "Brussels", address: "Boulevard Brand Whitlock 87, 1200, Woluwe-St-Lambert" },
+                    { city: "Zaventem", office: "Zaventem", address: "Alma Court, Lenneke Marelaan 4, B-1932" }
+                ]
+            },
+            {
+                name: "Denmark", lat: 55.6761, lon: 12.5683, verified: false,
+                offices: [
+                    { city: "Copenhagen", office: "Copenhagen", address: "Kalvebod Brygge 45, DK-1560" }
+                ]
+            },
+            {
+                name: "Finland", lat: 60.1699, lon: 24.9384, verified: false,
+                offices: [
+                    { city: "Espoo", office: "Espoo", address: "Karaportti Bldg 10, Karakaari 5, 02610 Espoo" },
+                    { city: "Helsinki", office: "Helsinki", address: "Itämerenkatu 5, FI-00180" },
+                    { city: "Tampere", office: "Tampere", address: "Pispalan valtatie 21, 33250 Tampere" }
+                ]
+            },
+            {
+                name: "France", lat: 48.8566, lon: 2.3522, verified: false,
+                offices: [
+                    { city: "Courbevoie", office: "Courbevoie", address: "11 avenue Dubonnet, 92400 Courbevoie" },
+                    { city: "Levallois-Perret", office: "Levallois", address: "88 rue de Villiers, 92 Levallois-Perret" },
+                    { city: "Paris", office: "Paris", address: "Tour Franklin, La Défense 8, 92042 Paris La Défense Cedex" },
+                    { city: "Poitiers", office: "Poitiers", address: "Pôle multimodal de la Gare, 86 Poitiers" }
+                ]
+            },
+            {
+                name: "Germany", lat: 50.1109, lon: 8.6821, verified: false,
+                offices: [
+                    { city: "Düsseldorf", office: "Düsseldorf", address: "Heltorfer Str. 1/1a, 40472 Düsseldorf" },
+                    { city: "Frankfurt", office: "Frankfurt", address: "MesseTurm, 60308 Frankfurt am Main" },
+                    { city: "Hamburg", office: "Hamburg", address: "Chilehaus A, Fischertwiete 2, 20095 Hamburg" },
+                    { city: "Munich", office: "Munich", address: "Landsberger Straße 110, 80339 München" },
+                    { city: "Stuttgart", office: "Stuttgart", address: "Colorado Tower, Industriestrasse 4, 70565 Stuttgart" },
+                    { city: "Walldorf", office: "Walldorf", address: "Altrottstrasse 31, Block A-EG, 69190 Walldorf" },
+                    { city: "Wolfsburg", office: "Wolfsburg", address: "Business Center Nord, Major-Hirst-Str. 11, 38442" }
+                ]
+            },
+            {
+                name: "Hungary", lat: 47.4979, lon: 19.0402, verified: false,
+                offices: [
+                    { city: "Budapest", office: "Budapest", address: "Irinyi József utca 4-20, 1117" },
+                    { city: "Budapest", office: "Budapest 1", address: "Aliz utca 2, 1117" }
+                ]
+            },
+            {
+                name: "Italy", lat: 45.4642, lon: 9.1900, verified: false,
+                offices: [
+                    { city: "Milan", office: "Milan", address: "Corso Italia 1, 20122 Milano" }
+                ]
+            },
+            {
+                name: "Luxembourg", lat: 49.6549, lon: 5.9908, verified: false,
+                offices: [
+                    { city: "Capellen", office: "Capellen", address: "Westside Village 89D, rue Pafebruch, L-8308 Capellen" }
+                ]
+            },
+            {
+                name: "Netherlands", lat: 52.3676, lon: 4.9041, verified: false,
+                offices: [
+                    { city: "Amsterdam", office: "Amsterdam", address: "Symphony Towers, 20th Floor, Gustav Mahlerplein 85-91, 1082 MS" }
+                ]
+            },
+            {
+                name: "Norway", lat: 59.9139, lon: 10.7522, verified: false,
+                offices: [
+                    { city: "Oslo", office: "Oslo", address: "Sandakerveien 116, 0484 Oslo" }
+                ]
+            },
+            {
+                name: "Poland", lat: 52.2297, lon: 21.0122, verified: false,
+                offices: [
+                    { city: "Warsaw", office: "Warsaw", address: "Al. Jana Pawła II 27, 00-867" }
+                ]
+            },
+            {
+                name: "Portugal", lat: 38.6979, lon: -9.2296, verified: false,
+                offices: [
+                    { city: "Algés", office: "Sabina Park", address: "Avenida José Gomes Ferreira nº15, 7ºU, 1495-139 Algés Miraflores" }
+                ]
+            },
+            {
+                name: "Spain", lat: 40.4168, lon: -3.7038, verified: false,
+                offices: [
+                    { city: "Madrid", office: "Madrid", address: "Calle Santa Leonor 65, Edificio F, 2ª Plta., Parque Empresarial Avalon, 28037" }
+                ]
+            },
+            {
+                name: "Sweden", lat: 59.3293, lon: 18.0686, verified: false,
+                offices: [
+                    { city: "Stockholm", office: "Stockholm", address: "Mäster Samuelsgatan 42, Floor 12, 111 57" }
+                ]
+            },
+            {
+                name: "Switzerland", lat: 47.3769, lon: 8.5417, verified: false,
+                offices: [
+                    { city: "Nyon", office: "Nyon", address: "Route de Crassier 7, CH-1262 Eysins" },
+                    { city: "Zurich", office: "Zurich", address: "Main Tower, Thurgauerstrasse 36/38, 8050 Zurich" }
+                ]
+            }
+        ];
+
+        // ---------------------------------------------------------------
+        // CITY DIRECTORY: one plain dot per city (every location in the
+        // data), each mirrored by a row in the sidebar. Offices only carry a
+        // country-level coordinate in the source data, so per-city latitudes
+        // and longitudes live in this lookup, keyed by "Country||City".
+        // ---------------------------------------------------------------
+        const CITY_COORDS = {
+            "India||Mumbai": [19.076, 72.8777],
+            "India||Thane": [19.2183, 72.9781],
+            "India||Navi Mumbai": [19.033, 73.0297],
+            "India||Pune": [18.5204, 73.8567],
+            "India||Chennai": [13.0827, 80.2707],
+            "India||Hyderabad": [17.385, 78.4867],
+            "India||Kolkata": [22.5726, 88.3639],
+            "India||New Delhi": [28.6139, 77.209],
+            "India||Gurugram": [28.4595, 77.0266],
+            "India||Noida": [28.5355, 77.391],
+            "India||Gandhinagar": [23.2156, 72.6369],
+            "India||Bhubaneswar": [20.2961, 85.8245],
+            "India||Nagpur": [21.1458, 79.0882],
+            "India||Indore": [22.7196, 75.8577],
+            "India||Lucknow": [26.8467, 80.9462],
+            "India||Thiruvananthapuram": [8.5241, 76.9366],
+            "India||Kochi": [9.9312, 76.2673],
+            "India||Jaipur": [26.9124, 75.7873],
+            "India||Ahmedabad": [23.0225, 72.5714],
+            "India||Vadodara": [22.3072, 73.1812],
+            "India||Patna": [25.5941, 85.1376],
+            "India||Bengaluru": [12.9716, 77.5946],
+            "USA||Atlanta, GA": [33.749, -84.388],
+            "USA||Bellevue, WA": [47.6101, -122.2015],
+            "USA||Bentonville, AR": [36.3729, -94.2088],
+            "USA||Bloomington, MN": [44.8408, -93.2983],
+            "USA||Charlotte, NC": [35.2271, -80.8431],
+            "USA||Dallas, TX": [32.7767, -96.797],
+            "USA||Denver, CO": [39.7392, -104.9903],
+            "USA||Edison, NJ": [40.5187, -74.4121],
+            "USA||Glendale, CA": [34.1425, -118.2551],
+            "USA||Houston, TX": [29.7604, -95.3698],
+            "USA||Cincinnati, OH": [39.1031, -84.512],
+            "USA||Minneapolis, MN": [44.9778, -93.265],
+            "USA||Naperville, IL": [41.7508, -88.1535],
+            "USA||New York, NY": [40.7128, -74.006],
+            "USA||Phoenix, AZ": [33.4484, -112.074],
+            "USA||Rockville, MD": [39.084, -77.1528],
+            "USA||Santa Clara, CA": [37.3541, -121.9552],
+            "USA||Milford, OH": [39.1751, -84.2941],
+            "USA||Sharonville, OH": [39.2681, -84.4133],
+            "USA||Wilmington, DE": [39.7391, -75.5398],
+            "Canada||Calgary": [51.0447, -114.0719],
+            "Canada||Montreal": [45.5019, -73.5674],
+            "Canada||Toronto": [43.6532, -79.3832],
+            "Argentina||Buenos Aires": [-34.6037, -58.3816],
+            "Brazil||São Paulo": [-23.5505, -46.6333],
+            "Chile||Santiago": [-33.4489, -70.6693],
+            "Colombia||Bogotá": [4.711, -74.0721],
+            "Colombia||Medellín": [6.2442, -75.5812],
+            "Ecuador||Quito": [-0.1807, -78.4678],
+            "Mexico||Guadalajara": [20.6597, -103.3496],
+            "Mexico||Mexico City": [19.4326, -99.1332],
+            "Mexico||Querétaro": [20.5888, -100.3899],
+            "Peru||Lima": [-12.0464, -77.0428],
+            "Uruguay||Montevideo": [-34.9011, -56.1645],
+            "Japan||Nagoya": [35.1815, 136.9066],
+            "Japan||Osaka": [34.6937, 135.5023],
+            "Japan||Tokyo": [35.6762, 139.6503],
+            "Australia (Offices)||Brisbane": [-27.4698, 153.0251],
+            "Australia (Offices)||Melbourne": [-37.8136, 144.9631],
+            "Australia (Offices)||Perth": [-31.9505, 115.8605],
+            "Australia (Offices)||Sydney": [-33.8688, 151.2093],
+            "New Zealand||Auckland": [-36.8485, 174.7633],
+            "Ireland||Dublin": [53.3498, -6.2603],
+            "Austria||Vienna": [48.2082, 16.3738],
+            "Belgium||Brussels": [50.8503, 4.3517],
+            "Belgium||Zaventem": [50.8836, 4.4715],
+            "Denmark||Copenhagen": [55.6761, 12.5683],
+            "Finland||Espoo": [60.2055, 24.6559],
+            "Finland||Helsinki": [60.1699, 24.9384],
+            "Finland||Tampere": [61.4978, 23.761],
+            "France||Courbevoie": [48.8973, 2.2569],
+            "France||Levallois-Perret": [48.8939, 2.287],
+            "France||Paris": [48.8566, 2.3522],
+            "France||Poitiers": [46.5802, 0.3404],
+            "Germany||Düsseldorf": [51.2277, 6.7735],
+            "Germany||Frankfurt": [50.1109, 8.6821],
+            "Germany||Hamburg": [53.5511, 9.9937],
+            "Germany||Munich": [48.1351, 11.582],
+            "Germany||Stuttgart": [48.7758, 9.1829],
+            "Germany||Walldorf": [49.305, 8.6428],
+            "Germany||Wolfsburg": [52.4227, 10.7865],
+            "Hungary||Budapest": [47.4979, 19.0402],
+            "Italy||Milan": [45.4642, 9.19],
+            "Luxembourg||Capellen": [49.6455, 5.9903],
+            "Netherlands||Amsterdam": [52.3676, 4.9041],
+            "Norway||Oslo": [59.9139, 10.7522],
+            "Poland||Warsaw": [52.2297, 21.0122],
+            "Portugal||Algés": [38.7031, -9.227],
+            "Spain||Madrid": [40.4168, -3.7038],
+            "Sweden||Stockholm": [59.3293, 18.0686],
+            "Switzerland||Nyon": [46.3833, 6.2333],
+            "Switzerland||Zurich": [47.3769, 8.5417]
+        };
+
+        // Zero-size anchor + floating pill, so a city's "City, Country" label
+        // sits just above its dot on screen at any camera angle. Hidden until
+        // the dot is hovered or selected (.show toggled in applyState).
+        function createPinLabel(text) {
+            const anchor = document.createElement('div');
+            anchor.className = 'pin-anchor';
+            const pill = document.createElement('div');
+            pill.className = 'pin-label';
+            pill.innerHTML = '<span class="pin-dot"></span><span>' + text + '</span>';
+            anchor.appendChild(pill);
+            const obj = new THREE.CSS2DObject(anchor);
+            obj.userData.pill = pill;
+            return obj;
+        }
+
+        const CITY_DOT_COLOR = 0xa8631f;
+
+        // Continent grouping for the sidebar's region filter chips, keyed by
+        // each country's display name (after stripping "(Offices)").
+        const COUNTRY_REGION = {
+            "India": "asia", "Japan": "asia",
+            "USA": "north-america", "Canada": "north-america", "Mexico": "north-america",
+            "Argentina": "south-america", "Brazil": "south-america", "Chile": "south-america",
+            "Colombia": "south-america", "Ecuador": "south-america", "Peru": "south-america",
+            "Uruguay": "south-america",
+            "Australia": "oceania", "New Zealand": "oceania",
+            "Ireland": "europe", "Austria": "europe", "Belgium": "europe", "Denmark": "europe",
+            "Finland": "europe", "France": "europe", "Germany": "europe", "Hungary": "europe",
+            "Italy": "europe", "Luxembourg": "europe", "Netherlands": "europe", "Norway": "europe",
+            "Poland": "europe", "Portugal": "europe", "Spain": "europe", "Sweden": "europe",
+            "Switzerland": "europe"
+        };
+
+        // Flatten officeCountries -> one entry per unique city, keeping every
+        // office (with address) that belongs to it. Also keep a per-country
+        // grouping for the sidebar, in the source order.
+        const directoryLocations = [];
+        const locById = new Map();
+        const perCountry = [];
+        let totalOffices = 0;
+
+        officeCountries.forEach((country, ci) => {
+            const displayName = country.name.replace(/\s*\(Offices\)\s*/, '').trim();
+            const region = COUNTRY_REGION[displayName] || 'other';
+            const byCity = new Map();
+            country.offices.forEach(o => {
+                if (!byCity.has(o.city)) byCity.set(o.city, []);
+                byCity.get(o.city).push(o);
+                totalOffices++;
+            });
+            const cities = [];
+            byCity.forEach((offices, city) => {
+                const coord = CITY_COORDS[country.name + '||' + city] || [country.lat, country.lon];
+                const id = 'loc-' + ci + '-' + city.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                const loc = { id, city, country: displayName, region, lat: coord[0], lon: coord[1], offices, verified: country.verified };
+                directoryLocations.push(loc);
+                locById.set(id, loc);
+                cities.push(loc);
+            });
+            perCountry.push({ displayName, region, verified: country.verified, cities, officeCount: country.offices.length });
+        });
+
+        // Build the dots. Present as plain, unlabeled markers from the very
+        // first frame (their individual pin-labels only ever show on hover
+        // or click — gated behind explorationActive below — so they read as
+        // background dots throughout the NY/Bombay story beats). Only New
+        // York and Bombay carry a permanent, always-on annotation, via the
+        // separate nyMarker/indiaMarker below.
+        const cityDotsGroup = new THREE.Group();
+        globeGroup.add(cityDotsGroup);
+
+        const pickables = [];
+        directoryLocations.forEach(loc => {
+            const dot = createSurfaceMarker(CITY_DOT_COLOR, 0.032);
+            placeMarkerOnSurface(dot, loc.lat, loc.lon);
+            const label = createPinLabel(loc.city + ', ' + loc.country);
+            dot.add(label);
+            cityDotsGroup.add(dot);
+            loc.dot = dot;
+            loc.core = dot.userData.core;
+            loc.halo = dot.userData.halo;
+            loc.baseColor = dot.userData.baseColor;
+            loc.pill = label.userData.pill;
+            dot.userData.hit.userData.locId = loc.id;
+            pickables.push(dot.userData.hit);
+        });
+
+        // New York and Mumbai each already have a directory dot at the exact
+        // same coordinates as the dedicated, permanently-labeled nyMarker /
+        // indiaMarker below — whichever of the pair is currently showing its
+        // permanent label stays hidden so the two don't z-fight at the same
+        // spot. nyMarker is visible with a label from frame 1, so its
+        // directory dot starts hidden; indiaMarker only grows in (with its
+        // label) partway through frame 2, so Mumbai's directory dot starts
+        // as a plain dot like every other city and is hidden right as
+        // indiaMarker appears (see the STEP 1 -> STEP 2 tween below), then
+        // both swap back once free exploration unlocks (exitingMarkers).
+        const nyDirectoryDot = directoryLocations.find(l => l.country === 'USA' && l.city === 'New York, NY');
+        const mumbaiDirectoryDot = directoryLocations.find(l => l.country === 'India' && l.city === 'Mumbai');
+        if (nyDirectoryDot) nyDirectoryDot.dot.visible = false;
+
+        // Sidebar directory — a persistent, searchable list of every city.
+        // It is fully populated once (below); hover and selection are kept in
+        // sync with the globe via applyState / setHover / setActive.
+        const sidebarListEl = document.getElementById('sidebar-list');
+        const sidebarSubEl = document.getElementById('sidebar-sub');
+        const sidebarSearchEl = document.getElementById('sidebar-search');
+
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+        }
+
+        sidebarSubEl.textContent = perCountry.length + ' countries · ' + totalOffices + ' offices';
+
+        (function renderDirectory() {
+            let html = '';
+            perCountry.forEach(group => {
+                html += '<div class="dir-group" data-region="' + group.region + '">';
+                html += '<div class="dir-country"><span>' + escapeHtml(group.displayName) + '</span>'
+                     +  '<span class="dir-count">' + group.officeCount + ' office' + (group.officeCount > 1 ? 's' : '') + '</span></div>';
+                group.cities.forEach(loc => {
+                    const meta = loc.offices.length > 1 ? (loc.offices.length + ' offices') : '';
+                    const search = (loc.city + ' ' + loc.country + ' ' + loc.offices.map(o => o.office + ' ' + o.address).join(' ')).toLowerCase();
+                    html += '<div class="dir-city" data-loc-id="' + loc.id + '" data-region="' + loc.region + '" data-search="' + escapeHtml(search) + '">';
+                    html += '<div class="dir-city-head"><span class="dir-city-name">' + escapeHtml(loc.city) + '</span>'
+                         +  (meta ? '<span class="dir-city-meta">' + meta + '</span>' : '') + '</div>';
+                    html += '<div class="dir-offices">';
+                    loc.offices.forEach(o => {
+                        html += '<div class="dir-office"><span class="dir-office-name">' + escapeHtml(o.office) + '</span>'
+                             +  '<span class="dir-office-addr">' + escapeHtml(o.address) + '</span></div>';
+                    });
+                    html += '</div></div>';
+                });
+                html += '</div>';
+            });
+            sidebarListEl.innerHTML = html;
+            directoryLocations.forEach(loc => { loc.row = sidebarListEl.querySelector('[data-loc-id="' + loc.id + '"]'); });
+        })();
+
+        // Shared hover/selection state, applied identically to the dot (scale,
+        // halo, colour, floating label) and its sidebar row (highlight + the
+        // expanding office details). Used by both the globe and the sidebar.
+        const ACTIVE_COLOR = new THREE.Color(0xb5451f);
+        let hoverId = null;
+        let activeId = null;
+        let explorationActive = false;
+
+        function applyState(loc) {
+            if (!loc) return;
+            const isActive = loc.id === activeId;
+            const isHover = loc.id === hoverId;
+            const emphasize = isActive || isHover;
+            const scale = isActive ? 2.0 : (isHover ? 1.6 : 1);
+            gsap.to(loc.dot.scale, { x: scale, y: scale, z: scale, duration: 0.25, ease: "power3.out", overwrite: true });
+            gsap.to(loc.halo.material, { opacity: isActive ? 0.32 : (isHover ? 0.2 : 0), duration: 0.25, overwrite: true });
+            loc.core.material.color.copy(isActive ? ACTIVE_COLOR : loc.baseColor);
+            if (loc.pill) {
+                loc.pill.classList.toggle('show', emphasize);
+                loc.pill.classList.toggle('active', isActive);
+            }
+            if (loc.row) {
+                loc.row.classList.toggle('is-hover', isHover && !isActive);
+                loc.row.classList.toggle('is-active', isActive);
+            }
+        }
+
+        function setHover(id) {
+            if (id === hoverId) return;
+            const prev = hoverId;
+            hoverId = id;
+            applyState(locById.get(prev));
+            applyState(locById.get(id));
+        }
+
+        function setActive(id, opts) {
+            opts = opts || {};
+            const prev = activeId;
+            activeId = id;
+            if (prev && prev !== id) applyState(locById.get(prev));
+            const loc = locById.get(id);
+            applyState(loc);
+            if (loc) {
+                focusOnLocation(loc.lat, loc.lon);
+                if (opts.scrollIntoView && loc.row) {
+                    loc.row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }
+            }
+        }
+
+        // Click-to-focus: rotate the globe so a clicked annotation's city becomes
+        // front-and-center, using the same math that centers each scripted stage.
+        // Only active once free exploration unlocks (see the ScrollTrigger onUpdate below).
+        function shortestDelta(current, target) {
+            let delta = (target - current) % (Math.PI * 2);
+            if (delta > Math.PI) delta -= Math.PI * 2;
+            if (delta < -Math.PI) delta += Math.PI * 2;
+            return current + delta;
+        }
+
+        function focusOnLocation(lat, lon) {
+            if (!controls.enabled) return;
+            // Use the LIVE camera position/direction — OrbitControls may have
+            // dragged it anywhere since free exploration unlocked, so centering
+            // must be computed relative to wherever the user is actually looking
+            // from right now, not the story's original fixed camera angle.
+            const camForward = camera.getWorldDirection(new THREE.Vector3());
+            // computeGlobeRotation's ray/sphere math works in world space, so
+            // it needs the globe's actual on-screen radius (post-scale), not
+            // its unscaled local geometry radius.
+            const rot = computeGlobeRotation(lat, lon, globeGroup.position, worldGlobeRadius, camera.position, camForward);
+            gsap.to(globeGroup.rotation, {
+                x: shortestDelta(globeGroup.rotation.x, rot.x),
+                y: shortestDelta(globeGroup.rotation.y, rot.y),
+                z: shortestDelta(globeGroup.rotation.z, rot.z),
+                duration: 1.3,
+                ease: "power3.inOut"
+            });
+        }
+
+        // ---- Globe interaction: hover + click on the city dots -----------
+        // All picking is done by raycasting the (invisible, generous) hit
+        // spheres on the canvas; the CSS2D labels stay pointer-transparent.
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2();
+
+        function pickAt(clientX, clientY) {
+            const rect = renderer.domElement.getBoundingClientRect();
+            pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+            pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(pointer, camera);
+            const hits = raycaster.intersectObjects(pickables, false);
+            // Nearest first; skip dots on the far hemisphere (visible through
+            // the translucent globe) by keeping only camera-facing ones.
+            for (let k = 0; k < hits.length; k++) {
+                const wp = hits[k].object.getWorldPosition(new THREE.Vector3());
+                const normal = wp.clone().sub(globeGroup.position).normalize();
+                const view = camera.position.clone().sub(wp).normalize();
+                if (normal.dot(view) > 0.02) return hits[k].object.userData.locId;
+            }
+            return null;
+        }
+
+        renderer.domElement.addEventListener('pointermove', (e) => {
+            if (!explorationActive) return;
+            const id = pickAt(e.clientX, e.clientY);
+            container.classList.toggle('dot-hover', !!id);
+            setHover(id);
+        });
+
+        // Distinguish a click (select) from a drag (orbit the globe).
+        let downX = 0, downY = 0, downT = 0;
+        renderer.domElement.addEventListener('pointerdown', (e) => {
+            downX = e.clientX; downY = e.clientY; downT = Date.now();
+        });
+        renderer.domElement.addEventListener('pointerup', (e) => {
+            if (!explorationActive) return;
+            const moved = Math.hypot(e.clientX - downX, e.clientY - downY);
+            if (moved > 6 || Date.now() - downT > 500) return;
+            const id = pickAt(e.clientX, e.clientY);
+            if (id) setActive(id, { scrollIntoView: true });
+        });
+
+        // ---- Sidebar interaction: hover + click on the city rows ---------
+        sidebarListEl.addEventListener('click', (e) => {
+            const row = e.target.closest('.dir-city');
+            if (!row || !explorationActive) return;
+            setActive(row.dataset.locId, { scrollIntoView: false });
+        });
+        sidebarListEl.addEventListener('mouseover', (e) => {
+            const row = e.target.closest('.dir-city');
+            setHover(row ? row.dataset.locId : null);
+        });
+        sidebarListEl.addEventListener('mouseleave', () => setHover(null));
+
+        // ---- Search / filter ---------------------------------------------
+        // Text search and the region chips narrow the same list together —
+        // a row must satisfy both to stay visible.
+        const sidebarFiltersEl = document.getElementById('sidebar-filters');
+        let activeRegion = 'all';
+
+        function applySidebarFilter() {
+            const q = sidebarSearchEl.value.trim().toLowerCase();
+            sidebarListEl.querySelectorAll('.dir-group').forEach(group => {
+                const regionMatch = activeRegion === 'all' || group.dataset.region === activeRegion;
+                let anyVisible = false;
+                group.querySelectorAll('.dir-city').forEach(row => {
+                    const match = regionMatch && (!q || row.dataset.search.indexOf(q) >= 0);
+                    row.classList.toggle('hidden', !match);
+                    if (match) anyVisible = true;
+                });
+                group.classList.toggle('hidden', !anyVisible);
+            });
+        }
+
+        sidebarSearchEl.addEventListener('input', applySidebarFilter);
+
+        sidebarFiltersEl.addEventListener('click', (e) => {
+            const chip = e.target.closest('.filter-chip');
+            if (!chip) return;
+            activeRegion = chip.dataset.region;
+            sidebarFiltersEl.querySelectorAll('.filter-chip').forEach(c => {
+                c.classList.toggle('active', c === chip);
+            });
+            applySidebarFilter();
+        });
+
+        // ---- Stage transition: story markers <-> explorable directory ----
+        // The scripted NY/India/section-3 markers belong to the told story;
+        // once free exploration unlocks they give way to the full field of
+        // city dots (and the reverse on scroll-up), so every dot on the globe
+        // always has a matching row in the sidebar and vice-versa.
+        const storyLabels = [nyLabel, indiaLabel, ...sec3Labels];
+
+        // The scripted markers (NY / Bombay / the American Express cities)
+        // and the full city-dot field never used to overlap — the old code
+        // cut the former's visibility instantly in the same tick that grew
+        // the latter in from scale 0, so for a beat almost nothing was left
+        // on the globe. Cross-fading their scale instead keeps something on
+        // the sphere at every frame of the handoff, in both directions. NY
+        // and Mumbai's own directory dots (companionDot) swap in right as
+        // the labeled marker fades out, so that spot is never doubled up.
+        const exitingMarkers = [
+            { group: nyMarker, companionDot: nyDirectoryDot && nyDirectoryDot.dot },
+            { group: indiaMarker, companionDot: mumbaiDirectoryDot && mumbaiDirectoryDot.dot },
+            { group: sec3MarkersGroup, companionDot: null }
+        ];
+
+        function enterExploration() {
+            explorationActive = true;
+            controls.enabled = true;
+            document.body.classList.add('stage-final');
+            storyLabels.forEach(l => l.visible = false);
+            // cityDotsGroup is visible throughout — nothing to reveal here,
+            // it just becomes clickable/hoverable (see pointermove/pointerup
+            // below, both gated on explorationActive).
+            exitingMarkers.forEach(({ group, companionDot }) => {
+                gsap.killTweensOf(group.scale);
+                gsap.to(group.scale, {
+                    x: 0.001, y: 0.001, z: 0.001, duration: 0.4, ease: "power2.in",
+                    onComplete: () => {
+                        group.visible = false;
+                        if (companionDot) companionDot.visible = true;
+                    }
+                });
+            });
+        }
+
+        function exitExploration() {
+            explorationActive = false;
+            controls.enabled = false;
+            controls.reset();
+            document.body.classList.remove('stage-final');
+            container.classList.remove('dot-hover');
+            setHover(null);
+            setActive(null);
+            exitingMarkers.forEach(({ group, companionDot }) => {
+                gsap.killTweensOf(group.scale);
+                group.visible = true;
+                if (companionDot) companionDot.visible = false;
+                gsap.fromTo(group.scale,
+                    { x: 0.001, y: 0.001, z: 0.001 },
+                    { x: 1, y: 1, z: 1, duration: 0.4, ease: "power2.out" }
+                );
+            });
+            storyLabels.forEach(l => l.visible = true);
+        }
+
+        const allLabels = [nyLabel, indiaLabel, ...sec3Labels];
+
+        // The Global Footprint card sits over the bottom of the globe, so a
+        // marker rotated underneath it would otherwise bleed through the
+        // translucent glass and read as text overlapping the card's copy.
+        // Suppress any label whose screen position currently falls behind it.
+        const finalPanel = document.getElementById('box-3');
+        function updateLabelOcclusion() {
+            if (!controls.enabled) return;
+            // Once the card has faded out at the end of the story, it no longer
+            // occludes anything even though it still occupies layout space.
+            if (parseFloat(getComputedStyle(finalPanel).opacity) < 0.05) {
+                allLabels.forEach(label => label.element.classList.remove('behind-panel'));
+                return;
+            }
+            const panelRect = finalPanel.getBoundingClientRect();
+            if (panelRect.width === 0 || panelRect.height === 0) return;
+            allLabels.forEach(label => {
+                if (!label.element.classList.contains('visible')) return;
+                const r = label.element.getBoundingClientRect();
+                const behind = !(r.right < panelRect.left || r.left > panelRect.right || r.bottom < panelRect.top || r.top > panelRect.bottom);
+                label.element.classList.toggle('behind-panel', behind);
+            });
+        }
+
+        // Rotation targets computed per-stage so the active city always lands
+        // front-and-center for that stage's globe position (see computeGlobeRotation).
+        // The globe itself slides from the right (USA) to the left (India) between
+        // stages, mirroring the card layout, so each stage gets its own group position.
+        const usaGroupPos = { x: 1.4, y: 0, z: 0 };
+        const indiaGroupPos = { x: -1.4, y: 0, z: 0 };
+        const centerGroupPos = { x: 0, y: 0.35, z: 0 };
+        // The camera never moves during the scripted stages (OrbitControls is
+        // disabled until free exploration unlocks), so these can use its fixed
+        // initial position/direction directly.
+        const initialCameraPos = camera.position.clone();
+        const initialCameraForward = new THREE.Vector3(0, 0, -1);
+        const worldGlobeRadius = globeRadius * globeScale;
+
+        // The camera's fixed forward (0,0,-1) only points at the globe's own
+        // silhouette-center when the globe sits at world x=0. Stages 1 & 2
+        // slide the globe off to the side (usaGroupPos / indiaGroupPos), so
+        // aiming with that same fixed forward lands the city at literal
+        // screen-center rather than the sphere's own front-and-center point —
+        // it ends up nearer the globe's inner edge instead of mid-silhouette.
+        // Aiming each ray at that stage's own group position instead puts the
+        // target city dead in the middle of the visible globe.
+        function forwardToward(groupPos) {
+            return new THREE.Vector3(groupPos.x, groupPos.y, groupPos.z)
+                .sub(initialCameraPos)
+                .normalize();
+        }
+
+        const targetRotations = {
+            usa: computeGlobeRotation(40.7128, -74.0060, usaGroupPos, worldGlobeRadius, initialCameraPos, forwardToward(usaGroupPos)),      // NYC dead-center on the globe
+            india: computeGlobeRotation(19.0760, 72.8777, indiaGroupPos, worldGlobeRadius, initialCameraPos, forwardToward(indiaGroupPos)),  // Bombay dead-center on the globe
+            center: computeGlobeRotation(10, -45, centerGroupPos, worldGlobeRadius, initialCameraPos, initialCameraForward)          // Atlantic-centered overview
+        };
+
+        // Set Initial Rotation
+        globeGroup.rotation.x = targetRotations.usa.x;
+        globeGroup.rotation.y = targetRotations.usa.y;
+        globeGroup.rotation.z = targetRotations.usa.z;
+
+        // Show NY annotation label initially
+        nyLabel.element.classList.add('visible');
+
+        // Staggered, content-aware reveal for a scene's icon/eyebrow/heading/copy,
+        // run each time a content-box becomes active (initial load, or scroll-triggered).
+        function animateContentIn(boxSelector) {
+            const box = document.querySelector(boxSelector);
+            if (!box) return;
+            const icon = box.querySelector('.box-icon');
+            const eyebrow = box.querySelector('.eyebrow');
+            const words = box.querySelectorAll('.word');
+            const para = box.querySelector('p');
+            const hint = box.querySelector('.drag-hint');
+
+            gsap.killTweensOf([icon, eyebrow, ...words, para, hint].filter(Boolean));
+            const inner = gsap.timeline();
+            if (icon) inner.fromTo(icon, { scale: 0.4, opacity: 0, rotate: -25 }, { scale: 1, opacity: 1, rotate: 0, duration: 0.6, ease: "back.out(2.2)" });
+            if (eyebrow) inner.fromTo(eyebrow, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, "<0.1");
+            if (words.length) inner.fromTo(words, { opacity: 0, y: "70%" }, { opacity: 1, y: "0%", duration: 0.7, ease: "power3.out", stagger: 0.045 }, "<0.1");
+            if (para) inner.fromTo(para, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, "-=0.35");
+            if (hint) inner.fromTo(hint, { opacity: 0, y: 10, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(2)" }, "-=0.2");
+        }
+
+        // 4. GSAP TIMELINE (NO CAMERA ZOOMING)
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.set("#box-1", { opacity: 1, y: 0 });
+        animateContentIn('#box-1');
+
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: ".pin-wrapper",
+                start: "top top",
+                end: "+=440%",
+                scrub: 1.5,
+                pin: true,
+                onUpdate: (self) => {
+                    const final = self.progress > 0.72;
+                    if (final && !explorationActive) enterExploration();
+                    else if (!final && explorationActive) exitExploration();
+                }
+            }
+        });
+
+        /* --- STEP 1 -> STEP 2 (New York to Bombay) --- */
+        tl
+        .to("#box-1", { opacity: 0, y: -20, duration: 1 })
+        .to(nyLabel.element, { opacity: 0, duration: 0.5 }, 0)
+        
+        // Exact Rotation to India (Camera z remains 5.2)
+        .to(globeGroup.rotation, {
+            x: targetRotations.india.x,
+            y: targetRotations.india.y,
+            z: targetRotations.india.z,
+            duration: 2.5,
+            ease: "sine.inOut"
+        }, "<")
+        // The globe itself travels from the right side of the screen to the
+        // left as the story hands off from New York to India, mirroring the
+        // card swap and giving the transition real cinematic motion.
+        .to(globeGroup.position, { x: -1.4, duration: 2.5, ease: "sine.inOut" }, "<")
+        // The globe turns from night to day: the land dots warm from a cool
+        // slate to a golden bronze right as the sun "rises" on the journey from
+        // New York to India.
+        .to(dotUniforms.uColor.value, { r: DOT_DAY.r, g: DOT_DAY.g, b: DOT_DAY.b, duration: 2.5, ease: "sine.inOut" }, "<")
+        // Mood shifts from a cool NYC-office blue to a golden sunrise amber —
+        // backdrop gradient, ambient/sun lighting, and the globe's atmosphere
+        // glow all warm up together so the "Follow the Sun" beat actually feels
+        // like the sun rising.
+        .to(document.documentElement, { "--mood-1": "#fbf4e6", "--mood-2": "#f2e5cb", "--mood-3": "#ead6b3", duration: 2.5, ease: "sine.inOut" }, "<")
+        .to(ambientLight, { intensity: 1.05, duration: 2.5, ease: "sine.inOut" }, "<")
+        .to(ambientLight.color, { r: 1, g: 0.93, b: 0.83, duration: 2.5, ease: "sine.inOut" }, "<")
+        .to(dirLight, { intensity: 1.2, duration: 2.5, ease: "sine.inOut" }, "<")
+        .to(dirLight.color, { r: 1, g: 0.8, b: 0.52, duration: 2.5, ease: "sine.inOut" }, "<")
+        .to(atmosMat.color, { r: 1, g: 0.68, b: 0.4, duration: 2.5, ease: "sine.inOut" }, "<")
+        .to(atmosMat, { opacity: 0.09, duration: 2.5, ease: "sine.inOut" }, "<")
+        .to(indiaMarker.scale, { x: 1, y: 1, z: 1, duration: 1, ease: "back.out(2)" })
+        .call(() => indiaLabel.element.classList.add('visible'))
+        .to("#box-2", { opacity: 1, y: 0, duration: 1 }, "<0.3")
+        .call(() => animateContentIn('#box-2'), null, "<")
+
+        /* --- STEP 2 -> STEP 3 (India to Global Overview) --- */
+        .to("#box-2", { opacity: 0, y: -20, duration: 1, delay: 1 })
+        .call(() => indiaLabel.element.classList.remove('visible'))
+
+        // Center Globe & Reveal Global Locations
+        .to(globeGroup.rotation, {
+            x: targetRotations.center.x,
+            y: targetRotations.center.y,
+            z: targetRotations.center.z,
+            duration: 3,
+            ease: "sine.inOut"
+        }, "<")
+        .to(globeGroup.position, { x: 0, y: 0.35, duration: 3, ease: "sine.inOut" }, "<")
+        // Settles into a bright, expansive teal-green for the worldwide footprint
+        // scene — lighting opens up wide and clear, the "amazed at how big this
+        // got" payoff beat.
+        .to(document.documentElement, { "--mood-1": "#f4f2ea", "--mood-2": "#e8e7da", "--mood-3": "#dde0cd", duration: 3, ease: "sine.inOut" }, "<")
+        .to(ambientLight, { intensity: 1.35, duration: 3, ease: "sine.inOut" }, "<")
+        .to(ambientLight.color, { r: 1, g: 1, b: 1, duration: 3, ease: "sine.inOut" }, "<")
+        .to(dirLight, { intensity: 1.0, duration: 3, ease: "sine.inOut" }, "<")
+        .to(dirLight.color, { r: 1, g: 1, b: 1, duration: 3, ease: "sine.inOut" }, "<")
+        .to(atmosMat.color, { r: 0.22, g: 0.85, b: 0.63, duration: 3, ease: "sine.inOut" }, "<")
+        .to(atmosMat, { opacity: 0.08, duration: 3, ease: "sine.inOut" }, "<")
+        // Dots settle into a deep teal for the worldwide-footprint payoff.
+        .to(dotUniforms.uColor.value, { r: DOT_GLOBAL.r, g: DOT_GLOBAL.g, b: DOT_GLOBAL.b, duration: 3, ease: "sine.inOut" }, "<")
+        .to(sec3MarkersGroup.scale, { x: 1, y: 1, z: 1, duration: 1.2, ease: "back.out(1.7)" }, "-=1")
+        .call(() => {
+            indiaLabel.element.classList.add('visible');
+            sec3Labels.forEach(l => l.element.classList.add('visible'));
+        })
+        .to("#box-3", { opacity: 1, y: 0, duration: 1.2 }, "<0.2")
+        .call(() => animateContentIn('#box-3'), null, "<")
+
+        /* --- Final beat: let the card rest, then dismiss it so the globe is
+           free to explore, unobstructed, once the story has been told. Also
+           drop pointer-events so the invisible card can't still block drags
+           on the globe underneath it. --- */
+        .to("#box-3", { opacity: 0, y: -16, duration: 1, ease: "power1.in", pointerEvents: "none" }, "+=1.8");
+
+        // Responsive Resizing — watch the canvas container itself rather than
+        // the window, since in the final stage the sidebar takes a fixed
+        // 400px off its width (see body.stage-final CSS). Reading clientWidth
+        // here is cheap (last measured value short-circuits it), so it also
+        // runs once every render frame from the loop below — a plain
+        // ResizeObserver callback fires on its own schedule, a tick behind
+        // the CSS width transition, which for a frame or two left the canvas
+        // drawing at a stale size while the container had already resized:
+        // exactly the "globe disappears" flash during the sidebar handoff.
+        let lastRenderW = 0, lastRenderH = 0;
+        function syncRendererSize() {
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            if (w === 0 || h === 0) return;
+            if (w === lastRenderW && h === lastRenderH) return;
+            lastRenderW = w;
+            lastRenderH = h;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+        }
+        new ResizeObserver(syncRendererSize).observe(container);
+
+        // 5. RENDER LOOP
+        function animate() {
+            requestAnimationFrame(animate);
+            syncRendererSize();
+            // Mumbai's plain directory dot and the labeled indiaMarker sit at
+            // the same spot, so exactly one may be visible at a time. Driven
+            // off indiaMarker's live scale (rather than a one-off scroll
+            // callback) so it stays correct scrubbing the story in either
+            // direction; free exploration overrides this via exitingMarkers.
+            if (mumbaiDirectoryDot && !explorationActive) {
+                mumbaiDirectoryDot.dot.visible = indiaMarker.scale.x < 0.5;
+            }
+            if (controls.enabled) {
+                // Keep the orbit centered on the globe's actual position (it
+                // settles slightly off-origin), so dragging rotates around the
+                // globe itself rather than around the world origin.
+                controls.target.copy(globeGroup.position);
+                controls.update();
+            }
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+            updateLabelOcclusion();
+        }
+        animate();
+    </script>
+</body>
+</html>

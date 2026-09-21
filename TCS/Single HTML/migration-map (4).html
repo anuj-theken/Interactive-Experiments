@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organic Migration Map Scrollytelling</title>
+    
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- ECharts JS -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+
+        #map-container {
+            position: sticky;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        #map, #echarts-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        #echarts-overlay {
+            z-index: 400;
+        }
+
+        .scroll-container {
+            position: relative;
+            z-index: 2;
+        }
+
+        .step {
+            height: 120vh;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 6vw;
+            box-sizing: border-box;
+            pointer-events: none;   /* let hovers fall through to map markers */
+        }
+
+        .step.step-intro {
+            justify-content: center;
+            padding-right: 0;
+        }
+
+        .step-content {
+            background: rgba(255, 255, 255, 0.92);
+            padding: 28px 36px;
+            border-radius: 12px;
+            max-width: 400px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            pointer-events: auto;
+        }
+
+        .step-content h2 {
+            margin-top: 0;
+            color: #d97706;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .step-content p {
+            line-height: 1.6;
+            color: #4b5563;
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .step-intro .step-content {
+            max-width: 480px;
+            text-align: center;
+        }
+
+        .step-intro .step-content h2 {
+            font-size: 2rem;
+        }
+
+        .factory-icon {
+            background: #ffffff;
+            border-radius: 50%;
+            border: 2px solid #d97706;
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+            text-align: center;
+            line-height: 44px;
+            font-size: 22px;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .factory-icon.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Journey markers (origins + destinations) — vintage boxed labels */
+        .marker-wrap {
+            position: relative;
+            width: 0;
+            height: 0;
+        }
+
+        .mk-dot {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 15px;
+            height: 15px;
+            margin: -7.5px 0 0 -7.5px;       /* centre on the coordinate */
+            border-radius: 50%;
+            border: 2px solid #fff;
+            opacity: 0;
+            transform: scale(0);
+            transform-origin: center;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: auto;
+            cursor: help;
+        }
+
+        .marker-wrap.visible .mk-dot {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .mk-label {
+            position: absolute;
+            white-space: nowrap;
+            background: rgba(247, 242, 227, 0.94);
+            border: 2px solid #999;
+            border-radius: 6px;
+            padding: 5px 12px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            color: #444;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transition: opacity 0.5s ease 0.15s;
+            pointer-events: auto;
+            cursor: help;
+        }
+
+        .marker-wrap.visible .mk-label {
+            opacity: 1;
+        }
+
+        /* Label placement relative to the dot */
+        .dir-right  .mk-label { left: 14px;  top: 0; transform: translateY(-50%); }
+        .dir-left   .mk-label { left: -14px; top: 0; transform: translate(-100%, -50%); }
+        .dir-top    .mk-label { left: 0; top: -14px; transform: translate(-50%, -100%); }
+        .dir-bottom .mk-label { left: 0; top: 14px;  transform: translate(-50%, 0); }
+
+        /* Hover tooltip (date / timeline) */
+        .mk-tooltip.leaflet-tooltip {
+            background: #3d3222;
+            color: #f7f2e3;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+        }
+
+        .mk-tooltip.leaflet-tooltip-top::before {
+            border-top-color: #3d3222;
+        }
+
+        /* Warm the base map toward a vintage cream palette */
+        .leaflet-tile-pane {
+            filter: sepia(0.34) saturate(1.15) brightness(1.04) contrast(0.96);
+        }
+
+        /* Legend */
+        #legend {
+            position: fixed;
+            top: 22px;
+            right: 22px;
+            z-index: 1000;
+            background: rgba(247, 242, 227, 0.92);
+            border: 1px solid rgba(120, 100, 70, 0.35);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 13px;
+            color: #4a3f2c;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+            pointer-events: none;
+        }
+
+        .legend-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-row + .legend-row {
+            margin-top: 8px;
+        }
+
+        .legend-line {
+            width: 34px;
+            height: 0;
+            border-top: 3px dashed #999;
+            flex: 0 0 auto;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 1.5px rgba(0,0,0,0.15);
+            flex: 0 0 auto;
+        }
+
+        .leaflet-control-attribution {
+            font-size: 9px;
+            opacity: 0.6;
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="legend">
+        <div class="legend-row"><span class="legend-line" style="border-top-color:#be123c"></span> Parsi migration</div>
+        <div class="legend-row"><span class="legend-line" style="border-top-color:#1e3a8a"></span> Tamil Brahmin migration</div>
+        <div class="legend-row"><span class="legend-dot" style="background:#be123c"></span> Origin / destination</div>
+    </div>
+
+    <div id="map-container">
+        <div id="map"></div>
+        <div id="echarts-overlay"></div>
+    </div>
+
+    <div class="scroll-container">
+        <!-- INTRO -->
+        <div class="step step-intro" id="step-intro">
+            <div class="step-content">
+                <h2>The Great Migration</h2>
+                <p>How the Parsis and Tamil Brahmins migrated across India.</p>
+            </div>
+        </div>
+
+        <!-- STEP 1 -->
+        <div class="step" id="step1">
+            <div class="step-content">
+                <h2>The Parsi Migration</h2>
+                <p>Descendants of Zoroastrian refugees who fled Persia after the Arab conquest, they sailed through the Persian Gulf and Arabian Sea to settle on India’s west coast (Gujarat) as farmers and traders.</p>
+            </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="step" id="step2">
+            <div class="step-content">
+                <h2>Tamil Brahmin Routes</h2>
+                <p>Simultaneously, Tamil Brahmins moved from their roots in the Kaveri delta outward through major corridors toward booming hubs like Bombay, Bangalore, and Chennai.</p>
+            </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="step" id="step3">
+            <div class="step-content">
+                <h2>Bombay Industrialization</h2>
+                <p>The Parsis moved down the Konkan coast into Bombay, building the docks, pioneering cotton mills, and founding modern industrial giants like the Tata Group.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // -----------------------------------------------------------------
+        // 1. NON-INTERACTIVE LIGHT MODE LEAFLET MAP
+        // -----------------------------------------------------------------
+        const map = L.map('map', {
+            zoomControl: false,
+            attributionControl: false,
+            dragging: false,
+            scrollWheelZoom: false,
+            doubleClickZoom: false,
+            boxZoom: false,
+            tap: false,
+            touchZoom: false,
+            keyboard: false
+        }).setView([22.0, 65.0], 5);
+
+        // Esri Light Gray Base (Free, clean vector tile background like reference image)
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 16,
+            attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
+        }).addTo(map);
+
+        L.control.attribution({ prefix: false, position: 'bottomright' }).addTo(map);
+
+        // Industrial Markers in Bombay
+        const coords = {
+            bombay: [18.9220, 72.8347],
+            bombayDocks: [18.9350, 72.8400],
+            tataMills: [19.0000, 72.8450]
+        };
+
+        const markers = [
+            L.marker(coords.bombay, { icon: createFactoryIcon('🏭') }).addTo(map),
+            L.marker(coords.bombayDocks, { icon: createFactoryIcon('⚓') }).addTo(map),
+            L.marker(coords.tataMills, { icon: createFactoryIcon('⚙️') }).addTo(map)
+        ];
+
+        function createFactoryIcon(symbol) {
+            return L.divIcon({
+                className: 'factory-icon',
+                html: symbol,
+                iconSize: [48, 48],
+                iconAnchor: [24, 24]
+            });
+        }
+
+        // Journey markers — origins anchor the start of each route; destinations
+        // reveal a name label when the traveler arrives, and every marker shows
+        // its date on hover.
+        const PARSI_COLOR = '#be123c';
+        const TB_COLOR = '#1e3a8a';
+
+        const journeyDefs = {
+            // Origins (shown by the step triggers)
+            parsiOrigin: { coord: [28.90, 50.70],      color: PARSI_COLOR, name: 'Persia',                    date: 'Fled Persia · 7th–10th c. CE', labelDir: 'right',  origin: true },
+            tbOrigin:    { coord: [10.7870, 79.1378],  color: TB_COLOR,    name: 'Kaveri Delta, Tamil Nadu',  date: 'Ancestral heartland',          labelDir: 'left',   origin: true },
+            // Destinations (revealed when their route completes)
+            gujarat:     { coord: [20.9168, 72.9098],  color: PARSI_COLOR, name: 'Sanjan, Gujarat',           date: 'Landfall · c. 8th–10th c. CE', labelDir: 'left',   progressKey: 'parsiPersiaToGujarat' },
+            chennai:     { coord: [13.0827, 80.2707],  color: TB_COLOR,    name: 'Chennai, Tamil Nadu',       date: 'Settled · 18th–19th c.',       labelDir: 'right',  progressKey: 'tbKaveriToChennai' },
+            bengaluru:   { coord: [12.9716, 77.5946],  color: TB_COLOR,    name: 'Bengaluru, Karnataka',      date: 'Settled · 19th–20th c.',       labelDir: 'left',   progressKey: 'tbKaveriToBangalore' }
+        };
+
+        function createJourneyIcon(def) {
+            const dir = def.labelDir || 'right';
+            return L.divIcon({
+                className: 'journey-icon',
+                html: `<div class="marker-wrap dir-${dir}">
+                    <div class="mk-dot" style="background:${def.color};box-shadow:0 0 0 2px ${def.color}, 0 2px 6px rgba(0,0,0,0.35)"></div>
+                    <div class="mk-label" style="border-color:${def.color};color:${def.color}">${def.name}</div>
+                </div>`,
+                iconSize: [0, 0],
+                iconAnchor: [0, 0]
+            });
+        }
+
+        const journeyMarkers = {};
+        Object.entries(journeyDefs).forEach(([key, def]) => {
+            const marker = L.marker(def.coord, { icon: createJourneyIcon(def), interactive: true })
+                .addTo(map)
+                .bindTooltip(def.date, { direction: 'top', offset: [0, -22], className: 'mk-tooltip', sticky: false });
+            journeyMarkers[key] = marker;
+        });
+
+        function setMarkerVisible(key, visible) {
+            const el = journeyMarkers[key] && journeyMarkers[key].getElement();
+            const wrap = el && el.querySelector('.marker-wrap');
+            if (wrap) wrap.classList.toggle('visible', visible);
+        }
+
+        // Destinations pop in once their route is essentially complete.
+        function updateDestinations() {
+            Object.entries(journeyDefs).forEach(([key, def]) => {
+                if (!def.progressKey) return;
+                setMarkerVisible(key, pathProgress[def.progressKey] >= 0.985);
+            });
+        }
+
+        // Helper to convert Lat/Lng to Pixel space
+        function toPt(coord) {
+            const pt = map.latLngToContainerPoint(coord);
+            return [pt.x, pt.y];
+        }
+
+        // Linear interpolation between two pixel points
+        function lerp(a, b, u) {
+            return [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u];
+        }
+
+        // Centripetal Catmull-Rom spline: smooth, organic curves that pass
+        // through every waypoint without overshooting, looping, or jumping.
+        function buildSmoothRoute(latLngArray, samplesPerSegment = 30) {
+            if (latLngArray.length < 2) return [];
+
+            const pts = latLngArray.map(toPt);
+            // Duplicate the endpoints so the curve actually reaches the first
+            // and last waypoints instead of stopping short.
+            const p = [pts[0], ...pts, pts[pts.length - 1]];
+            const path = [];
+
+            const alpha = 0.5; // 0.5 = centripetal parameterization
+            const dist = (a, b) => Math.max(Math.hypot(b[0] - a[0], b[1] - a[1]), 1e-6);
+
+            for (let i = 1; i < p.length - 2; i++) {
+                const p0 = p[i - 1], p1 = p[i], p2 = p[i + 1], p3 = p[i + 2];
+
+                const t0 = 0;
+                const t1 = t0 + Math.pow(dist(p0, p1), alpha);
+                const t2 = t1 + Math.pow(dist(p1, p2), alpha);
+                const t3 = t2 + Math.pow(dist(p2, p3), alpha);
+
+                for (let j = 0; j < samplesPerSegment; j++) {
+                    const t = t1 + (t2 - t1) * (j / samplesPerSegment);
+
+                    const a1 = lerp(p0, p1, (t - t0) / (t1 - t0));
+                    const a2 = lerp(p1, p2, (t - t1) / (t2 - t1));
+                    const a3 = lerp(p2, p3, (t - t2) / (t3 - t2));
+                    const b1 = lerp(a1, a2, (t - t0) / (t2 - t0));
+                    const b2 = lerp(a2, a3, (t - t1) / (t3 - t1));
+                    path.push(lerp(b1, b2, (t - t1) / (t2 - t1)));
+                }
+            }
+            path.push(pts[pts.length - 1]);
+            return path;
+        }
+
+        // Trim polyline points according to scroll growth percentage (0.0 to 1.0)
+        function slicePath(points, progress) {
+            if (progress <= 0) return [];
+            const count = Math.max(2, Math.floor(points.length * Math.min(progress, 1.0)));
+            return points.slice(0, count);
+        }
+
+        // State tracking for incremental scroll growth
+        let pathProgress = {
+            parsiPersiaToGujarat: 0,
+            parsiGujaratToBombay: 0,
+            tbKaveriToChennai: 0,
+            tbKaveriToBangalore: 0,
+            tbKaveriToBombay: 0
+        };
+
+        // -----------------------------------------------------------------
+        // CURVED TRANSPORT CORRIDOR WAYPOINTS (MATCHING REFERENCE DESIGN)
+        // -----------------------------------------------------------------
+        
+        // Parsi Sea Route — stays entirely over water: out of the Persian
+        // Gulf, through the Strait of Hormuz, down the Gulf of Oman, across
+        // the Arabian Sea, and south of Saurashtra to the Gujarat coast.
+        const parsiSeaRoute = [
+            [28.90, 50.70],     // Depart the Persian coast near Bushehr
+            [27.70, 51.90],     // Northern Persian Gulf
+            [27.00, 53.60],     // Central Persian Gulf
+            [26.80, 55.10],     // Approach to the strait
+            [26.55, 56.35],     // Strait of Hormuz (between Iran & Musandam)
+            [25.55, 57.40],     // Gulf of Oman
+            [24.30, 59.60],     // Off the Makran coast
+            [22.90, 63.20],     // Open Arabian Sea
+            [21.70, 67.60],     // Arabian Sea, tracking toward India
+            [20.30, 69.90],     // South of Saurashtra, off Diu
+            [20.05, 71.60],     // Approaching Gujarat from the south-west
+            [20.9168, 72.9098]  // Landfall at Sanjan, Gujarat
+        ];
+
+        // Coastal Path down to Bombay
+        const parsiGujaratToBombayRoute = [
+            [20.9168, 72.9098], // Sanjan
+            [20.10, 72.55],     // Just offshore, southern Gujarat
+            [19.40, 72.50],     // Coastal water off the Konkan
+            [18.9220, 72.8347]  // Bombay
+        ];
+
+        // Tamil Brahmin Corridor -> Chennai
+        // Up the Coromandel coastal plain via Puducherry & Villupuram.
+        const tbChennaiRoute = [
+            [10.7870, 79.1378], // Kaveri delta (Thanjavur / Kumbakonam)
+            [11.3900, 79.6900], // Chidambaram / Cuddalore coast
+            [11.9416, 79.8083], // Puducherry
+            [12.2253, 79.6500], // Villupuram
+            [12.6800, 79.9800], // Chengalpattu / Mamallapuram
+            [13.0827, 80.2707]  // Chennai
+        ];
+
+        // Tamil Brahmin Corridor -> Bengaluru
+        // West to Trichy, then the Salem–Krishnagiri–Hosur climb to the plateau.
+        const tbBangaloreRoute = [
+            [10.7870, 79.1378], // Kaveri delta
+            [10.7905, 78.7047], // Tiruchirappalli (Trichy)
+            [11.6643, 78.1460], // Salem
+            [12.1211, 78.1582], // Dharmapuri
+            [12.5266, 78.2141], // Krishnagiri
+            [12.7409, 77.8253], // Hosur
+            [12.9716, 77.5946]  // Bengaluru
+        ];
+
+        // Tamil Brahmin Corridor -> Bombay
+        // Diverges from the Bengaluru line at Salem and takes the Deccan
+        // interior: Bellary–Hubli–Belgaum–Kolhapur–Satara–Pune into Bombay.
+        const tbBombayRoute = [
+            [10.7870, 79.1378], // Kaveri delta
+            [11.6643, 78.1460], // Salem
+            [13.3400, 77.1000], // Deccan plateau ascent (east of Bengaluru)
+            [15.1394, 76.9214], // Bellary
+            [15.3647, 75.1240], // Hubli–Dharwad
+            [15.8497, 74.4977], // Belgaum
+            [16.7050, 74.2433], // Kolhapur
+            [17.6805, 74.0183], // Satara
+            [18.5204, 73.8567], // Pune
+            [18.9220, 72.8347]  // Bombay (down the Bhor Ghat)
+        ];
+
+        // -----------------------------------------------------------------
+        // 2. ECHARTS RENDER ENGINE
+        // -----------------------------------------------------------------
+        const chartDom = document.getElementById('echarts-overlay');
+        const myChart = echarts.init(chartDom);
+
+        function getChartOption() {
+            const rawParsi1 = buildSmoothRoute(parsiSeaRoute);
+            const rawParsi2 = buildSmoothRoute(parsiGujaratToBombayRoute);
+            const rawTbChennai = buildSmoothRoute(tbChennaiRoute);
+            const rawTbBangalore = buildSmoothRoute(tbBangaloreRoute);
+            const rawTbBombay = buildSmoothRoute(tbBombayRoute);
+
+            const p1 = slicePath(rawParsi1, pathProgress.parsiPersiaToGujarat);
+            const p2 = slicePath(rawParsi2, pathProgress.parsiGujaratToBombay);
+            const tb1 = slicePath(rawTbChennai, pathProgress.tbKaveriToChennai);
+            const tb2 = slicePath(rawTbBangalore, pathProgress.tbKaveriToBangalore);
+            const tb3 = slicePath(rawTbBombay, pathProgress.tbKaveriToBombay);
+
+            const bandData = [];
+            const dashData = [];
+            const travelerData = [];
+
+            // Crimson for the Parsi corridor, navy for the Tamil Brahmin corridor,
+            // each drawn as a soft corridor band beneath a dashed line.
+            const PARSI_COLOR = '#be123c';
+            const TB_COLOR = '#1e3a8a';
+            const PARSI_BAND = 'rgba(190, 18, 60, 0.16)';
+            const TB_BAND = 'rgba(30, 58, 138, 0.15)';
+
+            function addRoute(points, color, band) {
+                if (points.length <= 1) return;
+                bandData.push({
+                    coords: points,
+                    lineStyle: { color: band, width: 15, cap: 'round', join: 'round', opacity: 1 }
+                });
+                dashData.push({
+                    coords: points,
+                    lineStyle: {
+                        color: color,
+                        width: 3,
+                        type: [9, 7],
+                        cap: 'round',
+                        shadowColor: 'rgba(0, 0, 0, 0.15)',
+                        shadowBlur: 3
+                    }
+                });
+                travelerData.push({
+                    value: points[points.length - 1],
+                    itemStyle: { color: color, borderColor: '#ffffff', borderWidth: 2 }
+                });
+            }
+
+            addRoute(p1, PARSI_COLOR, PARSI_BAND);
+            addRoute(p2, PARSI_COLOR, PARSI_BAND);
+            addRoute(tb1, TB_COLOR, TB_BAND);
+            addRoute(tb2, TB_COLOR, TB_BAND);
+            addRoute(tb3, TB_COLOR, TB_BAND);
+
+            return {
+                xAxis: { show: false, min: 0, max: map.getSize().x },
+                yAxis: { show: false, min: 0, max: map.getSize().y, inverse: true },
+                grid: { left: 0, top: 0, right: 0, bottom: 0 },
+                series: [
+                    {
+                        type: 'lines',
+                        coordinateSystem: 'cartesian2d',
+                        polyline: true,
+                        silent: true,
+                        z: 1,
+                        data: bandData
+                    },
+                    {
+                        type: 'lines',
+                        coordinateSystem: 'cartesian2d',
+                        polyline: true,
+                        silent: true,
+                        z: 2,
+                        data: dashData
+                    },
+                    {
+                        type: 'scatter',
+                        coordinateSystem: 'cartesian2d',
+                        symbol: 'circle',
+                        symbolSize: 13,
+                        z: 10,
+                        data: travelerData,
+                        label: { show: false },
+                        itemStyle: {
+                            borderColor: '#ffffff',
+                            borderWidth: 2,
+                            shadowColor: 'rgba(0, 0, 0, 0.3)',
+                            shadowBlur: 4
+                        }
+                    }
+                ]
+            };
+        }
+
+        function updateChart() {
+            myChart.resize();
+            myChart.setOption(getChartOption());
+            updateDestinations();
+        }
+
+        map.on('move zoom', updateChart);
+        window.addEventListener('resize', updateChart);
+
+        // -----------------------------------------------------------------
+        // 3. GSAP SCROLLTRIGGER
+        // -----------------------------------------------------------------
+        gsap.registerPlugin(ScrollTrigger);
+
+        function setFactoriesVisible(visible) {
+            document.querySelectorAll('.factory-icon').forEach((el, index) => {
+                if (visible) {
+                    setTimeout(() => el.classList.add('visible'), index * 150);
+                } else {
+                    el.classList.remove('visible');
+                }
+            });
+        }
+
+        // Step 1 Trigger
+        gsap.to(pathProgress, {
+            parsiPersiaToGujarat: 1,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: "#step1",
+                start: "top center",
+                end: "bottom center",
+                scrub: true,
+                onUpdate: updateChart,
+                onEnter: () => {
+                    map.flyTo([22.0, 65.0], 5, { duration: 1 });
+                    setMarkerVisible('parsiOrigin', true);
+                },
+                onEnterBack: () => {
+                    map.flyTo([22.0, 65.0], 5, { duration: 1 });
+                    setFactoriesVisible(false);
+                    setMarkerVisible('parsiOrigin', true);
+                },
+                onLeaveBack: () => setMarkerVisible('parsiOrigin', false)
+            }
+        });
+
+        // Step 2 Trigger
+        gsap.to(pathProgress, {
+            parsiGujaratToBombay: 1,
+            tbKaveriToChennai: 1,
+            tbKaveriToBangalore: 1,
+            tbKaveriToBombay: 1,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: "#step2",
+                start: "top center",
+                end: "bottom center",
+                scrub: true,
+                onUpdate: updateChart,
+                onEnter: () => {
+                    map.flyTo([15.5, 77.0], 6, { duration: 1 });
+                    setMarkerVisible('tbOrigin', true);
+                },
+                onEnterBack: () => {
+                    map.flyTo([15.5, 77.0], 6, { duration: 1 });
+                    setFactoriesVisible(false);
+                    setMarkerVisible('tbOrigin', true);
+                },
+                onLeaveBack: () => setMarkerVisible('tbOrigin', false)
+            }
+        });
+
+        // Step 3a Trigger
+        ScrollTrigger.create({
+            trigger: "#step3",
+            start: "top center",
+            end: "top center",
+            onEnter: () => map.flyTo(coords.bombayDocks, 12, { duration: 1.8 }),
+            onEnterBack: () => {
+                map.flyTo(coords.bombayDocks, 12, { duration: 1.8 });
+                setFactoriesVisible(false);
+            }
+        });
+
+        // Step 3b Trigger
+        ScrollTrigger.create({
+            trigger: "#step3",
+            start: "45% center",
+            end: "45% center",
+            onEnter: () => setFactoriesVisible(true),
+            onLeaveBack: () => setFactoriesVisible(false)
+        });
+
+        updateChart();
+    </script>
+</body>
+</html>

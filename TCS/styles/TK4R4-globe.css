@@ -1,0 +1,572 @@
+/* styles/TK4R4-globe.css — "Follow the Sun" + "A Global Footprint" (V6.2/V6.3)
+
+   Per explicit user instruction, this module restores the ORIGINAL visual
+   design from suntime.html (its own warm-paper palette + Fraunces/Newsreader/
+   Inter typefaces) instead of the site design-system tokens. Needs three
+   Google Fonts added to the shared page <head>: Fraunces, Newsreader, Inter
+   — see this project's font stack:
+   https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600;700&display=swap
+
+   Two structural bug fixes from the combined-page integration are preserved
+   here even though they touch this same file — they are not "design", they
+   stop this module from breaking every module around it:
+   1. .TK4R4-mood-bg is position:absolute (not the original's position:fixed)
+      because .TK4R4-chapter is position:relative and spans this section's
+      full height — fixed pinned it over the ENTIRE page from load.
+   2. .TK4R4-office-sidebar keeps its ORIGINAL position:fixed (that part was
+      never the bug) — the real fix lives in scripts/TK4R4-globe.js as an
+      onLeave ScrollTrigger callback that force-closes exploration mode
+      once the user scrolls past this section, so the sidebar can't stay
+      stuck fixed over the modules below it. Don't remove that callback. */
+
+.TK4R4-chapter {
+  position: relative;
+  font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
+  color: #4a453c;
+}
+
+.TK4R4-mood-bg {
+  position: absolute; /* bug fix — see file header; original was fixed */
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(140% 120% at 78% 20%,
+      var(--TK4R4-mood-1, #f7f2e8) 0%,
+      var(--TK4R4-mood-2, #efe7d7) 55%,
+      var(--TK4R4-mood-3, #e6dcc7) 100%);
+}
+
+.TK4R4-pin-wrapper {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#TK4R4-canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  cursor: grab;
+  transition: width 0.6s cubic-bezier(.2, .9, .3, 1);
+}
+
+body.TK4R4-stage-final #TK4R4-canvas-container {
+  width: calc(100% - 400px);
+}
+
+body.TK4R4-stage-final #TK4R4-canvas-container.TK4R4-dot-hover {
+  cursor: pointer;
+}
+
+@media (max-width: 860px) {
+  body.TK4R4-stage-final #TK4R4-canvas-container {
+    width: 100%;
+    height: 58vh;
+  }
+}
+
+.TK4R4-text-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.TK4R4-content-box {
+  position: absolute;
+  padding: 0;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.TK4R4-content-box::before {
+  content: '';
+  display: block;
+  width: 56px;
+  height: 1px;
+  background: #211e19;
+  margin-bottom: 22px;
+  opacity: 0.8;
+}
+
+#TK4R4-box-3::before { margin-left: auto; margin-right: auto; }
+
+#TK4R4-box-1, #TK4R4-box-2 {
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: 430px;
+}
+
+#TK4R4-box-1 { left: 7%; }
+#TK4R4-box-2 { right: 7%; }
+
+#TK4R4-box-3 {
+  bottom: 6vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 720px;
+  text-align: center;
+}
+
+@media (max-width: 860px) {
+  body.TK4R4-stage-final #TK4R4-box-3 { left: 50%; }
+}
+
+.TK4R4-eyebrow {
+  display: block;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #8a8172;
+  margin-bottom: 18px;
+}
+
+.TK4R4-heading {
+  font-family: 'Fraunces', Georgia, serif;
+  font-optical-sizing: auto;
+  font-size: clamp(2.2rem, 3.4vw, 3.1rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.06;
+  color: #211e19;
+  margin-bottom: 1.1rem;
+}
+
+.TK4R4-word-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+}
+
+.TK4R4-word {
+  display: inline-block;
+  will-change: transform;
+}
+
+.TK4R4-content-box p {
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 1.16rem;
+  font-weight: 400;
+  line-height: 1.62;
+  color: #4a453c;
+  max-width: 42ch;
+}
+
+#TK4R4-box-3 p { max-width: 60ch; margin: 0 auto; }
+
+.TK4R4-drag-hint {
+  display: inline-block;
+  margin-top: 26px;
+  padding-top: 14px;
+  border-top: 1px solid #d8cebb;
+  color: #8a8172;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.TK4R4-drag-hint::after {
+  content: ' \2192';
+  color: #a8631f;
+}
+
+/* ── Narrative city labels (CSS2D, anchored to NY / Bombay / sec-3 markers) ── */
+.TK4R4-city-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(243, 238, 228, 0.7);
+  backdrop-filter: blur(2px);
+  color: #211e19;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 2px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.45s ease, transform 0.45s cubic-bezier(.2, .9, .3, 1.3), color 0.25s ease;
+  transform: translateY(6px);
+}
+
+.TK4R4-city-label .TK4R4-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a8631f;
+  flex: none;
+}
+
+.TK4R4-city-label.TK4R4-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.TK4R4-city-label.TK4R4-behind-panel {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+}
+
+/* The single emphasized narrative marker (Bombay) reads in the original's red */
+.TK4R4-city-label.TK4R4-signal .TK4R4-dot {
+  background: #b5451f;
+}
+
+/* ── Office directory sidebar ── */
+.TK4R4-office-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  max-width: 100vw;
+  height: 100vh;
+  background: rgba(247, 242, 232, 0.98);
+  border-left: 1px solid #d8cebb;
+  box-shadow: -18px 0 40px rgba(33, 30, 25, 0.08);
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(24px);
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(.2, .9, .3, 1.1);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 860px) {
+  .TK4R4-office-sidebar {
+    top: auto;
+    bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    height: 42vh;
+    border-left: none;
+    border-top: 1px solid #d8cebb;
+    box-shadow: 0 -18px 40px rgba(33, 30, 25, 0.08);
+    transform: translateY(24px);
+  }
+}
+
+body.TK4R4-stage-final .TK4R4-office-sidebar {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+@media (max-width: 860px) {
+  body.TK4R4-stage-final .TK4R4-office-sidebar { transform: translateY(0); }
+}
+
+.TK4R4-sidebar-header {
+  flex: none;
+  padding: 40px 32px 22px;
+  border-bottom: 1px solid #d8cebb;
+}
+
+.TK4R4-sidebar-eyebrow {
+  display: block;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #8a8172;
+  margin-bottom: 10px;
+}
+
+.TK4R4-sidebar-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #211e19;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.TK4R4-sidebar-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #8a8172;
+  margin-bottom: 16px;
+}
+
+.TK4R4-sidebar-search {
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  color: #211e19;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid #d8cebb;
+  border-radius: 4px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.TK4R4-sidebar-search::placeholder { color: #8a8172; }
+
+.TK4R4-sidebar-search:focus {
+  border-color: #a8631f;
+  background: #fff;
+}
+
+.TK4R4-sidebar-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.TK4R4-filter-chip {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4a453c;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid #d8cebb;
+  border-radius: 999px;
+  padding: 5px 11px;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.TK4R4-filter-chip:hover {
+  border-color: #a8631f;
+  color: #211e19;
+}
+
+.TK4R4-filter-chip.TK4R4-active {
+  background: #a8631f;
+  border-color: #a8631f;
+  color: #fdf9f0;
+}
+
+.TK4R4-sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 32px 40px;
+}
+
+.TK4R4-sidebar-list::-webkit-scrollbar { width: 6px; }
+.TK4R4-sidebar-list::-webkit-scrollbar-thumb {
+  background: #d8cebb;
+  border-radius: 3px;
+}
+
+.TK4R4-dir-group { margin-bottom: 6px; }
+.TK4R4-dir-group.TK4R4-hidden { display: none; }
+
+.TK4R4-dir-country {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: rgba(247, 242, 232, 0.98);
+  padding: 14px 0 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #8a8172;
+  border-bottom: 1px solid #d8cebb;
+}
+
+.TK4R4-dir-count {
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #8a8172;
+  opacity: 0.8;
+}
+
+.TK4R4-dir-city {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 12px;
+  margin: 4px 0;
+  border-radius: 6px;
+  border-left: 2px solid transparent;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.TK4R4-dir-city.TK4R4-hidden { display: none; }
+
+.TK4R4-dir-city:hover,
+.TK4R4-dir-city.TK4R4-is-hover {
+  background: rgba(168, 99, 31, 0.07);
+  border-left-color: #a8631f;
+}
+
+.TK4R4-dir-city.TK4R4-is-active {
+  background: rgba(181, 69, 31, 0.10);
+  border-left-color: #b5451f;
+}
+
+.TK4R4-dir-city-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.TK4R4-dir-city-name {
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 1.06rem;
+  font-weight: 500;
+  color: #211e19;
+  line-height: 1.25;
+}
+
+.TK4R4-dir-city-meta {
+  flex: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8a8172;
+}
+
+.TK4R4-dir-offices {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.TK4R4-dir-city.TK4R4-is-active .TK4R4-dir-offices {
+  max-height: 600px;
+}
+
+.TK4R4-dir-office {
+  padding: 10px 0 2px;
+  border-top: 1px solid #d8cebb;
+  margin-top: 10px;
+}
+
+.TK4R4-dir-office:first-child { border-top: none; margin-top: 8px; }
+
+.TK4R4-dir-office-name {
+  display: block;
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #211e19;
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+
+.TK4R4-dir-office-addr {
+  display: block;
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 0.84rem;
+  color: #4a453c;
+  line-height: 1.45;
+}
+
+/* ── Pin label: hover/active pill above a directory dot ── */
+.TK4R4-pin-anchor {
+  position: relative;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.TK4R4-pin-label {
+  position: absolute;
+  left: 0;
+  bottom: 11px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  background: rgba(247, 242, 232, 0.96);
+  backdrop-filter: blur(3px);
+  color: #211e19;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 3px;
+  border: 1px solid #d8cebb;
+  box-shadow: 0 8px 20px rgba(33, 30, 25, 0.16);
+  opacity: 0;
+  transform: translate(-50%, 6px);
+  transition: opacity 0.18s ease, transform 0.18s cubic-bezier(.2, .9, .3, 1.3);
+}
+
+.TK4R4-pin-label.TK4R4-show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.TK4R4-pin-label .TK4R4-pin-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a8631f;
+  flex: none;
+}
+
+.TK4R4-pin-label.TK4R4-active .TK4R4-pin-dot {
+  background: #b5451f;
+}
+
+/* ── Legend chip, shown only once free exploration unlocks ── */
+.TK4R4-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.TK4R4-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.68rem;
+  color: #4a453c;
+}
+
+.TK4R4-legend-item .TK4R4-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #a8631f;
+}
+
+.TK4R4-legend-item.TK4R4-legend-active .TK4R4-dot {
+  background: #b5451f;
+}

@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Tata Leadership Power Map (Copy)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+
+    /* --- warm beige light theme --- */
+    --bg:#e9e2d0;
+    --panel:#fbf7ee;
+    --note-bg:#f2ecdd;
+    --ink:#2c2823;
+    --ink-soft:#6a6456;
+    --ink-faint:#9b9484;
+    --line:#dcd3bf;
+    --line-soft:#e6ddca;
+
+    --band1:rgba(165,118,29,.08);
+    --band2:rgba(51,81,126,.06);
+    --band3:rgba(43,119,120,.06);
+
+    /* tier accents */
+    --t1:#a5761d;  --t1-fill:#8a5e2a;
+    --t2:#33517e;  --t2-fill:#3b5686;
+    --t3:#2b7778;  --t3-fill:#2f6e70;
+    --pivot-fill:#2c4573;
+
+    /* status rings */
+    --st-gold:#b5891a;
+    --st-red:#b73a2e;
+    --st-gray:#7b7263;
+    --st-hist:#a79e8b;
+
+    /* edge families */
+    --edge-succ:#c8bda2;
+    --edge-ctrl:#a5761d;
+    --edge-asc:#33517e;
+
+    --shadow:0 14px 40px -12px rgba(60,45,20,.30),0 0 0 .5px rgba(60,45,20,.04);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Hanken Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;
+    overflow:hidden;
+  }
+
+  header.top{
+    flex:0 0 auto;
+    padding:20px 26px 15px;
+    display:flex;gap:20px 40px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;
+    border-bottom:1px solid var(--line);
+  }
+  .title-block h1{
+    font-family:"Fraunces",serif;font-weight:500;
+    font-size:clamp(21px,3.2vw,30px);letter-spacing:-.01em;line-height:1.05;
+  }
+  .title-block .sub{
+    margin-top:7px;max-width:52ch;font-size:13.5px;line-height:1.5;color:var(--ink-soft);
+  }
+  .title-block .sub b{color:var(--ink);font-weight:600}
+
+  .legends{display:flex;gap:26px;flex-wrap:wrap}
+  .legend h2{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:9px}
+  .legend ul{list-style:none;display:flex;flex-direction:column;gap:7px}
+  .legend li{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-soft);white-space:nowrap}
+  .swatch{width:13px;height:13px;border-radius:50%;flex:0 0 auto;background:transparent}
+  .swatch.ring{border:3px solid var(--st-gold)}
+  .sw-gold{border-color:var(--st-gold)!important}
+  .sw-red{border-color:var(--st-red)!important}
+  .sw-gray{border-color:var(--st-gray)!important}
+  .sw-hist{border-color:var(--st-hist)!important;border-style:dashed}
+  .dash{width:26px;flex:0 0 auto}
+  .d-succ{border-top:2px solid var(--edge-succ)}
+  .d-ctrl{border-top:2px dashed var(--edge-ctrl)}
+  .d-asc{border-top:2.5px solid var(--edge-asc)}
+  .shape-note{font-size:11.5px;color:var(--ink-faint);margin-top:3px}
+  .shape-note span{display:inline-flex;align-items:center;gap:5px;margin-right:12px}
+  .mini-circle{width:11px;height:11px;border-radius:50%;background:var(--t2-fill);display:inline-block}
+  .mini-square{width:11px;height:11px;border-radius:3px;background:var(--t2);display:inline-block}
+
+  main{flex:1 1 auto;min-height:0;position:relative}
+  #stage{position:absolute;inset:0;overflow:hidden}
+  svg#map{display:block;width:100%;height:100%}
+
+  /* mobile / tablet: the graph runs full width and the section scrolls vertically to
+     reveal the rest, instead of being scaled down and letterboxed to fit one frame. A
+     visible rule above and below (plus a soft inner shadow) marks the chart out as its
+     own scrollable section, distinct from the header and footer around it. */
+  @media (max-width:1024px){
+    main{
+      overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
+      border-top:1px solid var(--ink-faint);
+      border-bottom:1px solid var(--ink-faint);
+      box-shadow:inset 0 8px 10px -10px rgba(44,40,35,.28),inset 0 -8px 10px -10px rgba(44,40,35,.28);
+    }
+    #stage{position:static;overflow:visible;width:100%}
+    svg#map{width:100%;height:auto}
+  }
+
+  /* SVG themed classes */
+  .band{stroke:var(--line-soft);stroke-width:1}
+  .band-1{fill:var(--band1)} .band-2{fill:var(--band2)} .band-3{fill:var(--band3)}
+  .tier-tab{font:700 11px "Hanken Grotesk",sans-serif;letter-spacing:.06em}
+  .tier-name{font:600 12px "Hanken Grotesk",sans-serif}
+  .tier-1 .tier-tab,.tier-1 .tier-name{fill:var(--t1)}
+  .tier-2 .tier-tab,.tier-2 .tier-name{fill:var(--t2)}
+  .tier-3 .tier-tab,.tier-3 .tier-name{fill:var(--t3)}
+
+  .edge{fill:none;stroke-linecap:round}
+  .e-succ{stroke:var(--edge-succ);stroke-width:1.6}
+  .e-ctrl{stroke:var(--edge-ctrl);stroke-width:1.8;stroke-dasharray:6 5;opacity:.9}
+  .e-asc{stroke:var(--edge-asc);stroke-width:2.4}
+  .e-asc.dotted{stroke-width:1.8;stroke-dasharray:2 5;opacity:.75}
+  .mk path{stroke:none}
+  .mk-succ path{fill:var(--edge-succ)} .mk-ctrl path{fill:var(--edge-ctrl)} .mk-asc path{fill:var(--edge-asc)}
+
+  .elabel{font:600 10.5px "Hanken Grotesk",sans-serif;fill:var(--ink-soft)}
+  .elabel-bg{fill:var(--panel);stroke:var(--line);stroke-width:1}
+
+  .node{cursor:pointer;outline:none}
+  .node .hit{fill:transparent}
+  .avatar-txt{fill:#fff;font-family:"Hanken Grotesk",sans-serif;font-weight:700;text-anchor:middle;dominant-baseline:central}
+  .hub-txt{fill:#fff;font-family:"Hanken Grotesk",sans-serif;font-weight:700;text-anchor:middle;dominant-baseline:central}
+  .n-name{fill:var(--ink);font-family:"Hanken Grotesk",sans-serif;font-weight:600;text-anchor:middle}
+  .n-sub{fill:var(--ink-faint);font-family:"Hanken Grotesk",sans-serif;font-weight:500;text-anchor:middle}
+  .focus-ring{opacity:0;fill:none;stroke:var(--ink);stroke-width:2;stroke-dasharray:3 3}
+  .node:focus-visible .focus-ring{opacity:.9}
+  .removed-badge circle{fill:var(--st-red)}
+  .removed-badge path{stroke:#fff;stroke-width:1.7;stroke-linecap:round}
+
+  svg#map.dimmed .node:not(.hl){opacity:.16}
+  svg#map.dimmed .edge:not(.hl){opacity:.08}
+  svg#map.dimmed g.elabel-group:not(.hl){opacity:.12}
+  .node,.edge,g.elabel-group{transition:opacity .18s ease}
+
+  /* tooltip (fixed to the viewport so it works the same whether the graph section
+     scrolls, as on mobile/tablet, or stays static, as on desktop) */
+  #tip{
+    position:fixed;z-index:50;pointer-events:none;
+    max-width:min(290px,86vw);min-width:200px;
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    box-shadow:var(--shadow);overflow:hidden;
+    opacity:0;transform:translateY(4px);transition:opacity .14s ease,transform .14s ease;
+  }
+  #tip.show{opacity:1;transform:translateY(0)}
+  .tip-top{display:flex;gap:11px;align-items:flex-start;padding:13px 14px 11px;border-bottom:1px solid var(--line-soft)}
+  .tip-av{width:38px;height:38px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12.5px;border:3px solid var(--st-gold)}
+  .tip-hd{min-width:0;flex:1 1 auto}
+  .tip-name{font-family:"Fraunces",serif;font-weight:600;font-size:16.5px;line-height:1.12;letter-spacing:-.01em}
+  .tip-tier{display:inline-block;flex:0 0 auto;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);border-radius:20px;padding:3px 7px}
+  .tip-meta{padding:11px 14px 4px;display:flex;flex-direction:column;gap:8px}
+  .tip-row{display:flex;gap:8px;font-size:12.5px;line-height:1.4}
+  .tip-k{flex:0 0 52px;color:var(--ink-faint);font-weight:600}
+  .tip-v{color:var(--ink);min-width:0}
+  .status-pill{display:inline-flex;align-items:center;gap:6px;font-weight:600}
+  .status-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .tip-note{margin:10px 14px 14px;padding:9px 11px;background:var(--note-bg);border-left:3px solid var(--st-gold);border-radius:0 7px 7px 0;font-size:12px;line-height:1.45;color:var(--ink-soft)}
+  .tip-note b{color:var(--ink);font-weight:600}
+
+  footer{
+    flex:0 0 auto;padding:11px 26px 14px;border-top:1px solid var(--line);
+    font-size:12px;color:var(--ink-faint);line-height:1.5;
+  }
+  footer b{color:var(--ink-soft);font-weight:600}
+
+  @media (max-width:760px){
+    header.top{padding:14px 16px 11px;gap:14px 24px}
+    .title-block .sub{font-size:12.5px}
+    .legends{gap:18px 22px}
+    .legend li{font-size:12px}
+    footer{padding:9px 16px 12px;font-size:11.5px}
+  }
+  @media (max-width:460px){
+    .title-block .sub{display:none}
+    .legend:nth-child(2) .shape-note{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+  <header class="top">
+    <div class="title-block">
+      <h1>The Tata Leadership Power Map</h1>
+      <p class="sub">Control runs down three tiers — <b>Tata Trusts → Tata Sons → TCS</b>. The story pivots on
+      <b>N. Chandrasekaran</b>, who rose through TCS and crossed up into the group chairmanship. Tap any figure.</p>
+    </div>
+    <div class="legends">
+      <div class="legend">
+        <h2>Status ring</h2>
+        <ul>
+          <li><span class="swatch ring sw-gold"></span>Current</li>
+          <li><span class="swatch ring sw-red"></span>Removed</li>
+          <li><span class="swatch ring sw-gray"></span>Stepped down voluntarily</li>
+          <li><span class="swatch ring sw-hist"></span>Historical / legacy</li>
+        </ul>
+      </div>
+      <div class="legend">
+        <h2>Connections</h2>
+        <ul>
+          <li><span class="dash d-succ"></span>Succession</li>
+          <li><span class="dash d-ctrl"></span>Ownership / control stake</li>
+          <li><span class="dash d-asc"></span>Chandrasekaran's ascent</li>
+        </ul>
+        <div class="shape-note">
+          <span><i class="mini-circle"></i>person</span>
+          <span><i class="mini-square"></i>entity</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div id="stage">
+      <svg id="map" role="img" aria-label="Interactive map of Tata leadership across Tata Trusts, Tata Sons and TCS"></svg>
+      <div id="tip" role="tooltip" aria-hidden="true"></div>
+    </div>
+  </main>
+
+  <footer>
+    <b>Reading the map:</b> each tier flows in chronological order. Chandrasekaran sits on the seam between Tata Sons and TCS — the one node that belongs to both.
+  </footer>
+
+<script>
+(function(){
+  "use strict";
+
+  const TIER={
+    1:{name:"Tata Trusts",tab:"TIER 1",role:"Governance & shareholding",cls:"tier-1"},
+    2:{name:"Tata Sons",tab:"TIER 2",role:"Holding board & chairmanship",cls:"tier-2"},
+    3:{name:"TCS",tab:"TIER 3",role:"Operating leadership",cls:"tier-3"}
+  };
+
+  // Each node carries two position sets: d = desktop/landscape layout (wide, tiers flow
+  // left→right), m = mobile/tablet layout (narrow, tiers stack top→bottom). Chandrasekaran
+  // gets deliberately generous clearance from his neighbours in both, so his label never
+  // collides with the converging succession/ascent edges.
+  const nodes=[
+    {id:"trusts",kind:"hub",tier:1,label:["Tata","Trusts"],name:"Tata Trusts",
+     role:"Majority shareholder of Tata Sons (~66%)",tenure:"Philanthropic umbrella",statusTag:"tier1",
+     note:"An umbrella of ~15 philanthropic entities; the <b>Sir Ratan Tata Trust</b> and <b>Sir Dorabji Tata Trust</b> are the most prominent.",
+     pos:{d:{x:150,y:130,r:30}, m:{x:88,y:115,r:25}}},
+    {id:"sons",kind:"hub",tier:2,label:["Tata","Sons"],name:"Tata Sons",
+     role:"Principal holding company & promoter",tenure:"The group's holding company",statusTag:"tier2",
+     note:"Holds the promoter stake across the operating Tata companies and appoints the group chairman. Roughly two-thirds owned by Tata Trusts.",
+     pos:{d:{x:100,y:300,r:30}, m:{x:88,y:325,r:25}}},
+    {id:"tcs",kind:"hub",tier:3,label:["TCS"],name:"TCS",
+     role:"Flagship operating company",tenure:"Tata Consultancy Services",statusTag:"tier3",
+     note:"Tata Sons holds roughly a <b>72% promoter stake</b>; TCS dividends fund much of the wider group.",
+     pos:{d:{x:100,y:618,r:30}, m:{x:88,y:1182,r:25}}},
+
+    {id:"noel",kind:"person",tier:1,initials:"NT",name:"Noel Tata",
+     role:"Chairman, Tata Trusts — earlier a Tata Sons chairmanship candidate",
+     tenure:"born on 1957 · Trusts chair Oct 2024–present",status:"gold",
+     note:"Took the Trusts chair in October 2024, following the death of Ratan Tata.",
+     pos:{d:{x:340,y:130,r:26}, m:{x:300,y:115,r:22}}},
+
+    {id:"jamsetji",kind:"person",tier:2,initials:"JT",name:"Jamsetji Tata",
+     role:"Founder",tenure:"born on 1839 · died on 1904",status:"hist",
+     note:"Dreamed of a steel plant, a hydro-power station, a world-class hotel and a science university. Three of the four were realised only after his death in 1904 — including the <b>Indian Institute of Science</b>, which opened in 1911.",
+     pos:{d:{x:250,y:300,r:26}, m:{x:262,y:325,r:19}}},
+    {id:"jrd",kind:"person",tier:2,initials:"JRD",name:"JRD Tata",
+     role:"Chairman, Tata Sons & Tata Group; later chairman emeritus",
+     tenure:"1938–1991 · emeritus to 1993",status:"hist",
+     note:"Funded the 1962 unit; the eventual TCS IPO was timed to his <b>100th birth anniversary</b>.",
+     pos:{d:{x:400,y:300,r:26}, m:{x:262,y:455,r:19}}},
+    {id:"ratan",kind:"person",tier:2,initials:"RT",name:"Ratan Tata",
+     role:"Chairman; later interim chairman",
+     tenure:"1991–Dec 2012 · interim Oct 2016–Feb 2017",status:"hist",
+     note:"Led the 2004 IPO roadshow and <b>tapped Chandrasekaran in Jan 2017</b>. Died 9 October 2024.",
+     pos:{d:{x:560,y:300,r:28}, m:{x:262,y:585,r:21}}},
+    {id:"cyrus",kind:"person",tier:2,initials:"CM",name:"Cyrus Mistry",
+     role:"Chairman",tenure:"Dec 2012–Oct 2016",status:"red",
+     note:"<b>Removed by the board</b> after losing the confidence of the majority shareholder. Died 4 September 2022.",
+     pos:{d:{x:720,y:300,r:26}, m:{x:262,y:715,r:19}}},
+
+    {id:"chandra",kind:"pivot",tier:2,initials:"NC",name:"N. Chandrasekaran",
+     role:"Chairman, Tata Sons · former CEO, TCS",
+     tenure:"TCS CEO 2009–17 → Sons chair 21 Feb 2017–20 Feb 2032",status:"gold",
+     tierLabel:"Tier 2 ↔ Tier 3",
+     note:"Rose from a <b>1987 TCS intern</b> to the first professional, non-family chairman of Tata Sons. Resigned in Aug 2026, then reversed the decision in Sep 2026.",
+     pos:{d:{x:780,y:454,r:40}, m:{x:392,y:917,r:32}}},
+
+    {id:"agarwala",kind:"person",tier:3,initials:"PMA",name:"PM Agarwala",
+     role:"MD, Tata Electric — took charge of TCS at the 1968 spin-off",
+     tenure:"1968–1974",status:"hist",
+     note:"Sought out a disciplinarian to lead the newly carved-out TCS.",
+     pos:{d:{x:250,y:618,r:26}, m:{x:262,y:1182,r:19}}},
+    {id:"kohli",kind:"person",tier:3,initials:"FCK",name:"FC Kohli",
+     role:"General manager, then head of TCS",tenure:"1969–2000",status:"hist",
+     note:"Blocked a plan to fold TCS into the Tata–Burroughs JV. The <b>“father of the Indian software industry”</b>; personally signed off on Chandrasekaran's hire.",
+     pos:{d:{x:400,y:618,r:26}, m:{x:262,y:1312,r:19}}},
+    {id:"ramadorai",kind:"person",tier:3,initials:"SR",name:"S Ramadorai",
+     role:"CEO, TCS (joined 1972)",tenure:"CEO 1996–2009",status:"gray",
+     note:"Built the Y2K <b>“software factory”</b> and set up Ignite; made Chandrasekaran his executive assistant after becoming CEO.",
+     pos:{d:{x:540,y:618,r:26}, m:{x:262,y:1442,r:19}}},
+    {id:"gopinathan",kind:"person",tier:3,initials:"RG",name:"Rajesh Gopinathan",
+     role:"CEO, TCS",tenure:"2017–2023",status:"gray",
+     note:"Abrupt exit amid restructuring backlash.",
+     pos:{d:{x:900,y:618,r:26}, m:{x:262,y:1572,r:19}}},
+    {id:"krithivasan",kind:"person",tier:3,initials:"KK",name:"K Krithivasan",
+     role:"CEO, TCS",tenure:"2023–present",status:"gold",
+     note:"Navigating global capability centres (GCCs), H-1B surcharges and AI pricing pressure.",
+     pos:{d:{x:1055,y:618,r:26}, m:{x:262,y:1702,r:19}}}
+  ];
+
+  // labelT nudges an edge label off the 50% midpoint. For every edge that touches the
+  // crowded pivot node, the label is pulled toward the OTHER endpoint so it never sits on
+  // top of Chandrasekaran's own name/tenure text.
+  const edges=[
+    {s:"noel",t:"trusts",type:"ctrl"},
+    {s:"trusts",t:"sons",type:"ctrl",label:"~66%"},
+    {s:"sons",t:"tcs",type:"ctrl",label:"~72%"},
+    {s:"jamsetji",t:"jrd",type:"succ"},
+    {s:"jrd",t:"ratan",type:"succ"},
+    {s:"ratan",t:"cyrus",type:"succ"},
+    {s:"agarwala",t:"kohli",type:"succ"},
+    {s:"kohli",t:"ramadorai",type:"succ"},
+    {s:"chandra",t:"gopinathan",type:"succ",curv:{d:.10,m:0},label:"handed TCS",labelT:{d:.68,m:.74}},
+    {s:"gopinathan",t:"krithivasan",type:"succ"},
+    {s:"kohli",t:"chandra",type:"asc",dotted:true,curv:{d:-.30,m:0},label:"hired 1987",labelT:{d:.30,m:.64}},
+    {s:"ramadorai",t:"chandra",type:"asc",curv:{d:-.12,m:0},label:"promoted to CEO",labelT:{d:.42,m:.34}},
+    {s:"ratan",t:"chandra",type:"asc",curv:{d:.14,m:0},label:"tapped as chair, 2017",labelT:{d:.32,m:.80}}
+  ];
+
+  const STATUS={
+    gold:{c:"var(--st-gold)",label:"Current"},
+    red:{c:"var(--st-red)",label:"Removed"},
+    gray:{c:"var(--st-gray)",label:"Stepped down voluntarily"},
+    hist:{c:"var(--st-hist)",label:"Historical / legacy"},
+    tier1:{c:"var(--t1)",label:"Current"},
+    tier2:{c:"var(--t2)",label:"Current"},
+    tier3:{c:"var(--t3)",label:"Current"}
+  };
+  const AVFILL={1:"var(--t1-fill)",2:"var(--t2-fill)",3:"var(--t3-fill)"};
+
+  // desktop / landscape bands (tiers side-by-side, wide canvas)
+  const BANDS_D=[
+    {t:1,y:52, h:150},
+    {t:2,y:214,h:200},
+    {t:3,y:494,h:230}
+  ];
+  // mobile / tablet-portrait bands (tiers stacked, tall narrow canvas). The gap between
+  // band 2 and band 3 is deliberately wide — Chandrasekaran's node lives in that seam,
+  // clear of both neighbouring clusters.
+  const BANDS_M=[
+    {t:1,y:20,  h:180},
+    {t:2,y:225, h:570},
+    {t:3,y:1082,h:700}
+  ];
+
+  const byId=Object.fromEntries(nodes.map(n=>[n.id,n]));
+  const NS="http://www.w3.org/2000/svg";
+  const svg=document.getElementById("map");
+  const stage=document.getElementById("stage");
+  const tip=document.getElementById("tip");
+
+  const adj={}; nodes.forEach(n=>adj[n.id]=new Set());
+  edges.forEach(e=>{adj[e.s].add(e.t);adj[e.t].add(e.s);});
+
+  const mq=window.matchMedia("(max-width: 1024px)");
+  let mode="desktop";
+  function detectMode(){ return mq.matches ? "mobile" : "desktop"; }
+  function P(n){ return mode==="mobile" ? n.pos.m : n.pos.d; }
+  function fsz(base){ return mode==="mobile" ? +(base*1.4).toFixed(1) : base; }
+
+  function el(tag,attrs,children){
+    const e=document.createElementNS(NS,tag);
+    if(attrs)for(const k in attrs)e.setAttribute(k,attrs[k]);
+    if(children)children.forEach(c=>e.appendChild(c));
+    return e;
+  }
+
+  // defs (created once)
+  const defs=el("defs");
+  [["succ","mk-succ"],["ctrl","mk-ctrl"],["asc","mk-asc"]].forEach(([id,cls])=>{
+    const m=el("marker",{id:"arw-"+id,class:"mk "+cls,viewBox:"0 0 10 10",refX:"8.5",refY:"5",markerWidth:"7",markerHeight:"7",orient:"auto-start-reverse"});
+    m.appendChild(el("path",{d:"M0,0 L10,5 L0,10 z"}));
+    defs.appendChild(m);
+  });
+  svg.appendChild(defs);
+
+  const content=el("g",{id:"content"});
+  svg.appendChild(content);
+
+  const shortT={
+    noel:"Trusts chair, 2024–",jamsetji:"1839–1904",jrd:"chair 1938–1991",
+    ratan:"chair 1991–2012",cyrus:"chair 2012–2016",chandra:"CEO ’09 · chair ’17–",
+    agarwala:"1968–1974",kohli:"1969–2000",ramadorai:"CEO 1996–2009",
+    gopinathan:"CEO 2017–2023",krithivasan:"CEO 2023–"
+  };
+
+  // geometry helpers ---------------------------------------------------
+  function edgeGeom(e){
+    const a=P(byId[e.s]),b=P(byId[e.t]);
+    let dx=b.x-a.x,dy=b.y-a.y; const len=Math.hypot(dx,dy)||1;
+    const ux=dx/len,uy=dy/len; const sr=a.r+4,tr=b.r+8;
+    const sx=a.x+ux*sr,sy=a.y+uy*sr,ex=b.x-ux*tr,ey=b.y-uy*tr;
+    const curv=e.curv?(typeof e.curv==="object"?(mode==="mobile"?e.curv.m:e.curv.d):e.curv):0;
+    if(!curv)return{d:`M${sx},${sy} L${ex},${ey}`,sx,sy,ex,ey,cx:(sx+ex)/2,cy:(sy+ey)/2,straight:true};
+    const mx=(sx+ex)/2,my=(sy+ey)/2,nx=-uy,ny=ux,off=curv*len;
+    const cx=mx+nx*off,cy=my+ny*off;
+    return{d:`M${sx},${sy} Q${cx},${cy} ${ex},${ey}`,sx,sy,ex,ey,cx,cy,straight:false};
+  }
+  function pointAt(g,t){
+    if(g.straight)return[g.sx+(g.ex-g.sx)*t, g.sy+(g.ey-g.sy)*t];
+    const mt=1-t;
+    return[mt*mt*g.sx+2*mt*t*g.cx+t*t*g.ex, mt*mt*g.sy+2*mt*t*g.cy+t*t*g.ey];
+  }
+
+  function pad(b,p){return{x:b.x-p,y:b.y-p,w:b.width+2*p,h:b.height+2*p};}
+  let CONTENT=null;
+
+  // Static view: no drag-to-pan, wheel/pinch-to-zoom, or zoom buttons — hover and click/tap
+  // are the only interactions. Desktop centers the whole diagram in the frame (default
+  // preserveAspectRatio scales it to fit). Mobile/tablet instead stretches the SVG to the
+  // full width of the section (see the max-width:1024px CSS) and locks in its natural
+  // aspect ratio via `aspect-ratio`, so the section scrolls rather than being shrunk to
+  // fit one screen.
+  function setView(){
+    svg.setAttribute("viewBox",`${CONTENT.x} ${CONTENT.y} ${CONTENT.w} ${CONTENT.h}`);
+    svg.style.aspectRatio = mode==="mobile" ? `${CONTENT.w} / ${CONTENT.h}` : "";
+  }
+
+  // ---------- build (and rebuild, on layout-mode change) ----------
+  function makeNode(n){
+    const p=P(n);
+    const g=el("g",{class:"node",tabindex:"0","data-id":n.id,role:"button","aria-label":n.name+", "+n.role});
+    g.appendChild(el("circle",{class:"hit",cx:p.x,cy:p.y,r:p.r+16}));
+    if(n.kind==="hub"){
+      const side=p.r*1.7;
+      g.appendChild(el("rect",{class:"focus-ring",x:p.x-side/2-5,y:p.y-side/2-5,width:side+10,height:side+10,rx:12}));
+      g.appendChild(el("rect",{x:p.x-side/2,y:p.y-side/2,width:side,height:side,rx:11,fill:"var(--t"+n.tier+")",stroke:"var(--panel)","stroke-width":"3"}));
+      n.label.forEach((line,i)=>{
+        const dy=(i-(n.label.length-1)/2)*13;
+        const t=el("text",{class:"hub-txt",x:p.x,y:p.y+dy,"font-size":fsz(n.label.length>1?11:13)});
+        t.appendChild(document.createTextNode(line)); g.appendChild(t);
+      });
+    }else{
+      const isPivot=n.kind==="pivot", ringC=STATUS[n.status].c;
+      g.appendChild(el("circle",{class:"focus-ring",cx:p.x,cy:p.y,r:p.r+6}));
+      g.appendChild(el("circle",{cx:p.x,cy:p.y,r:p.r,fill:"none",stroke:ringC,"stroke-width":isPivot?5:3.2,"stroke-dasharray":n.status==="hist"?"4 4":"none"}));
+      if(isPivot)g.appendChild(el("circle",{cx:p.x,cy:p.y,r:p.r+4,fill:"none",stroke:ringC,"stroke-width":"1.4",opacity:".35"}));
+      g.appendChild(el("circle",{cx:p.x,cy:p.y,r:p.r-4,fill:isPivot?"var(--pivot-fill)":AVFILL[n.tier]}));
+      const t=el("text",{class:"avatar-txt",x:p.x,y:p.y+1,"font-size":fsz(isPivot?17:(n.initials.length>2?11:14))});
+      t.appendChild(document.createTextNode(n.initials)); g.appendChild(t);
+      if(n.status==="red"){
+        const bx=p.x+p.r*.72,by=p.y-p.r*.72,bg=el("g",{class:"removed-badge"});
+        bg.appendChild(el("circle",{cx:bx,cy:by,r:8,stroke:"var(--panel)","stroke-width":"2"}));
+        bg.appendChild(el("path",{d:`M${bx-3},${by-3} L${bx+3},${by+3} M${bx+3},${by-3} L${bx-3},${by+3}`}));
+        g.appendChild(bg);
+      }
+      const nameOff=isPivot?26:17;
+      const nameY=p.y+p.r+nameOff;
+      const nm=el("text",{class:"n-name",x:p.x,y:nameY,"font-size":fsz(isPivot?14.5:12.5)});
+      nm.appendChild(document.createTextNode(n.name)); g.appendChild(nm);
+      const sub=el("text",{class:"n-sub",x:p.x,y:nameY+(isPivot?17:15),"font-size":fsz(11)});
+      sub.appendChild(document.createTextNode(shortT[n.id]||n.tenure)); g.appendChild(sub);
+    }
+    return g;
+  }
+
+  function tipHTML(n){
+    const st=STATUS[n.status||n.statusTag];
+    const avC=n.kind==="hub"?"var(--t"+n.tier+")":(n.kind==="pivot"?"var(--pivot-fill)":AVFILL[n.tier]);
+    const ringStyle=n.kind==="hub"?"border-color:var(--t"+n.tier+")":"border-color:"+st.c+(n.status==="hist"?";border-style:dashed":"");
+    const tierTag=n.tierLabel||(TIER[n.tier].tab.replace("TIER ","Tier ")+" · "+TIER[n.tier].name);
+    const initials=n.kind==="hub"?n.name.split(" ").map(w=>w[0]).join("").slice(0,3):n.initials;
+    let statusRow="";
+    if(n.kind!=="hub"){
+      statusRow=`<div class="tip-row"><span class="tip-k">Status</span><span class="tip-v"><span class="status-pill"><span class="status-dot" style="background:${st.c}"></span>${st.label}</span></span></div>`;
+    }
+    return `
+      <div class="tip-top">
+        <div class="tip-av" style="background:${avC};${ringStyle}">${initials}</div>
+        <div class="tip-hd"><div class="tip-name">${n.name}</div></div>
+        <span class="tip-tier">${tierTag}</span>
+      </div>
+      <div class="tip-meta">
+        <div class="tip-row"><span class="tip-k">Role</span><span class="tip-v">${n.role}</span></div>
+        <div class="tip-row"><span class="tip-k">${n.kind==="hub"?"About":"Tenure"}</span><span class="tip-v">${n.tenure}</span></div>
+        ${statusRow}
+      </div>
+      ${n.note?`<div class="tip-note" style="border-left-color:${st.c}">${n.note}</div>`:""}`;
+  }
+
+  let nodeLayer=null, edgeLayer=null, labelLayer=null;
+
+  function highlight(id){
+    svg.classList.add("dimmed");
+    const keep=new Set([id,...adj[id]]);
+    nodeLayer.querySelectorAll(".node").forEach(g=>g.classList.toggle("hl",keep.has(g.dataset.id)));
+    edgeLayer.querySelectorAll(".edge").forEach(pth=>pth.classList.toggle("hl",pth.dataset.s===id||pth.dataset.t===id));
+    labelLayer.querySelectorAll(".elabel-group").forEach(g=>g.classList.toggle("hl",g.dataset.s===id||g.dataset.t===id));
+  }
+  function clearHighlight(){svg.classList.remove("dimmed");svg.querySelectorAll(".hl").forEach(e=>e.classList.remove("hl"));}
+  function placeTip(clientX,clientY){
+    // #tip is position:fixed, so these are plain viewport coordinates — works the same
+    // whether the graph section is static (desktop) or scrolled (mobile/tablet).
+    const vw=window.innerWidth,vh=window.innerHeight;
+    const tw=tip.offsetWidth,th=tip.offsetHeight;
+    let x=clientX+16,y=clientY+16;
+    if(x+tw>vw-8)x=clientX-tw-16;
+    if(y+th>vh-8)y=vh-th-8;
+    if(x<8)x=8; if(y<8)y=8;
+    tip.style.left=x+"px";tip.style.top=y+"px";
+  }
+  function showTip(n){tip.innerHTML=tipHTML(n);tip.classList.add("show");tip.setAttribute("aria-hidden","false");}
+  function hideTip(){tip.classList.remove("show");tip.setAttribute("aria-hidden","true");}
+
+  function attachNodeEvents(){
+    nodeLayer.querySelectorAll(".node").forEach(g=>{
+      const n=byId[g.dataset.id];
+      g.addEventListener("mouseenter",e=>{highlight(n.id);showTip(n);placeTip(e.clientX,e.clientY);});
+      g.addEventListener("mousemove",e=>{placeTip(e.clientX,e.clientY);});
+      g.addEventListener("mouseleave",()=>{clearHighlight();hideTip();});
+      g.addEventListener("focus",()=>{highlight(n.id);showTip(n);const rc=g.getBoundingClientRect();placeTip(rc.left+rc.width/2,rc.top+rc.height/2);});
+      g.addEventListener("blur",()=>{clearHighlight();hideTip();});
+      g.addEventListener("click",e=>{highlight(n.id);showTip(n);placeTip(e.clientX,e.clientY);e.stopPropagation();});
+      g.addEventListener("keydown",e=>{if(e.key==="Escape"){clearHighlight();hideTip();g.blur();}});
+    });
+  }
+
+  function build(){
+    clearHighlight();hideTip();
+    while(content.firstChild)content.removeChild(content.firstChild);
+
+    const BANDS=mode==="mobile"?BANDS_M:BANDS_D;
+    const bandW=mode==="mobile"?470:1172;
+    const bandX=mode==="mobile"?14:24;
+
+    const bandLayer=el("g");
+    BANDS.forEach(b=>{
+      const g=el("g",{class:TIER[b.t].cls});
+      g.appendChild(el("rect",{class:"band band-"+b.t,x:bandX,y:b.y,width:bandW,height:b.h,rx:14}));
+      g.appendChild(el("text",{class:"tier-tab",x:bandX+20,y:b.y+24,"font-size":fsz(11)},[document.createTextNode(TIER[b.t].tab)]));
+      const nm=el("text",{class:"tier-name",x:bandX+20,y:b.y+42,"font-size":fsz(12)});
+      nm.appendChild(document.createTextNode(TIER[b.t].name));
+      const rl=el("tspan",{dx:"8",style:"fill:var(--ink-faint);font-weight:500"});
+      rl.appendChild(document.createTextNode("· "+TIER[b.t].role));
+      nm.appendChild(rl); g.appendChild(nm); bandLayer.appendChild(g);
+    });
+    content.appendChild(bandLayer);
+
+    edgeLayer=el("g"); labelLayer=el("g");
+    edges.forEach(e=>{
+      const g=edgeGeom(e);
+      const cls="edge e-"+e.type+(e.dotted?" dotted":"");
+      const path=el("path",{class:cls,d:g.d,"marker-end":"url(#arw-"+e.type+")"});
+      path.dataset.s=e.s; path.dataset.t=e.t; edgeLayer.appendChild(path);
+      if(e.label){
+        const t=e.labelT?(mode==="mobile"?e.labelT.m:e.labelT.d):.5;
+        const[lx,ly]=pointAt(g,t);
+        const lg=el("g",{class:"elabel-group"}); lg.dataset.s=e.s; lg.dataset.t=e.t;
+        const fs=fsz(10.5);
+        const w=e.label.length*(fs*.58)+12;
+        lg.appendChild(el("rect",{class:"elabel-bg",x:lx-w/2,y:ly-9,width:w,height:18,rx:9}));
+        const tx=el("text",{class:"elabel",x:lx,y:ly+3.5,"text-anchor":"middle","font-size":fs});
+        tx.appendChild(document.createTextNode(e.label)); lg.appendChild(tx); labelLayer.appendChild(lg);
+      }
+    });
+    content.appendChild(edgeLayer);
+    content.appendChild(labelLayer);
+
+    nodeLayer=el("g");
+    nodes.forEach(n=>nodeLayer.appendChild(makeNode(n)));
+    content.appendChild(nodeLayer);
+
+    CONTENT=pad(content.getBBox(), mode==="mobile"?20:26);
+    setView();
+    attachNodeEvents();
+  }
+
+  function setMode(next){
+    if(next===mode && CONTENT)return;
+    mode=next;
+    build();
+  }
+
+  // ---------- resize: only rebuild when crossing the desktop/mobile breakpoint ----------
+  // No drag-to-pan, wheel/pinch-to-zoom, or zoom buttons — hover and click/tap on a node
+  // are the only interactions. The SVG itself scales responsively via CSS (viewBox +
+  // width:100%, with aspect-ratio locked in on mobile/tablet), so plain window resizes
+  // need no JS beyond swapping the node layout when the mode changes.
+  window.addEventListener("resize",()=>{
+    const next=detectMode();
+    if(next!==mode)setMode(next);
+  });
+  window.addEventListener("orientationchange",()=>setTimeout(()=>{
+    const next=detectMode();
+    if(next!==mode)setMode(next);
+  },200));
+
+  svg.addEventListener("click",e=>{
+    if(e.target===svg||(e.target.tagName==="rect"&&e.target.classList.contains("band"))){clearHighlight();hideTip();}
+  });
+
+  // ---------- go ----------
+  mode=detectMode();
+  build();
+})();
+</script>
+</body>
+</html>

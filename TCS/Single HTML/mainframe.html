@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCS Mains History - ICL 1900 Visualisation</title>
+
+    <!-- GSAP Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- Three.js, for the IBM 5110 model rendered behind the console -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <!-- Model embedded as base64 so it loads over file:// without a server -->
+    <script src="3dModels/ibm5110Data.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #001647;
+            --terminal-green: #2bf189;
+            --dim-green: #0d4223;
+            --panel-bg: #111813;
+            --panel-border: #1a3824;
+            --glow: 0 0 10px rgba(43, 241, 137, 0.4);
+            --bright-glow: 0 0 18px rgba(43, 241, 137, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--terminal-green);
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: hidden;
+        }
+
+        /* Scanline Filter Over Scene */
+        .crt-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Subtle Vignette & Screen Curve Rim */
+        .screen-bezel {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+            pointer-events: none;
+            z-index: 99;
+        }
+
+        /* IBM 5110 3D scene — sits behind the console panel, in the same
+           fixed viewport, so the physical hardware looms in the margins
+           around the terminal UI rather than being hidden behind its
+           opaque panel background. */
+        #webgl-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 0;
+            cursor: grab;
+        }
+
+        #webgl-container:active {
+            cursor: grabbing;
+        }
+
+        /* Terminal text, positioned to sit exactly on the static 3D
+           model's own screen (see SCREEN_RECT in the scene script below —
+           these percentages are kept in sync with that same rect). A fake
+           CRT screen backing (dark green-black + scanlines) sits behind
+           the text, same idea as the canvas-texture screens in the y2k
+           prototype, so it reads as a lit display rather than text just
+           floating over the model's own (unlit) screen mesh. */
+        .terminal-display {
+            position: fixed;
+            /* Center-anchored (not top-left), matching the translate(-50%,
+               -50%) the script applies once it's projecting this box from
+               a real 3D anchor point every frame — these left/top/
+               transform values are just the equivalent starting position,
+               so there's no jump when the script takes over on model
+               load. */
+            left: 27.85%;
+            top: 39.2%;
+            transform: translate(-50%, -50%);
+            width: 19.5%;
+            height: 24%;
+            padding: 1.4% 1.8%;
+            overflow: hidden;
+            z-index: 2;
+            background:
+                repeating-linear-gradient(
+                    to bottom,
+                    rgba(43, 241, 137, 0.08) 0px,
+                    rgba(43, 241, 137, 0.08) 1px,
+                    transparent 1px,
+                    transparent 4px
+                ),
+                #050d08;
+            box-shadow: inset 0 0 18px rgba(43, 241, 137, 0.2);
+        }
+
+        /* Main Floating Text Render Inside Console Screen */
+        .console-text-wrapper {
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .narrative-card {
+            position: absolute;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(12px);
+            font-size: 0.95rem;
+            line-height: 1.4;
+            text-shadow: var(--glow);
+            word-spacing: 1px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .narrative-card .highlight {
+            color: #fff;
+            background: var(--dim-green);
+            padding: 0 4px;
+        }
+
+        .narrative-card.quote {
+            font-style: italic;
+            color: #ffffff;
+            border-left: 3px solid var(--terminal-green);
+            padding-left: 15px;
+        }
+
+        /* Blinking Cursor Effect */
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2rem;
+            background: var(--terminal-green);
+            margin-left: 5px;
+            vertical-align: middle;
+            animation: blink 0.8s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Scroll Engine Setup */
+        .scroll-space {
+            position: relative;
+            z-index: 10;
+            height: 900vh; /* Provides depth for smooth scroll triggering */
+            pointer-events: none; /* was swallowing clicks meant for the 3D model underneath it */
+        }
+
+        .footer-caption {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 101;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            opacity: 0.6;
+            text-transform: uppercase;
+        }
+
+        /* Page-level title, sitting above the model */
+        .page-header {
+            position: fixed;
+            top: 6%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            font-family: 'Reckless', Georgia, 'Times New Roman', serif;
+            font-size: 2.1rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--terminal-green);
+            text-shadow: var(--bright-glow);
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        /* Photos for frames 2/6/8 — overlaid top-right of the model, shown
+           only during their own card's on-screen window (see the GSAP
+           timeline, which fades these in lockstep with their card). */
+        .frame-image {
+            position: fixed;
+            top: 10%;
+            right: 12%;
+            width: 23vw;
+            max-width: 320px;
+            border: 2px solid var(--terminal-green);
+            box-shadow: var(--glow);
+            opacity: 0;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        /* Responsive Layout Adjustments */
+        @media (max-width: 850px) {
+            .narrative-card {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="webgl-container"></div>
+    <div class="crt-overlay"></div>
+    <div class="screen-bezel"></div>
+
+    <div class="footer-caption">Representation of 1978 IBM 5110 portable computer</div>
+
+    <div class="page-header">First TCS Contract</div>
+
+    <!-- Photos for specific narrative beats (frames 2, 6 and 8 — i.e.
+         card-1/card-5/card-7 below), overlaid top-right of the model.
+         Faded in/out in sync with their card by the GSAP timeline. -->
+    <img class="frame-image" id="frame-image-0" src="imgs/3.jpeg" alt="">
+    <img class="frame-image" id="frame-image-1" src="imgs/6.jpg" alt="">
+    <img class="frame-image" id="frame-image-6" src="imgs/2.jpg" alt="">
+    <img class="frame-image" id="frame-image-7" src="imgs/8.jpg" alt="">
+
+    <!-- Terminal text overlaid directly onto the static 3D model's own
+         screen (see #webgl-container script — modelGroup no longer
+         rotates, and its fixed orientation is chosen so the screen faces
+         the camera). Position/size are tuned to that screen's on-screen
+         rect, not a generic centered panel. -->
+    <div class="terminal-display" id="terminal-display">
+        <div class="console-text-wrapper">
+
+                    <!-- Shown before any scrolling happens; faded out the
+                         moment the timeline starts (see the GSAP setup),
+                         same as every other card fading out. -->
+                    <div class="narrative-card" id="card-intro" style="opacity: 1; transform: translateY(0);">
+                        &gt; Scroll to execute
+                    </div>
+
+                    <div class="narrative-card" id="card-0">
+                        To meet its exports obligation, TCS provided software services to Burroughs — migrating old mainframe software.
+                    </div>
+
+                    <div class="narrative-card" id="card-1">
+                        First job: converting a hospital accounting package from <span class="highlight">Medium Systems COBOL</span> to <span class="highlight">Small Systems COBOL</span>.
+                    </div>
+
+                    <div class="narrative-card" id="card-2">
+                        The contract was worth <span class="highlight">$24,000</span>.
+                    </div>
+
+                    <div class="narrative-card" id="card-3">
+                        Engineers in Detroit sent manuals and code to Bombay.
+                    </div>
+
+                    <div class="narrative-card" id="card-4">
+                        Engineers in Bombay wrote a programme to translate the code.
+                    </div>
+
+                    <div class="narrative-card" id="card-5">
+                        It ran on an <span class="highlight">ICL mainframe</span> — bought cheap from LIC after unions blocked its use.
+                    </div>
+
+                    <div class="narrative-card" id="card-6">
+                        This seeded TCS’s model: <span class="highlight">develop in India, implement globally</span>.
+                    </div>
+
+                    <div class="narrative-card quote" id="card-7">
+                        “That’s how the Indian software industry was born — not by design, but by accident.”<br><br>— S Ramadorai.
+                    </div>
+
+                </div>
+    </div>
+
+    <!-- Scroll distance provider -->
+    <div class="scroll-space"></div>
+
+    <script>
+        // --- IBM 5110 3D SCENE ---
+        // Renders the actual hardware as a static hero shot. Confirmed via
+        // a debug grid+axes render that the model is already correctly
+        // Y-up by default (no corrective rotation needed) — it was just
+        // being viewed too close/elevated before. MODEL_ROTATION_Y turns
+        // it 45° further toward the camera from its default angle.
+        const MODEL_ROTATION_X = 0;
+        const MODEL_ROTATION_Y = -90 * Math.PI / 180;
+        const DEBUG_VIEW = false;
+        (function initIbm5110Scene() {
+            const container = document.getElementById('webgl-container');
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x001647);
+
+            const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            if (DEBUG_VIEW) {
+                camera.position.set(8, 8, 40);
+            } else {
+                camera.position.set(0, 0, 6);
+            }
+            camera.lookAt(0, 0, 0);
+
+            if (DEBUG_VIEW) {
+                scene.add(new THREE.AxesHelper(5)); // red=X green=Y blue=Z
+                scene.add(new THREE.GridHelper(10, 10));
+            }
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            container.appendChild(renderer.domElement);
+
+            // Cool navy ambient/hemisphere fill plus a terminal-green rim
+            // light, so the hardware sits in the same lighting world as the
+            // CRT-green console UI in front of it.
+            scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+            scene.add(new THREE.HemisphereLight(0x24407a, 0x001030, 0.6));
+
+            const rimLight = new THREE.DirectionalLight(0x2bf189, 1.1);
+            rimLight.position.set(-6, 3, -4);
+            scene.add(rimLight);
+
+            const keyLight = new THREE.DirectionalLight(0xffffff, 0.6);
+            keyLight.position.set(4, 6, 8);
+            scene.add(keyLight);
+
+            const modelGroup = new THREE.Group();
+            // Nudges the model right on screen to center it — done by
+            // moving the model, not the camera, so the viewing angle/
+            // rotation stays exactly as tuned (moving the camera while it
+            // still lookAt()s the origin would just re-aim at the model
+            // and keep it dead-center instead of shifting it).
+            modelGroup.position.x = 0.6;
+            scene.add(modelGroup);
+
+            // Meshes the drag-to-rotate raycaster can hit (populated once
+            // the model loads, below).
+            const interactiveMeshes = [];
+            const raycaster = new THREE.Raycaster();
+
+            // The screen overlay needs to track the model's actual 3D
+            // rotation, not just spin flat in place, or it reads as
+            // detached from the panel — screenAnchorLocal is the real 3D
+            // point (in modelGroup's own local space) the calibrated
+            // screen rect's center actually sits on, found once below by
+            // raycasting into the loaded model. Every frame we re-project
+            // that same point through the live camera and move the
+            // overlay to match, so it stays glued to that spot on the
+            // panel through any rotation.
+            const terminalDisplayEl = document.getElementById('terminal-display');
+            let screenAnchorLocal = null;
+
+            function base64ToArrayBuffer(base64) {
+                const binary = atob(base64);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                return bytes.buffer;
+            }
+
+            const gltfLoader = new THREE.GLTFLoader();
+            gltfLoader.parse(base64ToArrayBuffer(window.IBM_5110_DATA), '', (gltf) => {
+                const model = gltf.scene;
+
+                // Center and normalize scale the same way as the y2k
+                // archive's devices, since this model's own unit scale is
+                // unknown ahead of time.
+                const box = new THREE.Box3().setFromObject(model);
+                const size = new THREE.Vector3();
+                box.getSize(size);
+                const center = new THREE.Vector3();
+                box.getCenter(center);
+                model.position.sub(center);
+
+                console.log('IBM 5110 raw bounding size (pre-scale):', size.x, size.y, size.z);
+
+                const targetSize = DEBUG_VIEW ? 4 : 5;
+                const maxDim = Math.max(size.x, size.y, size.z) || 1;
+                const scaleFactor = targetSize / maxDim;
+                modelGroup.scale.setScalar(scaleFactor);
+                // Order 'XYZ': the X correction (Z-up -> Y-up) is applied
+                // first, intrinsically, then Y spins around the now-correct
+                // vertical axis on top of that — not the other way round.
+                model.rotation.order = 'XYZ';
+                model.rotation.x = MODEL_ROTATION_X;
+                model.rotation.y = MODEL_ROTATION_Y;
+                modelGroup.add(model);
+
+                model.traverse((child) => {
+                    if (child.isMesh) interactiveMeshes.push(child);
+                });
+
+                // modelGroup is still at its rest rotation here (drag
+                // hasn't happened yet), so a ray through the calibrated
+                // screen rect's center hits exactly the real spot on the
+                // panel that rect was tuned to line up with. Remember that
+                // point in modelGroup's local space so it can be
+                // re-projected every frame regardless of later rotation.
+                camera.updateMatrixWorld();
+                modelGroup.updateMatrixWorld(true);
+
+                const rect = terminalDisplayEl.getBoundingClientRect();
+                const anchorNdc = new THREE.Vector2(
+                    ((rect.left + rect.width / 2) / window.innerWidth) * 2 - 1,
+                    -((rect.top + rect.height / 2) / window.innerHeight) * 2 + 1
+                );
+                raycaster.setFromCamera(anchorNdc, camera);
+                const anchorHit = raycaster.intersectObjects(interactiveMeshes)[0];
+                if (anchorHit) {
+                    screenAnchorLocal = modelGroup.worldToLocal(anchorHit.point.clone());
+                }
+
+                gsap.from(modelGroup.scale, {
+                    x: 0, y: 0, z: 0,
+                    duration: 1.1,
+                    ease: "back.out(1.5)"
+                });
+            }, (err) => console.error('Failed to load IBM 5110 model:', err));
+
+            // --- DRAG TO ROTATE (subtle tilt only, not a free spin) ---
+            // modelGroup's own rotation is left at 0/0/0 — the model's
+            // fixed base orientation lives on the child `model` (see
+            // MODEL_ROTATION_X/Y above) — so rotating modelGroup here just
+            // adds a small extra tilt on top of that base pose, and spring
+            // back to 0 always returns to exactly the tuned base angle.
+            const pointer = new THREE.Vector2();
+            const MAX_DRAG_ROTATION_Y = 10 * Math.PI / 180; // left/right
+            const MAX_DRAG_ROTATION_X = 5 * Math.PI / 180;  // up/down — the panel's own steep slope already reads as "tilted down", so this stays tighter
+
+            let dragging = false;
+            let previousPointerPosition = { x: 0, y: 0 };
+
+            container.addEventListener('pointerdown', (e) => {
+                pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+                pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+                raycaster.setFromCamera(pointer, camera);
+                const intersects = raycaster.intersectObjects(interactiveMeshes);
+
+                if (intersects.length > 0) {
+                    dragging = true;
+                    previousPointerPosition = { x: e.clientX, y: e.clientY };
+                }
+            });
+
+            window.addEventListener('pointermove', (e) => {
+                if (!dragging) return;
+
+                const deltaX = e.clientX - previousPointerPosition.x;
+                const deltaY = e.clientY - previousPointerPosition.y;
+
+                modelGroup.rotation.y = Math.max(-MAX_DRAG_ROTATION_Y, Math.min(MAX_DRAG_ROTATION_Y, modelGroup.rotation.y + deltaX * 0.016));
+                modelGroup.rotation.x = Math.max(-MAX_DRAG_ROTATION_X, Math.min(MAX_DRAG_ROTATION_X, modelGroup.rotation.x + deltaY * 0.016));
+
+                previousPointerPosition = { x: e.clientX, y: e.clientY };
+            });
+
+            const releaseDrag = () => {
+                if (!dragging) return;
+                dragging = false;
+
+                gsap.to(modelGroup.rotation, {
+                    x: 0,
+                    y: 0,
+                    duration: 0.8,
+                    ease: "back.out(1.7)"
+                });
+            };
+
+            window.addEventListener('pointerup', releaseDrag);
+            window.addEventListener('pointerleave', releaseDrag);
+
+            const projected = new THREE.Vector3();
+            function animate() {
+                requestAnimationFrame(animate);
+
+                // Re-project screenAnchorLocal through the live camera every
+                // frame so the overlay tracks the real point on the panel it
+                // was calibrated against — both its screen position AND its
+                // rotation — instead of just spinning flat in place while
+                // the actual 3D screen moves elsewhere underneath it.
+                if (screenAnchorLocal) {
+                    projected.copy(screenAnchorLocal).applyMatrix4(modelGroup.matrixWorld).project(camera);
+                    const px = (projected.x * 0.5 + 0.5) * window.innerWidth;
+                    const py = (-projected.y * 0.5 + 0.5) * window.innerHeight;
+                    const rotXdeg = modelGroup.rotation.x * 180 / Math.PI;
+                    const rotYdeg = modelGroup.rotation.y * 180 / Math.PI;
+                    terminalDisplayEl.style.left = px + 'px';
+                    terminalDisplayEl.style.top = py + 'px';
+                    terminalDisplayEl.style.transform = `translate(-50%, -50%) perspective(1400px) rotateX(${rotXdeg}deg) rotateY(${rotYdeg}deg)`;
+                }
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        })();
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Setup Scroll Driven Animations with GSAP Timeline
+        const totalCards = 8;
+        const timeline = gsap.timeline({
+            scrollTrigger: {
+                trigger: ".scroll-space",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 1
+            }
+        });
+
+        // Frames 1, 2 and 8 (card-0/card-1/card-7, 0-indexed) also carry a
+        // photo — faded in/out in lockstep with their card via the "<"
+        // position parameter, which starts a tween at the same point on
+        // the timeline as the one just added.
+        const imageForCard = { 0: '#frame-image-0', 3: '#frame-image-1', 5: '#frame-image-6', 7: '#frame-image-7' };
+
+        // The idle "> Scroll to execute" prompt fades out the instant the
+        // timeline starts, at the same moment card-0 fades in.
+        timeline.to('#card-intro', { opacity: 0, duration: 0.6, ease: "power2.in" }, 0);
+
+        // Loop over text elements to build progressive fade-in / fade-out sequence
+        for (let i = 0; i < totalCards; i++) {
+            const card = `#card-${i}`;
+            const image = imageForCard[i];
+
+            timeline.to(card, {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                ease: "power2.out"
+            });
+            if (image) timeline.to(image, { opacity: 1, duration: 1, ease: "power2.out" }, "<");
+
+            // Hold text on-screen briefly
+            timeline.to(card, {
+                opacity: 1,
+                duration: 1.5
+            });
+
+            // Fade out unless it's the final quote statement
+            if (i < totalCards - 1) {
+                timeline.to(card, {
+                    opacity: 0,
+                    y: -30,
+                    duration: 1,
+                    ease: "power2.in"
+                });
+                if (image) timeline.to(image, { opacity: 0, duration: 1, ease: "power2.in" }, "<");
+            }
+        }
+    </script>
+</body>
+</html>

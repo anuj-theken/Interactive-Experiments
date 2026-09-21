@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Indian IT Giants: Market Cap Growth (2006–2026)</title>
+
+  <!-- Typography: Archivo, IBM Plex Mono & Serif fallbacks -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- ECharts & GSAP Core + ScrollTrigger CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       TCS DESIGN SYSTEM TOKENS & BASE STYLES
+       ========================================================================== */
+    :root {
+      /* Moodboard Ground & Ink */
+      --color-bg: #f3efe9;       /* Bone paper ground */
+      --color-bg-warm: #e6e0d4;  /* Greige secondary ground */
+      --color-surface: #ffffff;  /* Surface card */
+      --color-text: #001647;     /* Ink Navy text */
+      --color-muted: #5a6580;    /* Slate muted text */
+      --color-rule: #d9d3c6;     /* Hairline border */
+      --color-grid: #cfe3e3;     /* Graph paper grid */
+
+      /* Moodboard Palette Tokens */
+      --color-primary: #2540b4;   /* Cobalt */
+      --color-secondary: #001647; /* Ink Navy */
+      --color-signal: #ff6900;    /* Signal Orange (Hot Accent) */
+      --color-aqua: #8dd7d6;
+
+      /* Categorical Series Tokens (Light Mode - Validated) */
+      --slot-1: #2946ba; /* TCS - Cobalt */
+      --slot-2: #fe6906; /* INFY - Signal Orange */
+      --slot-3: #41c5c5; /* WIPRO - Teal */
+      --slot-4: #e5a02c; /* HCLTECH - Amber */
+
+      /* Fonts */
+      --font-heading: Georgia, 'Times New Roman', serif;
+      --font-body: 'Archivo', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Outer Wrapper */
+    .TK4R-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    /* Pinning Container */
+    .TK4R-sticky-container {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Left Narrative Panel (40%) */
+    .TK4R-left-panel {
+      flex: 0 0 40%;
+      height: 100vh;
+      padding: 48px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-right: 1px solid var(--color-rule);
+      background: var(--color-bg);
+      z-index: 2;
+    }
+
+    /* Header chrome */
+    .TK4R-eyebrow {
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: 8px;
+    }
+
+    .TK4R-title {
+      font-family: var(--font-heading);
+      font-size: clamp(26px, 3vw, 36px);
+      font-weight: 400;
+      line-height: 1.1;
+      color: var(--color-secondary);
+      margin-bottom: 12px;
+    }
+
+    .TK4R-subtitle {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--color-muted);
+      margin-bottom: 24px;
+    }
+
+    /* Custom Interactive Legend */
+    .TK4R-legend {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 14px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-rule);
+      border-radius: 4px;
+      margin-bottom: 24px;
+    }
+
+    .TK4R-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .TK4R-legend-chip {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* Text Block Scrollytelling Area */
+    .TK4R-text-area {
+      flex: 1;
+      position: relative;
+      margin-top: 12px;
+    }
+
+    .TK4R-text-block {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .TK4R-text-block.is-active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .TK4R-node-year {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .TK4R-node-year::before {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--color-primary);
+    }
+
+    .TK4R-block-heading {
+      font-family: var(--font-heading);
+      font-size: 22px;
+      color: var(--color-secondary);
+      margin-bottom: 8px;
+      line-height: 1.25;
+    }
+
+    .TK4R-block-body {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--color-text);
+    }
+
+    .TK4R-footer-note {
+      font-size: 12px;
+      color: var(--color-muted);
+      border-top: 1px solid var(--color-rule);
+      padding-top: 12px;
+    }
+
+    /* Right Chart Panel (60%) */
+    .TK4R-right-panel {
+      flex: 0 0 60%;
+      height: 100vh;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      /* Graph Paper Background Motif */
+      background-color: var(--color-bg);
+      background-image:
+        linear-gradient(var(--color-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+      background-size: 22px 22px;
+    }
+
+    .TK4R-chart-card {
+      width: 100%;
+      height: 85vh;
+      background: var(--color-surface);
+      border: 1px solid var(--color-rule);
+      border-radius: 4px;
+      padding: 24px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #TK4R-echarts-container {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE DESIGN
+       ========================================================================== */
+    @media (max-width: 900px) {
+      .TK4R-sticky-container {
+        flex-direction: column;
+      }
+      .TK4R-left-panel {
+        flex: 0 0 45vh;
+        width: 100%;
+        height: 45vh;
+        padding: 20px;
+        border-right: none;
+        border-bottom: 1px solid var(--color-rule);
+      }
+      .TK4R-right-panel {
+        flex: 0 0 55vh;
+        width: 100%;
+        height: 55vh;
+        padding: 12px;
+      }
+      .TK4R-chart-card {
+        height: 100%;
+        padding: 12px;
+      }
+      .TK4R-title {
+        font-size: 20px;
+      }
+      .TK4R-subtitle {
+        display: none;
+      }
+      .TK4R-block-heading {
+        font-size: 18px;
+      }
+      .TK4R-block-body {
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="TK4R-wrapper">
+  <!-- Pinning Viewport -->
+  <div class="TK4R-sticky-container">
+    
+    <!-- Left Panel: Narrative & Context -->
+    <div class="TK4R-left-panel">
+      <div>
+        <div class="TK4R-eyebrow">Interactive Data Story</div>
+        <h1 class="TK4R-title">Indian IT Tier-1 Index Growth</h1>
+        <p class="TK4R-subtitle">Indexed performance comparison normalized to base 100 (2006 = 100.0)</p>
+
+        <!-- Custom Color Legend -->
+        <div class="TK4R-legend">
+          <div class="TK4R-legend-item">
+            <span class="TK4R-legend-chip" style="background: var(--slot-1);"></span> TCS
+          </div>
+          <div class="TK4R-legend-item">
+            <span class="TK4R-legend-chip" style="background: var(--slot-2);"></span> Infosys (INFY)
+          </div>
+          <div class="TK4R-legend-item">
+            <span class="TK4R-legend-chip" style="background: var(--slot-3);"></span> Wipro
+          </div>
+          <div class="TK4R-legend-item">
+            <span class="TK4R-legend-chip" style="background: var(--slot-4);"></span> HCLTech
+          </div>
+        </div>
+
+        <!-- Narrative Blocks Area -->
+        <div class="TK4R-text-area">
+          <!-- Step 0 -->
+          <div class="TK4R-text-block is-active" data-step="0">
+            <div class="TK4R-node-year">2006 – 2009</div>
+            <h2 class="TK4R-block-heading">Post-IPO Baseline & Financial Crisis</h2>
+            <p class="TK4R-block-body">Following early listing milestones, the global financial crisis of 2008–2009 heavily suppressed valuation across Indian IT exporters, forcing consolidation.</p>
+          </div>
+          <!-- Step 1 -->
+          <div class="TK4R-text-block" data-step="1">
+            <div class="TK4R-node-year">2010 – 2013</div>
+            <h2 class="TK4R-block-heading">TCS Pulls Ahead</h2>
+            <p class="TK4R-block-body">TCS expands its margin advantage over industry peers, crossing 4.9x base valuation by 2013, supported by massive scaling in global enterprise services.</p>
+          </div>
+          <!-- Step 2 -->
+          <div class="TK4R-text-block" data-step="2">
+            <div class="TK4R-node-year">2014 – 2018</div>
+            <h2 class="TK4R-block-heading">Digital & Cloud Migration Era</h2>
+            <p class="TK4R-block-body">Large enterprise cloud transformation contracts spark multi-year multi-fold growth. TCS surges to over 12x its 2006 baseline while HCLTech steadily gains momentum.</p>
+          </div>
+          <!-- Step 3 -->
+          <div class="TK4R-text-block" data-step="3">
+            <div class="TK4R-node-year">2019 – 2022</div>
+            <h2 class="TK4R-block-heading">Post-Pandemic Digital Surge</h2>
+            <p class="TK4R-block-body">Unprecedented demand for remote work technology, cloud infrastructure, and software digitalization propels TCS above 32x and Infosys above 15x base growth.</p>
+          </div>
+          <!-- Step 4 -->
+          <div class="TK4R-text-block" data-step="4">
+            <div class="TK4R-node-year">2023 – 2026</div>
+            <h2 class="TK4R-block-heading">Peak Expansion & Normalization</h2>
+            <p class="TK4R-block-body">TCS touches a record 39x expansion in 2025 before industry growth normalizes in 2026 amid global macroeconomic stabilization.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="TK4R-footer-note">
+        Source: Market Data (2006–2026) · Normalized Baseline = 100.0
+      </div>
+    </div>
+
+    <!-- Right Panel: ECharts Visualization Container -->
+    <div class="TK4R-right-panel">
+      <div class="TK4R-chart-card">
+        <div id="TK4R-echarts-container"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const fullYears = [
+      "2006","2007","2008","2009","2010","2011","2012","2013","2014","2015",
+      "2016","2017","2018","2019","2020","2021","2022","2023","2024","2025","2026"
+    ];
+
+    // Updated raw values provided (converted to cumulative index relative to 2006=100)
+    const rawTCS = [100, 154, 69, 60, 293, 161, 99, 121, 169, 114, 98, 95, 142, 131, 107, 152, 121, 93, 116, 111, 79];
+    const rawINFY = [100, 159, 67, 89, 192, 128, 89, 104, 135, 118, 111, 82, 128, 136, 106, 164, 143, 90, 111, 117, 90];
+    const rawWIPRO = [100, 117, 70, 55, 283, 114, 96, 101, 143, 107, 95, 82, 134, 122, 86, 177, 137, 70, 120, 133, 79];
+    const rawHCLTECH = [100, 106, 77, 51, 304, 143, 91, 159, 215, 124, 99, 96, 124, 103, 119, 157, 125, 107, 147, 114, 102];
+
+    function calculateCumulative(arr) {
+      let cumulative = [];
+      let val = 100;
+      arr.forEach((v, i) => {
+        if (i === 0) {
+          cumulative.push(100);
+        } else {
+          val = val * (v / 100);
+          cumulative.push(Number(val.toFixed(2)));
+        }
+      });
+      return cumulative;
+    }
+
+    const dataTCS = calculateCumulative(rawTCS);
+    const dataINFY = calculateCumulative(rawINFY);
+    const dataWIPRO = calculateCumulative(rawWIPRO);
+    const dataHCLTECH = calculateCumulative(rawHCLTECH);
+
+    // Dynamic Max calculation for chart dynamic Y-axis max scale
+    const maxY = Math.ceil(Math.max(...dataTCS, ...dataINFY, ...dataWIPRO, ...dataHCLTECH) * 1.05);
+
+    // Scrollytelling Step Configuration
+    const steps = [
+      { revealUntil: 4,  markerIdx: 3,  yearLabel: "2009" },
+      { revealUntil: 8,  markerIdx: 7,  yearLabel: "2013" },
+      { revealUntil: 13, markerIdx: 12, yearLabel: "2018" },
+      { revealUntil: 17, markerIdx: 16, yearLabel: "2022" },
+      { revealUntil: 21, markerIdx: 19, yearLabel: "2025" }
+    ];
+
+    // Design System Categorical Colors
+    const colors = {
+      tcs: '#2946ba',
+      infy: '#fe6906',
+      wipro: '#41c5c5',
+      hcltech: '#e5a02c'
+    };
+
+    const chartDom = document.getElementById("TK4R-echarts-container");
+    const myChart = echarts.init(chartDom);
+    const textBlocks = document.querySelectorAll(".TK4R-text-block");
+
+    let currentStep = -1;
+
+    function getMarker(val, year, color) {
+      return {
+        symbol: "circle",
+        symbolSize: 8,
+        itemStyle: { color: color, borderColor: "#ffffff", borderWidth: 2 },
+        label: { show: false },
+        data: [{ coord: [year, val] }]
+      };
+    }
+
+    const baseOption = {
+      backgroundColor: "transparent",
+      grid: {
+        left: "3%",
+        right: "4%",
+        bottom: "6%",
+        top: "8%",
+        containLabel: true
+      },
+      tooltip: {
+        trigger: "axis",
+        backgroundColor: "#001647",
+        textStyle: { color: "#f3efe9", fontFamily: "Archivo", fontSize: 12 },
+        borderWidth: 0,
+        formatter: function (params) {
+          let header = `<div style="font-family:'IBM Plex Mono';font-size:11px;margin-bottom:4px;color:#8dd7d6;">YEAR: ${params[0].name}</div>`;
+          params.forEach((item) => {
+            header += `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 0;">
+              <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${item.color};margin-right:6px;"></span>${item.seriesName}:</span>
+              <strong style="font-family:'IBM Plex Mono';">${item.value.toFixed(2)}</strong>
+            </div>`;
+          });
+          return header;
+        }
+      },
+      xAxis: {
+        type: "category",
+        boundaryGap: false,
+        data: fullYears,
+        axisLine: { lineStyle: { color: "#001647", width: 1 } },
+        axisTick: { lineStyle: { color: "#d9d3c6" } },
+        axisLabel: { color: "#5a6580", fontFamily: "IBM Plex Mono", fontSize: 11 }
+      },
+      yAxis: {
+        type: "value",
+        min: 0,
+        max: maxY,
+        splitLine: { show: true, lineStyle: { color: "#cfe3e3", type: "solid", width: 1 } },
+        axisLabel: { color: "#5a6580", fontFamily: "IBM Plex Mono", fontSize: 11 }
+      },
+      series: [
+        { name: "TCS", type: "line", smooth: 0.2, symbol: "none", lineStyle: { color: colors.tcs, width: 3 }, itemStyle: { color: colors.tcs }, data: [dataTCS[0]] },
+        { name: "Infosys (INFY)", type: "line", smooth: 0.2, symbol: "none", lineStyle: { color: colors.infy, width: 2.5 }, itemStyle: { color: colors.infy }, data: [dataINFY[0]] },
+        { name: "Wipro", type: "line", smooth: 0.2, symbol: "none", lineStyle: { color: colors.wipro, width: 2 }, itemStyle: { color: colors.wipro }, data: [dataWIPRO[0]] },
+        { name: "HCLTech", type: "line", smooth: 0.2, symbol: "none", lineStyle: { color: colors.hcltech, width: 2 }, itemStyle: { color: colors.hcltech }, data: [dataHCLTECH[0]] }
+      ]
+    };
+
+    myChart.setOption(baseOption);
+
+    function updateChartStep(stepIdx) {
+      const step = steps[stepIdx];
+      if (!step) return;
+
+      const count = step.revealUntil;
+      const mIdx = step.markerIdx;
+      const year = fullYears[mIdx];
+
+      myChart.setOption({
+        series: [
+          { name: "TCS", data: dataTCS.slice(0, count), markPoint: getMarker(dataTCS[mIdx], year, colors.tcs) },
+          { name: "Infosys (INFY)", data: dataINFY.slice(0, count), markPoint: getMarker(dataINFY[mIdx], year, colors.infy) },
+          { name: "Wipro", data: dataWIPRO.slice(0, count), markPoint: getMarker(dataWIPRO[mIdx], year, colors.wipro) },
+          { name: "HCLTech", data: dataHCLTECH.slice(0, count), markPoint: getMarker(dataHCLTECH[mIdx], year, colors.hcltech) }
+        ]
+      });
+    }
+
+    function setActiveBlock(nextStep) {
+      if (nextStep === currentStep) return;
+      
+      textBlocks.forEach((block) => {
+        const blockStep = parseInt(block.getAttribute("data-step"), 10);
+        if (blockStep === nextStep) {
+          block.classList.add("is-active");
+        } else {
+          block.classList.remove("is-active");
+        }
+      });
+
+      updateChartStep(nextStep);
+      currentStep = nextStep;
+    }
+
+    // GSAP ScrollTrigger Pinning
+    ScrollTrigger.create({
+      trigger: ".TK4R-wrapper",
+      start: "top top",
+      end: "+=3500",
+      pin: ".TK4R-sticky-container",
+      scrub: 0.5,
+      onUpdate: (self) => {
+        let stepIdx = Math.floor(self.progress * steps.length);
+        if (stepIdx >= steps.length) stepIdx = steps.length - 1;
+        setActiveBlock(stepIdx);
+      }
+    });
+
+    setActiveBlock(0);
+
+    window.addEventListener("resize", function () {
+      myChart.resize();
+    });
+  });
+</script>
+</body>
+</html>

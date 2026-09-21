@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Y2K Technology Archive</title>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #e8e6df;
+            color: #1a1a1a;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        #webgl-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            cursor: grab;
+        }
+
+        #webgl-container:active {
+            cursor: grabbing;
+        }
+
+        /* Scroll track height to drive GSAP ScrollTrigger */
+        .scroll-container {
+            position: relative;
+            height: 500vh;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        /* Hero header/subheader — position matches the reference layout
+           (reference/y21.png etc.), measured as a left/top percentage of
+           the viewport so it holds its place relative to the devices
+           around it at any window size. The heading never changes or
+           fades; only the subheader's TEXT is swapped by JS as you scroll
+           (see updateStoryState) — one shared element, never two stacked
+           texts, so nothing can visually overlap during a transition. */
+        .hero-text {
+            position: fixed;
+            left: 39.5%;
+            top: 7.5%;
+            z-index: 10;
+            pointer-events: none;
+            max-width: 320px;
+        }
+
+        .hero-text h1 {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-weight: 400;
+            font-size: 2.5rem;
+            line-height: 1.15;
+            color: #1a1a1a;
+            margin: 0 0 16px 0;
+        }
+
+        .hero-text p {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 1.05rem;
+            line-height: 1.4;
+            color: #6b6b6b;
+            margin: 0;
+        }
+
+        /* Repair-hands overlay — the same illustration (reference/*.png,
+           hands mending a heart) placed directly over each broken device's
+           own screen (CRT and retro_screen), matching reference/y2k3.png.
+           Position/size are per-device (see inline style below); the
+           transform recenters the image on the heart's own position within
+           the source asset (measured at ~57%/30% of the image) rather than
+           the image's bounding box, so the heart — not empty canvas —
+           lands on the screen. */
+        .fix-hands {
+            position: fixed;
+            z-index: 13;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .fix-hands img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+    </style>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <!-- GSAP & ScrollTrigger CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <!-- Models embedded as base64 so they load over file:// without a server -->
+    <script src="3dModels/modelData.js"></script>
+</head>
+<body>
+
+    <div id="webgl-container"></div>
+
+    <div class="hero-text" id="heroText">
+        <h1>The Y2K phenomenan</h1>
+        <p id="subheaderText">When the world was crashing, TCS saved the day</p>
+    </div>
+
+    <!-- Repair-hands overlay, positioned directly on the CRT monitor's own
+         screen (matches reference/y2k3.png). Fraction left/top come from
+         the same measured position used to place the 3D device itself. -->
+    <div class="fix-hands" id="fixHandsCrt"
+         style="left:19.72%; top:50.09%; width:clamp(160px,27vw,340px); transform:translate(-57.05%,-29.55%);">
+        <img src="fix-hands.png" alt="">
+    </div>
+
+    <!-- Same overlay, positioned on the retro_screen device's own screen. -->
+    <div class="fix-hands" id="fixHandsScreen"
+         style="left:74.09%; top:37.80%; width:clamp(90px,13vw,170px); transform:translate(-57.05%,-29.55%);">
+        <img src="fix-hands.png" alt="">
+    </div>
+
+    <div class="scroll-container"></div>
+
+    <script>
+        // --- 1. THREE.JS SCENE SETUP ---
+        const container = document.getElementById('webgl-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xe8e6df);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 14);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        container.appendChild(renderer.domElement);
+
+        // Even, shadowless lighting so every object reads at the same
+        // brightness regardless of which way it's rotated to face the
+        // camera — a dominant ambient/hemisphere fill instead of one hard
+        // directional key light, which would light each model's differently
+        // -oriented faces unevenly. No light here casts real shadows; a flat
+        // fake shadow is drawn under each device instead (see loadDevice).
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+        scene.add(ambientLight);
+
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0xe8e6df, 0.6);
+        scene.add(hemiLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.35);
+        dirLight.position.set(5, 10, 12);
+        scene.add(dirLight);
+
+        // --- 2. CANVAS TEXTURES FOR DISPLAY SCREENS ---
+        const devices = [];
+
+        function createScreenTexture(initialText, dateFontSize = 48) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+
+            const texture = new THREE.CanvasTexture(canvas);
+
+            function update(text, bugged = false) {
+                // Background
+                ctx.fillStyle = bugged ? '#2a0808' : '#141a15';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Grid lines
+                ctx.strokeStyle = bugged ? 'rgba(255, 50, 50, 0.2)' : 'rgba(100, 255, 150, 0.15)';
+                ctx.lineWidth = 2;
+                for (let i = 0; i < canvas.height; i += 16) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, i);
+                    ctx.lineTo(canvas.width, i);
+                    ctx.stroke();
+                }
+
+                // Archival Header Text
+                ctx.fillStyle = bugged ? '#ff4d4d' : '#00ff66';
+                ctx.font = '700 22px "Helvetica Neue", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('SYS.DATE.LOG', canvas.width / 2, 50);
+
+                // Date Display — dateFontSize is per-device (see loadDevice's
+                // dateFontSize option) so a physically small screen (like the
+                // phone's) can use a larger font to stay legible, since the
+                // same canvas texture is stretched to fit whatever physical
+                // screen size that device has.
+                ctx.font = `700 ${dateFontSize}px "Courier New", monospace`;
+                ctx.fillText(text, canvas.width / 2, 140);
+
+                texture.needsUpdate = true;
+            }
+
+            update(initialText);
+            return { texture, update };
+        }
+
+        // --- 3. RETRO DEVICE GENERATORS (GLB MODELS) ---
+        const interactiveMeshes = [];
+        const gltfLoader = new THREE.GLTFLoader();
+
+        // Shared soft-edged RECTANGLE texture for the flat fake shadow drawn
+        // under every device (see loadDevice) — a blurred filled rect
+        // rather than a radial-gradient circle, so that when it's scaled
+        // non-uniformly to each device's own width/height (computed once
+        // the model loads) it reads as a shadow shaped like that device,
+        // not a generic round blob. One texture/geometry reused everywhere
+        // since the shape itself never changes, only its per-device
+        // position/scale does.
+        const shadowTexture = (function () {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            ctx.filter = 'blur(22px)';
+            ctx.fillStyle = 'rgba(0,0,0,0.38)';
+            const pad = 46;
+            ctx.fillRect(pad, pad, canvas.width - pad * 2, canvas.height - pad * 2);
+            return new THREE.CanvasTexture(canvas);
+        })();
+        const shadowGeo = new THREE.PlaneGeometry(1, 1);
+
+        // Models are embedded as base64 in 3dModels/modelData.js and loaded
+        // via GLTFLoader.parse() rather than GLTFLoader.load(url) — .load()
+        // fetches the .glb over the network, which browsers block for local
+        // files opened via file://, so the archive would only render when
+        // served over HTTP. Decoding embedded base64 needs no fetch at all.
+        function base64ToArrayBuffer(base64) {
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        // Loads a .glb (by its base name, embedded in window.Y2K_MODEL_DATA),
+        // normalizes its scale/position to a consistent target size, and
+        // overlays the date readout directly onto that model's own screen
+        // area (measured per-model, since each source model has a different
+        // screen position/size and — for three of them — needed a
+        // corrective rotation to even face the camera).
+        function loadDevice(url, x, y, z, willBug, opts = {}) {
+            const targetSize = opts.targetSize || 1.9;
+            const rotationY = (opts.rotationY || 0) * Math.PI / 180;
+            const rotationX = (opts.rotationX || 0) * Math.PI / 180;
+            const liftAxis = opts.liftAxis || 'y';
+
+            // screenOffset/screenSize were measured against a model scaled to
+            // refSize (its targetSize at measurement time). Everything about
+            // the model scales linearly with targetSize, so rescale those
+            // measured numbers by the same ratio instead of re-measuring
+            // whenever targetSize changes.
+            const refSize = opts.refSize || targetSize;
+            const sizeRatio = targetSize / refSize;
+            const rawOffset = opts.screenOffset || { x: 0, y: 0, z: 0.3 };
+            const rawSize = opts.screenSize || { w: 1, h: 0.6 };
+            const screenOffset = { x: rawOffset.x * sizeRatio, y: rawOffset.y * sizeRatio, z: rawOffset.z * sizeRatio };
+            const screenSize = { w: rawSize.w * sizeRatio, h: rawSize.h * sizeRatio };
+
+            const group = new THREE.Group();
+            group.position.set(x, y, z);
+            scene.add(group);
+
+            // Rotation pivot — `group`'s origin is the model's BASE (its
+            // bottom, on the baseline), so rotating `group` directly would
+            // swing each device around its feet instead of spinning in
+            // place. `pivot` is a child of `group` recentered to the
+            // model's true vertical middle once its height is known (see
+            // `lift` below), and drag/idle rotation is applied to `pivot`
+            // instead — most noticeable on the tall phone and the
+            // Game-Boy-style console.
+            const pivot = new THREE.Group();
+            group.add(pivot);
+
+            const screenTex = createScreenTexture(opts.initialDate || '15.08.1998', opts.dateFontSize || 48);
+
+            const deviceObj = { group, pivot, screenTex, willBug };
+            devices.push(deviceObj);
+
+            // Flat fake shadow — sits directly BEHIND the model (same
+            // footprint, pushed back in z) rather than below it, like the
+            // device is lying flat on its back with a shadow peeking out
+            // around its edges, instead of standing upright with a shadow
+            // cast at its feet. Sized proportionally to this device's own
+            // targetSize. It's a sibling of `group` (not a child), so it
+            // stays flat and at the same relative depth as every other
+            // device's shadow — instead of tilting when the model is
+            // dragged or drifting forward when it's brought to the front on
+            // click.
+            const centerY = y + targetSize / 2;
+            const shadowMat = new THREE.MeshBasicMaterial({
+                map: shadowTexture,
+                transparent: true,
+                depthWrite: false
+            });
+            const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
+            shadowMesh.position.set(x, centerY, z - 0.4);
+            shadowMesh.scale.set(0.001, 0.001, 1); // pop-in start, synced with model
+            scene.add(shadowMesh);
+
+            // Screen overlay — fitted to this model's actual screen rect,
+            // positioned once the model loads and its real scale is known.
+            const screenGeo = new THREE.PlaneGeometry(screenSize.w, screenSize.h);
+            const screenMat = new THREE.MeshBasicMaterial({ map: screenTex.texture });
+            const screenMesh = new THREE.Mesh(screenGeo, screenMat);
+            screenMesh.scale.setScalar(0.001); // pop-in start, synced with model
+            screenMesh.userData.deviceRef = deviceObj;
+            pivot.add(screenMesh);
+            interactiveMeshes.push(screenMesh);
+
+            const modelHolder = new THREE.Group();
+            pivot.add(modelHolder);
+
+            function onGltfReady(gltf) {
+                const model = gltf.scene;
+
+                // Center the model on its own bounding box, then scale by
+                // its LONGEST axis (not just height) to a common target.
+                // Source models come from different authors at wildly
+                // different unit scales, and several are modeled lying
+                // flat (small height, large footprint) — normalizing on
+                // height alone would blow those up to a huge size.
+                const box = new THREE.Box3().setFromObject(model);
+                const size = new THREE.Vector3();
+                box.getSize(size);
+                const center = new THREE.Vector3();
+                box.getCenter(center);
+                model.position.sub(center);
+
+                const maxDim = Math.max(size.x, size.y, size.z) || 1;
+                const scaleFactor = targetSize / maxDim;
+                // The axis that ends up vertical after rotation isn't always
+                // the model's raw Y (a 90°-on-X rotation swaps Y and Z) — use
+                // whichever raw axis liftAxis names so the model's bottom
+                // still lands on the baseline instead of sinking/floating.
+                const lift = (size[liftAxis] * scaleFactor) / 2;
+
+                // Recenter the pivot to the model's true vertical middle —
+                // everything below is now positioned relative to that
+                // middle instead of the baseline.
+                pivot.position.y = lift;
+
+                // Re-center the shadow on the model's real vertical middle
+                // now that `lift` is known exactly (the value used when the
+                // shadow was first created was only an approximation based
+                // on targetSize, since liftAxis can make the true height
+                // differ from that).
+                shadowMesh.position.y = y + lift;
+
+                // Shadow rectangle sized to this model's own footprint: its
+                // vertical extent is exactly the height used for `lift`
+                // above, and its horizontal extent is the wider of the
+                // other two raw axes (the one not used for height) — a
+                // reasonable stand-in for "on-screen width" without needing
+                // to track exactly which raw axis faces the camera after
+                // each model's own corrective rotation.
+                const otherAxes = ['x', 'y', 'z'].filter(a => a !== liftAxis);
+                const shadowHeight = size[liftAxis] * scaleFactor;
+                const shadowWidth = Math.max(size[otherAxes[0]], size[otherAxes[1]]) * scaleFactor;
+
+                modelHolder.scale.setScalar(0.001); // pop-in start
+                modelHolder.rotation.order = 'YXZ';
+                modelHolder.rotation.y = rotationY;
+                modelHolder.rotation.x = rotationX;
+                modelHolder.add(model);
+
+                screenMesh.position.set(screenOffset.x, screenOffset.y, screenOffset.z);
+
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.userData.deviceRef = deviceObj;
+                        interactiveMeshes.push(child);
+                    }
+                });
+
+                gsap.to(modelHolder.scale, {
+                    x: scaleFactor, y: scaleFactor, z: scaleFactor,
+                    duration: 0.9,
+                    ease: "back.out(1.6)"
+                });
+                gsap.to(screenMesh.scale, {
+                    x: 1, y: 1, z: 1,
+                    duration: 0.9,
+                    ease: "back.out(1.6)"
+                });
+                gsap.to(shadowMesh.scale, {
+                    x: shadowWidth * 1.2, y: shadowHeight * 1.2,
+                    duration: 0.9,
+                    ease: "back.out(1.6)"
+                });
+            }
+
+            function onGltfError(err) {
+                console.error('Failed to load model:', url, err);
+            }
+
+            const key = url.split('/').pop().replace(/\.glb$/, '');
+            const base64 = window.Y2K_MODEL_DATA && window.Y2K_MODEL_DATA[key];
+            if (!base64) {
+                onGltfError(new Error('No embedded model data for key: ' + key));
+                return deviceObj;
+            }
+            gltfLoader.parse(base64ToArrayBuffer(base64), '', onGltfReady, onGltfError);
+
+            return deviceObj;
+        }
+
+        // Placement matches the updated reference composition
+        // (reference/y2knew.png, five devices — no Game Boy): x/y centers
+        // and relative sizes were measured from that image's pixel
+        // bounding boxes (as fractions of its 1546x786 canvas), then mapped
+        // onto this scene's world space. Positions are the model's BASE
+        // (loadDevice lifts each model up by half its own height from y),
+        // so y here is desired-vertical-center minus targetSize/2 — not the
+        // center itself.
+        //
+        // These three (willBug: true) are "the 3 devices that broke" the
+        // end-of-scroll illustration depicts being fixed.
+        loadDevice('3dModels/crt_computer_monitor.glb', -5.62, -2.16, 0.5, true, {
+            initialDate: '15.08.1998', targetSize: 4.3, refSize: 1.9,
+            screenOffset: { x: 0, y: 0.2295, z: 0.98 }, screenSize: { w: 1.36, h: 1.02 }
+        });
+        loadDevice('3dModels/simple_computer_placeholder.glb', 0.15, -4.17, -0.8, false, {
+            initialDate: '10.11.1998', targetSize: 3.6, refSize: 1.9,
+            screenOffset: { x: 0.03, y: 0.362, z: 0.78 }, screenSize: { w: 1.0, h: 0.88 }
+        });
+        loadDevice('3dModels/retro_screen.glb', 4.47, -0.185, 0.6, true, {
+            initialDate: '15.08.1998', targetSize: 3.2, refSize: 1.7, rotationY: 270,
+            screenOffset: { x: -0.04, y: 0.334, z: 0.85 }, screenSize: { w: 1.12, h: 0.84 }
+        });
+        loadDevice('3dModels/retro_80s_phone.glb', 7.94, 0.975, -0.4, false, {
+            initialDate: '22.03.1999', targetSize: 3.42, refSize: 1.7, rotationY: 90, dateFontSize: 70,
+            screenOffset: { x: 0.06, y: 0.10, z: 0.16 }, screenSize: { w: 0.28, h: 0.16 }
+        });
+        loadDevice('3dModels/retro_arcade_game_controller.glb', 5.93, -4.81, 0.2, true, {
+            initialDate: '10.11.1998', targetSize: 2.98, refSize: 1.9,
+            screenOffset: { x: 0.013, y: 0.0126, z: 0.10 }, screenSize: { w: 0.75, h: 0.60 }
+        });
+
+        // --- 4. INDIVIDUAL OBJECT ROTATION WITH SPRING RETURN ---
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        const MAX_DRAG_ROTATION = 10 * Math.PI / 180; // subtle tilt only, not a free spin
+
+        let activeRotatingDevice = null;
+        let previousPointerPosition = { x: 0, y: 0 };
+
+        window.addEventListener('pointerdown', (e) => {
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(interactiveMeshes);
+
+            if (intersects.length > 0) {
+                const hitObj = intersects[0].object;
+                activeRotatingDevice = hitObj.userData.deviceRef;
+                previousPointerPosition = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            if (!activeRotatingDevice) return;
+
+            const deltaX = e.clientX - previousPointerPosition.x;
+            const deltaY = e.clientY - previousPointerPosition.y;
+
+            // Apply rotation around the pivot recentered to the model's
+            // middle, clamped to a small tilt rather than a free spin
+            const rot = activeRotatingDevice.pivot.rotation;
+            rot.y = Math.max(-MAX_DRAG_ROTATION, Math.min(MAX_DRAG_ROTATION, rot.y + deltaX * 0.008));
+            rot.x = Math.max(-MAX_DRAG_ROTATION, Math.min(MAX_DRAG_ROTATION, rot.x + deltaY * 0.008));
+
+            previousPointerPosition = { x: e.clientX, y: e.clientY };
+        });
+
+        const releaseRotation = () => {
+            if (!activeRotatingDevice) return;
+
+            // Spring back rotation to 0 — position never changes, so there's
+            // nothing to restore there
+            gsap.to(activeRotatingDevice.pivot.rotation, {
+                x: 0,
+                y: 0,
+                z: 0,
+                duration: 0.8,
+                ease: "back.out(1.7)"
+            });
+
+            activeRotatingDevice = null;
+        };
+
+        window.addEventListener('pointerup', releaseRotation);
+        window.addEventListener('pointerleave', releaseRotation);
+
+        // --- 5. GSAP SCROLLTRIGGER STORYLINE ---
+        // Full scrollytelling arc, driven entirely by scroll progress
+        // (0 -> 1, scrubbed both directions), matching reference/y21.png,
+        // y2k2.png, y2k3.png and y2kend.png:
+        //   1. Header (constant) + subheader "...TCS saved the day"
+        //   2. Subheader swaps to "...gonna break" as screens glitch
+        //   3. Subheader swaps BACK to "...TCS saved the day" as the
+        //      repair-hands overlay appears on the two broken screens
+        //   4. Subheader swaps to "It saved the world..." as screens end
+        //      up fixed and the hands disappear
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.timeline({
+            scrollTrigger: {
+                trigger: ".scroll-container",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 0.5,
+                onUpdate: (self) => updateStoryState(self.progress)
+            }
+        });
+
+        const subheaderEl = document.getElementById('subheaderText');
+        const fixHandsCrtEl = document.getElementById('fixHandsCrt');
+        const fixHandsScreenEl = document.getElementById('fixHandsScreen');
+
+        const SUB_A = 'When the world was crashing, TCS saved the day';
+        const SUB_B = "As the time came close, the 4 digit filed was gonna break";
+        const SUB_C = 'It saved the world from a huge crash';
+
+        // Boundaries where the subheader's text changes.
+        const B1 = 0.24; // A -> B
+        const B2 = 0.50; // B -> A
+        const B3 = 0.76; // A -> C
+        const DIP = 0.025; // width of the brief fade-to-0 right at a boundary
+
+        // Fade in from `inEnd`, hold until `holdEnd`, fade out until
+        // `outEnd` — shared shape for the hands overlay.
+        function fadeWindow(progress, inEnd, holdEnd, outEnd) {
+            if (progress < inEnd) return inEnd > 0 ? progress / inEnd : 1;
+            if (progress < holdEnd) return 1;
+            if (progress < outEnd) return 1 - (progress - holdEnd) / (outEnd - holdEnd);
+            return 0;
+        }
+
+        function updateStoryState(progress) {
+            // Subheader — a SINGLE shared element whose text content swaps
+            // at each boundary, so two versions of the copy can never be
+            // visible (let alone overlapping) at once. Opacity briefly dips
+            // to 0 right at the swap point purely so the text-change itself
+            // isn't an abrupt jump-cut, then recovers to 1.
+            let subText;
+            if (progress < B1) subText = SUB_A;
+            else if (progress < B2) subText = SUB_B;
+            else if (progress < B3) subText = SUB_A;
+            else subText = SUB_C;
+            if (subheaderEl.textContent !== subText) subheaderEl.textContent = subText;
+
+            let dipOpacity = 1;
+            for (const b of [B1, B2, B3]) {
+                const dist = Math.abs(progress - b);
+                if (dist < DIP) {
+                    dipOpacity = Math.min(dipOpacity, dist / DIP);
+                }
+            }
+            subheaderEl.style.opacity = dipOpacity;
+
+            // Repair-hands overlay on the CRT and retro_screen devices —
+            // snaps instantly to visible once the screens have been red
+            // (broken) for a bit, rather than gradually fading in from the
+            // very start of the scroll, then fades out normally before
+            // SUB_C.
+            const HANDS_SHOW_AT = 0.40; // well after screens turn red at B1
+            let handsOpacity;
+            if (progress < HANDS_SHOW_AT) {
+                handsOpacity = 0;
+            } else {
+                handsOpacity = fadeWindow(progress, HANDS_SHOW_AT, 0.68, 0.76);
+            }
+            fixHandsCrtEl.style.opacity = handsOpacity;
+            fixHandsScreenEl.style.opacity = handsOpacity;
+
+            if (progress < B1) {
+                // Phase 1: Dates scrolling up to 31.12.99 — 2-digit year,
+                // matching the Y2K four-digit-field problem itself
+                const p = progress / B1;
+                const year = 1998 + Math.floor(p * 1.99);
+                const day = String(1 + Math.floor(p * 30)).padStart(2, '0');
+                const month = String(1 + Math.floor(p * 11)).padStart(2, '0');
+                const yearShort = String(year).slice(-2);
+
+                const dateStr = `${day}.${month}.${yearShort}`;
+
+                devices.forEach(d => d.screenTex.update(dateStr, false));
+
+            } else if (progress < 0.60) {
+                // Phase 2: Y2K Bug manifestation — the broken devices'
+                // 2-digit year field rolls over to "00" (1900), in red;
+                // unaffected devices already show the correct 4-digit 2000
+                devices.forEach(d => {
+                    if (d.willBug) {
+                        d.screenTex.update("01.01.00", true); // Glitch: field rolls to '00'
+                    } else {
+                        d.screenTex.update("01.01.2000", false);
+                    }
+                });
+
+            } else {
+                // Phase 3: Fixed — the moment the hands are actively on the
+                // screens, dates resolve to the full 4-digit 2000 and stay
+                devices.forEach(d => d.screenTex.update("01.01.2000", false));
+            }
+        }
+
+        updateStoryState(0);
+
+        // --- 6. RENDER LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Subtle floating tilt effect for idle objects when not interacting
+            const time = Date.now() * 0.001;
+            devices.forEach((d, i) => {
+                if (d !== activeRotatingDevice) {
+                    d.pivot.rotation.x = Math.sin(time + i) * 0.02;
+                    d.pivot.rotation.y = Math.cos(time + i) * 0.02;
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // --- 7. RESIZE HANDLER ---
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

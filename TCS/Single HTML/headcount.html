@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employee Count Matrix Chart (FY16 - FY26)</title>
+<style>
+  :root {
+    --tcs-color: #4f46e5;
+    --infosys-color: #f97316;
+    --wipro-color: #10b981;
+    --empty-color: #f4f5f7;
+    --empty-border: #ececef;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f4f6f9;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    margin: 0;
+  }
+  #chart-container {
+    width: 100%;
+    max-width: 1180px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 24px 28px 16px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 2px;
+  }
+  h2 {
+    text-align: center;
+    font-size: 13px;
+    font-weight: normal;
+    color: #666;
+    margin: 0 0 14px;
+  }
+  #legend {
+    display: flex;
+    justify-content: center;
+    gap: 22px;
+    margin-bottom: 18px;
+    font-size: 13px;
+    color: #444;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 2px; }
+
+  #plot-area {
+    display: flex;
+    align-items: flex-end;
+  }
+
+  #y-axis {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: var(--plot-height, 380px);
+    padding-right: 8px;
+    font-size: 11px;
+    color: #888;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  #groups-wrapper {
+    display: flex;
+    flex: 1;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    border-left: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    height: var(--plot-height, 380px);
+    padding: 0 10px;
+  }
+
+  .group-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+  }
+
+  .group-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+  }
+
+  .bar-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+    cursor: pointer;
+  }
+
+  .matrix {
+    display: grid;
+    gap: 3px;
+    align-content: end;
+    justify-content: center;
+  }
+
+  .cell {
+    width: 9px;
+    height: 9px;
+    border-radius: 1px;
+    background-color: var(--empty-color);
+    border: 1px solid var(--empty-border);
+  }
+
+  .cell.filled-tcs { background-color: var(--tcs-color); border-color: var(--tcs-color); }
+  .cell.filled-infosys { background-color: var(--infosys-color); border-color: var(--infosys-color); }
+  .cell.filled-wipro { background-color: var(--wipro-color); border-color: var(--wipro-color); }
+
+  #x-axis {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 10px 0;
+    font-size: 12px;
+    color: #444;
+  }
+  #x-axis span { text-align: center; }
+
+  #tooltip {
+    position: fixed;
+    display: none;
+    background: rgba(30,30,30,0.92);
+    color: #fff;
+    font-size: 12px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    pointer-events: none;
+    z-index: 10;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<div id="chart-container">
+  <h1>Bar Graph</h1>
+  <h2>TCS (Standalone) vs. Infosys + Wipro (Combined) [FY16 - FY26] &mdash; Matrix View</h2>
+
+  <div id="legend">
+    <div class="legend-item"><span class="legend-swatch" style="background:var(--tcs-color)"></span>TCS</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:var(--infosys-color)"></span>Infosys</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:var(--wipro-color)"></span>Wipro</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:var(--empty-color); border:1px solid var(--empty-border)"></span>Unfilled (scale)</div>
+  </div>
+
+  <div id="plot-area">
+    <div id="y-axis"></div>
+    <div id="groups-wrapper"></div>
+  </div>
+  <div id="x-axis"></div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+  var years = ['FY16','FY17','FY18','FY19','FY20','FY21','FY22','FY23','FY24','FY25','FY26'];
+
+  var tcs = [353843, 387223, 394998, 424285, 448464, 488649, 592195, 614795, 601546, 607979, 584519];
+  var infosys = [194044, 200364, 204107, 228123, 242371, 259619, 314015, 343234, 317240, 323578, 328594];
+  var wipro = [156831, 165481, 159923, 171425, 182886, 197712, 246743, 258570, 232614, 233346, 242156];
+
+  // ---- matrix settings ----
+  var COLUMNS = 3;              // columns per bar (multi-column matrix)
+  var UNIT = 5000;              // employees represented by one cell
+  var CELL_SIZE = 9;            // px, must match CSS .cell width/height
+  var GAP = 3;
+
+  var data = years.map(function(y, i) {
+    var combined = infosys[i] + wipro[i];
+    var t = Math.round(tcs[i] / UNIT);
+    var inf = Math.round(infosys[i] / UNIT);
+    var w = Math.round(wipro[i] / UNIT);
+    return {
+      year: y,
+      tcs: tcs[i], infosys: infosys[i], wipro: wipro[i], combined: combined,
+      tCells: t, infCells: inf, wCells: w,
+      combinedCells: inf + w
+    };
+  });
+
+  var maxCells = Math.max.apply(null, data.map(function(d){ return Math.max(d.tCells, d.combinedCells); }));
+  var ROWS = Math.ceil(maxCells / COLUMNS);
+  var plotHeight = ROWS * (CELL_SIZE + GAP);
+
+  document.documentElement.style.setProperty('--plot-height', plotHeight + 'px');
+
+  // y-axis labels (top = max, bottom = 0)
+  var yAxis = document.getElementById('y-axis');
+  var yTicks = 5;
+  for (var t = yTicks; t >= 0; t--) {
+    var val = Math.round((maxCells * UNIT) * (t / yTicks));
+    var lbl = document.createElement('div');
+    lbl.textContent = (val / 1000).toFixed(0) + 'k';
+    yAxis.appendChild(lbl);
+  }
+
+  var groupsWrapper = document.getElementById('groups-wrapper');
+  var xAxis = document.getElementById('x-axis');
+  var tooltip = document.getElementById('tooltip');
+  var barWidth = COLUMNS * (CELL_SIZE + GAP);
+  var groupWidth = barWidth * 2 + 6; // two bars + gap between them
+
+  function buildMatrix(cellTypesInOrder, tooltipHtml) {
+    var totalSlots = ROWS * COLUMNS;
+    var cellType = new Array(totalSlots).fill('empty');
+    var idx = 0;
+    cellTypesInOrder.forEach(function(seg) {
+      for (var i = 0; i < seg.count && idx < totalSlots; i++, idx++) cellType[idx] = seg.cls;
+    });
+
+    var fillOrder = [];
+    for (var r = ROWS - 1; r >= 0; r--) {
+      for (var c = 0; c < COLUMNS; c++) {
+        fillOrder.push({ row: r, col: c });
+      }
+    }
+
+    var grid = [];
+    for (var r = 0; r < ROWS; r++) { grid.push(new Array(COLUMNS).fill('empty')); }
+    fillOrder.forEach(function(pos, i) {
+      grid[pos.row][pos.col] = cellType[i];
+    });
+
+    var matrix = document.createElement('div');
+    matrix.className = 'matrix';
+    matrix.style.gap = GAP + 'px';
+    matrix.style.gridTemplateColumns = 'repeat(' + COLUMNS + ', ' + CELL_SIZE + 'px)';
+    matrix.style.gridTemplateRows = 'repeat(' + ROWS + ', ' + CELL_SIZE + 'px)';
+
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = 0; c < COLUMNS; c++) {
+        var cell = document.createElement('div');
+        cell.className = 'cell ' + grid[r][c];
+        matrix.appendChild(cell);
+      }
+    }
+
+    var barBlock = document.createElement('div');
+    barBlock.className = 'bar-block';
+    barBlock.style.width = barWidth + 'px';
+    barBlock.appendChild(matrix);
+    barBlock.addEventListener('mousemove', function(ev) {
+      tooltip.style.display = 'block';
+      tooltip.style.left = (ev.clientX + 14) + 'px';
+      tooltip.style.top = (ev.clientY + 14) + 'px';
+      tooltip.innerHTML = tooltipHtml;
+    });
+    barBlock.addEventListener('mouseleave', function() {
+      tooltip.style.display = 'none';
+    });
+    return barBlock;
+  }
+
+  data.forEach(function(d) {
+    var groupBlock = document.createElement('div');
+    groupBlock.className = 'group-block';
+    groupBlock.style.width = groupWidth + 'px';
+
+    var groupBars = document.createElement('div');
+    groupBars.className = 'group-bars';
+
+    var tcsTooltip = '<strong>' + d.year + ' &mdash; TCS</strong><br>' + d.tcs.toLocaleString();
+    var combinedTooltip = '<strong>' + d.year + ' &mdash; Infosys + Wipro</strong><br>' +
+      'Infosys: ' + d.infosys.toLocaleString() + '<br>' +
+      'Wipro: ' + d.wipro.toLocaleString() + '<br>' +
+      'Combined: ' + d.combined.toLocaleString();
+
+    var tcsBar = buildMatrix([{ cls: 'filled-tcs', count: d.tCells }], tcsTooltip);
+    var combinedBar = buildMatrix(
+      [{ cls: 'filled-infosys', count: d.infCells }, { cls: 'filled-wipro', count: d.wCells }],
+      combinedTooltip
+    );
+
+    groupBars.appendChild(tcsBar);
+    groupBars.appendChild(combinedBar);
+    groupBlock.appendChild(groupBars);
+    groupsWrapper.appendChild(groupBlock);
+
+    var xLabel = document.createElement('span');
+    xLabel.style.width = groupWidth + 'px';
+    xLabel.textContent = d.year;
+    xAxis.appendChild(xLabel);
+  });
+</script>
+
+</body>
+</html>
