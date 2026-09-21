@@ -68,10 +68,6 @@
 .TK4R8-legend-swatch.TK4R8-swatch-tcs      { background: var(--cat-1); }
 .TK4R8-legend-swatch.TK4R8-swatch-infosys  { background: var(--cat-2); }
 .TK4R8-legend-swatch.TK4R8-swatch-wipro    { background: var(--cat-3); }
-.TK4R8-legend-swatch.TK4R8-swatch-empty {
-  background: var(--color-bg-warm);
-  border: 1px solid var(--color-rule);
-}
 
 .TK4R8-plot-area {
   display: flex;
@@ -140,8 +136,11 @@
   width: 9px;
   height: 9px;
   border-radius: 1px;
-  background-color: var(--color-bg-warm);
-  border: 1px solid var(--color-rule);
+  /* Softened further toward the white card — a full-strength --color-bg-warm
+     tiled across hundreds of small cells reads much heavier than it does as
+     a single surface, so it's blended down before use here. */
+  background-color: color-mix(in srgb, var(--color-bg-warm) 45%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-rule) 55%, var(--color-surface));
 }
 
 .TK4R8-cell.TK4R8-filled-tcs     { background-color: var(--cat-1); border-color: var(--cat-1); }
