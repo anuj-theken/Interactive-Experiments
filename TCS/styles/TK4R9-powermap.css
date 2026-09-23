@@ -1,24 +1,60 @@
-/* styles/TK4R9-powermap.css — Power & conflict network graph.
+/* styles/TK4R9-powermap.css — Power map, told as a five-step scrollytelling sequence.
    All color and type values are read from styles/globals.css tokens. No CDN
-   imports, no @font-face, no :root — those live only in globals.css. */
+   imports, no @font-face, no :root — those live only in globals.css.
 
-.TK4R9-chart-frame {
-  width: 100%;
-  max-width: 1450px;
-  margin: 0 auto;
-  padding: 40px 24px;
-  box-sizing: border-box;
+   Structure mirrors TK4R6: .TK4R9-sticky-viewport is a DIRECT CHILD of
+   .TK4R9-chart-section and a sibling of .TK4R9-narrative-layer. A sticky element's
+   room to stick comes from its parent's height, so don't wrap it in an intermediate
+   element, and don't put overflow (anything but visible) on the section or any
+   ancestor — either change breaks position:sticky.
+
+   Two layouts (switched at 1200px, matching the JS):
+   - stack (default): the map pins to the top of the screen and the cards scroll up
+     underneath it; the map camera zooms to the tier each step is about.
+   - wide: the map pins full-height and the cards scroll up a lane on its left. */
+
+.TK4R9-chart-section {
+  position: relative;
+
+  /* Viz-local palette — deeper, more muted than the site's categorical tokens, and
+     scoped to this section so other modules are unaffected. */
+  --TK4R9-t1: #27375a;   /* Tata Trusts — ink blue */
+  --TK4R9-t2: #8a3a22;   /* Tata Sons — oxblood / rust */
+  --TK4R9-t3: #2b5c59;   /* TCS — deep teal */
+  --TK4R9-succ: #a2772c; /* succession — muted ochre */
+  --TK4R9-ctrl: #5a4470; /* ownership stake — plum */
+  --TK4R9-asc: #4c7447;  /* Chandrasekaran's rise — moss */
+  --TK4R9-div: #3b5f7c;  /* dividends — steel blue */
+  /* Paper grain, layered over the page colour — across the whole section (full width,
+     full height) so there's no textured box edge, and again on the cards */
+  --TK4R9-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .16  0 0 0 0 .13  0 0 0 0 .09  0 0 0 .32 -.12'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
+  background-color: var(--color-bg);
+  background-image: var(--TK4R9-grain);
 }
 
-.TK4R9-chart-container {
-  width: 100%;
-  max-width: 1350px;
-  margin: 0 auto;
-  background: var(--color-surface);
-  border: 1px solid var(--color-rule);
-  border-radius: 4px;
+/* ── Sticky map ── */
+.TK4R9-sticky-viewport {
+  position: sticky;
+  top: 0;
+  height: 60vh;
+  height: 60svh;
+  z-index: 3;
   box-sizing: border-box;
-  padding: 32px 32px 28px;
+  padding: 10px 12px;
+  /* opaque here (cards scroll up underneath it), so it carries the grain itself */
+  background-color: var(--color-bg);
+  background-image: var(--TK4R9-grain);
+  box-shadow: 0 10px 18px -16px color-mix(in srgb, var(--color-text) 45%, transparent);
+}
+
+.TK4R9-chart-frame {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: transparent;
+  border-radius: 4px;
+  padding: 12px 14px 8px;
 }
 
 .TK4R9-chart-header {
@@ -27,43 +63,33 @@
   align-items: flex-start;
   gap: 24px;
   flex-wrap: wrap;
-  margin-bottom: 20px;
-}
-
-.TK4R9-eyebrow {
-  font-family: var(--font-body);
-  font-size: var(--type-eyebrow);
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-primary);
-  margin: 0 0 12px;
+  margin-bottom: 6px;
 }
 
 .TK4R9-chart-title {
   font-family: var(--font-display);
-  font-size: var(--type-heading);
+  font-size: var(--type-subheading);
   font-weight: 400;
   line-height: 1.08;
   color: var(--color-text);
-  margin: 0 0 10px;
+  margin: 0;
 }
 
 .TK4R9-chart-subtitle {
+  display: none;
   font-family: var(--font-body);
   font-size: var(--type-body);
   line-height: 1.5;
   color: var(--color-muted);
   max-width: 58ch;
-  margin: 0;
+  margin: 10px 0 0;
 }
-
 .TK4R9-chart-subtitle b { color: var(--color-text); font-weight: 600; }
 
-/* ── Custom HTML legend chips — tiers + connection types ── */
+/* ── Header legend chips — tiers, connection types, status rings ── */
 .TK4R9-legend {
-  display: flex;
-  gap: 24px;
+  display: none;
+  gap: 28px;
   flex-wrap: wrap;
   flex-shrink: 0;
 }
@@ -95,7 +121,6 @@
   font-size: var(--type-legend);
   color: var(--color-text);
   white-space: nowrap;
-  cursor: default;
 }
 
 .TK4R9-legend-dot {
@@ -106,6 +131,7 @@
   background: transparent;
   border: 2.5px solid currentColor;
 }
+.TK4R9-legend-dot.is-dashed { border-style: dashed; border-width: 2px; }
 
 .TK4R9-legend-dash {
   width: 22px;
@@ -115,145 +141,263 @@
 }
 .TK4R9-legend-dash.is-dashed { border-top-style: dashed; }
 
-/* ── Status / shape note — small, sits just under the header ── */
-.TK4R9-note {
-  font-family: var(--font-body);
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--color-muted);
-  margin: 0 0 18px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--color-rule);
-}
-.TK4R9-note b { color: var(--color-text); font-weight: 600; }
-.TK4R9-note-key { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
-.TK4R9-note-key span { display: inline-flex; align-items: center; gap: 5px; }
-.TK4R9-note-shape { width: 10px; height: 10px; flex: 0 0 auto; background: var(--color-muted); }
-.TK4R9-note-shape.is-square { border-radius: 2px; }
-.TK4R9-note-shape.is-circle { border-radius: 50%; }
-
 /* ── Stage ── */
-.TK4R9-stage-wrap {
-  position: relative;
-  width: 100%;
-  height: 680px;
-}
-
 .TK4R9-stage {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 svg#TK4R9-map { display: block; width: 100%; height: 100%; }
 
-@media (max-width: 1023px) {
-  .TK4R9-stage-wrap {
-    height: auto;
-    max-height: 72vh;
+/* ── Narrative cards ── */
+.TK4R9-narrative-layer {
+  position: relative;
+  z-index: 1;
+  padding-bottom: 30vh;
+}
+
+.TK4R9-top-buffer { height: 6vh; }
+
+.TK4R9-narrative-step {
+  min-height: 70vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  box-sizing: border-box;
+  padding: 16px 12px;
+  opacity: 0.3;
+  transition: opacity 0.4s ease-out;
+}
+.TK4R9-narrative-step.is-active { opacity: 1; }
+
+.TK4R9-narrative-card {
+  width: 100%;
+  max-width: 560px;
+  box-sizing: border-box;
+  background-color: var(--color-bg);
+  background-image: var(--TK4R9-grain);
+  border: 1px solid var(--color-rule);
+  border-radius: 12px;
+  padding: 20px 22px;
+  box-shadow:
+    0 2px 6px color-mix(in srgb, var(--color-text) 8%, transparent),
+    0 18px 40px -12px color-mix(in srgb, var(--color-text) 30%, transparent);
+}
+
+.TK4R9-narrative-card > p {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-text);
+  margin: 0 0 12px;
+}
+.TK4R9-narrative-card > p:last-child { margin-bottom: 0; }
+.TK4R9-narrative-card strong { font-weight: 700; }
+
+.TK4R9-narrative-card > p.TK4R9-card-tier {
+  font-size: var(--type-eyebrow);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  margin: 0 0 6px;
+}
+.TK4R9-card-tier-1 { color: var(--TK4R9-t1); }
+.TK4R9-card-tier-2 { color: var(--TK4R9-t2); }
+.TK4R9-card-tier-3 { color: var(--TK4R9-t3); }
+
+.TK4R9-card-title {
+  font-family: var(--font-display);
+  font-size: var(--type-subheading);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--color-text);
+  margin: 0 0 10px;
+}
+
+/* People list — numbered when it's a succession (ol), plain for a single figure (ul) */
+.TK4R9-people {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  counter-reset: TK4R9-seq;
+}
+.TK4R9-card-tier + .TK4R9-people { margin-top: 4px; }
+
+.TK4R9-person {
+  position: relative;
+  padding: 11px 0;
+  border-top: 1px solid var(--color-rule);
+}
+.TK4R9-person:last-child { padding-bottom: 0; }
+ol.TK4R9-people > .TK4R9-person {
+  counter-increment: TK4R9-seq;
+  padding-left: 30px;
+}
+ol.TK4R9-people > .TK4R9-person::before {
+  content: counter(TK4R9-seq, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 13px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+ol.TK4R9-people > .TK4R9-person.is-pivot::before { color: var(--color-text); }
+
+.TK4R9-person-hd {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.TK4R9-person-name {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.TK4R9-person p {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.TK4R9-tag {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+  padding: 4px 7px;
+  border-radius: 20px;
+  border: 1px solid currentColor;
+}
+.TK4R9-tag.is-current { color: var(--status-good); background: color-mix(in srgb, var(--status-good) 10%, transparent); }
+.TK4R9-tag.is-removed { color: var(--status-critical); background: color-mix(in srgb, var(--status-critical) 10%, transparent); }
+
+/* ── Tablet: a little more room for the header ── */
+@media (min-width: 768px) {
+  .TK4R9-chart-frame { padding: 16px 20px 10px; }
+  .TK4R9-narrative-card { padding: 24px 28px; }
+}
+
+/* ── Wide layout: map pinned full-height, cards scroll up a lane on its left ── */
+@media (min-width: 1200px) {
+  .TK4R9-sticky-viewport {
+    height: 100vh;
+    z-index: 1;
+    padding: 24px;
+    background: transparent;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
   }
-  .TK4R9-stage {
-    position: static;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    max-height: 72vh;
-    border-top: 1px solid var(--color-rule);
-    border-bottom: 1px solid var(--color-rule);
-    box-shadow:
-      inset 0 8px 10px -10px color-mix(in srgb, var(--color-text) 28%, transparent),
-      inset 0 -8px 10px -10px color-mix(in srgb, var(--color-text) 28%, transparent);
+
+  .TK4R9-chart-frame {
+    width: 100%;
+    max-width: 1350px;
+    max-height: 880px;
+    display: grid;
+    grid-template-columns: 360px minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: 32px;
+    padding: 28px 32px 20px;
+    pointer-events: auto;
   }
-  svg#TK4R9-map { width: 100%; height: auto; }
+  /* Everything sits in the right-hand column; the left column is left empty as the
+     lane the cards scroll up, so they never pass over the title or the map. */
+  .TK4R9-chart-header, .TK4R9-stage { grid-column: 2; }
+  .TK4R9-chart-header { flex-direction: column; gap: 16px; margin-bottom: 8px; }
+
+  .TK4R9-chart-title { font-size: var(--type-heading); }
+  .TK4R9-chart-subtitle { display: block; font-size: 17px; max-width: none; }
+  .TK4R9-legend { display: flex; gap: 40px; }
+  .TK4R9-legend-group ul { flex-direction: row; flex-wrap: wrap; gap: 6px 16px; }
+
+  /* Pull the cards up over the pinned map so the first one arrives with it */
+  .TK4R9-narrative-layer {
+    z-index: 2;
+    margin-top: -100vh;
+    padding-bottom: 40vh;
+  }
+  .TK4R9-top-buffer { height: 62vh; }
+
+  .TK4R9-narrative-step {
+    min-height: 90vh;
+    width: min(1350px, 100% - 48px);
+    margin: 0 auto;
+    padding: 24px 0 24px 20px;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .TK4R9-narrative-card {
+    max-width: 384px;
+    padding: 24px 24px 22px;
+  }
 }
 
 /* ── SVG-themed marks (colors resolved live via CSS var()) ── */
-.TK4R9-band { stroke: var(--color-rule); stroke-width: 1; }
-.TK4R9-band-1 { fill: color-mix(in srgb, var(--cat-1) 8%, var(--color-bg)); }
-.TK4R9-band-2 { fill: color-mix(in srgb, var(--cat-2) 8%, var(--color-bg)); }
-.TK4R9-band-3 { fill: color-mix(in srgb, var(--cat-3) 8%, var(--color-bg)); }
+.TK4R9-band { stroke-width: 1; }
+.TK4R9-band-grain { pointer-events: none; opacity: .9; }
+.TK4R9-band-1 { fill: color-mix(in srgb, var(--TK4R9-t1) 9%, var(--color-bg)); stroke: color-mix(in srgb, var(--TK4R9-t1) 28%, var(--color-bg)); }
+.TK4R9-band-2 { fill: color-mix(in srgb, var(--TK4R9-t2) 9%, var(--color-bg)); stroke: color-mix(in srgb, var(--TK4R9-t2) 28%, var(--color-bg)); }
+.TK4R9-band-3 { fill: color-mix(in srgb, var(--TK4R9-t3) 9%, var(--color-bg)); stroke: color-mix(in srgb, var(--TK4R9-t3) 28%, var(--color-bg)); }
 
+.TK4R9-tier { transition: opacity .5s ease; }
 .TK4R9-tier-tab { font-family: var(--font-body); font-weight: 700; letter-spacing: 0.06em; }
 .TK4R9-tier-name { font-family: var(--font-body); font-weight: 600; }
 .TK4R9-tier-name tspan { fill: var(--color-muted); font-weight: 500; }
-.TK4R9-tier-1 .TK4R9-tier-tab, .TK4R9-tier-1 .TK4R9-tier-name { fill: var(--cat-1); }
-.TK4R9-tier-2 .TK4R9-tier-tab, .TK4R9-tier-2 .TK4R9-tier-name { fill: var(--cat-2); }
-.TK4R9-tier-3 .TK4R9-tier-tab, .TK4R9-tier-3 .TK4R9-tier-name { fill: var(--cat-3); }
+.TK4R9-tier-1 .TK4R9-tier-tab, .TK4R9-tier-1 .TK4R9-tier-name { fill: var(--TK4R9-t1); }
+.TK4R9-tier-2 .TK4R9-tier-tab, .TK4R9-tier-2 .TK4R9-tier-name { fill: var(--TK4R9-t2); }
+.TK4R9-tier-3 .TK4R9-tier-tab, .TK4R9-tier-3 .TK4R9-tier-name { fill: var(--TK4R9-t3); }
 
-.TK4R9-edge { fill: none; stroke-linecap: round; transition: opacity .18s ease; }
-.TK4R9-e-succ { stroke: var(--cat-4); stroke-width: 1.6; }
-.TK4R9-e-ctrl { stroke: var(--cat-5); stroke-width: 1.8; stroke-dasharray: 6 5; opacity: .9; }
-.TK4R9-e-asc { stroke: var(--cat-6); stroke-width: 2.4; }
-.TK4R9-e-asc.is-dotted { stroke-width: 1.8; stroke-dasharray: 2 5; opacity: .8; }
+.TK4R9-edge { fill: none; stroke-linecap: round; transition: opacity .35s ease; }
+.TK4R9-e-succ { stroke: var(--TK4R9-succ); stroke-width: 1.8; }
+.TK4R9-e-ctrl { stroke: var(--TK4R9-ctrl); stroke-width: 1.8; stroke-dasharray: 6 5; }
+.TK4R9-e-asc { stroke: var(--TK4R9-asc); stroke-width: 2.4; }
+.TK4R9-e-asc.is-dotted { stroke-width: 1.8; stroke-dasharray: 2 5; }
+.TK4R9-e-div { stroke: var(--TK4R9-div); stroke-width: 2.2; }
 .TK4R9-mk path { stroke: none; }
-.TK4R9-mk-succ path { fill: var(--cat-4); }
-.TK4R9-mk-ctrl path { fill: var(--cat-5); }
-.TK4R9-mk-asc path { fill: var(--cat-6); }
+.TK4R9-mk-succ path { fill: var(--TK4R9-succ); }
+.TK4R9-mk-ctrl path { fill: var(--TK4R9-ctrl); }
+.TK4R9-mk-asc path { fill: var(--TK4R9-asc); }
+.TK4R9-mk-div path { fill: var(--TK4R9-div); }
 
+g.TK4R9-elabel-group { transition: opacity .35s ease; }
 .TK4R9-elabel { font-family: var(--font-body); font-weight: 600; fill: var(--color-muted); }
 .TK4R9-elabel-bg { fill: var(--color-surface); stroke: var(--color-rule); stroke-width: 1; }
 
-.TK4R9-node { cursor: pointer; outline: none; transition: opacity .18s ease; }
-.TK4R9-node .TK4R9-hit { fill: transparent; }
+.TK4R9-node { transition: opacity .45s ease; }
 .TK4R9-avatar-txt, .TK4R9-hub-txt { fill: var(--color-surface); font-family: var(--font-body); font-weight: 700; text-anchor: middle; dominant-baseline: central; }
-.TK4R9-n-name { fill: var(--color-text); font-family: var(--font-body); font-weight: 600; text-anchor: middle; }
-.TK4R9-n-sub { fill: var(--color-muted); font-family: var(--font-body); font-weight: 500; text-anchor: middle; }
-.TK4R9-focus-ring { opacity: 0; fill: none; stroke: var(--color-text); stroke-width: 2; stroke-dasharray: 3 3; }
-.TK4R9-node:focus-visible .TK4R9-focus-ring { opacity: .9; }
+.TK4R9-n-name { fill: var(--color-text); font-family: var(--font-body); font-weight: 600; }
+.TK4R9-n-sub { fill: var(--color-muted); font-family: var(--font-body); font-weight: 500; }
 .TK4R9-removed-badge circle { fill: var(--status-critical); }
 .TK4R9-removed-badge path { stroke: var(--color-surface); stroke-width: 1.7; stroke-linecap: round; }
 
+/* ── Step states: the step's nodes/edges stay lit, everything else recedes ── */
 svg#TK4R9-map.is-dimmed .TK4R9-node:not(.is-hl) { opacity: .16; }
-svg#TK4R9-map.is-dimmed .TK4R9-edge:not(.is-hl) { opacity: .08; }
-svg#TK4R9-map.is-dimmed g.TK4R9-elabel-group:not(.is-hl) { opacity: .12; }
+svg#TK4R9-map.is-dimmed .TK4R9-edge:not(.is-hl) { opacity: .1; }
+svg#TK4R9-map.is-dimmed g.TK4R9-elabel-group:not(.is-hl) { opacity: .1; }
+svg#TK4R9-map .TK4R9-edge.is-hidden:not(.is-hl),
+svg#TK4R9-map g.TK4R9-elabel-group.is-hidden:not(.is-hl) { opacity: 0; }
 
-/* ── Tooltip — fixed to viewport, works whether the stage scrolls or not ── */
-#TK4R9-tip {
-  position: fixed;
-  z-index: 50;
-  pointer-events: none;
-  max-width: min(290px, 86vw);
-  min-width: 200px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-rule);
-  border-radius: 8px;
-  box-shadow: 0 14px 32px -12px color-mix(in srgb, var(--color-text) 30%, transparent);
-  overflow: hidden;
-  opacity: 0;
-  transform: translateY(4px);
-  transition: opacity .14s ease, transform .14s ease;
-}
-#TK4R9-tip.is-shown { opacity: 1; transform: translateY(0); }
-
-.TK4R9-tip-top { display: flex; gap: 11px; align-items: flex-start; padding: 13px 14px 11px; border-bottom: 1px solid var(--color-rule); }
-.TK4R9-tip-av { width: 36px; height: 36px; border-radius: 50%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; color: var(--color-surface); font-family: var(--font-body); font-weight: 700; font-size: var(--type-legend); border: 3px solid var(--status-good); }
-.TK4R9-tip-hd { min-width: 0; flex: 1 1 auto; }
-.TK4R9-tip-name { font-family: var(--font-display); font-weight: 600; font-size: var(--type-legend); line-height: 1.2; color: var(--color-text); }
-.TK4R9-tip-tier { display: inline-block; flex: 0 0 auto; font-family: var(--font-body); font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--color-muted); border: 1px solid var(--color-rule); border-radius: 20px; padding: 3px 7px; }
-.TK4R9-tip-meta { padding: 11px 14px 4px; display: flex; flex-direction: column; gap: 8px; }
-.TK4R9-tip-row { display: flex; gap: 8px; font-family: var(--font-body); font-size: var(--type-legend); line-height: 1.4; }
-.TK4R9-tip-k { flex: 0 0 52px; color: var(--color-muted); font-weight: 600; }
-.TK4R9-tip-v { color: var(--color-text); min-width: 0; }
-.TK4R9-status-pill { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
-.TK4R9-status-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
-.TK4R9-tip-note { margin: 10px 14px 14px; padding: 9px 11px; background: var(--color-bg-warm); border-left: 3px solid var(--status-good); border-radius: 0 6px 6px 0; font-family: var(--font-body); font-size: 12px; line-height: 1.45; color: var(--color-muted); }
-.TK4R9-tip-note b { color: var(--color-text); font-weight: 600; }
-
-.TK4R9-source {
-  font-family: var(--font-body);
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--color-muted);
-  margin: 18px 0 0;
-}
-.TK4R9-source b { color: var(--color-text); font-weight: 600; }
-
-@media (max-width: 768px) {
-  .TK4R9-chart-frame { padding: 20px 12px; }
-  .TK4R9-chart-container { padding: 20px 18px 18px; }
-  .TK4R9-legend { gap: 18px; }
-}
+svg#TK4R9-map[data-tier] .TK4R9-tier { opacity: .5; }
+svg#TK4R9-map[data-tier="1"] .TK4R9-tier-1,
+svg#TK4R9-map[data-tier="2"] .TK4R9-tier-2,
+svg#TK4R9-map[data-tier="3"] .TK4R9-tier-3 { opacity: 1; }
 
 @media (prefers-reduced-motion: reduce) {
-  .TK4R9-node, .TK4R9-edge, g.TK4R9-elabel-group, #TK4R9-tip { transition: none !important; }
+  .TK4R9-node, .TK4R9-edge, g.TK4R9-elabel-group, .TK4R9-tier, .TK4R9-narrative-step { transition: none !important; }
 }

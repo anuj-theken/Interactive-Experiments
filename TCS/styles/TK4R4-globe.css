@@ -14,10 +14,10 @@
       because .TK4R4-chapter is position:relative and spans this section's
       full height — fixed pinned it over the ENTIRE page from load.
    2. .TK4R4-office-sidebar keeps its ORIGINAL position:fixed (that part was
-      never the bug) — the real fix lives in scripts/TK4R4-globe.js as an
-      onLeave ScrollTrigger callback that force-closes exploration mode
-      once the user scrolls past this section, so the sidebar can't stay
-      stuck fixed over the modules below it. Don't remove that callback. */
+      never the bug) — the real fix lives in scripts/TK4R4-globe.js as
+      syncExploration(), which re-derives open/closed from the pin's scroll
+      progress on every ScrollTrigger callback and every frame, so the
+      sidebar can't stay stuck fixed over the modules above or below it. */
 
 .TK4R4-chapter {
   position: relative;
@@ -107,8 +107,10 @@ body.TK4R4-stage-final #TK4R4-canvas-container.TK4R4-dot-hover {
 #TK4R4-box-1 { left: 7%; }
 #TK4R4-box-2 { right: 7%; }
 
+/* Anchored low (and the globe is lifted for this frame in TK4R4-globe.js)
+   so the body text sits below the map instead of over it. */
 #TK4R4-box-3 {
-  bottom: 6vh;
+  bottom: 3vh;
   left: 50%;
   transform: translateX(-50%);
   width: 90%;
@@ -165,6 +167,18 @@ body.TK4R4-stage-final #TK4R4-canvas-container.TK4R4-dot-hover {
 }
 
 #TK4R4-box-3 p { max-width: 60ch; margin: 0 auto; }
+
+/* Extra room under the heading lifts it up while the body text stays put
+   (the box is bottom-anchored). */
+#TK4R4-box-3 .TK4R4-heading { margin-bottom: 2.4rem; }
+
+/* Short screens: tighten frame 3 so its body text still clears the globe. */
+@media (max-height: 800px) {
+  #TK4R4-box-3::before { margin-bottom: 14px; }
+  #TK4R4-box-3 .TK4R4-heading { font-size: clamp(1.9rem, 3vw, 2.6rem); margin-bottom: 1.6rem; }
+  #TK4R4-box-3 p { font-size: 1.02rem; line-height: 1.5; max-width: 66ch; }
+  #TK4R4-box-3 .TK4R4-drag-hint { margin-top: 14px; padding-top: 10px; }
+}
 
 .TK4R4-drag-hint {
   display: inline-block;
@@ -368,6 +382,10 @@ body.TK4R4-stage-final .TK4R4-office-sidebar {
   flex: 1;
   overflow-y: auto;
   padding: 8px 32px 40px;
+  /* Selecting a city scrolls it to the top while the previously open city
+     collapses above it; the JS already accounts for that shift, so browser
+     scroll anchoring must not compensate a second time. */
+  overflow-anchor: none;
 }
 
 .TK4R4-sidebar-list::-webkit-scrollbar { width: 6px; }
@@ -420,6 +438,9 @@ body.TK4R4-stage-final .TK4R4-office-sidebar {
 }
 
 .TK4R4-dir-city.TK4R4-hidden { display: none; }
+
+/* Country line inside a city row — only shown on phones (card strip). */
+.TK4R4-dir-city-country { display: none; }
 
 .TK4R4-dir-city:hover,
 .TK4R4-dir-city.TK4R4-is-hover {
@@ -569,4 +590,95 @@ body.TK4R4-stage-final .TK4R4-office-sidebar {
 
 .TK4R4-legend-item.TK4R4-legend-active .TK4R4-dot {
   background: #b5451f;
+}
+
+/* ── Phones: globe up top, story text anchored to the bottom, and the office
+   directory reduced to just the city list. Kept last so it overrides the
+   desktop rules above. The globe placement itself lives in TK4R4-globe.js
+   (IS_MOBILE). ── */
+@media (max-width: 860px) {
+  #TK4R4-box-1, #TK4R4-box-2 {
+    top: auto;
+    bottom: 6vh;
+    left: 24px;
+    right: 24px;
+    max-width: none;
+    transform: none;
+  }
+
+  #TK4R4-box-3 { bottom: 3vh; }
+  #TK4R4-box-3 .TK4R4-heading { font-size: 2rem; margin-bottom: 1rem; }
+  #TK4R4-box-3 p { font-size: 1rem; line-height: 1.5; }
+  #TK4R4-box-3 .TK4R4-drag-hint { margin-top: 14px; padding-top: 10px; }
+
+  /* Final frame: no sidebar — a horizontally scrollable strip of city cards
+     along the bottom. Tapping a marker slides its card into view (JS). */
+  body.TK4R4-stage-final #TK4R4-canvas-container { height: calc(100% - 190px); }
+
+  .TK4R4-office-sidebar {
+    left: 0;
+    right: 0;
+    width: auto;
+    height: auto;
+    /* Clip the 90-card strip so its overflow can't widen the page — phone
+       browsers otherwise zoom the whole page out to fit it. */
+    overflow: hidden;
+    background: transparent;
+    border-top: none;
+    box-shadow: none;
+  }
+  .TK4R4-sidebar-header { display: none; }
+
+  .TK4R4-sidebar-list {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 10px 16px 20px;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 16px;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    min-width: 0;
+    width: 100%;
+  }
+  .TK4R4-sidebar-list::-webkit-scrollbar { display: none; }
+
+  .TK4R4-dir-group { display: contents; }
+  .TK4R4-dir-country { display: none; }
+
+  .TK4R4-dir-city,
+  .TK4R4-dir-city:hover,
+  .TK4R4-dir-city.TK4R4-is-hover {
+    flex: 0 0 min(78vw, 320px);
+    height: 160px;
+    margin: 0;
+    padding: 14px 16px;
+    overflow-y: auto;
+    scroll-snap-align: start;
+    background: rgba(247, 242, 232, 0.97);
+    border: 1px solid #d8cebb;
+    border-left: 3px solid #d8cebb;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(33, 30, 25, 0.10);
+  }
+  .TK4R4-dir-city.TK4R4-is-active {
+    background: #f4e6da;
+    border-color: #e2c3ae;
+    border-left-color: #b5451f;
+  }
+
+  .TK4R4-dir-city-country {
+    display: block;
+    margin-bottom: 4px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #8a8172;
+  }
+
+  /* Cards always show their office addresses. */
+  .TK4R4-dir-offices { max-height: none; }
 }

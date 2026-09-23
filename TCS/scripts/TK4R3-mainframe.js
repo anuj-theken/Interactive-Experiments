@@ -21,7 +21,20 @@ document.addEventListener("DOMContentLoaded", function () {
   // on-screen *position* only becomes meaningful once scrolled into its own
   // pin range, so any anchor calc based on that position would be wrong for
   // everyone who hasn't scrolled there yet.
-  const SCREEN_ANCHOR_PCT = { x: 0.2785, y: 0.392 };
+  const SCREEN_ANCHOR_PCT = { x: 0.2517, y: 0.3972 };
+  // The CSS terminal box as a fraction of the viewport (width 20.35%,
+  // height 25%) — used to find the model screen's edges.
+  const SCREEN_BOX_PCT = { w: 0.2035, h: 0.25 };
+  // The anchor above was tuned on a 16:10 desktop. Raycasting it against
+  // the live viewport lands off the screen on portrait devices, so it's
+  // always resolved against a fixed 16:10 reference camera instead.
+  const REFERENCE_ASPECT = 1440 / 900;
+
+  // Portrait / narrow layout (phones, iPad portrait): the camera zooms and
+  // pans so only the model's left side is in frame — its left edge a small
+  // gap from the viewport edge, the rest cropped off to the right — which
+  // makes the screen big enough to read. Photos sit below the screen.
+  const compactQuery = window.matchMedia("(max-aspect-ratio: 11/10), (max-width: 700px)");
 
   const MODEL_ROTATION_X = 0;
   const MODEL_ROTATION_Y = (-90 * Math.PI) / 180;
@@ -38,11 +51,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let { w, h } = getSize();
 
-    const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+    const DESKTOP_FOV = 45;
+    const DESKTOP_CAMERA_Z = 6;
+    const COMPACT_FOV = 22;
+
+    const camera = new THREE.PerspectiveCamera(DESKTOP_FOV, w / h, 0.1, 1000);
     if (DEBUG_VIEW) {
       camera.position.set(8, 8, 40);
     } else {
-      camera.position.set(0, 0, 6);
+      camera.position.set(0, 0, DESKTOP_CAMERA_Z);
     }
     camera.lookAt(0, 0, 0);
 
@@ -75,6 +92,101 @@ document.addEventListener("DOMContentLoaded", function () {
     const interactiveMeshes = [];
     const raycaster = new THREE.Raycaster();
     let screenAnchorLocal = null;
+    let screenEdgesLocal = null; // left, right, top, bottom points on the model screen
+    let modelPointsLocal = []; // sampled vertices, for measuring the model's projected extent
+    let finalScale = 1;
+    let compact = false;
+
+    const stickyEl = container.parentElement;
+    const headerEl = stickyEl.querySelector(".TK4R3-page-header");
+    const frameImages = [...stickyEl.querySelectorAll(".TK4R3-frame-image")];
+    const COMPACT_IMAGE_BOTTOM = 52; // must match .TK4R3-frame-image bottom in the compact CSS
+    frameImages.forEach((img) => {
+      if (!img.complete) img.addEventListener("load", () => applyLayout(), { once: true });
+    });
+
+    function projectToPx(local, cam, cw, ch, out) {
+      out.copy(local).applyMatrix4(modelGroup.matrixWorld).project(cam);
+      return { x: (out.x * 0.5 + 0.5) * cw, y: (-out.y * 0.5 + 0.5) * ch };
+    }
+
+    // Frames the camera for the current viewport. Desktop keeps the original
+    // untouched view; compact zooms/pans it via setViewOffset (a pure 2D
+    // crop of the same perspective, so the terminal tracking still works).
+    function applyLayout() {
+      const { w: cw, h: ch } = getSize();
+      compact = compactQuery.matches;
+      // Compact uses a narrower, further-back lens covering the same view:
+      // flatter perspective, so the base juts out less past the screen and
+      // the screen can take more of the viewport width.
+      if (!DEBUG_VIEW) {
+        const fov = compact ? COMPACT_FOV : DESKTOP_FOV;
+        camera.fov = fov;
+        camera.position.z =
+          DESKTOP_CAMERA_Z * Math.tan(((DESKTOP_FOV / 2) * Math.PI) / 180) / Math.tan(((fov / 2) * Math.PI) / 180);
+        camera.updateMatrixWorld();
+      }
+      camera.aspect = cw / ch;
+      camera.clearViewOffset();
+
+      if (!compact || !screenEdgesLocal || !modelPointsLocal.length) {
+        terminalDisplayEl.style.width = "";
+        terminalDisplayEl.style.height = "";
+        terminalDisplayEl.style.fontSize = "";
+        frameImages.forEach((img) => {
+          img.style.width = "";
+          img.style.height = "";
+        });
+        return;
+      }
+
+      // Measure at rest: final scale, no drag tilt.
+      const savedScale = modelGroup.scale.x;
+      const savedRot = { x: modelGroup.rotation.x, y: modelGroup.rotation.y };
+      modelGroup.scale.setScalar(finalScale);
+      modelGroup.rotation.set(0, 0, 0);
+      modelGroup.updateMatrixWorld(true);
+      camera.updateMatrixWorld();
+
+      const tmp = new THREE.Vector3();
+      let minX = Infinity, minY = Infinity, maxY = -Infinity;
+      for (const p of modelPointsLocal) {
+        const s = projectToPx(p, camera, cw, ch, tmp);
+        if (s.x < minX) minX = s.x;
+        if (s.y < minY) minY = s.y;
+        if (s.y > maxY) maxY = s.y;
+      }
+      const screenRight = projectToPx(screenEdgesLocal.right, camera, cw, ch, tmp).x;
+      const screenBottom = projectToPx(screenEdgesLocal.bottom, camera, cw, ch, tmp).y;
+
+      modelGroup.scale.setScalar(savedScale);
+      modelGroup.rotation.set(savedRot.x, savedRot.y, 0);
+
+      const gap = Math.max(12, cw * 0.035);
+      const headerBottom = headerEl ? headerEl.offsetTop + headerEl.offsetHeight : ch * 0.12;
+      const top = headerBottom + ch * 0.04;
+      // Screen's right edge near the right side of the viewport, but keep
+      // the model short enough to leave room for the photos underneath.
+      const zoom = Math.min((cw * 0.94 - gap) / (screenRight - minX), (ch * 0.52) / (maxY - minY));
+
+      const offsetX = minX * zoom - gap;
+      const offsetY = minY * zoom - top;
+      camera.setViewOffset(cw * zoom, ch * zoom, offsetX, offsetY, cw, ch);
+
+      // Photos: as wide as the viewport allows (up to 640px), bottom-anchored
+      // above the footer caption (CSS), and never taller than the space
+      // between the screen and the caption — so they may overlap the
+      // model's base/keyboard but never the screen text.
+      const maxW = Math.min(cw - 32, 640);
+      const maxH = ch - COMPACT_IMAGE_BOTTOM - (screenBottom * zoom - offsetY) - 12;
+      frameImages.forEach((img) => {
+        if (!img.naturalWidth) return;
+        const aspect = img.naturalWidth / img.naturalHeight;
+        const imgW = Math.max(0, Math.min(maxW, maxH * aspect));
+        img.style.width = imgW + "px";
+        img.style.height = imgW / aspect + "px";
+      });
+    }
 
     function base64ToArrayBuffer(base64) {
       const binary = atob(base64);
@@ -100,6 +212,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const targetSize = DEBUG_VIEW ? 4 : 5;
         const maxDim = Math.max(size.x, size.y, size.z) || 1;
         const scaleFactor = targetSize / maxDim;
+        finalScale = scaleFactor;
         modelGroup.scale.setScalar(scaleFactor);
         model.rotation.order = "XYZ";
         model.rotation.x = MODEL_ROTATION_X;
@@ -110,18 +223,42 @@ document.addEventListener("DOMContentLoaded", function () {
           if (child.isMesh) interactiveMeshes.push(child);
         });
 
-        camera.updateMatrixWorld();
         modelGroup.updateMatrixWorld(true);
 
-        const anchorNdc = new THREE.Vector2(
-          SCREEN_ANCHOR_PCT.x * 2 - 1,
-          -(SCREEN_ANCHOR_PCT.y * 2 - 1)
-        );
-        raycaster.setFromCamera(anchorNdc, camera);
-        const anchorHit = raycaster.intersectObjects(interactiveMeshes)[0];
-        if (anchorHit) {
-          screenAnchorLocal = modelGroup.worldToLocal(anchorHit.point.clone());
-        }
+        const refCamera = camera.clone();
+        refCamera.aspect = REFERENCE_ASPECT;
+        refCamera.clearViewOffset();
+        refCamera.updateMatrixWorld();
+
+        const hitLocal = (pctX, pctY) => {
+          raycaster.setFromCamera(new THREE.Vector2(pctX * 2 - 1, -(pctY * 2 - 1)), refCamera);
+          const hit = raycaster.intersectObjects(interactiveMeshes)[0];
+          return hit ? modelGroup.worldToLocal(hit.point.clone()) : null;
+        };
+
+        const ax = SCREEN_ANCHOR_PCT.x;
+        const ay = SCREEN_ANCHOR_PCT.y;
+        screenAnchorLocal = hitLocal(ax, ay);
+        const edges = {
+          left: hitLocal(ax - SCREEN_BOX_PCT.w / 2, ay),
+          right: hitLocal(ax + SCREEN_BOX_PCT.w / 2, ay),
+          top: hitLocal(ax, ay - SCREEN_BOX_PCT.h / 2),
+          bottom: hitLocal(ax, ay + SCREEN_BOX_PCT.h / 2),
+        };
+        if (edges.left && edges.right && edges.top && edges.bottom) screenEdgesLocal = edges;
+
+        const v = new THREE.Vector3();
+        interactiveMeshes.forEach((mesh) => {
+          const pos = mesh.geometry && mesh.geometry.attributes.position;
+          if (!pos) return;
+          const step = Math.max(1, Math.floor(pos.count / 400));
+          for (let i = 0; i < pos.count; i += step) {
+            v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrixWorld);
+            modelPointsLocal.push(modelGroup.worldToLocal(v.clone()));
+          }
+        });
+
+        applyLayout();
 
         gsap.from(modelGroup.scale, {
           x: 0,
@@ -191,6 +328,7 @@ document.addEventListener("DOMContentLoaded", function () {
     window.addEventListener("pointerleave", releaseDrag);
 
     const projected = new THREE.Vector3();
+    const edgeTmp = new THREE.Vector3();
     function animate() {
       requestAnimationFrame(animate);
 
@@ -204,6 +342,17 @@ document.addEventListener("DOMContentLoaded", function () {
         terminalDisplayEl.style.left = px + "px";
         terminalDisplayEl.style.top = py + "px";
         terminalDisplayEl.style.transform = `translate(-50%, -50%) perspective(1400px) rotateX(${rotXdeg}deg) rotateY(${rotYdeg}deg)`;
+
+        if (compact && screenEdgesLocal) {
+          const l = projectToPx(screenEdgesLocal.left, camera, cw, ch, edgeTmp).x;
+          const r = projectToPx(screenEdgesLocal.right, camera, cw, ch, edgeTmp).x;
+          const t = projectToPx(screenEdgesLocal.top, camera, cw, ch, edgeTmp).y;
+          const b = projectToPx(screenEdgesLocal.bottom, camera, cw, ch, edgeTmp).y;
+          const boxW = Math.max(0, r - l);
+          terminalDisplayEl.style.width = boxW + "px";
+          terminalDisplayEl.style.height = Math.max(0, b - t) + "px";
+          terminalDisplayEl.style.fontSize = Math.max(11, Math.min(18, boxW / 17)) + "px";
+        }
       }
 
       renderer.render(scene, camera);
@@ -212,8 +361,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     window.addEventListener("resize", () => {
       const { w: cw, h: ch } = getSize();
-      camera.aspect = cw / ch;
-      camera.updateProjectionMatrix();
+      applyLayout();
       renderer.setSize(cw, ch);
     });
   })();

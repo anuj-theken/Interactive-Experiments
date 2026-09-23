@@ -24,7 +24,26 @@ document.addEventListener("DOMContentLoaded", function () {
   const scene = new THREE.Scene();
 
   const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.z = 5.2;
+
+  // ── Phone layout (same 860px breakpoint as the CSS) ──
+  // A portrait phone is far narrower than the globe at the desktop camera
+  // distance, so on phones the camera pulls back until the globe fits the
+  // screen width, the globe sits centred in the top part of the screen, and
+  // the story text is anchored to the bottom (see TK4R4-globe.css). Chosen at
+  // load, like the rest of this module's layout.
+  const IS_MOBILE = window.matchMedia("(max-width: 860px)").matches;
+  const WORLD_GLOBE_R = 2.0 * 0.6; // globeRadius * globeScale, defined below
+  const HALF_FOV_TAN = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  // Camera distance at which the globe takes up at most `wFrac` of the view's
+  // width and `hFrac` of its height.
+  function fitCameraZ(aspect, wFrac, hFrac) {
+    return Math.max(WORLD_GLOBE_R / (wFrac * HALF_FOV_TAN * aspect), WORLD_GLOBE_R / (hFrac * HALF_FOV_TAN));
+  }
+  camera.position.z = IS_MOBILE ? fitCameraZ(camera.aspect, 0.86, 0.42) : 5.2;
+  // World y that puts the globe's centre `frac` of the way down the screen.
+  function yAtScreenFrac(frac) {
+    return camera.position.z * HALF_FOV_TAN * (1 - 2 * frac);
+  }
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -52,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const globeGroup = new THREE.Group();
   scene.add(globeGroup);
-  globeGroup.position.set(1.4, 0, 0);
+  // Set from the story layout (usaGroupPos) further down.
   const globeScale = 0.6;
   globeGroup.scale.setScalar(globeScale);
 
@@ -365,6 +384,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const meta = loc.offices.length > 1 ? loc.offices.length + " offices" : "";
         const search = (loc.city + " " + loc.country + " " + loc.offices.map((o) => o.office + " " + o.address).join(" ")).toLowerCase();
         html += '<div class="TK4R4-dir-city" data-loc-id="' + loc.id + '" data-region="' + loc.region + '" data-search="' + escapeHtml(search) + '">';
+        html += '<span class="TK4R4-dir-city-country">' + escapeHtml(loc.country) + "</span>";
         html += '<div class="TK4R4-dir-city-head"><span class="TK4R4-dir-city-name">' + escapeHtml(loc.city) + "</span>"
           + (meta ? '<span class="TK4R4-dir-city-meta">' + meta + "</span>" : "") + "</div>";
         html += '<div class="TK4R4-dir-offices">';
@@ -414,19 +434,84 @@ document.addEventListener("DOMContentLoaded", function () {
     applyState(locById.get(id));
   }
 
-  function setActive(id, opts) {
-    opts = opts || {};
+  // Where a selected row's top edge lands, in px from the top of the list's
+  // scrollport. It is one fixed value for every row — the list's top padding
+  // (the sticky country header pins below it) plus the TALLEST country header
+  // — so the highlighted city always settles in exactly the same spot.
+  function rowLandingY() {
+    const padTop = parseFloat(getComputedStyle(sidebarListEl).paddingTop) || 0;
+    let headerH = 0;
+    sidebarListEl.querySelectorAll(".TK4R4-dir-country").forEach((h) => {
+      headerH = Math.max(headerH, h.offsetHeight);
+    });
+    return padTop + headerH + 4;
+  }
+
+  function rowOffsetInList(row) {
+    const listTop = sidebarListEl.getBoundingClientRect().top + sidebarListEl.clientTop;
+    return row.getBoundingClientRect().top - listTop;
+  }
+
+  // Scrolls the sidebar list so `row` lands at rowLandingY(). `collapsingRow`
+  // is the previously active row: its office list is animating shut, so if it
+  // sits above `row` the layout will shift up by that height — subtract it now
+  // so we aim at the final spot. Once the 0.4s expand/collapse has finished we
+  // re-measure and nudge, so any leftover drift is corrected too.
+  let scrollFixTimer = null;
+  // Phones: the list is a horizontal strip of cards (CSS), so slide the
+  // selected card to the left edge of the strip instead.
+  function scrollCardIntoView(row) {
+    const padLeft = parseFloat(getComputedStyle(sidebarListEl).paddingLeft) || 0;
+    const listLeft = sidebarListEl.getBoundingClientRect().left + sidebarListEl.clientLeft;
+    const target = sidebarListEl.scrollLeft + (row.getBoundingClientRect().left - listLeft) - padLeft;
+    sidebarListEl.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+  }
+
+  function scrollRowToTop(row, collapsingRow) {
+    clearTimeout(scrollFixTimer);
+    if (!row.offsetParent) return; // hidden by the search / region filter
+    if (IS_MOBILE) return scrollCardIntoView(row);
+    const landY = rowLandingY();
+    // Enough trailing room that even the last rows in the list can reach the top.
+    sidebarListEl.style.paddingBottom = Math.max(40, sidebarListEl.clientHeight - landY) + "px";
+    let shift = 0;
+    let collapsingOffices = null;
+    if (collapsingRow && collapsingRow !== row && collapsingRow.offsetParent &&
+        (collapsingRow.compareDocumentPosition(row) & Node.DOCUMENT_POSITION_FOLLOWING)) {
+      collapsingOffices = collapsingRow.querySelector(".TK4R4-dir-offices");
+      shift = collapsingOffices.offsetHeight;
+    }
+    // scrollTop + offset is the row's absolute position in the list, so it is
+    // valid even while a smooth scroll is mid-flight. (Never correct with a
+    // relative scrollBy: Chrome adds it to the in-flight scroll's target.)
+    const absTarget = () => Math.max(0, sidebarListEl.scrollTop + rowOffsetInList(row) - landY);
+    const target = Math.max(0, absTarget() - shift);
+    sidebarListEl.scrollTo({ top: target, behavior: "smooth" });
+    // Re-aim only once the row above has actually finished collapsing —
+    // measuring earlier would see a half-collapsed layout and "correct" to the
+    // wrong spot (transitions can lag well behind timers on a busy page).
+    let tries = 0;
+    const settle = () => {
+      if (collapsingOffices && collapsingOffices.offsetHeight > 0 && ++tries < 20) {
+        scrollFixTimer = setTimeout(settle, 150);
+        return;
+      }
+      const settled = absTarget();
+      if (Math.abs(settled - target) > 1) sidebarListEl.scrollTo({ top: settled, behavior: "smooth" });
+    };
+    scrollFixTimer = setTimeout(settle, 450);
+  }
+
+  function setActive(id) {
     const prev = activeId;
     activeId = id;
-    if (prev && prev !== id) applyState(locById.get(prev));
+    const prevLoc = prev && prev !== id ? locById.get(prev) : null;
     const loc = locById.get(id);
+    // Measure before toggling classes so the collapsing row's height is still intact.
+    if (loc && loc.row) scrollRowToTop(loc.row, prevLoc && prevLoc.row);
+    if (prevLoc) applyState(prevLoc);
     applyState(loc);
-    if (loc) {
-      focusOnLocation(loc.lat, loc.lon);
-      if (opts.scrollIntoView && loc.row) {
-        loc.row.scrollIntoView({ block: "nearest", behavior: "smooth" });
-      }
-    }
+    if (loc) focusOnLocation(loc.lat, loc.lon);
   }
 
   function shortestDelta(current, target) {
@@ -467,6 +552,30 @@ document.addEventListener("DOMContentLoaded", function () {
     return null;
   }
 
+  // Touch: only the globe itself is draggable. OrbitControls (r128) calls
+  // preventDefault on every touchstart/touchmove on the canvas while enabled,
+  // which blocked page scrolling across the whole screen on phones. This
+  // capture-phase listener on the container runs first: a gesture that starts
+  // off the globe never reaches the controls, so the browser scrolls instead.
+  function touchIsOnGlobe(touch) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointer.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    const r = worldGlobeRadius * 1.04;
+    return raycaster.ray.distanceSqToPoint(globeGroup.position) <= r * r;
+  }
+  let touchOffGlobe = false;
+  container.addEventListener("touchstart", (e) => {
+    if (e.touches.length === 1) touchOffGlobe = explorationActive && !touchIsOnGlobe(e.touches[0]);
+    if (touchOffGlobe) e.stopPropagation();
+  }, { capture: true, passive: true });
+  ["touchmove", "touchend", "touchcancel"].forEach((type) => {
+    container.addEventListener(type, (e) => {
+      if (touchOffGlobe) e.stopPropagation();
+    }, { capture: true, passive: true });
+  });
+
   renderer.domElement.addEventListener("pointermove", (e) => {
     if (!explorationActive) return;
     const id = pickAt(e.clientX, e.clientY);
@@ -485,13 +594,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const moved = Math.hypot(e.clientX - downX, e.clientY - downY);
     if (moved > 6 || Date.now() - downT > 500) return;
     const id = pickAt(e.clientX, e.clientY);
-    if (id) setActive(id, { scrollIntoView: true });
+    if (id) setActive(id);
   });
 
   sidebarListEl.addEventListener("click", (e) => {
     const row = e.target.closest(".TK4R4-dir-city");
     if (!row || !explorationActive) return;
-    setActive(row.dataset.locId, { scrollIntoView: false });
+    setActive(row.dataset.locId);
   });
   sidebarListEl.addEventListener("mouseover", (e) => {
     const row = e.target.closest(".TK4R4-dir-city");
@@ -538,6 +647,12 @@ document.addEventListener("DOMContentLoaded", function () {
     explorationActive = true;
     controls.enabled = true;
     document.body.classList.add("TK4R4-stage-final");
+    if (IS_MOBILE) {
+      // The canvas now stops above the card strip (CSS), so move the camera
+      // back in until the globe fills what's left.
+      const aspect = container.clientWidth / Math.max(1, container.clientHeight);
+      gsap.to(camera.position, { z: fitCameraZ(aspect, 0.88, 0.8), duration: 0.8, ease: "power2.out", overwrite: true });
+    }
     storyLabels.forEach((l) => (l.visible = false));
     exitingMarkers.forEach(({ group, companionDot }) => {
       gsap.killTweensOf(group.scale);
@@ -554,6 +669,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function exitExploration() {
     explorationActive = false;
     controls.enabled = false;
+    gsap.killTweensOf(camera.position);
     controls.reset();
     document.body.classList.remove("TK4R4-stage-final");
     container.classList.remove("TK4R4-dot-hover");
@@ -586,9 +702,16 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  const usaGroupPos = { x: 1.4, y: 0, z: 0 };
-  const indiaGroupPos = { x: -1.4, y: 0, z: 0 };
-  const centerGroupPos = { x: 0, y: 0.35, z: 0 };
+  // Desktop: globe beside the text (right for New York, left for Bombay).
+  // Phone: globe centred near the top, text below it.
+  const usaGroupPos = IS_MOBILE ? { x: 0, y: yAtScreenFrac(0.28), z: 0 } : { x: 1.4, y: 0, z: 0 };
+  const indiaGroupPos = IS_MOBILE ? { x: 0, y: yAtScreenFrac(0.28), z: 0 } : { x: -1.4, y: 0, z: 0 };
+  // Frame 3 lifts the globe higher so "A Global Footprint" body text sits
+  // below it; once that text fades the globe settles back to the explore height.
+  const centerGroupPos = IS_MOBILE ? { x: 0, y: yAtScreenFrac(0.24), z: 0 } : { x: 0, y: 0.55, z: 0 };
+  // Phone explore view: the globe fills the canvas above the city list.
+  const EXPLORE_GLOBE_Y = IS_MOBILE ? 0 : 0.35;
+  globeGroup.position.set(usaGroupPos.x, usaGroupPos.y, usaGroupPos.z);
   const initialCameraPos = camera.position.clone();
   const initialCameraForward = new THREE.Vector3(0, 0, -1);
   const worldGlobeRadius = globeRadius * globeScale;
@@ -600,8 +723,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const targetRotations = {
     usa: computeGlobeRotation(40.7128, -74.006, usaGroupPos, worldGlobeRadius, initialCameraPos, forwardToward(usaGroupPos)),
     india: computeGlobeRotation(19.076, 72.8777, indiaGroupPos, worldGlobeRadius, initialCameraPos, forwardToward(indiaGroupPos)),
-    center: computeGlobeRotation(10, -45, centerGroupPos, worldGlobeRadius, initialCameraPos, initialCameraForward),
+    // On phones the raised globe is off the camera's straight-ahead ray, so aim at it directly.
+    center: computeGlobeRotation(10, -45, centerGroupPos, worldGlobeRadius, initialCameraPos, IS_MOBILE ? forwardToward(centerGroupPos) : initialCameraForward),
+    // Slow drifts while frames 1 and 2 hold: the globe keeps turning a few
+    // degrees toward its next stop instead of sitting still.
+    usaDrift: computeGlobeRotation(40.7128, -74.006 + 7, usaGroupPos, worldGlobeRadius, initialCameraPos, forwardToward(usaGroupPos)),
+    indiaDrift: computeGlobeRotation(19.076, 72.8777 - 7, indiaGroupPos, worldGlobeRadius, initialCameraPos, forwardToward(indiaGroupPos)),
   };
+  const FRAME1_HOLD = 2.6; // timeline units frame 1 stays up (was 1.2)
+  const FRAME2_HOLD = 3.4; // timeline units frame 2 stays up after fading in (was 2.2)
 
   globeGroup.rotation.x = targetRotations.usa.x;
   globeGroup.rotation.y = targetRotations.usa.y;
@@ -631,39 +761,49 @@ document.addEventListener("DOMContentLoaded", function () {
   gsap.set("#TK4R4-box-1", { opacity: 1, y: 0 });
   animateContentIn("#TK4R4-box-1");
 
-  const tl = gsap.timeline({
+  // Exploration mode (fixed office sidebar) is only allowed inside this
+  // window of the pinned section's scroll progress. The start is derived
+  // from the "box3Gone" label below once the timeline is built; the end
+  // stops short of 1 so the sidebar has already faded out before the pin
+  // releases and the next module scrolls up underneath it.
+  let exploreStart = 0.86;
+  const EXPLORE_END = 0.975;
+
+  // Single source of truth for sidebar open/closed. Called from every
+  // ScrollTrigger callback AND every animation frame, so it can't get stuck
+  // open when a callback is skipped (fast flings, scrollbar drags, a reload
+  // that lands past the section, or a refresh that re-measures the pin).
+  let tl = null;
+  function syncExploration(self) {
+    const st = self || (tl && tl.scrollTrigger);
+    const p = st ? st.progress : 0;
+    const final = !!st && st.isActive && p > exploreStart && p < EXPLORE_END;
+    if (final && !explorationActive) enterExploration();
+    else if (!final && explorationActive) exitExploration();
+  }
+
+  tl = gsap.timeline({
     scrollTrigger: {
       trigger: ".TK4R4-pin-wrapper",
       start: "top top",
-      end: "+=440%",
+      // Stretched from 440% alongside the longer frame holds below, so the
+      // scroll distance per unit of timeline stays the same as before.
+      end: "+=685%",
       scrub: 1.5,
       pin: true,
-      onUpdate: (self) => {
-        // #TK4R4-box-3 ("A Global Footprint") now fully fades in, holds, and
-        // fades back out to opacity 0 by ~progress 0.80 (verified empirically —
-        // the timeline has a padding-only tail after its fade-out specifically
-        // to create this room). 0.83 leaves a clear margin past that so the
-        // sidebar never appears while any of box-3 is still visible — was
-        // 0.72, which used to fire while box-3 was still fading in.
-        const final = self.progress > 0.83;
-        if (final && !explorationActive) enterExploration();
-        else if (!final && explorationActive) exitExploration();
-      },
-      // GSAP clamps progress at 1 once the user scrolls forward past this
-      // trigger's end, so onUpdate never fires again to close exploration
-      // mode out — without this, the fixed office-sidebar (and its
-      // TK4R4-stage-final body class) would stay pinned over every module
-      // below it for the rest of the page.
-      onLeave: () => {
-        if (explorationActive) exitExploration();
-      },
+      onUpdate: syncExploration,
+      onLeave: syncExploration,
+      onLeaveBack: syncExploration,
+      onRefresh: syncExploration,
     },
   });
 
-  tl.to("#TK4R4-box-1", { opacity: 0, y: -20, duration: 1 })
-    .to(nyLabel.element, { opacity: 0, duration: 0.5 }, 0)
+  // Hold frame 1 ("The 24/7 Advantage") on screen while the globe drifts slowly.
+  tl.to(globeGroup.rotation, { x: targetRotations.usaDrift.x, y: targetRotations.usaDrift.y, z: targetRotations.usaDrift.z, duration: FRAME1_HOLD, ease: "none" })
+    .to("#TK4R4-box-1", { opacity: 0, y: -20, duration: 1 })
+    .to(nyLabel.element, { opacity: 0, duration: 0.5 }, "<")
     .to(globeGroup.rotation, { x: targetRotations.india.x, y: targetRotations.india.y, z: targetRotations.india.z, duration: 2.5, ease: "sine.inOut" }, "<")
-    .to(globeGroup.position, { x: -1.4, duration: 2.5, ease: "sine.inOut" }, "<")
+    .to(globeGroup.position, { x: indiaGroupPos.x, y: indiaGroupPos.y, duration: 2.5, ease: "sine.inOut" }, "<")
     .to(dotUniforms.uColor.value, { r: DOT_DAY.r, g: DOT_DAY.g, b: DOT_DAY.b, duration: 2.5, ease: "sine.inOut" }, "<")
     .to(root, { "--TK4R4-mood-1": MOOD_SUNRISE[0], "--TK4R4-mood-2": MOOD_SUNRISE[1], "--TK4R4-mood-3": MOOD_SUNRISE[2], duration: 2.5, ease: "sine.inOut" }, "<")
     .to(ambientLight, { intensity: 1.05, duration: 2.5, ease: "sine.inOut" }, "<")
@@ -676,10 +816,12 @@ document.addEventListener("DOMContentLoaded", function () {
     .call(() => indiaLabel.element.classList.add("TK4R4-visible"))
     .to("#TK4R4-box-2", { opacity: 1, y: 0, duration: 1 }, "<0.3")
     .call(() => animateContentIn("#TK4R4-box-2"), null, "<")
-    .to("#TK4R4-box-2", { opacity: 0, y: -20, duration: 1, delay: 1 })
+    // Hold frame 2 ("Follow the Sun") while the globe drifts slowly; starts as box-2 fades in.
+    .to(globeGroup.rotation, { x: targetRotations.indiaDrift.x, y: targetRotations.indiaDrift.y, z: targetRotations.indiaDrift.z, duration: 1 + FRAME2_HOLD, ease: "none" }, "<")
+    .to("#TK4R4-box-2", { opacity: 0, y: -20, duration: 1 })
     .call(() => indiaLabel.element.classList.remove("TK4R4-visible"))
     .to(globeGroup.rotation, { x: targetRotations.center.x, y: targetRotations.center.y, z: targetRotations.center.z, duration: 3, ease: "sine.inOut" }, "<")
-    .to(globeGroup.position, { x: 0, y: 0.35, duration: 3, ease: "sine.inOut" }, "<")
+    .to(globeGroup.position, { x: centerGroupPos.x, y: centerGroupPos.y, duration: 3, ease: "sine.inOut" }, "<")
     .to(root, { "--TK4R4-mood-1": MOOD_GLOBAL[0], "--TK4R4-mood-2": MOOD_GLOBAL[1], "--TK4R4-mood-3": MOOD_GLOBAL[2], duration: 3, ease: "sine.inOut" }, "<")
     .to(ambientLight, { intensity: 1.35, duration: 3, ease: "sine.inOut" }, "<")
     .to(ambientLight.color, { r: 1, g: 1, b: 1, duration: 3, ease: "sine.inOut" }, "<")
@@ -695,13 +837,19 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .to("#TK4R4-box-3", { opacity: 1, y: 0, duration: 1.2 }, "<0.2")
     .call(() => animateContentIn("#TK4R4-box-3"), null, "<")
-    .to("#TK4R4-box-3", { opacity: 0, y: -16, duration: 1, ease: "power1.in", pointerEvents: "none" }, "+=0.6")
+    .to("#TK4R4-box-3", { opacity: 0, y: -16, duration: 1, ease: "power1.in", pointerEvents: "none" }, "+=1.2") // frame 3 hold (was 0.6)
+    .to(globeGroup.position, { y: EXPLORE_GLOBE_Y, duration: 1.6, ease: "sine.inOut" }, "<")
+    .addLabel("box3Gone")
     // Padding-only tail: nothing animates here, it just stretches the
-    // timeline's total duration so box-3's fade-out above (now already
-    // scripted to finish well before the end) lands at an earlier fraction
-    // of scroll progress, leaving real room for exploration mode afterward
-    // with box-3 fully gone — see the onUpdate threshold below.
-    .to({}, { duration: 3 });
+    // timeline's total duration so box-3's fade-out above lands at an
+    // earlier fraction of scroll progress, leaving real room for
+    // exploration mode afterward with box-3 fully gone.
+    .to({}, { duration: 4 });
+
+  // Open the sidebar a short margin (0.8 timeline units) after box-3 has fully
+  // faded, so it never overlaps any of box-3 — recomputed from the label so
+  // it stays correct if the frame holds above are retuned.
+  exploreStart = (tl.labels.box3Gone + 0.8) / tl.duration();
 
   // ── 5. Resize + render loop ────────────────────────────────────────
   let lastRenderW = 0, lastRenderH = 0;
@@ -725,6 +873,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (mumbaiDirectoryDot && !explorationActive) {
       mumbaiDirectoryDot.dot.visible = indiaMarker.scale.x < 0.5;
     }
+    syncExploration();
     if (controls.enabled) {
       controls.target.copy(globeGroup.position);
       controls.update();

@@ -1,34 +1,119 @@
 <div class="TK4R-spacer"></div>
 
-<!--v1.0-->
+<!--v2.0-->
 <section class="TK4R9-chart-section">
-  <div class="TK4R9-chart-frame">
-    <div class="TK4R9-chart-container">
+  <div class="TK4R9-sticky-viewport">
+    <div class="TK4R9-chart-frame">
       <div class="TK4R9-chart-header">
         <div class="TK4R9-chart-header-text">
-          <p class="TK4R9-eyebrow">Power &amp; Conflict</p>
           <h2 class="TK4R9-chart-title">The Tata leadership power map</h2>
-          <p class="TK4R9-chart-subtitle">Control runs down three tiers — <b>Tata Trusts → Tata Sons → TCS</b>. The story pivots on <b>N. Chandrasekaran</b>, who rose through TCS and crossed up into the group chairmanship. Tap any figure.</p>
+          <p class="TK4R9-chart-subtitle">The Tata Group&rsquo;s structure shows who commands authority through time. <b>N Chandrasekaran</b> is a rare individual who managed to rise through TCS and become the group chairman.</p>
         </div>
         <div class="TK4R9-legend" id="TK4R9-legend"></div>
       </div>
 
-      <p class="TK4R9-note">
-        <b>Status ring</b> — a solid gold ring marks someone <b>currently</b> in the role; red marks <b>removed</b>; gray marks <b>stepped down voluntarily</b>; a dashed ring marks a <b>historical / legacy</b> figure.
-        <span class="TK4R9-note-key">
-          <span><span class="TK4R9-note-shape is-circle"></span>person</span>
-          <span><span class="TK4R9-note-shape is-square"></span>entity</span>
-        </span>
-      </p>
-
-      <div class="TK4R9-stage-wrap">
-        <div class="TK4R9-stage" id="TK4R9-stage">
-          <svg id="TK4R9-map" role="img" aria-label="Interactive map of Tata leadership across Tata Trusts, Tata Sons and TCS"></svg>
-          <div id="TK4R9-tip" role="tooltip" aria-hidden="true"></div>
-        </div>
+      <div class="TK4R9-stage" id="TK4R9-stage">
+        <svg id="TK4R9-map" role="img" aria-label="Map of Tata leadership across Tata Trusts, Tata Sons and TCS"></svg>
       </div>
+    </div>
+  </div>
 
-      <p class="TK4R9-source"><b>Reading the map:</b> each tier flows in chronological order. Chandrasekaran sits on the seam between Tata Sons and TCS — the one node that belongs to both. Source: Tata Sons &amp; TCS public filings and company disclosures.</p>
+  <div class="TK4R9-narrative-layer">
+    <div class="TK4R9-top-buffer"></div>
+
+    <!-- Step 1 — Tier 1: Tata Trusts -->
+    <div class="TK4R9-narrative-step" data-step="1">
+      <div class="TK4R9-narrative-card">
+        <p class="TK4R9-card-tier TK4R9-card-tier-1">Tier 1</p>
+        <h3 class="TK4R9-card-title">Tata Trusts</h3>
+        <p>Tata Trusts is the group&rsquo;s philanthropic umbrella and the majority shareholder of Tata Sons with a <strong>66% stake</strong>. It includes the Sir Ratan Tata Trust and Sir Dorabji Tata Trust.</p>
+        <ul class="TK4R9-people">
+          <li class="TK4R9-person">
+            <div class="TK4R9-person-hd"><span class="TK4R9-person-name">Noel Tata</span><span class="TK4R9-tag is-current">Current</span></div>
+            <p>Born 1957. Tata Trusts chairman since Oct 2024. Previously a candidate to chair Tata Sons.</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Step 2 — Tier 2: Tata Sons -->
+    <div class="TK4R9-narrative-step" data-step="2">
+      <div class="TK4R9-narrative-card">
+        <p class="TK4R9-card-tier TK4R9-card-tier-2">Tier 2</p>
+        <h3 class="TK4R9-card-title">Tata Sons</h3>
+        <p>Tata Sons is the principal investment holding company and promoter of the Tata Group. It controls a <strong>72% stake in TCS</strong> and appoints the group chairman.</p>
+      </div>
+    </div>
+
+    <!-- Step 3 — Tier 2 nodes: the succession at Tata Sons -->
+    <div class="TK4R9-narrative-step" data-step="3">
+      <div class="TK4R9-narrative-card">
+        <p class="TK4R9-card-tier TK4R9-card-tier-2">Tier 2 &middot; Tata Sons</p>
+        <ol class="TK4R9-people">
+          <li class="TK4R9-person">
+            <div class="TK4R9-person-hd"><span class="TK4R9-person-name">Jamsetji Tata</span></div>
+            <p>Born 1839, died 1904. Founded the Tata Group in 1868.</p>
+          </li>
+          <li class="TK4R9-person">
+            <div class="TK4R9-person-hd"><span class="TK4R9-person-name">JRD Tata</span></div>
+            <p>Born 1904, died 1993. Chairman of Tata Sons and the Tata Group from 1938 to 1991, then chairman emeritus until his death. Funded the data processing unit that eventually became TCS. The IPO of TCS was timed to his 100th birth anniversary.</p>
+          </li>
+          <li class="TK4R9-person">
+            <div class="TK4R9-person-hd"><span class="TK4R9-person-name">Ratan Tata</span></div>
+            <p>Born 1937, died 2024. Tata Sons chairman from 1991 to Dec 2012. Interim chairman from 24 Oct 2016 to 21 Feb 2017. Led the 2004 IPO roadshow. Tapped N Chandrasekaran as Tata Sons chairman in Jan 2017.</p>
+          </li>
+          <li class="TK4R9-person">
+            <div class="TK4R9-person-hd"><span class="TK4R9-person-name">Cyrus Mistry</span><span class="TK4R9-tag is-removed">Removed</span></div>
+            <p>Chairman from Dec 2012 to 24 Oct 2016. Removed after losing the board&rsquo;s confidence. Died 4 Sep 2022.</p>
+          </li>
+          <li class="TK4R9-person is-pivot">
+            <div class="TK4R9-person-hd"><span class="TK4R9-person-name">N Chandrasekaran</span><span class="TK4R9-tag is-current">Current</span></div>
+            <p>Chairman from 21 Feb 2017 to 20 Feb 2032 (pending shareholder approval at the next annual general meeting). Originally resigned in Aug 2026 but reversed the decision in the following month.</p>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Step 4 — Tier 3: TCS -->
+    <div class="TK4R9-narrative-step" data-step="4">
+      <div class="TK4R9-narrative-card">
+        <p class="TK4R9-card-tier TK4R9-card-tier-3">Tier 3</p>
+        <h3 class="TK4R9-card-title">TCS</h3>
+        <p>TCS is the Tata Group&rsquo;s flagship operating company. TCS&rsquo;s <strong>dividends fund much of the group&rsquo;s operations</strong>.</p>
+      </div>
+    </div>
+
+    <!-- Step 5 — Tier 3 nodes: the succession at TCS -->
+    <div class="TK4R9-narrative-step" data-step="5">
+      <div class="TK4R9-narrative-card">
+        <p class="TK4R9-card-tier TK4R9-card-tier-3">Tier 3 &middot; TCS</p>
+        <ol class="TK4R9-people">
+          <li class="TK4R9-person">
+            <div class="TK4R9-person-hd"><span class="TK4R9-person-name">PM Agarwala</span></div>
+            <p>Originally the managing director of Tata Electric, took charge of TCS when it was a spin-off in 1968. Remained CEO until 1974.</p>
+          </li>
+          <li class="TK4R9-person">
+            <div class="TK4R9-person-hd"><span class="TK4R9-person-name">FC Kohli</span></div>
+            <p>Joined TCS as general manager, then led the company from 1969 to 2000. Personally signed off on Chandrasekaran&rsquo;s hiring. Known as the &ldquo;father of the Indian software industry&rdquo;.</p>
+          </li>
+          <li class="TK4R9-person">
+            <div class="TK4R9-person-hd"><span class="TK4R9-person-name">S Ramadorai</span></div>
+            <p>Joined TCS in 1972. Worked as resident manager in New York in 1979. Led as CEO from 1996 to 2009. Set up the Y2K &ldquo;software factory&rdquo; and Ignite programme. Appointed Chandrasekaran as his executive assistant after becoming CEO.</p>
+          </li>
+          <li class="TK4R9-person is-pivot">
+            <div class="TK4R9-person-hd"><span class="TK4R9-person-name">N Chandrasekaran</span></div>
+            <p>Joined TCS as an intern in 1987. Rose through the ranks and was CEO from 2009 to 2017.</p>
+          </li>
+          <li class="TK4R9-person">
+            <div class="TK4R9-person-hd"><span class="TK4R9-person-name">Rajesh Gopinathan</span><span class="TK4R9-tag is-removed">Removed</span></div>
+            <p>Was CEO from 2017 to 2023. Abrupt exit amid restructuring.</p>
+          </li>
+          <li class="TK4R9-person">
+            <div class="TK4R9-person-hd"><span class="TK4R9-person-name">K Krithivasan</span><span class="TK4R9-tag is-current">Current</span></div>
+            <p>TCS CEO from 2023 to the present. Facing GCCs, H-1B visa surcharges in the US, and pricing pressure due to artificial intelligence.</p>
+          </li>
+        </ol>
+      </div>
     </div>
   </div>
 </section>

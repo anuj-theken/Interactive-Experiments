@@ -17,15 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
     37325, 48894, 62990, 81809, 94648, 108646, 117966,
     123104, 146463, 156949, 164177, 191754, 225458, 240893,
     255324, 267021,
-    {
-      value: 267021,
-      itemStyle: {
-        color: "rgba(99, 102, 241, 0.25)",
-        borderColor: "#6366f1",
-        borderWidth: 2,
-        borderType: "dashed"
-      }
-    }
+    null // FY27: no revenue bar — only the capex-ratio projection is shown
   ];
 
   const ratioHistorical = [
@@ -40,9 +32,16 @@ document.addEventListener("DOMContentLoaded", function () {
     null, 0.5, 2.0
   ];
 
+  // Revenue is stored in Rs crore; displayed in Rs lakh crore (1 lakh crore = 100,000 crore).
+  const REVENUE_SERIES = "Revenue (Rs lakh crore)";
+  const RATIO_SERIES = "Capex Ratio (%)";
+  const PROJECTION_SERIES = "FY27 Target Projection";
+  const BAR_COLOR = "#6366f1";
+  const LINE_COLOR = "#d97706";
+
   const numberFormatter = function (val) {
     if (val === null || val === undefined) return "N/A";
-    return "₹" + new Intl.NumberFormat("en-IN").format(val) + " Cr";
+    return "Rs " + (val / 100000).toFixed(2) + " lakh crore";
   };
 
   const percentFormatter = function (val) {
@@ -54,9 +53,14 @@ document.addEventListener("DOMContentLoaded", function () {
   const chartDom = document.getElementById("TK4R10-chart");
   const legendDom = document.getElementById("TK4R10-legend");
   if (!chartDom || typeof echarts === "undefined") return;
-  // Original design's legend is ECharts' own top-of-chart legend, not the
-  // site's custom HTML chip pattern — leave the header's legend slot empty.
-  if (legendDom) legendDom.style.display = "none";
+  // HTML legend (instead of ECharts' built-in one) so the two ratio series
+  // read as a solid line and a dotted line rather than filled squares.
+  if (legendDom) {
+    legendDom.innerHTML =
+      '<span class="TK4R10-legend-item"><span class="TK4R10-legend-bar"></span>' + REVENUE_SERIES + "</span>" +
+      '<span class="TK4R10-legend-item"><span class="TK4R10-legend-line"></span>' + RATIO_SERIES + "</span>" +
+      '<span class="TK4R10-legend-item"><span class="TK4R10-legend-line TK4R10-legend-line--dotted"></span>' + PROJECTION_SERIES + "</span>";
+  }
 
   // 3. Library init
   const chart = echarts.init(chartDom);
@@ -91,34 +95,24 @@ document.addEventListener("DOMContentLoaded", function () {
             if (value === null || value === undefined) return;
 
             let seriesLabel = param.seriesName;
-            if (seriesLabel.indexOf("Ratio") !== -1) seriesLabel = "Capex Ratio";
+            if (param.seriesName !== REVENUE_SERIES) seriesLabel = "Capex Ratio";
             if (seenSeries.has(seriesLabel)) return;
             seenSeries.add(seriesLabel);
 
-            const formattedVal = param.seriesName === "Revenue" ? numberFormatter(value) : percentFormatter(value);
+            const isRevenue = param.seriesName === REVENUE_SERIES;
+            const formattedVal = isRevenue ? numberFormatter(value) : percentFormatter(value);
+            const dotColor = isRevenue ? BAR_COLOR : LINE_COLOR;
 
             content += '<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:2px 0;">' +
               '<span style="display:flex;align-items:center;gap:6px;">' +
-              '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + param.color + ';"></span>' +
+              '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + dotColor + ';"></span>' +
               '<span style="font-size:12px;color:#64748b;">' + seriesLabel + ':</span></span>' +
               '<span style="font-weight:600;font-size:12px;">' + formattedVal + "</span></div>";
           });
           return header + content;
         }
       },
-      legend: {
-        top: "0%",
-        left: "center",
-        icon: "circle",
-        textStyle: { color: textColor, fontSize: 12, fontWeight: 500 },
-        itemGap: 28,
-        data: [
-          { name: "Revenue (₹ Cr)", icon: "roundRect" },
-          { name: "Capex Ratio (%)", icon: "path://M0 0h24v24H0z" },
-          { name: "FY27 Target Projection", icon: "path://M0 0h24v24H0z" }
-        ]
-      },
-      grid: { left: "2%", right: "2%", bottom: "4%", top: "12%", containLabel: true },
+      grid: { left: "2%", right: "2%", bottom: "4%", top: "8%", containLabel: true },
       xAxis: [
         {
           type: "category",
@@ -138,19 +132,19 @@ document.addEventListener("DOMContentLoaded", function () {
       yAxis: [
         {
           type: "value",
-          name: "Revenue (₹ Cr)",
-          nameTextStyle: { color: textColor, fontSize: 11, padding: [0, 0, 0, 10] },
+          name: REVENUE_SERIES,
+          nameTextStyle: { color: textColor, fontSize: 11, align: "left", padding: [0, 0, 0, -24] },
           position: "left",
           splitLine: { lineStyle: { color: gridBorderColor, type: "dashed" } },
           axisLabel: {
             color: textColor,
             fontSize: 11,
-            formatter: function (value) { return (value / 1000).toFixed(0) + "k Cr"; }
+            formatter: function (value) { return value === 0 ? "0" : (value / 100000).toFixed(1); }
           }
         },
         {
           type: "value",
-          name: "Capex Ratio (%)",
+          name: RATIO_SERIES,
           nameTextStyle: { color: textColor, fontSize: 11, padding: [0, 10, 0, 0] },
           position: "right",
           min: -1.0,
@@ -161,7 +155,7 @@ document.addEventListener("DOMContentLoaded", function () {
       ],
       series: [
         {
-          name: "Revenue (₹ Cr)",
+          name: REVENUE_SERIES,
           type: "bar",
           yAxisIndex: 0,
           barMaxWidth: 36,
@@ -176,25 +170,25 @@ document.addEventListener("DOMContentLoaded", function () {
           data: revenueData
         },
         {
-          name: "Capex Ratio (%)",
+          name: RATIO_SERIES,
           type: "line",
           yAxisIndex: 1,
           smooth: false,
           symbol: "circle",
           symbolSize: 7,
-          itemStyle: { color: "#d97706", borderWidth: 2, borderColor: "#ffffff" },
+          itemStyle: { color: "#d97706", borderWidth: 0 },
           lineStyle: { width: 3, color: "#d97706", type: "solid" },
           data: ratioHistorical
         },
         {
-          name: "FY27 Target Projection",
+          name: PROJECTION_SERIES,
           type: "line",
           yAxisIndex: 1,
           smooth: false,
           connectNulls: true,
           symbol: "circle",
           symbolSize: 8,
-          itemStyle: { color: "#d97706", borderWidth: 2, borderColor: "#ffffff" },
+          itemStyle: { color: "#d97706", borderWidth: 0 },
           lineStyle: { width: 3, color: "#d97706", type: "dotted" },
           data: ratioDottedProjection
         }

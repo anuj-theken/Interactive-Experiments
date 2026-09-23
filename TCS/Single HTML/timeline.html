@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCS Corporate History Timeline</title>
+    <!-- Apache ECharts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+    <style>
+        /* Design Tokens & Theme Setup */
+        :root {
+            --type-stat:       72px;
+            --type-heading:    36px;
+            --type-subheading: 22px;
+            --type-body:       18px;
+            --type-legend:     14px;
+            --type-eyebrow:    11px;
+
+            --font-display: "Reckless", Georgia, serif;
+            --font-body:    "Archivo", system-ui, -apple-system, sans-serif;
+            --font-mono:    "IBM Plex Mono", ui-monospace, monospace;
+
+            --spacing: 60px;
+
+            --color-bg:           transparent;
+            --color-bg-warm:      #e6e0d4;
+            --color-surface:      transparent;
+            --color-text:         #001647;
+            --color-muted:        #5a6580;
+            --color-rule:         #d9d3c6;
+            --color-primary:      #2540b4;
+        }
+
+        @media (max-width: 1023px) {
+            :root {
+                --type-stat:       56px;
+                --type-heading:    32px;
+                --type-subheading: 20px;
+                --type-body:       16px;
+                --type-legend:     12px;
+                --spacing:         40px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --type-stat:       44px;
+                --type-heading:    28px;
+                --type-subheading: 17px;
+                --type-body:       14px;
+                --type-legend:     11px;
+                --spacing:         20px;
+            }
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            color: var(--color-text);
+            font-family: var(--font-body);
+        }
+
+        .TK4R-spacer {
+            height: var(--spacing);
+        }
+
+        .TK4R1-chart-section {
+            width: 100%;
+            background: transparent;
+        }
+
+        .TK4R1-chart-frame {
+            width: 100%;
+            max-width: 1450px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            box-sizing: border-box;
+            background: transparent;
+        }
+
+        .TK4R1-chart-container {
+            width: 100%;
+            max-width: 1350px;
+            margin: 0 auto;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 32px;
+            box-sizing: border-box;
+        }
+
+        .TK4R1-chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .TK4R1-chart-title {
+            font-family: var(--font-display);
+            font-size: var(--type-heading);
+            color: var(--color-text);
+            margin: 0 0 8px 0;
+            font-weight: 400;
+        }
+
+        .TK4R1-chart-subtitle {
+            font-family: var(--font-body);
+            font-size: var(--type-subheading);
+            color: var(--color-muted);
+            margin: 0;
+        }
+
+        .TK4R1-legend {
+            display: flex;
+            align-items: center;
+        }
+
+        .TK4R1-legend-item {
+            font-family: var(--font-body);
+            font-size: var(--type-legend);
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+        }
+
+        .TK4R1-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: var(--color-primary);
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .TK4R1-desktop-only {
+            display: block;
+        }
+
+        .TK4R1-mobile-only {
+            display: none;
+            padding: 20px 10px;
+        }
+
+        .TK4R1-timeline-scroll-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            padding-top: 10px;
+            box-sizing: border-box;
+        }
+
+        #TK4R1-chart {
+            width: 3800px;
+            height: 420px;
+            background: transparent;
+        }
+
+        .TK4R1-timeline-scroll-wrapper::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .TK4R1-timeline-scroll-wrapper::-webkit-scrollbar-thumb {
+            background-color: var(--color-primary);
+            border-radius: 10px;
+        }
+
+        .TK4R1-timeline-scroll-wrapper::-webkit-scrollbar-track {
+            background: var(--color-bg-warm);
+        }
+
+        .TK4R1-source {
+            font-family: var(--font-body);
+            font-size: 13px;
+            color: var(--color-muted);
+            margin-top: 24px;
+            margin-bottom: 0;
+        }
+
+        /* Responsive Mobile Vertical Rules */
+        @media (max-width: 768px) {
+            .TK4R1-chart-frame {
+                padding: 20px 12px;
+            }
+
+            .TK4R1-chart-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .TK4R1-desktop-only {
+                display: none;
+            }
+
+            .TK4R1-mobile-only {
+                display: block;
+            }
+
+            .TK4R1-vertical-timeline {
+                border-left: 2px solid var(--color-primary);
+                margin-left: 8px;
+                padding-left: 24px;
+                position: relative;
+            }
+
+            .TK4R1-timeline-item {
+                position: relative;
+                margin-bottom: 32px;
+                text-align: left;
+            }
+
+            /* Dot aligned vertically with title header line */
+            .TK4R1-timeline-item::before {
+                content: '';
+                position: absolute;
+                left: -31px;
+                top: 26px;
+                width: 12px;
+                height: 12px;
+                background: var(--color-primary);
+                border: 2px solid #ffffff;
+                border-radius: 50%;
+                box-sizing: border-box;
+            }
+
+            .TK4R1-m-date {
+                color: var(--color-muted);
+                font-size: var(--type-legend);
+                font-family: var(--font-mono);
+                font-variant-numeric: tabular-nums;
+                font-weight: 500;
+                line-height: 1.2;
+            }
+
+            .TK4R1-m-title {
+                color: var(--color-primary);
+                font-weight: bold;
+                font-size: 18px;
+                margin: 4px 0 6px 0;
+                font-family: var(--font-display);
+                line-height: 1.2;
+            }
+
+            .TK4R1-m-desc {
+                color: var(--color-text);
+                font-size: var(--type-body);
+                line-height: 1.5;
+                font-family: var(--font-body);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="TK4R-spacer"></div>
+
+    <section class="TK4R1-chart-section">
+        <div class="TK4R1-chart-frame">
+            <div class="TK4R1-chart-container">
+                <div class="TK4R1-chart-header">
+                    <div class="TK4R1-chart-header-text">
+                        <h2 class="TK4R1-chart-title">The Evolution of TCS</h2>
+                        <p class="TK4R1-chart-subtitle">From a data-processing division to a global IT titan.</p>
+                    </div>
+                    <div class="TK4R1-legend" id="TK4R1-legend">
+                        <div class="TK4R1-legend-item">
+                            <span class="TK4R1-dot"></span>
+                            Milestone Events
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop Horizontal Scrollable Timeline -->
+                <div class="TK4R1-desktop-only">
+                    <div class="TK4R1-timeline-scroll-wrapper">
+                        <div id="TK4R1-chart"></div>
+                    </div>
+                </div>
+
+                <!-- Mobile Vertical Timeline -->
+                <div class="TK4R1-mobile-only">
+                    <div class="TK4R1-vertical-timeline" id="TK4R1-mobile-list"></div>
+                </div>
+
+                <p class="TK4R1-source">Source: Tata Consultancy Services &amp; Tata Sons Historical Records.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="TK4R-spacer"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const data = [
+                { date: '1962', title: 'TCS is Born', desc: 'JRD Tata sets up a data-processing division within Tata Sons, which later becomes TCS.' },
+                { date: '1969', title: 'Kohli Arrives', desc: 'FC Kohli joins TCS as General Manager.' },
+                { date: '1979', title: 'Overseas Expansion', desc: 'TCS becomes the first company to open a sales office abroad and sends Ramadorai to New York as its first resident manager.' },
+                { date: '1996', title: 'New Leadership', desc: 'FC Kohli picks S Ramadorai as CEO.' },
+                { date: '1997', title: 'Software Factory', desc: 'TCS sets up a software factory in Chennai to solve the Y2K Bug.' },
+                { date: '2003', title: 'Revenue Milestone', desc: 'TCS became India’s first billion-dollar software company.' },
+                { date: '2004', title: 'Public Debut', desc: 'TCS launches its IPO on the 100th birth anniversary of JRD Tata.' },
+                { date: '2006', title: 'Learning Module', desc: 'Ramadorai launches a new training program called Ignite for the non-engineering science graduates.' },
+                { date: '2009', title: 'Leadership Transition', desc: 'N Chandrasekaran becomes CEO of TCS.' },
+                { date: '2017', title: 'TCS to Tata Sons', desc: 'Chandrasekaran becomes the first non-Parsi chairman of Tata Sons; Rajesh Gopinathan replaces him at TCS.' },
+                { date: '2023', title: 'Krithi Takes Over', desc: 'Gopinathan steps down and Krithivasan becomes CEO of TCS.' },
+                { date: '2026', title: 'Succession Issue', desc: 'Chandrasekaran decides not to seek reappointment as Tata Sons Chairman, but reverses the decision and receives another five-year term.' }
+            ];
+
+            const css = getComputedStyle(document.documentElement);
+            const PRIMARY = css.getPropertyValue("--color-primary").trim() || "#2540b4";
+            const TEXT = css.getPropertyValue("--color-text").trim() || "#001647";
+            const MUTED = css.getPropertyValue("--color-muted").trim() || "#5a6580";
+            const FONT_DISPLAY = css.getPropertyValue("--font-display").trim() || "Reckless, serif";
+            const FONT_BODY = css.getPropertyValue("--font-body").trim() || "Archivo, sans-serif";
+            const FONT_MONO = css.getPropertyValue("--font-mono").trim() || "IBM Plex Mono, monospace";
+
+            function forceWordWrap(text, maxCharsPerLine) {
+                const words = text.split(' ');
+                let lines = [];
+                let currentLine = '';
+                words.forEach(word => {
+                    if (currentLine.length + word.length > maxCharsPerLine) {
+                        lines.push(currentLine.trim());
+                        currentLine = word + ' ';
+                    } else {
+                        currentLine += word + ' ';
+                    }
+                });
+                lines.push(currentLine.trim());
+                return lines.join('\n');
+            }
+
+            // Populate Mobile List
+            const mobileList = document.getElementById('TK4R1-mobile-list');
+            if (mobileList) {
+                data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'TK4R1-timeline-item';
+                    div.innerHTML = `<div class="TK4R1-m-date">${item.date}</div><div class="TK4R1-m-title">${item.title}</div><div class="TK4R1-m-desc">${item.desc}</div>`;
+                    mobileList.appendChild(div);
+                });
+            }
+
+            // ECharts Initialization
+            const chartDom = document.getElementById('TK4R1-chart');
+            if (!chartDom) return;
+
+            const myChart = echarts.init(chartDom);
+            const horizontalSpacing = 280;
+
+            const option = {
+                backgroundColor: 'transparent',
+                silent: true,
+                grid: { left: 80, right: 300, top: 0, bottom: 0 },
+                xAxis: { type: 'value', show: false, min: 0, max: (data.length - 1) * horizontalSpacing },
+                yAxis: { type: 'value', show: false, min: 0, max: 100 },
+                series: [{
+                    type: 'line',
+                    data: data.map((_, i) => [i * horizontalSpacing, 75]),
+                    lineStyle: { color: PRIMARY, width: 3 },
+                    symbol: 'circle',
+                    symbolSize: 16,
+                    itemStyle: { color: PRIMARY, borderWidth: 3, borderColor: '#ffffff' },
+                    label: {
+                        show: true,
+                        position: 'bottom',
+                        offset: [-8, 12],
+                        align: 'left',
+                        formatter: (p) => {
+                            const item = data[p.dataIndex];
+                            const wrappedDesc = forceWordWrap(item.desc, 30);
+                            return `{d|${item.date}}\n{t|${item.title}}\n{desc|${wrappedDesc}}`;
+                        },
+                        rich: {
+                            d: {
+                                color: MUTED,
+                                fontWeight: '500',
+                                fontSize: 14,
+                                align: 'left',
+                                padding: [0, 0, 6, 0],
+                                fontFamily: FONT_MONO
+                            },
+                            t: {
+                                color: PRIMARY,
+                                fontWeight: 'normal',
+                                fontSize: 18,
+                                align: 'left',
+                                padding: [0, 0, 10, 0],
+                                fontFamily: FONT_DISPLAY
+                            },
+                            desc: {
+                                color: TEXT,
+                                fontSize: 14,
+                                lineHeight: 20,
+                                align: 'left',
+                                fontFamily: FONT_BODY
+                            }
+                        }
+                    }
+                }]
+            };
+
+            myChart.setOption(option);
+
+            window.addEventListener('resize', () => {
+                myChart.resize();
+            });
+        });
+    </script>
+</body>
+</html>

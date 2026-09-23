@@ -10,16 +10,20 @@ document.addEventListener("DOMContentLoaded", function () {
   if (!chartDom || typeof echarts === "undefined") return;
 
   const myChart = echarts.init(chartDom);
+  // marker borders match the chart frame, which uses the site background
+  const BG = getComputedStyle(document.documentElement).getPropertyValue("--color-bg").trim() || "#f3efe9";
 
   function getChartOption(cutoffIndex) {
     const visibleTCS = TK4R6_TCS_REVENUE.map((val, idx) => (idx <= cutoffIndex ? val : null));
     const visibleNASDAQ = TK4R6_NASDAQ.map((val, idx) => (idx <= cutoffIndex ? val : null));
+    // phones: the 2000–2002 band is too narrow for the full note
+    const isNarrow = chartDom.clientWidth < 560;
 
     return {
       animationDuration: 800,
       animationEasing: "cubicOut",
       backgroundColor: "transparent",
-      grid: { top: "15%", left: "2%", right: "2%", bottom: "10%", containLabel: true },
+      grid: { top: "15%", left: isNarrow ? 14 : "2%", right: isNarrow ? 14 : "2%", bottom: "10%", containLabel: true },
       tooltip: {
         trigger: "axis",
         backgroundColor: "#12192c",
@@ -31,9 +35,10 @@ document.addEventListener("DOMContentLoaded", function () {
           let html = '<div style="font-weight:bold; margin-bottom:4px; font-family:Lora;">Year ' + year + "</div>";
           params.forEach(function (p) {
             if (p.value !== null && p.value !== undefined) {
-              const formatted = Number(p.value).toLocaleString("en-IN");
-              const prefix = p.seriesName === "TCS Revenue" ? "Rs " : "^";
-              const suffix = p.seriesName === "TCS Revenue" ? " M" : " pts";
+              const isTCS = p.seriesName === "TCS Revenue";
+              const formatted = Number(p.value).toLocaleString("en-IN", isTCS ? { minimumFractionDigits: 1, maximumFractionDigits: 1 } : {});
+              const prefix = isTCS ? "Rs " : "^";
+              const suffix = isTCS ? " crore" : " pts";
               html += '<div style="color:' + p.color + '; font-size:11px;">' +
                 p.seriesName + ": <b>" + prefix + formatted + suffix + "</b></div>";
             }
@@ -55,9 +60,9 @@ document.addEventListener("DOMContentLoaded", function () {
           // just what's currently revealed) so the axis never shifts as more
           // of the line draws in while scrolling.
           type: "value",
-          name: "TCS (Rs Million)",
+          name: "TCS (Rs crore)",
           min: 0,
-          max: 55000,
+          max: 5500,
           nameTextStyle: { color: "#b45309", fontFamily: "Plus Jakarta Sans", fontWeight: "bold", fontSize: 11 },
           position: "left",
           axisLine: { show: true, lineStyle: { color: "#edd13e", width: 2 } },
@@ -67,13 +72,13 @@ document.addEventListener("DOMContentLoaded", function () {
             color: "#854d0e",
             fontFamily: "Plus Jakarta Sans",
             fontSize: 11,
-            formatter: function (val) { return val >= 1000 ? (val / 1000).toFixed(0) + "k" : val; }
+            formatter: function (val) { return val.toLocaleString("en-IN"); }
           }
         },
         {
           // Right axis: NASDAQ Composite. Same fixed-range treatment.
           type: "value",
-          name: "NASDAQ Composite",
+          name: isNarrow ? "NASDAQ" : "NASDAQ Composite",
           min: 0,
           max: 4500,
           nameTextStyle: { color: "#1e40af", fontFamily: "Plus Jakarta Sans", fontWeight: "bold", fontSize: 11 },
@@ -97,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
           smooth: 0.35,
           symbol: "circle",
           symbolSize: 8,
-          itemStyle: { color: "#edd13e", borderWidth: 2, borderColor: "#12192c" },
+          itemStyle: { color: "#edd13e", borderWidth: 2, borderColor: BG },
           lineStyle: { width: 3.5, color: "#edd13e" },
           areaStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -122,7 +127,29 @@ document.addEventListener("DOMContentLoaded", function () {
               { offset: 1, color: "rgba(37, 99, 235, 0.01)" }
             ])
           },
-          data: visibleNASDAQ
+          data: visibleNASDAQ,
+          markLine: {
+            symbol: "none",
+            silent: true,
+            lineStyle: { color: "#ff6900", width: 1, type: "dashed" },
+            label: { show: false },
+            data: cutoffIndex >= 8 ? [{ xAxis: "2000" }] : []
+          },
+          markArea: {
+            silent: true,
+            itemStyle: { color: "#ff6900", opacity: 0.08 },
+            label: {
+              show: true,
+              position: "insideBottom",
+              distance: 8,
+              color: "#ff6900",
+              fontFamily: "Plus Jakarta Sans",
+              fontSize: isNarrow ? 9 : 11,
+              lineHeight: isNarrow ? 12 : 15,
+              formatter: isNarrow ? "Dot-com\nbust" : "Dot-com bubble bursts\nNASDAQ: 4,069 \u2192 1,335"
+            },
+            data: cutoffIndex >= 8 ? [[{ xAxis: "2000" }, { xAxis: "2002" }]] : []
+          }
         }
       ]
     };
@@ -159,4 +186,10 @@ document.addEventListener("DOMContentLoaded", function () {
   window.addEventListener("resize", function () {
     myChart.resize();
   });
+
+  // axis labels are measured at init; re-measure once the web fonts land so
+  // containLabel doesn't clip them
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { myChart.resize(); });
+  }
 });

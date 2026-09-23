@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TCS — A History in Ten Charts</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- TK4R4 (globe) + TK4R10 (capex) restore their own original typefaces
+       rather than the site design tokens, per explicit user instruction. -->
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- TK4R6 (revenue vs NASDAQ) also restores its own original typefaces. -->
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Leaflet CSS (TK4R2 migration map) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Design tokens — single source of truth, loaded before every module stylesheet -->
+  <link rel="stylesheet" href="/TCS/styles/globals.css" />
+
+  <!-- Module stylesheets, in page order -->
+  <link rel="stylesheet" href="/TCS/styles/TK4R1-marketcap.css" />
+  <link rel="stylesheet" href="/TCS/styles/TK4R2-migration.css" />
+  <link rel="stylesheet" href="/TCS/styles/TK4R3-mainframe.css" />
+  <link rel="stylesheet" href="/TCS/styles/TK4R4-globe.css" />
+  <link rel="stylesheet" href="/TCS/styles/TK4R5-y2k.css" />
+  <link rel="stylesheet" href="/TCS/styles/TK4R6-nasdaq.css" />
+  <link rel="stylesheet" href="/TCS/styles/TK4R7-stocks.css" />
+  <link rel="stylesheet" href="/TCS/styles/TK4R8-headcount.css" />
+  <link rel="stylesheet" href="/TCS/styles/TK4R9-powermap.css" />
+  <link rel="stylesheet" href="/TCS/styles/TK4R10-capex.css" />
+</head>
+<body>
+
+  <div class="TK4R-intro">
+    <p class="TK4R-eyebrow">TCS — Sixty Years</p>
+    <h1 class="TK4R-title">From a Bombay back office to the world's clock</h1>
+    <p class="TK4R-subtitle">Ten interactive chapters on how Tata Consultancy Services grew from a 1968 mainframe contract into one of the world's largest IT services companies.</p>
+  </div>
+
+  <div class="TK4R-spacer"></div>
+
+  <!-- TK4R1 — Market capitalization vs. Indian IT peers -->
+  <div class="TK4R-spacer"></div>
+
+  <!--v1.0-->
+  <section class="TK4R1-chart-section">
+    <div class="TK4R1-chart-frame">
+      <div class="TK4R1-chart-container">
+        <div class="TK4R1-chart-header">
+          <div class="TK4R1-chart-header-text">
+            <p class="TK4R1-eyebrow">Market Capitalisation</p>
+            <h2 class="TK4R1-chart-title">TCS vs. Indian IT Peers (1999–2026)</h2>
+            <p class="TK4R1-chart-subtitle">Market capitalisation in Rs lakh crore</p>
+          </div>
+          <div class="TK4R1-legend" id="TK4R1-legend"></div>
+        </div>
+        <div id="TK4R1-chart"></div>
+        <p class="TK4R1-source">Data Source: <a href="https://companiesmarketcap.com/inr/tata-consultancy-services/marketcap/" target="_blank" rel="noopener">CompaniesMarketCap</a></p>
+      </div>
+    </div>
+  </section>
+
+  <div class="TK4R-spacer"></div>
+
+  <!-- TK4R2 — Migration map -->
+  <!--v1.0-->
+  <section class="TK4R2-chart-section">
+    <div class="TK4R2-map-container">
+      <div class="TK4R2-chart-header">
+        <p class="TK4R2-eyebrow">Chapter 02</p>
+        <h2 class="TK4R2-chart-title">Two migrations, one city</h2>
+      </div>
+      <div class="TK4R2-legend" id="TK4R2-legend"></div>
+      <div id="TK4R2-map" class="TK4R2-map"></div>
+      <div id="TK4R2-echarts-overlay" class="TK4R2-echarts-overlay"></div>
+    </div>
+
+    <div class="TK4R2-scroll-container">
+      <div class="TK4R2-step TK4R2-step-intro" id="TK4R2-step-intro">
+        <div class="TK4R2-step-content">
+          <h2>The Great Migration</h2>
+          <p>How the Parsis and Tamil Brahmins migrated across India.</p>
+        </div>
+      </div>
+
+      <div class="TK4R2-step" id="TK4R2-step1">
+        <div class="TK4R2-step-content">
+          <figure class="TK4R2-step-figure">
+            <img src="/TCS/map_images/Zoroastrian%20family%20photographed%20by%20A.Sevryugin.%20Iran,%20late%2019th%20century..jpeg" alt="A Zoroastrian family in Iran, late 19th century" loading="lazy">
+            <figcaption>A Zoroastrian family in Iran, late 19th century. Photo: Antoin Sevruguin</figcaption>
+          </figure>
+          <h2>The Parsi Migration</h2>
+          <p>Descendants of Zoroastrian refugees who fled Persia after the Arab conquest, they sailed through the Persian Gulf and Arabian Sea to settle on India's west coast (Gujarat) as farmers and traders.</p>
+        </div>
+      </div>
+
+      <div class="TK4R2-step" id="TK4R2-step2">
+        <div class="TK4R2-step-content">
+          <figure class="TK4R2-step-figure">
+            <img src="/TCS/map_images/Tamil_brahmin_couple_circa_1945.jpg" style="object-position: center top" alt="A Tamil Brahmin couple, circa 1945" loading="lazy">
+            <figcaption>A Tamil Brahmin couple, c. 1945</figcaption>
+          </figure>
+          <h2>Tamil Brahmin Routes</h2>
+          <p>Simultaneously, Tamil Brahmins moved from their roots in the Kaveri delta outward through major corridors toward booming hubs like Bombay, Bangalore, and Chennai.</p>
+        </div>
+      </div>
+
+      <div class="TK4R2-step" id="TK4R2-step3">
+        <div class="TK4R2-step-content">
+          <figure class="TK4R2-step-figure">
+            <img src="/TCS/map_images/Inside%20Bombay%20spinning%20and%20weaving%20company.jpg" alt="Workers inside a Bombay spinning and weaving mill" loading="lazy">
+            <figcaption>Inside the Bombay Spinning and Weaving Company</figcaption>
+          </figure>
+          <h2>Bombay Industrialization</h2>
+          <p>The Parsis moved down the Konkan coast into Bombay, building the docks, pioneering cotton mills, and founding modern industrial giants like the Tata Group.</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="TK4R2-source">Source: Historical migration scholarship; Tata Group company history.</p>
+  </section>
+
+  <div class="TK4R-spacer"></div>
+
+  <!-- TK4R3 — The Burroughs deal -->
+  <!--v1.0-->
+  <section class="TK4R3-chapter">
+    <div class="TK4R3-scroll-wrapper">
+      <div class="TK4R3-sticky-content">
+
+        <div id="TK4R3-webgl-container"></div>
+        <div class="TK4R3-crt-overlay"></div>
+        <div class="TK4R3-screen-bezel"></div>
+
+        <div class="TK4R3-page-header">First outsourcing job for Burroughs</div>
+
+        <img class="TK4R3-frame-image" id="TK4R3-frame-image-0" src="/TCS/imgs/3.jpeg" alt="Archival photo, Burroughs contract, frame 1">
+        <img class="TK4R3-frame-image" id="TK4R3-frame-image-1" src="/TCS/imgs/6.jpg" alt="Archival photo, Burroughs contract, frame 2">
+        <img class="TK4R3-frame-image" id="TK4R3-frame-image-6" src="/TCS/imgs/2.jpg" alt="Archival photo, Burroughs contract, frame 3">
+        <img class="TK4R3-frame-image" id="TK4R3-frame-image-7" src="/TCS/imgs/8.jpg" alt="Archival photo, Burroughs contract, frame 4">
+
+        <div class="TK4R3-terminal-display" id="TK4R3-terminal-display">
+          <div class="TK4R3-console-text-wrapper">
+
+            <div class="TK4R3-narrative-card" id="TK4R3-card-intro" style="opacity: 1; transform: translateY(0);">
+              &gt; Scroll to execute<span class="TK4R3-cursor"></span>
+            </div>
+
+            <div class="TK4R3-narrative-card" id="TK4R3-card-0">
+              To meet its exports obligation, TCS provided software services to Burroughs, migrating old mainframe software.
+            </div>
+
+            <div class="TK4R3-narrative-card" id="TK4R3-card-1">
+              The first job: converting a hospital accounting package from <span class="TK4R3-highlight">Medium Systems COBOL</span> to <span class="TK4R3-highlight">Small Systems COBOL</span>.
+            </div>
+
+            <div class="TK4R3-narrative-card" id="TK4R3-card-2">
+              The contract was worth <span class="TK4R3-highlight">$24,000</span>.
+            </div>
+
+            <div class="TK4R3-narrative-card" id="TK4R3-card-3">
+              Engineers in Detroit sent manuals and code to Bombay.
+            </div>
+
+            <div class="TK4R3-narrative-card" id="TK4R3-card-4">
+              Engineers in Bombay wrote a programme to translate the code.
+            </div>
+
+            <div class="TK4R3-narrative-card" id="TK4R3-card-5">
+              It ran on an <span class="TK4R3-highlight">ICL mainframe</span> bought cheap from LIC after unions blocked its use.
+            </div>
+
+            <div class="TK4R3-narrative-card" id="TK4R3-card-6">
+              This seeded TCS's model: <span class="TK4R3-highlight">develop in India, implement globally</span>.
+            </div>
+
+            <div class="TK4R3-narrative-card TK4R3-quote" id="TK4R3-card-7">
+              "That's how the Indian software industry was born — not by design, but by accident."<br><br>— S Ramadorai.
+            </div>
+
+          </div>
+        </div>
+
+        <div class="TK4R3-footer-caption">Representation of 1978 IBM 5110 portable computer</div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="TK4R-spacer"></div>
+
+  <!-- TK4R4 — Follow the sun / global footprint -->
+  <!--v1.0-->
+  <section class="TK4R4-chapter">
+    <div class="TK4R4-mood-bg"></div>
+
+    <div class="TK4R4-pin-wrapper">
+      <div id="TK4R4-canvas-container"></div>
+
+      <div class="TK4R4-text-overlay">
+        <div class="TK4R4-content-box" id="TK4R4-box-1">
+          <span class="TK4R4-eyebrow">New York</span>
+          <h2 class="TK4R4-heading"><span class="TK4R4-word-mask"><span class="TK4R4-word">The</span></span> <span class="TK4R4-word-mask"><span class="TK4R4-word">24/7</span></span> <span class="TK4R4-word-mask"><span class="TK4R4-word">Advantage</span></span></h2>
+          <p>With clients in New York, S Ramadorai and TCS realised that the time zone difference was an advantage. It was possible to work 24 hours a day, 7 days a week.</p>
+        </div>
+
+        <div class="TK4R4-content-box" id="TK4R4-box-2">
+          <span class="TK4R4-eyebrow">Bombay</span>
+          <h2 class="TK4R4-heading"><span class="TK4R4-word-mask"><span class="TK4R4-word">Follow</span></span> <span class="TK4R4-word-mask"><span class="TK4R4-word">the</span></span> <span class="TK4R4-word-mask"><span class="TK4R4-word">Sun</span></span></h2>
+          <p>This led to the offshore-onshore method: TCS engineers in India work while the US sleeps. The team could &ldquo;follow the sun&rdquo; and work round the clock, like a mainframe that never shuts down.</p>
+        </div>
+
+        <div class="TK4R4-content-box" id="TK4R4-box-3">
+          <h2 class="TK4R4-heading"><span class="TK4R4-word-mask"><span class="TK4R4-word">A</span></span> <span class="TK4R4-word-mask"><span class="TK4R4-word">Global</span></span> <span class="TK4R4-word-mask"><span class="TK4R4-word">Footprint</span></span></h2>
+          <p>TCS&rsquo;s team on the IGIC contract grew to 300&ndash;400 over ten years. Its way of working was to build close, long-term relationships with clients &mdash; learning their countries, cultures, markets and products. Its work for American Express alone took TCS to Arizona, Florida, Argentina, the United Kingdom, Australia and Yugoslavia.</p>
+          <div class="TK4R4-drag-hint">Drag or tap a marker to explore</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Persistent office directory, shown only once free exploration unlocks
+         (body.TK4R4-stage-final, toggled by scripts/TK4R4-globe.js). -->
+    <div class="TK4R4-office-sidebar" id="TK4R4-office-sidebar">
+      <div class="TK4R4-sidebar-header">
+        <span class="TK4R4-sidebar-eyebrow">Global Office Directory</span>
+        <div class="TK4R4-sidebar-title">Explore every location</div>
+        <div class="TK4R4-sidebar-sub" id="TK4R4-sidebar-sub">Loading&hellip;</div>
+        <input id="TK4R4-sidebar-search" class="TK4R4-sidebar-search" type="text" placeholder="Search city, country or office&hellip;" autocomplete="off" spellcheck="false">
+        <div class="TK4R4-sidebar-filters" id="TK4R4-sidebar-filters">
+          <span class="TK4R4-filter-chip TK4R4-active" data-region="all">All</span>
+          <span class="TK4R4-filter-chip" data-region="asia">Asia</span>
+          <span class="TK4R4-filter-chip" data-region="north-america">North America</span>
+          <span class="TK4R4-filter-chip" data-region="south-america">South America</span>
+          <span class="TK4R4-filter-chip" data-region="europe">Europe</span>
+          <span class="TK4R4-filter-chip" data-region="oceania">Oceania</span>
+        </div>
+        <div class="TK4R4-legend">
+          <span class="TK4R4-legend-item"><span class="TK4R4-dot"></span>Office</span>
+          <span class="TK4R4-legend-item TK4R4-legend-active"><span class="TK4R4-dot"></span>Selected</span>
+        </div>
+      </div>
+      <div class="TK4R4-sidebar-list" id="TK4R4-sidebar-list"></div>
+    </div>
+  </section>
+
+  <div class="TK4R-spacer"></div>
+
+  <!-- TK4R5 — The Y2K bug -->
+  <!--v1.0-->
+  <section class="TK4R5-y2k-section">
+    <div class="TK4R5-scroll-wrapper">
+      <div class="TK4R5-sticky">
+        <div class="TK4R5-webgl-container" id="TK4R5-webgl"></div>
+
+        <div class="TK4R5-hero-text" id="TK4R5-hero-text">
+          <h2 class="TK4R5-hero-title">The Y2K phenomenon</h2>
+          <p class="TK4R5-hero-sub" id="TK4R5-subheader">To save memory, programmers stored years using two digits instead of four, so 1997 was recorded simply as &ldquo;97&rdquo;</p>
+        </div>
+
+        <p class="TK4R5-hero-sub TK4R5-side-text" id="TK4R5-side-text"></p>
+
+        <div class="TK4R5-fix-tool" id="TK4R5-fix-screwdriver">
+          <img src="/TCS/imgs/Y2K%204.png" alt="Hand fixing the CRT monitor with a screwdriver">
+        </div>
+        <div class="TK4R5-fix-tool" id="TK4R5-fix-wrench">
+          <img src="/TCS/imgs/Y2K%206.png" alt="Hand fixing the desktop computer with a wrench">
+        </div>
+        <div class="TK4R5-fix-tool" id="TK4R5-fix-toolbox">
+          <img src="/TCS/imgs/Y2K%205.png" alt="Hand carrying a TCS toolbox">
+        </div>
+      </div>
+    </div>
+    <p class="TK4R5-source">Source: TCS Archives; NASSCOM Y2K remediation records.</p>
+  </section>
+
+  <div class="TK4R-spacer"></div>
+
+  <!-- TK4R6 — TCS revenue vs. NASDAQ -->
+  <!--v1.0-->
+  <section class="TK4R6-chart-section">
+    <div class="TK4R6-sticky-viewport">
+      <div class="TK4R6-chart-frame" id="TK4R6-chartBox">
+        <div class="TK4R6-chart-header">
+          <h2 class="TK4R6-chart-title">A steady rise in TCS's revenue</h2>
+          <div class="TK4R6-legend">
+            <span class="TK4R6-legend-pill TK4R6-legend-amber">
+              <span class="TK4R6-legend-dot TK4R6-dot-tcs"></span>
+              <span>Revenue <em>(Rs crore)</em></span>
+            </span>
+            <span class="TK4R6-legend-pill TK4R6-legend-blue">
+              <span class="TK4R6-legend-dot TK4R6-dot-nasdaq"></span>
+              <span>NASDAQ Composite</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="TK4R6-chart-canvas" id="TK4R6-chart"></div>
+
+        <div class="TK4R6-context-bar">
+          <span class="TK4R6-status-dot"></span>
+          <span class="TK4R6-status" id="TK4R6-status">1992 &ndash; 1995</span>
+          <span class="TK4R6-scroll-hint">Scroll to continue &darr;</span>
+        </div>
+
+        <p class="TK4R6-source">
+          Source: TCS Annual Reports; NASDAQ Composite historical index. Pre-FY2011 TCS revenue is drawn
+          from period filings &mdash; a NASDAQ-comparable revenue series is only consistently available for
+          FY2011&ndash;FY2026 in company filings.
+        </p>
+      </div>
+    </div>
+
+    <div class="TK4R6-narrative-layer">
+      <div class="TK4R6-top-buffer"></div>
+
+      <div class="TK4R6-narrative-step" id="TK4R6-step-1" data-cutoff="3" data-status="1992 &ndash; 1995" data-position="right">
+        <div class="TK4R6-narrative-card">
+          <p>Between 1992 and 1995, TCS expanded its software services footprint incrementally. This took its revenue from <strong>Rs 21.8 lakh</strong> to <strong>Rs 52 lakh</strong>.</p>
+          <p>Meanwhile, the NASDAQ was mostly flat at 1,000 points.</p>
+        </div>
+      </div>
+
+      <div class="TK4R6-narrative-step" id="TK4R6-step-2" data-cutoff="7" data-status="1996 &ndash; 1999" data-position="left">
+        <div class="TK4R6-narrative-card">
+          <p>By 1999, TCS&rsquo;s annual revenue reached <strong>Rs 2,114.6 crore</strong>, while the NASDAQ surged to 4,069 during the peak of the dot-com rally.</p>
+        </div>
+      </div>
+
+      <div class="TK4R6-narrative-step" id="TK4R6-step-3" data-cutoff="9" data-status="2000 &ndash; 2001" data-position="left">
+        <div class="TK4R6-narrative-card">
+          <p>Trust built during Y2K converted into long-term maintenance contracts.</p>
+        </div>
+      </div>
+
+      <div class="TK4R6-narrative-step" id="TK4R6-step-4" data-cutoff="10" data-status="2002" data-position="left">
+        <div class="TK4R6-narrative-card">
+          <div class="TK4R6-stat-row">
+            <div class="TK4R6-stat-caption">Between 1992 and 2002, TCS grew &rarr;</div>
+            <div class="TK4R6-circle TK4R6-circle-tcs">
+              <span class="TK4R6-circle-figure">40x</span>
+              <span class="TK4R6-circle-label">Profits surged</span>
+            </div>
+            <div class="TK4R6-circle TK4R6-circle-tata">
+              <span class="TK4R6-circle-figure">40%</span>
+              <span class="TK4R6-circle-label">Tata Group's total profits</span>
+            </div>
+          </div>
+          <p>By 2002, TCS&rsquo;s revenue reached <strong>Rs 5,012.4 crore</strong>, defying the global tech downturn. It was the Tata Group's premier cash engine.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="TK4R-spacer"></div>
+
+  <!-- TK4R7 — Stock prices rebased since IPO -->
+  <!--v1.0-->
+  <section class="TK4R7-chart-section">
+    <div class="TK4R7-wrapper">
+      <div class="TK4R7-sticky-container">
+
+        <!-- Left panel: narrative & legend -->
+        <div class="TK4R7-left-panel">
+          <div>
+            <h2 class="TK4R7-title">Indian IT Tier-1 Index Growth</h2>
+            <p class="TK4R7-subtitle">Indexed stock performance since 2006,<br />normalized to base 100.</p>
+
+            <div class="TK4R7-legend" id="TK4R7-legend"></div>
+
+            <div class="TK4R7-text-area">
+              <div class="TK4R7-text-block is-active" data-step="0">
+                <div class="TK4R7-node-year">2009</div>
+                <p class="TK4R7-block-body">Chandrasekaran becomes CEO of TCS</p>
+              </div>
+              <div class="TK4R7-text-block" data-step="1">
+                <div class="TK4R7-node-year">2017</div>
+                <p class="TK4R7-block-body">Chandrasekaran becomes the first non-Parsi chairman of Tata Sons, Rajesh Gopinathan replaces him at TCS</p>
+              </div>
+              <div class="TK4R7-text-block" data-step="2">
+                <div class="TK4R7-node-year">2023</div>
+                <p class="TK4R7-block-body">Gopinathan steps down and Krithivasan becomes CEO of TCS</p>
+              </div>
+              <div class="TK4R7-text-block" data-step="3">
+                <div class="TK4R7-node-year">2026</div>
+                <p class="TK4R7-block-body">Chandrasekaran decides not to seek reappointment as Tata Sons Chairman, but reverses the decision and receives another five-year term</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right panel: chart -->
+        <div class="TK4R7-right-panel">
+          <div class="TK4R7-chart-frame">
+            <div class="TK4R7-chart-container">
+              <div id="TK4R7-chart"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="TK4R-spacer"></div>
+
+  <!-- TK4R8 — Headcount matrix -->
+  <!--v1.0-->
+  <section class="TK4R8-chart-section">
+    <div class="TK4R8-chart-frame">
+      <div class="TK4R8-chart-container">
+        <div class="TK4R8-chart-header">
+          <div class="TK4R8-chart-header-text">
+            <h2 class="TK4R8-chart-title">Historical headcount of key IT companies</h2>
+            <p class="TK4R8-chart-subtitle">TCS’s headcount is consistently higher than Infosys and Wipro combined</p>
+          </div>
+          <div class="TK4R8-legend">
+            <div class="TK4R8-legend-item"><span class="TK4R8-legend-swatch TK4R8-swatch-tcs"></span>TCS</div>
+            <div class="TK4R8-legend-item"><span class="TK4R8-legend-swatch TK4R8-swatch-infosys"></span>Infosys</div>
+            <div class="TK4R8-legend-item"><span class="TK4R8-legend-swatch TK4R8-swatch-wipro"></span>Wipro</div>
+          </div>
+        </div>
+
+        <div class="TK4R8-plot-area">
+          <div class="TK4R8-y-axis"></div>
+          <div class="TK4R8-plot-scroll">
+            <div class="TK4R8-groups-wrapper"></div>
+            <div class="TK4R8-x-axis"></div>
+          </div>
+        </div>
+
+        <p class="TK4R8-source">Source: Company annual reports.</p>
+      </div>
+    </div>
+    <div class="TK4R8-tooltip"></div>
+  </section>
+
+  <div class="TK4R-spacer"></div>
+
+  <!-- TK4R9 — The Tata leadership power map -->
+  <!--v1.0-->
+  <section class="TK4R9-chart-section">
+    <div class="TK4R9-chart-frame">
+      <div class="TK4R9-chart-container">
+        <div class="TK4R9-chart-header">
+          <div class="TK4R9-chart-header-text">
+            <p class="TK4R9-eyebrow">Power &amp; Conflict</p>
+            <h2 class="TK4R9-chart-title">The Tata leadership power map</h2>
+            <p class="TK4R9-chart-subtitle">Control runs down three tiers — <b>Tata Trusts → Tata Sons → TCS</b>. The story pivots on <b>N. Chandrasekaran</b>, who rose through TCS and crossed up into the group chairmanship. Tap any figure.</p>
+          </div>
+          <div class="TK4R9-legend" id="TK4R9-legend"></div>
+        </div>
+
+        <p class="TK4R9-note">
+          <b>Status ring</b> — a solid gold ring marks someone <b>currently</b> in the role; red marks <b>removed</b>; gray marks <b>stepped down voluntarily</b>; a dashed ring marks a <b>historical / legacy</b> figure.
+          <span class="TK4R9-note-key">
+            <span><span class="TK4R9-note-shape is-circle"></span>person</span>
+            <span><span class="TK4R9-note-shape is-square"></span>entity</span>
+          </span>
+        </p>
+
+        <div class="TK4R9-stage-wrap">
+          <div class="TK4R9-stage" id="TK4R9-stage">
+            <svg id="TK4R9-map" role="img" aria-label="Interactive map of Tata leadership across Tata Trusts, Tata Sons and TCS"></svg>
+            <div id="TK4R9-tip" role="tooltip" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <p class="TK4R9-source"><b>Reading the map:</b> each tier flows in chronological order. Chandrasekaran sits on the seam between Tata Sons and TCS — the one node that belongs to both. Source: Tata Sons &amp; TCS public filings and company disclosures.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="TK4R-spacer"></div>
+
+  <!-- TK4R10 — The capex bet behind HyperVault -->
+  <!--v1.0-->
+  <section class="TK4R10-chart-section">
+    <div class="TK4R10-chart-frame">
+      <div class="TK4R10-chart-container">
+        <div class="TK4R10-chart-header">
+          <div class="TK4R10-chart-header-text">
+            <h2 class="TK4R10-chart-title">The capex bet behind HyperVault</h2>
+            <p class="TK4R10-chart-subtitle">The capex-to-revenue ratio has been under 1% over the last decade.<br>However, TCS has committed USD 7 billion to build data centers along with private equity firm TPG</p>
+          </div>
+          <div class="TK4R10-legend" id="TK4R10-legend"></div>
+        </div>
+        <div id="TK4R10-chart" class="TK4R10-chart"></div>
+        <p class="TK4R10-source">Source: TCS Annual Reports; HyperVault deal terms.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="TK4R-spacer"></div>
+
+  <footer class="TK4R-footer">
+    TCS — A History in Ten Charts. Design system derived from <em>TCS Mood Board.png</em>.
+  </footer>
+
+  <!-- ═══════════════ Third-party libraries ═══════════════ -->
+  <!-- Order matters: three.min.js before its examples/js add-ons; gsap.min.js before ScrollTrigger.min.js -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS2DRenderer.js"></script>
+
+  <!-- ═══════════════ Module scripts — data files load before their module's logic ═══════════════ -->
+  <script src="/TCS/scripts/TK4R1-marketcap_data.js"></script>
+  <script src="/TCS/scripts/TK4R1-marketcap.js"></script>
+
+  <script src="/TCS/scripts/TK4R2-migration.js"></script>
+
+  <script src="/TCS/3dModels/ibm5110Data.js"></script>
+  <script src="/TCS/scripts/TK4R3-mainframe.js"></script>
+
+  <script src="/TCS/scripts/TK4R4-globe_data.js"></script>
+  <script src="/TCS/scripts/TK4R4-globe.js"></script>
+
+  <script src="/TCS/3dModels/modelData.js"></script>
+  <script src="/TCS/scripts/TK4R5-y2k.js"></script>
+
+  <script src="/TCS/scripts/TK4R6-nasdaq_data.js"></script>
+  <script src="/TCS/scripts/TK4R6-nasdaq.js"></script>
+
+  <script src="/TCS/scripts/TK4R7-stocks.js"></script>
+
+  <script src="/TCS/scripts/TK4R8-headcount.js"></script>
+
+  <script src="/TCS/scripts/TK4R9-powermap_data.js"></script>
+  <script src="/TCS/scripts/TK4R9-powermap.js"></script>
+
+  <script src="/TCS/scripts/TK4R10-capex.js"></script>
+
+</body>
+</html>

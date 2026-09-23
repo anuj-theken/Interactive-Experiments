@@ -1,8 +1,9 @@
 /* styles/TK4R5-y2k.css — TK4R5: the Y2K bug (3D device scrollytelling).
    Visual design restored to the original y2k.html prototype verbatim (its
-   own warm-grey archive palette and Helvetica/Georgia pairing, not the
+   own warm-grey archive palette and Georgia heading, not the
    site's design tokens — a deliberate, user-requested exception for this
-   module). Structurally this still differs from the original in one way:
+   module; body text uses the site's --font-body like the other vizzes).
+   Structurally this still differs from the original in one way:
    the source used position:fixed full-viewport overlays, which only worked
    because it was the only content on the page — kept on the scroll-wrapper/
    sticky pattern instead so it stays scoped to its own 500vh span. Do not
@@ -26,7 +27,7 @@
   overflow: hidden;
   background-color: #e8e6df;
   color: #1a1a1a;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
 }
 
 .TK4R5-webgl-container {
@@ -49,19 +50,7 @@
   top: 7.5%;
   z-index: 10;
   pointer-events: none;
-  max-width: 320px;
-}
-
-/* Not part of the original composition — kept small and out of the way so
-   it doesn't compete with the restored original heading/subhead below it. */
-.TK4R5-eyebrow {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #6b6b6b;
-  margin: 0 0 10px;
+  max-width: min(400px, 22.5vw);
 }
 
 .TK4R5-hero-title {
@@ -74,38 +63,64 @@
 }
 
 .TK4R5-hero-sub {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 1.05rem;
-  line-height: 1.4;
+  font-family: var(--font-body);
+  font-size: 1.15rem;
+  line-height: 1.3;
   color: #6b6b6b;
   margin: 0;
 }
 
-.TK4R5-fix-hands {
+/* Second text block, bottom right — takes the spot the arcade controller
+   used to hold in the composition. */
+.TK4R5-side-text {
   position: absolute;
+  left: 67.5%;
+  top: 68%;
+  z-index: 10;
+  max-width: min(420px, 24%);
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* Hand-drawn repair tools that fade in over the devices in the last frame.
+   Positioned from the top-left corner by the script, which pins each one to
+   a point on its 3D model every frame (see updateToolPins). */
+.TK4R5-fix-tool {
+  position: absolute;
+  left: 0;
+  top: 0;
   z-index: 13;
   pointer-events: none;
   opacity: 0;
 }
 
-.TK4R5-fix-hands img {
+.TK4R5-fix-tool img {
   display: block;
   width: 100%;
   height: auto;
-}
-
-.TK4R5-source {
-  font-family: var(--font-body);
-  font-size: 13px;
-  color: var(--color-muted);
-  text-align: center;
-  padding: 28px 24px 0;
 }
 
 @media (max-width: 768px) {
   .TK4R5-hero-text {
     left: 6%;
     top: 6%;
-    max-width: 60%;
+    max-width: 88%;
+  }
+
+  .TK4R5-hero-sub {
+    font-size: 1rem;
+    line-height: normal;
+  }
+
+  /* On mobile the script moves the side paragraph into the hero block, so
+     it reads straight on from the main one instead of sitting apart. */
+  .TK4R5-hero-text .TK4R5-side-text {
+    position: static;
+    max-width: none;
+    margin-top: 0.6em;
+  }
+
+  .TK4R5-hero-text .TK4R5-side-text--continues {
+    margin-top: 0;
   }
 }

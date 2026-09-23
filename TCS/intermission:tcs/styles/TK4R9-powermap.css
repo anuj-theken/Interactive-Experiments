@@ -1,0 +1,259 @@
+/* styles/TK4R9-powermap.css — Power & conflict network graph.
+   All color and type values are read from styles/globals.css tokens. No CDN
+   imports, no @font-face, no :root — those live only in globals.css. */
+
+.TK4R9-chart-frame {
+  width: 100%;
+  max-width: 1450px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  box-sizing: border-box;
+}
+
+.TK4R9-chart-container {
+  width: 100%;
+  max-width: 1350px;
+  margin: 0 auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 4px;
+  box-sizing: border-box;
+  padding: 32px 32px 28px;
+}
+
+.TK4R9-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.TK4R9-eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin: 0 0 12px;
+}
+
+.TK4R9-chart-title {
+  font-family: var(--font-display);
+  font-size: var(--type-heading);
+  font-weight: 400;
+  line-height: 1.08;
+  color: var(--color-text);
+  margin: 0 0 10px;
+}
+
+.TK4R9-chart-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: 1.5;
+  color: var(--color-muted);
+  max-width: 58ch;
+  margin: 0;
+}
+
+.TK4R9-chart-subtitle b { color: var(--color-text); font-weight: 600; }
+
+/* ── Custom HTML legend chips — tiers + connection types ── */
+.TK4R9-legend {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.TK4R9-legend-group h3 {
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin: 0 0 8px;
+}
+
+.TK4R9-legend-group ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+}
+
+.TK4R9-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: var(--type-legend);
+  color: var(--color-text);
+  white-space: nowrap;
+  cursor: default;
+}
+
+.TK4R9-legend-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: transparent;
+  border: 2.5px solid currentColor;
+}
+
+.TK4R9-legend-dash {
+  width: 22px;
+  height: 0;
+  border-top: 2px solid currentColor;
+  flex: 0 0 auto;
+}
+.TK4R9-legend-dash.is-dashed { border-top-style: dashed; }
+
+/* ── Status / shape note — small, sits just under the header ── */
+.TK4R9-note {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-muted);
+  margin: 0 0 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--color-rule);
+}
+.TK4R9-note b { color: var(--color-text); font-weight: 600; }
+.TK4R9-note-key { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.TK4R9-note-key span { display: inline-flex; align-items: center; gap: 5px; }
+.TK4R9-note-shape { width: 10px; height: 10px; flex: 0 0 auto; background: var(--color-muted); }
+.TK4R9-note-shape.is-square { border-radius: 2px; }
+.TK4R9-note-shape.is-circle { border-radius: 50%; }
+
+/* ── Stage ── */
+.TK4R9-stage-wrap {
+  position: relative;
+  width: 100%;
+  height: 680px;
+}
+
+.TK4R9-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+svg#TK4R9-map { display: block; width: 100%; height: 100%; }
+
+@media (max-width: 1023px) {
+  .TK4R9-stage-wrap {
+    height: auto;
+    max-height: 72vh;
+  }
+  .TK4R9-stage {
+    position: static;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    max-height: 72vh;
+    border-top: 1px solid var(--color-rule);
+    border-bottom: 1px solid var(--color-rule);
+    box-shadow:
+      inset 0 8px 10px -10px color-mix(in srgb, var(--color-text) 28%, transparent),
+      inset 0 -8px 10px -10px color-mix(in srgb, var(--color-text) 28%, transparent);
+  }
+  svg#TK4R9-map { width: 100%; height: auto; }
+}
+
+/* ── SVG-themed marks (colors resolved live via CSS var()) ── */
+.TK4R9-band { stroke: var(--color-rule); stroke-width: 1; }
+.TK4R9-band-1 { fill: color-mix(in srgb, var(--cat-1) 8%, var(--color-bg)); }
+.TK4R9-band-2 { fill: color-mix(in srgb, var(--cat-2) 8%, var(--color-bg)); }
+.TK4R9-band-3 { fill: color-mix(in srgb, var(--cat-3) 8%, var(--color-bg)); }
+
+.TK4R9-tier-tab { font-family: var(--font-body); font-weight: 700; letter-spacing: 0.06em; }
+.TK4R9-tier-name { font-family: var(--font-body); font-weight: 600; }
+.TK4R9-tier-name tspan { fill: var(--color-muted); font-weight: 500; }
+.TK4R9-tier-1 .TK4R9-tier-tab, .TK4R9-tier-1 .TK4R9-tier-name { fill: var(--cat-1); }
+.TK4R9-tier-2 .TK4R9-tier-tab, .TK4R9-tier-2 .TK4R9-tier-name { fill: var(--cat-2); }
+.TK4R9-tier-3 .TK4R9-tier-tab, .TK4R9-tier-3 .TK4R9-tier-name { fill: var(--cat-3); }
+
+.TK4R9-edge { fill: none; stroke-linecap: round; transition: opacity .18s ease; }
+.TK4R9-e-succ { stroke: var(--cat-4); stroke-width: 1.6; }
+.TK4R9-e-ctrl { stroke: var(--cat-5); stroke-width: 1.8; stroke-dasharray: 6 5; opacity: .9; }
+.TK4R9-e-asc { stroke: var(--cat-6); stroke-width: 2.4; }
+.TK4R9-e-asc.is-dotted { stroke-width: 1.8; stroke-dasharray: 2 5; opacity: .8; }
+.TK4R9-mk path { stroke: none; }
+.TK4R9-mk-succ path { fill: var(--cat-4); }
+.TK4R9-mk-ctrl path { fill: var(--cat-5); }
+.TK4R9-mk-asc path { fill: var(--cat-6); }
+
+.TK4R9-elabel { font-family: var(--font-body); font-weight: 600; fill: var(--color-muted); }
+.TK4R9-elabel-bg { fill: var(--color-surface); stroke: var(--color-rule); stroke-width: 1; }
+
+.TK4R9-node { cursor: pointer; outline: none; transition: opacity .18s ease; }
+.TK4R9-node .TK4R9-hit { fill: transparent; }
+.TK4R9-avatar-txt, .TK4R9-hub-txt { fill: var(--color-surface); font-family: var(--font-body); font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+.TK4R9-n-name { fill: var(--color-text); font-family: var(--font-body); font-weight: 600; text-anchor: middle; }
+.TK4R9-n-sub { fill: var(--color-muted); font-family: var(--font-body); font-weight: 500; text-anchor: middle; }
+.TK4R9-focus-ring { opacity: 0; fill: none; stroke: var(--color-text); stroke-width: 2; stroke-dasharray: 3 3; }
+.TK4R9-node:focus-visible .TK4R9-focus-ring { opacity: .9; }
+.TK4R9-removed-badge circle { fill: var(--status-critical); }
+.TK4R9-removed-badge path { stroke: var(--color-surface); stroke-width: 1.7; stroke-linecap: round; }
+
+svg#TK4R9-map.is-dimmed .TK4R9-node:not(.is-hl) { opacity: .16; }
+svg#TK4R9-map.is-dimmed .TK4R9-edge:not(.is-hl) { opacity: .08; }
+svg#TK4R9-map.is-dimmed g.TK4R9-elabel-group:not(.is-hl) { opacity: .12; }
+
+/* ── Tooltip — fixed to viewport, works whether the stage scrolls or not ── */
+#TK4R9-tip {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  max-width: min(290px, 86vw);
+  min-width: 200px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 8px;
+  box-shadow: 0 14px 32px -12px color-mix(in srgb, var(--color-text) 30%, transparent);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .14s ease, transform .14s ease;
+}
+#TK4R9-tip.is-shown { opacity: 1; transform: translateY(0); }
+
+.TK4R9-tip-top { display: flex; gap: 11px; align-items: flex-start; padding: 13px 14px 11px; border-bottom: 1px solid var(--color-rule); }
+.TK4R9-tip-av { width: 36px; height: 36px; border-radius: 50%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; color: var(--color-surface); font-family: var(--font-body); font-weight: 700; font-size: var(--type-legend); border: 3px solid var(--status-good); }
+.TK4R9-tip-hd { min-width: 0; flex: 1 1 auto; }
+.TK4R9-tip-name { font-family: var(--font-display); font-weight: 600; font-size: var(--type-legend); line-height: 1.2; color: var(--color-text); }
+.TK4R9-tip-tier { display: inline-block; flex: 0 0 auto; font-family: var(--font-body); font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--color-muted); border: 1px solid var(--color-rule); border-radius: 20px; padding: 3px 7px; }
+.TK4R9-tip-meta { padding: 11px 14px 4px; display: flex; flex-direction: column; gap: 8px; }
+.TK4R9-tip-row { display: flex; gap: 8px; font-family: var(--font-body); font-size: var(--type-legend); line-height: 1.4; }
+.TK4R9-tip-k { flex: 0 0 52px; color: var(--color-muted); font-weight: 600; }
+.TK4R9-tip-v { color: var(--color-text); min-width: 0; }
+.TK4R9-status-pill { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+.TK4R9-status-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
+.TK4R9-tip-note { margin: 10px 14px 14px; padding: 9px 11px; background: var(--color-bg-warm); border-left: 3px solid var(--status-good); border-radius: 0 6px 6px 0; font-family: var(--font-body); font-size: 12px; line-height: 1.45; color: var(--color-muted); }
+.TK4R9-tip-note b { color: var(--color-text); font-weight: 600; }
+
+.TK4R9-source {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-muted);
+  margin: 18px 0 0;
+}
+.TK4R9-source b { color: var(--color-text); font-weight: 600; }
+
+@media (max-width: 768px) {
+  .TK4R9-chart-frame { padding: 20px 12px; }
+  .TK4R9-chart-container { padding: 20px 18px 18px; }
+  .TK4R9-legend { gap: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .TK4R9-node, .TK4R9-edge, g.TK4R9-elabel-group, #TK4R9-tip { transition: none !important; }
+}

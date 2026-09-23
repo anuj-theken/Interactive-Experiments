@@ -1,0 +1,193 @@
+/* styles/TK4R3-mainframe.css — Burroughs deal / IBM 5110 scroll narrative.
+   Visual design restored to the original mainframe.html prototype verbatim
+   (its own terminal-green CRT palette, not the site's design tokens — a
+   deliberate, user-requested exception for this module).
+
+   Structurally this still differs from the original in one way: the source
+   prototype used position:fixed full-viewport overlays, which only worked
+   because it was the only content on the page. Embedded among 9 other
+   modules that would pin this scene over everything below it, so it's kept
+   on the scroll-wrapper/sticky-content pattern instead, scoped to its own
+   900vh span. Do not add overflow:hidden (or anything but visible) to
+   .TK4R3-chapter or any other ancestor of .TK4R3-sticky-content — that
+   breaks position:sticky. The sticky element clips its own children via its
+   own overflow:hidden below, which is fine. */
+
+.TK4R3-chapter {
+  position: relative;
+  background-color: #001647;
+  color: #2bf189;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.TK4R3-scroll-wrapper {
+  position: relative;
+  height: 900vh;
+}
+
+.TK4R3-sticky-content {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* IBM 5110 3D scene */
+#TK4R3-webgl-container {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  cursor: grab;
+}
+
+#TK4R3-webgl-container:active {
+  cursor: grabbing;
+}
+
+/* Scanline filter over the scene */
+.TK4R3-crt-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+    linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  background-size: 100% 4px, 6px 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Vignette / screen-curve rim */
+.TK4R3-screen-bezel {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* Terminal text, tracked every frame onto the static 3D model's own
+   screen (see TK4R3-mainframe.js). Center-anchored to match the
+   translate(-50%, -50%) the script applies once it starts projecting
+   this box from a real 3D anchor point. */
+.TK4R3-terminal-display {
+  position: absolute;
+  left: 27.85%;
+  top: 39.2%;
+  transform: translate(-50%, -50%);
+  width: 19.5%;
+  height: 24%;
+  padding: 1.4% 1.8%;
+  overflow: hidden;
+  z-index: 2;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(43, 241, 137, 0.08) 0px,
+      rgba(43, 241, 137, 0.08) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    #050d08;
+  box-shadow: inset 0 0 18px rgba(43, 241, 137, 0.2);
+}
+
+.TK4R3-console-text-wrapper {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.TK4R3-narrative-card {
+  position: absolute;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(12px);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #2bf189;
+  text-shadow: 0 0 10px rgba(43, 241, 137, 0.4);
+  word-spacing: 1px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.TK4R3-narrative-card .TK4R3-highlight {
+  color: #fff;
+  background: #0d4223;
+  padding: 0 4px;
+}
+
+.TK4R3-narrative-card.TK4R3-quote {
+  font-style: italic;
+  color: #ffffff;
+  border-left: 3px solid #2bf189;
+  padding-left: 15px;
+}
+
+.TK4R3-cursor {
+  display: inline-block;
+  width: 10px;
+  height: 1.2rem;
+  background: #2bf189;
+  margin-left: 5px;
+  vertical-align: middle;
+  animation: TK4R3-blink 0.8s infinite;
+}
+
+@keyframes TK4R3-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.TK4R3-footer-caption {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  opacity: 0.6;
+  text-transform: uppercase;
+}
+
+.TK4R3-page-header {
+  position: absolute;
+  top: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  font-family: 'Reckless', Georgia, 'Times New Roman', serif;
+  font-size: 2.1rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #2bf189;
+  text-shadow: 0 0 18px rgba(43, 241, 137, 0.8);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Photos for frames 2/6/8 — overlaid top-right of the model, shown only
+   during their own card's on-screen window (see the GSAP timeline). */
+.TK4R3-frame-image {
+  position: absolute;
+  top: 10%;
+  right: 12%;
+  width: 23vw;
+  max-width: 320px;
+  border: 2px solid #2bf189;
+  box-shadow: 0 0 10px rgba(43, 241, 137, 0.4);
+  opacity: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+@media (max-width: 850px) {
+  .TK4R3-narrative-card {
+    font-size: 0.85rem;
+  }
+}

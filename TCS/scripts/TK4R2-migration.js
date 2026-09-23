@@ -58,18 +58,39 @@ document.addEventListener("DOMContentLoaded", function () {
     tataMills: [19.0, 72.845],
   };
 
-  function createFactoryIcon(symbol) {
-    return L.divIcon({
-      className: "TK4R2-factory-icon",
-      html: symbol,
-      iconSize: [48, 48],
-      iconAnchor: [24, 24],
+  // Icon paths inlined from icons/*.svg (Material Symbols) so they render without
+  // loading a file and take their colour from CSS
+  const icons = {
+    factory: "M80-80v-481l280-119v80l200-80v120h320v480H80Zm80-80h640v-320H480v-82l-200 80v-78l-120 53v347Zm280-80h80v-160h-80v160Zm-160 0h80v-160h-80v160Zm320 0h80v-160h-80v160Zm280-320H680l40-320h120l40 320ZM160-160h640-640Z",
+    anchor: "M355-102q-64-22-116-60t-85.5-89Q120-302 120-360v-120l160 120-62 62q29 51 92 88t130 47v-357H320v-80h120v-47q-35-13-57.5-43.5T360-760q0-50 35-85t85-35q50 0 85 35t35 85q0 39-22.5 69.5T520-647v47h120v80H520v357q67-10 130-47t92-88l-62-62 160-120v120q0 58-33.5 109T721-162q-52 38-116 60T480-80q-61 0-125-22Zm125-618q17 0 28.5-11.5T520-760q0-17-11.5-28.5T480-800q-17 0-28.5 11.5T440-760q0 17 11.5 28.5T480-720Z",
+    mills: "M120-120v-560h160v-160h400v320h160v400H520v-160h-80v160H120Zm80-80h80v-80h-80v80Zm0-160h80v-80h-80v80Zm0-160h80v-80h-80v80Zm160 160h80v-80h-80v80Zm0-160h80v-80h-80v80Zm0-160h80v-80h-80v80Zm160 320h80v-80h-80v80Zm0-160h80v-80h-80v80Zm0-160h80v-80h-80v80Zm160 480h80v-80h-80v80Zm0-160h80v-80h-80v80Z",
+  };
+
+  // Factory icons live in their own layer above the ECharts overlay (Leaflet
+  // markers sit beneath it), repositioned on every map move in updateChart()
+  const iconLayer = document.createElement("div");
+  iconLayer.className = "TK4R2-icon-layer";
+  section.querySelector(".TK4R2-map-container").appendChild(iconLayer);
+
+  const factoryIcons = [
+    { coord: coords.bombay, path: icons.factory },
+    { coord: coords.bombayDocks, path: icons.anchor },
+    { coord: coords.tataMills, path: icons.mills },
+  ].map((def) => {
+    const el = document.createElement("div");
+    el.className = "TK4R2-factory-icon";
+    el.innerHTML = `<svg class="TK4R2-factory-glyph" viewBox="0 -960 960 960" aria-hidden="true"><path d="${def.path}"/></svg>`;
+    iconLayer.appendChild(el);
+    return { el, coord: def.coord };
+  });
+
+  function positionFactoryIcons() {
+    factoryIcons.forEach(({ el, coord }) => {
+      const [x, y] = toPt(coord);
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
     });
   }
-
-  L.marker(coords.bombay, { icon: createFactoryIcon("🏭") }).addTo(map);
-  L.marker(coords.bombayDocks, { icon: createFactoryIcon("⚓") }).addTo(map);
-  L.marker(coords.tataMills, { icon: createFactoryIcon("⚙️") }).addTo(map);
 
   const journeyDefs = {
     parsiOrigin: { coord: [28.9, 50.7], color: PARSI_COLOR, name: "Persia", date: "Fled Persia · 7th–10th c. CE", labelDir: "right", origin: true },
@@ -230,6 +251,7 @@ document.addEventListener("DOMContentLoaded", function () {
     myChart.resize();
     myChart.setOption(getChartOption());
     updateDestinations();
+    positionFactoryIcons();
   }
 
   map.on("move zoom", updateChart);
@@ -248,6 +270,24 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // Camera per step. On phones the fixed desktop zooms crop the routes, so fit
+  // each step's routes to the screen instead.
+  const isMobile = () => window.matchMedia("(max-width: 768px)").matches;
+  const stepViews = {
+    step1: { center: [22.0, 65.0], zoom: 5, bounds: parsiSeaRoute },
+    step2: { center: [15.5, 77.0], zoom: 6, bounds: [...tbChennaiRoute, ...tbBangaloreRoute, ...tbBombayRoute, ...parsiGujaratToBombayRoute] },
+    step3: { center: coords.bombayDocks, zoom: 12, mobileZoom: 11 },
+  };
+
+  function flyToStep(key, duration = 1) {
+    const v = stepViews[key];
+    if (!isMobile()) return map.flyTo(v.center, v.zoom, { duration });
+    if (v.bounds) return map.flyToBounds(v.bounds, { padding: [24, 24], duration });
+    map.flyTo(v.center, v.mobileZoom, { duration });
+  }
+
+  if (isMobile()) map.fitBounds(parsiSeaRoute, { padding: [24, 24] });
+
   gsap.to(pathProgress, {
     parsiPersiaToGujarat: 1,
     ease: "power2.out",
@@ -257,8 +297,8 @@ document.addEventListener("DOMContentLoaded", function () {
       end: "bottom center",
       scrub: true,
       onUpdate: updateChart,
-      onEnter: () => { map.flyTo([22.0, 65.0], 5, { duration: 1 }); setMarkerVisible("parsiOrigin", true); },
-      onEnterBack: () => { map.flyTo([22.0, 65.0], 5, { duration: 1 }); setFactoriesVisible(false); setMarkerVisible("parsiOrigin", true); },
+      onEnter: () => { flyToStep("step1"); setMarkerVisible("parsiOrigin", true); },
+      onEnterBack: () => { flyToStep("step1"); setFactoriesVisible(false); setMarkerVisible("parsiOrigin", true); },
       onLeaveBack: () => setMarkerVisible("parsiOrigin", false),
     },
   });
@@ -275,8 +315,8 @@ document.addEventListener("DOMContentLoaded", function () {
       end: "bottom center",
       scrub: true,
       onUpdate: updateChart,
-      onEnter: () => { map.flyTo([15.5, 77.0], 6, { duration: 1 }); setMarkerVisible("tbOrigin", true); },
-      onEnterBack: () => { map.flyTo([15.5, 77.0], 6, { duration: 1 }); setFactoriesVisible(false); setMarkerVisible("tbOrigin", true); },
+      onEnter: () => { flyToStep("step2"); setMarkerVisible("tbOrigin", true); },
+      onEnterBack: () => { flyToStep("step2"); setFactoriesVisible(false); setMarkerVisible("tbOrigin", true); },
       onLeaveBack: () => setMarkerVisible("tbOrigin", false),
     },
   });
@@ -285,8 +325,8 @@ document.addEventListener("DOMContentLoaded", function () {
     trigger: "#TK4R2-step3",
     start: "top center",
     end: "top center",
-    onEnter: () => map.flyTo(coords.bombayDocks, 12, { duration: 1.8 }),
-    onEnterBack: () => { map.flyTo(coords.bombayDocks, 12, { duration: 1.8 }); setFactoriesVisible(false); },
+    onEnter: () => flyToStep("step3", 1.8),
+    onEnterBack: () => { flyToStep("step3", 1.8); setFactoriesVisible(false); },
   });
 
   ScrollTrigger.create({

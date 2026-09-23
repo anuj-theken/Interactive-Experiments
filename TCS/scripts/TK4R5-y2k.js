@@ -13,8 +13,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const container = document.getElementById("TK4R5-webgl");
   const scrollWrapper = section.querySelector(".TK4R5-scroll-wrapper");
   const subheaderEl = document.getElementById("TK4R5-subheader");
-  const fixHandsCrtEl = document.getElementById("TK4R5-fix-hands-crt");
-  const fixHandsScreenEl = document.getElementById("TK4R5-fix-hands-screen");
+  const sideTextEl = document.getElementById("TK4R5-side-text");
+  const heroTextEl = document.getElementById("TK4R5-hero-text");
+  const sideTextHome = { parent: sideTextEl.parentNode, next: sideTextEl.nextSibling };
+  const mobileQuery = window.matchMedia("(max-width: 768px)");
+  const fixToolEls = section.querySelectorAll(".TK4R5-fix-tool");
 
   // 3. THREE.JS SCENE SETUP
   const scene = new THREE.Scene();
@@ -22,6 +25,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
   camera.position.set(0, 0, 14);
+
+  // Desktop frames the whole five-device composition. On mobile only the
+  // centre PC fits, so the camera moves in and centres on it, below the text.
+  function applyLayout() {
+    if (mobileQuery.matches) {
+      camera.position.set(0.12, -1.1, 10.5);
+      heroTextEl.appendChild(sideTextEl);
+    } else {
+      camera.position.set(0, 0, 14);
+      sideTextHome.parent.insertBefore(sideTextEl, sideTextHome.next);
+    }
+  }
+  applyLayout();
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(container.clientWidth, container.clientHeight);
@@ -247,20 +263,20 @@ document.addEventListener("DOMContentLoaded", function () {
     return deviceObj;
   }
 
-  // Placement matches the reference composition (five devices): x/y centers
+  // Placement matches the reference composition (four devices): x/y centers
   // and relative sizes were measured as fractions of the reference canvas,
   // then mapped onto this scene's world space. Positions are the model's
   // BASE (loadDevice lifts each model up by half its own height from y).
-  // These three (willBug: true) are "the devices that broke".
-  loadDevice("3dModels/crt_computer_monitor.glb", -5.62, -2.16, 0.5, true, {
+  // The CRT and the centre PC (willBug: true) are "the devices that broke".
+  const crtDevice = loadDevice("3dModels/crt_computer_monitor.glb", -5.62, -2.16, 0.5, true, {
     initialDate: "15.08.1998", targetSize: 4.3, refSize: 1.9,
     screenOffset: { x: 0, y: 0.2295, z: 0.98 }, screenSize: { w: 1.36, h: 1.02 }
   });
-  loadDevice("3dModels/simple_computer_placeholder.glb", 0.15, -4.17, -0.8, false, {
+  const pcDevice = loadDevice("3dModels/simple_computer_placeholder.glb", 0.15, -4.17, -0.8, true, {
     initialDate: "10.11.1998", targetSize: 3.6, refSize: 1.9,
-    screenOffset: { x: 0.03, y: 0.362, z: 0.78 }, screenSize: { w: 1.0, h: 0.88 }
+    screenOffset: { x: 0.011, y: 0.362, z: 0.78 }, screenSize: { w: 1.05, h: 0.88 }
   });
-  loadDevice("3dModels/retro_screen.glb", 4.47, -0.185, 0.6, true, {
+  loadDevice("3dModels/retro_screen.glb", 4.47, -0.185, 0.6, false, {
     initialDate: "15.08.1998", targetSize: 3.2, refSize: 1.7, rotationY: 270,
     screenOffset: { x: -0.04, y: 0.334, z: 0.85 }, screenSize: { w: 1.12, h: 0.84 }
   });
@@ -268,10 +284,69 @@ document.addEventListener("DOMContentLoaded", function () {
     initialDate: "22.03.1999", targetSize: 3.42, refSize: 1.7, rotationY: 90, dateFontSize: 70,
     screenOffset: { x: 0.06, y: 0.10, z: 0.16 }, screenSize: { w: 0.28, h: 0.16 }
   });
-  loadDevice("3dModels/retro_arcade_game_controller.glb", 5.93, -4.81, 0.2, true, {
-    initialDate: "10.11.1998", targetSize: 2.98, refSize: 1.9,
-    screenOffset: { x: 0.013, y: 0.0126, z: 0.10 }, screenSize: { w: 0.75, h: 0.60 }
-  });
+
+  // Repair-tool illustrations — DOM overlays pinned to a point on a model.
+  // `anchor` is in that device's pivot space (the same space as its screen
+  // overlay), `imgAnchor` is the matching point on the image as a fraction
+  // of its size, and `worldWidth` is the image's width in world units. Each
+  // frame the pin is projected to screen space, so the tool rides along with
+  // the model's idle wobble and drag tilt and stays on it at any viewport
+  // size. The toolbox has no device, so it's pinned in world space and gets
+  // the same idle wobble as a device would.
+  const toolPins = [
+    { // screwdriver tip on the CRT's screen
+      el: document.getElementById("TK4R5-fix-screwdriver"), device: crtDevice,
+      anchor: new THREE.Vector3(0.55, 0.95, 2.24), imgAnchor: { x: 0.984, y: 0.012 }, worldWidth: 3.6
+    },
+    { // wrench jaws around the PC's right-hand knob
+      el: document.getElementById("TK4R5-fix-wrench"), device: pcDevice,
+      anchor: new THREE.Vector3(1.03, -0.43, 1.5), imgAnchor: { x: 0.09, y: 0.15 }, worldWidth: 2.4
+    },
+    { // toolbox, free-standing at the bottom right
+      el: document.getElementById("TK4R5-fix-toolbox"), device: null, wobblePhase: 4,
+      anchor: new THREE.Vector3(7.4, -2.5, 0), imgAnchor: { x: 0.5, y: 0.5 }, worldWidth: 3.8
+    }
+  ];
+
+  const pinPoint = new THREE.Vector3();
+  const pinEdge = new THREE.Vector3();
+
+  function updateToolPins(time) {
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+
+    toolPins.forEach(pin => {
+      pinPoint.copy(pin.anchor);
+      pinEdge.set(pin.anchor.x + pin.worldWidth, pin.anchor.y, pin.anchor.z);
+
+      let rotX, rotY;
+      if (pin.device) {
+        pin.device.pivot.localToWorld(pinPoint);
+        pin.device.pivot.localToWorld(pinEdge);
+        rotX = pin.device.pivot.rotation.x;
+        rotY = pin.device.pivot.rotation.y;
+      } else {
+        rotX = Math.sin(time + pin.wobblePhase) * 0.02;
+        rotY = Math.cos(time + pin.wobblePhase) * 0.02;
+      }
+
+      pinPoint.project(camera);
+      pinEdge.project(camera);
+
+      const x = (pinPoint.x + 1) / 2 * w;
+      const y = (1 - pinPoint.y) / 2 * h;
+      const widthPx = Math.hypot((pinEdge.x - pinPoint.x) / 2 * w, (pinEdge.y - pinPoint.y) / 2 * h);
+      const ax = pin.imgAnchor.x * 100;
+      const ay = pin.imgAnchor.y * 100;
+
+      // CSS rotateX runs opposite to three.js rotation.x (y points down)
+      pin.el.style.width = `${widthPx}px`;
+      pin.el.style.transformOrigin = `${ax}% ${ay}%`;
+      pin.el.style.transform =
+        `translate(${x}px, ${y}px) translate(${-ax}%, ${-ay}%) ` +
+        `perspective(800px) rotateX(${-rotX}rad) rotateY(${rotY}rad)`;
+    });
+  }
 
   // 6. INDIVIDUAL OBJECT ROTATION WITH SPRING RETURN
   const raycaster = new THREE.Raycaster();
@@ -320,12 +395,12 @@ document.addEventListener("DOMContentLoaded", function () {
   window.addEventListener("pointerleave", releaseRotation);
 
   // 7. GSAP SCROLLTRIGGER STORYLINE
-  // Full scrollytelling arc, driven by scroll progress (0 -> 1, scrubbed
-  // both directions):
-  //   1. Header (constant) + subheader "...TCS saved the day"
-  //   2. Subheader swaps to "...gonna break" as screens glitch
-  //   3. Subheader swaps BACK as the repair-hands overlay appears
-  //   4. Subheader swaps to "It saved the world..." as screens end up fixed
+  // Three text frames, driven by scroll progress (0 -> 1, scrubbed both
+  // directions). Within a frame the paragraphs appear one after the other:
+  // the main one under the title first, then the side one (bottom right).
+  //   1. Two-digit years (main) -> the "00" rollover (side), screens glitch
+  //   2. The misreading's knock-on failures, split across main + side
+  //   3. TCS brought in to patch the code; repair tools appear, screens fixed
   gsap.registerPlugin(ScrollTrigger);
 
   gsap.timeline({
@@ -338,53 +413,61 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  const SUB_A = "When the world was crashing, TCS saved the day";
-  const SUB_B = "As the time came close, the 4 digit filed was gonna break";
-  const SUB_C = "It saved the world from a huge crash";
+  const FRAMES = [
+    {
+      start: 0,
+      main: "To save memory, programmers stored years using two digits instead of four, so 1997 was recorded simply as \u201c97\u201d",
+      side: "On 1 January 2000, that field would flip to \u201c00\u201d, and systems worldwide risked interpreting it as 1900 rather than 2000",
+      sideAt: 0.15
+    },
+    {
+      start: 0.36,
+      main: "This misreading threatened to trigger incorrect date calculations, cascading errors, and broader failures across",
+      side: "finance, aviation, government infrastructure, and other systems",
+      sideAt: 0.50,
+      continues: true // side finishes the main sentence — no gap when stacked
+    },
+    {
+      start: 0.68,
+      main: "With too few programmers in the US to fix the bug in time, companies including India\u2019s TCS were brought in to patch the code at scale",
+      side: "",
+      sideAt: 1
+    }
+  ];
 
-  const B1 = 0.24; // A -> B
-  const B2 = 0.50; // B -> A
-  const B3 = 0.76; // A -> C
-  const DIP = 0.025; // width of the brief fade-to-0 right at a boundary
+  const BUG_AT = FRAMES[0].sideAt; // screens break as the "00" paragraph lands
+  const TOOLS_AT = 0.74;           // repair tools fade in during frame 3
+  const FIXED_AT = 0.82;           // screens resolve once the tools are on
+  const DIP = 0.025; // width of the brief fade-to-0 right at a frame boundary
+  const FADE = 0.03; // fade-in length for the side paragraph and the tools
 
-  function fadeWindow(progress, inEnd, holdEnd, outEnd) {
-    if (progress < inEnd) return inEnd > 0 ? progress / inEnd : 1;
-    if (progress < holdEnd) return 1;
-    if (progress < outEnd) return 1 - (progress - holdEnd) / (outEnd - holdEnd);
-    return 0;
-  }
+  const clamp01 = (v) => Math.max(0, Math.min(1, v));
 
   function updateStoryState(progress) {
-    let subText;
-    if (progress < B1) subText = SUB_A;
-    else if (progress < B2) subText = SUB_B;
-    else if (progress < B3) subText = SUB_A;
-    else subText = SUB_C;
-    if (subheaderEl.textContent !== subText) subheaderEl.textContent = subText;
+    let i = FRAMES.length - 1;
+    while (i > 0 && progress < FRAMES[i].start) i--;
+    const frame = FRAMES[i];
 
+    if (subheaderEl.textContent !== frame.main) subheaderEl.textContent = frame.main;
+    if (sideTextEl.textContent !== frame.side) sideTextEl.textContent = frame.side;
+    sideTextEl.classList.toggle("TK4R5-side-text--continues", !!frame.continues);
+
+    // Dip both paragraphs to 0 around each frame boundary so the swap is hidden
     let dipOpacity = 1;
-    for (const b of [B1, B2, B3]) {
-      const dist = Math.abs(progress - b);
-      if (dist < DIP) {
-        dipOpacity = Math.min(dipOpacity, dist / DIP);
-      }
+    for (const f of FRAMES.slice(1)) {
+      const dist = Math.abs(progress - f.start);
+      if (dist < DIP) dipOpacity = Math.min(dipOpacity, dist / DIP);
     }
     subheaderEl.style.opacity = dipOpacity;
+    sideTextEl.style.opacity = clamp01((progress - frame.sideAt) / FADE) * dipOpacity;
 
-    const HANDS_SHOW_AT = 0.40; // well after screens turn critical at B1
-    let handsOpacity;
-    if (progress < HANDS_SHOW_AT) {
-      handsOpacity = 0;
-    } else {
-      handsOpacity = fadeWindow(progress, HANDS_SHOW_AT, 0.68, 0.76);
-    }
-    fixHandsCrtEl.style.opacity = handsOpacity;
-    fixHandsScreenEl.style.opacity = handsOpacity;
+    const toolsOpacity = clamp01((progress - TOOLS_AT) / FADE);
+    fixToolEls.forEach(el => { el.style.opacity = toolsOpacity; });
 
-    if (progress < B1) {
+    if (progress < BUG_AT) {
       // Phase 1: dates scrolling up to 31.12.99 — 2-digit year, matching
       // the Y2K four-digit-field problem itself
-      const p = progress / B1;
+      const p = progress / BUG_AT;
       const year = 1998 + Math.floor(p * 1.99);
       const day = String(1 + Math.floor(p * 30)).padStart(2, "0");
       const month = String(1 + Math.floor(p * 11)).padStart(2, "0");
@@ -392,7 +475,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const dateStr = `${day}.${month}.${yearShort}`;
 
       devices.forEach(d => d.screenTex.update(dateStr, false));
-    } else if (progress < 0.60) {
+    } else if (progress < FIXED_AT) {
       // Phase 2: bug manifestation — the broken devices' 2-digit year field
       // rolls over to "00" (1900); unaffected devices already show 2000
       devices.forEach(d => {
@@ -423,12 +506,14 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     renderer.render(scene, camera);
+    updateToolPins(time);
   }
 
   animate();
 
   // 9. RESIZE HANDLER
   window.addEventListener("resize", () => {
+    applyLayout();
     camera.aspect = container.clientWidth / container.clientHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(container.clientWidth, container.clientHeight);

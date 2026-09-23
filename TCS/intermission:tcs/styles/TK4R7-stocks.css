@@ -1,0 +1,217 @@
+/* styles/TK4R7-stocks.css — TK4R7: stock prices rebased to 100 since IPO */
+
+.TK4R7-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.TK4R7-sticky-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Left narrative panel */
+.TK4R7-left-panel {
+  flex: 0 0 40%;
+  height: 100vh;
+  padding: 48px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid var(--color-rule);
+  background: var(--color-bg);
+  z-index: 2;
+}
+
+.TK4R7-eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: 14px;
+}
+
+.TK4R7-title {
+  font-family: var(--font-display);
+  font-size: var(--type-heading);
+  font-weight: 400;
+  line-height: 1.1;
+  color: var(--color-secondary);
+  margin-bottom: 12px;
+}
+
+.TK4R7-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: 1.5;
+  color: var(--color-muted);
+  margin-bottom: 24px;
+}
+
+/* Custom HTML legend — chips carry identity, label text stays ink */
+.TK4R7-legend {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 4px;
+  margin-bottom: 24px;
+}
+
+.TK4R7-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: var(--type-legend);
+  font-weight: 500;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.TK4R7-legend-item.is-inactive { opacity: 0.35; }
+
+.TK4R7-legend-chip {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* Scrollytelling narrative blocks */
+.TK4R7-text-area {
+  flex: 1;
+  position: relative;
+  margin-top: 12px;
+}
+
+.TK4R7-text-block {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.TK4R7-text-block.is-active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.TK4R7-node-year {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.TK4R7-node-year::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-primary);
+}
+
+.TK4R7-block-heading {
+  font-family: var(--font-display);
+  font-size: var(--type-subheading);
+  color: var(--color-secondary);
+  margin-bottom: 8px;
+  line-height: 1.25;
+}
+
+.TK4R7-block-body {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: 1.6;
+  color: var(--color-text);
+}
+
+.TK4R7-source {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-muted);
+  border-top: 1px solid var(--color-rule);
+  padding-top: 12px;
+}
+
+/* Right chart panel */
+.TK4R7-right-panel {
+  flex: 0 0 60%;
+  height: 100vh;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--color-bg);
+  background-image:
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.TK4R7-chart-frame {
+  width: 100%;
+  height: 85vh;
+  box-sizing: border-box;
+}
+
+.TK4R7-chart-container {
+  width: 100%;
+  height: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 4px;
+  padding: 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+#TK4R7-chart {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Responsive layout (structural — not a type-token role) ── */
+@media (max-width: 900px) {
+  .TK4R7-sticky-container {
+    flex-direction: column;
+  }
+  .TK4R7-left-panel {
+    flex: 0 0 45vh;
+    width: 100%;
+    height: 45vh;
+    padding: 20px;
+    border-right: none;
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .TK4R7-right-panel {
+    flex: 0 0 55vh;
+    width: 100%;
+    height: 55vh;
+    padding: 12px;
+  }
+  .TK4R7-chart-frame { height: 100%; }
+  .TK4R7-chart-container { padding: 12px; }
+  .TK4R7-subtitle { display: none; }
+}

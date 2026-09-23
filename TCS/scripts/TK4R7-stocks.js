@@ -23,29 +23,11 @@ document.addEventListener("DOMContentLoaded", function () {
     "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"
   ];
 
-  const rawTCS = [100, 154, 69, 60, 293, 161, 99, 121, 169, 114, 98, 95, 142, 131, 107, 152, 121, 93, 116, 111, 79];
-  const rawINFY = [100, 159, 67, 89, 192, 128, 89, 104, 135, 118, 111, 82, 128, 136, 106, 164, 143, 90, 111, 117, 90];
-  const rawWIPRO = [100, 117, 70, 55, 283, 114, 96, 101, 143, 107, 95, 82, 134, 122, 86, 177, 137, 70, 120, 133, 79];
-  const rawHCLTECH = [100, 106, 77, 51, 304, 143, 91, 159, 215, 124, 99, 96, 124, 103, 119, 157, 125, 107, 147, 114, 102];
-
-  function calculateCumulative(arr) {
-    const cumulative = [];
-    let val = 100;
-    arr.forEach((v, i) => {
-      if (i === 0) {
-        cumulative.push(100);
-      } else {
-        val = val * (v / 100);
-        cumulative.push(Number(val.toFixed(2)));
-      }
-    });
-    return cumulative;
-  }
-
-  const dataTCS = calculateCumulative(rawTCS);
-  const dataINFY = calculateCumulative(rawINFY);
-  const dataWIPRO = calculateCumulative(rawWIPRO);
-  const dataHCLTECH = calculateCumulative(rawHCLTECH);
+  // Cumulative index, base 100 in 2006
+  const dataTCS = [100, 154, 107, 64, 187, 302, 299, 362, 613, 700, 686, 651, 926, 1217, 1300, 1983, 2407, 2239, 2594, 2882, 2265];
+  const dataINFY = [100, 159, 106, 95, 182, 234, 208, 216, 292, 345, 384, 313, 399, 542, 576, 943, 1347, 1216, 1352, 1578, 1419];
+  const dataWIPRO = [100, 117, 82, 45, 128, 146, 140, 141, 201, 216, 205, 167, 224, 272, 234, 413, 567, 399, 480, 638, 507];
+  const dataHCLTECH = [100, 106, 81, 41, 126, 180, 164, 261, 562, 699, 694, 665, 826, 847, 1007, 1579, 1977, 2115, 3100, 3524, 3584];
 
   const maxY = Math.ceil(Math.max(...dataTCS, ...dataINFY, ...dataWIPRO, ...dataHCLTECH) * 1.05);
 
@@ -54,10 +36,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const steps = [
     { revealUntil: 4, markerIdx: 3, yearLabel: "2009" },
-    { revealUntil: 8, markerIdx: 7, yearLabel: "2013" },
-    { revealUntil: 13, markerIdx: 12, yearLabel: "2018" },
-    { revealUntil: 17, markerIdx: 16, yearLabel: "2022" },
-    { revealUntil: 21, markerIdx: 19, yearLabel: "2025" }
+    { revealUntil: 12, markerIdx: 11, yearLabel: "2017" },
+    { revealUntil: 18, markerIdx: 17, yearLabel: "2023" },
+    { revealUntil: 21, markerIdx: 20, yearLabel: "2026" }
   ];
 
   // 3. DOM references — always use the module prefix
@@ -100,20 +81,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const baseOption = {
     backgroundColor: "transparent",
-    grid: { left: "3%", right: "6%", bottom: "6%", top: "8%", containLabel: true },
+    // containLabel ignores endLabels, so reserve fixed room on the right for the longest name
+    grid: { left: "3%", right: 92, bottom: "6%", top: "8%", containLabel: true },
     legend: { data: categories, show: false },
     tooltip: {
       trigger: "axis",
       backgroundColor: SURFACE,
-      borderColor: RULE,
-      borderWidth: 1,
+      borderWidth: 0,
       textStyle: { color: INK, fontFamily: FONT_BODY, fontSize: 14 },
       formatter: function (params) {
         let body = `<div style="font-family:${FONT_MONO};font-size:11px;margin-bottom:4px;color:${MUTED};">YEAR: ${params[0].name}</div>`;
         params.forEach((item) => {
           body += `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 0;">
             <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${item.color};margin-right:6px;"></span>${item.seriesName}:</span>
-            <strong style="font-family:${FONT_MONO};color:${INK};">${item.value.toFixed(2)}</strong>
+            <strong style="font-family:${FONT_MONO};color:${INK};">${item.value.toLocaleString("en-IN")}</strong>
           </div>`;
         });
         return body;

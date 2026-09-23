@@ -1,0 +1,213 @@
+/* styles/globals.css — TCS design tokens. Single source of truth. */
+
+@font-face {
+  font-family: "Reckless";
+  src: url("../fonts/Reckless-Medium.woff2") format("woff2"),
+       url("../fonts/Reckless-Medium.woff") format("woff");
+  font-weight: 400 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Reckless";
+  src: url("../fonts/Reckless-MediumItalic.woff2") format("woff2"),
+       url("../fonts/Reckless-MediumItalic.woff") format("woff");
+  font-weight: 400 500;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Reckless";
+  src: url("../fonts/Reckless-Bold.woff2") format("woff2"),
+       url("../fonts/Reckless-Bold.woff") format("woff");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Reckless";
+  src: url("../fonts/Reckless-BoldItalic.woff2") format("woff2"),
+       url("../fonts/Reckless-BoldItalic.woff") format("woff");
+  font-weight: 600 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  /* ── Type scale — pc / desktop (≥1024px) ── */
+  --type-stat:       72px;
+  --type-heading:    36px;
+  --type-subheading: 22px;
+  --type-body:       18px;
+  --type-legend:     14px;
+  --type-eyebrow:    11px;
+
+  --font-display: "Reckless", Georgia, "Times New Roman", serif;
+  --font-body:    "Archivo", sans-serif;
+  --font-mono:    "IBM Plex Mono", ui-monospace, monospace;
+
+  /* ── Section spacing — pc / desktop (≥1024px) ── */
+  --spacing: 120px;
+
+  /* ── Surfaces & ink ── */
+  --color-bg:           #f3efe9;
+  --color-bg-warm:      #e6e0d4;
+  --color-surface:      #ffffff;
+  --color-bg-dark:      #001647;
+
+  --color-text:         #001647;
+  --color-muted:        #5a6580;
+  --color-text-invert:  #f3efe9;
+  --color-muted-invert: #9fb0d4;
+  --color-rule:         #d9d3c6;
+  --color-grid:         #cfe3e3;
+
+  /* ── Brand / accent ── */
+  --color-primary:   #2540b4;
+  --color-secondary: #001647;
+  --color-accent:    #8dd7d6;
+  --color-sky:       #5ba9d1;
+  --color-signal:    #ff6900;
+  --color-amber:     #f3ad3d;
+  --color-green:     #7abc72;
+  --color-forest:    #10371a;
+  --color-mint:      #a7d7bc;
+  --color-plum:      #7927af;
+
+  /* ── Chart: categorical, light. FIXED ORDER — assign 1..6, never cycle ── */
+  --cat-1: #2946ba;
+  --cat-2: #fe6906;
+  --cat-3: #41c5c5;
+  --cat-4: #e5a02c;
+  --cat-5: #7827ae;
+  --cat-6: #7abd72;
+
+  /* ── Chart: categorical, dark (on --color-bg-dark). Same slot order ── */
+  --cat-dark-1: #648bff;
+  --cat-dark-2: #ee6200;
+  --cat-dark-3: #2ca7a7;
+  --cat-dark-4: #c58502;
+  --cat-dark-5: #b569f2;
+  --cat-dark-6: #65a75e;
+
+  /* ── Chart: sequential (magnitude), single hue, light → dark ── */
+  --seq-100: #90a8e3;
+  --seq-200: #6c8bde;
+  --seq-300: #4a6dd7;
+  --seq-400: #3150c5;
+  --seq-500: #223a9c;
+  --seq-600: #182a6b;
+
+  --seq-dark-100: #2b49be;
+  --seq-dark-200: #4265d7;
+  --seq-dark-300: #6082e6;
+  --seq-dark-400: #82a0ee;
+  --seq-dark-500: #a6bdf5;
+  --seq-dark-600: #cad9fb;
+
+  /* ── Chart: diverging — Cobalt ↔ Orange, NEUTRAL midpoint ── */
+  --div-neg-3: #3150c5;
+  --div-neg-2: #5a7ad6;
+  --div-neg-1: #89a1df;
+  --div-mid:   #dcd7cb;
+  --div-pos-1: #d59071;
+  --div-pos-2: #d46935;
+  --div-pos-3: #c04d00;
+
+  /* ── Status — reserved meaning, never a series color ── */
+  --status-good:     #2f7d32;
+  --status-warning:  #b07503;
+  --status-serious:  #c04d00;
+  --status-critical: #a31f1f;
+}
+
+/* iPad (769px–1023px) */
+@media (max-width: 1023px) {
+  :root {
+    --type-stat:       56px;
+    --type-heading:    32px;
+    --type-subheading: 20px;
+    --type-body:       16px;
+    --type-legend:     12px;
+    --type-eyebrow:    11px;
+    --spacing: 110px;
+  }
+}
+
+/* Mobile (≤768px) */
+@media (max-width: 768px) {
+  :root {
+    --type-stat:       44px;
+    --type-heading:    28px;
+    --type-subheading: 17px;
+    --type-body:       14px;
+    --type-legend:     11px;
+    --type-eyebrow:    10px;
+    --spacing: 100px;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* overflow-x lives on html (the actual root scroller in standards mode), not
+   body — body establishing its own overflow triggers a second, competing
+   scroll context that breaks position:sticky for every descendant. */
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+.TK4R-spacer {
+  height: var(--spacing);
+}
+
+.TK4R-intro {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 160px 24px 0;
+  text-align: center;
+}
+
+.TK4R-eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin: 0 0 18px;
+}
+
+.TK4R-title {
+  font-family: var(--font-display);
+  font-size: var(--type-stat);
+  line-height: 1.02;
+  margin: 0 0 20px;
+  color: var(--color-text);
+}
+
+.TK4R-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--type-subheading);
+  line-height: 1.5;
+  color: var(--color-muted);
+  max-width: 60ch;
+  margin: 0 auto;
+}
+
+.TK4R-footer {
+  border-top: 1px solid var(--color-rule);
+  padding: 40px 24px 80px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-muted);
+}

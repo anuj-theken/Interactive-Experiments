@@ -151,10 +151,13 @@
 
 /* overflow-x lives on html (the actual root scroller in standards mode), not
    body — body establishing its own overflow triggers a second, competing
-   scroll context that breaks position:sticky for every descendant. */
+   scroll context that breaks position:sticky for every descendant.
+   `clip` (with `hidden` as the fallback) clips without making html a scroll
+   container at all, which mobile browsers handle more reliably for sticky. */
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {

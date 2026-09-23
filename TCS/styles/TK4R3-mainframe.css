@@ -72,12 +72,14 @@
    this box from a real 3D anchor point. */
 .TK4R3-terminal-display {
   position: absolute;
-  left: 27.85%;
-  top: 39.2%;
+  left: 25.17%;
+  top: 39.72%;
   transform: translate(-50%, -50%);
-  width: 19.5%;
-  height: 24%;
-  padding: 1.4% 1.8%;
+  /* Sized in vh because the model scales with viewport height, not width
+     (same as 20.35% x 25% on the 16:10 layout it was tuned on). */
+  width: 32.55vh;
+  height: 25vh;
+  padding: 2.24vh 2.88vh;
   overflow: hidden;
   z-index: 2;
   background:
@@ -172,13 +174,16 @@
 }
 
 /* Photos for frames 2/6/8 — overlaid top-right of the model, shown only
-   during their own card's on-screen window (see the GSAP timeline). */
+   during their own card's on-screen window (see the GSAP timeline).
+   Top edge sits halfway between the header and the top of the model. */
 .TK4R3-frame-image {
   position: absolute;
-  top: 10%;
-  right: 12%;
-  width: 23vw;
-  max-width: 320px;
+  top: 17%;
+  /* Pinned to the model rather than the window edge: the model is centred
+     and scales with height, so offsets from centre are in vh (matches the
+     old right: 12% / 320px at 1440x900). */
+  left: calc(50% + 25.2vh);
+  width: 35.5vh;
   border: 2px solid #2bf189;
   box-shadow: 0 0 10px rgba(43, 241, 137, 0.4);
   opacity: 0;
@@ -189,5 +194,46 @@
 @media (max-width: 850px) {
   .TK4R3-narrative-card {
     font-size: 0.85rem;
+  }
+}
+
+/* Portrait / narrow (phones, iPad portrait) — must match compactQuery in
+   TK4R3-mainframe.js. The script frames the model so only its left side is
+   in view, sizes the terminal box (and its font) to the model's screen, and
+   sizes the photos to fill the width below the screen. */
+@media (max-aspect-ratio: 11/10), (max-width: 700px) {
+  .TK4R3-page-header {
+    top: 5%;
+    width: calc(100% - 32px);
+    font-size: clamp(1.35rem, 5.6vw, 2.1rem);
+    line-height: 1.15;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .TK4R3-terminal-display {
+    padding: 0.7em 0.9em;
+  }
+
+  .TK4R3-narrative-card {
+    font-size: 1em;
+  }
+
+  /* Width/height set by the script from each photo's aspect ratio. */
+  .TK4R3-frame-image {
+    top: auto;
+    bottom: 52px; /* clears the footer caption; matches COMPACT_IMAGE_BOTTOM */
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: min(calc(100% - 32px), 640px);
+    max-width: none;
+  }
+
+  .TK4R3-footer-caption {
+    width: calc(100% - 32px);
+    text-align: center;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
   }
 }
