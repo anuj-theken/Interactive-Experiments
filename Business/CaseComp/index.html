@@ -6,7 +6,17 @@
 <style>
 *{box-sizing:border-box}html,body{margin:0;background:#f4f1e9;color:#111;font-family:Arial,Helvetica,sans-serif;overflow:hidden}
 
-.interactive{position:fixed;inset:0;display:block;background:#f4f1e9;overflow:hidden;touch-action:none;cursor:grab;z-index:5}
+/* wall texture — a fine plaster/paper grain sitting under the whole
+   scene, viewport-fixed (not part of .surface) so it reads as the wall
+   the posters are pinned to rather than something printed on the grid
+   itself. Pure luminance noise at very low alpha: it never shifts the
+   base #f4f1e9 tone, just breaks up the otherwise perfectly flat fill
+   the same way a real wall/paper surface never is. */
+.interactive{position:fixed;inset:0;display:block;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"),
+    #f4f1e9;
+  overflow:hidden;touch-action:none;cursor:grab;z-index:5}
 .interactive:active{cursor:grabbing}
 .interactive.locked{cursor:default}
 .surface{position:absolute;left:0;top:0;transform-origin:0 0;
@@ -267,7 +277,7 @@
   </aside>
 </div>
 
-<script src="poster_data.js?v=20260917"></script>
+<script src="poster_data.js?v=20260928"></script>
 <script>
 (()=>{
 const interactive=document.querySelector('#interactive'), surface=document.querySelector('#surface');
@@ -474,7 +484,162 @@ while(freeCells.size>0 && guard-->0){
   if(!progressed) break;
 }
 
-// -- 4b. colour assignment — adjacency-aware, not list-order. With this
+// -- 4b. orphan consolidation — the round-robin growth above sometimes
+//    boxes a region in early (usually a mid-size one, pinched between
+//    faster neighbours), forcing it to jump to the nearest free cell
+//    anywhere on the board for its remaining posters — a stray tile far
+//    from its own mass. Find each region's disconnected fragments and
+//    hand every stray cell to whichever neighbouring region actually
+//    surrounds it (a free merge — that region already borders the
+//    cell), paying for it with a same-count chain of boundary-cell
+//    swaps relayed back through however many regions sit between there
+//    and our own main body, so the cell we get back always touches our
+//    main mass directly. Every region in the chain keeps the exact same
+//    poster count throughout; only the boundary between each adjacent
+//    pair shifts by one cell.
+function regionComponents(name){
+  const cells=regionCells[name];
+  const set=new Set(cells), seen=new Set(), comps=[];
+  cells.forEach(start=>{
+    if(seen.has(start)) return;
+    const comp=[start]; seen.add(start);
+    let frontier=[start];
+    while(frontier.length){
+      const next=[];
+      frontier.forEach(key=>{
+        const {col,row}=coordOf.get(key);
+        NEI4.forEach(([dx,dy])=>{
+          const nk=cellKey(col+dx,row+dy);
+          if(set.has(nk) && !seen.has(nk)){ seen.add(nk); comp.push(nk); next.push(nk); }
+        });
+      });
+      frontier=next;
+    }
+    comps.push(comp);
+  });
+  comps.sort((a,b)=>b.length-a.length);
+  return comps;
+}
+function regionAdjacencyGraph(){
+  const adj={};
+  sortedNames.forEach(n=>adj[n]=new Set());
+  coordOf.forEach((c,key)=>{
+    const owner=cellOwner.get(key);
+    if(!owner) return;
+    NEI4.forEach(([dx,dy])=>{
+      const nk=cellKey(c.col+dx,c.row+dy);
+      if(!coordOf.has(nk)) return;
+      const o2=cellOwner.get(nk);
+      if(o2 && o2!==owner) adj[owner].add(o2);
+    });
+  });
+  return adj;
+}
+// a cell owned by fromRegion that borders some cell owned by intoRegion
+function findBoundaryCell(fromRegion,intoRegion){
+  for(const key of regionCells[fromRegion]){
+    const {col,row}=coordOf.get(key);
+    for(const [dx,dy] of NEI4){
+      if(cellOwner.get(cellKey(col+dx,row+dy))===intoRegion) return key;
+    }
+  }
+  return null;
+}
+// a cell owned by fromRegion that borders any cell in targetSet
+function findBoundaryCellTouchingSet(fromRegion,targetSet){
+  for(const key of regionCells[fromRegion]){
+    const {col,row}=coordOf.get(key);
+    for(const [dx,dy] of NEI4){
+      if(targetSet.has(cellKey(col+dx,row+dy))) return key;
+    }
+  }
+  return null;
+}
+function applySwap(cellId,fromName,toName){
+  cellOwner.set(cellId,toName);
+  regionCells[fromName].splice(regionCells[fromName].indexOf(cellId),1);
+  regionCells[toName].push(cellId);
+}
+const MAX_CHAIN_HOPS=6;
+for(let pass=0; pass<30; pass++){
+  let anyChange=false;
+  sortedNames.forEach(name=>{
+    const comps=regionComponents(name);
+    if(comps.length<=1) return;
+    const mainSet=new Set(comps[0]);
+    for(let ci=1; ci<comps.length; ci++){
+      comps[ci].forEach(orphan=>{
+        if(cellOwner.get(orphan)!==name || mainSet.has(orphan)) return;
+        const {col,row}=coordOf.get(orphan);
+        const hostVotes={};
+        NEI4.forEach(([dx,dy])=>{
+          const o=cellOwner.get(cellKey(col+dx,row+dy));
+          if(o && o!==name) hostVotes[o]=(hostVotes[o]||0)+1;
+        });
+        const host=Object.entries(hostVotes).sort((a,b)=>b[1]-a[1]).map(e=>e[0])[0];
+        if(!host) return;
+        const mainNeighbors=new Set();
+        mainSet.forEach(key=>{
+          const {col:mc,row:mr}=coordOf.get(key);
+          NEI4.forEach(([dx,dy])=>{
+            const o=cellOwner.get(cellKey(mc+dx,mr+dy));
+            if(o && o!==name) mainNeighbors.add(o);
+          });
+        });
+        // shortest region-to-region path from host to any region already
+        // touching our main body (BFS over the live adjacency graph,
+        // never routing back through name itself)
+        const graph=regionAdjacencyGraph();
+        let path=null;
+        if(mainNeighbors.has(host)){
+          path=[host];
+        } else {
+          const prev={}, visited=new Set([host]);
+          let queue=[host];
+          outer: while(queue.length){
+            const next=[];
+            for(const r of queue){
+              for(const nb of graph[r]){
+                if(nb===name || visited.has(nb)) continue;
+                visited.add(nb); prev[nb]=r; next.push(nb);
+                if(mainNeighbors.has(nb)){
+                  const p=[nb]; let cur=nb;
+                  while(cur!==host){ cur=prev[cur]; p.push(cur); }
+                  path=p.reverse(); // [host, ..., region touching main]
+                  break outer;
+                }
+              }
+            }
+            queue=next;
+          }
+        }
+        if(!path || path.length>MAX_CHAIN_HOPS) return;
+        // plan every boundary-cell hand-off before touching anything —
+        // host -> path[1] -> ... -> R0(=last, touches main) -> name
+        const gives=[];
+        let ok=true;
+        for(let i=0;i<path.length-1;i++){
+          const donor=findBoundaryCell(path[i],path[i+1]);
+          if(!donor){ ok=false; break; }
+          gives.push({cell:donor, from:path[i], to:path[i+1]});
+        }
+        if(ok){
+          const R0=path[path.length-1];
+          const lastDonor=findBoundaryCellTouchingSet(R0,mainSet);
+          if(!lastDonor) ok=false; else gives.push({cell:lastDonor, from:R0, to:name});
+        }
+        if(!ok) return;
+        applySwap(orphan,name,host); // host already touches the orphan — a free merge
+        gives.forEach(g=>applySwap(g.cell,g.from,g.to));
+        mainSet.add(gives[gives.length-1].cell);
+        anyChange=true;
+      });
+    }
+  });
+  if(!anyChange) break;
+}
+
+// -- 4c. colour assignment — adjacency-aware, not list-order. With this
 //    many opportunity spaces, evenly spacing hues by array order can hand
 //    two hues that are close on the wheel to two regions that happen to
 //    sit right next to each other on the diamond, so the seam between
@@ -499,7 +664,7 @@ coordOf.forEach((c,key)=>{
   });
 });
 const N_SPACES=opportunitySpaces.length, HUE_STEP=360/N_SPACES;
-const BANDS=[{s:78,l:38},{s:64,l:50},{s:88,l:29}];
+const BANDS=[{s:80,l:26},{s:68,l:34},{s:88,l:19}];
 function hueDist(a,b){ const d=Math.abs(a-b)%360; return Math.min(d,360-d); }
 const colorOrder=[...opportunitySpaces].sort((a,b)=>clusterAdj[b].size-clusterAdj[a].size);
 const usedHueSlots=new Set(), CLUSTER_HUE={}, CLUSTER_COLORS={};
@@ -560,11 +725,17 @@ sortedNames.forEach(name=>{
       const canvas=document.createElement('canvas');
       canvas.className='poster';
       // internal resolution matches the source's own aspect ratio at a
-      // fixed high pixel size, so the fine grain stays crisp even at
-      // max zoom; CSS object-fit:contain then letterboxes it into the
-      // card exactly like the old <img> did.
+      // fixed pixel size — sized to the card's largest actual on-screen
+      // height (CELL_H at LABEL_HIDE_ZOOM, the most this ever gets
+      // shown before the real photo crossfades in, plus headroom for
+      // retina) rather than an arbitrarily high one. A too-high
+      // resolution drawn this small forces the browser to minify the
+      // sparse dot pattern hard, which moirés into a white-flecked
+      // digital plaid instead of reading as ink on paper. CSS
+      // object-fit:contain then letterboxes it into the card exactly
+      // like the old <img> did.
       const boxAR=w/h, imgAR=p.ratio||boxAR;
-      canvas.height=460; canvas.width=Math.round(460*imgAR);
+      canvas.height=160; canvas.width=Math.round(160*imgAR);
       card.appendChild(canvas);
       renderPosterCanvas(canvas,p.file,color);
       // the real photo — same sizing/crop treatment as the canvas above,
@@ -586,7 +757,7 @@ sortedNames.forEach(name=>{
       card.style.setProperty('--zoomCover', zoomCover.toFixed(4));
       card.insertAdjacentHTML('beforeend', `<span class="matchSpotlight"></span>`);
     } else {
-      card.innerHTML=`<span class="emptyNo">#${p.no}</span><span class="fillerTint" style="--cc:${color}"></span>`;
+      card.innerHTML=`<span class="emptyNo">#${p.posterNo||p.no}</span><span class="fillerTint" style="--cc:${color}"></span>`;
     }
     card.insertAdjacentHTML('beforeend', `<span class="halo"></span>`);
     surface.appendChild(card);
@@ -792,7 +963,7 @@ const scenes=storyPosters.map((p,i)=>{
     no:p.no,
     camera:{x:t.x, y:t.y, zoom:t.zoom},
     quote:top.text,
-    respondent:'Respondent #'+p.no,
+    respondent:'Respondent #'+(p.posterNo||p.no),
     demo:[top.ageBin, top.city].filter(Boolean).join(', '),
     end:i===storyPosters.length-1
   };
@@ -1109,7 +1280,7 @@ function openPoster(p){
   zoomToPoster(p.no);
 
   const fc=feelingColor(p.feeling);
-  panelKicker.innerHTML=`<span class="dot" style="background:${fc}"></span><span>${esc(p.feeling)}</span><span>·</span><span>Poster #${esc(p.no)}</span>`;
+  panelKicker.innerHTML=`<span class="dot" style="background:${fc}"></span><span>${esc(p.feeling)}</span><span>·</span><span>Poster #${esc(p.posterNo||p.no)}</span>`;
   panelTitle.textContent=p.opportunitySpace;
 
   // an active age filter narrows the carousel to just the responses in
