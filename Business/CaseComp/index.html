@@ -373,271 +373,113 @@ for(let hw=4; hw<80; hw++){
   }
 }
 const coordOf=new Map(insideCells.map(c=>[cellKey(c.col,c.row),c]));
-const freeCells=new Set(coordOf.keys());
+
+// -- 2. recursive bisection — split the ordered list of clusters into
+//    two halves of roughly equal poster count, cut the diamond's cells
+//    the same way along its longer axis (sorted by that axis, ties broken
+//    by the other, so each side of the cut is one contiguous run), and
+//    recurse. Every cluster ends up as a single compact block of exactly
+//    its own size — no seeds, no stray fragments to repair afterwards.
+//    The list order is thematic (THEME_ORDER), and bisection keeps list
+//    neighbours spatially adjacent, so related spaces (all the money
+//    ones, all the household ones…) sit next to each other.
+const THEME_ORDER=[
+  'Growing my money','Where did my money go?','Getting your money back','Buying the insurance','Madam, OTP?',
+  'Finding the exact right thing','Ordering',
+  'Keeping the machines running','Renting a home','Looking after the pet','Keeping up with the school',
+  "Managing the family's health",'What to cook today?','Sticking to the goal','Running your wedding',
+  'Getting the slot','Getting a ride','Getting the visa','Planning the trip',
+];
+const themedNames=[
+  ...THEME_ORDER.filter(n=>byCluster[n]&&byCluster[n].length),
+  ...sortedNames.filter(n=>!THEME_ORDER.includes(n)&&byCluster[n].length),
+];
+const regionCells={};
+sortedNames.forEach(name=>{ regionCells[name]=[]; });
+function bisect(names,cells){
+  if(!cells.length) return;
+  if(names.length===1){ regionCells[names[0]].push(...cells.map(c=>cellKey(c.col,c.row))); return; }
+  const total=names.reduce((s,n)=>s+targetCount[n],0);
+  // split point that best balances the two halves' counts, order kept
+  let acc=0,split=1,bestDiff=Infinity;
+  for(let i=1;i<names.length;i++){
+    acc+=targetCount[names[i-1]];
+    const diff=Math.abs(total/2-acc);
+    if(diff<bestDiff){ bestDiff=diff; split=i; }
+  }
+  const leftCount=names.slice(0,split).reduce((s,n)=>s+targetCount[n],0);
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  cells.forEach(c=>{
+    const x=c.col*CELL_W, y=c.row*CELL_H;
+    minX=Math.min(minX,x); maxX=Math.max(maxX,x); minY=Math.min(minY,y); maxY=Math.max(maxY,y);
+  });
+  const byX=(maxX-minX)>=(maxY-minY);
+  const sorted=[...cells].sort(byX ? (p,q)=>p.col-q.col||p.row-q.row : (p,q)=>p.row-q.row||p.col-q.col);
+  bisect(names.slice(0,split),sorted.slice(0,leftCount));
+  bisect(names.slice(split),sorted.slice(leftCount));
+}
+bisect(themedNames,insideCells);
 const cellOwner=new Map();
+sortedNames.forEach(name=>regionCells[name].forEach(key=>cellOwner.set(key,name)));
 
-// -- 2. one seed per cluster: biggest cluster seeds at the centre; every
-//    later seed is the free cell that maximises its distance from all
-//    earlier seeds (farthest-point sampling), so seeds start spread out
-//    and their regions grow into each other rather than one swallowing
-//    the rest --
-const seeds=[];
-sortedNames.forEach((name,i)=>{
-  let bestKey=null;
-  if(i===0){
-    bestKey=cellKey(gcx,gcy);
-  } else {
-    let bestScore=-Infinity;
-    freeCells.forEach(key=>{
-      const {col,row}=coordOf.get(key);
-      let minD=Infinity;
-      seeds.forEach(s=>{ const d=Math.abs(col-s.col)+Math.abs(row-s.row); if(d<minD) minD=d; });
-      if(minD>bestScore){ bestScore=minD; bestKey=key; }
-    });
-  }
-  const c=coordOf.get(bestKey);
-  seeds.push({name,col:c.col,row:c.row});
-  cellOwner.set(bestKey,name);
-  freeCells.delete(bestKey);
-});
-
-// -- 3. round-robin BFS growth: each cluster claims its nearest free cell
-//    one at a time (not all at once), so every region grows in lockstep
-//    and they meet each other with an organic, interleaved edge instead
-//    of one finishing its whole shape before the next starts --
-const regionQueue={}, regionCells={};
-sortedNames.forEach(name=>{ regionQueue[name]=[]; regionCells[name]=[]; });
-function enqueueNeighbors(name,key){
-  const {col,row}=coordOf.get(key);
-  NEI4.forEach(([dx,dy])=>{
-    const nk=cellKey(col+dx,row+dy);
-    if(coordOf.has(nk) && freeCells.has(nk)) regionQueue[name].push(nk);
-  });
-}
-seeds.forEach(s=>{ regionCells[s.name].push(cellKey(s.col,s.row)); enqueueNeighbors(s.name,cellKey(s.col,s.row)); });
-
-function nearestFreeCellToRegion(name){
-  const visited=new Set(regionCells[name]);
-  let frontier=regionCells[name].slice();
-  while(frontier.length){
-    const next=[];
-    for(const key of frontier){
-      const {col,row}=coordOf.get(key);
-      for(const [dx,dy] of NEI4){
-        const nk=cellKey(col+dx,row+dy);
-        if(!coordOf.has(nk) || visited.has(nk)) continue;
-        visited.add(nk);
-        if(freeCells.has(nk)) return nk;
-        next.push(nk);
-      }
-    }
-    frontier=next;
-  }
-  return null;
-}
-
-let remaining=sortedNames.filter(name=>regionCells[name].length<targetCount[name]);
-let guard=insideCells.length*4;
-while(remaining.length && freeCells.size>0 && guard-->0){
-  for(const name of remaining){
-    if(regionCells[name].length>=targetCount[name]) continue;
-    let claimed=null;
-    while(regionQueue[name].length){
-      const cand=regionQueue[name].shift();
-      if(freeCells.has(cand)){ claimed=cand; break; }
-    }
-    if(!claimed) claimed=nearestFreeCellToRegion(name);
-    if(claimed){
-      cellOwner.set(claimed,name);
-      freeCells.delete(claimed);
-      regionCells[name].push(claimed);
-      enqueueNeighbors(name,claimed);
-    }
-  }
-  remaining=sortedNames.filter(name=>regionCells[name].length<targetCount[name]);
-}
-
-// -- 4. a handful of inside-cells can be left over once every region hit
-//    its target count (the diamond mask is sized >= total posters) —
-//    hand each to whichever neighbouring region borders it most, so the
-//    diamond stays solid with no unclaimed holes --
-guard=200;
-while(freeCells.size>0 && guard-->0){
-  let progressed=false;
-  [...freeCells].forEach(key=>{
-    const {col,row}=coordOf.get(key);
-    const votes={};
-    NEI4.forEach(([dx,dy])=>{
-      const owner=cellOwner.get(cellKey(col+dx,row+dy));
-      if(owner) votes[owner]=(votes[owner]||0)+1;
-    });
-    const entries=Object.entries(votes);
-    if(entries.length){
-      entries.sort((a,b)=>b[1]-a[1]);
-      const owner=entries[0][0];
-      cellOwner.set(key,owner);
-      regionCells[owner].push(key);
-      freeCells.delete(key);
-      progressed=true;
-    }
-  });
-  if(!progressed) break;
-}
-
-// -- 4b. orphan consolidation — the round-robin growth above sometimes
-//    boxes a region in early (usually a mid-size one, pinched between
-//    faster neighbours), forcing it to jump to the nearest free cell
-//    anywhere on the board for its remaining posters — a stray tile far
-//    from its own mass. Find each region's disconnected fragments and
-//    hand every stray cell to whichever neighbouring region actually
-//    surrounds it (a free merge — that region already borders the
-//    cell), paying for it with a same-count chain of boundary-cell
-//    swaps relayed back through however many regions sit between there
-//    and our own main body, so the cell we get back always touches our
-//    main mass directly. Every region in the chain keeps the exact same
-//    poster count throughout; only the boundary between each adjacent
-//    pair shifts by one cell.
-function regionComponents(name){
-  const cells=regionCells[name];
+// -- 3. stray repair — a straight cut through a piece that earlier cuts
+//    left non-convex can strand a cell or two away from their region's
+//    main block. Trade each stray to a neighbouring region in exchange
+//    for one of that region's cells touching our main block, only when
+//    both regions stay in one piece afterwards (counts never change).
+function componentsOf(cells){
   const set=new Set(cells), seen=new Set(), comps=[];
   cells.forEach(start=>{
     if(seen.has(start)) return;
-    const comp=[start]; seen.add(start);
-    let frontier=[start];
-    while(frontier.length){
-      const next=[];
-      frontier.forEach(key=>{
-        const {col,row}=coordOf.get(key);
-        NEI4.forEach(([dx,dy])=>{
-          const nk=cellKey(col+dx,row+dy);
-          if(set.has(nk) && !seen.has(nk)){ seen.add(nk); comp.push(nk); next.push(nk); }
-        });
+    const comp=[start], stack=[start]; seen.add(start);
+    while(stack.length){
+      const {col,row}=coordOf.get(stack.pop());
+      NEI4.forEach(([dx,dy])=>{
+        const nk=cellKey(col+dx,row+dy);
+        if(set.has(nk) && !seen.has(nk)){ seen.add(nk); comp.push(nk); stack.push(nk); }
       });
-      frontier=next;
     }
     comps.push(comp);
   });
-  comps.sort((a,b)=>b.length-a.length);
-  return comps;
+  return comps.sort((a,b)=>b.length-a.length);
 }
-function regionAdjacencyGraph(){
-  const adj={};
-  sortedNames.forEach(n=>adj[n]=new Set());
-  coordOf.forEach((c,key)=>{
-    const owner=cellOwner.get(key);
-    if(!owner) return;
-    NEI4.forEach(([dx,dy])=>{
-      const nk=cellKey(c.col+dx,c.row+dy);
-      if(!coordOf.has(nk)) return;
-      const o2=cellOwner.get(nk);
-      if(o2 && o2!==owner) adj[owner].add(o2);
+function neighbourKeys(key){
+  const {col,row}=coordOf.get(key);
+  return NEI4.map(([dx,dy])=>cellKey(col+dx,row+dy)).filter(k=>coordOf.has(k));
+}
+function tradeCells(name,give,other,take){
+  const swap=(arr,out,inn)=>{ arr.splice(arr.indexOf(out),1); arr.push(inn); };
+  swap(regionCells[name],give,take); swap(regionCells[other],take,give);
+  cellOwner.set(give,other); cellOwner.set(take,name);
+}
+for(let pass=0; pass<20; pass++){
+  let changed=false;
+  sortedNames.forEach(name=>{
+    const comps=componentsOf(regionCells[name]);
+    if(comps.length<=1) return;
+    const main=new Set(comps[0]);
+    comps.slice(1).flat().forEach(stray=>{
+      if(cellOwner.get(stray)!==name) return;
+      const hosts=[...new Set(neighbourKeys(stray).map(k=>cellOwner.get(k)).filter(o=>o&&o!==name))];
+      for(const other of hosts){
+        const candidates=regionCells[other].filter(k=>neighbourKeys(k).some(n=>main.has(n)));
+        const take=candidates.find(k=>{
+          tradeCells(name,stray,other,k);
+          const ok=componentsOf(regionCells[other]).length===1 && componentsOf(regionCells[name]).length<comps.length;
+          tradeCells(name,k,other,stray); // undo the trial
+          return ok;
+        });
+        if(take){ tradeCells(name,stray,other,take); main.add(take); changed=true; return; }
+      }
     });
   });
-  return adj;
+  if(!changed) break;
 }
-// a cell owned by fromRegion that borders some cell owned by intoRegion
-function findBoundaryCell(fromRegion,intoRegion){
-  for(const key of regionCells[fromRegion]){
-    const {col,row}=coordOf.get(key);
-    for(const [dx,dy] of NEI4){
-      if(cellOwner.get(cellKey(col+dx,row+dy))===intoRegion) return key;
-    }
-  }
-  return null;
-}
-// a cell owned by fromRegion that borders any cell in targetSet
-function findBoundaryCellTouchingSet(fromRegion,targetSet){
-  for(const key of regionCells[fromRegion]){
-    const {col,row}=coordOf.get(key);
-    for(const [dx,dy] of NEI4){
-      if(targetSet.has(cellKey(col+dx,row+dy))) return key;
-    }
-  }
-  return null;
-}
-function applySwap(cellId,fromName,toName){
-  cellOwner.set(cellId,toName);
-  regionCells[fromName].splice(regionCells[fromName].indexOf(cellId),1);
-  regionCells[toName].push(cellId);
-}
-const MAX_CHAIN_HOPS=6;
-for(let pass=0; pass<30; pass++){
-  let anyChange=false;
-  sortedNames.forEach(name=>{
-    const comps=regionComponents(name);
-    if(comps.length<=1) return;
-    const mainSet=new Set(comps[0]);
-    for(let ci=1; ci<comps.length; ci++){
-      comps[ci].forEach(orphan=>{
-        if(cellOwner.get(orphan)!==name || mainSet.has(orphan)) return;
-        const {col,row}=coordOf.get(orphan);
-        const hostVotes={};
-        NEI4.forEach(([dx,dy])=>{
-          const o=cellOwner.get(cellKey(col+dx,row+dy));
-          if(o && o!==name) hostVotes[o]=(hostVotes[o]||0)+1;
-        });
-        const host=Object.entries(hostVotes).sort((a,b)=>b[1]-a[1]).map(e=>e[0])[0];
-        if(!host) return;
-        const mainNeighbors=new Set();
-        mainSet.forEach(key=>{
-          const {col:mc,row:mr}=coordOf.get(key);
-          NEI4.forEach(([dx,dy])=>{
-            const o=cellOwner.get(cellKey(mc+dx,mr+dy));
-            if(o && o!==name) mainNeighbors.add(o);
-          });
-        });
-        // shortest region-to-region path from host to any region already
-        // touching our main body (BFS over the live adjacency graph,
-        // never routing back through name itself)
-        const graph=regionAdjacencyGraph();
-        let path=null;
-        if(mainNeighbors.has(host)){
-          path=[host];
-        } else {
-          const prev={}, visited=new Set([host]);
-          let queue=[host];
-          outer: while(queue.length){
-            const next=[];
-            for(const r of queue){
-              for(const nb of graph[r]){
-                if(nb===name || visited.has(nb)) continue;
-                visited.add(nb); prev[nb]=r; next.push(nb);
-                if(mainNeighbors.has(nb)){
-                  const p=[nb]; let cur=nb;
-                  while(cur!==host){ cur=prev[cur]; p.push(cur); }
-                  path=p.reverse(); // [host, ..., region touching main]
-                  break outer;
-                }
-              }
-            }
-            queue=next;
-          }
-        }
-        if(!path || path.length>MAX_CHAIN_HOPS) return;
-        // plan every boundary-cell hand-off before touching anything —
-        // host -> path[1] -> ... -> R0(=last, touches main) -> name
-        const gives=[];
-        let ok=true;
-        for(let i=0;i<path.length-1;i++){
-          const donor=findBoundaryCell(path[i],path[i+1]);
-          if(!donor){ ok=false; break; }
-          gives.push({cell:donor, from:path[i], to:path[i+1]});
-        }
-        if(ok){
-          const R0=path[path.length-1];
-          const lastDonor=findBoundaryCellTouchingSet(R0,mainSet);
-          if(!lastDonor) ok=false; else gives.push({cell:lastDonor, from:R0, to:name});
-        }
-        if(!ok) return;
-        applySwap(orphan,name,host); // host already touches the orphan — a free merge
-        gives.forEach(g=>applySwap(g.cell,g.from,g.to));
-        mainSet.add(gives[gives.length-1].cell);
-        anyChange=true;
-      });
-    }
-  });
-  if(!anyChange) break;
-}
+// row-major within each region, so the feeling-sorted posters (step 5)
+// read as tidy bands rather than a scatter
+sortedNames.forEach(name=>{
+  regionCells[name].sort((p,q)=>{ const a=coordOf.get(p), b=coordOf.get(q); return a.row-b.row||a.col-b.col; });
+});
 
 // -- 4c. colour assignment — adjacency-aware, not list-order. With this
 //    many opportunity spaces, evenly spacing hues by array order can hand
@@ -664,7 +506,7 @@ coordOf.forEach((c,key)=>{
   });
 });
 const N_SPACES=opportunitySpaces.length, HUE_STEP=360/N_SPACES;
-const BANDS=[{s:80,l:26},{s:68,l:34},{s:88,l:19}];
+const BANDS=[{s:92,l:33},{s:82,l:41},{s:96,l:26}];
 function hueDist(a,b){ const d=Math.abs(a-b)%360; return Math.min(d,360-d); }
 const colorOrder=[...opportunitySpaces].sort((a,b)=>clusterAdj[b].size-clusterAdj[a].size);
 const usedHueSlots=new Set(), CLUSTER_HUE={}, CLUSTER_COLORS={};
