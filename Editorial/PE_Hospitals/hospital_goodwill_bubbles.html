@@ -57,20 +57,31 @@ const deals = [
   ['Max Healthcare', 'Jaypee', 'Jaypee Healthcare Ltd', 'FY25', '100% equity via CIRP', 625, 570, 91]
 ];
 
-// Spread bubbles that share the same group + year horizontally
-const cellCount = {}, cellIdx = {};
-deals.forEach(d => { const k = d[0] + d[3]; cellCount[k] = (cellCount[k] || 0) + 1; });
+// Deals sharing a group + year form one cluster, laid out in px once bubble sizes are known
+const cells = {};
+deals.forEach(d => (cells[d[0] + d[3]] ??= []).push(d));
 
-const seriesData = groups.map(g => deals.filter(d => d[0] === g).map(d => {
-  const k = d[0] + d[3];
-  const n = cellCount[k];
-  const i = cellIdx[k] = (cellIdx[k] ?? -1) + 1;
-  const offset = (i - (n - 1) / 2) * 0.5;
-  return {
-    value: [years.indexOf(d[3]) + offset, groups.indexOf(g), d[7]],
-    short: d[1], full: d[2], year: d[3], deal: d[4], cons: d[5], gw: d[6]
-  };
-}));
+// Grain: each colour becomes a tiling canvas of itself with per-pixel lightness noise,
+// drawn at device resolution so the grain stays one screen pixel fine
+const dpr = window.devicePixelRatio || 1;
+function grain(hex) {
+  const n = Math.round(128 * dpr), cv = document.createElement('canvas');
+  cv.width = cv.height = n;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = hex;
+  ctx.fillRect(0, 0, n, n);
+  const img = ctx.getImageData(0, 0, n, n), px = img.data;
+  for (let i = 0; i < px.length; i += 4) {
+    const j = (Math.random() - 0.5) * 14;
+    px[i] += j; px[i + 1] += j; px[i + 2] += j;
+  }
+  ctx.putImageData(img, 0, 0);
+  return cv;
+}
+const grains = colors.map(grain);
+// ECharts draws a symbol as a 2-unit shape scaled up to symbolSize, which would stretch the
+// pattern too, so counter-scale it per bubble
+const grainFill = (gi, px) => ({ image: grains[gi], repeat: 'repeat', scaleX: 2 / (px * dpr), scaleY: 2 / (px * dpr) });
 
 const el = document.getElementById('chart');
 
@@ -84,6 +95,27 @@ function option() {
   const showLabels = k >= 0.6;
   const size = pct => (44 + pct * 0.62) * k;
 
+  // Pack each cluster side by side with a slight overlap so same-year deals read as one group,
+  // tighter than the gap to the neighbouring year; capped so a cluster can't run into the next year
+  const pos = new Map();
+  Object.values(cells).forEach(list => {
+    const r = list.map(d => size(d[7]) / 2);
+    const links = r.slice(1).reduce((t, ri, i) => t + r[i] + ri, 0);
+    const f = links ? Math.min(0.92, (1.2 * slot - r[0] - r[r.length - 1]) / links) : 0;
+    const xs = [0];
+    for (let i = 1; i < r.length; i++) xs.push(xs[i - 1] + (r[i - 1] + r[i]) * f);
+    const mid = (xs[0] - r[0] + xs[xs.length - 1] + r[r.length - 1]) / 2;
+    list.forEach((d, i) => pos.set(d, years.indexOf(d[3]) + (xs[i] - mid) / slot));
+  });
+  // larger bubbles first so overlapping smaller ones are drawn in front
+  const seriesData = groups.map((g, gi) => deals.filter(d => d[0] === g)
+    .sort((a, b) => b[7] - a[7])
+    .map(d => ({
+      value: [pos.get(d), groups.indexOf(g), d[7]],
+      itemStyle: { color: grainFill(gi, size(d[7])) },
+      short: d[1], full: d[2], year: d[3], deal: d[4], cons: d[5], gw: d[6]
+    })));
+
   const series = groups.map((g, gi) => ({
     name: g,
     type: 'scatter',
@@ -94,12 +126,9 @@ function option() {
     label: {
       show: showLabels,
       position: 'inside',
-      // name only where the bubble is big enough to hold it; tooltip has the rest
-      formatter: p => size(p.value[2]) >= 52 ? `{pct|${p.value[2]}%}\n{nm|${p.data.short}}` : `{pct|${p.value[2]}%}`,
-      rich: {
-        pct: { fontFamily: F.bold, fontWeight: 'bold', fontSize: 12, color: C.onFill, align: 'center' },
-        nm: { fontFamily: F.body, fontSize: 9, color: C.onFill, align: 'center' }
-      }
+      // goodwill % only; deal names are in the tooltip
+      formatter: p => `${p.value[2]}%`,
+      fontFamily: F.bold, fontWeight: 'bold', fontSize: 12, color: C.onFill
     },
     data: seriesData[gi],
     z: 10 // above the row-guide markLine (markLine defaults to z 5)
@@ -114,6 +143,12 @@ function option() {
       label: { show: true, position: 'start', distance: 12, formatter: p => groups[p.value], ...KEN.axisLabelBold, fontSize: narrow ? 12 : 14 },
       lineStyle: { color: C.grid, width: 0.8, type: 'solid' },
       data: groups.map((_, i) => ({ yAxis: i }))
+    },
+    // faint bands on alternate years so each bubble's year column is clear
+    markArea: {
+      silent: true,
+      itemStyle: { color: 'rgba(92,74,74,0.05)' },
+      data: [1, 3].map(i => [{ xAxis: i - 0.5 }, { xAxis: i + 0.5 }])
     }
   });
 
