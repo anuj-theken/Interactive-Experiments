@@ -9,22 +9,24 @@
 <script src="assets/ken-echarts.js"></script>
 <style>
   #chart { height: clamp(440px, 62vw, 580px); }
+  .subtitle { font-size: clamp(16px, 2.8vw, 19px); }
+  .legend-row .legend-items { flex: 1; justify-content: center; text-align: center; }
+  @media (min-width: 481px) { .footer-right { max-width: 340px; } }
+  @media (max-width: 480px) { .footer { gap: 14px; } }
 </style>
 </head>
 <body>
 <div class="page page--wide">
-  <div class="main-title">Deal multiples vs. hospital beds</div>
-  <div class="subtitle">EV/EBITDA paid in PE and strategic hospital deals against bed expansion in the listed universe, FY19–FY27</div>
+  <div class="main-title">Big Beds, Bigger Bids</div>
+  <div class="subtitle">Private Equity now pays a higher multiple for private Indian hospitals than the public market does for listed ones</div>
 
   <div class="legend-box">
     <div class="legend-row">
-      <div class="legend-key">Key</div>
       <div class="legend-items">
-        <div class="leg-item"><span class="swatch-bar" id="sw-beds"></span>Installed beds (listed universe)</div>
-        <div class="leg-item"><span class="swatch-dot" id="sw-deal"></span>PE / strategic deal EV/EBITDA</div>
+        <div class="leg-item"><span class="swatch-bar" id="sw-beds"></span>Installed beds (top 11 listed chains)</div>
+        <div class="leg-item"><span class="swatch-dot" id="sw-deal"></span>Deal multiple (EV/EBITDA)</div>
       </div>
     </div>
-    <div class="note">Bars show the FY19 starting total, then beds added each year. Where two deals fall in one year, markers are offset for readability. FY27 bed count not yet available.</div>
   </div>
 
   <div class="viz-area" id="chart"></div>
@@ -32,7 +34,7 @@
   <div class="footer">
     <img src="assets/logo.png" alt="The Ken" class="footer-logo">
     <div class="footer-center">Graphic by Anuj, 9 Oct '26</div>
-    <div class="footer-right">Source: Company filings</div>
+    <div class="footer-right">Source: Equirus Securities, IIFL industry reports, The Ken research. Bed count covers top 11 listed hospital chains</div>
   </div>
 </div>
 <script>
@@ -42,18 +44,18 @@
   document.getElementById('sw-deal').style.background = DEAL;
 
   const years = ['FY19','FY20','FY21','FY22','FY23','FY24','FY25','FY26','FY27'];
-  const beds  = [33859, 36483, 36713, 37360, 40974, 42177, 45186, 49744, null];
+  const beds  = [33859, 36483, 36713, 37360, 40974, 42177, 50328, 54886, null];
 
   // [buyer, target, fiscal year, EV/EBITDA, horizontal offset]
   const deals = [
-    ['IHH', 'Fortis', 'FY19', 22, 0],
+    ['IHH', 'Fortis Healthcare', 'FY19', 22, 0],
     ['Manipal', 'Columbia Asia', 'FY21', 17, 0],
     ['OTPP', 'Sahyadri', 'FY23', 14, 0],
     ['Blackstone', 'QCIL', 'FY24', 15, 0],
-    ['Max', 'Jaypee', 'FY25', 24, -0.18],
+    ['Max Healthcare', 'Jaypee Healthcare', 'FY25', 24, -0.18],
     ['Aster', 'QCIL', 'FY25', 25, 0.18],
     ['Permira + TPG', 'Cloudnine', 'FY27', 37, -0.18],
-    ['KKR', 'Medicover', 'FY27', 46, 0.18]
+    ['KKR', 'Medicover India', 'FY27', 46, 0.18]
   ];
 
   // waterfall: FY19 is the starting total; later years float on the prior total and show only the addition
@@ -83,13 +85,13 @@
           type: 'category', data: years,
           axisLine: { lineStyle: { color: C.rule, width: 1.5 } },
           axisTick: { show: false },
-          axisLabel: { ...KEN.axisLabelBold, fontSize: narrow ? 11 : 14, interval: 0 }
+          axisLabel: { ...KEN.axisLabelBold, fontSize: narrow ? 11 : 14, interval: 0, formatter: v => narrow ? v.replace('FY', '') : v }
         },
         { type: 'value', min: -0.5, max: years.length - 0.5, show: false }
       ],
       yAxis: [
         {
-          type: 'value', min: 0, max: 54, interval: 10, position: 'left',
+          type: 'value', min: 0, max: 60, interval: 10, position: 'left',
           name: 'Total beds (K)', nameLocation: 'end', nameGap: 18,
           nameTextStyle: { ...KEN.axisName, color: BEDS, align: 'left' },
           axisLine: { show: true, onZero: false, lineStyle: { color: BEDS, width: 1.5 } },
@@ -114,7 +116,7 @@
           data: wfBase, itemStyle: { color: 'transparent' }, silent: true, tooltip: { show: false }
         },
         {
-          name: 'Installed beds (listed universe)',
+          name: 'Installed beds (top 11 listed chains)',
           type: 'bar', stack: 'wf', xAxisIndex: 0, yAxisIndex: 0, barWidth: '60%',
           data: wfStep.map((v, i) => i === 0 ? { value: v, itemStyle: { color: BEDS } } : v),
           itemStyle: { color: BEDS_TINT, borderColor: BEDS, borderWidth: 1 },
@@ -146,9 +148,15 @@
           z: 2
         },
         {
-          name: 'PE / strategic deal EV/EBITDA',
+          name: 'Deal multiple (EV/EBITDA)',
           type: 'line', xAxisIndex: 1, yAxisIndex: 1,
-          data: dealPoints,
+          // phones: the FY25 pair (24x, 25x) labels drop below their dots so they clear the 26x caption
+          data: narrow
+            ? dealPoints.map(d =>
+                d.target === 'Jaypee Healthcare' ? { ...d, label: { ...d.label, position: 'bottom', align: 'right', offset: [-14, 0] } }
+                : d.buyer === 'Aster' ? { ...d, label: { ...d.label, position: 'bottom' } }
+                : d)
+            : dealPoints,
           symbol: 'circle', symbolSize: narrow ? 8 : 10,
           lineStyle: { color: DEAL, width: 1.5, opacity: 0.55 },
           itemStyle: { color: DEAL, borderColor: C.bg, borderWidth: 1.5 },
@@ -163,16 +171,28 @@
             formatter: p => KEN.tt.name(`${p.data.buyer} → ${p.data.target}`)
               + KEN.tt.meta(p.data.fy) + KEN.tt.line('EV/EBITDA', p.data.value[1] + 'x')
           },
-          // 22x reference (FY19 IHH / Fortis multiple)
+          // 26x reference
           markLine: {
             silent: true, symbol: 'none',
             lineStyle: { color: DEAL, type: [6, 4], width: 1, opacity: 0.55 },
             // sits in the right axis label column
             label: {
-              show: true, position: 'end', distance: 8, formatter: '22x',
+              show: true, position: 'end', distance: 8, formatter: '26x',
               color: DEAL, fontFamily: F.bold, fontWeight: 'bold', fontSize: 12, opacity: 1
             },
-            data: [{ yAxis: 22 }]
+            data: [
+              { yAxis: 26 },
+              // caption above the line in the FY21–FY24 gap: floating bars sit higher, deal dots lower
+              {
+                yAxis: 26, lineStyle: { opacity: 0 },
+                label: {
+                  position: 'insideMiddleTop', distance: 4, formatter: 'Average public market multiple',
+                  fontFamily: F.body, fontWeight: 'normal', fontStyle: 'normal', fontSize: narrow ? 11 : 12,
+                  // only the Light cut is loaded, so a hairline stroke in the text colour gives it medium weight
+                  textBorderColor: DEAL, textBorderWidth: 0.4
+                }
+              }
+            ]
           },
           z: 5
         }

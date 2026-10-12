@@ -137,6 +137,8 @@ body {
 .footer-center { font-size: 14px; color: var(--ken-text); text-align: center; flex: 1; }
 .footer-right  { font-size: 14px; color: var(--ken-text); text-align: right; max-width: 170px; flex-shrink: 0; }
 
+/* Mobile: footer stacks vertically — logo, credit, source — centred */
 @media (max-width: 480px) {
-  .footer-center, .footer-right { font-size: 12px; }
+  .footer { flex-direction: column; justify-content: center; gap: 6px; padding: 20px 0 16px; }
+  .footer-center, .footer-right { font-size: 12px; text-align: center; max-width: none; flex: none; }
 }
