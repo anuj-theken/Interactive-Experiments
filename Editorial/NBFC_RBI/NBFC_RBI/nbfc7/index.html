@@ -69,11 +69,17 @@
 
             .inline-legend-row {
                 display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 12px;
+                flex-direction: column;
+                gap: 8px;
                 font-size: 13px;
                 color: #444;
+                align-items: center;
+                justify-content: center;
+            }
+            .legend-items {
+                display: flex;
+                align-items: center;
+                gap: 6px;
                 flex-wrap: wrap;
             }
             .legend-circle-positive {
@@ -117,7 +123,6 @@
                 object-fit: contain;
             }
 
-            /* Optimized Mobile Layout Spaces */
             @media (max-width: 767px) {
                 body {
                     padding: 6px 10px 4px;
@@ -130,6 +135,8 @@
                 }
                 #header-section .subheader {
                     margin-bottom: 6px;
+                    font-size: 16px;
+                    padding-bottom: 12px;
                 }
                 #footer {
                     flex-direction: column;
@@ -137,18 +144,29 @@
                     text-align: center;
                     padding: 8px 0;
                 }
+
+                .legend-explainer {
+                    font-size: 0.9rem; /* Ensures it stays smaller than the subheader */
+                }
             }
 
-            .inline-legend-row {
-                display: flex;
-                flex-direction: column;
-                gap: 8px; /* Adds a clean spacing between the two lines */
+            /* --- iPad / Tablet Styles --- */
+            @media (min-width: 768px) and (max-width: 1024px) {
+                #header-section .subheader {
+                    margin-bottom: 6px;
+                    font-size: 18px;
+                    padding-bottom: 12px;
+                }
+
+                .legend-explainer {
+                    font-size: 1rem; /* Keeps the hierarchy intact */
+                }
             }
         </style>
     </head>
     <body>
         <div id="header-section">
-            <h1>Class of FY25</h1>
+            <h1>Class of FY25 new</h1>
             <p class="subheader">
                 NBFCs running high-APR personal loans saw their revenues
                 skyrocket through FY25
@@ -389,7 +407,7 @@
                     subs: ["Creditwalle"],
                     rev24: 0.4,
                     rev25: 7.3,
-                    growthMult: 16.9,
+                    growthMult: 1.9,
                     yoe: 1992,
                 },
                 {
@@ -402,17 +420,19 @@
                 },
             ];
 
+            // Identify the Top 3 companies based on growth multiplier
+            const top3Companies = [...rawData]
+                .sort((a, b) => b.growthMult - a.growthMult)
+                .slice(0, 3)
+                .map((item) => item.name);
+
             const TERRACOTTA_RED = "#e48d73";
 
             function getDeviceProfile() {
                 const width = window.innerWidth;
-                if (width < 768) {
-                    return "mobile";
-                } else if (width >= 768 && width <= 1024) {
-                    return "ipad";
-                } else {
-                    return "desktop";
-                }
+                if (width < 768) return "mobile";
+                if (width <= 1024) return "ipad";
+                return "desktop";
             }
 
             function getPositiveColor(multiple) {
@@ -432,15 +452,15 @@
 
             function calculateParentSize(multiple) {
                 const profile = getDeviceProfile();
-                let multiplier = 30;
-                let minSize = 55;
+                let multiplier = 5;
+                let minSize = 60;
 
                 if (profile === "mobile") {
-                    multiplier = 15;
-                    minSize = 48;
+                    multiplier = 14;
+                    minSize = 50;
                 } else if (profile === "ipad") {
-                    multiplier = 36;
-                    minSize = 52;
+                    multiplier = 50;
+                    minSize = 58;
                 }
 
                 let baseSize = Math.log1p(multiple) * multiplier;
@@ -452,12 +472,7 @@
 
             function buildGraphData() {
                 const simNodes = [];
-                const echartsLinks = [];
                 const profile = getDeviceProfile();
-
-                let subSize = 18;
-                if (profile === "mobile") subSize = 12;
-                if (profile === "ipad") subSize = 15;
 
                 rawData.forEach((item, index) => {
                     const groupColor =
@@ -484,102 +499,86 @@
                         color: groupColor,
                         customData: sharedMetaData,
                     });
-
-                    item.subs.forEach((sub) => {
-                        simNodes.push({
-                            id: sub,
-                            name: sub,
-                            radius: subSize / 2,
-                            symbolSize: subSize,
-                            category: index,
-                            isParent: false,
-                            color: groupColor,
-                            customData: sharedMetaData,
-                        });
-                        echartsLinks.push({ source: item.name, target: sub });
-                    });
                 });
 
+                // Pack tightly together using standard D3 collision & centering forces
                 const simulation = d3
                     .forceSimulation(simNodes)
-                    .force(
-                        "link",
-                        d3
-                            .forceLink(echartsLinks)
-                            .id((d) => d.id)
-                            .distance(
-                                (l) =>
-                                    (l.source.radius + l.target.radius) * 0.65,
-                            )
-                            .strength(1),
-                    )
-                    .force("x", d3.forceX(0).strength(0.95))
-                    .force("y", d3.forceY(0).strength(0.95))
+                    .force("x", d3.forceX(0).strength(0.2))
+                    .force("y", d3.forceY(0).strength(0.2))
                     .force(
                         "collide",
                         d3
                             .forceCollide()
-                            .radius((d) => d.radius)
+                            .radius((d) => d.radius + 3)
                             .strength(1)
-                            .iterations(12),
+                            .iterations(15),
                     )
                     .stop();
 
                 for (let i = 0; i < 600; i++) simulation.tick();
 
-                // FIX: Decouple D3 link object mutations back into target clean strings for ECharts parsing
-                const cleanLinks = echartsLinks.map((l) => ({
-                    source:
-                        typeof l.source === "object" ? l.source.id : l.source,
-                    target:
-                        typeof l.target === "object" ? l.target.id : l.target,
-                }));
-
-                globalNodes = simNodes.map((n) => ({
-                    name: n.name,
-                    x: n.x,
-                    y: n.y,
-                    symbolSize: n.symbolSize,
-                    category: n.category,
-                    itemStyle: {
-                        color: n.color,
-                        opacity: n.isParent ? 0.95 : 0.75,
-                    },
-                    label: n.isParent
-                        ? {
-                              show: true,
-                              position: "inside",
-                              color: "#ffffff",
-                              fontSize: Math.max(
-                                  profile === "mobile" ? 8 : 10,
-                                  Math.min(
-                                      profile === "mobile" ? 11 : 14,
-                                      n.symbolSize / 6,
+                globalNodes = simNodes.map((n) => {
+                    const isTop3 = top3Companies.includes(n.name);
+                    return {
+                        name: n.name,
+                        x: n.x,
+                        y: n.y,
+                        symbolSize: n.symbolSize,
+                        category: n.category,
+                        itemStyle: {
+                            color: n.color,
+                            opacity: 0.95,
+                        },
+                        label: {
+                            show: true,
+                            position: "inside",
+                            color: "#ffffff",
+                            fontSize: isTop3
+                                ? Math.max(
+                                      profile === "mobile" ? 8 : 9,
+                                      Math.min(
+                                          profile === "mobile" ? 10 : 12,
+                                          n.symbolSize / 9,
+                                      ),
+                                  )
+                                : Math.max(
+                                      profile === "mobile" ? 9 : 11,
+                                      Math.min(
+                                          profile === "mobile" ? 12 : 15,
+                                          n.symbolSize / 5,
+                                      ),
                                   ),
-                              ),
-                              fontWeight: "bold",
-                              formatter: (p) =>
-                                  `x${p.data.customData.growthMult}`,
-                          }
-                        : { show: false },
-                    customData: n.customData,
-                }));
+                            fontWeight: "bold",
+                            overflow: "break",
+                            lineOverflow: "truncate",
+                            width: n.symbolSize * 0.85,
+                            formatter: (p) => {
+                                // Top 3 display full names, others display their growth multiplier
+                                return isTop3
+                                    ? p.data.name
+                                    : `x${p.data.customData.growthMult}`;
+                            },
+                        },
+                        customData: n.customData,
+                    };
+                });
 
-                return { nodes: globalNodes, links: cleanLinks };
+                return { nodes: globalNodes, links: [] };
             }
 
             function getChartOption() {
                 const graphData = buildGraphData();
                 const profile = getDeviceProfile();
 
-                let responsiveZoom = 0.9;
+                let responsiveZoom = 1;
                 if (profile === "mobile") responsiveZoom = 1;
                 if (profile === "ipad") responsiveZoom = 0.9;
 
                 return {
                     tooltip: {
                         trigger: "item",
-                        backgroundColor: "rgba(246, 242, 242, 0.8)",
+                        backgroundColor: "rgba(246, 242, 242, 0.95)",
                         borderColor: "#194b2d",
                         borderWidth: 1.5,
                         padding: 0,
@@ -614,11 +613,11 @@
                             if (!params.data || !params.data.customData)
                                 return "";
                             const data = params.data.customData;
-                            const hoveredNodeName = params.name;
                             const isNegativeOrFlat = data.growthMult <= 1;
                             const accentColor = isNegativeOrFlat
                                 ? "#e48d73"
                                 : "#194b2d";
+
                             const cardWidth =
                                 profile === "mobile" ? "250px" : "320px";
                             const titleSize =
@@ -633,17 +632,10 @@
                                 profile === "mobile" ? "75px" : "95px";
 
                             let channelsHtml = "";
-                            if (data.subsList.length > 0) {
+                            if (data.subsList && data.subsList.length > 0) {
                                 channelsHtml = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px ${profile === "mobile" ? "8px" : "16px"}; font-family: 'GT America', sans-serif; font-weight: normal; color: #444;">`;
                                 data.subsList.forEach((sub) => {
-                                    const isTargetSub = sub === hoveredNodeName;
-                                    const subBg = isTargetSub
-                                        ? "background-color: rgba(25, 75, 45, 0.1); padding: 1px 4px; border-radius: 2px;"
-                                        : "";
-                                    const subWeight = isTargetSub
-                                        ? "font-weight: bold; color: #194b2d;"
-                                        : "color: #444;";
-                                    channelsHtml += `<div style="font-size: ${metaSize}; ${subBg} ${subWeight} word-wrap: break-word; word-break: break-all;">${sub}</div>`;
+                                    channelsHtml += `<div style="font-size: ${metaSize}; color: #444; word-wrap: break-word; word-break: break-all;">${sub}</div>`;
                                 });
                                 channelsHtml += "</div>";
                             } else {
@@ -672,7 +664,7 @@
                                         </div>
                                     </div>
                                     <hr style="border: none; border-top: 1px solid #e0e0e0; margin-bottom: 10px"/>
-                                    <div style="font-size: ${bodySize}; color: #444; margin-bottom: 6px; font-weight: bold;">Brand Channels</div>
+                                    <div style="font-size: ${bodySize}; color: #444; margin-bottom: 6px; font-weight: bold;">Loan Websites</div>
                                     ${channelsHtml}
                                 </div>`;
                         },
@@ -686,7 +678,7 @@
                             center: ["0%", "0%"],
                             zoom: responsiveZoom,
                             data: graphData.nodes,
-                            links: graphData.links,
+                            links: [],
                             roam: true,
                             focusNodeAdjacency: false,
                             emphasis: { disabled: true },
@@ -699,24 +691,21 @@
             myChart.setOption(getChartOption());
 
             myChart.on("mouseover", "series", function (params) {
-                if (!params.data || !params.data.customData) return;
+                if (!params.data || typeof params.data.category === "undefined")
+                    return;
 
                 const targetCategory = params.data.category;
                 const updatedNodes = globalNodes.map((node) => {
-                    const isSameCluster = node.category === targetCategory;
+                    const isSameNode = node.category === targetCategory;
                     return {
                         ...node,
                         itemStyle: {
                             ...node.itemStyle,
-                            opacity: isSameCluster
-                                ? node.label.show
-                                    ? 0.95
-                                    : 0.75
-                                : 0.15,
+                            opacity: isSameNode ? 0.95 : 0.15,
                         },
                         label: {
                             ...node.label,
-                            color: isSameCluster
+                            color: isSameNode
                                 ? "#ffffff"
                                 : "rgba(255, 255, 255, 0.2)",
                         },

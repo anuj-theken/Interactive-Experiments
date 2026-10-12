@@ -1,0 +1,31 @@
+<iframe
+    src="index.html"
+    width="100%"
+    height="500px"
+    title="Local Page"
+    class="NBFC_RBI"
+></iframe>
+<style>
+    /* Desktop (Default Styles) */
+    iframe {
+        max-width: 100%;
+        height: 37em;
+        border: none; /* Optional: removes default iframe border */
+    }
+
+    /* iPad / Tablet (Typically screens up to 1024px) */
+    @media screen and (max-width: 1024px) {
+        iframe {
+            max-width: 100%;
+            height: 35em; /* Slightly reduced height for better tablet framing */
+        }
+    }
+
+    /* Mobile Devices (Typically screens up to 768px) */
+    @media screen and (max-width: 768px) {
+        iframe {
+            max-width: 100%;
+            height: 28em; /* Reduced height so users don't have to scroll forever */
+        }
+    }
+</style>

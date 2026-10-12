@@ -1,0 +1,142 @@
+/* The Ken — editorial chart design system
+   Derived from Lightrock_Investment_Potfolio/Lightrock_Investment_Chart_Arundhati.
+   See DESIGN_SYSTEM.md for usage. Fonts are resolved relative to this file (fonts/). */
+
+@font-face { font-family: 'Jazmin Alt';      src: url('fonts/JazminAlt-Bold.otf') format('opentype');          font-weight: bold; font-display: swap; }
+@font-face { font-family: 'GT America Bold'; src: url('fonts/GT-America-Standard-Black.ttf') format('truetype'); font-weight: bold; font-display: swap; }
+@font-face { font-family: 'GT America';      src: url('fonts/GT-America-Standard-Light.ttf') format('truetype'); font-weight: 300;  font-display: swap; }
+
+:root {
+  /* Surface & lines */
+  --ken-bg:        #F7F2F2;
+  --ken-rule:      #DCCFCF;   /* legend box, footer, tooltip borders (1.5px) */
+  --ken-grid:      #E0D4D4;   /* gridlines / row guides inside the plot (0.8px) */
+  --ken-outline:   #C4AAAA;   /* hollow size keys, dashed connectors */
+
+  /* Text */
+  --ken-ink:       #1A1208;   /* title, emphasised values */
+  --ken-text:      #5C4A4A;   /* subtitle, axis labels, legend keys, notes, footer */
+  --ken-text-soft: #4A3535;   /* legend item labels */
+  --ken-body:      #3A2E20;   /* tooltip body */
+  --ken-na:        #9A8E7A;   /* missing values */
+
+  /* Categorical palette — use in this order */
+  --ken-c1: #C8423A;  /* red (primary accent) */
+  --ken-c2: #4A7A5A;  /* green */
+  --ken-c3: #4A9E9A;  /* teal */
+  --ken-c4: #3D3D3D;  /* charcoal */
+  --ken-c5: #7A9E4A;  /* olive */
+  --ken-c6: #A89880;  /* taupe */
+  --ken-c7: #D4A8A0;  /* blush (light — use ink text on it) */
+
+  /* Type */
+  --ken-font-display: 'Jazmin Alt', Georgia, serif;
+  --ken-font-body:    'GT America', Arial, sans-serif;
+  --ken-font-bold:    'GT America Bold', Arial, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--ken-bg);
+  font-family: var(--ken-font-body);
+  color: var(--ken-ink);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+/* Page column: 640px standard, .page--wide for charts that need horizontal room */
+.page {
+  width: 100%;
+  max-width: 640px;
+  padding: clamp(16px, 4vw, 32px) clamp(12px, 4vw, 28px) 0;
+  display: flex;
+  flex-direction: column;
+}
+.page--wide { max-width: 960px; }
+
+/* 1. Title */
+.main-title {
+  font-family: var(--ken-font-display);
+  font-size: clamp(28px, 6vw, 42px);
+  font-weight: bold;
+  color: var(--ken-ink);
+  line-height: 1.05;
+  letter-spacing: -1px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+/* 2. Subtitle */
+.subtitle {
+  font-size: clamp(14px, 2.2vw, 15px);
+  color: var(--ken-text);
+  line-height: 1.5;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* 3. Legend box — ruled top and bottom */
+.legend-box {
+  border-top: 1.5px solid var(--ken-rule);
+  border-bottom: 1.5px solid var(--ken-rule);
+  padding: 6px 0;
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.legend-row { display: flex; align-items: center; }
+.legend-key {
+  font-family: var(--ken-font-bold);
+  font-size: 9px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ken-text);
+  width: clamp(64px, 13vw, 80px);
+  min-width: 56px;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+.legend-items { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.leg-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: clamp(12px, 3.7vw, 14px);
+  color: var(--ken-text-soft);
+  padding: 3px 6px 3px 4px;
+  border-radius: 3px;
+  border: 1.5px solid transparent;
+}
+.swatch-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.swatch-bar  { width: 12px; height: 10px; flex-shrink: 0; }
+
+/* 4. Reading note (inside legend box or under it) */
+.note {
+  font-style: italic;
+  font-size: 12px;
+  color: var(--ken-text);
+  line-height: 1.45;
+}
+
+/* 5. Chart area */
+.viz-area { position: relative; width: 100%; }
+
+/* 6. Footer — logo | credit | source */
+.footer {
+  border-top: 1.5px solid var(--ken-rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 24px 0 16px;
+  margin-top: 4px;
+}
+.footer-logo   { height: 18px; display: block; }
+.footer-center { font-size: 14px; color: var(--ken-text); text-align: center; flex: 1; }
+.footer-right  { font-size: 14px; color: var(--ken-text); text-align: right; max-width: 170px; flex-shrink: 0; }
+
+@media (max-width: 480px) {
+  .footer-center, .footer-right { font-size: 12px; }
+}

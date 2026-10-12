@@ -6138,7 +6138,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Other reasons",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "20% of monthly rent"
   },
   {
     "age": "25 – 34",
@@ -6151,7 +6152,8 @@ window.SURVEY_DATA = {
     "lastHike": "More than 40%",
     "vacancySpeed": "It has not been vacant in years",
     "raiseReason": "People were ready to pay",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": ""
   },
   {
     "age": "35 – 44",
@@ -6164,7 +6166,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Other reasons",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "NA"
   },
   {
     "age": "45 – 54",
@@ -6177,7 +6180,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "No"
   },
   {
     "age": "45 – 54",
@@ -6190,7 +6194,8 @@ window.SURVEY_DATA = {
     "lastHike": "11–20%",
     "vacancySpeed": "More than a month",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Sell the house"
+    "cutEarnings": "Sell the house",
+    "brokerCost": "One month rent"
   },
   {
     "age": "35 – 44",
@@ -6203,7 +6208,8 @@ window.SURVEY_DATA = {
     "lastHike": "I did not raise it",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "I did not raise it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -6216,7 +6222,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "Rent it out for short stays instead (like Airbnb)"
+    "cutEarnings": "Rent it out for short stays instead (like Airbnb)",
+    "brokerCost": "I did not use a broker. I avoid them because both the tenant and owner lose in such a situation. There is absolutely no need to pay a high brokerage when there are so many platforms to list rentals for apartments."
   },
   {
     "age": "45 – 54",
@@ -6229,7 +6236,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "Rent it out for short stays instead (like Airbnb)"
+    "cutEarnings": "Rent it out for short stays instead (like Airbnb)",
+    "brokerCost": "no"
   },
   {
     "age": "25 – 34",
@@ -6242,7 +6250,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -6255,7 +6264,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "No"
   },
   {
     "age": "35 – 44",
@@ -6268,7 +6278,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "People were ready to pay",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -6281,7 +6292,8 @@ window.SURVEY_DATA = {
     "lastHike": "I did not raise it",
     "vacancySpeed": "It has not been vacant in years",
     "raiseReason": "I did not raise it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "1 month rent"
   },
   {
     "age": "45 – 54",
@@ -6294,7 +6306,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "More than a month",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": ""
   },
   {
     "age": "25 – 34",
@@ -6307,7 +6320,8 @@ window.SURVEY_DATA = {
     "lastHike": "I did not raise it",
     "vacancySpeed": "In a week or two",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -6320,7 +6334,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "It has not been vacant in years",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "no"
   },
   {
     "age": "35 – 44",
@@ -6333,7 +6348,8 @@ window.SURVEY_DATA = {
     "lastHike": "",
     "vacancySpeed": "",
     "raiseReason": "",
-    "cutEarnings": ""
+    "cutEarnings": "",
+    "brokerCost": "No. But used one to find for ourselves when we got one"
   },
   {
     "age": "35 – 44",
@@ -6346,7 +6362,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "No"
   },
   {
     "age": "35 – 44",
@@ -6359,7 +6376,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "People were ready to pay",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": ""
   },
   {
     "age": "35 – 44",
@@ -6372,7 +6390,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Other reasons",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "55 and above",
@@ -6385,7 +6404,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "More than a month",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "Yes. One month's rent. This was set and agreed before search commenced."
   },
   {
     "age": "25 – 34",
@@ -6398,7 +6418,8 @@ window.SURVEY_DATA = {
     "lastHike": "The house was empty/does not apply",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "People were ready to pay",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -6411,7 +6432,8 @@ window.SURVEY_DATA = {
     "lastHike": "I did not raise it",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "I did not raise it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "Yes. Usually half to one month rent from my side and I guess same from the other side"
   },
   {
     "age": "45 – 54",
@@ -6424,7 +6446,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "No did not use a broker. Rented it via a reference."
   },
   {
     "age": "35 – 44",
@@ -6437,7 +6460,8 @@ window.SURVEY_DATA = {
     "lastHike": "11–20%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": "No"
   },
   {
     "age": "45 – 54",
@@ -6450,7 +6474,8 @@ window.SURVEY_DATA = {
     "lastHike": "",
     "vacancySpeed": "In a week or two",
     "raiseReason": "A new metro or office nearby raised demand",
-    "cutEarnings": "Rent it out for short stays instead (like Airbnb)"
+    "cutEarnings": "Rent it out for short stays instead (like Airbnb)",
+    "brokerCost": "Yes, half month rent"
   },
   {
     "age": "55 and above",
@@ -6463,7 +6488,8 @@ window.SURVEY_DATA = {
     "lastHike": "11–20%",
     "vacancySpeed": "It has not been vacant in years",
     "raiseReason": "Other reasons",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": "no"
   },
   {
     "age": "55 and above",
@@ -6476,7 +6502,8 @@ window.SURVEY_DATA = {
     "lastHike": "11–20%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "People were ready to pay",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": "Used online services - paid 15,000/-."
   },
   {
     "age": "45 – 54",
@@ -6489,7 +6516,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "My costs went up — tax, repairs, loan etc",
-    "cutEarnings": "Rent it out for short stays instead (like Airbnb)"
+    "cutEarnings": "Rent it out for short stays instead (like Airbnb)",
+    "brokerCost": "No"
   },
   {
     "age": "35 – 44",
@@ -6502,7 +6530,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "More than a month",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": ""
   },
   {
     "age": "35 – 44",
@@ -6515,7 +6544,8 @@ window.SURVEY_DATA = {
     "lastHike": "The house was empty/does not apply",
     "vacancySpeed": "In a week or two",
     "raiseReason": "I did not raise it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "no"
   },
   {
     "age": "55 and above",
@@ -6528,7 +6558,8 @@ window.SURVEY_DATA = {
     "lastHike": "",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -6541,7 +6572,8 @@ window.SURVEY_DATA = {
     "lastHike": "11–20%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "No"
   },
   {
     "age": "55 and above",
@@ -6554,7 +6586,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Other reasons",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "No, but used online platforms, at no cost"
   },
   {
     "age": "55 and above",
@@ -6567,7 +6600,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "Sell the house"
+    "cutEarnings": "Sell the house",
+    "brokerCost": "No"
   },
   {
     "age": "45 – 54",
@@ -6580,7 +6614,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "It has not been vacant in years",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -6593,7 +6628,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "More than a month",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "25 – 34",
@@ -6606,7 +6642,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "More than a month",
     "raiseReason": "Other reasons",
-    "cutEarnings": "Rent it out for short stays instead (like Airbnb)"
+    "cutEarnings": "Rent it out for short stays instead (like Airbnb)",
+    "brokerCost": "Yes , I think it was one month rent"
   },
   {
     "age": "55 and above",
@@ -6619,7 +6656,8 @@ window.SURVEY_DATA = {
     "lastHike": "",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -6632,7 +6670,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "0"
   },
   {
     "age": "35 – 44",
@@ -6645,7 +6684,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "More than a month",
     "raiseReason": "My costs went up — tax, repairs, loan etc",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": "50,000 INR"
   },
   {
     "age": "55 and above",
@@ -6658,7 +6698,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "Other reasons",
-    "cutEarnings": "Rent it out for short stays instead (like Airbnb)"
+    "cutEarnings": "Rent it out for short stays instead (like Airbnb)",
+    "brokerCost": "1 month rent"
   },
   {
     "age": "45 – 54",
@@ -6671,7 +6712,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "It has not been vacant in years",
     "raiseReason": "",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "No"
   },
   {
     "age": "55 and above",
@@ -6684,7 +6726,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "My costs went up — tax, repairs, loan etc",
-    "cutEarnings": "Not sure"
+    "cutEarnings": "Not sure",
+    "brokerCost": "Quite a lot! A months rent as commission"
   },
   {
     "age": "55 and above",
@@ -6697,7 +6740,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "More than a month",
     "raiseReason": "My costs went up — tax, repairs, loan etc",
-    "cutEarnings": "Not sure"
+    "cutEarnings": "Not sure",
+    "brokerCost": "One months rent as commission"
   },
   {
     "age": "35 – 44",
@@ -6710,7 +6754,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "More than a month",
     "raiseReason": "Other reasons",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": "1 month rent"
   },
   {
     "age": "35 – 44",
@@ -6723,7 +6768,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "Part of propert management services"
   },
   {
     "age": "55 and above",
@@ -6736,7 +6782,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "Other reasons",
-    "cutEarnings": "Not sure"
+    "cutEarnings": "Not sure",
+    "brokerCost": "15 days rent"
   },
   {
     "age": "55 and above",
@@ -6749,7 +6796,8 @@ window.SURVEY_DATA = {
     "lastHike": "21–40%",
     "vacancySpeed": "More than a month",
     "raiseReason": "People were ready to pay",
-    "cutEarnings": "Sell the house"
+    "cutEarnings": "Sell the house",
+    "brokerCost": "40% of rent"
   },
   {
     "age": "35 – 44",
@@ -6762,7 +6810,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "",
     "raiseReason": "",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": ""
   },
   {
     "age": "35 – 44",
@@ -6775,7 +6824,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "My costs went up — tax, repairs, loan etc",
-    "cutEarnings": "Rent it out for short stays instead (like Airbnb)"
+    "cutEarnings": "Rent it out for short stays instead (like Airbnb)",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -6788,7 +6838,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "Other reasons",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "55 and above",
@@ -6801,7 +6852,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": ""
+    "cutEarnings": "",
+    "brokerCost": ""
   },
   {
     "age": "55 and above",
@@ -6814,7 +6866,8 @@ window.SURVEY_DATA = {
     "lastHike": "I did not raise it",
     "vacancySpeed": "More than a month",
     "raiseReason": "I did not raise it",
-    "cutEarnings": "Sell the house"
+    "cutEarnings": "Sell the house",
+    "brokerCost": "i used No Broker"
   },
   {
     "age": "25 – 34",
@@ -6827,7 +6880,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "55 and above",
@@ -6840,7 +6894,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "",
-    "cutEarnings": "Rent it out for short stays instead (like Airbnb)"
+    "cutEarnings": "Rent it out for short stays instead (like Airbnb)",
+    "brokerCost": "No"
   },
   {
     "age": "35 – 44",
@@ -6853,7 +6908,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "1 month for first time and small token fee for renewals"
   },
   {
     "age": "55 and above",
@@ -6866,7 +6922,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "My costs went up — tax, repairs, loan etc",
-    "cutEarnings": "Keep the house vacant until the rule changes"
+    "cutEarnings": "Keep the house vacant until the rule changes",
+    "brokerCost": "no"
   },
   {
     "age": "55 and above",
@@ -6879,7 +6936,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "Yes, about one month's rent (survey flow test)"
   }
 ],
   homeowner: [

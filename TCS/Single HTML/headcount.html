@@ -259,10 +259,15 @@
     barBlock.style.width = barWidth + 'px';
     barBlock.appendChild(matrix);
     barBlock.addEventListener('mousemove', function(ev) {
-      tooltip.style.display = 'block';
-      tooltip.style.left = (ev.clientX + 14) + 'px';
-      tooltip.style.top = (ev.clientY + 14) + 'px';
       tooltip.innerHTML = tooltipHtml;
+      tooltip.style.display = 'block';
+      // Flip to the other side of the cursor near the right/bottom edge.
+      var tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+      var left = ev.clientX + 14, top = ev.clientY + 14;
+      if (left + tw > window.innerWidth - 4) left = ev.clientX - 14 - tw;
+      if (top + th > window.innerHeight - 4) top = ev.clientY - 14 - th;
+      tooltip.style.left = Math.max(4, left) + 'px';
+      tooltip.style.top = Math.max(4, top) + 'px';
     });
     barBlock.addEventListener('mouseleave', function() {
       tooltip.style.display = 'none';

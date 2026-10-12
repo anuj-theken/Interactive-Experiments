@@ -46,6 +46,61 @@ document.addEventListener("DOMContentLoaded", function () {
   var xAxis = container.querySelector(".TK4R8-x-axis");
   var tooltip = document.querySelector(".TK4R8-tooltip");
 
+  // Tooltip behaviour. With a mouse it follows the pointer as before. On
+  // touch screens a tap shows it near the top of the plot, centred on the
+  // tapped bar but clamped inside the plot so it can never run out of
+  // frame, and — since a tap never sends a "mouse left" — it is dismissed
+  // after a few seconds, on scroll, on a tap elsewhere, or once the chart
+  // leaves view.
+  var section = container.closest(".TK4R8-chart-section") || container;
+  var hideTimer = null;
+
+  function hideTooltip() {
+    clearTimeout(hideTimer);
+    tooltip.style.display = "none";
+  }
+
+  var PINNED_TOP_OFFSET = 40; // px below the top of the plot
+
+  function showPinnedTooltip(html, barBlock) {
+    tooltip.innerHTML = html;
+    tooltip.style.display = "block";
+    var plot = groupsWrapper.getBoundingClientRect();
+    var bar = barBlock.getBoundingClientRect();
+    var tw = tooltip.offsetWidth;
+    var left = bar.left + bar.width / 2 - tw / 2;
+    left = Math.max(plot.left + 4, Math.min(left, plot.right - tw - 4));
+    tooltip.style.left = Math.max(4, left) + "px";
+    tooltip.style.top = (plot.top + PINNED_TOP_OFFSET) + "px";
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(hideTooltip, 3000);
+  }
+
+  // Follow the cursor, but flip to the other side when the tooltip would
+  // run past the right edge of the chart (e.g. on the last bar) or the
+  // bottom of the viewport.
+  var CURSOR_OFFSET = 14;
+
+  function positionMouseTooltip(ev) {
+    var tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+    var rightEdge = Math.min(window.innerWidth, section.getBoundingClientRect().right) - 4;
+    var left = ev.clientX + CURSOR_OFFSET;
+    if (left + tw > rightEdge) left = ev.clientX - CURSOR_OFFSET - tw;
+    var top = ev.clientY + CURSOR_OFFSET;
+    if (top + th > window.innerHeight - 4) top = ev.clientY - CURSOR_OFFSET - th;
+    tooltip.style.left = Math.max(4, left) + "px";
+    tooltip.style.top = Math.max(4, top) + "px";
+  }
+
+  window.addEventListener("scroll", hideTooltip, { passive: true });
+  plotScroll.addEventListener("scroll", hideTooltip, { passive: true });
+  document.addEventListener("touchstart", function (e) {
+    if (!section.contains(e.target)) hideTooltip();
+  }, { passive: true });
+  new IntersectionObserver(function (entries) {
+    if (!entries[0].isIntersecting) hideTooltip();
+  }).observe(container);
+
   function render(L) {
     var COLUMNS = L.cols, UNIT = L.unit, CELL_SIZE = L.cell, GAP = L.gap;
 
@@ -124,14 +179,17 @@ document.addEventListener("DOMContentLoaded", function () {
       barBlock.className = "TK4R8-bar-block";
       barBlock.style.width = barWidth + "px";
       barBlock.appendChild(matrix);
-      barBlock.addEventListener("mousemove", function (ev) {
-        tooltip.style.display = "block";
-        tooltip.style.left = (ev.clientX + 14) + "px";
-        tooltip.style.top = (ev.clientY + 14) + "px";
+      barBlock.addEventListener("pointermove", function (ev) {
+        if (ev.pointerType !== "mouse") return;
         tooltip.innerHTML = tooltipHtml;
+        tooltip.style.display = "block";
+        positionMouseTooltip(ev);
       });
-      barBlock.addEventListener("mouseleave", function () {
-        tooltip.style.display = "none";
+      barBlock.addEventListener("pointerleave", function (ev) {
+        if (ev.pointerType === "mouse") hideTooltip();
+      });
+      barBlock.addEventListener("pointerup", function (ev) {
+        if (ev.pointerType !== "mouse") showPinnedTooltip(tooltipHtml, barBlock);
       });
       return barBlock;
     }

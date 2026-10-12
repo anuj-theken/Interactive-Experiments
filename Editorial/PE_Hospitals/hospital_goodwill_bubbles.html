@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hospital Acquisitions – Goodwill %</title>
+<link rel="stylesheet" href="assets/ken-chart.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+<script src="assets/ken-echarts.js"></script>
+<style>
+  #chart { height: clamp(420px, 60vw, 560px); }
+</style>
+</head>
+<body>
+<div class="page page--wide">
+  <div class="main-title">Paying for goodwill</div>
+  <div class="subtitle">Hospital acquisitions: goodwill as % of consideration, FY21–FY25</div>
+
+  <div class="legend-box">
+    <div class="note">Bubble size = goodwill %. Hover for deal details.</div>
+  </div>
+
+  <div class="viz-area" id="chart"></div>
+
+  <div class="footer">
+    <img src="assets/logo.png" alt="The Ken" class="footer-logo">
+    <div class="footer-center">Graphic by Anuj, 9 Oct '26</div>
+    <div class="footer-right">Source: Company filings</div>
+  </div>
+</div>
+
+<script>
+const { C, F } = KEN;
+const groups = ['HCG', 'Baby Memorial', 'QCIL (Care)', 'Max Healthcare'];
+const years = ['FY21', 'FY22', 'FY23', 'FY24', 'FY25'];
+const colors = C.palette.slice(0, 4);
+
+// [group, short name, full name, year, deal, consideration, goodwill, goodwill %]
+const deals = [
+  ['HCG', 'Suchirayu', 'Suchirayu Health Care Solutions (Hubli)', 'FY22', '60.88% allotment (78.60% total)', 69, 28, 40],
+  ['HCG', 'Triesta/Strand', 'Triesta / Strand Diagnostic Business', 'FY22', 'Business Transfer Agreement', 74, 56, 76],
+  ['HCG', 'SRJ & Amrish', 'SRJ Health Care & Amrish Oncology (Indore)', 'FY24', 'Slump sale', 48, 42, 88],
+  ['HCG', 'Vizag', 'Vizag Hospital (VHCRPL)', 'FY25', '51% controlling stake', 206, 207, 100],
+
+  ['Baby Memorial', 'Genesis', 'Genesis Institute of Medical Science (Kannur)', 'FY23', '100% equity', 148, 144, 98],
+  ['Baby Memorial', 'Thodupuzha', 'Thodupuzha Division (Chazhikattu Hospital)', 'FY25', 'Slump sale', 150, 25, 16],
+  ['Baby Memorial', 'Payyanur', 'Payyanur Medical Service & Research Centre', 'FY25', '88.98% equity', 49, 31, 63],
+
+  ['QCIL (Care)', 'Thumbay', 'Thumbay Hospital New Life (Hyderabad)', 'FY23', '100% slump sale', 20, 2, 9],
+  ['QCIL (Care)', 'CHL Indore', 'Convenient Hospitals Ltd (Indore)', 'FY23', '95% equity', 379, 214, 57],
+  ['QCIL (Care)', 'UCIMS', 'United Ciigma Institute of Medical Sciences (Aurangabad)', 'FY23', '76.06% equity', 359, 355, 99],
+  ['QCIL (Care)', 'Condis/KIMS', 'Condis India Healthcare & KIMSHEALTH', 'FY24', '80.19% Condis / 69.71% KIMS', 2382, 1860, 78],
+
+  ['Max Healthcare', 'Radiant merger', 'Radiant Life Care / Max Healthcare Composite Merger', 'FY21', 'Composite merger / reverse acquisition', 3987, 2037, 51],
+  ['Max Healthcare', 'Alexis', 'Alexis Multi-Speciality Hospital', 'FY24', '100% equity', 372, 221, 59],
+  ['Max Healthcare', 'Starlit/Sahara', 'Starlit Medical Centre / Sahara Hospital', 'FY24', 'Slump sale BTA / 100% equity', 198, 243, 123],
+  ['Max Healthcare', 'Jaypee', 'Jaypee Healthcare Ltd', 'FY25', '100% equity via CIRP', 625, 570, 91]
+];
+
+// Spread bubbles that share the same group + year horizontally
+const cellCount = {}, cellIdx = {};
+deals.forEach(d => { const k = d[0] + d[3]; cellCount[k] = (cellCount[k] || 0) + 1; });
+
+const seriesData = groups.map(g => deals.filter(d => d[0] === g).map(d => {
+  const k = d[0] + d[3];
+  const n = cellCount[k];
+  const i = cellIdx[k] = (cellIdx[k] ?? -1) + 1;
+  const offset = (i - (n - 1) / 2) * 0.42;
+  return {
+    value: [years.indexOf(d[3]) + offset, groups.indexOf(g), d[7]],
+    short: d[1], full: d[2], year: d[3], deal: d[4], cons: d[5], gw: d[6]
+  };
+}));
+
+const el = document.getElementById('chart');
+
+function option() {
+  const w = el.clientWidth;
+  const narrow = w < 560;
+  const gridLeft = narrow ? 96 : 130, gridRight = 16;
+  // Bubble sizes were tuned for a ~165px year column; scale down with the column
+  const slot = (w - gridLeft - gridRight) / 6;
+  const k = Math.min(1, slot / 165);
+  const showLabels = k >= 0.6;
+
+  const series = groups.map((g, gi) => ({
+    name: g,
+    type: 'scatter',
+    itemStyle: { color: colors[gi], borderColor: C.bg, borderWidth: 1 },
+    symbolSize: v => (30 + v[2] * 0.45) * k,
+    emphasis: { scale: 1.07, itemStyle: { borderColor: 'rgba(255,255,255,0.45)', borderWidth: 1.5 } },
+    label: {
+      show: showLabels,
+      position: 'inside',
+      // name only where the bubble is big enough to hold it; tooltip has the rest
+      formatter: p => (30 + p.value[2] * 0.45) * k >= 52 ? `{pct|${p.value[2]}%}\n{nm|${p.data.short}}` : `{pct|${p.value[2]}%}`,
+      rich: {
+        pct: { fontFamily: F.bold, fontWeight: 'bold', fontSize: 12, color: C.onFill, align: 'center' },
+        nm: { fontFamily: F.body, fontSize: 9, color: C.onFill, align: 'center' }
+      }
+    },
+    data: seriesData[gi],
+    // row guides through each company's row, labelled at the left like the Lightrock year rows
+    markLine: gi === 0 ? {
+      silent: true, symbol: 'none',
+      label: { show: true, position: 'start', distance: 12, formatter: p => groups[p.value], ...KEN.axisLabelBold, fontSize: narrow ? 12 : 14 },
+      lineStyle: { color: C.grid, width: 0.8, type: 'solid' },
+      data: groups.map((_, i) => ({ yAxis: i }))
+    } : undefined,
+    z: 3
+  }));
+
+  return {
+    textStyle: { fontFamily: F.body },
+    grid: { left: gridLeft, right: gridRight, top: 10, bottom: 36 },
+    tooltip: {
+      ...KEN.tooltip,
+      formatter: p => KEN.tt.name(p.data.full)
+        + KEN.tt.meta(`${p.seriesName} · ${p.data.year}`)
+        + KEN.tt.meta(p.data.deal)
+        + KEN.tt.rule(
+            KEN.tt.line('Consideration', `₹${p.data.cons} Cr`)
+          + KEN.tt.line('Goodwill', `₹${p.data.gw} Cr`)
+          + KEN.tt.line('Goodwill %', `${p.value[2]}%`))
+    },
+    xAxis: {
+      type: 'value', min: -1, max: 5, interval: 1,
+      axisLabel: { ...KEN.axisLabelBold, fontSize: narrow ? 12 : 14, formatter: v => years[v] ?? '' },
+      axisLine: { show: false }, axisTick: { show: false }, splitLine: { show: false }
+    },
+    yAxis: {
+      type: 'value', min: -0.6, max: 3.6, interval: 1, inverse: true,
+      axisLabel: { show: false },
+      axisLine: { show: false }, axisTick: { show: false }, splitLine: { show: false }
+    },
+    series
+  };
+}
+
+KEN.whenFontsReady(() => {
+  const chart = echarts.init(el);
+  chart.setOption(option());
+  window.addEventListener('resize', () => { chart.resize(); chart.setOption(option()); });
+});
+</script>
+</body>
+</html>

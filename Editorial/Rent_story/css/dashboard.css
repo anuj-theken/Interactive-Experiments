@@ -300,6 +300,15 @@ body {
   min-height: 1220px;
 }
 
+/* Overview's own content (top-row 281px + gap + its now-auto-height grid,
+   section 4) totals ~873px, short of the shared 900px floor — leaving a
+   ~27px gap of its own below the grid otherwise, on top of whatever the
+   772px/900px floors already used to leave before the dashboard-grid fix
+   above. Tightened to fit exactly instead. */
+.theme-overview .panel-body {
+  min-height: 873px;
+}
+
 /* Charts<->Responses switch entrance (js/filters.js's FilterUI.replayEnter
    toggles this class on whichever view just became visible — .dashboard-
    grid for Charts, .responses-view for Responses — re-triggering it via a
@@ -424,15 +433,23 @@ body {
   min-height: 0;
 }
 
-/* Overview, Homeowner and Non-Resident are all 2-row-slot layouts (vs. 3 for
+/* Homeowner and Non-Resident are 2-row-slot layouts (vs. 3 for
    Landlord/Tenant), so their grid keeps its original ~772px default height
    (772px = the old 820px container max-height minus 48px padding) instead
    of stretching to fill the taller .dashboard-container above. The leftover
    space collects below as an empty gap rather than inflating their cards. */
-.theme-overview .dashboard-grid,
 .theme-homeowner .dashboard-grid,
 .theme-nonresident .dashboard-grid {
   flex: 0 0 772px;
+}
+
+/* Overview shrinks to its own (shorter) content instead — its 2nd grid row
+   is `auto`-height now (below), not `1fr`, so this can't rely on the
+   772px number above: fixing the box at 772px while its rows only need
+   ~576px just relocated the same dead space from "inside row 2, below the
+   pies" to "below the grid, inside this box" instead of removing it. */
+.theme-overview .dashboard-grid {
+  flex: 0 0 auto;
 }
 
 .left-column {
@@ -477,10 +494,13 @@ body {
    overrides the column/row template. Row 1 is pinned to --stat-bar-height
    (not `1fr`) so the bar-chart card lines up with the .stat-bar-card height
    used on the other 4 dashboards; the KPI card shares that row and height
-   too. */
+   too. Row 2 is `auto` (not `1fr`) — its pie cards are fixed-height
+   (.pie-fit-card, section 4) and don't stretch to fill it, so a `1fr` row
+   here just reserved space nothing was going to use: visible empty space
+   below the pies instead of an equally-tall row 2 actually needing it. */
 .overview-grid {
   grid-template-columns: 1.3fr 0.85fr 0.85fr;
-  grid-template-rows: var(--stat-bar-height) 1fr;
+  grid-template-rows: var(--stat-bar-height) auto;
 }
 
 .overview-grid .span-col-1 { grid-column: span 1; }

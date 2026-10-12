@@ -160,9 +160,38 @@ window.Aggregate = (function () {
     return /[.,]/.test(text);
   }
 
+  // A looser bar than looksLikeSentence for fields whose real answers are
+  // often short PHRASES rather than punctuated sentences (e.g. "20% of
+  // monthly rent", "1 month rent") — punctuation would wrongly reject
+  // those. 2+ words is enough on its own to drop bare "No"/"NA"/"0"
+  // non-answers; `survey flow test` marks a handful of QA rows left in
+  // the raw CSV export, not real respondent data.
+  function isSubstantiveAnswer(text) {
+    if (!text) return false;
+    const trimmed = text.trim();
+    if (!trimmed || /survey flow test/i.test(trimmed)) return false;
+    return trimmed.split(/\s+/).filter(Boolean).length >= 2;
+  }
+
+  // Drops every item after the first whose `keyFn(item)` result repeats —
+  // Landlord's raiseReason/cutEarnings free-text fields overlap heavily
+  // with the closed-choice options right above them in the survey (e.g.
+  // "Rents in the area went up, so I did the same"), so many respondents
+  // just retyped the option verbatim, producing several response cards
+  // with the exact same quote(s) instead of a genuine free-text answer.
+  function dedupeBy(items, keyFn) {
+    const seen = new Set();
+    return items.filter((item) => {
+      const key = keyFn(item);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
   return {
     AGE_OPTIONS, CAREER_OPTIONS, REGION_OPTIONS,
-    filterRecords, tally, tallyGrouped, countFlag, percentages, regionCounts, shortCareer, optionsWithData, looksLikeSentence
+    filterRecords, tally, tallyGrouped, countFlag, percentages, regionCounts, shortCareer, optionsWithData, looksLikeSentence, isSubstantiveAnswer, dedupeBy
   };
 })();
 
@@ -385,11 +414,29 @@ window.FilterUI = (function () {
 
   function mountResponses(scrollEl, paginationEl, items, opts) {
     opts = opts || {};
-    const pageSize = opts.pageSize || 9;
-    const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+    const basePageSize = opts.pageSize || 9;
+    let pageSize = basePageSize;
+    let totalPages = 1;
     let page = 0;
 
+    // .responses-scroll's own column count is set by CSS (3 desktop / 2
+    // iPad / 1 phone — css/dashboard.css sections 9/11/12), not by this
+    // function — reading it back keeps a page at this dashboard's usual 3
+    // rows regardless of how many columns that resolves to. Without this,
+    // the same fixed 9-per-page stacks into 5 rows at 2 columns or 9 rows
+    // at 1, growing the Responses tab's height well past the Charts tab's
+    // own (a single carousel card below that same breakpoint) instead of
+    // the two roughly matching like they do on desktop.
+    function columnsNow() {
+      const cols = getComputedStyle(scrollEl).gridTemplateColumns.split(' ').filter(Boolean).length;
+      return Math.max(cols, 1);
+    }
+
     function renderPage() {
+      pageSize = columnsNow() * 3;
+      totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+      page = Math.min(page, totalPages - 1);
+
       buildResponseCards(scrollEl, items.slice(page * pageSize, page * pageSize + pageSize), opts.emptyText);
 
       if (items.length === 0) {
@@ -408,6 +455,33 @@ window.FilterUI = (function () {
     }
 
     renderPage();
+
+    // mountResponses runs again on every filter change (same scrollEl,
+    // fresh `items` closure each time) — a plain addEventListener here
+    // would stack a new resize listener per filter click, each holding
+    // its own increasingly-stale `items`. Stashing the latest renderPage
+    // on the element itself and binding exactly one shared listener (only
+    // the first time this scrollEl is ever mounted) keeps it to one
+    // listener total, always calling through to whichever mount is
+    // current. It only fires on an actual column-count change (not just
+    // any resize, or a height-only one) — crossing 700px/1024px, where
+    // css/dashboard.css sections 9/11/12 change .responses-scroll's own
+    // column count — so a page already open adopts the new page size
+    // instead of staying at whatever it was mounted with.
+    scrollEl.__mountResponsesLive = { renderPage, columnsNow };
+    if (!scrollEl.__mountResponsesResizeBound) {
+      scrollEl.__mountResponsesResizeBound = true;
+      let lastCols = columnsNow();
+      window.addEventListener('resize', () => {
+        const live = scrollEl.__mountResponsesLive;
+        if (!live) return;
+        const cols = live.columnsNow();
+        if (cols !== lastCols) {
+          lastCols = cols;
+          live.renderPage();
+        }
+      });
+    }
   }
 
   // Below `opts.breakpoint` (matches css/dashboard.css section 11's own

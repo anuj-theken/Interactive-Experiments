@@ -277,8 +277,28 @@ window.initTenantCharts = function initTenantCharts() {
         formatter: ChartTheme.allStatsTooltip(LEAVE_RENT_LABELS.map((name, i) => [name, leaveRent.counts[i], leaveColors[i]]))
       },
       grid: { left: '0%', right: '4%', bottom: '0%', top: '4%', containLabel: true },
+      // A narrow filter can shrink every count down to single digits, and
+      // with no floor here ECharts auto-scales the axis to match — a bar
+      // of 1 out of an axis max of 1 fills the full plot width, shoving
+      // its value label right up against the category label on the far
+      // side. min/max floor the axis at ±20 regardless of how small the
+      // filtered counts get, so a thin sliver of data stays a thin sliver
+      // instead of stretching to fill the chart. The extra *1.15 headroom
+      // matters separately from that floor: whichever bar happens to BE
+      // the largest always reaches its own axis extreme exactly (by
+      // definition), so its outside-position value label has nowhere to
+      // sit — the 15% of extra axis range past the real max/floor is
+      // empty space reserved for exactly that label, on every bar, not
+      // just the small ones the floor covers.
       xAxis: {
         type: 'value',
+        // Rounded up to the nearest 10 (not the raw *1.15 value) so
+        // ECharts' own tick generator lands on whole numbers along this
+        // padded range too — an un-rounded bound like 117.3 was showing
+        // up as a tick label itself (and, from float rounding, as an
+        // uglier 57.499999999998 on the positive side).
+        min: (value) => -Math.ceil(Math.max(Math.abs(value.min), 20) * 1.15 / 10) * 10,
+        max: (value) => Math.ceil(Math.max(value.max, 20) * 1.15 / 10) * 10,
         axisLabel: { formatter: (v) => Math.abs(v), ...commonTextStyle, fontSize: 10 },
         splitLine: { lineStyle: { type: 'dashed', color: BORDER_TONE } }
       },

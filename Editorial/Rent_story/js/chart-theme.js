@@ -165,25 +165,29 @@ window.ChartTheme = (function () {
   // convention still holds.
   function contrastRamp(hex, count) {
     const { h, s } = hexToHsl(hex);
-    const minL = 26, maxL = 68;
-    const sat = Math.max(s, 38); // floor saturation so the palest steps don't wash out to near-gray
+    // Widened from the original 26-68 — with 6-7 categories (e.g.
+    // Landlord's "why did you raise the rent" dot matrix) each step was
+    // only ~7% lightness apart, too close to tell two adjacent dots apart
+    // at 11px. Stretched closer to the usable extremes (dark enough to
+    // stay a real color, light enough to still clear the near-white
+    // --card-bg) instead, so every step reads as a distinct shade even at
+    // dot size — same hue throughout, never a different color per step.
+    const minL = 14, maxL = 80;
+    const sat = Math.max(s, 55); // floor saturation so the palest steps stay a color, not a wash-out
     return Array.from({ length: Math.max(1, count) }, (_, i) =>
       hslToHex(h, sat, count > 1 ? minL + (maxL - minL) * (i / (count - 1)) : minL)
     );
   }
 
-  // Picks a readable in-segment label color against an arbitrary bar/slice
-  // fill — every palette here ramps from a dark tone down to a near-white
-  // tint, and a flatly white label (the old default) went unreadable on
-  // those lightest tints. `hex` is whatever color ECharts resolved for that
-  // segment (`params.color` in a label callback). The dark choice is
-  // `darkColor` — that CHART's own darkest palette shade, passed in by the
-  // caller (or, for pieOption, worked out automatically from its own data,
-  // see below) — rather than a generic gray, so a light-slice label reads
-  // as the same color family as the rest of the chart instead of a
-  // one-off default.
+  // In-segment label color for a bar/pie slice — every palette here ramps
+  // from a dark tone down to a medium-light tint (never as pale as the
+  // page's own near-white background), so the page's own off-white
+  // reads clearly against any of them, dark or light, without needing a
+  // per-segment dark/light branch at all. `hex`/`darkColor` are no longer
+  // used, kept as accepted (ignored) args so every existing call site
+  // stays valid without touching each one.
   function contrastColor(hex, darkColor) {
-    return luminance(hex) > 0.55 ? (darkColor || 'rgba(0, 0, 0, 0.72)') : '#fff';
+    return '#faf8f2';
   }
 
   // The lowest-luminance color actually used in `data` (each item's
@@ -260,12 +264,16 @@ window.ChartTheme = (function () {
   // series are built one at a time, each with only its own segment's color
   // in scope, so there's no single `data` array here to read every
   // segment's color back out of).
-  function statBarLabel(darkColor) {
+  // `labelColor` is an optional straight override (e.g. non-resident's own
+  // olive palette wanted a whiter, punchier label than the shared
+  // off-white contrastColor gives everyone else) — omit it to keep the
+  // normal shared behavior.
+  function statBarLabel(darkColor, labelColor) {
     return {
       show: true,
       position: 'inside',
       formatter: (p) => (p.value < 5 ? '' : Math.round(p.value * 10) / 10 + '%'),
-      color: (p) => contrastColor(p.color, darkColor),
+      color: labelColor || ((p) => contrastColor(p.color, darkColor)),
       fontFamily: 'GT America Bold, sans-serif',
       fontWeight: 700,
       fontSize: 9
@@ -336,7 +344,11 @@ window.ChartTheme = (function () {
           show: true,
           position: 'inside',
           formatter: opts.showCount ? pieCountFormatter : pieLabelFormatter,
-          color: (p) => contrastColor(p.color, darkColor),
+          // opts.labelColor is a straight override (e.g. Homeowner's pies
+          // wanted a whiter, punchier label than the shared off-white
+          // contrastColor gives everyone else) — omit it to keep the
+          // normal shared behavior.
+          color: opts.labelColor || ((p) => contrastColor(p.color, darkColor)),
           fontFamily: 'GT America Bold, sans-serif',
           fontWeight: 700,
           fontSize: mini ? 9 : 10

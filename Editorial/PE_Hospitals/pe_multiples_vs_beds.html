@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PE Multiples vs Beds</title>
+<link rel="stylesheet" href="assets/ken-chart.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<script src="assets/ken-echarts.js"></script>
+<style>
+  #chart { height: clamp(440px, 62vw, 580px); }
+</style>
+</head>
+<body>
+<div class="page page--wide">
+  <div class="main-title">Deal multiples vs. hospital beds</div>
+  <div class="subtitle">EV/EBITDA paid in PE and strategic hospital deals against bed expansion in the listed universe, FY19–FY27</div>
+
+  <div class="legend-box">
+    <div class="legend-row">
+      <div class="legend-key">Key</div>
+      <div class="legend-items">
+        <div class="leg-item"><span class="swatch-bar" id="sw-beds"></span>Installed beds (listed universe)</div>
+        <div class="leg-item"><span class="swatch-dot" id="sw-deal"></span>PE / strategic deal EV/EBITDA</div>
+      </div>
+    </div>
+    <div class="note">Bars show the FY19 starting total, then beds added each year. Labels show buyer / target. Where two deals fall in one year, markers are offset for readability. FY27 bed count not yet available.</div>
+  </div>
+
+  <div class="viz-area" id="chart"></div>
+
+  <div class="footer">
+    <img src="assets/logo.png" alt="The Ken" class="footer-logo">
+    <div class="footer-center">Graphic by Anuj, 9 Oct '26</div>
+    <div class="footer-right">Source: Company filings</div>
+  </div>
+</div>
+<script>
+  const { C, F } = KEN;
+  const BEDS = C.palette[2], BEDS_TINT = 'rgba(74,158,154,0.45)', DEAL = C.palette[0];
+  document.getElementById('sw-beds').style.background = BEDS;
+  document.getElementById('sw-deal').style.background = DEAL;
+
+  const years = ['FY19','FY20','FY21','FY22','FY23','FY24','FY25','FY26','FY27'];
+  const beds  = [33859, 36483, 36713, 37360, 40974, 42177, 45186, 49744, null];
+
+  // [buyer, target, fiscal year, EV/EBITDA, horizontal offset]
+  const deals = [
+    ['IHH', 'Fortis', 'FY19', 22, 0],
+    ['Manipal', 'Columbia Asia', 'FY21', 17, 0],
+    ['OTPP', 'Sahyadri', 'FY23', 14, 0],
+    ['Blackstone', 'QCIL', 'FY24', 15, 0],
+    ['Max', 'Jaypee', 'FY25', 24, -0.18],
+    ['Aster', 'QCIL', 'FY25', 25, 0.18],
+    ['Permira + TPG', 'Cloudnine', 'FY27', 37, -0.18],
+    ['KKR', 'Medicover', 'FY27', 46, 0.18]
+  ];
+
+  // waterfall: FY19 is the starting total; later years float on the prior total and show only the addition
+  const bedsK = beds.map(v => v == null ? null : v / 1000);
+  const lastBed = bedsK.reduce((a, v, i) => v == null ? a : i, 0);
+  const wfBase = bedsK.map((v, i) => v == null ? null : (i === 0 ? 0 : bedsK[i - 1]));
+  const wfStep = bedsK.map((v, i) => v == null ? null : (i === 0 ? v : v - bedsK[i - 1]));
+
+  const align = o => o < 0 ? 'right' : (o > 0 ? 'left' : 'center');
+  const dealPoints = deals.map(([b, t, fy, m, o]) => ({
+    value: [years.indexOf(fy) + o, m],
+    buyer: b, target: t, fy,
+    label: fy === 'FY19' ? { position: 'left', distance: 8 } : { align: align(o), offset: [o < 0 ? -6 : o > 0 ? 6 : 0, 0] }
+  }));
+  const dealNames = deals.map(([b, t, fy, m, o]) => ({
+    value: [years.indexOf(fy) + o, m],
+    label: { formatter: `${b} / ${t}`, align: align(o), offset: [o < 0 ? -6 : o > 0 ? 6 : 0, 0] }
+  }));
+
+  const labelBg = 'rgba(247,242,242,0.85)';
+  const el = document.getElementById('chart');
+
+  function option() {
+    const narrow = el.clientWidth < 560;
+    return {
+      textStyle: { fontFamily: F.body },
+      grid: { left: narrow ? 40 : 56, right: narrow ? 40 : 96, top: 44, bottom: 36 },
+      tooltip: { ...KEN.tooltip, trigger: 'item' },
+      xAxis: [
+        {
+          type: 'category', data: years,
+          axisLine: { lineStyle: { color: C.rule, width: 1.5 } },
+          axisTick: { show: false },
+          axisLabel: { ...KEN.axisLabelBold, fontSize: narrow ? 11 : 14, interval: 0 }
+        },
+        { type: 'value', min: -0.5, max: years.length - 0.5, show: false }
+      ],
+      yAxis: [
+        {
+          type: 'value', min: 0, max: 60, interval: 10, position: 'left',
+          name: 'Total beds (K)', nameLocation: 'end', nameGap: 18,
+          nameTextStyle: { ...KEN.axisName, color: BEDS, align: 'left' },
+          axisLine: { show: true, onZero: false, lineStyle: { color: BEDS, width: 1.5 } },
+          axisTick: { show: false },
+          axisLabel: { ...KEN.axisLabel, color: BEDS },
+          splitLine: KEN.gridLine
+        },
+        {
+          type: 'value', min: 0, max: 50, interval: 10, position: 'right',
+          name: 'EV / EBITDA (x)', nameLocation: 'end', nameGap: 18,
+          nameTextStyle: { ...KEN.axisName, color: DEAL, align: 'right' },
+          axisLine: { show: true, onZero: false, lineStyle: { color: DEAL, width: 1.5 } },
+          axisTick: { show: false },
+          axisLabel: { ...KEN.axisLabel, color: DEAL },
+          splitLine: { show: false }
+        }
+      ],
+      series: [
+        {
+          // invisible base that lifts each year's increment to the previous total
+          name: 'base', type: 'bar', stack: 'wf', xAxisIndex: 0, yAxisIndex: 0, barWidth: '60%',
+          data: wfBase, itemStyle: { color: 'transparent' }, silent: true, tooltip: { show: false }
+        },
+        {
+          name: 'Installed beds (listed universe)',
+          type: 'bar', stack: 'wf', xAxisIndex: 0, yAxisIndex: 0, barWidth: '60%',
+          data: wfStep.map((v, i) => i === 0 ? { value: v, itemStyle: { color: BEDS } } : v),
+          itemStyle: { color: BEDS_TINT, borderColor: BEDS, borderWidth: 1 },
+          emphasis: { itemStyle: { borderWidth: 1.5 } },
+          label: {
+            show: !narrow, position: 'top', color: BEDS, fontFamily: F.bold, fontWeight: 'bold', fontSize: 12,
+            formatter: p => {
+              const i = p.dataIndex;
+              if (bedsK[i] == null) return '';
+              if (i === 0) return bedsK[0].toFixed(1) + 'K';
+              const d = '+' + (bedsK[i] - bedsK[i - 1]).toFixed(1) + 'K';
+              return i === lastBed ? `{tot|${bedsK[i].toFixed(1)}K total}\n${d}` : d;
+            },
+            rich: { tot: { color: '#fff', backgroundColor: BEDS, padding: [3, 6], borderRadius: 3, fontFamily: F.bold, fontWeight: 'bold', fontSize: 12, lineHeight: 26 } }
+          },
+          markLine: {
+            silent: true, symbol: 'none', label: { show: false },
+            lineStyle: { color: C.outline, type: 'dashed', width: 1 },
+            data: bedsK.slice(0, lastBed).map((v, i) => [
+              { coord: [years[i], v] }, { coord: [years[i + 1], v] }
+            ])
+          },
+          tooltip: {
+            formatter: p => {
+              const i = p.dataIndex, tot = Math.round(bedsK[i] * 1000).toLocaleString('en-IN');
+              if (i === 0) return KEN.tt.name(p.name) + KEN.tt.line('Total beds', tot);
+              const add = Math.round((bedsK[i] - bedsK[i - 1]) * 1000).toLocaleString('en-IN');
+              return KEN.tt.name(p.name) + KEN.tt.line('Beds added', '+' + add) + KEN.tt.line('Total beds', tot);
+            }
+          },
+          z: 2
+        },
+        {
+          name: 'PE / strategic deal EV/EBITDA',
+          type: 'line', xAxisIndex: 1, yAxisIndex: 1,
+          data: dealPoints,
+          symbol: 'circle', symbolSize: narrow ? 8 : 10,
+          lineStyle: { color: DEAL, width: 1.5, opacity: 0.55 },
+          itemStyle: { color: DEAL, borderColor: C.bg, borderWidth: 1.5 },
+          emphasis: { scale: 1.2, itemStyle: { borderColor: 'rgba(255,255,255,0.45)' } },
+          label: {
+            show: true, position: 'top', distance: 8,
+            color: DEAL, fontFamily: F.bold, fontWeight: 'bold', fontSize: narrow ? 11 : 13,
+            backgroundColor: labelBg, padding: [1, 3],
+            formatter: p => p.value[1] + 'x'
+          },
+          tooltip: {
+            formatter: p => KEN.tt.name(`${p.data.buyer} → ${p.data.target}`)
+              + KEN.tt.meta(p.data.fy) + KEN.tt.line('EV/EBITDA', p.data.value[1] + 'x')
+          },
+          z: 5
+        },
+        {
+          name: 'deal-names', type: 'scatter', xAxisIndex: 1, yAxisIndex: 1,
+          data: dealNames, symbolSize: 0, silent: true, tooltip: { show: false },
+          label: {
+            show: !narrow, position: 'bottom', distance: 10,
+            color: C.text, fontStyle: 'italic', fontSize: 11,
+            backgroundColor: labelBg, padding: [1, 3]
+          },
+          z: 4
+        }
+      ]
+    };
+  }
+
+  KEN.whenFontsReady(() => {
+    const chart = echarts.init(el);
+    chart.setOption(option());
+    window.addEventListener('resize', () => { chart.resize(); chart.setOption(option()); });
+  });
+</script>
+</body>
+</html>

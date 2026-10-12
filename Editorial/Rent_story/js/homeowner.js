@@ -133,14 +133,14 @@ window.initHomeownerCharts = function initHomeownerCharts() {
     const todayRents = Aggregate.tally(records, 'todayRents', TODAY_RENTS_VALUES);
     charts.todayRents.setOption(ChartTheme.pieOption(
       TODAY_RENTS_LABELS.map((name, i) => ({ value: todayRents.counts[i], name, itemStyle: { color: PALETTE[i] } })),
-      commonTextStyle, { name: 'Today Rents', legendRows: 3 }
+      commonTextStyle, { name: 'Today Rents', legendRows: 3, labelColor: 'rgba(255, 255, 255, 0.88)' }
     ), true);
 
     // --- "Do you think buying a home is possible for young renters today?" ---
     const buyingPossible = Aggregate.tally(records, 'buyingPossible', BUYING_POSSIBLE_VALUES);
     charts.buyingPossible.setOption(ChartTheme.pieOption(
       BUYING_POSSIBLE_LABELS.map((name, i) => ({ value: buyingPossible.counts[i], name, itemStyle: { color: BUYING_POSSIBLE_COLORS[i] } })),
-      commonTextStyle, { name: 'Buying Possible', legendRows: 3 }
+      commonTextStyle, { name: 'Buying Possible', legendRows: 3, labelColor: 'rgba(255, 255, 255, 0.88)' }
     ), true);
   }
 

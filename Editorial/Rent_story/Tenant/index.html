@@ -319,6 +319,15 @@ body {
   min-height: 1220px;
 }
 
+/* Overview's own content (top-row 281px + gap + its now-auto-height grid,
+   section 4) totals ~873px, short of the shared 900px floor — leaving a
+   ~27px gap of its own below the grid otherwise, on top of whatever the
+   772px/900px floors already used to leave before the dashboard-grid fix
+   above. Tightened to fit exactly instead. */
+.theme-overview .panel-body {
+  min-height: 873px;
+}
+
 /* Charts<->Responses switch entrance (js/filters.js's FilterUI.replayEnter
    toggles this class on whichever view just became visible — .dashboard-
    grid for Charts, .responses-view for Responses — re-triggering it via a
@@ -443,15 +452,23 @@ body {
   min-height: 0;
 }
 
-/* Overview, Homeowner and Non-Resident are all 2-row-slot layouts (vs. 3 for
+/* Homeowner and Non-Resident are 2-row-slot layouts (vs. 3 for
    Landlord/Tenant), so their grid keeps its original ~772px default height
    (772px = the old 820px container max-height minus 48px padding) instead
    of stretching to fill the taller .dashboard-container above. The leftover
    space collects below as an empty gap rather than inflating their cards. */
-.theme-overview .dashboard-grid,
 .theme-homeowner .dashboard-grid,
 .theme-nonresident .dashboard-grid {
   flex: 0 0 772px;
+}
+
+/* Overview shrinks to its own (shorter) content instead — its 2nd grid row
+   is `auto`-height now (below), not `1fr`, so this can't rely on the
+   772px number above: fixing the box at 772px while its rows only need
+   ~576px just relocated the same dead space from "inside row 2, below the
+   pies" to "below the grid, inside this box" instead of removing it. */
+.theme-overview .dashboard-grid {
+  flex: 0 0 auto;
 }
 
 .left-column {
@@ -496,10 +513,13 @@ body {
    overrides the column/row template. Row 1 is pinned to --stat-bar-height
    (not `1fr`) so the bar-chart card lines up with the .stat-bar-card height
    used on the other 4 dashboards; the KPI card shares that row and height
-   too. */
+   too. Row 2 is `auto` (not `1fr`) — its pie cards are fixed-height
+   (.pie-fit-card, section 4) and don't stretch to fill it, so a `1fr` row
+   here just reserved space nothing was going to use: visible empty space
+   below the pies instead of an equally-tall row 2 actually needing it. */
 .overview-grid {
   grid-template-columns: 1.3fr 0.85fr 0.85fr;
-  grid-template-rows: var(--stat-bar-height) 1fr;
+  grid-template-rows: var(--stat-bar-height) auto;
 }
 
 .overview-grid .span-col-1 { grid-column: span 1; }
@@ -1795,7 +1815,7 @@ body {
             </div>
 
             <div class="card">
-              <div class="card-title">Choose your poison</div>
+              <div class="card-title">Compromises made</div>
               <div id="tn-chart-coping-pie" class="chart-box"></div>
             </div>
           </div>
@@ -7972,7 +7992,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Other reasons",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "20% of monthly rent"
   },
   {
     "age": "25 – 34",
@@ -7985,7 +8006,8 @@ window.SURVEY_DATA = {
     "lastHike": "More than 40%",
     "vacancySpeed": "It has not been vacant in years",
     "raiseReason": "People were ready to pay",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": ""
   },
   {
     "age": "35 – 44",
@@ -7998,7 +8020,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Other reasons",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "NA"
   },
   {
     "age": "45 – 54",
@@ -8011,7 +8034,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "No"
   },
   {
     "age": "45 – 54",
@@ -8024,7 +8048,8 @@ window.SURVEY_DATA = {
     "lastHike": "11–20%",
     "vacancySpeed": "More than a month",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Sell the house"
+    "cutEarnings": "Sell the house",
+    "brokerCost": "One month rent"
   },
   {
     "age": "35 – 44",
@@ -8037,7 +8062,8 @@ window.SURVEY_DATA = {
     "lastHike": "I did not raise it",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "I did not raise it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -8050,7 +8076,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "Rent it out for short stays instead (like Airbnb)"
+    "cutEarnings": "Rent it out for short stays instead (like Airbnb)",
+    "brokerCost": "I did not use a broker. I avoid them because both the tenant and owner lose in such a situation. There is absolutely no need to pay a high brokerage when there are so many platforms to list rentals for apartments."
   },
   {
     "age": "45 – 54",
@@ -8063,7 +8090,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "Rent it out for short stays instead (like Airbnb)"
+    "cutEarnings": "Rent it out for short stays instead (like Airbnb)",
+    "brokerCost": "no"
   },
   {
     "age": "25 – 34",
@@ -8076,7 +8104,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -8089,7 +8118,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "No"
   },
   {
     "age": "35 – 44",
@@ -8102,7 +8132,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "People were ready to pay",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -8115,7 +8146,8 @@ window.SURVEY_DATA = {
     "lastHike": "I did not raise it",
     "vacancySpeed": "It has not been vacant in years",
     "raiseReason": "I did not raise it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "1 month rent"
   },
   {
     "age": "45 – 54",
@@ -8128,7 +8160,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "More than a month",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": ""
   },
   {
     "age": "25 – 34",
@@ -8141,7 +8174,8 @@ window.SURVEY_DATA = {
     "lastHike": "I did not raise it",
     "vacancySpeed": "In a week or two",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -8154,7 +8188,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "It has not been vacant in years",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "no"
   },
   {
     "age": "35 – 44",
@@ -8167,7 +8202,8 @@ window.SURVEY_DATA = {
     "lastHike": "",
     "vacancySpeed": "",
     "raiseReason": "",
-    "cutEarnings": ""
+    "cutEarnings": "",
+    "brokerCost": "No. But used one to find for ourselves when we got one"
   },
   {
     "age": "35 – 44",
@@ -8180,7 +8216,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "No"
   },
   {
     "age": "35 – 44",
@@ -8193,7 +8230,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "People were ready to pay",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": ""
   },
   {
     "age": "35 – 44",
@@ -8206,7 +8244,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Other reasons",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "55 and above",
@@ -8219,7 +8258,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "More than a month",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "Yes. One month's rent. This was set and agreed before search commenced."
   },
   {
     "age": "25 – 34",
@@ -8232,7 +8272,8 @@ window.SURVEY_DATA = {
     "lastHike": "The house was empty/does not apply",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "People were ready to pay",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -8245,7 +8286,8 @@ window.SURVEY_DATA = {
     "lastHike": "I did not raise it",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "I did not raise it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "Yes. Usually half to one month rent from my side and I guess same from the other side"
   },
   {
     "age": "45 – 54",
@@ -8258,7 +8300,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "No did not use a broker. Rented it via a reference."
   },
   {
     "age": "35 – 44",
@@ -8271,7 +8314,8 @@ window.SURVEY_DATA = {
     "lastHike": "11–20%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": "No"
   },
   {
     "age": "45 – 54",
@@ -8284,7 +8328,8 @@ window.SURVEY_DATA = {
     "lastHike": "",
     "vacancySpeed": "In a week or two",
     "raiseReason": "A new metro or office nearby raised demand",
-    "cutEarnings": "Rent it out for short stays instead (like Airbnb)"
+    "cutEarnings": "Rent it out for short stays instead (like Airbnb)",
+    "brokerCost": "Yes, half month rent"
   },
   {
     "age": "55 and above",
@@ -8297,7 +8342,8 @@ window.SURVEY_DATA = {
     "lastHike": "11–20%",
     "vacancySpeed": "It has not been vacant in years",
     "raiseReason": "Other reasons",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": "no"
   },
   {
     "age": "55 and above",
@@ -8310,7 +8356,8 @@ window.SURVEY_DATA = {
     "lastHike": "11–20%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "People were ready to pay",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": "Used online services - paid 15,000/-."
   },
   {
     "age": "45 – 54",
@@ -8323,7 +8370,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "My costs went up — tax, repairs, loan etc",
-    "cutEarnings": "Rent it out for short stays instead (like Airbnb)"
+    "cutEarnings": "Rent it out for short stays instead (like Airbnb)",
+    "brokerCost": "No"
   },
   {
     "age": "35 – 44",
@@ -8336,7 +8384,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "More than a month",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": ""
   },
   {
     "age": "35 – 44",
@@ -8349,7 +8398,8 @@ window.SURVEY_DATA = {
     "lastHike": "The house was empty/does not apply",
     "vacancySpeed": "In a week or two",
     "raiseReason": "I did not raise it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "no"
   },
   {
     "age": "55 and above",
@@ -8362,7 +8412,8 @@ window.SURVEY_DATA = {
     "lastHike": "",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -8375,7 +8426,8 @@ window.SURVEY_DATA = {
     "lastHike": "11–20%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "No"
   },
   {
     "age": "55 and above",
@@ -8388,7 +8440,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Other reasons",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "No, but used online platforms, at no cost"
   },
   {
     "age": "55 and above",
@@ -8401,7 +8454,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "Sell the house"
+    "cutEarnings": "Sell the house",
+    "brokerCost": "No"
   },
   {
     "age": "45 – 54",
@@ -8414,7 +8468,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "It has not been vacant in years",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -8427,7 +8482,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "More than a month",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "25 – 34",
@@ -8440,7 +8496,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "More than a month",
     "raiseReason": "Other reasons",
-    "cutEarnings": "Rent it out for short stays instead (like Airbnb)"
+    "cutEarnings": "Rent it out for short stays instead (like Airbnb)",
+    "brokerCost": "Yes , I think it was one month rent"
   },
   {
     "age": "55 and above",
@@ -8453,7 +8510,8 @@ window.SURVEY_DATA = {
     "lastHike": "",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -8466,7 +8524,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "0"
   },
   {
     "age": "35 – 44",
@@ -8479,7 +8538,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "More than a month",
     "raiseReason": "My costs went up — tax, repairs, loan etc",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": "50,000 INR"
   },
   {
     "age": "55 and above",
@@ -8492,7 +8552,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "Other reasons",
-    "cutEarnings": "Rent it out for short stays instead (like Airbnb)"
+    "cutEarnings": "Rent it out for short stays instead (like Airbnb)",
+    "brokerCost": "1 month rent"
   },
   {
     "age": "45 – 54",
@@ -8505,7 +8566,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "It has not been vacant in years",
     "raiseReason": "",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "No"
   },
   {
     "age": "55 and above",
@@ -8518,7 +8580,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "My costs went up — tax, repairs, loan etc",
-    "cutEarnings": "Not sure"
+    "cutEarnings": "Not sure",
+    "brokerCost": "Quite a lot! A months rent as commission"
   },
   {
     "age": "55 and above",
@@ -8531,7 +8594,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "More than a month",
     "raiseReason": "My costs went up — tax, repairs, loan etc",
-    "cutEarnings": "Not sure"
+    "cutEarnings": "Not sure",
+    "brokerCost": "One months rent as commission"
   },
   {
     "age": "35 – 44",
@@ -8544,7 +8608,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "More than a month",
     "raiseReason": "Other reasons",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": "1 month rent"
   },
   {
     "age": "35 – 44",
@@ -8557,7 +8622,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "Part of propert management services"
   },
   {
     "age": "55 and above",
@@ -8570,7 +8636,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "Other reasons",
-    "cutEarnings": "Not sure"
+    "cutEarnings": "Not sure",
+    "brokerCost": "15 days rent"
   },
   {
     "age": "55 and above",
@@ -8583,7 +8650,8 @@ window.SURVEY_DATA = {
     "lastHike": "21–40%",
     "vacancySpeed": "More than a month",
     "raiseReason": "People were ready to pay",
-    "cutEarnings": "Sell the house"
+    "cutEarnings": "Sell the house",
+    "brokerCost": "40% of rent"
   },
   {
     "age": "35 – 44",
@@ -8596,7 +8664,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "",
     "raiseReason": "",
-    "cutEarnings": "There are ways to get around such limits"
+    "cutEarnings": "There are ways to get around such limits",
+    "brokerCost": ""
   },
   {
     "age": "35 – 44",
@@ -8609,7 +8678,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "My costs went up — tax, repairs, loan etc",
-    "cutEarnings": "Rent it out for short stays instead (like Airbnb)"
+    "cutEarnings": "Rent it out for short stays instead (like Airbnb)",
+    "brokerCost": ""
   },
   {
     "age": "45 – 54",
@@ -8622,7 +8692,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "Other reasons",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "55 and above",
@@ -8635,7 +8706,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": ""
+    "cutEarnings": "",
+    "brokerCost": ""
   },
   {
     "age": "55 and above",
@@ -8648,7 +8720,8 @@ window.SURVEY_DATA = {
     "lastHike": "I did not raise it",
     "vacancySpeed": "More than a month",
     "raiseReason": "I did not raise it",
-    "cutEarnings": "Sell the house"
+    "cutEarnings": "Sell the house",
+    "brokerCost": "i used No Broker"
   },
   {
     "age": "25 – 34",
@@ -8661,7 +8734,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": ""
   },
   {
     "age": "55 and above",
@@ -8674,7 +8748,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "",
-    "cutEarnings": "Rent it out for short stays instead (like Airbnb)"
+    "cutEarnings": "Rent it out for short stays instead (like Airbnb)",
+    "brokerCost": "No"
   },
   {
     "age": "35 – 44",
@@ -8687,7 +8762,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "I was charging low before, so I fixed it",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "1 month for first time and small token fee for renewals"
   },
   {
     "age": "55 and above",
@@ -8700,7 +8776,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a few days — many people wanted it",
     "raiseReason": "My costs went up — tax, repairs, loan etc",
-    "cutEarnings": "Keep the house vacant until the rule changes"
+    "cutEarnings": "Keep the house vacant until the rule changes",
+    "brokerCost": "no"
   },
   {
     "age": "55 and above",
@@ -8713,7 +8790,8 @@ window.SURVEY_DATA = {
     "lastHike": "Up to 10%",
     "vacancySpeed": "In a week or two",
     "raiseReason": "Rents in the area went up, so I did the same",
-    "cutEarnings": "Keep renting — some rent is better than none"
+    "cutEarnings": "Keep renting — some rent is better than none",
+    "brokerCost": "Yes, about one month's rent (survey flow test)"
   }
 ],
   homeowner: [
@@ -10895,25 +10973,29 @@ window.ChartTheme = (function () {
   // convention still holds.
   function contrastRamp(hex, count) {
     const { h, s } = hexToHsl(hex);
-    const minL = 26, maxL = 68;
-    const sat = Math.max(s, 38); // floor saturation so the palest steps don't wash out to near-gray
+    // Widened from the original 26-68 — with 6-7 categories (e.g.
+    // Landlord's "why did you raise the rent" dot matrix) each step was
+    // only ~7% lightness apart, too close to tell two adjacent dots apart
+    // at 11px. Stretched closer to the usable extremes (dark enough to
+    // stay a real color, light enough to still clear the near-white
+    // --card-bg) instead, so every step reads as a distinct shade even at
+    // dot size — same hue throughout, never a different color per step.
+    const minL = 14, maxL = 80;
+    const sat = Math.max(s, 55); // floor saturation so the palest steps stay a color, not a wash-out
     return Array.from({ length: Math.max(1, count) }, (_, i) =>
       hslToHex(h, sat, count > 1 ? minL + (maxL - minL) * (i / (count - 1)) : minL)
     );
   }
 
-  // Picks a readable in-segment label color against an arbitrary bar/slice
-  // fill — every palette here ramps from a dark tone down to a near-white
-  // tint, and a flatly white label (the old default) went unreadable on
-  // those lightest tints. `hex` is whatever color ECharts resolved for that
-  // segment (`params.color` in a label callback). The dark choice is
-  // `darkColor` — that CHART's own darkest palette shade, passed in by the
-  // caller (or, for pieOption, worked out automatically from its own data,
-  // see below) — rather than a generic gray, so a light-slice label reads
-  // as the same color family as the rest of the chart instead of a
-  // one-off default.
+  // In-segment label color for a bar/pie slice — every palette here ramps
+  // from a dark tone down to a medium-light tint (never as pale as the
+  // page's own near-white background), so the page's own off-white
+  // reads clearly against any of them, dark or light, without needing a
+  // per-segment dark/light branch at all. `hex`/`darkColor` are no longer
+  // used, kept as accepted (ignored) args so every existing call site
+  // stays valid without touching each one.
   function contrastColor(hex, darkColor) {
-    return luminance(hex) > 0.55 ? (darkColor || 'rgba(0, 0, 0, 0.72)') : '#fff';
+    return '#faf8f2';
   }
 
   // The lowest-luminance color actually used in `data` (each item's
@@ -10990,12 +11072,16 @@ window.ChartTheme = (function () {
   // series are built one at a time, each with only its own segment's color
   // in scope, so there's no single `data` array here to read every
   // segment's color back out of).
-  function statBarLabel(darkColor) {
+  // `labelColor` is an optional straight override (e.g. non-resident's own
+  // olive palette wanted a whiter, punchier label than the shared
+  // off-white contrastColor gives everyone else) — omit it to keep the
+  // normal shared behavior.
+  function statBarLabel(darkColor, labelColor) {
     return {
       show: true,
       position: 'inside',
       formatter: (p) => (p.value < 5 ? '' : Math.round(p.value * 10) / 10 + '%'),
-      color: (p) => contrastColor(p.color, darkColor),
+      color: labelColor || ((p) => contrastColor(p.color, darkColor)),
       fontFamily: 'GT America Bold, sans-serif',
       fontWeight: 700,
       fontSize: 9
@@ -11066,7 +11152,11 @@ window.ChartTheme = (function () {
           show: true,
           position: 'inside',
           formatter: opts.showCount ? pieCountFormatter : pieLabelFormatter,
-          color: (p) => contrastColor(p.color, darkColor),
+          // opts.labelColor is a straight override (e.g. Homeowner's pies
+          // wanted a whiter, punchier label than the shared off-white
+          // contrastColor gives everyone else) — omit it to keep the
+          // normal shared behavior.
+          color: opts.labelColor || ((p) => contrastColor(p.color, darkColor)),
           fontFamily: 'GT America Bold, sans-serif',
           fontWeight: 700,
           fontSize: mini ? 9 : 10
@@ -11340,9 +11430,38 @@ window.Aggregate = (function () {
     return /[.,]/.test(text);
   }
 
+  // A looser bar than looksLikeSentence for fields whose real answers are
+  // often short PHRASES rather than punctuated sentences (e.g. "20% of
+  // monthly rent", "1 month rent") — punctuation would wrongly reject
+  // those. 2+ words is enough on its own to drop bare "No"/"NA"/"0"
+  // non-answers; `survey flow test` marks a handful of QA rows left in
+  // the raw CSV export, not real respondent data.
+  function isSubstantiveAnswer(text) {
+    if (!text) return false;
+    const trimmed = text.trim();
+    if (!trimmed || /survey flow test/i.test(trimmed)) return false;
+    return trimmed.split(/\s+/).filter(Boolean).length >= 2;
+  }
+
+  // Drops every item after the first whose `keyFn(item)` result repeats —
+  // Landlord's raiseReason/cutEarnings free-text fields overlap heavily
+  // with the closed-choice options right above them in the survey (e.g.
+  // "Rents in the area went up, so I did the same"), so many respondents
+  // just retyped the option verbatim, producing several response cards
+  // with the exact same quote(s) instead of a genuine free-text answer.
+  function dedupeBy(items, keyFn) {
+    const seen = new Set();
+    return items.filter((item) => {
+      const key = keyFn(item);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
   return {
     AGE_OPTIONS, CAREER_OPTIONS, REGION_OPTIONS,
-    filterRecords, tally, tallyGrouped, countFlag, percentages, regionCounts, shortCareer, optionsWithData, looksLikeSentence
+    filterRecords, tally, tallyGrouped, countFlag, percentages, regionCounts, shortCareer, optionsWithData, looksLikeSentence, isSubstantiveAnswer, dedupeBy
   };
 })();
 
@@ -11565,11 +11684,29 @@ window.FilterUI = (function () {
 
   function mountResponses(scrollEl, paginationEl, items, opts) {
     opts = opts || {};
-    const pageSize = opts.pageSize || 9;
-    const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+    const basePageSize = opts.pageSize || 9;
+    let pageSize = basePageSize;
+    let totalPages = 1;
     let page = 0;
 
+    // .responses-scroll's own column count is set by CSS (3 desktop / 2
+    // iPad / 1 phone — css/dashboard.css sections 9/11/12), not by this
+    // function — reading it back keeps a page at this dashboard's usual 3
+    // rows regardless of how many columns that resolves to. Without this,
+    // the same fixed 9-per-page stacks into 5 rows at 2 columns or 9 rows
+    // at 1, growing the Responses tab's height well past the Charts tab's
+    // own (a single carousel card below that same breakpoint) instead of
+    // the two roughly matching like they do on desktop.
+    function columnsNow() {
+      const cols = getComputedStyle(scrollEl).gridTemplateColumns.split(' ').filter(Boolean).length;
+      return Math.max(cols, 1);
+    }
+
     function renderPage() {
+      pageSize = columnsNow() * 3;
+      totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+      page = Math.min(page, totalPages - 1);
+
       buildResponseCards(scrollEl, items.slice(page * pageSize, page * pageSize + pageSize), opts.emptyText);
 
       if (items.length === 0) {
@@ -11588,6 +11725,33 @@ window.FilterUI = (function () {
     }
 
     renderPage();
+
+    // mountResponses runs again on every filter change (same scrollEl,
+    // fresh `items` closure each time) — a plain addEventListener here
+    // would stack a new resize listener per filter click, each holding
+    // its own increasingly-stale `items`. Stashing the latest renderPage
+    // on the element itself and binding exactly one shared listener (only
+    // the first time this scrollEl is ever mounted) keeps it to one
+    // listener total, always calling through to whichever mount is
+    // current. It only fires on an actual column-count change (not just
+    // any resize, or a height-only one) — crossing 700px/1024px, where
+    // css/dashboard.css sections 9/11/12 change .responses-scroll's own
+    // column count — so a page already open adopts the new page size
+    // instead of staying at whatever it was mounted with.
+    scrollEl.__mountResponsesLive = { renderPage, columnsNow };
+    if (!scrollEl.__mountResponsesResizeBound) {
+      scrollEl.__mountResponsesResizeBound = true;
+      let lastCols = columnsNow();
+      window.addEventListener('resize', () => {
+        const live = scrollEl.__mountResponsesLive;
+        if (!live) return;
+        const cols = live.columnsNow();
+        if (cols !== lastCols) {
+          lastCols = cols;
+          live.renderPage();
+        }
+      });
+    }
   }
 
   // Below `opts.breakpoint` (matches css/dashboard.css section 11's own
@@ -12014,8 +12178,28 @@ window.initTenantCharts = function initTenantCharts() {
         formatter: ChartTheme.allStatsTooltip(LEAVE_RENT_LABELS.map((name, i) => [name, leaveRent.counts[i], leaveColors[i]]))
       },
       grid: { left: '0%', right: '4%', bottom: '0%', top: '4%', containLabel: true },
+      // A narrow filter can shrink every count down to single digits, and
+      // with no floor here ECharts auto-scales the axis to match — a bar
+      // of 1 out of an axis max of 1 fills the full plot width, shoving
+      // its value label right up against the category label on the far
+      // side. min/max floor the axis at ±20 regardless of how small the
+      // filtered counts get, so a thin sliver of data stays a thin sliver
+      // instead of stretching to fill the chart. The extra *1.15 headroom
+      // matters separately from that floor: whichever bar happens to BE
+      // the largest always reaches its own axis extreme exactly (by
+      // definition), so its outside-position value label has nowhere to
+      // sit — the 15% of extra axis range past the real max/floor is
+      // empty space reserved for exactly that label, on every bar, not
+      // just the small ones the floor covers.
       xAxis: {
         type: 'value',
+        // Rounded up to the nearest 10 (not the raw *1.15 value) so
+        // ECharts' own tick generator lands on whole numbers along this
+        // padded range too — an un-rounded bound like 117.3 was showing
+        // up as a tick label itself (and, from float rounding, as an
+        // uglier 57.499999999998 on the positive side).
+        min: (value) => -Math.ceil(Math.max(Math.abs(value.min), 20) * 1.15 / 10) * 10,
+        max: (value) => Math.ceil(Math.max(value.max, 20) * 1.15 / 10) * 10,
         axisLabel: { formatter: (v) => Math.abs(v), ...commonTextStyle, fontSize: 10 },
         splitLine: { lineStyle: { type: 'dashed', color: BORDER_TONE } }
       },

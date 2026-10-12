@@ -246,17 +246,16 @@ window.initLandlordCharts = function initLandlordCharts() {
 
   function renderResponses(records) {
     const items = records
-      .map((r) => {
-        const lines = [];
-        if (r.raiseReason && Aggregate.looksLikeSentence(r.raiseReason)) lines.push({ label: 'Why they raised the rent', quote: r.raiseReason });
-        if (r.cutEarnings && Aggregate.looksLikeSentence(r.cutEarnings)) lines.push({ label: 'If a rent cap cut their earnings', quote: r.cutEarnings });
-        return lines.length ? { lines, meta: (r.age || 'Age not specified') + ' • ' + (r.career ? Aggregate.shortCareer(r.career) : 'Career not specified') } : null;
-      })
-      .filter(Boolean);
+      .filter((r) => Aggregate.isSubstantiveAnswer(r.brokerCost))
+      .map((r) => ({
+        quote: r.brokerCost,
+        meta: (r.age || 'Age not specified') + ' • ' + (r.career ? Aggregate.shortCareer(r.career) : 'Career not specified')
+      }));
+    const deduped = Aggregate.dedupeBy(items, (item) => item.quote.trim().toLowerCase());
     FilterUI.mountResponses(
       document.getElementById('ll-responses'),
       document.getElementById('ll-pagination'),
-      items,
+      deduped,
       { emptyText: 'No landlord responses match these filters.' }
     );
   }
