@@ -65,7 +65,7 @@ const seriesData = groups.map(g => deals.filter(d => d[0] === g).map(d => {
   const k = d[0] + d[3];
   const n = cellCount[k];
   const i = cellIdx[k] = (cellIdx[k] ?? -1) + 1;
-  const offset = (i - (n - 1) / 2) * 0.42;
+  const offset = (i - (n - 1) / 2) * 0.5;
   return {
     value: [years.indexOf(d[3]) + offset, groups.indexOf(g), d[7]],
     short: d[1], full: d[2], year: d[3], deal: d[4], cons: d[5], gw: d[6]
@@ -82,33 +82,40 @@ function option() {
   const slot = (w - gridLeft - gridRight) / 6;
   const k = Math.min(1, slot / 165);
   const showLabels = k >= 0.6;
+  const size = pct => (44 + pct * 0.62) * k;
 
   const series = groups.map((g, gi) => ({
     name: g,
     type: 'scatter',
-    itemStyle: { color: colors[gi], borderColor: C.bg, borderWidth: 1 },
-    symbolSize: v => (30 + v[2] * 0.45) * k,
-    emphasis: { scale: 1.07, itemStyle: { borderColor: 'rgba(255,255,255,0.45)', borderWidth: 1.5 } },
+    // opaque (scatter defaults to 0.8) so the row lines don't show through
+    itemStyle: { color: colors[gi], opacity: 1, borderColor: C.bg, borderWidth: 1.5 },
+    symbolSize: v => size(v[2]),
+    emphasis: { scale: 1.07, itemStyle: { opacity: 1, borderColor: 'rgba(255,255,255,0.45)', borderWidth: 1.5 } },
     label: {
       show: showLabels,
       position: 'inside',
       // name only where the bubble is big enough to hold it; tooltip has the rest
-      formatter: p => (30 + p.value[2] * 0.45) * k >= 52 ? `{pct|${p.value[2]}%}\n{nm|${p.data.short}}` : `{pct|${p.value[2]}%}`,
+      formatter: p => size(p.value[2]) >= 52 ? `{pct|${p.value[2]}%}\n{nm|${p.data.short}}` : `{pct|${p.value[2]}%}`,
       rich: {
         pct: { fontFamily: F.bold, fontWeight: 'bold', fontSize: 12, color: C.onFill, align: 'center' },
         nm: { fontFamily: F.body, fontSize: 9, color: C.onFill, align: 'center' }
       }
     },
     data: seriesData[gi],
-    // row guides through each company's row, labelled at the left like the Lightrock year rows
-    markLine: gi === 0 ? {
+    z: 10 // above the row-guide markLine (markLine defaults to z 5)
+  }));
+
+  // row guides through each company's row, labelled at the left like the Lightrock year rows;
+  // kept in their own series at a lower z so the bubbles sit on top of the lines
+  series.push({
+    type: 'scatter', data: [], silent: true, z: 1,
+    markLine: {
       silent: true, symbol: 'none',
       label: { show: true, position: 'start', distance: 12, formatter: p => groups[p.value], ...KEN.axisLabelBold, fontSize: narrow ? 12 : 14 },
       lineStyle: { color: C.grid, width: 0.8, type: 'solid' },
       data: groups.map((_, i) => ({ yAxis: i }))
-    } : undefined,
-    z: 3
-  }));
+    }
+  });
 
   return {
     textStyle: { fontFamily: F.body },
