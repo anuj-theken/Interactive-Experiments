@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Are Your Best Years Behind You?</title>
+<link rel="stylesheet" href="assets/ken-chart.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="assets/ken-echarts.js"></script>
+<script src="data/readers.js"></script>
+<style>
+  :root { --red: #C8423A; --char: #3D3D3D; --teal: #4A9E9A; --dot: #C4AAAA; }
+  body { display: block; overflow-x: hidden; }
+  p { margin: 0; }
+
+  /* Reading progress */
+  .progress { position: fixed; top: 0; left: 0; height: 3px; width: 100%; background: var(--red); transform-origin: 0 50%; transform: scaleX(0); z-index: 50; }
+
+  /* Hero */
+  .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 60px 20px; position: relative; overflow: hidden; }
+  .hero-dots { position: absolute; inset: 0; pointer-events: none; }
+  .hero-dots span { position: absolute; width: 9px; height: 9px; border-radius: 50%; background: var(--dot); opacity: .55; }
+  .kicker { font-family: var(--ken-font-bold); font-weight: bold; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--red); margin-bottom: 18px; position: relative; }
+  .hero h1 { font-family: var(--ken-font-display); font-weight: bold; font-size: clamp(44px, 10vw, 112px); line-height: .95; letter-spacing: -2px; color: var(--ken-ink); max-width: 11ch; position: relative; }
+  .hero h1 .w { display: inline-block; }
+  .hero h1 em { font-style: normal; color: var(--red); }
+  .dek { font-size: clamp(16px, 2.4vw, 20px); line-height: 1.5; color: var(--ken-text); max-width: 34em; margin-top: 26px; position: relative; }
+  .byline { font-size: 13px; color: var(--ken-text); margin-top: 22px; position: relative; }
+  .byline b { font-family: var(--ken-font-bold); color: var(--ken-ink); }
+  .cue { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); font-family: var(--ken-font-bold); font-weight: bold; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ken-text); }
+  .cue i { display: block; width: 1.5px; height: 34px; background: var(--ken-text); margin: 8px auto 0; transform-origin: top; }
+
+  /* Prose between graphics */
+  .prose { max-width: 620px; margin: 0 auto; padding: 18vh 20px; }
+  .prose p { font-size: clamp(17px, 2.3vw, 20px); line-height: 1.6; color: var(--ken-body); }
+  .prose p + p { margin-top: 1.1em; }
+  .chapter { font-family: var(--ken-font-bold); font-weight: bold; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--red); margin-bottom: 14px; }
+  .prose h2 { font-family: var(--ken-font-display); font-weight: bold; font-size: clamp(34px, 6vw, 58px); line-height: 1; letter-spacing: -1px; color: var(--ken-ink); margin-bottom: 24px; }
+
+  /* Big interlude line */
+  .interlude { min-height: 90vh; display: flex; align-items: center; justify-content: center; padding: 0 20px; }
+  .interlude p { font-family: var(--ken-font-display); font-weight: bold; font-size: clamp(36px, 7vw, 76px); line-height: 1.04; letter-spacing: -1px; text-align: center; max-width: 13ch; color: var(--ken-ink); }
+  .interlude .w { display: inline-block; opacity: .12; }
+
+  /* Scrollytelling */
+  .scrolly { position: relative; display: grid; grid-template-columns: minmax(300px, 400px) minmax(0, 1fr); gap: 0 48px; max-width: 1240px; margin: 0 auto; padding: 0 28px; }
+  .graphic { grid-column: 2; grid-row: 1; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 28px 0 16px; }
+  .g-head { min-height: 52px; border-bottom: 1.5px solid var(--ken-rule); padding-bottom: 10px; }
+  .g-title { font-family: var(--ken-font-bold); font-weight: bold; font-size: 15px; color: var(--ken-ink); line-height: 1.3; }
+  .g-sub { font-size: 13px; color: var(--ken-text); margin-top: 3px; }
+  .g-chart { flex: 1; min-height: 0; }
+  .g-foot { font-size: 11px; color: var(--ken-text); font-style: italic; border-top: 1.5px solid var(--ken-rule); padding-top: 8px; }
+  .steps { grid-column: 1; grid-row: 1; padding: 50vh 0 60vh; position: relative; z-index: 2; }
+  .step { min-height: 95vh; display: flex; align-items: center; }
+  .step:last-child { min-height: 70vh; }
+  .card { background: var(--ken-bg); border: 1.5px solid var(--ken-rule); border-radius: 3px; padding: 20px 22px; font-size: 17px; line-height: 1.55; color: var(--ken-body); opacity: .35; transition: opacity .4s; }
+  .step.is-active .card { opacity: 1; }
+  .card .big { font-family: var(--ken-font-display); font-weight: bold; font-size: 44px; line-height: 1; color: var(--red); display: block; margin-bottom: 8px; }
+  .card .hint { display: block; font-size: 12px; font-style: italic; color: var(--ken-text); margin-top: 10px; }
+  .hl { font-family: var(--ken-font-bold); font-weight: bold; padding: 0 4px; border-radius: 3px; color: #fff; white-space: nowrap; }
+  .hl.red { background: var(--red); } .hl.char { background: var(--char); } .hl.teal { background: #3E8783; } .hl.dot { background: var(--dot); color: var(--ken-ink); }
+
+  @media (max-width: 860px) {
+    .scrolly { display: block; padding: 0; }
+    .graphic { height: 100vh; padding: 16px 16px 10px; }
+    .steps { margin-top: -100vh; padding: 70vh 16px 50vh; pointer-events: none; }
+    .step { min-height: 110vh; align-items: flex-end; }
+    .card { pointer-events: auto; background: rgba(247,242,242,.96); box-shadow: 0 4px 20px rgba(0,0,0,.10); font-size: 16px; opacity: 1; }
+    .step:not(.is-active) .card { opacity: .9; }
+  }
+
+  /* Quote wall */
+  .wall { max-width: 1040px; margin: 0 auto; padding: 4vh 20px 12vh; columns: 3 260px; column-gap: 28px; }
+  .q { break-inside: avoid; margin-bottom: 26px; border-top: 1.5px solid var(--ken-rule); padding-top: 14px; }
+  .q-tag { font-family: var(--ken-font-bold); font-weight: bold; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--red); }
+  .q-text { font-size: 19px; line-height: 1.4; color: var(--ken-ink); margin-top: 8px; }
+  .q.lg .q-text { font-family: var(--ken-font-display); font-weight: bold; font-size: 28px; line-height: 1.1; }
+  .q-who { font-size: 12px; font-style: italic; color: var(--ken-text); margin-top: 8px; }
+
+  /* Standalone charts */
+  .figure { max-width: 680px; margin: 0 auto; padding: 0 20px 14vh; }
+  .figure .g-head { margin-bottom: 4px; }
+  .figure .chart { height: 360px; }
+
+  /* Ending */
+  .method { max-width: 620px; margin: 0 auto; padding: 0 20px 20px; font-size: 13px; line-height: 1.6; color: var(--ken-text); }
+  .method h3 { font-family: var(--ken-font-bold); font-weight: bold; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ken-ink); margin-bottom: 8px; }
+  .method p + p { margin-top: .8em; }
+  .end-foot { max-width: 620px; margin: 0 auto; padding: 0 20px; }
+</style>
+</head>
+<body>
+<div class="progress"></div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-dots" id="heroDots"></div>
+  <div class="kicker">First Principles · Reader survey</div>
+  <h1 id="heroTitle">Are your best years <em>behind</em> you?</h1>
+  <p class="dek">We asked 301 readers which decade of their life has been the happiest, when they first felt middle-aged, and at what age they would stop ageing if they could. Their answers follow a pattern.</p>
+  <p class="byline">By <b>Anuj Debnath</b> · 12 October 2026</p>
+  <div class="cue">Scroll<i></i></div>
+</header>
+
+<!-- CHAPTER 1 -->
+<section class="prose">
+  <div class="chapter">Chapter one</div>
+  <h2>The happiest decade</h2>
+  <p>In September, we asked readers of First Principles a few questions about getting older. Which decade of your life has been your happiest so far? Which one do you expect to be your happiest? Have you ever felt middle-aged?</p>
+  <p>301 of you answered. Here is what you told us, one reader at a time.</p>
+</section>
+
+<section class="scrolly" data-chart="A">
+  <div class="graphic">
+    <div class="g-head"><div class="g-title"></div><div class="g-sub"></div></div>
+    <div class="g-chart"></div>
+    <div class="g-foot">Each dot is one reader. Hover over a dot to see that reader's answers.</div>
+  </div>
+  <div class="steps">
+    <div class="step" data-step="a1"><div class="card"><span class="big" data-count="301">301</span>Every dot here is one reader who took our survey.</div></div>
+    <div class="step" data-step="a2"><div class="card">Most of you are in the middle of your lives. <b>77%</b> are in your 30s, 40s or 50s. Readers in their 30s are the largest group.</div></div>
+    <div class="step" data-step="a3"><div class="card">We asked which decade has been your happiest so far. For almost half of you (<b>49%</b>), the answer was <span class="hl red">the decade you're in now</span>. Most of the rest named <span class="hl char">an earlier one</span>.</div></div>
+    <div class="step" data-step="a4"><div class="card">Move each reader to the decade they named, and two decades stand out: <b>the 20s and the 30s</b>. Together they get 58% of the answers.<span class="hint">Red dots are still readers who named the decade they're in now.</span></div></div>
+    <div class="step" data-step="a5"><div class="card">Then we asked which decade you <i>expect</i> to be your happiest. The answers move later. The <b>50s</b> get more votes than any other decade. Only 12 readers picked their 20s.</div></div>
+    <div class="step" data-step="a6"><div class="card">Put the two answers side by side. <b>6 in 10</b> of you think <span class="hl red">your best decade is still ahead</span>. About a third say <span class="hl char">it's now</span>. Only 17 readers think <span class="hl teal">it's behind them</span>.<span class="hint">Even among readers in their 50s, almost nobody thinks it's behind them.</span></div></div>
+  </div>
+</section>
+
+<section class="interlude"><p class="split">Then, at some point, something changes.</p></section>
+
+<!-- CHAPTER 2 -->
+<section class="prose">
+  <div class="chapter">Chapter two</div>
+  <h2>The day you felt middle-aged</h2>
+  <p>Middle age doesn't start on a fixed date. It's more a feeling, and it tends to arrive suddenly. So we asked: have you ever felt middle-aged? If so, at what age, and what happened?</p>
+</section>
+
+<section class="scrolly" data-chart="B">
+  <div class="graphic">
+    <div class="g-head"><div class="g-title"></div><div class="g-sub"></div></div>
+    <div class="g-chart"></div>
+    <div class="g-foot">Each dot is one reader. Hover over a dot to see that reader's answers.</div>
+  </div>
+  <div class="steps">
+    <div class="step" data-step="b1"><div class="card"><b>132 of you</b> said <span class="hl red">yes</span>, you have felt middle-aged. That's about one in six readers in their 20s, and more than two in three in their 50s.</div></div>
+    <div class="step" data-step="b2"><div class="card">We asked when it first happened. Half of you had felt it by <b>43</b>.<span class="hint">124 readers gave an age.</span></div></div>
+    <div class="step" data-step="b3"><div class="card">Notice the tall stacks. <span class="hl red">35, 40, 45, 50, 55</span>. More than half of all the ages given end in a 0 or a 5. Milestone birthdays seem to do a lot of the work.</div></div>
+    <div class="step" data-step="b4"><div class="card">What actually happened? For almost half of the readers who told us, it was <span class="hl red">their own body</span>: an injury that wouldn't heal, a diabetes diagnosis, a metabolism that seemed to switch off at 40.</div></div>
+    <div class="step" data-step="b5"><div class="card">Next came <span class="hl char">children growing up</span>, and <span class="hl teal">parents growing old</span>. And over and over, one moment: a child calling you "uncle".</div></div>
+  </div>
+</section>
+
+<section class="prose" style="padding-bottom:4vh">
+  <div class="chapter">In your words</div>
+  <h2>“Kids started calling me uncle”</h2>
+  <p>When we asked what made you feel middle-aged, here are some of the answers you gave.</p>
+</section>
+<section class="wall" id="wallMid"></section>
+
+<section class="figure">
+  <div class="g-head"><div class="g-title">What made readers feel middle-aged</div><div class="g-sub">% of the 128 written answers that mention each theme. One answer can mention more than one.</div></div>
+  <div class="chart" id="chartTrig"></div>
+  <div class="g-foot">Themes assigned by keyword matching on free-text answers, so the numbers are approximate.</div>
+</section>
+
+<section class="interlude"><p class="split">So what if you could stop the clock?</p></section>
+
+<!-- CHAPTER 3 -->
+<section class="prose">
+  <div class="chapter">Chapter three</div>
+  <h2>The pill</h2>
+  <p>Last question. Imagine a pill that stops biological ageing in its tracks. You stay the age you were when you took it, for good. At what age would you take it?</p>
+</section>
+
+<section class="scrolly" data-chart="C">
+  <div class="graphic">
+    <div class="g-head"><div class="g-title"></div><div class="g-sub"></div></div>
+    <div class="g-chart"></div>
+    <div class="g-foot">Each dot is one reader. Hover over a dot to see that reader's answers.</div>
+  </div>
+  <div class="steps">
+    <div class="step" data-step="c1"><div class="card">272 of you gave an age. The answers run from 10 to 110.</div></div>
+    <div class="step" data-step="c2"><div class="card"><span class="big">35</span>This is both the most common answer and the median: <span class="hl red">39 readers</span> would stop at exactly 35. 59% of readers would stop before 40.</div></div>
+    <div class="step" data-step="c3"><div class="card">Round numbers again. <b>60%</b> of the answers <span class="hl red">end in a 0 or a 5</span>. We seem to think about our lives in five-year blocks.</div></div>
+    <div class="step" data-step="c4"><div class="card">Your answer depends on how old you are now. Readers in their 20s would stop at around <b>28</b>, inside the decade they're in. Readers in their 50s would go back to <b>45</b>, and readers in their 70s to <b>60</b>. <span class="hl red">Red dots</span> are readers who would go back to an age they have already passed.<span class="hint">Grey bands show the decade each group is in now.</span></div></div>
+    <div class="step" data-step="c5"><div class="card">And then there are the <span class="hl red">four readers</span> who said 99, 100 or 110. One of them wrote: “Wouldn't take the pill actually.”</div></div>
+  </div>
+</section>
+
+<section class="prose" style="padding-bottom:4vh">
+  <div class="chapter">In your words</div>
+  <h2>Why that age?</h2>
+</section>
+<section class="wall" id="wallPill"></section>
+
+<!-- CHAPTER 4 -->
+<section class="prose">
+  <div class="chapter">Chapter four</div>
+  <h2>What makes a decade good</h2>
+  <p>We also gave readers a list of things that could make a decade good and asked them to pick as many as they wanted. Freedom came first, just ahead of relationships. Work was in the middle of the list. Learning came last.</p>
+</section>
+<section class="figure">
+  <div class="g-head"><div class="g-title">What a good decade needs</div><div class="g-sub">% of the 271 readers who picked at least one option</div></div>
+  <div class="chart" id="chartFact"></div>
+</section>
+
+<section class="prose">
+  <p>Put together, the answers show a pattern. Most readers think their happiest decade so far is a recent one, and most expect the happiest one to come later still. Most would freeze themselves around 35 if they could. And middle age doesn't come with a particular birthday. It comes when your knees, your children or your younger colleagues start to remind you of your age.</p>
+</section>
+
+<section class="method">
+  <h3>About the data</h3>
+  <p>301 readers of First Principles answered the survey between 13 and 22 September 2026. It is not a representative sample. 72% of respondents are men, and most live in Bengaluru, Mumbai or Delhi NCR.</p>
+  <p>Percentages leave out readers who skipped a question or said it was too close to call. If a reader said they expected their happiest decade to be “the one I'm in now”, we counted it as the decade they are in. Themes in the middle-age answers were assigned by keyword matching, so a single answer can count towards more than one theme. We quote only readers who agreed to be quoted, and we identify them only by decade and city.</p>
+</section>
+<div class="end-foot">
+  <div class="footer"><img src="assets/logo.png" alt="The Ken" class="footer-logo"><div class="footer-center">Graphic by Anuj Debnath, 12 Oct '26</div><div class="footer-right">Source: First Principles reader survey</div></div>
+</div>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+const P = window.READERS, N = P.length;
+const { C, F } = KEN;
+const RED = '#C8423A', CHAR = '#3D3D3D', TEAL = '#4A9E9A', DOT = '#C4AAAA';
+const DEC = ['Teens', '20s', '30s', '40s', '50s', '60s', '70s+'];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const pct = (a, b) => Math.round(100 * a / b);
+// Readers' fields
+const nowD = p => p[0], hapD = p => p[1], expD = p => p[2], mid = p => p[3], midAge = p => p[4], pill = p => p[5], trig = p => p[6];
+const outlook = p => (p[0] < 0 || p[2] === -1) ? null : p[2] === -2 ? 'behind' : p[2] > p[0] ? 'ahead' : p[2] === p[0] ? 'now' : 'behind';
+
+/* ---------- Layout engine: every step returns {dots:[{x,y,c,o}], size, labels:[], bands:[]} in pixels ---------- */
+const PAD = { t: 34, b: 44, l: 6, r: 6 };
+const lbl = (x, y, text, style = {}) => ({ value: [x, y], name: text, label: { show: true, position: 'inside', formatter: '{b}', fontFamily: F.bold, fontWeight: 'bold', fontSize: 12, color: C.text, ...style } });
+const hidden = (W, H) => ({ x: W / 2, y: H + 30, c: DOT, o: 0 });
+
+function rankSort(ids, colorFn, order) { return ids.slice().sort((a, b) => order.indexOf(colorFn(P[a])) - order.indexOf(colorFn(P[b])) || a - b); }
+
+function gridLayout(W, H, colorFn = () => DOT, order = [DOT]) {
+  const aw = W - PAD.l - PAD.r, ah = H - PAD.t - PAD.b;
+  const cols = Math.ceil(Math.sqrt(N * aw / ah)), rows = Math.ceil(N / cols);
+  const s = Math.min(aw / cols, ah / rows, 26);
+  const x0 = PAD.l + (aw - cols * s) / 2 + s / 2, y0 = PAD.t + (ah - rows * s) / 2 + s / 2;
+  const dots = new Array(N);
+  rankSort([...Array(N).keys()], colorFn, order).forEach((id, i) => {
+    dots[id] = { x: x0 + (i % cols) * s, y: y0 + Math.floor(i / cols) * s, c: colorFn(P[id]), o: 1 };
+  });
+  return { dots, size: s * 0.78, labels: [] };
+}
+
+// Waffle columns, one per group, stacked from the bottom
+function groupLayout(W, H, groupFn, names, colorFn, order, topLabel) {
+  const aw = W - PAD.l - PAD.r, ah = H - PAD.t - PAD.b - 22;
+  const G = names.length, colW = aw / G;
+  const members = names.map(() => []);
+  P.forEach((p, id) => { const g = groupFn(p); if (g != null && g >= 0 && g < G) members[g].push(id); });
+  const max = Math.max(...members.map(m => m.length));
+  let s = 24, k;
+  for (; s > 2; s -= 0.25) { k = Math.max(1, Math.floor(colW * 0.8 / s)); if (Math.ceil(max / k) * s <= ah) break; }
+  const base = PAD.t + 22 + ah;
+  const dots = P.map(() => hidden(W, H)), labels = [];
+  members.forEach((m, g) => {
+    const cx = PAD.l + colW * (g + 0.5);
+    rankSort(m, colorFn, order).forEach((id, i) => {
+      dots[id] = { x: cx - (k - 1) * s / 2 + (i % k) * s, y: base - Math.floor(i / k) * s - s / 2, c: colorFn(P[id]), o: 1 };
+    });
+    labels.push(lbl(cx, base + 16, names[g], { fontSize: 13, color: C.ink }));
+    const top = base - Math.ceil(m.length / k) * s - 12;
+    if (topLabel && m.length) labels.push(lbl(cx, top, topLabel(m, g), { fontSize: 12, color: C.text }));
+  });
+  return { dots, size: s * 0.8, labels };
+}
+
+// Dot histogram along an age axis
+function histLayout(W, H, valueFn, lo, hi, colorFn, order, ticks, extra = []) {
+  const aw = W - PAD.l - PAD.r, ah = H - PAD.t - PAD.b;
+  const nb = hi - lo + 1, bw = aw / nb;
+  const bins = Array.from({ length: nb }, () => []);
+  P.forEach((p, id) => { const v = valueFn(p); if (v != null) bins[Math.min(hi, Math.max(lo, v)) - lo].push(id); });
+  const max = Math.max(...bins.map(b => b.length));
+  const s = Math.min(bw, ah / max, 16);
+  const base = PAD.t + ah;
+  const dots = P.map(() => hidden(W, H)), labels = [];
+  const xOf = v => PAD.l + (v - lo + 0.5) * bw;
+  bins.forEach((b, i) => rankSort(b, colorFn, order).forEach((id, j) => {
+    dots[id] = { x: xOf(lo + i), y: base - j * s - s / 2, c: colorFn(P[id]), o: 1 };
+  }));
+  ticks.forEach(([v, t]) => labels.push(lbl(xOf(v), base + 16, t, { fontFamily: F.body, fontWeight: 'normal', fontSize: 12 })));
+  extra.forEach(e => labels.push(lbl(xOf(e.v), base - bins[e.v - lo].length * s - 14, e.t, { color: C.ink, backgroundColor: 'rgba(247,242,242,0.85)', padding: [2, 4] })));
+  return { dots, size: Math.max(2.5, s * 0.82), labels };
+}
+
+// One strip per current decade, dots stacked by pill age. Rows get height in proportion to their tallest stack.
+function rowsLayout(W, H, rowFn, names, valueFn, lo, hi, colorFn, order, bandFn) {
+  const LW = 44, aw = W - PAD.l - PAD.r - LW, ah = H - PAD.t - PAD.b;
+  const R = names.length, uw = aw / (hi - lo + 1), GAP = 14;
+  const cells = {}, rowMax = new Array(R).fill(0);
+  P.forEach((p, id) => { const r = rowFn(p), v = valueFn(p); if (r == null || r < 0 || r >= R || v == null) return; const key = r + ':' + Math.min(hi, v); (cells[key] = cells[key] || []).push(id); rowMax[r] = Math.max(rowMax[r], cells[key].length); });
+  const units = rowMax.map(m => Math.max(m, 5));
+  const s = Math.min(uw * 1.4, (ah - GAP * R) / units.reduce((a, b) => a + b, 0), 12);
+  const rowBase = []; let y = PAD.t;
+  units.forEach((u, r) => { y += u * s + GAP; rowBase[r] = y - GAP / 2; });
+  const xOf = v => PAD.l + LW + (v - lo + 0.5) * uw;
+  const dots = P.map(() => hidden(W, H)), labels = [], bands = [];
+  Object.entries(cells).forEach(([key, ids]) => {
+    const [r, v] = key.split(':').map(Number);
+    rankSort(ids, colorFn, order).forEach((id, j) => { dots[id] = { x: xOf(v), y: rowBase[r] - j * s - s / 2, c: colorFn(P[id]), o: 1 }; });
+  });
+  names.forEach((n, r) => {
+    labels.push(lbl(PAD.l + LW / 2, rowBase[r] - s / 2, n, { fontSize: 13, color: C.ink }));
+    const b = bandFn(r); if (b) bands.push([xOf(b[0]) - uw / 2, rowBase[r] - units[r] * s, xOf(b[1]) + uw / 2, rowBase[r] + 2]);
+  });
+  for (let v = lo; v <= hi; v += 10) labels.push(lbl(xOf(v), PAD.t + ah + 16, v >= 80 ? '80+' : String(v), { fontFamily: F.body, fontWeight: 'normal', fontSize: 12 }));
+  return { dots, size: Math.max(3, s * 0.85), labels, bands };
+}
+
+/* ---------- Steps ---------- */
+const decadeTicks = (lo, hi) => { const t = []; for (let v = lo; v <= hi; v += 5) t.push([v, String(v)]); return t; };
+const STEPS = {
+  a1: { t: 'All 301 readers', s: 'One dot per survey response', f: (W, H) => gridLayout(W, H) },
+  a2: { t: 'Readers by the decade they are in now', s: 'Number of readers',
+    f: (W, H) => groupLayout(W, H, nowD, DEC, () => DOT, [DOT], m => m.length) },
+  a3: { t: 'Is your happiest decade the one you’re in?', s: '% of each group who say it is',
+    f: (W, H) => groupLayout(W, H, nowD, DEC, p => p[1] < 0 ? DOT : p[1] === p[0] ? RED : CHAR, [RED, CHAR, DOT],
+      m => { const named = m.filter(i => P[i][1] >= 0); return named.length ? pct(named.filter(i => P[i][1] === P[i][0]).length, named.length) + '%' : ''; }) },
+  a4: { t: 'Readers by their happiest decade so far', s: 'Number of readers who named each decade',
+    f: (W, H) => groupLayout(W, H, hapD, DEC, p => p[1] === p[0] ? RED : CHAR, [RED, CHAR], m => m.length) },
+  a5: { t: 'Readers by the decade they expect to be happiest', s: 'Number of readers who named each decade',
+    f: (W, H) => groupLayout(W, H, p => p[2] === -2 ? 7 : p[2], [...DEC, 'Behind me'], p => p[2] === -2 ? TEAL : CHAR, [CHAR, TEAL], m => m.length) },
+  a6: { t: 'Is your happiest decade ahead of you?', s: 'Readers by the decade they are in now. Label: % who say it is still ahead',
+    f: (W, H) => groupLayout(W, H, p => outlook(p) ? p[0] : null, DEC, p => ({ ahead: RED, now: CHAR, behind: TEAL })[outlook(p)], [RED, CHAR, TEAL],
+      m => pct(m.filter(i => outlook(P[i]) === 'ahead').length, m.length) + '%') },
+
+  b1: { t: 'Have you ever felt middle-aged?', s: 'Readers by the decade they are in now. Label: % who said yes',
+    f: (W, H) => groupLayout(W, H, p => p[3] >= 0 ? p[0] : null, DEC, p => p[3] === 1 ? RED : DOT, [RED, DOT],
+      m => pct(m.filter(i => P[i][3] === 1).length, m.length) + '%') },
+  b2: { t: 'The age readers first felt middle-aged', s: 'One dot per reader',
+    f: (W, H) => histLayout(W, H, p => p[4] != null && p[4] >= 20 ? p[4] : null, 20, 61, () => CHAR, [CHAR], decadeTicks(20, 60), [{ v: 43, t: 'Median: 43' }]) },
+  b3: { t: 'The age readers first felt middle-aged', s: 'Red: ages ending in 0 or 5',
+    f: (W, H) => histLayout(W, H, p => p[4] != null && p[4] >= 20 ? p[4] : null, 20, 61, p => p[4] % 5 === 0 ? RED : DOT, [RED, DOT], decadeTicks(20, 60),
+      [35, 40, 45, 50, 55].map(v => ({ v, t: String(v) }))) },
+  b4: { t: 'What made them feel it', s: 'Red: the answer mentions body or health',
+    f: (W, H) => histLayout(W, H, p => p[4] != null && p[4] >= 20 ? p[4] : null, 20, 61, p => p[6] & 1 ? RED : DOT, [RED, DOT], decadeTicks(20, 60)) },
+  b5: { t: 'What made them feel it', s: 'Answers that mention children growing up, or parents ageing',
+    f: (W, H) => histLayout(W, H, p => p[4] != null && p[4] >= 20 ? p[4] : null, 20, 61, p => p[6] & 2 ? CHAR : p[6] & 4 ? TEAL : DOT, [CHAR, TEAL, DOT], decadeTicks(20, 60)) },
+
+  c1: { t: 'At what age would you take the pill?', s: 'One dot per reader. Answers over 80 are grouped',
+    f: (W, H) => histLayout(W, H, pill, 10, 81, () => DOT, [DOT], [[10, '10'], [20, '20'], [30, '30'], [40, '40'], [50, '50'], [60, '60'], [70, '70'], [81, '80+']]) },
+  c2: { t: 'At what age would you take the pill?', s: 'Red: 35, the most common answer',
+    f: (W, H) => histLayout(W, H, pill, 10, 81, p => p[5] === 35 ? RED : DOT, [RED, DOT], [[10, '10'], [20, '20'], [30, '30'], [40, '40'], [50, '50'], [60, '60'], [70, '70'], [81, '80+']], [{ v: 35, t: '39 readers' }]) },
+  c3: { t: 'At what age would you take the pill?', s: 'Red: ages ending in 0 or 5',
+    f: (W, H) => histLayout(W, H, pill, 10, 81, p => p[5] % 5 === 0 ? RED : DOT, [RED, DOT], [[10, '10'], [20, '20'], [30, '30'], [40, '40'], [50, '50'], [60, '60'], [70, '70'], [81, '80+']]) },
+  c4: { t: 'Pill age by the decade readers are in now', s: 'Red: would go back to an age they have already passed',
+    f: (W, H) => rowsLayout(W, H, p => p[0] - 1, DEC.slice(1), pill, 10, 81, p => p[5] < (p[0] + 1) * 10 ? RED : CHAR, [RED, CHAR], r => [(r + 1) * 10 + 10, Math.min(81, (r + 1) * 10 + 19)]) },
+  c5: { t: 'Pill age by the decade readers are in now', s: 'Red: answers of 99 or older',
+    f: (W, H) => rowsLayout(W, H, p => p[0] - 1, DEC.slice(1), pill, 10, 81, p => p[5] > 80 ? RED : DOT, [RED, DOT], r => [(r + 1) * 10 + 10, Math.min(81, (r + 1) * 10 + 19)]) },
+};
+
+/* ---------- Dot charts ---------- */
+const DEC_LONG = ['in their teens', 'in their 20s', 'in their 30s', 'in their 40s', 'in their 50s', 'in their 60s', 'aged 70 or more'];
+function readerTip(p) {
+  const d = i => i >= 0 ? DEC[i] : 'No answer';
+  const lines = [
+    KEN.tt.line('Happiest so far', d(p[1])),
+    KEN.tt.line('Expects happiest', p[2] === -2 ? 'Behind them' : d(p[2])),
+    KEN.tt.line('Felt middle-aged', p[3] === 1 ? (p[4] ? 'At ' + p[4] : 'Yes') : p[3] === 0 ? 'Not yet' : 'No answer'),
+    KEN.tt.line('Would take the pill at', p[5] ?? 'No answer')
+  ];
+  return KEN.tt.name('A reader ' + (p[0] >= 0 ? DEC_LONG[p[0]] : '')) + lines.join('');
+}
+
+const charts = {};
+function setupChart(section) {
+  const el = section.querySelector('.g-chart');
+  const chart = echarts.init(el, null, { renderer: 'canvas' });
+  const state = { chart, section, step: null, visible: [] };
+  chart.setOption({
+    animationDurationUpdate: 900, animationEasingUpdate: 'cubicInOut',
+    grid: { left: 0, right: 0, top: 0, bottom: 0 },
+    xAxis: { type: 'value', show: false, min: 0, max: 1 }, yAxis: { type: 'value', show: false, inverse: true, min: 0, max: 1 },
+    tooltip: { ...KEN.tooltip, trigger: 'item' },
+    series: [
+      { id: 'bands', type: 'custom', silent: true, z: 1, data: [],
+        renderItem: (pr, api) => { const a = api.coord([api.value(0), api.value(1)]), b = api.coord([api.value(2), api.value(3)]);
+          return { type: 'rect', shape: { x: a[0], y: a[1], width: b[0] - a[0], height: b[1] - a[1], r: 2 }, style: { fill: 'rgba(196,170,170,0.22)' } }; } },
+      { id: 'dots', type: 'scatter', z: 3, data: [],
+        animationDelayUpdate: i => (i % 97) * 4,
+        emphasis: { scale: 1.6, itemStyle: { borderColor: C.ink, borderWidth: 1.5 } },
+        tooltip: { formatter: pr => state.visible[pr.dataIndex] ? readerTip(P[pr.dataIndex]) : '' } },
+      { id: 'labels', type: 'scatter', z: 4, silent: true, symbolSize: 0, data: [], tooltip: { show: false } }
+    ]
+  });
+  window.addEventListener('resize', () => { chart.resize(); if (state.step) render(state, state.step, true); });
+  return state;
+}
+
+function render(state, stepId, instant) {
+  const st = STEPS[stepId]; if (!st) return;
+  state.step = stepId;
+  const { chart, section } = state, W = chart.getWidth(), H = chart.getHeight();
+  const L = st.f(W, H);
+  state.visible = L.dots.map(d => d.o > 0);
+  const head = section.querySelector('.g-head');
+  if (head.dataset.t !== st.t + st.s) {
+    head.dataset.t = st.t + st.s;
+    gsap.to(head, { opacity: 0, y: -4, duration: .18, onComplete: () => {
+      head.querySelector('.g-title').textContent = st.t; head.querySelector('.g-sub').textContent = st.s;
+      gsap.to(head, { opacity: 1, y: 0, duration: .3 });
+    } });
+  }
+  chart.setOption({
+    animation: !instant,
+    xAxis: { max: W }, yAxis: { max: H },
+    series: [
+      { id: 'bands', data: L.bands || [] },
+      { id: 'dots', symbolSize: L.size, data: L.dots.map(d => ({ value: [d.x, d.y], itemStyle: { color: d.c, opacity: d.o } })) },
+      { id: 'labels', data: L.labels }
+    ]
+  });
+}
+
+/* ---------- Standalone charts ---------- */
+function barChart(el, rows, max) {
+  const chart = echarts.init(el);
+  window.addEventListener('resize', () => chart.resize());
+  const sorted = [...rows].sort((a, b) => a[1] - b[1]);
+  const base = {
+    grid: { left: 8, right: 48, top: 8, bottom: 8, containLabel: true },
+    tooltip: { ...KEN.tooltip, formatter: p => KEN.tt.name(p.name) + KEN.tt.line('Share', p.value + '%') },
+    xAxis: { type: 'value', show: false, max },
+    yAxis: { type: 'category', data: sorted.map(r => r[0]), axisLine: { show: false }, axisTick: { show: false }, axisLabel: { ...KEN.axisLabelBold, fontSize: 13 } },
+    series: [{ type: 'bar', barMaxWidth: 22, itemStyle: { color: RED }, animationDuration: 1100, animationEasing: 'cubicOut', animationDelay: i => (sorted.length - i) * 90,
+      emphasis: { itemStyle: { borderColor: 'rgba(255,255,255,0.45)', borderWidth: 1.5 } },
+      label: { show: true, position: 'right', fontFamily: F.bold, fontWeight: 'bold', fontSize: 12, color: C.text, formatter: '{c}%' },
+      data: sorted.map(() => 0) }]
+  };
+  chart.setOption(base);
+  ScrollTrigger.create({ trigger: el, start: 'top 75%', once: true, onEnter: () => chart.setOption({ series: [{ data: sorted.map(r => r[1]) }] }) });
+}
+
+/* ---------- Quote walls ---------- */
+const QUOTES_MID = [
+  ['At 30', '30s, Bengaluru', 'Kids started calling me and uncle :(', true],
+  ['At 51', '50s, Bengaluru', 'Losing badminton matches to my son', true],
+  ['At 50', '50s, Delhi', 'I started to realise that my team is younger than my nieces and nephews'],
+  ['At 47', '40s, Gurugram', 'Started having loose stomach next day of having my favourite Mutton dish; having to start counting my beers and pegs..'],
+  ['At 42', '50s, Manila', 'I didn’t like the new music anymore', true],
+  ['At 40', '40s, Singapore', 'A switch seems to have been turned off as soon as I turned 40 - metabolism isn\'t the same anymore…'],
+  ['At 44', '40s', 'I was the oldest person in most professional and social groups.'],
+  ['At 40', '40s, Mumbai', 'Inability to run 5k run within 30 min'],
+  ['At 49', '50s, Bengaluru', 'Changed from salt pepper to salt', true],
+  ['At 35', '30s, Kolkata', 'Just being hyperaware of my mortality. Also my dad passed away at 62 so that probably contributed.'],
+  ['At 59', '60s, Kolkata', 'Approaching my 60th birthday, being called a \'veteran\''],
+  ['At 37', '30s', 'My friend had a child - I suddenly realised I am just 3 years away from being 40'],
+];
+const QUOTES_PILL = [
+  ['Would stop at 25', '30s, Mysuru', 'That is a sweet spot. You have seen a fair bit of world, enough to know what life expects from you and also not so much that you have lived it.', true],
+  ['Would stop at 35', '30s, Delhi', 'Knees would get creaky after that', true],
+  ['Would stop at 35', '30s', 'There is a perfect balance. Health wise, career growth wise, parents are young and healthy, relationships are all balanced.'],
+  ['Would stop at 40', '50s, Bengaluru', 'You have 10-20 good years to spend before your kids get too busy with their lives'],
+  ['Would stop at 45', '50s, Bengaluru', 'I get 5 years more to take better care of myself - never prioritised myself till 50.'],
+  ['Would stop at 20', '30s, Bengaluru', 'Best time - peak of health, no responsibilities, young love, no thinking about financial future'],
+  ['Would stop at 25', '20s, Bengaluru', 'fully developed pre frontal cortex', true],
+  ['Would stop at 30', '30s, Mumbai', 'Great career , healthy parents , no kids'],
+  ['Would stop at 110', '20s, Mumbai', 'Wouldn’t take the pill actually', true],
+];
+function fillWall(id, list) {
+  const el = document.getElementById(id);
+  el.innerHTML = list.map(([tag, who, text, lg]) =>
+    `<div class="q${lg ? ' lg' : ''}"><div class="q-tag">${esc(tag)}</div><div class="q-text">“${esc(text)}”</div><div class="q-who">${esc(who)}</div></div>`).join('');
+  gsap.utils.toArray(el.children).forEach(q => gsap.from(q, { y: 40, opacity: 0, duration: .8, ease: 'power3.out', scrollTrigger: { trigger: q, start: 'top 92%' } }));
+}
+
+/* ---------- Boot ---------- */
+KEN.whenFontsReady(() => {
+  // Progress bar
+  gsap.to('.progress', { scaleX: 1, ease: 'none', scrollTrigger: { start: 0, end: 'max', scrub: .3 } });
+
+  // Hero: drifting dots + word-by-word title
+  const hd = document.getElementById('heroDots');
+  for (let i = 0; i < 46; i++) { const s = document.createElement('span'); s.style.left = Math.random() * 100 + '%'; s.style.top = Math.random() * 100 + '%'; if (i % 7 === 0) s.style.background = RED; hd.appendChild(s); }
+  gsap.to('#heroDots span', { y: () => gsap.utils.random(-60, 60), x: () => gsap.utils.random(-40, 40), duration: () => gsap.utils.random(5, 9), repeat: -1, yoyo: true, ease: 'sine.inOut' });
+  gsap.to('#heroDots', { opacity: 0, scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
+  const h1 = document.getElementById('heroTitle');
+  h1.innerHTML = h1.innerHTML.replace(/(<em>.*?<\/em>|[^\s<]+)/g, '<span class="w">$1</span>');
+  gsap.timeline()
+    .from('.kicker', { y: 12, opacity: 0, duration: .6 })
+    .from('#heroTitle .w', { y: 60, opacity: 0, rotate: 3, duration: .9, stagger: .08, ease: 'power4.out' }, '-=.3')
+    .from('.dek, .byline', { y: 16, opacity: 0, duration: .7, stagger: .12 }, '-=.4')
+    .from('.cue', { opacity: 0, duration: .6 })
+    .fromTo('.cue i', { scaleY: 0 }, { scaleY: 1, duration: 1, repeat: -1, ease: 'power2.inOut' });
+
+  // Prose fade-ups
+  gsap.utils.toArray('.prose > *').forEach(el => gsap.from(el, { y: 30, opacity: 0, duration: .8, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 88%' } }));
+
+  // Interludes: words light up as you scroll
+  document.querySelectorAll('.split').forEach(p => {
+    p.innerHTML = p.textContent.split(' ').map(w => `<span class="w">${w}</span>`).join(' ');
+    gsap.to(p.querySelectorAll('.w'), { opacity: 1, stagger: .1, ease: 'none', scrollTrigger: { trigger: p, start: 'top 80%', end: 'bottom 40%', scrub: true } });
+  });
+
+  // Scrollytelling sections
+  document.querySelectorAll('.scrolly').forEach(section => {
+    const state = setupChart(section);
+    const steps = [...section.querySelectorAll('.step')];
+    render(state, steps[0].dataset.step, true);
+    steps.forEach(step => ScrollTrigger.create({
+      trigger: step, start: 'top 60%', end: 'bottom 60%',
+      onToggle: self => {
+        step.classList.toggle('is-active', self.isActive);
+        if (self.isActive && state.step !== step.dataset.step) render(state, step.dataset.step);
+      }
+    }));
+  });
+
+  // "301" counter
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const o = { v: 0 }, n = +el.dataset.count;
+    gsap.to(o, { v: n, duration: 1.4, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 80%' }, onUpdate: () => el.textContent = Math.round(o.v) });
+  });
+
+  fillWall('wallMid', QUOTES_MID);
+  fillWall('wallPill', QUOTES_PILL);
+  barChart(document.getElementById('chartTrig'),
+    [['Body and health', 48], ['Kids growing up', 20], ['Parents ageing or dying', 13], ['Work and career', 13], ['Feeling older than the room', 12], ['A milestone birthday', 9], ['Mood and mindset', 7], ['Responsibilities and money', 5]], 55);
+  barChart(document.getElementById('chartFact'),
+    [['Freedom and fewer obligations', 47], ['Relationships or family', 45], ['Financial security', 40], ['Work or building something', 37], ['Health and energy', 34], ['Learning or discovery', 31]], 55);
+  ScrollTrigger.refresh();
+});
+</script>
+</body>
+</html>

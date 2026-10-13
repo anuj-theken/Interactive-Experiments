@@ -61,7 +61,7 @@
 
 .TK4R6-chart-title {
   font-family: 'Lora', Georgia, serif;
-  font-size: 1.6rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #0f172a;
   letter-spacing: -0.01em;
@@ -89,6 +89,7 @@
 .TK4R6-legend-amber em { color: #b45309; }
 
 .TK4R6-legend-blue { color: #1e3a8a; }
+.TK4R6-legend-blue em { color: #2563eb; }
 
 .TK4R6-legend-dot {
   width: 11px;
@@ -98,49 +99,13 @@
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
 
-.TK4R6-legend-dot.TK4R6-dot-tcs    { background: #edd13e; }
-.TK4R6-legend-dot.TK4R6-dot-nasdaq { background: #2563eb; }
+.TK4R6-legend-dot.TK4R6-dot-tcs    { background: #2563eb; }
+.TK4R6-legend-dot.TK4R6-dot-nasdaq { background: #edd13e; }
 
 .TK4R6-chart-canvas {
   width: 100%;
   flex-grow: 1;
   min-height: 260px;
-}
-
-.TK4R6-context-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 12px;
-  color: #64748b;
-  padding-top: 10px;
-  border-top: 1px solid rgba(100, 116, 139, 0.25);
-}
-
-.TK4R6-status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #b45309;
-  flex-shrink: 0;
-}
-
-.TK4R6-status {
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-  color: #334155;
-}
-
-.TK4R6-scroll-hint {
-  margin-left: auto;
-  color: #94a3b8;
-}
-
-.TK4R6-scroll-hint::after { content: ' \2193'; }
-
-@media (max-width: 640px) {
-  .TK4R6-scroll-hint { display: none; }
 }
 
 .TK4R6-source {
@@ -188,7 +153,7 @@
 
 .TK4R6-narrative-card p {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 1rem;
+  font-size: 1.6rem;
   line-height: 1.7;
   color: #334155;
   margin: 0 0 1rem;
@@ -197,6 +162,18 @@
 .TK4R6-narrative-card p:last-child { margin-bottom: 0; }
 
 .TK4R6-narrative-card strong { color: #0f172a; font-weight: 700; }
+
+/* Figures in the narrative are highlighted in the colour of the line they
+   refer to (blue = TCS revenue, yellow = NASDAQ) instead of being bolded. */
+.TK4R6-hl {
+  color: #0f172a;
+  padding: 0.05em 0.3em;
+  border-radius: 3px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.TK4R6-hl-tcs    { background: rgba(37, 99, 235, 0.18); }
+.TK4R6-hl-nasdaq { background: rgba(237, 209, 62, 0.45); }
 
 /* ── stat circles — original amber/blue ring pair ── */
 .TK4R6-stat-row {
@@ -261,6 +238,12 @@
 @media (max-width: 1023px) {
   .TK4R6-narrative-step[data-position="right"],
   .TK4R6-narrative-step[data-position="left"] { justify-content: center; }
+
+  /* phones + tablets: caption on its own line so the two circles always
+     share a row and overlap instead of wrapping apart */
+  .TK4R6-stat-row { gap: 0; row-gap: 10px; }
+  .TK4R6-stat-caption { flex-basis: 100%; max-width: none; text-align: center; }
+  .TK4R6-circle-tcs { margin-right: -1.5rem; }
 }
 
 @media (max-width: 768px) {

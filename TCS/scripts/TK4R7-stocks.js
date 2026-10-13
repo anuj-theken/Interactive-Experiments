@@ -31,8 +31,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const maxY = Math.ceil(Math.max(...dataTCS, ...dataINFY, ...dataWIPRO, ...dataHCLTECH) * 1.05);
 
-  const categories = ["TCS", "Infosys (INFY)", "Wipro", "HCLTech"];
-  const seriesData = { "TCS": dataTCS, "Infosys (INFY)": dataINFY, "Wipro": dataWIPRO, "HCLTech": dataHCLTECH };
+  const categories = ["TCS", "Infosys", "Wipro", "HCLTech"];
+  const seriesData = { "TCS": dataTCS, "Infosys": dataINFY, "Wipro": dataWIPRO, "HCLTech": dataHCLTECH };
 
   const steps = [
     { revealUntil: 4, markerIdx: 3, yearLabel: "2009" },
@@ -86,6 +86,7 @@ document.addEventListener("DOMContentLoaded", function () {
     legend: { data: categories, show: false },
     tooltip: {
       trigger: "axis",
+      confine: true,
       backgroundColor: SURFACE,
       borderWidth: 0,
       textStyle: { color: INK, fontFamily: FONT_BODY, fontSize: 14 },
@@ -129,6 +130,9 @@ document.addEventListener("DOMContentLoaded", function () {
         fontFamily: FONT_BODY,
         fontSize: 11
       },
+      // Early on all four lines sit near base 100, so their end labels
+      // would stack on top of each other — push overlapping ones apart.
+      labelLayout: { moveOverlap: "shiftY" },
       data: [seriesData[cat][0]]
     }))
   };
@@ -186,6 +190,35 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   setActiveBlock(0);
+
+  // Tooltip behaviour. A tap never sends a "pointer left", so on touch
+  // screens an ECharts tooltip would otherwise stay up indefinitely and ride
+  // along over neighbouring sections. It is dismissed after a few seconds,
+  // on scroll, on a tap outside the chart, and once the chart leaves view.
+  (function tameTooltip() {
+    const noHover = window.matchMedia("(hover: none)");
+    let shown = false;
+    let hideTimer = null;
+    function hideTip() {
+      clearTimeout(hideTimer);
+      if (!shown) return;
+      shown = false;
+      myChart.dispatchAction({ type: "hideTip" });
+    }
+    myChart.on("showTip", function () {
+      shown = true;
+      clearTimeout(hideTimer);
+      if (noHover.matches) hideTimer = setTimeout(hideTip, 3000);
+    });
+    myChart.on("hideTip", function () { shown = false; clearTimeout(hideTimer); });
+    window.addEventListener("scroll", hideTip, { passive: true });
+    document.addEventListener("touchstart", function (e) {
+      if (!chartDom.contains(e.target)) hideTip();
+    }, { passive: true });
+    new IntersectionObserver(function (entries) {
+      if (!entries[0].isIntersecting) hideTip();
+    }).observe(chartDom);
+  })();
 
   window.addEventListener("resize", function () {
     myChart.resize();

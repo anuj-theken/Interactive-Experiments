@@ -63,7 +63,7 @@
 }
 
 /* HTML legend (filled by TK4R10-capex.js): bar swatch for revenue, solid
-   line for the capex ratio, dotted line for the FY27 projection. */
+   line for the capex ratio. */
 .TK4R10-legend {
   display: flex;
   flex-wrap: wrap;
@@ -93,8 +93,6 @@
   height: 0;
   border-top: 3px solid #d97706;
 }
-
-.TK4R10-legend-line--dotted { border-top-style: dotted; }
 
 .TK4R10-chart {
   width: 100%;

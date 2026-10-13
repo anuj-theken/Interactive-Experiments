@@ -148,11 +148,9 @@
   width: var(--TK4R8-cell-size, 9px);
   height: var(--TK4R8-cell-size, 9px);
   border-radius: 1px;
-  /* Softened toward the page-coloured card — a full-strength --color-bg-warm
-     tiled across hundreds of small cells reads much heavier than it does as
-     a single surface, so it's blended down before use here. */
-  background-color: color-mix(in srgb, var(--color-bg-warm) 45%, var(--color-bg));
-  border: 1px solid color-mix(in srgb, var(--color-rule) 55%, var(--color-bg));
+  /* Unfilled cells are invisible — only the filled squares show. */
+  background-color: transparent;
+  border: 1px solid transparent;
 }
 
 .TK4R8-cell.TK4R8-filled-tcs     { background-color: var(--cat-1); border-color: var(--cat-1); }

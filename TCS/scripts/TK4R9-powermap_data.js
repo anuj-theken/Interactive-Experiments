@@ -74,7 +74,7 @@ const TK4R9_EDGES=[
     {s:"gopinathan",t:"krithivasan",type:"succ"},
     {s:"kohli",t:"chandra",type:"asc",dotted:true,curv:{d:-.30,m:-.36},label:"hired 1987",labelT:{d:.30,m:null}},
     {s:"ramadorai",t:"chandra",type:"asc",curv:{d:-.12,m:-.4},label:"promoted to CEO",labelT:{d:.42,m:null}},
-    {s:"ratan",t:"chandra",type:"asc",curv:{d:.14,m:.45},label:"tapped as chair, 2017",labelT:{d:.53,m:null}}
+    {s:"ratan",t:"chandra",type:"asc",curv:{d:.14,m:.45},label:"tapped as chair, 2017",labelT:{d:.62,m:null}}
 ];
 
 // The five scroll frames. For each step:
@@ -112,7 +112,7 @@ const TK4R9_STATUS_META={
 
 const TK4R9_SHORT_T={
   noel:"Trusts chair, 2024–",jamsetji:"1839–1904",jrd:"chair 1938–1991",
-  ratan:"chair 1991–2012",cyrus:"chair 2012–2016",chandra:"CEO ’09 · chair ’17–",
+  ratan:"chair 1991–2012",cyrus:"chair 2012–2016",chandra:"CEO 2009, Chair 2017–",
   agarwala:"1968–1974",kohli:"1969–2000",ramadorai:"CEO 1996–2009",
   gopinathan:"CEO 2017–2023",krithivasan:"CEO 2023–"
 };

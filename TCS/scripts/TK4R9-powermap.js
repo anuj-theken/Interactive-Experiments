@@ -163,13 +163,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const t = el("text", { class: "TK4R9-avatar-txt", x: p.x, y: p.y + 1, "font-size": fsz(avRatio, BASE_K) });
         t.appendChild(document.createTextNode(n.initials)); g.appendChild(t);
       }
-      if (n.status === "red") {
-        const bx = p.x + p.r * .72, by = p.y - p.r * .72;
-        const bg = el("g", { class: "TK4R9-removed-badge" });
-        bg.appendChild(el("circle", { cx: bx, cy: by, r: 8, stroke: "var(--color-surface)", "stroke-width": "2" }));
-        bg.appendChild(el("path", { d: "M" + (bx - 3) + "," + (by - 3) + " L" + (bx + 3) + "," + (by + 3) + " M" + (bx + 3) + "," + (by - 3) + " L" + (bx - 3) + "," + (by + 3) }));
-        g.appendChild(bg);
-      }
       // desktop: name + tenure centred under the node; mobile: to the right, list-style
       const nameFs = fsz(isPivot ? RATIO.namePivot : RATIO.nameNormal), subFs = fsz(RATIO.sub);
       const side = mode === "mobile";

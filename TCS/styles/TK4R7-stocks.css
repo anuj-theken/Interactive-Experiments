@@ -10,6 +10,8 @@
   height: 100vh;
   display: flex;
   overflow: hidden;
+  /* One solid card colour behind both panels, matching the other charts. */
+  background: var(--color-bg);
 }
 
 /* Left narrative panel */

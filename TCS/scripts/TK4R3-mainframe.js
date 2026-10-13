@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const stickyEl = container.parentElement;
     const headerEl = stickyEl.querySelector(".TK4R3-page-header");
     const frameImages = [...stickyEl.querySelectorAll(".TK4R3-frame-image")];
-    const COMPACT_IMAGE_BOTTOM = 52; // must match .TK4R3-frame-image bottom in the compact CSS
+    const COMPACT_IMAGE_BOTTOM = 76; // must match .TK4R3-frame-image bottom in the compact CSS
     frameImages.forEach((img) => {
       if (!img.complete) img.addEventListener("load", () => applyLayout(), { once: true });
     });

@@ -45,9 +45,17 @@ document.addEventListener("DOMContentLoaded", function () {
     return camera.position.z * HALF_FOV_TAN * (1 - 2 * frac);
   }
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  // Phones get a lighter globe so low-end devices don't stall: no MSAA, a
+  // lower pixel-ratio cap, half the land dots, lower-poly spheres and a 30fps
+  // render loop (see LOW_POWER uses below).
+  const LOW_POWER = IS_MOBILE;
+  const renderer = new THREE.WebGLRenderer({
+    antialias: !LOW_POWER,
+    alpha: true,
+    powerPreference: LOW_POWER ? "low-power" : "default",
+  });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, LOW_POWER ? 1.5 : 2));
   container.appendChild(renderer.domElement);
 
   const labelRenderer = new THREE.CSS2DRenderer();
@@ -98,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
   (function buildGraticule() {
     const verts = [];
     const R = globeRadius * 1.002;
-    const SEG = 96;
+    const SEG = LOW_POWER ? 48 : 96;
     for (let lat = -80; lat <= 80; lat += 20) {
       for (let i = 0; i < SEG; i++) {
         const a = (i / SEG) * 360 - 180;
@@ -122,8 +130,11 @@ document.addEventListener("DOMContentLoaded", function () {
     globeGroup.add(new THREE.LineSegments(geo, graticuleMat));
   })();
 
+  // Low power: keep every other land dot (pairs of lat/lon, so step by 4)
+  // and draw each one a little larger to keep the continents reading solid.
   const dotPositions = [];
-  for (let i = 0; i < TK4R4_LAND_DOTS.length; i += 2) {
+  const DOT_STEP = LOW_POWER ? 4 : 2;
+  for (let i = 0; i < TK4R4_LAND_DOTS.length; i += DOT_STEP) {
     const v = latLongToVector3(TK4R4_LAND_DOTS[i] / 10, TK4R4_LAND_DOTS[i + 1] / 10, globeRadius);
     dotPositions.push(v.x, v.y, v.z);
   }
@@ -138,7 +149,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const dotUniforms = {
     uColor: { value: DOT_NIGHT.clone() },
-    uSize: { value: 4.3 },
+    uSize: { value: LOW_POWER ? 5.2 : 4.3 },
     uDpr: { value: renderer.getPixelRatio() },
     uFront: { value: 0.95 },
     uBack: { value: 0.13 },
@@ -177,7 +188,9 @@ document.addEventListener("DOMContentLoaded", function () {
   globeGroup.add(dotsMesh);
 
   // Faint atmosphere rim, tweened per story beat — original palette.
-  const atmosGeo = new THREE.SphereGeometry(globeRadius + 0.02, 64, 64);
+  const atmosGeo = LOW_POWER
+    ? new THREE.SphereGeometry(globeRadius + 0.02, 32, 24)
+    : new THREE.SphereGeometry(globeRadius + 0.02, 64, 64);
   const atmosMat = new THREE.MeshBasicMaterial({
     color: 0xcdbb9c,
     transparent: true,
@@ -190,20 +203,31 @@ document.addEventListener("DOMContentLoaded", function () {
   const ATMOS_GLOBAL = new THREE.Color(0.22, 0.85, 0.63);
 
   // ── 3. MARKERS ─────────────────────────────────────────────────────
+  // Markers of the same size share their sphere geometries (~100 office dots).
+  const markerGeoCache = new Map();
+  function sphereGeo(radius, segs) {
+    const w = LOW_POWER ? Math.max(6, Math.round(segs / 2)) : segs;
+    const key = radius + "|" + w;
+    if (!markerGeoCache.has(key)) markerGeoCache.set(key, new THREE.SphereGeometry(radius, w, w));
+    return markerGeoCache.get(key);
+  }
+
   function createSurfaceMarker(color, radius = 0.03) {
     const group = new THREE.Group();
     const core = new THREE.Mesh(
-      new THREE.SphereGeometry(radius, 16, 16),
+      sphereGeo(radius, 16),
       new THREE.MeshBasicMaterial({ color: color })
     );
     group.add(core);
     const halo = new THREE.Mesh(
-      new THREE.SphereGeometry(radius * 2.2, 20, 20),
+      sphereGeo(radius * 2.2, 20),
       new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0, depthWrite: false })
     );
+    // Invisible until hovered/selected — skip its draw call while it's at 0.
+    halo.visible = false;
     group.add(halo);
     const hit = new THREE.Mesh(
-      new THREE.SphereGeometry(radius * 3.2, 12, 12),
+      sphereGeo(radius * 3.2, 12),
       new THREE.MeshBasicMaterial({ visible: false })
     );
     hit.visible = false;
@@ -380,19 +404,15 @@ document.addEventListener("DOMContentLoaded", function () {
       html += '<div class="TK4R4-dir-group" data-region="' + group.region + '">';
       html += '<div class="TK4R4-dir-country"><span>' + escapeHtml(group.displayName) + "</span>"
         + '<span class="TK4R4-dir-count">' + group.officeCount + " office" + (group.officeCount > 1 ? "s" : "") + "</span></div>";
+      // Each row is just "City, Country | N offices" — office names and
+      // street addresses are deliberately left out of the directory.
       group.cities.forEach((loc) => {
-        const meta = loc.offices.length > 1 ? loc.offices.length + " offices" : "";
-        const search = (loc.city + " " + loc.country + " " + loc.offices.map((o) => o.office + " " + o.address).join(" ")).toLowerCase();
+        const meta = loc.offices.length + " office" + (loc.offices.length > 1 ? "s" : "");
+        const search = (loc.city + " " + loc.country).toLowerCase();
         html += '<div class="TK4R4-dir-city" data-loc-id="' + loc.id + '" data-region="' + loc.region + '" data-search="' + escapeHtml(search) + '">';
-        html += '<span class="TK4R4-dir-city-country">' + escapeHtml(loc.country) + "</span>";
-        html += '<div class="TK4R4-dir-city-head"><span class="TK4R4-dir-city-name">' + escapeHtml(loc.city) + "</span>"
-          + (meta ? '<span class="TK4R4-dir-city-meta">' + meta + "</span>" : "") + "</div>";
-        html += '<div class="TK4R4-dir-offices">';
-        loc.offices.forEach((o) => {
-          html += '<div class="TK4R4-dir-office"><span class="TK4R4-dir-office-name">' + escapeHtml(o.office) + "</span>"
-            + '<span class="TK4R4-dir-office-addr">' + escapeHtml(o.address) + "</span></div>";
-        });
-        html += "</div></div>";
+        html += '<div class="TK4R4-dir-city-head"><span class="TK4R4-dir-city-name">' + escapeHtml(loc.city + ", " + loc.country) + "</span>"
+          + '<span class="TK4R4-dir-city-meta">' + meta + "</span></div>";
+        html += "</div>";
       });
       html += "</div>";
     });
@@ -414,7 +434,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const emphasize = isActive || isHover;
     const scale = isActive ? 2.0 : isHover ? 1.6 : 1;
     gsap.to(loc.dot.scale, { x: scale, y: scale, z: scale, duration: 0.25, ease: "power3.out", overwrite: true });
-    gsap.to(loc.halo.material, { opacity: isActive ? 0.32 : isHover ? 0.2 : 0, duration: 0.25, overwrite: true });
+    if (emphasize) loc.halo.visible = true;
+    gsap.to(loc.halo.material, {
+      opacity: isActive ? 0.32 : isHover ? 0.2 : 0, duration: 0.25, overwrite: true,
+      onComplete: () => { if (loc.halo.material.opacity === 0) loc.halo.visible = false; },
+    });
     loc.core.material.color.copy(isActive ? ACTIVE_COLOR : loc.baseColor);
     if (loc.pill) {
       loc.pill.classList.toggle("TK4R4-show", emphasize);
@@ -458,13 +482,13 @@ document.addEventListener("DOMContentLoaded", function () {
   // so we aim at the final spot. Once the 0.4s expand/collapse has finished we
   // re-measure and nudge, so any leftover drift is corrected too.
   let scrollFixTimer = null;
-  // Phones: the list is a horizontal strip of cards (CSS), so slide the
-  // selected card to the left edge of the strip instead.
+  // Phones: the list is a non-interactive vertical stack of five card slots
+  // that fades out top and bottom (CSS), so glide the selected card into the
+  // second slot — the list's top padding is exactly one slot tall.
   function scrollCardIntoView(row) {
-    const padLeft = parseFloat(getComputedStyle(sidebarListEl).paddingLeft) || 0;
-    const listLeft = sidebarListEl.getBoundingClientRect().left + sidebarListEl.clientLeft;
-    const target = sidebarListEl.scrollLeft + (row.getBoundingClientRect().left - listLeft) - padLeft;
-    sidebarListEl.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+    const slotTwoY = parseFloat(getComputedStyle(sidebarListEl).paddingTop) || 0;
+    const target = sidebarListEl.scrollTop + rowOffsetInList(row) - slotTwoY;
+    sidebarListEl.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
   }
 
   function scrollRowToTop(row, collapsingRow) {
@@ -479,7 +503,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (collapsingRow && collapsingRow !== row && collapsingRow.offsetParent &&
         (collapsingRow.compareDocumentPosition(row) & Node.DOCUMENT_POSITION_FOLLOWING)) {
       collapsingOffices = collapsingRow.querySelector(".TK4R4-dir-offices");
-      shift = collapsingOffices.offsetHeight;
+      shift = collapsingOffices ? collapsingOffices.offsetHeight : 0;
     }
     // scrollTop + offset is the row's absolute position in the list, so it is
     // valid even while a smooth scroll is mid-flight. (Never correct with a
@@ -643,6 +667,10 @@ document.addEventListener("DOMContentLoaded", function () {
     { group: sec3MarkersGroup, companionDot: null },
   ];
 
+  // The final frame opens with this office already selected (web and phone).
+  const DEFAULT_LOC = mumbaiDirectoryDot;
+  let defaultSelectCall = null;
+
   function enterExploration() {
     explorationActive = true;
     controls.enabled = true;
@@ -652,6 +680,14 @@ document.addEventListener("DOMContentLoaded", function () {
       // back in until the globe fills what's left.
       const aspect = container.clientWidth / Math.max(1, container.clientHeight);
       gsap.to(camera.position, { z: fitCameraZ(aspect, 0.88, 0.8), duration: 0.8, ease: "power2.out", overwrite: true });
+    }
+    // Select the default once the phone camera move above has settled (the
+    // globe turn is aimed from the camera's position), unless the reader has
+    // already picked a place themselves.
+    if (DEFAULT_LOC) {
+      defaultSelectCall = gsap.delayedCall(IS_MOBILE ? 0.85 : 0.45, () => {
+        if (explorationActive && !activeId) setActive(DEFAULT_LOC.id);
+      });
     }
     storyLabels.forEach((l) => (l.visible = false));
     exitingMarkers.forEach(({ group, companionDot }) => {
@@ -669,6 +705,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function exitExploration() {
     explorationActive = false;
     controls.enabled = false;
+    if (defaultSelectCall) defaultSelectCall.kill();
     gsap.killTweensOf(camera.position);
     controls.reset();
     document.body.classList.remove("TK4R4-stage-final");
@@ -867,13 +904,28 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   new ResizeObserver(syncRendererSize).observe(container);
 
-  function animate() {
+  // Skip drawing entirely while the globe is scrolled out of view.
+  let onScreen = true;
+  new IntersectionObserver((entries) => {
+    onScreen = entries[entries.length - 1].isIntersecting;
+  }).observe(container);
+
+  // Low power: draw at most ~30fps. (The small slack absorbs rAF jitter so a
+  // 60Hz screen reliably lands on every other frame.)
+  const MIN_FRAME_MS = LOW_POWER ? 1000 / 30 - 4 : 0;
+  let lastFrameT = 0;
+
+  function animate(now) {
     requestAnimationFrame(animate);
+    // Every frame, even when not drawing, so the sidebar can't get stuck open.
+    syncExploration();
+    if (!onScreen) return;
+    if (MIN_FRAME_MS && now - lastFrameT < MIN_FRAME_MS) return;
+    lastFrameT = now;
     syncRendererSize();
     if (mumbaiDirectoryDot && !explorationActive) {
       mumbaiDirectoryDot.dot.visible = indiaMarker.scale.x < 0.5;
     }
-    syncExploration();
     if (controls.enabled) {
       controls.target.copy(globeGroup.position);
       controls.update();

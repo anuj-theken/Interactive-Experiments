@@ -422,14 +422,14 @@ document.addEventListener("DOMContentLoaded", function () {
     },
     {
       start: 0.36,
-      main: "This misreading threatened to trigger incorrect date calculations, cascading errors, and broader failures across",
-      side: "finance, aviation, government infrastructure, and other systems",
+      main: "This misreading threatened to trigger incorrect date calculations, cascading errors, and broader failures\u2026",
+      side: "\u2026 across finance, aviation, government infrastructure, and other systems",
       sideAt: 0.50,
       continues: true // side finishes the main sentence — no gap when stacked
     },
     {
       start: 0.68,
-      main: "With too few programmers in the US to fix the bug in time, companies including India\u2019s TCS were brought in to patch the code at scale",
+      main: "Without enough programmers in the US to fix the bug in time, companies including India\u2019s TCS were brought in to patch the code at scale",
       side: "",
       sideAt: 1
     }

@@ -1,5 +1,5 @@
 // scripts/TK4R1-marketcap_data.js — TK4R1
-// Market cap (₹ Trillion) 1999–2026. Source: CompaniesMarketCap.
+// Market cap (Rs lakh crore) 1999–2026. Source: CompaniesMarketCap.
 const TK4R1_YEARS = ["1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"];
 
 const TK4R1_RAW_DATA = {

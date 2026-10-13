@@ -17,17 +17,37 @@
   }
   .subtitle { font-size: clamp(16px, 2.8vw, 19px); }
   .legend-row .legend-items { flex: 1; justify-content: center; text-align: center; }
+  /* interaction hint: pill under the key so readers know the marks open details */
+  .hint {
+    align-self: center; display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--ken-font-body); font-weight: 300; font-size: 13px; color: var(--ken-ink);
+    border: 1px solid var(--ken-rule); border-radius: 4px; padding: 3px 10px 3px 8px;
+  }
+  /* size key: hollow circles scaled like the bubbles (44 + pct × 0.62, 100% = 28px) */
+  .size-key { gap: 10px; }
+  .sk { display: inline-flex; align-items: center; gap: 4px; font-family: var(--ken-font-bold); font-weight: bold; font-size: 12px; color: var(--ken-text); }
+  .sk i { display: block; border-radius: 50%; border: 1.5px solid var(--ken-outline); background: rgba(200,66,58,0.10); box-sizing: border-box; }
+  .legend-items .hint { margin-left: 8px; }
+  /* desktop/tablet: size key, text and hint stay on one line */
+  @media (min-width: 820px) { .legend-row .legend-items { flex-wrap: nowrap; white-space: nowrap; } }
+  .hint svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--ken-c1); }
 </style>
 </head>
 <body>
 <div class="page page--wide">
-  <div class="main-title">Goodwill Hunting</div>
-  <div class="subtitle">Hospital acquisitions by platforms routinely clear with goodwill accounting for 75% or more of the purchase price</div>
+  <div class="main-title">Goodwill hunting</div>
+  <div class="subtitle">Hospital acquisitions by platforms routinely clear with goodwill accounting<br>for 75% or more of the purchase price</div>
 
   <div class="legend-box">
     <div class="legend-row">
       <div class="legend-items">
-        <div class="leg-item">Bubbles sized to goodwill as a percentage of total consideration paid. Hover for details</div>
+        <div class="leg-item size-key" aria-hidden="true">
+          <span class="sk"><i style="width:13px;height:13px"></i>10%</span>
+          <span class="sk"><i style="width:20px;height:20px"></i>50%</span>
+          <span class="sk"><i style="width:28px;height:28px"></i>100%</span>
+        </div>
+        <div class="leg-item">Goodwill as % of total consideration paid</div>
+        <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11V5a2 2 0 0 1 4 0v5"/><path d="M13 10V9a2 2 0 0 1 4 0v2"/><path d="M17 11a2 2 0 0 1 4 0v3a7 7 0 0 1-7 7h-1a7 7 0 0 1-5.6-2.8L4.6 15a2 2 0 0 1 3.2-2.4L9 14"/></svg>Hover or tap a bubble for deal details</div>
       </div>
     </div>
   </div>
@@ -44,6 +64,8 @@
 <script>
 const { C, F } = KEN;
 const groups = ['HCG', 'Baby Memorial', 'QCIL (Care)', 'Max Healthcare'];
+// row labels: company (PE owner)
+const rowLabels = ['HCG (KKR)', 'Baby Memorial (KKR)', 'QCIL (Blackstone)', 'Max Healthcare (ex-KKR)'];
 const years = ['FY21', 'FY22', 'FY23', 'FY24', 'FY25'];
 const colors = C.palette.slice(0, 4);
 
@@ -104,7 +126,7 @@ function option() {
   // Phones: group names sit above each row so the plot gets the full width, the empty
   // left column is dropped, and same-year deals stack vertically instead of side by side
   const narrow = mobileQuery.matches;
-  const gridLeft = narrow ? 6 : 130, gridRight = narrow ? 6 : 16;
+  const gridLeft = narrow ? 6 : 210, gridRight = narrow ? 6 : 16;
   const gridTop = narrow ? 30 : 10, gridBottom = narrow ? 30 : 36;
   const xMin = narrow ? -0.5 : -1, xMax = narrow ? 4.5 : 5;
   const slot = (w - gridLeft - gridRight) / (xMax - xMin);   // px per year
@@ -112,8 +134,10 @@ function option() {
   // Bubble sizes were tuned for a ~165px year column (~70px on phones); scale down with it
   const k = Math.min(1, slot / (narrow ? 70 : 165));
   const size = narrow ? pct => (20 + pct * 0.4) * k : pct => (44 + pct * 0.62) * k;
-  const minLabel = narrow ? 22 : 0;
-  const showLabels = narrow || k >= 0.6;
+  // % labels at every width (tablets included); smaller type when the bubbles shrink,
+  // dropped only on a bubble too small to hold the text
+  const minLabel = 22;
+  const labelSize = narrow ? 9 : (k < 0.75 ? 10 : 12);
 
   // Pack each cluster with a slight overlap so same-year deals read as one group, tighter than
   // the gap to the neighbouring year; side by side on desktop, stacked on phones
@@ -148,11 +172,11 @@ function option() {
     symbolSize: v => size(v[2]),
     emphasis: { scale: 1.07, itemStyle: { opacity: 1, borderColor: 'rgba(255,255,255,0.45)', borderWidth: 1.5 } },
     label: {
-      show: showLabels,
+      show: true,
       position: 'inside',
       // goodwill % only; deal names are in the tooltip
       formatter: p => size(p.value[2]) >= minLabel ? `${p.value[2]}%` : '',
-      fontFamily: F.bold, fontWeight: 'bold', fontSize: narrow ? 9 : 12, color: C.onFill
+      fontFamily: F.bold, fontWeight: 'bold', fontSize: labelSize, color: C.onFill
     },
     data: seriesData[gi],
     z: 10 // above the row-guide markLine (markLine defaults to z 5)
@@ -165,8 +189,8 @@ function option() {
     markLine: {
       silent: true, symbol: 'none',
       label: narrow
-        ? { show: true, position: 'insideStartTop', distance: [0, unitY * 0.46], formatter: p => groups[p.value], ...KEN.axisLabelBold, fontSize: 12 }
-        : { show: true, position: 'start', distance: 12, formatter: p => groups[p.value], ...KEN.axisLabelBold, fontSize: 14 },
+        ? { show: true, position: 'insideStartTop', distance: [0, unitY * 0.46], formatter: p => rowLabels[p.value], ...KEN.axisLabelBold, fontSize: 12 }
+        : { show: true, position: 'start', distance: 12, formatter: p => rowLabels[p.value], ...KEN.axisLabelBold, fontSize: 14 },
       lineStyle: { color: C.grid, width: 0.8, type: 'solid' },
       data: groups.map((_, i) => ({ yAxis: i }))
     },
@@ -189,8 +213,7 @@ function option() {
         + KEN.tt.meta(p.data.deal)
         + KEN.tt.rule(
             KEN.tt.line('Consideration', `₹${p.data.cons} Cr`)
-          + KEN.tt.line('Goodwill', `₹${p.data.gw} Cr`)
-          + KEN.tt.line('Goodwill %', `${p.value[2]}%`))
+          + KEN.tt.line('Goodwill', `₹${p.data.gw} Cr`))
     },
     xAxis: {
       // half-step ticks so a -0.5 start still lands labels on the whole years

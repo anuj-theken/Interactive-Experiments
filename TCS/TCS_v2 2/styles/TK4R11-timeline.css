@@ -1,0 +1,159 @@
+/* styles/TK4R11-timeline.css — TK4R11
+   Corporate history timeline. Horizontal scrolling ECharts spine on
+   desktop/iPad, vertical HTML list on mobile (≤768px). */
+
+.TK4R11-chart-section {
+  width: 100%;
+}
+
+.TK4R11-chart-frame {
+  width: 100%;
+  max-width: 1450px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  box-sizing: border-box;
+}
+
+.TK4R11-chart-container {
+  width: 100%;
+  max-width: 1350px;
+  margin: 0 auto;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+.TK4R11-chart-header {
+  margin-bottom: 24px;
+}
+
+.TK4R11-chart-title {
+  font-family: var(--font-display);
+  font-size: var(--type-heading);
+  font-weight: 400;
+  color: var(--color-text);
+  margin: 0 0 8px 0;
+}
+
+.TK4R11-chart-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--type-subheading);
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.TK4R11-desktop-only {
+  display: block;
+}
+
+.TK4R11-mobile-only {
+  display: none;
+  padding: 20px 10px;
+}
+
+.TK4R11-timeline-scroll-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  padding-top: 10px;
+  box-sizing: border-box;
+}
+
+.TK4R11-chart {
+  width: 3800px;
+  height: 420px;
+}
+
+.TK4R11-timeline-scroll-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.TK4R11-timeline-scroll-wrapper::-webkit-scrollbar-thumb {
+  background-color: var(--color-primary);
+  border-radius: 10px;
+}
+
+.TK4R11-timeline-scroll-wrapper::-webkit-scrollbar-track {
+  background: var(--color-bg-warm);
+}
+
+.TK4R11-source {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-muted);
+  margin-top: 24px;
+  margin-bottom: 0;
+}
+
+/* Mobile — swap the horizontal chart for a vertical list */
+@media (max-width: 768px) {
+  .TK4R11-chart-frame {
+    padding: 20px 12px;
+  }
+
+  .TK4R11-chart-container {
+    padding: 20px;
+  }
+
+  .TK4R11-desktop-only {
+    display: none;
+  }
+
+  .TK4R11-mobile-only {
+    display: block;
+  }
+
+  .TK4R11-vertical-timeline {
+    border-left: 2px solid var(--color-primary);
+    margin-left: 8px;
+    padding-left: 24px;
+    position: relative;
+  }
+
+  .TK4R11-timeline-item {
+    position: relative;
+    margin-bottom: 32px;
+    text-align: left;
+  }
+
+  /* Node dot aligned with the title line */
+  .TK4R11-timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -31px;
+    top: 26px;
+    width: 12px;
+    height: 12px;
+    background: var(--color-primary);
+    border: 2px solid var(--color-bg);
+    border-radius: 50%;
+    box-sizing: border-box;
+  }
+
+  .TK4R11-m-date {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--type-legend);
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--color-muted);
+  }
+
+  .TK4R11-m-title {
+    font-family: var(--font-display);
+    font-size: var(--type-subheading);
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--color-primary);
+    margin: 4px 0 6px 0;
+  }
+
+  .TK4R11-m-desc {
+    font-family: var(--font-body);
+    font-size: var(--type-body);
+    line-height: 1.5;
+    color: var(--color-text);
+  }
+}

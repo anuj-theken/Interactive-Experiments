@@ -120,6 +120,22 @@ document.addEventListener("DOMContentLoaded", function () {
       .bindTooltip(def.date, { direction: "top", offset: [0, -22], className: "TK4R2-mk-tooltip", sticky: false });
   });
 
+  // A tap opens a marker tooltip but never sends a "mouse out", so on touch
+  // screens close it after a few seconds and whenever the page scrolls.
+  const noHover = window.matchMedia("(hover: none)");
+  let tooltipTimer = null;
+  function closeMarkerTooltips() {
+    clearTimeout(tooltipTimer);
+    Object.values(journeyMarkers).forEach((m) => m.closeTooltip());
+  }
+  Object.values(journeyMarkers).forEach((m) => {
+    m.on("tooltipopen", () => {
+      clearTimeout(tooltipTimer);
+      if (noHover.matches) tooltipTimer = setTimeout(closeMarkerTooltips, 3000);
+    });
+  });
+  window.addEventListener("scroll", closeMarkerTooltips, { passive: true });
+
   function setMarkerVisible(key, visible) {
     const el = journeyMarkers[key] && journeyMarkers[key].getElement();
     const wrap = el && el.querySelector(".TK4R2-marker-wrap");

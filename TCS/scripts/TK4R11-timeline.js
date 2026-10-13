@@ -3,18 +3,18 @@
 document.addEventListener("DOMContentLoaded", function () {
   // 1. Data
   const data = [
-    { date: '1962', title: 'TCS is Born', desc: 'JRD Tata sets up a data-processing division within Tata Sons, which later becomes TCS.' },
-    { date: '1969', title: 'Kohli Arrives', desc: 'FC Kohli joins TCS as General Manager.' },
-    { date: '1979', title: 'Overseas Expansion', desc: 'TCS becomes the first company to open a sales office abroad and sends Ramadorai to New York as its first resident manager.' },
-    { date: '1996', title: 'New Leadership', desc: 'FC Kohli picks S Ramadorai as CEO.' },
-    { date: '1997', title: 'Software Factory', desc: 'TCS sets up a software factory in Chennai to solve the Y2K Bug.' },
-    { date: '2003', title: 'Revenue Milestone', desc: 'TCS became India’s first billion-dollar software company.' },
-    { date: '2004', title: 'Public Debut', desc: 'TCS launches its IPO on the 100th birth anniversary of JRD Tata.' },
-    { date: '2006', title: 'Learning Module', desc: 'Ramadorai launches a new training program called Ignite for the non-engineering science graduates.' },
-    { date: '2009', title: 'Leadership Transition', desc: 'N Chandrasekaran becomes CEO of TCS.' },
-    { date: '2017', title: 'TCS to Tata Sons', desc: 'Chandrasekaran becomes the first non-Parsi chairman of Tata Sons; Rajesh Gopinathan replaces him at TCS.' },
-    { date: '2023', title: 'Krithi Takes Over', desc: 'Gopinathan steps down and Krithivasan becomes CEO of TCS.' },
-    { date: '2026', title: 'Succession Issue', desc: 'Chandrasekaran decides not to seek reappointment as Tata Sons Chairman, but reverses the decision and receives another five-year term.' }
+    { date: '1962', title: 'TCS is Born', desc: 'JRD Tata sets up a data-processing division within Tata Sons, which later becomes TCS' },
+    { date: '1969', title: 'Kohli Arrives', desc: 'FC Kohli joins TCS as General Manager' },
+    { date: '1979', title: 'Overseas Expansion', desc: 'TCS becomes the first company to open a sales office abroad and sends Ramadorai to New York as its first resident manager' },
+    { date: '1996', title: 'New Leadership', desc: 'FC Kohli picks S Ramadorai as CEO' },
+    { date: '1997', title: 'Software Factory', desc: 'TCS sets up a software factory in Chennai to solve the Y2K Bug' },
+    { date: '2003', title: 'Revenue Milestone', desc: 'TCS became India’s first billion-dollar software company' },
+    { date: '2004', title: 'Public Debut', desc: 'TCS launches its IPO on the 100th birth anniversary of JRD Tata' },
+    { date: '2006', title: 'Learning Module', desc: 'Ramadorai launches a new training program called Ignite for the non-engineering science graduates' },
+    { date: '2009', title: 'Leadership Transition', desc: 'N Chandrasekaran becomes CEO of TCS' },
+    { date: '2017', title: 'TCS to Tata Sons', desc: 'Chandrasekaran becomes the first non-Parsi chairman of Tata Sons; Rajesh Gopinathan replaces him at TCS' },
+    { date: '2023', title: 'Krithi Takes Over', desc: 'Gopinathan steps down and Krithivasan becomes CEO of TCS' },
+    { date: '2026', title: 'Succession Issue', desc: 'Chandrasekaran decides not to seek reappointment as Tata Sons Chairman, but reverses the decision and receives another five-year term' }
   ];
 
   // 2. Tokens — read the design system, never hardcode
@@ -66,7 +66,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (!chartDom) return;
 
-  // 4. Library init
+  // 4. Sizing — entry titles 2rem and descriptions 1.6rem, matching the
+  // other sections. ECharts needs px, so resolve rem against the root font
+  // size; then wrap descriptions to fit one node's slot and grow the chart
+  // tall enough for the longest one.
+  const REM = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  const TITLE_FS = 2 * REM;
+  const DESC_FS = 1.6 * REM;
+  const DESC_LH = Math.round(DESC_FS * 1.45);
+  const GRID_LEFT = 80, GRID_RIGHT = 300;
+  const slotWidth = (chartDom.clientWidth - GRID_LEFT - GRID_RIGHT) / (data.length - 1);
+  const wrapChars = Math.max(12, Math.floor((slotWidth - 36) / (DESC_FS * 0.52)));
+  const wrapped = data.map(function (item) { return forceWordWrap(item.desc, wrapChars); });
+  const maxLines = Math.max.apply(null, wrapped.map(function (w) { return w.split('\n').length; }));
+  // node row sits 25% down; below it: offset + date + title + description
+  const labelHeight = 12 + 8 + px('--type-legend') + 6 + TITLE_FS * 1.2 + 10 + maxLines * DESC_LH + 24;
+  chartDom.style.height = Math.max(420, Math.ceil(labelHeight / 0.75)) + 'px';
+
   const chart = echarts.init(chartDom);
   const horizontalSpacing = 280;
 
@@ -74,7 +90,7 @@ document.addEventListener("DOMContentLoaded", function () {
   chart.setOption({
     backgroundColor: 'transparent',
     silent: true,
-    grid: { left: 80, right: 300, top: 0, bottom: 0 },
+    grid: { left: GRID_LEFT, right: GRID_RIGHT, top: 0, bottom: 0 },
     xAxis: { type: 'value', show: false, min: 0, max: (data.length - 1) * horizontalSpacing },
     yAxis: { type: 'value', show: false, min: 0, max: 100 },
     series: [{
@@ -91,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
         align: 'left',
         formatter: function (p) {
           const item = data[p.dataIndex];
-          return '{d|' + item.date + '}\n{t|' + item.title + '}\n{desc|' + forceWordWrap(item.desc, 30) + '}';
+          return '{d|' + item.date + '}\n{t|' + item.title + '}\n{desc|' + wrapped[p.dataIndex] + '}';
         },
         rich: {
           d: {
@@ -105,15 +121,15 @@ document.addEventListener("DOMContentLoaded", function () {
           t: {
             color: PRIMARY,
             fontWeight: 'normal',
-            fontSize: px('--type-body'),
+            fontSize: TITLE_FS,
             align: 'left',
             padding: [0, 0, 10, 0],
             fontFamily: FONT_DISPLAY
           },
           desc: {
             color: INK,
-            fontSize: px('--type-legend'),
-            lineHeight: 20,
+            fontSize: DESC_FS,
+            lineHeight: DESC_LH,
             align: 'left',
             fontFamily: FONT_BODY
           }
