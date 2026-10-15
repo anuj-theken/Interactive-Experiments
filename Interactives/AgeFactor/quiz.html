@@ -36,6 +36,15 @@
     .stage { min-height: 0; padding: 18px 16px 14px; }
     .side { position: static; }
     .brand { font-size: 18px; } .count { display: none; }
+    /* Mobile: the question card comes first, so every question is answerable without scrolling;
+       the illustration / chart follows, and the age profile goes last */
+    .app { gap: 16px; }
+    .side { display: contents; }
+    .prompt { order: 1; box-shadow: 5px 5px 0 var(--red); padding: 16px 16px 14px; }
+    .stage { order: 2; }
+    .profile { order: 3; }
+    .stage h1 { font-size: 26px; letter-spacing: -.5px; margin: 6px 0 6px; }
+    .lede { font-size: 14.5px; }
   }
 
   .kicker { font-family: var(--ken-font-bold); font-weight: bold; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--red); }
@@ -120,8 +129,6 @@
   .row .lab { font-family: var(--ken-font-bold); font-weight: bold; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ken-text); min-width: 44px; }
   .chip { background: #fff; border: 2px solid var(--ink); border-radius: 3px; padding: 6px 12px; font-size: 14px; color: var(--ink); }
   .chip[aria-pressed=true] { background: var(--ink); color: #fff; }
-  .swatch { width: 28px; height: 28px; border: 2px solid var(--ken-bg); outline: 2px solid transparent; }
-  .swatch[aria-pressed=true] { outline-color: var(--ink); }
 
   /* Profile card */
   .profile { background: var(--card); border: 1.5px solid var(--ken-rule); border-radius: 4px; padding: 14px 16px; }
@@ -207,7 +214,7 @@ const val = k => me[k] === SKIP ? undefined : me[k];
 const youRow = () => [me.dec, val('hap') ?? -1, val('exp') ?? -1, val('mid') ?? -1, val('midAge') ?? null, val('pill') ?? null, val('trig') || 0, val('fact') || 0];
 const ALL = () => P.concat([youRow()]);
 const peers = () => { const g = P.filter(p => p[0] === me.dec); return g.length >= 10 ? { g, label: `readers in ${THEIR[me.dec]}` } : { g: P, label: 'all readers' }; };
-const art = (age, o = {}) => Character(age, { hair: me.hair, skin: me.skin, ...o });
+const art = (age, o = {}) => Character(age, o);
 const outlook = p => (p[0] < 0 || p[2] === -1) ? null : p[2] === -2 ? 'behind' : p[2] > p[0] ? 'ahead' : p[2] === p[0] ? 'now' : 'behind';
 const decAge = i => i === 0 ? 16 : Math.min(i * 10 + 15, 78);
 
@@ -392,16 +399,13 @@ const pickStrip = i => $('art').querySelectorAll('.strip > div').forEach((d, j) 
 /* ---------------- Cards ---------------- */
 const CARDS = [
   { id: 'age', k: 'Start here', title: 'How old are you?',
-    lede: 'This is a story about getting older, and it starts with you. Build your character, then answer the questions 301 readers of First Principles answered. After each one, you’ll see how you compare.',
+    lede: 'This is a story about getting older, and it starts with you. Set your age, then answer the questions 301 readers of First Principles answered. After each one, you’ll see how you compare.',
     art: () => `<div class="frame hero-frame" id="meFrame">${art(me.age)}<div class="cap" id="meCap">You, at ${me.age}</div></div>`,
     ask() {
       $('prompt').innerHTML = promptHTML({ q: 'How old are you?', skip: false, primary: { label: 'That’s me →' },
-        body: slider('ageIn', 13, 90, me.age) + `<div class="row"><span class="lab">Hair</span>${['short', 'long'].map(h => `<button class="chip" data-hair="${h}" aria-pressed="${me.hair === h}">${h[0].toUpperCase() + h.slice(1)}</button>`).join('')}</div>
-          <div class="row"><span class="lab">Skin</span>${SKINS.map((s, i) => `<button class="swatch" data-skin="${i}" style="background:${s}" aria-label="Skin tone ${i + 1}" aria-pressed="${me.skin === s}"></button>`).join('')}</div>` });
+        body: slider('ageIn', 13, 90, me.age) });
       const repaint = pop => { const f = $('meFrame'); f.querySelector('svg').outerHTML = art(me.age); $('meCap').textContent = `You, at ${me.age}`; if (pop) gsap.fromTo(f, { scale: .97 }, { scale: 1, duration: .35, ease: 'back.out(3)' }); };
       $('ageIn').oninput = e => { const d = decadeOf(me.age); me.age = +e.target.value; $('ageInVal').textContent = me.age; repaint(decadeOf(me.age) !== d); };
-      $('prompt').querySelectorAll('[data-hair]').forEach(b => b.onclick = () => { me.hair = b.dataset.hair; $('prompt').querySelectorAll('[data-hair]').forEach(x => x.setAttribute('aria-pressed', x === b)); repaint(true); });
-      $('prompt').querySelectorAll('[data-skin]').forEach(b => b.onclick = () => { me.skin = SKINS[+b.dataset.skin]; $('prompt').querySelectorAll('[data-skin]').forEach(x => x.setAttribute('aria-pressed', x === b)); repaint(true); });
       return () => { me.dec = decadeOf(me.age); me.started = true; return ['age']; };
     } },
 
@@ -644,8 +648,10 @@ const QUOTES_PILL = [
   ['Would stop at 45', 4, 'long', 'Bengaluru', 'I get 5 years more to take better care of myself - never prioritised myself till 50.'],
 ];
 function panels(list, mood) {
+  let prev = null; // neighbouring panels never show the same portrait
   return `<div class="panels">${list.map(([tag, d, hair, city, q], i) => {
-    const svg = Character(decAge(d), { hair, mood: i % 3 === 0 ? 'o' : mood, skin: SKINS[i % 3] }).replace('viewBox="0 0 200 200"', 'viewBox="20 38 160 128" preserveAspectRatio="xMidYMid slice"');
+    const pid = prev = window.AGE_ART.portraitId(decAge(d), { avoid: [prev] });
+    const svg = Character(decAge(d), { id: pid }).replace('viewBox="0 0 200 200"', 'viewBox="15 8 170 136" preserveAspectRatio="xMidYMid slice"');
     return `<div class="qp"><div class="art">${svg}</div><div class="txt"><div class="qt">“${esc(q)}”</div><div class="who"><b>${esc(tag)}</b>${DEC[d]}, ${esc(city)}</div></div></div>`;
   }).join('')}</div>`;
 }

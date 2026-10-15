@@ -1,5 +1,6 @@
 // Flat SVG characters for the Age Factor story. Everything is drawn in a 200×200 square.
-// Character(age, opts) returns an <svg> string; Scene(name, opts) composes multi-figure panels.
+// Character(age, opts) returns an <svg> string showing the portrait for that age; Scene(name, opts) adds props on top.
+// figure() is the older flat drawing, kept for reference.
 (function () {
   const INK = '#1A1208';
   const BGS = ['#F2D7C9', '#E7D3C1', '#E9CFCB', '#D9DCCB', '#D3DDD9', '#E3DACB', '#E6DDE3'];
@@ -78,11 +79,19 @@
   const wrap = (inner, bg, label) =>
     `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img"${label ? ` aria-label="${label}"` : ''}><rect width="200" height="200" fill="${bg}"/>${inner}</svg>`;
 
+  // Illustrated portraits (imgs/characters/web). Each decade lists the portraits that can stand for it, best fit first.
+  const PORTRAIT_DIR = 'imgs/characters/web/';
+  const BY_DECADE = [[2, 1], [1, 4, 2], [4, 3, 1], [3, 5, 4], [5, 7, 3], [7, 5, 8], [8, 7]];
+  function portraitId(age, o = {}) {
+    const list = BY_DECADE[decadeOf(age)], avoid = o.avoid || [];
+    return list.find(n => !avoid.includes(n)) || list[0];
+  }
+  const portrait = (age, o = {}) => `<image href="${PORTRAIT_DIR}p${o.id || portraitId(age, o)}.jpg" width="200" height="200" preserveAspectRatio="xMidYMid slice"/>`;
+
   function Character(age, o = {}) {
-    const bg = o.bg || BGS[decadeOf(age)];
-    let inner = figure(age, o);
+    let inner = portrait(age, o);
     if (o.question) inner = `<g opacity=".28">${inner}</g><text x="100" y="118" text-anchor="middle" font-family="Jazmin Alt, Georgia, serif" font-weight="bold" font-size="76" fill="${INK}">?</text>`;
-    return wrap(inner, bg, o.label);
+    return wrap(inner, o.bg || BGS[decadeOf(age)], o.label);
   }
 
   function bubble(x, y, w, h, text, tailX, tailY, size = 15) {
@@ -94,15 +103,12 @@
     const age = o.age || 40, hair = o.hair || 'short';
     if (name === 'uncle') {
       const word = hair === 'long' ? 'Hi aunty!' : 'Hi uncle!';
-      const kid = `<g transform="translate(118 92) scale(.55)">${figure(9, { hair: 'long', shirt: '#C8423A', mood: 'joy', skin: '#D9A27A' })}</g>`;
-      const adult = `<g transform="translate(-30 14)">${figure(Math.max(age, 36), { hair, mood: 'o' })}</g>`;
-      return wrap(adult + kid + bubble(104, 18, 86, 38, word, 160, 82), '#E9CFCB', 'A child calls the character uncle');
+      return wrap(portrait(age, o) + bubble(118, 10, 76, 34, word, 186, 62, 13), '#E9CFCB', 'Someone calls the character uncle');
     }
     if (name === 'pill') {
-      const clock = `<g transform="translate(36 40)"><circle r="24" fill="#fff" stroke="${INK}" stroke-width="3"/><path d="M0 0 V-15 M0 0 L10 6" stroke="#C8423A" stroke-width="3.5" stroke-linecap="round"/><circle r="2.5" fill="${INK}"/></g>`;
-      const pill = `<g transform="translate(146 164) rotate(-35)"><rect x="-26" y="-11" width="52" height="22" rx="11" fill="#fff" stroke="${INK}" stroke-width="2.5"/><path d="M0 -11 H15 A11 11 0 0 1 15 11 H0 Z" fill="#C8423A" stroke="${INK}" stroke-width="2.5"/></g>`;
-      const hand = `<circle cx="140" cy="176" r="12" fill="${o.skin || SKINS[0]}" stroke="rgba(26,18,8,.15)" stroke-width="2"/>`;
-      return wrap(clock + `<g transform="translate(-6 8)">${figure(age, { hair, mood: 'worried' })}</g>` + hand + pill, '#D3DDD9', 'The character holds an anti-ageing pill');
+      const clock = `<g transform="translate(30 32)"><circle r="20" fill="#fff" stroke="${INK}" stroke-width="3"/><path d="M0 0 V-15 M0 0 L10 6" stroke="#C8423A" stroke-width="3.5" stroke-linecap="round"/><circle r="2.5" fill="${INK}"/></g>`;
+      const pill = `<g transform="translate(164 172) rotate(-35)"><rect x="-26" y="-11" width="52" height="22" rx="11" fill="#fff" stroke="${INK}" stroke-width="2.5"/><path d="M0 -11 H15 A11 11 0 0 1 15 11 H0 Z" fill="#C8423A" stroke="${INK}" stroke-width="2.5"/></g>`;
+      return wrap(portrait(age, o) + clock + pill, '#D3DDD9', 'The character next to an anti-ageing pill');
     }
     if (name === 'crowd') {
       let s = '';
@@ -114,15 +120,22 @@
     }
     if (name === 'decade') {
       const icons = { freedom: '✈', family: '♥', money: '₹', work: '⚒', health: '✚', learning: '✎' };
-      let s = `<g transform="translate(0 10)">${figure(age, { hair, mood: 'joy' })}</g>`;
-      Object.values(icons).forEach((ic, i) => {
-        const ang = -Math.PI * (0.1 + i * 0.16), x = 100 + Math.cos(ang) * 82, y = 104 + Math.sin(ang) * 82;
-        s += `<g transform="translate(${x} ${y})"><circle r="15" fill="#fff" stroke="${INK}" stroke-width="2.2"/><text y="6" text-anchor="middle" font-size="16" fill="#C8423A" font-family="Arial">${ic}</text></g>`;
+      let s = portrait(age, o);
+      const on = o.on || []; // keys of icons the reader picked: drawn bigger and filled red
+      Object.entries(icons).forEach(([k, ic], i) => {
+        const ang = -Math.PI * (0.1 + i * 0.16), x = 100 + Math.cos(ang) * 82, y = 104 + Math.sin(ang) * 82, hot = on.includes(k);
+        s += `<g transform="translate(${x} ${y}) scale(${hot ? 1.25 : on.length ? .85 : 1})" opacity="${on.length && !hot ? .55 : 1}"><circle r="15" fill="${hot ? '#C8423A' : '#fff'}" stroke="${INK}" stroke-width="2.2"/><text y="6" text-anchor="middle" font-size="16" fill="${hot ? '#fff' : '#C8423A'}" font-family="Arial">${ic}</text></g>`;
       });
       return wrap(s, '#F2D7C9', 'The character surrounded by things that make a decade good');
     }
     return Character(age, o);
   }
 
-  window.AGE_ART = { Character, Scene, figure, decadeOf, SKINS };
+  // Transparent head-and-shoulders cut-outs of the same portraits, for chart marks
+  const CUT_DIR = 'imgs/characters/cut/';
+  const ALL_IDS = [2, 1, 4, 3, 5, 7, 8];
+  // A stable, varied cut-out for mark i: drawn from the reader's decade when known, otherwise from all seven
+  const cutFor = (i, dec) => { const list = dec >= 0 ? BY_DECADE[dec] : ALL_IDS; return `${CUT_DIR}c${list[(i * 7 + (i >> 3)) % list.length]}.png`; };
+
+  window.AGE_ART = { Character, Scene, figure, decadeOf, SKINS, portraitId, PORTRAIT_DIR, cutFor };
 })();
