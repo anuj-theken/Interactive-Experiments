@@ -84,6 +84,7 @@
   /* ===== Visual elements: question cards, comic strips, quote panels, interludes ===== */
   .ask { max-width: 960px; margin: 0 auto; padding: 36px 20px 8px; display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 40px; align-items: center; }
   .ask .frame { max-width: 300px; }
+  .ask.solo { grid-template-columns: minmax(0, 680px); justify-content: center; }
   @media (max-width: 760px) { .ask { grid-template-columns: 1fr; gap: 28px; } .ask .frame { max-width: 240px; } }
   .qcard { background: #fff; border: 3px solid var(--ink); border-radius: 4px; box-shadow: 8px 8px 0 var(--red); padding: 22px 24px 18px; }
   .qlabel { font-family: var(--ken-font-bold); font-weight: bold; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--ken-text); }
@@ -135,7 +136,6 @@
   .you-line { display: block; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed rgba(59,42,38,.3); font-style: italic; }
   .you-line:empty { display: none; }
   .you-line b { font-style: normal; }
-  .pr.you .pl::after { content: 'You'; display: inline-block; margin-left: 6px; padding: 1px 5px; background: var(--red); color: #fff; font-size: 10px; border-radius: 2px; vertical-align: 1px; }
   .qfoot { margin-top: 14px; font-size: 12.5px; font-style: italic; color: var(--ken-text); }
 
 
@@ -204,23 +204,6 @@
     .card .big { font-size: 34px; margin-bottom: 4px; }
   }
 
-  .picto { margin: 14px 0 10px; }
-  .pr { display: grid; grid-template-columns: 170px minmax(0, 1fr) 40px; gap: 12px; align-items: center; padding: 7px 0; border-bottom: 1px dashed var(--ken-grid); }
-  .pl { font-family: var(--ken-font-bold); font-weight: bold; font-size: 13px; color: var(--ken-text); text-align: right; }
-  .dm { display: flex; flex-wrap: wrap; gap: 1px; padding: 2px 0; min-width: 0; }
-  .dm i { display: block; width: 14px; height: 14px; flex: none; background: var(--c); overflow: hidden; }
-  .dm i img { display: block; width: 90%; height: 90%; margin: 10% 5% 0; }
-  .pp { display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); }
-  .pp i { display: block; aspect-ratio: 1; color: #E6DADA; background: currentColor; overflow: hidden; }
-  .pp i img { width: 90%; height: 90%; margin: 10% 5% 0; display: block; }
-  .pp i:not(.on) img { opacity: .35; }
-  @media (max-width: 600px) { .pp i img { display: none; } } /* too small to read on phones; plain squares instead */
-  .pr { transition: background .15s; cursor: default; }
-  .picto.hov .pr { opacity: .45; }
-  .picto.hov .pr.on { opacity: 1; background: rgba(200,66,58,.06); }
-  .ptip { position: fixed; z-index: 50; pointer-events: none; opacity: 0; transition: opacity .12s; max-width: 260px; background: var(--ken-bg); border: 1px solid var(--ken-rule); border-radius: 3px; box-shadow: 0 4px 20px rgba(0,0,0,.1); padding: 10px 12px; font-size: 13px; line-height: 1.5; color: var(--ken-body); }
-  .pv { font-family: var(--ken-font-bold); font-weight: bold; font-size: 13px; color: var(--ink); }
-  @media (max-width: 600px) { .pr { grid-template-columns: 1fr 40px; } .pl { grid-column: 1 / -1; text-align: left; } }
   .g-art .anchor-frame { width: min(340px, 70%, 52vh); transform-origin: 50% 50%; }
   .anchor-frame .tags { position: absolute; left: 8px; right: 8px; bottom: 8px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
   .anchor-frame .tags span { background: #fff; border: 2px solid var(--ink); font-family: var(--ken-font-bold); font-weight: bold; font-size: 12.5px; color: var(--ink); padding: 3px 8px; }
@@ -278,31 +261,93 @@
 
 <!-- ===== INTRO LETTER ===== -->
 <section class="nl nl-intro">
-  <p>This is a special edition of First Principles. In September, we asked you about getting older: which decade of your life has been the happiest, when you first felt middle-aged, and at what age you would stop the clock if you could. 301 of you answered.</p>
+  <p>This is a special edition of First Principles. In September, we asked you about getting older: at what age you would stop the clock if you could, which decade of your life has been the happiest, and when you first felt middle-aged. 301 of you answered.</p>
   <p>Here’s everything we have for you in <i>First Principles</i> this week:</p>
   <ol class="contents">
+    <li><a href="#s-pill">The pill that stops the clock</a></li>
     <li><a href="#s-happiest">The happiest decade</a></li>
+    <li><a href="#s-good">What makes a decade good</a></li>
     <li><a href="#s-middle">The day you felt middle-aged</a></li>
     <li><a href="#s-uncle">“Kids started calling me uncle”</a></li>
-    <li><a href="#s-pill">The pill that stops the clock</a></li>
-    <li><a href="#s-good">What makes a decade good</a></li>
+    <li><a href="#s-ahead">Is the best yet to come?</a></li>
     <li><a href="#s-turn">Your turn</a></li>
   </ol>
   <p class="note">[The best way to experience this edition is to read it on our website or app. The charts move as you scroll, and you can hover over or tap them to see each reader’s answers. Most email clients won’t show them.]</p>
 </section>
 
-<!-- ===== 1. THE HAPPIEST DECADE ===== -->
+<!-- ===== YOUR AGE: asked first, used by every answer after it ===== -->
+<section class="ask">
+  <div class="frame" id="askAge"><div class="cap">You</div></div>
+  <div class="qcard">
+    <div class="qlabel">Before we start</div>
+    <div class="qtext">How old are you?</div>
+    <div class="qform" id="formAge"></div>
+    <div class="qyou" id="youAge" aria-live="polite"></div>
+    <div class="qfoot">We use it to place you among the 301 readers. It stays on this page.</div>
+  </div>
+</section>
+
+<!-- ===== 1. THE PILL ===== -->
+<section class="nl sec" id="s-pill">
+  <div class="sec-mark"></div>
+  <h2>The pill that stops the clock</h2>
+  <p>We started with the biggest question of all: what if you could stop getting older?</p>
+</section>
+<section class="ask">
+  <div class="frame" id="askPill"><div class="cap">The pill</div></div>
+  <div class="qcard">
+    <div class="qlabel">Question 1 · We asked</div>
+    <div class="qtext">If you had a pill that could stop biological ageing in its tracks, at what age would you take it?</div>
+    <div class="qform" id="formPill"></div>
+    <div class="qyou" id="youPill" aria-live="polite"></div>
+    <div class="qfoot">272 readers gave an age</div>
+  </div>
+</section>
+
+<section class="scrolly" data-chart="C">
+  <div class="graphic">
+    <div class="g-head"><div class="g-title"></div><div class="g-sub"></div><div class="tap-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V11m0-.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3.6 14.6a1.5 1.5 0 0 1 2.5-1.7L9 16"/></svg>Hover or tap on the chart for details</div></div>
+    <div class="g-body"><div class="g-chart"></div><div class="g-art"></div></div>
+    <div class="g-foot">Each square is one reader. The teal-outlined square is our reader.</div>
+  </div>
+  <div class="steps">
+    <div class="step" data-step="c0"><div class="card"><span class="you-line" data-you="c0"></span>Meet one reader. They are in their 40s, and they would take the pill at <b>30</b>, going back more than ten years.<span class="hint">The illustration is ours; the answers are real. We’ll follow this reader all the way through.</span></div></div>
+    <div class="step" data-step="c1"><div class="card"><span class="big">301</span>Now shrink our reader down to a single square, and add everyone else who answered. Every square is a person, coloured by how old they are now: the darker, the older. Half would stop the clock by <b>35</b>, the red line.<span class="hint">Each column is how old readers are now; up is the age they’d take the pill. Our reader would stop at 30.</span></div></div>
+    <div class="step" data-step="c2"><div class="card"><b>117 readers</b>, 43%, would <span class="hl ink">go back</span>: they’d take the pill at an age younger than they are now. The older the reader, the more likely: 12% of readers in their 20s, but 60% of those in their 50s.<span class="hint">Our reader is one of them. We only know each reader’s decade, so “younger than now” means before the decade they’re in.</span></div></div>
+    <div class="step" data-step="c3"><div class="card">Only <b>43</b> would <span class="hl ink">wait</span>, picking an age older than they are now. Most of them are young: 41% of readers in their 20s would wait, but just 5% of those in their 50s.<span class="hint">The other 106 would stop somewhere in the decade they’re in now.</span></div></div>
+    <div class="step" data-step="c4"><div class="card">And then there are the <span class="hl ink">four readers</span> who said 99, 100 or 110. One of them wrote: “Wouldn’t take the pill actually.”</div></div>
+  </div>
+</section>
+
+<section class="strip-sec">
+  <p class="lead">How far back readers would go</p>
+  <div class="strip" id="stripPill" style="--n:6"></div>
+  <p class="strip-note">Median age at which readers in each decade would take the pill. Illustrations, not portraits of real readers.</p>
+</section>
+
+<section class="ask solo">
+  <div class="qcard">
+    <div class="qlabel">Question 2 · We asked</div>
+    <div class="qtext">Why that age?</div>
+    <div class="qfoot">Some of your answers. We quote only readers who agreed to be quoted, and identify them by decade and city.</div>
+  </div>
+</section>
+<div class="panels" id="panelsPill"></div>
+
+<section class="interlude"><p class="split">But how have the years been so far?</p></section>
+
+<!-- ===== 2. THE HAPPIEST DECADE ===== -->
 <section class="nl sec" id="s-happiest">
   <div class="sec-mark"></div>
   <h2>The happiest decade</h2>
-  <p>We started with the obvious question.</p>
+  <p>Then we asked about the years you’ve already lived.</p>
 </section>
 <section class="ask">
   <div class="frame" id="askHap"><div class="cap">Looking back</div></div>
   <div class="qcard">
-    <div class="qlabel">Question 1 · We asked</div>
-    <div class="qtext">Which decade of your life has been your happiest so far?</div>
-<div class="qform" id="formHap"></div>
+    <div class="qlabel">Questions 3 and 4 · We asked</div>
+    <div class="qtext">Which decade of your life are you in right now? And which has been your happiest so far?</div>
+    <div class="qform" id="formHap"></div>
     <div class="qyou" id="youHap" aria-live="polite"></div>
     <div class="qfoot">280 readers named a decade</div>
   </div>
@@ -312,28 +357,51 @@
   <div class="graphic">
     <div class="g-head"><div class="g-title"></div><div class="g-sub"></div><div class="tap-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V11m0-.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3.6 14.6a1.5 1.5 0 0 1 2.5-1.7L9 16"/></svg>Hover or tap on the chart for details</div></div>
     <div class="g-body"><div class="g-chart"></div><div class="g-art"></div></div>
-    <div class="g-foot">Each square is one reader. The outlined square is our reader.</div>
+    <div class="g-foot">Each square is one reader. The teal-outlined square is our reader.</div>
   </div>
   <div class="steps">
-    <div class="step" data-step="a0"><div class="card"><span class="you-line" data-you="a0"></span>Meet one reader. They are in their 40s. Asked which decade has been their happiest so far, they said <b>their 20s</b>. And the happiest one ever? They expect it to be <b>their 50s</b>.<span class="hint">The illustration is ours; the answers are real.</span></div></div>
-    <div class="step" data-step="a1"><div class="card"><span class="big">301</span>Now shrink our reader down to a single square, and add everyone else who answered. Every square is a person, coloured by how old they are now: the darker the square, the older the reader. The outlined one is the reader you just met.</div></div>
+    <div class="step" data-step="a0"><div class="card"><span class="you-line" data-you="a0"></span>Remember our reader? They’re in their 40s, and their happiest decade so far has been <b>their 20s</b>.</div></div>
+    <div class="step" data-step="a1"><div class="card"><span class="big">301</span>Here are all 301 readers again, sorted by how old they are now. The outlined square is our reader.</div></div>
     <div class="step" data-step="a2"><div class="card">Sort them into clusters by the decade they’re in now. Readers in their 30s are the largest group, then those in their 40s and 50s.<span class="hint">Our reader is in the 40s cluster.</span></div></div>
     <div class="step" data-step="a3"><div class="card">Almost half of readers (<b>49%</b>) said their happiest decade so far is <span class="hl ink">the one they’re in now</span>: the bright squares. Most of the rest named an earlier one.</div></div>
     <div class="step" data-step="a4"><div class="card">Now move each reader to the decade they named. Two clusters stand out: <b>the 20s and the 30s</b>, with 58% of the answers. Watch the colours: the 20s cluster is full of darker squares, older readers looking back.<span class="hint">Our reader moves to the 20s.</span></div></div>
-    <div class="step" data-step="a5"><div class="card"><span class="mini-q">“Looking ahead, which decade do you expect will be your happiest?”</span>The answers move later. The <b>50s</b> get more votes than any other decade. Only 12 readers picked their 20s.<span class="hint">Our reader moves to the 50s.</span></div></div>
-    <div class="step" data-step="a6"><div class="card">Put the two answers together. <b>6 in 10</b> readers think their best decade is <span class="hl ink">still ahead</span>. About a third say it’s now, and only 17 say it’s behind them. The colours show who: the “still ahead” cluster is mostly younger, lighter squares; “behind me” is darker.<span class="hint">Our reader, in their 40s with the 50s to look forward to, is in “still ahead”.</span></div></div>
   </div>
 </section>
 
-<section class="strip-sec">
-  <p class="lead">The best is still ahead, until it isn’t</p>
-  <div class="strip" id="stripAhead" style="--n:4"></div>
-  <p class="strip-note">Share of readers in each decade who say their happiest decade is still ahead of them. Illustrations, not portraits of real readers.</p>
+<!-- ===== 3. WHAT DEFINED IT ===== -->
+<section class="nl sec" id="s-good">
+  <div class="sec-mark"></div>
+  <h2>What makes a decade good</h2>
+  <p>Next, what made that happiest decade what it was.</p>
+</section>
+<section class="ask">
+  <div class="frame" id="askGood"><div class="cap">A good decade</div></div>
+  <div class="qcard">
+    <div class="qlabel">Question 5 · We asked</div>
+    <div class="qtext">What most defined your happiest decade? Pick up to two.</div>
+    <div class="qform" id="formGood"></div>
+    <div class="qyou" id="youGood" aria-live="polite"></div>
+    <div class="qfoot">271 readers picked at least one</div>
+  </div>
+</section>
+<section class="scrolly" data-chart="E">
+  <div class="graphic">
+    <div class="g-head"><div class="g-title"></div><div class="g-sub"></div><div class="tap-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V11m0-.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3.6 14.6a1.5 1.5 0 0 1 2.5-1.7L9 16"/></svg>Hover or tap on the chart for details</div></div>
+    <div class="g-body"><div class="g-chart"></div><div class="g-art"></div></div>
+    <div class="g-foot">Each square is one reader. The teal-outlined square is our reader.</div>
+  </div>
+  <div class="steps">
+    <div class="step" data-step="e1"><div class="card"><span class="big">266</span>These are the readers who told us what defined their happiest decade. Overall, <b>freedom</b> came first (47%), just ahead of relationships (45%). Learning came last (31%).<span class="hint">Most picked two things. Each reader is one square, coloured by their age now.</span></div></div>
+    <div class="step" data-step="e2"><div class="card">Now sort them by the decade they named as their happiest. The answer changes with the decade.<span class="hint">Our reader is in the 20s cluster.</span></div></div>
+    <div class="step" data-step="e3"><div class="card">If your best decade was your teens or your 20s, it was about <span class="hl ink">freedom</span>: almost two in three of those readers picked it.<span class="hint">Our reader picked freedom too, along with work.</span></div></div>
+    <div class="step" data-step="e4"><div class="card">If it was your 30s, it was about <span class="hl ink">people</span>. 61% of those readers picked relationships or family, more than anything else.</div></div>
+    <div class="step" data-step="e5"><div class="card">And if it was your 40s or 50s, it was about <span class="hl ink">money</span>. Nearly two in three of those readers picked financial security.<span class="hint">The 60s cluster combines readers whose happiest decade was their 60s or later.</span></div></div>
+  </div>
 </section>
 
 <section class="interlude"><p class="split">Then, at some point, something changes.</p></section>
 
-<!-- ===== 2. FELT MIDDLE-AGED ===== -->
+<!-- ===== 4. FELT MIDDLE-AGED ===== -->
 <section class="nl sec" id="s-middle">
   <div class="sec-mark"></div>
   <h2>The day you felt middle-aged</h2>
@@ -342,11 +410,11 @@
 <section class="ask">
   <div class="frame" id="askMid"><div class="cap">The moment</div></div>
   <div class="qcard">
-    <div class="qlabel">Question 2 · We asked</div>
-    <div class="qtext">Have you ever felt middle-aged? At what age, and what happened?</div>
-<div class="qform" id="formMid"></div>
+    <div class="qlabel">Question 6 · We asked</div>
+    <div class="qtext">Have you ever felt middle-aged?</div>
+    <div class="qform" id="formMid"></div>
     <div class="qyou" id="youMid" aria-live="polite"></div>
-    <div class="qfoot">132 readers said yes; 128 described the moment</div>
+    <div class="qfoot">283 readers answered; 132 said yes</div>
   </div>
 </section>
 
@@ -354,28 +422,58 @@
   <div class="graphic">
     <div class="g-head"><div class="g-title"></div><div class="g-sub"></div><div class="tap-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V11m0-.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3.6 14.6a1.5 1.5 0 0 1 2.5-1.7L9 16"/></svg>Hover or tap on the chart for details</div></div>
     <div class="g-body"><div class="g-chart"></div><div class="g-art"></div></div>
-    <div class="g-foot">Each square is one reader. The outlined square is our reader.</div>
+    <div class="g-foot">Each square is one reader. The teal-outlined square is our reader.</div>
   </div>
   <div class="steps">
     <div class="step" data-step="b0"><div class="card"><span class="you-line" data-you="b0"></span>Remember our reader? They first felt middle-aged at <b>43</b>. What gave it away was their health.</div></div>
     <div class="step" data-step="b1"><div class="card"><b>132 readers</b> said <span class="hl ink">yes</span>, they have felt middle-aged. That’s about one in six readers in their 20s, and more than two in three in their 50s.<span class="hint">Each bar is the decade readers are in now. The bright squares said yes.</span></div></div>
-    <div class="step" data-step="b2"><div class="card">When did it first happen? Half of them had felt it by <b>43</b>, exactly when our reader did.<span class="hint">124 readers gave an age. Each square is one of them, at the age they first felt it.</span></div></div>
+  </div>
+</section>
+
+<section class="ask solo">
+  <div class="qcard">
+    <div class="qlabel">Question 7 · We asked</div>
+    <div class="qtext">At what age did you first feel middle-aged?</div>
+    <div class="qform" id="formMidAge"></div>
+    <div class="qyou" id="youMidAge" aria-live="polite"></div>
+    <div class="qfoot">124 readers gave an age</div>
+  </div>
+</section>
+
+<section class="scrolly" data-chart="B2">
+  <div class="graphic">
+    <div class="g-head"><div class="g-title"></div><div class="g-sub"></div><div class="tap-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V11m0-.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3.6 14.6a1.5 1.5 0 0 1 2.5-1.7L9 16"/></svg>Hover or tap on the chart for details</div></div>
+    <div class="g-body"><div class="g-chart"></div><div class="g-art"></div></div>
+    <div class="g-foot">Each square is one reader. The teal-outlined square is our reader.</div>
+  </div>
+  <div class="steps">
+    <div class="step" data-step="b2"><div class="card">Half of them had felt it by <b>43</b>, exactly when our reader did.<span class="hint">124 readers gave an age. Each square is one of them, at the age they first felt it.</span></div></div>
     <div class="step" data-step="b3"><div class="card">Now look at the colours. The darker, older squares sit further right: readers in their 30s first felt it at about <b>33</b>, in their 40s at <b>40</b>, in their 50s at <b>48</b>, in their 60s at <b>55</b>. Middle age seems to stay a few years behind you, wherever you are.<span class="hint">Those are the medians for each group. Only four readers in their 20s, and four in their 70s or beyond, gave an age.</span></div></div>
     <div class="step" data-step="b4"><div class="card">Look at the tall stacks: <span class="hl ink">35, 40, 45, 50, 55</span>. More than half of all the ages end in a 0 or a 5. Milestone birthdays seem to do a lot of the work.</div></div>
   </div>
 </section>
 
-<!-- ===== 3. IN THEIR WORDS ===== -->
+<!-- ===== 5. WHAT HAPPENED ===== -->
 <section class="nl sec" id="s-uncle">
   <div class="sec-mark"></div>
   <h2>“Kids started calling me uncle”</h2>
   <p>What gave it away? For almost half of you, it was <b>your own body</b>.</p>
 </section>
+<section class="ask solo">
+  <div class="qcard">
+    <div class="qlabel">Question 8 · We asked</div>
+    <div class="qtext">What happened at that age that made you feel it?</div>
+    <div class="qform" id="formTrig"></div>
+    <div class="qyou" id="youTrig" aria-live="polite"></div>
+    <div class="qfoot">128 readers described the moment</div>
+  </div>
+</section>
+
 <section class="scrolly" data-chart="D">
   <div class="graphic">
     <div class="g-head"><div class="g-title"></div><div class="g-sub"></div><div class="tap-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V11m0-.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3.6 14.6a1.5 1.5 0 0 1 2.5-1.7L9 16"/></svg>Hover or tap on the chart for details</div></div>
     <div class="g-body"><div class="g-chart"></div><div class="g-art"></div></div>
-    <div class="g-foot">Each square is one reader. The outlined square is our reader.</div>
+    <div class="g-foot">Each square is one reader. The teal-outlined square is our reader.</div>
   </div>
   <div class="steps">
     <div class="step" data-step="d1"><div class="card"><span class="big">116</span>These are the readers who told us what happened, each one a square coloured by their age now.<span class="hint">128 readers described the moment; 116 named something we could sort into a theme.</span></div></div>
@@ -389,71 +487,43 @@
 </section>
 <div class="panels" id="panelsMid"></div>
 
-<section class="interlude"><p class="split">So what if you could stop the clock?</p></section>
+<section class="interlude"><p class="split">So what comes next?</p></section>
 
-<!-- ===== 4. THE PILL ===== -->
-<section class="nl sec" id="s-pill">
+<!-- ===== 6. LOOKING AHEAD ===== -->
+<section class="nl sec" id="s-ahead">
   <div class="sec-mark"></div>
-  <h2>The pill that stops the clock</h2>
-  <p>Our last big question asked you to imagine you could stop getting older.</p>
+  <h2>Is the best yet to come?</h2>
+  <p>Finally, we asked you to look ahead.</p>
 </section>
 <section class="ask">
-  <div class="frame" id="askPill"><div class="cap">The pill</div></div>
+  <div class="frame" id="askExp"><div class="cap">Looking ahead</div></div>
   <div class="qcard">
-    <div class="qlabel">Question 3 · We asked</div>
-    <div class="qtext">If you had a pill that could stop biological ageing in its tracks, at what age would you take it?</div>
-<div class="qform" id="formPill"></div>
-    <div class="qyou" id="youPill" aria-live="polite"></div>
-    <div class="qfoot">272 readers gave an age</div>
+    <div class="qlabel">Question 9 · We asked</div>
+    <div class="qtext">Looking ahead, which decade do you expect will be your happiest?</div>
+    <div class="qform" id="formExp"></div>
+    <div class="qyou" id="youExp" aria-live="polite"></div>
+    <div class="qfoot">265 readers named a decade</div>
   </div>
 </section>
 
-<section class="scrolly" data-chart="C">
+<section class="scrolly" data-chart="A2">
   <div class="graphic">
     <div class="g-head"><div class="g-title"></div><div class="g-sub"></div><div class="tap-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V11m0-.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3.6 14.6a1.5 1.5 0 0 1 2.5-1.7L9 16"/></svg>Hover or tap on the chart for details</div></div>
     <div class="g-body"><div class="g-chart"></div><div class="g-art"></div></div>
-    <div class="g-foot">Each square is one reader. The outlined square is our reader.</div>
+    <div class="g-foot">Each square is one reader. The teal-outlined square is our reader.</div>
   </div>
   <div class="steps">
-    <div class="step" data-step="c0"><div class="card"><span class="you-line" data-you="c0"></span>Our reader again. They are in their 40s, and they would take the pill at <b>30</b>, going back more than ten years.</div></div>
-    <div class="step" data-step="c1"><div class="card"><span class="big">35</span>Here is everyone’s answer, grouped by how old readers are now. Half would stop the clock by <b>35</b>, the dashed line, and 39 readers picked exactly 35.<span class="hint">Our reader is in their 40s and would stop at 30.</span></div></div>
-    <div class="step" data-step="c2"><div class="card"><b>117 readers</b>, 43%, would <span class="hl ink">go back</span>: they’d take the pill at an age younger than they are now. The older the reader, the more likely: 12% of readers in their 20s, but 60% of those in their 50s.<span class="hint">Our reader is one of them. We only know each reader’s decade, so “younger than now” means before the decade they’re in.</span></div></div>
-    <div class="step" data-step="c3"><div class="card">Only <b>43</b> would <span class="hl ink">wait</span>, picking an age older than they are now. Most of them are young: 41% of readers in their 20s would wait, but just 5% of those in their 50s.<span class="hint">The other 106 would stop somewhere in the decade they’re in now.</span></div></div>
-    <div class="step" data-step="c4"><div class="card">And then there are the <span class="hl ink">four readers</span> who said 99, 100 or 110. One of them wrote: “Wouldn’t take the pill actually.”</div></div>
+    <div class="step" data-step="a5"><div class="card">The answers move later. The <b>50s</b> get more votes than any other decade. Only 12 readers picked their 20s.<span class="hint">Our reader expects their 50s to be their best.</span></div></div>
+    <div class="step" data-step="a6"><div class="card">Put the two answers together. <b>6 in 10</b> readers think their best decade is <span class="hl ink">still ahead</span>. About a third say it’s now, and only 17 say it’s behind them. The colours show who: the “still ahead” cluster is mostly younger, lighter squares; “behind me” is darker.<span class="hint">Our reader, in their 40s with the 50s to look forward to, is in “still ahead”.</span></div></div>
   </div>
 </section>
 
 <section class="strip-sec">
-  <p class="lead">How far back readers would go</p>
-  <div class="strip" id="stripPill" style="--n:6"></div>
-  <p class="strip-note">Median age at which readers in each decade would take the pill. Illustrations, not portraits of real readers.</p>
-</section>
-
-<section class="nl"><p>And why that age? Some of your answers:</p></section>
-<div class="panels" id="panelsPill"></div>
-
-<!-- ===== 5. A GOOD DECADE ===== -->
-<section class="nl sec" id="s-good">
-  <div class="sec-mark"></div>
-  <h2>What makes a decade good</h2>
-  <p>Finally, we asked what made your happiest decade good.</p>
-</section>
-<section class="ask">
-  <div class="frame" id="askGood"><div class="cap">A good decade</div></div>
-  <div class="qcard">
-    <div class="qlabel">Question 4 · We asked</div>
-    <div class="qtext">What made your happiest decade good? Pick as many as you like.</div>
-<div class="qform" id="formGood"></div>
-    <div class="qyou" id="youGood" aria-live="polite"></div>
-    <div class="qfoot">271 readers picked at least one</div>
-  </div>
+  <p class="lead">The best is still ahead, until it isn’t</p>
+  <div class="strip" id="stripAhead" style="--n:4"></div>
+  <p class="strip-note">Share of readers in each decade who say their happiest decade is still ahead of them. Illustrations, not portraits of real readers.</p>
 </section>
 <section class="nl">
-  <div class="fig">
-    <div class="g-head"><div class="g-title">What a good decade needs</div><div class="g-sub">One square per reader who picked each option, coloured by their age now. 271 readers answered; most picked more than one.</div><div class="tap-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V11m0-.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3.6 14.6a1.5 1.5 0 0 1 2.5-1.7L9 16"/></svg>Hover or tap on the chart for details</div></div>
-    <div class="picto" id="chartFact"></div>
-  </div>
-  <p>Freedom came first, just ahead of relationships. Learning came last.</p>
   <p>Put together, the answers show a pattern. Most of you think your happiest decade so far is a recent one, and most expect the happiest one to come later still. And middle age doesn’t come with a particular birthday. It comes when your knees, your children or your younger colleagues start to remind you of your age.</p>
 </section>
 <section class="strip-sec">
@@ -501,10 +571,11 @@
 <script>
 gsap.registerPlugin(ScrollTrigger);
 gsap.defaults({ overwrite: 'auto' });
-const { Character, Scene, SKINS, cutFor } = window.AGE_ART;
+const { Character, Scene, SKINS, cutFor, decadeOf } = window.AGE_ART;
 const P = window.READERS, N = P.length;
 const { C, F } = KEN;
-const RED = '#C8423A', CHAR = '#3D3D3D', TEAL = '#4A9E9A', DOT = '#C4AAAA', INK = '#1A1208';
+const MARK_A = '#0B7A75', MARK_Y = '#FFC531'; // our reader: teal; you: yellow
+const RED = '#C8423A', MED_RED = '#E0201B', CHAR = '#3D3D3D', TEAL = '#4A9E9A', DOT = '#C4AAAA', INK = '#1A1208';
 const DEC = ['Teens', '20s', '30s', '40s', '50s', '60s', '70s+'];
 const THEIR = ['their teens', 'their 20s', 'their 30s', 'their 40s', 'their 50s', 'their 60s', 'their 70s or beyond'];
 const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
@@ -636,9 +707,18 @@ function pillLayout(W, H, colorFn, order) {
     bands.push([PAD.l + LW, yOf(v) - .5, PAD.l + LW + aw, yOf(v) + .5, .45, 0]);
     labels.push(lbl(PAD.l + LW / 2 - 2, yOf(v), v === 80 ? '80+' : String(v), { fontFamily: F.body, fontWeight: 'normal', fontSize: 12 }));
   }
+  // Diagonal: roughly each column's age now. Below it, readers would go back; above it, they'd wait
+  const ageMid = g => g === 0 ? 16 : Math.min(75, (g + 1) * 10 + 5), x0 = PAD.l + LW, x1 = PAD.l + LW + aw;
+  const yAtX = x => { const t = (x - cx(0)) / (cx(6) - cx(0)); return yOf(ageMid(0) + t * (ageMid(6) - ageMid(0))); };
+  bands.push([x0, yAtX(x0), x1, yAtX(x1), 0, 2]);
+  const ang = Math.atan2(yAtX(x0) - yAtX(x1), x1 - x0) * 180 / Math.PI, note = { fontSize: 12, color: C.ink, backgroundColor: 'rgba(247,242,242,.92)', padding: [2, 5] };
+  labels.push(lbl(cx(5) + colW * .55, yAtX(cx(5) + colW * .55) - 13, 'Their age now', { ...note, rotate: ang, fontSize: 11, fontFamily: F.body, fontWeight: 'normal', color: C.text }));
+  const wide = colW >= 70, plain = { ...note, fontFamily: F.body, fontWeight: 'normal' };
+  labels.push(lbl(cx(1) + (wide ? 0 : colW * .4), yOf(66), wide ? '↑ Would wait: older than now' : '↑ Would wait', plain));
+  labels.push(lbl(wide ? cx(5) : cx(5) - colW * .2, yOf(17), wide ? '↓ Would go back: younger than now' : '↓ Would go back', plain));
   // Median line (zero-height dashed box)
-  bands.push([PAD.l + LW, yOf(35), PAD.l + LW + aw, yOf(35), 0, 1]);
-  labels.push(lbl(PAD.l + LW + aw - 34, yOf(35) - 11, 'Median: 35', { fontSize: 12, color: C.ink, backgroundColor: 'rgba(247,242,242,.92)', padding: [1, 4] }));
+  bands.push([PAD.l + LW, yOf(35), PAD.l + LW + aw, yOf(35), 0, 3]);
+  labels.push(lbl(PAD.l + LW + aw - 38, yOf(35) - 13, 'Median: 35', { fontSize: 12.5, color: '#fff', backgroundColor: MED_RED, padding: [3, 6], borderRadius: 2 }));
   labels.push(lbl(PAD.l + LW / 2 + 22, top - 16, 'Age they’d take the pill ↑', { fontFamily: F.body, fontWeight: 'normal', fontSize: 11.5, color: C.text, align: 'left' }));
   const roomy = colW >= 70;
   DEC.forEach((d, g) => labels.push(lbl(cx(g), base + 18, d + (roomy ? ' now' : ''), { fontSize: roomy ? 12.5 : 11.5, color: C.ink })));
@@ -654,8 +734,12 @@ const midVal = p => p[4] == null ? null : Math.max(20, Math.min(61, p[4]));
 // Section 3: what gave it away. A reader who named several things sits with the first in this order.
 const THEMES = [[1, 'Their body'], [2, 'Kids growing up'], [4, 'Parents ageing'], [8, 'Work'], [16, 'Older than the room'], [32, 'A milestone birthday']];
 const theme = p => { if (!(p[6] > 0)) return null; const t = THEMES.findIndex(([b]) => p[6] & b); return t < 0 ? null : t; };
+// What defined the happiest decade, grouped by which decade it was
+const GOOD_DEC = ['Teens', '20s', '30s', '40s', '50s', '60s+'];
+const goodGroup = p => !(p[7] > 0) || p[1] < 0 ? null : Math.min(p[1], 5);
+const pickedPct = bit => m => pct(m.filter(i => P[i][7] & bit).length, m.length) + '% picked it';
 const STEPS = {
-  a0: { t: 'Meet one reader', s: 'Illustration of a real survey response', art: () => anchorArt(Character(45, { hair: 'long', mood: 'smile', skin: SKINS[1] }), 'A reader in their 40s', ['Happiest so far: 20s', 'Expects: 50s']) },
+  a0: { t: 'The same reader', s: 'Illustration of a real survey response', art: () => anchorArt(Character(45), 'Our reader, in their 40s', ['Happiest so far: 20s']) },
   a1: { t: 'All 301 readers', s: 'One square per reader, coloured by their age now', f: (W, H) => gridLayout(W, H, ageC, AGE_ORDER) },
   a2: { t: 'Readers by the decade they are in now', s: 'Colour shows each reader’s age now: the darker, the older', f: (W, H) => clusterLayout(W, H, p => p[0], DEC, ageC, AGE_ORDER, m => m.length + ' readers') },
   a3: { t: 'Is your happiest decade the one you’re in?', s: 'Bright squares: yes, it’s the decade they’re in now. Label: % of each group', f: (W, H) => clusterLayout(W, H, p => p[0], DEC, hiC(p => p[1] >= 0 && p[1] === p[0]), HI_ORDER, m => { const n = m.filter(i => P[i][1] >= 0); return n.length ? pct(n.filter(i => P[i][1] === P[i][0]).length, n.length) + '% say yes' : ''; }) },
@@ -671,10 +755,15 @@ const STEPS = {
   d2: { t: 'What made readers feel middle-aged', s: 'Readers grouped by what gave it away', f: (W, H) => clusterLayout(W, H, p => { const t = theme(p); return t == null ? null : t === 0 ? 0 : 1; }, ['Their body', 'Something else'], ageC, AGE_ORDER, m => m.length + ' readers') },
   d3: { t: 'What made readers feel middle-aged', s: 'Readers grouped by what gave it away', f: (W, H) => clusterLayout(W, H, p => { const t = theme(p); return t == null ? null : Math.min(t, 3); }, ['Their body', 'Kids growing up', 'Parents ageing', 'Something else'], ageC, AGE_ORDER, m => m.length + ' readers') },
   d4: { t: 'What made readers feel middle-aged', s: 'Readers grouped by what gave it away. Colour is their age now', f: (W, H) => clusterLayout(W, H, theme, THEMES.map(t => t[1]), ageC, AGE_ORDER, m => m.length + ' readers') },
-  c0: { t: 'The same reader, again', s: 'Illustration of a real survey response', art: () => anchorArt(Scene('pill', { age: 45, hair: 'long', skin: SKINS[1] }), 'Our reader, now in their 40s', ['Would take the pill at 30']) },
-  c1: { t: 'At what age would you take the pill?', s: 'Each column is how old readers are now. Up: the age they’d take the pill. Answers over 80 are grouped', f: (W, H) => pillLayout(W, H, ageC, AGE_ORDER) },
-  c2: { t: 'Who would go back?', s: 'Bright: would take the pill at an age younger than they are now', f: (W, H) => pillLayout(W, H, hiC(p => pillWhen(p) === 'back'), HI_ORDER) },
-  c3: { t: 'Who would wait?', s: 'Bright: would take the pill at an age older than they are now', f: (W, H) => pillLayout(W, H, hiC(p => pillWhen(p) === 'wait'), HI_ORDER) },
+  e1: { t: 'What defined readers’ happiest decade', s: 'Each square is a reader who answered, coloured by their age now', f: (W, H) => clusterLayout(W, H, p => p[7] > 0 ? 0 : null, ['Readers who answered'], ageC, AGE_ORDER, m => m.length + ' readers') },
+  e2: { t: 'What defined readers’ happiest decade', s: 'Each cluster is the decade readers named as their happiest', f: (W, H) => clusterLayout(W, H, goodGroup, GOOD_DEC, ageC, AGE_ORDER, m => m.length + ' readers') },
+  e3: { t: 'Freedom', s: 'Bright: picked freedom and fewer obligations. Clusters: the decade readers named as their happiest', f: (W, H) => clusterLayout(W, H, goodGroup, GOOD_DEC, hiC(p => p[7] & 8), HI_ORDER, pickedPct(8)) },
+  e4: { t: 'Relationships', s: 'Bright: picked relationships or family. Clusters: the decade readers named as their happiest', f: (W, H) => clusterLayout(W, H, goodGroup, GOOD_DEC, hiC(p => p[7] & 2), HI_ORDER, pickedPct(2)) },
+  e5: { t: 'Financial security', s: 'Bright: picked financial security. Clusters: the decade readers named as their happiest', f: (W, H) => clusterLayout(W, H, goodGroup, GOOD_DEC, hiC(p => p[7] & 16), HI_ORDER, pickedPct(16)) },
+  c0: { t: 'Meet one reader', s: 'Illustration of a real survey response', art: () => anchorArt(Scene('pill', { age: 45 }), 'A reader in their 40s', ['Would take the pill at 30']) },
+  c1: { t: 'At what age would you take the pill?', s: 'Each column is how old readers are now. Up: the age they’d take the pill. The diagonal marks their age now', f: (W, H) => pillLayout(W, H, ageC, AGE_ORDER) },
+  c2: { t: 'Who would go back?', s: 'Bright: would take the pill at an age younger than they are now (below the diagonal)', f: (W, H) => pillLayout(W, H, hiC(p => pillWhen(p) === 'back'), HI_ORDER) },
+  c3: { t: 'Who would wait?', s: 'Bright: would take the pill at an age older than they are now (above the diagonal)', f: (W, H) => pillLayout(W, H, hiC(p => pillWhen(p) === 'wait'), HI_ORDER) },
   c4: { t: 'And who would never take it?', s: 'Bright: answers of 99 or older', f: (W, H) => pillLayout(W, H, hiC(p => pillWhen(p) === 'never'), HI_ORDER) },
 };
 
@@ -694,7 +783,13 @@ function setupScrolly(section) {
     xAxis: { type: 'value', show: false, min: 0, max: 1 }, yAxis: { type: 'value', show: false, inverse: true, min: 0, max: 1 },
     tooltip: { ...KEN.tooltip, trigger: 'item' },
     series: [
-      { id: 'bands', type: 'custom', silent: true, data: [], renderItem: (pr, api) => { const a = api.coord([api.value(0), api.value(1)]), b = api.coord([api.value(2), api.value(3)]); return { type: 'rect', shape: { x: a[0], y: a[1], width: b[0] - a[0], height: b[1] - a[1] }, style: api.value(5) ? { fill: 'rgba(255,255,255,0.55)', stroke: '#1A1208', lineWidth: 1.5, lineDash: [5, 3] } : { fill: `rgba(196,170,170,${api.value(4) || 0.22})` } }; } },
+      { id: 'bands', type: 'custom', silent: true, data: [], renderItem: (pr, api) => {
+        // [x0, y0, x1, y1, fillAlpha, kind]: kind 0 filled band, 1 dashed box, 2 faint dotted line, 3 red line
+        const a = api.coord([api.value(0), api.value(1)]), b = api.coord([api.value(2), api.value(3)]), kind = api.value(5);
+        if (kind === 2) return { type: 'line', shape: { x1: a[0], y1: a[1], x2: b[0], y2: b[1] }, style: { stroke: 'rgba(26,18,8,0.26)', lineWidth: 1.2, lineDash: [1, 5], lineCap: 'round' } };
+        if (kind === 3) return { type: 'line', shape: { x1: a[0], y1: a[1], x2: b[0], y2: b[1] }, style: { stroke: MED_RED, lineWidth: 3 } };
+        return { type: 'rect', shape: { x: a[0], y: a[1], width: b[0] - a[0], height: b[1] - a[1] }, style: kind ? { fill: 'rgba(255,255,255,0.55)', stroke: '#1A1208', lineWidth: 1.5, lineDash: [5, 3] } : { fill: `rgba(196,170,170,${api.value(4) || 0.22})` } };
+      } },
       { id: 'dots', type: 'scatter', symbol: 'rect', data: [], animationDelayUpdate: i => st.delays ? st.delays[i] : (i % 97) * 3.5, animationDurationUpdate: 800, emphasis: { scale: false, itemStyle: { borderColor: INK, borderWidth: 1.5 } },
         tooltip: { formatter: pr => st.visible[pr.dataIndex] ? readerTip(PX[pr.dataIndex], pr.dataIndex === ANCHOR, pr.dataIndex === YI) : '' } },
       { id: 'faces', type: 'scatter', silent: true, data: [], animationDelayUpdate: i => st.delays ? st.delays[i] : (i % 97) * 3.5, animationDurationUpdate: 800, tooltip: { show: false } },
@@ -706,21 +801,28 @@ function setupScrolly(section) {
   const FACE_MIN = 12;
   const dotsData = (L, opacity) => L.dots.map((d, i) => {
     const o = typeof opacity === 'function' ? opacity(i, d) : d.o, isA = i === ANCHOR, isY = i === YI;
-    return { value: [d.x, d.y], symbol: 'rect', symbolSize: isA || isY ? Math.max(L.s, 8) : L.s + 0.6,
-      itemStyle: { color: isY ? '#fff' : d.c, opacity: o, borderColor: isA ? INK : isY ? RED : 'transparent', borderWidth: isA || isY ? Math.max(2, Math.round(L.s / 6)) : 0 } };
+    const mark = isA || isY;
+    return { value: [d.x, d.y], symbol: 'rect', symbolSize: mark ? Math.max(L.s * 1.25, 10) : L.s + 0.6,
+      itemStyle: mark
+        ? { color: isY ? MARK_Y : d.c, opacity: o, borderColor: isA ? MARK_A : INK, borderWidth: Math.max(2.5, Math.round(L.s / 4)), shadowBlur: 6, shadowColor: 'rgba(26,18,8,.45)' }
+        : { color: d.c, opacity: o, borderWidth: 0 } };
   });
   const facesData = (L, opacity) => L.dots.map((d, i) => {
-    const o = typeof opacity === 'function' ? opacity(i, d) : d.o, sz = isMark(i) ? Math.max(L.s, 8) : L.s;
+    const o = typeof opacity === 'function' ? opacity(i, d) : d.o, sz = isMark(i) ? Math.max(L.s * 1.25, 10) : L.s;
     return { value: [d.x, d.y], symbol: 'image://' + cutFor(i, PX[i][0]), symbolSize: L.s >= FACE_MIN ? sz * .9 : 0, itemStyle: { opacity: isFaded(d.c) ? o * .25 : o } };
   });
   const dotSeries = (L, opacity) => [{ id: 'dots', data: dotsData(L, opacity) }, { id: 'faces', data: facesData(L, opacity) }];
   // "You" sits above its square; if it shares a stack with our reader, our reader's tag moves to the side
   const anchorLabel = L => {
-    const a = L.dots[ANCHOR], y = L.dots[YI], h = Math.max(L.s, 8) / 2, out = [], tag = { color: '#fff', padding: [3, 6], borderRadius: 2, fontSize: 11 };
-    if (y.o > 0) out.push(lbl(y.x, y.y - h - 12, 'You', { ...tag, backgroundColor: RED }));
+    const a = L.dots[ANCHOR], y = L.dots[YI], h = Math.max(L.s * 1.25, 10) / 2, out = [];
+    const tag = { padding: [4, 8], borderRadius: 3, fontSize: 12, borderColor: '#fff', borderWidth: 2, shadowBlur: 8, shadowColor: 'rgba(26,18,8,.35)', shadowOffsetY: 2 };
+    if (y.o > 0) out.push(lbl(y.x, y.y - h - 15, 'You', { ...tag, color: INK, backgroundColor: MARK_Y }));
     if (a.o > 0) {
-      const near = y.o > 0 && Math.abs(a.x - y.x) < 44 && Math.abs(a.y - y.y) < 30;
-      out.push(near ? lbl(a.x + h + 38, a.y, 'Our reader', { ...tag, backgroundColor: INK }) : lbl(a.x, a.y - h - 12, 'Our reader', { ...tag, backgroundColor: INK }));
+      const near = y.o > 0 && Math.abs(a.x - y.x) < 50 && Math.abs(a.y - y.y) < 34;
+      const st = { ...tag, color: '#fff', backgroundColor: MARK_A };
+      // Side by side with you: put our reader's tag on the side away from you (below if there's no room sideways)
+      const side = y.x >= a.x ? -1 : 1, sx = a.x + side * (h + 46);
+      out.push(!near ? lbl(a.x, a.y - h - 15, 'Our reader', st) : sx > 46 ? lbl(sx, a.y, 'Our reader', st) : lbl(a.x, a.y + h + 15, 'Our reader', st));
     }
     return out;
   };
@@ -787,33 +889,13 @@ function setupScrolly(section) {
     layout = L;
   }
   window.addEventListener('resize', () => { chart.resize(); if (st.step && !STEPS[st.step].art) render(st.step, true); });
-  REFRESH.push(() => { foot.textContent = 'Each square is one reader. The outlined square is our reader.' + (youIn() ? ' The square marked “You” is you.' : ''); if (st.step && !STEPS[st.step].art) render(st.step); });
+  REFRESH.push(() => { foot.textContent = 'Each square is one reader. The teal-outlined square is our reader.' + (youIn() ? ' The yellow square is you.' : ''); if (st.step && !STEPS[st.step].art) render(st.step); });
   const steps = [...section.querySelectorAll('.step')];
   render(steps[0].dataset.step, true);
-  steps.forEach(step => ScrollTrigger.create({ trigger: step, start: 'top 60%', end: 'bottom 60%',
+  steps.forEach(step => ScrollTrigger.create({ trigger: step, start: 'top 50%', end: 'bottom 50%', // the chart holds until the next card reaches mid-screen
     onToggle: self => { step.classList.toggle('is-active', self.isActive); if (self.isActive && st.step !== step.dataset.step) render(step.dataset.step); } }));
 }
 
-/* ---------- Dot matrix: one dot per reader who picked each option, coloured by age now ---------- */
-function dotMatrix(el, rows, base) {
-  const data = rows.map(([name, bit]) => { const ids = P.map((p, i) => i).filter(i => P[i][7] & bit).sort((a, b) => P[a][0] - P[b][0] || a - b); return { name, ids, v: pct(ids.length, base) }; });
-  el.innerHTML = data.map(r => `<div class="pr" data-name="${r.name}"><div class="pl">${r.name}</div><div class="dm">${r.ids.map(i => `<i style="--c:${ageC(P[i])}"><img src="${cutFor(i, P[i][0])}" alt=""></i>`).join('')}</div><div class="pv">${r.v}%</div></div>`).join('');
-  const tip = document.body.appendChild(Object.assign(document.createElement('div'), { className: 'ken-tooltip ptip' }));
-  const show = (row, e) => {
-    el.classList.add('hov'); el.querySelectorAll('.pr').forEach(x => x.classList.toggle('on', x === row));
-    const r = data[+row.dataset.i], byDec = DEC.map((d, k) => r.ids.filter(i => P[i][0] === k).length), top = byDec.indexOf(Math.max(...byDec));
-    tip.innerHTML = `<b style="font-family:var(--ken-font-bold)">${r.name}</b><br>${r.ids.length} of ${base} readers (${r.v}%)<br><span style="opacity:.75">Biggest group: readers in ${THEIR[top]} (${byDec[top]})</span>`;
-    const x = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 8), y = e.clientY + 14 + tip.offsetHeight > innerHeight ? e.clientY - tip.offsetHeight - 10 : e.clientY + 14;
-    Object.assign(tip.style, { left: x + 'px', top: y + 'px', opacity: 1 });
-  };
-  const hide = () => { el.classList.remove('hov'); el.querySelectorAll('.pr.on').forEach(x => x.classList.remove('on')); tip.style.opacity = 0; };
-  el.querySelectorAll('.pr').forEach((r, i) => { r.dataset.i = i; r.addEventListener('pointermove', e => show(r, e)); r.addEventListener('pointerleave', hide); r.addEventListener('click', e => show(r, e)); });
-  addEventListener('scroll', hide, { passive: true });
-  el.querySelectorAll('.pr').forEach((r, ri) => {
-    gsap.fromTo(r.querySelectorAll('.dm i'), { scale: 0 }, { scale: 1, duration: .3, stagger: .006, delay: ri * .1, ease: 'back.out(2)', scrollTrigger: { trigger: el, start: 'top 75%' } });
-    gsap.from(r.querySelector('.pv'), { autoAlpha: 0, x: -6, duration: .4, delay: ri * .1 + .6, scrollTrigger: { trigger: el, start: 'top 75%' } });
-  });
-}
 
 
 /* ---------- Illustrated strips and quote panels ---------- */
@@ -853,9 +935,10 @@ function quotePanels(id, list, mood) {
 
 /* ---------- Your answers: optional chips on each question card. They place a "You" square in the charts
    and rewrite the opening card of the section that follows. Nothing is stored or sent anywhere. ---------- */
-const ans = { now: null, hap: null, exp: null, mid: null, midAge: null, trig: null, pill: null, fact: 0 };
+const ans = { age: null, now: null, hap: null, exp: null, mid: null, midAge: null, trig: null, pill: null, fact: 0 };
 const FACTORS = [['Freedom and fewer obligations', 8], ['Relationships or family', 2], ['Financial security', 16], ['Work or building something', 1], ['Health and energy', 4], ['Learning or discovery', 32]];
 const TRIGS = [['My body or health', 1], ['Kids growing up', 2], ['Parents ageing', 4], ['Work', 8], ['Feeling older than the room', 16], ['A milestone birthday', 32], ['Something else', 0]];
+const OTHER = 64; // "Other" on question 5: counted as an answer, not drawn in the chart
 const WOULDNT = 100; // "I wouldn't take it" sits with the readers who answered 99+
 const MED_MID = 43;
 const qrow = (label, inner, hide) => `<div class="qrow"${hide ? ' hidden' : ''}><span class="qlab">${label}</span>${inner}</div>`;
@@ -917,33 +1000,39 @@ const reveal = el => { if (el.hidden) { el.hidden = false; gsap.from(el, { y: 8,
 const peers = () => { const g = ans.now != null ? P.filter(p => p[0] === ans.now) : []; return g.length >= 10 ? { g, who: `readers in ${THEIR[ans.now]}` } : { g: P, who: 'readers' }; };
 const yrs = n => n === 1 ? '1 year' : n + ' years';
 
+function ageText() {
+  if (ans.age == null) return '';
+  const g = P.filter(p => p[0] === ans.now);
+  return `You’re in <b>your ${DEC[ans.now]}</b>, like <b>${g.length}</b> of the 301 readers (${pct(g.length, N)}%). We’ll use your age in the questions ahead.<span class="go">Scroll on to start.</span>`;
+}
 function hapText() {
   if (ans.now == null || ans.hap == null) return '';
   const { g, who } = peers();
-  let t;
-  if (ans.hap === -1) t = `Too close to call. Only <b>11 readers</b> said the same; everyone else picked a decade.`;
-  else {
-    const named = g.filter(p => p[1] >= 0), same = named.filter(p => p[1] === ans.hap).length;
-    t = `You said <b>your ${DEC[ans.hap]}</b>${ans.hap === ans.now ? ', the decade you’re in now' : ''}. <b>${pct(same, named.length)}%</b> of ${who} said the same.`;
-  }
-  if (ans.exp != null) {
-    const out = ans.exp === -2 ? 'behind' : ans.exp > ans.now ? 'ahead' : ans.exp === ans.now ? 'now' : 'behind';
-    const known = g.filter(p => outlook(p)), k = pct(known.filter(p => outlook(p) === out).length, known.length);
-    t += ' ' + { ahead: `And you think your best decade is still ahead, like <b>${k}%</b> of ${who}.`, now: `And you think it’s the one you’re in now, like <b>${k}%</b> of ${who}.`, behind: `And you think it’s behind you. Only <b>${k}%</b> of ${who} agree.` }[out];
-  }
-  return t + '<span class="go">Scroll on to find yourself among the 301 readers.</span>';
+  if (ans.hap === -1) return `Too close to call. Only <b>11 readers</b> said the same; everyone else picked a decade.<span class="go">Scroll on to find yourself among the 301 readers.</span>`;
+  const named = g.filter(p => p[1] >= 0), same = named.filter(p => p[1] === ans.hap).length;
+  return `You said <b>your ${DEC[ans.hap]}</b>${ans.hap === ans.now ? ', the decade you’re in now' : ''}. <b>${pct(same, named.length)}%</b> of ${who} said the same.<span class="go">Scroll on to find yourself among the 301 readers.</span>`;
+}
+function expText() {
+  if (ans.exp == null) return '';
+  const { g, who } = peers(), known = g.filter(p => outlook(p));
+  if (ans.now == null) return `You said <b>${ans.exp === -2 ? 'it’s behind you' : 'your ' + DEC[ans.exp]}</b>.<span class="go">Answer question 3 above to see how you compare.</span>`;
+  const out = ans.exp === -2 ? 'behind' : ans.exp > ans.now ? 'ahead' : ans.exp === ans.now ? 'now' : 'behind', k = pct(known.filter(p => outlook(p) === out).length, known.length);
+  return { ahead: `You think your best decade is still ahead, like <b>${k}%</b> of ${who}.`, now: `You think it’s the one you’re in now, like <b>${k}%</b> of ${who}.`, behind: `You think it’s behind you. Only <b>${k}%</b> of ${who} agree.` }[out] + '<span class="go">Scroll on to see where you sit.</span>';
 }
 function midText() {
   if (ans.mid == null) return '';
   const { g, who } = peers(), said = g.filter(p => p[3] >= 0), yes = pct(said.filter(p => p[3] === 1).length, said.length);
-  if (!ans.mid) return `Not yet. <b>${100 - yes}%</b> of ${who} haven’t either.<span class="go">Scroll on to see when it hit everyone else.</span>`;
-  let t = `You have, like <b>${yes}%</b> of ${who}.`;
-  if (ans.midAge != null) {
-    const d = ans.midAge - MED_MID;
-    t += ` You felt it at <b>${ans.midAge}</b>. ` + (d === 0 ? `That’s exactly the median: half of readers had felt it by ${MED_MID}.` : `Half of readers had felt it by ${MED_MID}, so you got there ${yrs(Math.abs(d))} ${d < 0 ? 'earlier' : 'later'} than most.`);
-  }
-  if (ans.trig != null) t += ' ' + ({ 1: 'And like almost half of readers who described the moment, it was your body.', 2: 'Children growing up came second among readers’ answers, at 20%.', 4: '13% of readers who described the moment mentioned their parents.', 8: '13% of readers who described the moment mentioned work.', 16: '12% of readers said it was feeling older than the people around them.', 32: '9% of readers pinned it on a milestone birthday.', 0: '' })[ans.trig];
-  return t + '<span class="go">Scroll on to see where you sit.</span>';
+  return ans.mid ? `You have, like <b>${yes}%</b> of ${who}.<span class="go">Scroll on to see where you sit.</span>` : `Not yet. <b>${100 - yes}%</b> of ${who} haven’t either.<span class="go">Scroll on to see when it hit everyone else.</span>`;
+}
+function midAgeText() {
+  if (!ans.mid || ans.midAge == null) return '';
+  const d = ans.midAge - MED_MID;
+  const ago = ans.age != null && ans.age > ans.midAge ? ` That was ${yrs(ans.age - ans.midAge)} ago.` : '';
+  return `You felt it at <b>${ans.midAge}</b>.${ago} ` + (d === 0 ? `That’s exactly the median: half of readers had felt it by ${MED_MID}.` : `Half of readers had felt it by ${MED_MID}, so you got there ${yrs(Math.abs(d))} ${d < 0 ? 'earlier' : 'later'} than most.`) + '<span class="go">Scroll on to see where you sit.</span>';
+}
+function trigText() {
+  if (!ans.mid || ans.trig == null) return '';
+  return ({ 1: 'Like almost half of readers who described the moment, it was your body.', 2: 'Children growing up came second among readers’ answers, at 20%.', 4: '13% of readers who described the moment mentioned their parents.', 8: '13% of readers who described the moment mentioned work.', 16: '12% of readers said it was feeling older than the people around them.', 32: '9% of readers pinned it on a milestone birthday.', 0: 'Something else, like the 12 readers whose moments didn’t fit a theme.' })[ans.trig] + '<span class="go">Scroll on to see where you sit.</span>';
 }
 function pillText() {
   if (ans.pill == null) return '';
@@ -951,20 +1040,21 @@ function pillText() {
   if (ans.pill === WOULDNT) return `You wouldn’t take it. Only <b>4 of ${all.length}</b> readers said anything like that: 99, 100 or 110.<span class="go">Scroll on to see where everyone else would stop.</span>`;
   const v = ans.pill, lo = pct(all.filter(p => p[5] < v).length, all.length), hi = pct(all.filter(p => p[5] > v).length, all.length), same = all.filter(p => p[5] === v).length;
   let t = `You’d stop at <b>${v}</b>. ${same ? `<b>${same}</b> reader${same > 1 ? 's' : ''} picked exactly ${v}. ` : 'No reader picked exactly that. '}<b>${lo}%</b> would stop younger, and <b>${hi}%</b> older.`;
-  if (ans.now != null && ans.now > 0 && v < (ans.now + 1) * 10) t += ` That means going back to an age you’ve already passed.`;
+  if (ans.age != null) t += v < ans.age ? ` That means going back <b>${yrs(ans.age - v)}</b>.` : v > ans.age ? ` That means waiting <b>${yrs(v - ans.age)}</b> more.` : ' That’s exactly your age now: you’d stop today.';
+  else if (ans.now != null && ans.now > 0 && v < (ans.now + 1) * 10) t += ` That means going back to an age you’ve already passed.`;
   return t + '<span class="go">Scroll on to see where you sit.</span>';
 }
 function goodText() {
   const picked = FACTORS.filter(([, b]) => ans.fact & b);
-  if (!picked.length) return '';
+  if (!picked.length) return ans.fact & OTHER ? 'You picked something else. Readers’ top pick was freedom, at 47%.' : '';
   const share = { 8: 47, 2: 45, 16: 40, 1: 37, 4: 34, 32: 31 };
-  return 'You picked ' + picked.map(([n, b]) => `<b>${n.toLowerCase()}</b> (${share[b]}% of readers did too)`).join(', ').replace(/, ([^,]*)$/, ' and $1') + '.<span class="go">Your picks are marked in the chart below.</span>';
+  return 'You picked ' + picked.map(([n, b]) => `<b>${n.toLowerCase()}</b> (${share[b]}% of readers did too)`).join(', ').replace(/, ([^,]*)$/, ' and $1') + '.<span class="go">Scroll on to see where you sit.</span>';
 }
 // The first card of each section speaks to you once you've answered
 const OPEN = {
-  a0: () => ans.now == null || ans.hap == null ? '' : `You’re in your ${DEC[ans.now]}, and ${ans.hap === -1 ? 'your happiest decade so far is too close to call' : `your happiest decade so far has been your ${DEC[ans.hap]}`}. ${ans.hap === 1 ? 'The reader you’re about to meet said the same.' : 'Here’s a reader who answered differently.'}`,
+  a0: () => ans.now == null || ans.hap == null ? '' : `You’re in your ${DEC[ans.now]}, and ${ans.hap === -1 ? 'your happiest decade so far is too close to call' : `your happiest decade so far has been your ${DEC[ans.hap]}`}. ${ans.hap === 1 ? 'So did our reader.' : 'Our reader said their 20s.'}`,
   b0: () => ans.mid == null ? '' : !ans.mid ? 'You haven’t felt middle-aged yet. Our reader has.' : ans.midAge != null ? `You first felt middle-aged at <b>${ans.midAge}</b>. ${ans.midAge === 43 ? 'So did our reader.' : 'Our reader felt it at 43.'}` : 'You’ve felt middle-aged too. So has our reader.',
-  c0: () => ans.pill == null ? '' : ans.pill === WOULDNT ? 'You wouldn’t take the pill at all. Our reader would.' : `You’d take the pill at <b>${ans.pill}</b>. ${ans.pill === 30 ? 'So would our reader.' : 'Our reader would take it at 30.'}`,
+  c0: () => ans.pill == null ? '' : ans.pill === WOULDNT ? 'You wouldn’t take the pill at all. The reader you’re about to meet would.' : `You’d take the pill at <b>${ans.pill}</b>. ${ans.pill === 30 ? 'So would the reader you’re about to meet.' : 'The reader you’re about to meet would take it at 30.'}`,
 };
 // The illustration beside each question changes with the reader's answer
 const AV = {};
@@ -976,7 +1066,9 @@ function setAvatar(id, key, svg, cap) {
 }
 const FACT_ICON = { 8: 'freedom', 2: 'family', 16: 'money', 1: 'work', 4: 'health', 32: 'learning' };
 function updateAvatars() {
-  const nowAge = ans.now != null ? decAge(ans.now) : null;
+  const nowAge = ans.age ?? (ans.now != null ? decAge(ans.now) : null);
+  if (ans.age != null) setAvatar('askAge', 'a' + decadeOf(ans.age), Character(ans.age), `You, at ${ans.age}`);
+  else setAvatar('askAge', 'd', Character(35, { question: true }), 'You');
   if (ans.hap === -1) setAvatar('askHap', 'tc', Character(nowAge || 40, { question: true }), 'Too close to call');
   else if (ans.hap != null) setAvatar('askHap', 'h' + ans.hap, Character(decAge(ans.hap)), `Happiest: your ${DEC[ans.hap]}`);
   else if (ans.now != null) setAvatar('askHap', 'n' + ans.now, Character(nowAge), `You, in your ${DEC[ans.now]}`);
@@ -990,6 +1082,10 @@ function updateAvatars() {
   else if (ans.pill != null) setAvatar('askPill', 'p' + ans.pill, Scene('pill', { age: ans.pill }), `Stopped at ${ans.pill}`);
   else setAvatar('askPill', 'd', Scene('pill', { age: 38 }), 'The pill');
 
+  if (ans.exp === -2) setAvatar('askExp', 'eb', Character(78), 'Best: behind me');
+  else if (ans.exp != null) setAvatar('askExp', 'e' + ans.exp, Character(decAge(ans.exp)), `Best: my ${DEC[ans.exp]}`);
+  else setAvatar('askExp', 'd', Character(44, { question: true }), 'Looking ahead');
+
   const on = Object.keys(FACT_ICON).filter(b => ans.fact & b).map(b => FACT_ICON[b]);
   const age = ans.hap != null && ans.hap >= 0 ? decAge(ans.hap) : nowAge || 33;
   setAvatar('askGood', 'g' + ans.fact + '-' + age, Scene('decade', { age, on }), on.length ? `Your good decade` : 'A good decade');
@@ -998,50 +1094,82 @@ let heavyT;
 function syncYou(light) {
   YOU[0] = ans.now ?? -1; YOU[1] = ans.hap ?? -1; YOU[2] = ans.exp ?? -1;
   YOU[3] = ans.mid == null ? -1 : ans.mid; YOU[4] = ans.mid ? ans.midAge : null; YOU[5] = ans.pill; YOU[6] = ans.mid ? ans.trig || 0 : 0; YOU[7] = ans.fact;
-  [['youHap', hapText], ['youMid', midText], ['youPill', pillText], ['youGood', goodText]].forEach(([id, f]) => { const h = f(); if ($(id).innerHTML !== h) { const was = $(id).innerHTML; $(id).innerHTML = h; if (h && (!light || !was)) gsap.fromTo($(id), { autoAlpha: .3 }, { autoAlpha: 1, duration: .4 }); } });
+  [['youAge', ageText], ['youPill', pillText], ['youHap', hapText], ['youGood', goodText], ['youMid', midText], ['youMidAge', midAgeText], ['youTrig', trigText], ['youExp', expText]].forEach(([id, f]) => { const h = f(); if ($(id).innerHTML !== h) { const was = $(id).innerHTML; $(id).innerHTML = h; if (h && (!light || !was)) gsap.fromTo($(id), { autoAlpha: .3 }, { autoAlpha: 1, duration: .4 }); } });
   updateAvatars();
   document.querySelectorAll('[data-you]').forEach(el => el.innerHTML = OPEN[el.dataset.you]());
-  [['formHap', ans.hap != null], ['formMid', ans.mid != null], ['formPill', ans.pill != null], ['formGood', ans.fact > 0]].forEach(([id, on]) => $(id).classList.toggle('done', on));
+  [['formAge', ans.age != null], ['formPill', ans.pill != null], ['formHap', ans.hap != null], ['formGood', ans.fact > 0], ['formMid', ans.mid != null], ['formMidAge', !!ans.mid && ans.midAge != null], ['formTrig', !!ans.mid && ans.trig != null], ['formExp', ans.exp != null]].forEach(([id, on]) => $(id).classList.toggle('done', on));
   // Charts, cards and layout wait until a slider settles
   clearTimeout(heavyT);
   const heavy = () => {
     renderCards();
-    document.querySelectorAll('#chartFact .pr').forEach(r => { const f = FACTORS.find(([n]) => n === r.dataset.name); r.classList.toggle('you', !!f && !!(ans.fact & f[1])); });
     REFRESH.forEach(f => f());
     ScrollTrigger.refresh();
   };
   if (light) heavyT = setTimeout(heavy, 300); else heavy();
 }
+let gateDecades = () => {};
 function buildForms() {
-  const decs = DEC.map((d, i) => [d, i]);
-  $('formHap').innerHTML = turnHTML('Answer, and you’ll appear as a square in the charts below.', 'You’re in the charts below') + qrow('First, which decade are you in now?', chipsHTML(decs, 'optNow')) + qrow('Your happiest so far', chipsHTML([...decs, ['Too close to call', -1]], 'optHap'), true) + qrow('And the happiest one ever? You expect…', chipsHTML([...decs, ['It’s behind me', -2]], 'optExp'), true);
-  const gate = () => {
-    $('optHap').querySelectorAll('button').forEach(b => b.disabled = +b.dataset.v > ans.now);
-    $('optExp').querySelectorAll('button').forEach(b => b.disabled = +b.dataset.v >= 0 && +b.dataset.v < ans.now);
+  const decs = DEC.map((d, i) => [d, i]), IN = 'Answer, and you’ll appear as a square in the charts below.', OK = 'You’re in the charts below';
+  // Before we start: age (wired below, once the decade chips exist)
+  const wireAge = () => {
+  $('formAge').innerHTML = turnHTML('Drag the slider. Your age shapes the answers that follow.', 'Thanks. Scroll on') + qrow('My age', slideHTML('inAge', 13, 90, 35));
+  onSlide('inAge', v => {
+    ans.age = v; ans.now = decadeOf(v);
+    // Q3 is answered by your age; you can still change it there
+    $('optNow').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', +x.dataset.v === ans.now));
+    reveal($('optHap').parentNode); gateDecades();
+    if (ans.hap != null && ans.hap > ans.now) { ans.hap = null; pressed('optHap'); }
+    if (ans.exp != null && ans.exp >= 0 && ans.exp < ans.now) { ans.exp = null; pressed('optExp'); }
+    const mi = $('inMidAge'); mi.max = Math.max(16, v); mi.parentNode.querySelector('.qscale span:last-child').textContent = mi.max;
+    if (ans.midAge != null && ans.midAge > v) { ans.midAge = v; mi.value = v; }
+    syncYou(true);
+  }, 'years old');
+  };
+
+  // Q1: the pill
+  $('formPill').innerHTML = turnHTML('Drag the slider to pick an age. You’ll appear in the charts below.', OK) + qrow('I’d take it at', slideHTML('inPill', 10, 99, 35) + `<div class="qopts qnever"><span class="qor">or</span><button type="button" id="btnNever" aria-pressed="false">I wouldn’t take it</button></div>`);
+  const pillSl = onSlide('inPill', v => { ans.pill = v; $('btnNever').setAttribute('aria-pressed', 'false'); syncYou(true); }, 'years old');
+  $('btnNever').addEventListener('click', () => { const on = $('btnNever').getAttribute('aria-pressed') !== 'true'; $('btnNever').setAttribute('aria-pressed', on); if (on) pillSl.reset(); ans.pill = on ? WOULDNT : null; syncYou(); });
+
+  // Q3 and Q4: decade now, happiest so far
+  $('formHap').innerHTML = turnHTML(IN, OK) + qrow('Which decade are you in now?', chipsHTML(decs, 'optNow')) + qrow('Your happiest so far', chipsHTML([...decs, ['Too close to call', -1]], 'optHap'), true);
+  // Q9: looking ahead (its own card near the end)
+  $('formExp').innerHTML = turnHTML(IN, OK) + qrow('The decade you expect to be your happiest', chipsHTML([...decs, ['It’s behind me', -2]], 'optExp'));
+  gateDecades = () => {
+    $('optHap').querySelectorAll('button').forEach(b => b.disabled = ans.now != null && +b.dataset.v > ans.now);
+    $('optExp').querySelectorAll('button').forEach(b => b.disabled = ans.now != null && +b.dataset.v >= 0 && +b.dataset.v < ans.now);
   };
   onChips('optNow', v => {
-    ans.now = v; gate();
+    if (ans.age != null && decadeOf(ans.age) !== v) ans.age = null; // picked a different decade: the age no longer fits
+    ans.now = v; gateDecades();
     if (ans.hap != null && ans.hap > v) { ans.hap = null; pressed('optHap'); }
     if (ans.exp != null && ans.exp >= 0 && ans.exp < v) { ans.exp = null; pressed('optExp'); }
     reveal($('optHap').parentNode); syncYou();
   });
-  onChips('optHap', v => { ans.hap = v; reveal($('optExp').parentNode); syncYou(); });
+  onChips('optHap', v => { ans.hap = v; syncYou(); });
   onChips('optExp', v => { ans.exp = v; syncYou(); });
 
-  $('formMid').innerHTML = turnHTML('Answer, and you’ll appear as a square in the charts below.', 'You’re in the charts below') + qrow('Have you felt it?', chipsHTML([['Yes', 1], ['No, not yet', 0]], 'optMid')) + qrow('At what age?', slideHTML('inMidAge', 15, 75, 40), true) + qrow('What gave it away?', chipsHTML(TRIGS.map(([t, b]) => [t, b]), 'optTrig'), true);
-  const midSl = onSlide('inMidAge', v => { ans.midAge = v; syncYou(true); }, 'years old');
-  onChips('optMid', v => { ans.mid = v; if (v) midSl.start(ans.now != null ? Math.min(decAge(ans.now), 45) : 40); [$('inMidAge').closest('.qrow'), $('optTrig').parentNode].forEach(r => v ? reveal(r) : r.hidden = true); syncYou(); });
-  onChips('optTrig', v => { ans.trig = v; syncYou(); });
+  // Q5: up to two picks, plus Other
+  $('formGood').innerHTML = turnHTML('Pick up to two. You’ll appear as a square in the charts below.', 'You’re in the charts below') + qrow('What defined it?', chipsHTML([...FACTORS, ['Other', OTHER]], 'optGood'));
+  onChips('optGood', (v, b) => {
+    ans.fact = b.getAttribute('aria-pressed') === 'true' ? ans.fact | v : ans.fact & ~v;
+    const btns = $('optGood').querySelectorAll('button'), full = [...btns].filter(x => x.getAttribute('aria-pressed') === 'true').length >= 2;
+    btns.forEach(x => x.disabled = full && x.getAttribute('aria-pressed') !== 'true');
+    syncYou();
+  }, true);
 
-  $('formPill').innerHTML = turnHTML('Drag the slider to pick an age. You’ll appear in the charts below.', 'You’re in the charts below') + qrow('I’d take it at', slideHTML('inPill', 10, 99, 35) + `<div class="qopts qnever"><span class="qor">or</span><button type="button" id="btnNever" aria-pressed="false">I wouldn’t take it</button></div>`);
-  const pillSl = onSlide('inPill', v => { ans.pill = v; $('btnNever').setAttribute('aria-pressed', 'false'); syncYou(true); }, 'years old');
-  $('btnNever').addEventListener('click', () => { const on = $('btnNever').getAttribute('aria-pressed') !== 'true'; $('btnNever').setAttribute('aria-pressed', on); if (on) pillSl.reset(); ans.pill = on ? WOULDNT : null; syncYou(); });
+  // Q6, Q7, Q8: middle age, as three cards. Answering the age or the moment means "yes".
+  const sayYes = () => { if (ans.mid !== 1) { ans.mid = 1; $('optMid').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x.dataset.v === '1')); } };
+  $('formMid').innerHTML = turnHTML(IN, OK) + qrow('Have you felt it?', chipsHTML([['Yes', 1], ['No, not yet', 0]], 'optMid'));
+  $('formMidAge').innerHTML = turnHTML('Drag the slider to the age it first happened.', OK) + qrow('I first felt it at', slideHTML('inMidAge', 15, 75, 40));
+  $('formTrig').innerHTML = turnHTML('Pick the closest. You’ll be placed in its cluster below.', OK) + qrow('What gave it away?', chipsHTML(TRIGS, 'optTrig'));
+  const midSl = onSlide('inMidAge', v => { sayYes(); ans.midAge = v; syncYou(true); }, 'years old');
+  onChips('optMid', v => { ans.mid = v; if (v) midSl.start(Math.min(ans.age ?? (ans.now != null ? decAge(ans.now) : 40), 45)); syncYou(); });
+  onChips('optTrig', v => { sayYes(); ans.trig = v; syncYou(); });
 
-  $('formGood').innerHTML = turnHTML('Pick as many as you like. Your picks will be marked in the chart below.', 'Marked in the chart below') + qrow('What made it good?', chipsHTML(FACTORS, 'optGood'));
-  onChips('optGood', (v, b) => { ans.fact = b.getAttribute('aria-pressed') === 'true' ? ans.fact | v : ans.fact & ~v; syncYou(); }, true);
-  ['formHap', 'formMid', 'formPill', 'formGood'].forEach(id => tapHint($(id)));
+  wireAge();
+  ['formAge', 'formPill', 'formHap', 'formGood', 'formMid', 'formMidAge', 'formTrig', 'formExp'].forEach(id => tapHint($(id)));
 }
-
 
 /* ---------- Your card: one shareable 1600x900 landscape image of the reader's answers.
    The page shows the same canvas that gets shared, so what you see is what you send. ---------- */
@@ -1049,7 +1177,7 @@ const CW = 1600, CH = 900;
 const imgCache = {};
 const loadImg = src => imgCache[src] || (imgCache[src] = new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; }));
 const SHARE_URL = () => location.protocol.startsWith('http') ? location.origin + location.pathname : 'https://the-ken.com';
-const anyAnswer = () => ans.now != null || ans.mid != null || ans.pill != null || ans.fact > 0;
+const anyAnswer = () => ans.age != null || ans.now != null || ans.mid != null || ans.pill != null || ans.fact > 0;
 function cardData() {
   const { g, who } = peers();
   const out = ans.exp == null || ans.now == null ? null : ans.exp === -2 ? 'behind' : ans.exp > ans.now ? 'ahead' : ans.exp === ans.now ? 'now' : 'behind';
@@ -1073,8 +1201,8 @@ function cardData() {
   }
   // Good decade
   const picked = FACTORS.filter(([, b]) => ans.fact & b);
-  rows.push(['A good decade needs', picked.length ? picked.map(([n]) => n.split(' ')[0]).join(', ') : null, ans.fact & 8 ? 'Freedom was readers’ top pick too' : 'Readers’ top pick was freedom (47%)']);
-  return { verdict, rows, decade: ans.now };
+  rows.push(['My happiest decade was about', picked.length ? picked.map(([n]) => n.split(' ')[0]).join(', ') : ans.fact & OTHER ? 'Something else' : null, ans.fact & 8 ? 'Freedom was readers’ top pick too' : 'Readers’ top pick was freedom (47%)']);
+  return { verdict, rows: [rows[2], rows[0], rows[3], rows[1]], decade: ans.now };
 }
 function wrapText(ctx, text, x, y, maxW, lineH, maxLines = 9) {
   const words = text.split(' '); let line = '', n = 0;
@@ -1110,7 +1238,7 @@ async function renderCards() {
   if (portrait) ctx.drawImage(portrait, LX, PY, PS, PS);
   else { ctx.fillStyle = 'rgba(26,18,8,.35)'; ctx.font = `220px ${DISP}`; ctx.textAlign = 'center'; ctx.fillText('?', LX + PS / 2, PY + PS / 2 + 76); ctx.textAlign = 'left'; }
   ctx.lineWidth = 5; ctx.strokeStyle = INKC; ctx.strokeRect(LX, PY, PS, PS);
-  const cap = D.decade != null ? 'ME, IN ' + THEIR[D.decade].replace('their', 'MY').toUpperCase() : 'ME';
+  const cap = ans.age != null ? 'ME, AT ' + ans.age : D.decade != null ? 'ME, IN ' + THEIR[D.decade].replace('their', 'MY').toUpperCase() : 'ME';
   ctx.font = `22px ${BOLD}`; spacing(ctx, '2px'); const cw = ctx.measureText(cap).width + 26;
   ctx.fillStyle = INKC; ctx.fillRect(LX, PY, cw, 44); ctx.fillStyle = '#fff'; ctx.fillText(cap, LX + 13, PY + 31); spacing(ctx, '0px');
   ctx.fillStyle = INKC; fitFont(ctx, 'Where do you stand?', DISP, 44, LW); ctx.fillText('Where do you stand?', LX, 618);
@@ -1183,8 +1311,10 @@ KEN.whenFontsReady(() => {
   $('askMid').insertAdjacentHTML('afterbegin', Scene('uncle', { age: 42, hair: 'short' }));
   $('askPill').insertAdjacentHTML('afterbegin', Scene('pill', { age: 38, hair: 'long', skin: SKINS[1] }));
   $('askGood').insertAdjacentHTML('afterbegin', Scene('decade', { age: 33, hair: 'short' }));
+  $('askExp').insertAdjacentHTML('afterbegin', Character(44, { question: true }));
+  $('askAge').insertAdjacentHTML('afterbegin', Character(35, { question: true }));
   gsap.utils.toArray('.ask').forEach(a => {
-    gsap.from(a.querySelector('.frame'), { x: -40, rotate: -4, autoAlpha: 0, duration: .8, ease: 'back.out(1.4)', scrollTrigger: { trigger: a, start: 'top 75%' } });
+    if (a.querySelector('.frame')) gsap.from(a.querySelector('.frame'), { x: -40, rotate: -4, autoAlpha: 0, duration: .8, ease: 'back.out(1.4)', scrollTrigger: { trigger: a, start: 'top 75%' } });
     gsap.from(a.querySelector('.qcard'), { x: 40, autoAlpha: 0, duration: .8, ease: 'power3.out', scrollTrigger: { trigger: a, start: 'top 75%' } });
     gsap.fromTo(a.querySelectorAll('.qrow:not([hidden]) .qopts > button, .qrow:not([hidden]) .qslide'), { y: 10, opacity: 0 }, { y: 0, opacity: 1, stagger: .05, duration: .35, delay: .4, overwrite: false, clearProps: 'opacity,transform', scrollTrigger: { trigger: a, start: 'top 75%' } });
   });
@@ -1205,11 +1335,10 @@ KEN.whenFontsReady(() => {
   });
 
   const KEY = `<div class="age-key" aria-label="Colour key: age now"><b>Age now</b>${DEC.map((d, i) => `<span><i style="background:${AGEC[i]}"></i>${d}</span>`).join('')}</div>`;
-  document.querySelectorAll('.scrolly .g-sub, #chartFact').forEach(el => el.id === 'chartFact' ? el.previousElementSibling.querySelector('.g-sub').insertAdjacentHTML('afterend', KEY) : el.insertAdjacentHTML('afterend', KEY));
+  document.querySelectorAll('.scrolly .g-sub').forEach(el => el.insertAdjacentHTML('afterend', KEY));
   document.querySelectorAll('.scrolly').forEach(setupScrolly);
   quotePanels('panelsMid', QUOTES_MID, 'worried');
   quotePanels('panelsPill', QUOTES_PILL, 'smile');
-  dotMatrix($('chartFact'), [['Freedom and fewer obligations', 8], ['Relationships or family', 2], ['Financial security', 16], ['Work or building something', 1], ['Health and energy', 4], ['Learning or discovery', 32]], 271);
   ScrollTrigger.refresh();
 });
 </script>
