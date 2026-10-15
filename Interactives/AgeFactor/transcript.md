@@ -1,14 +1,27 @@
 # Are your best years behind you? — text transcript
 
-All the words in the interactive, in the order a reader meets them.
+All the words in the interactive, in the order a reader meets them. This file has **two parts**:
+
+| | Part | What to do |
+|---|---|---|
+| 📘 | **[PART 1 · INSTRUCTIONS](#part-1)** | Read once before you start. Nothing to edit here. |
+| 📝 | **[PART 2 · PAGE CONTENT](#part-2)** | The page itself, top to bottom. **All your edits go here.** |
+
+<br>
 
 ---
+---
 
-## Read this first: two kinds of block
+<a id="part-1"></a>
 
-This file has only two kinds of block. Each one is labelled.
+# 📘 PART 1 · INSTRUCTIONS
 
-### ✏️ TEXT — edit this
+> **Read this once before editing. Don't edit anything in Part 1.**
+> Your edits go in [Part 2 · Page content](#part-2), further down.
+
+This file has only two kinds of block, and each one is labelled.
+
+## ✏️ TEXT — edit this
 
 Words the reader sees on the page. Each one looks like this:
 
@@ -20,7 +33,7 @@ Words the reader sees on the page. Each one looks like this:
 - The `<!-- id: … -->` line underneath is a hidden tag that links the text back to the page. **Don't touch it.**
 - **Edit only the words under the tag.**
 
-### 📊 / 🖼️ / 🔘 VISUAL — don't edit, context only
+## 📊 / 🖼️ / 🔘 VISUAL — don't edit, context only
 
 Descriptions of the things on the page that aren't text, so you know what the words sit next to:
 
@@ -36,14 +49,14 @@ They look like this, in a grey box with a ⛔ line:
 
 Anything you change inside these boxes is ignored. To ask for a change to a chart, write `[ED: …]` next to it.
 
-### How the scroll sections work
+## How the scroll sections work
 
 Most sections are **scrollytelling**: a chart stays pinned on screen while text cards scroll up over it. Each card is one **Step**. When a new card arrives, the chart changes. So each Step below has:
 
 1. 📊 what the chart shows at that moment, then
 2. ✏️ the chart's title and subtitle (shown above the chart), and the card text.
 
-### Formatting in TEXT blocks
+## Formatting in TEXT blocks
 
 | Write | To get |
 |---|---|
@@ -54,16 +67,31 @@ Most sections are **scrollytelling**: a chart stays pinned on screen while text 
 | A line starting `Big number:` | the large red number at the top of a card |
 | `{curly braces}` | filled in live from the reader's own answers, e.g. `{decade}` → "30s". Reword around them, but keep the braces. |
 
-### Leaving notes
+## Leaving notes
 
 - `[ED: your note]` anywhere: a question or a request instead of an edit.
 - `[CUT]` as the text: remove that block. Please don't delete blocks.
 - If you change a **number**, add `[ED: number changed]` so the chart can be checked to match.
 
+> ✅ **End of instructions.** Everything below is the page content.
+
+<br>
+
+---
 ---
 ---
 
-# PAGE HEADER
+<a id="part-2"></a>
+
+# 📝 PART 2 · PAGE CONTENT
+
+> **This is the page, top to bottom. Edit the ✏️ TEXT blocks here.**
+> Grey boxes (📊 🖼️ 🔘) describe the charts and visuals. They're for context only.
+>
+> **Sections:** Page header · Intro letter · Opening question · 1 The pill · 2 The happiest decade · 3 What makes a decade good · 4 Felt middle-aged · 5 "Kids started calling me uncle" · 6 Is the best yet to come? · 7 Your turn · About the data
+
+
+## PAGE HEADER
 
 > 🖼️ **ILLUSTRATION · Lede image** — ⛔ context only, don't edit
 > Five women of different ages, from a young girl to an older woman, among daisies. Full width at the top of the page.
@@ -94,7 +122,7 @@ Illustration of five women of different ages, from a young girl to an older woma
 
 ---
 
-# INTRO LETTER
+## INTRO LETTER
 
 ✏️ **TEXT · Intro paragraph 1**
 <!-- id: intro.p1 -->
@@ -120,7 +148,7 @@ Here’s everything we have for you in *First Principles* this week:
 
 ---
 
-# OPENING QUESTION: YOUR AGE
+## OPENING QUESTION: YOUR AGE
 
 > 🖼️ **ILLUSTRATION · Character beside the question** — ⛔ context only, don't edit
 > A drawn character. It changes to look the age the reader picks.
@@ -155,7 +183,7 @@ You’re in **your {decade}**, like **{n}** of the 301 readers ({pct}%). We’ll
 ---
 ---
 
-# SECTION 1 · THE PILL THAT STOPS THE CLOCK
+## SECTION 1 · THE PILL THAT STOPS THE CLOCK
 
 ✏️ **TEXT · Section heading**
 <!-- id: s1.heading -->
@@ -165,7 +193,7 @@ The pill that stops the clock
 <!-- id: s1.intro -->
 We started with the biggest question of all: what if you could stop getting older?
 
-## Question 1
+### Question 1
 
 > 🖼️ **ILLUSTRATION · Scene beside the question** — ⛔ context only, don't edit
 > A "pill" scene. After the reader answers, it shows a character at the age they picked.
@@ -203,7 +231,7 @@ You’d stop at **{age}**. **{n}** readers picked exactly {age}. **{pct}%** woul
 <!-- id: ask.pill.response-never -->
 You wouldn’t take it. Only **4 of 272** readers said anything like that: 99, 100 or 110. Scroll on to see where everyone else would stop.
 
-## Scrollytelling: the pill chart (5 steps)
+### Scrollytelling: the pill chart (5 steps)
 
 > 📊 **INTERACTIVE CHART · applies to every scroll section in this file** — ⛔ context only, don't edit
 > Every chart has a red "Hover or tap on the chart for details" tag above it and the line below under it.
@@ -212,7 +240,7 @@ You wouldn’t take it. Only **4 of 272** readers said anything like that: 99, 1
 <!-- id: scrolly.foot -->
 Each square is one reader. The teal-outlined square is our reader.
 
-### Step c0
+#### Step c0
 
 > 🖼️ **ILLUSTRATION (in the chart's place)** — ⛔ context only, don't edit
 > No chart yet. A drawn reader in their 40s, with tag: "Would take the pill at 30".
@@ -241,7 +269,7 @@ Meet one reader. They are in their 40s, and they would take the pill at **30**, 
 
 Note: The illustration is ours; the answers are real. We’ll follow this reader all the way through.
 
-### Step c1
+#### Step c1
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Chart type:** Columns of small squares (a dot/strip chart).
@@ -272,7 +300,7 @@ Now shrink our reader down to a single square, and add everyone else who answere
 
 Note: Each column is how old readers are now; up is the age they’d take the pill. Our reader would stop at 30.
 
-### Step c2
+#### Step c2
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Same chart as c1.**
@@ -292,7 +320,7 @@ Bright: would take the pill at an age younger than they are now (below the diago
 
 Note: Our reader is one of them. We only know each reader’s decade, so “younger than now” means before the decade they’re in.
 
-### Step c3
+#### Step c3
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Same chart as c1.**
@@ -312,7 +340,7 @@ Only **43** would ==wait==, picking an age older than they are now. Most of them
 
 Note: The other 106 would stop somewhere in the decade they’re in now.
 
-### Step c4
+#### Step c4
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Same chart as c1.**
@@ -330,7 +358,7 @@ Bright: answers of 99 or older
 <!-- id: c4.card -->
 And then there are the ==four readers== who said 99, 100 or 110. One of them wrote: “Wouldn’t take the pill actually.”
 
-## After the chart: character strip
+### After the chart: character strip
 
 > 🖼️ **ILLUSTRATION · Row of characters** — ⛔ context only, don't edit
 > Six drawn characters, one per decade (20s … 70s+). Each wears a tag with the median age that group would stop at: 28, 34, 38, 45, 50, 60.
@@ -343,7 +371,7 @@ How far back readers would go
 <!-- id: strip.pill.note -->
 Median age at which readers in each decade would take the pill. Illustrations, not portraits of real readers.
 
-## Question 2 and reader quotes
+### Question 2 and reader quotes
 
 ✏️ **TEXT · Small label**
 <!-- id: ask.why.label -->
@@ -376,7 +404,7 @@ But how have the years been so far?
 ---
 ---
 
-# SECTION 2 · THE HAPPIEST DECADE
+## SECTION 2 · THE HAPPIEST DECADE
 
 ✏️ **TEXT · Section heading**
 <!-- id: s2.heading -->
@@ -386,7 +414,7 @@ The happiest decade
 <!-- id: s2.intro -->
 Then we asked about the years you’ve already lived.
 
-## Questions 3 and 4
+### Questions 3 and 4
 
 > 🖼️ **ILLUSTRATION · Character beside the question** — ⛔ context only, don't edit
 > Changes to the decade the reader picks.
@@ -426,9 +454,9 @@ You said **your {decade}**, the decade you’re in now. **{pct}%** of {readers i
 <!-- id: ask.hap.response-tie -->
 Too close to call. Only **11 readers** said the same; everyone else picked a decade. Scroll on to find yourself among the 301 readers.
 
-## Scrollytelling: the happiest decade (5 steps)
+### Scrollytelling: the happiest decade (5 steps)
 
-### Step a0
+#### Step a0
 
 > 🖼️ **ILLUSTRATION (in the chart's place)** — ⛔ context only, don't edit
 > The same reader from Section 1, in their 40s, with tag: "Happiest so far: 20s".
@@ -455,7 +483,7 @@ You’re in your {decade}, and your happiest decade so far has been your {happie
 <!-- id: a0.card -->
 Remember our reader? They’re in their 40s, and their happiest decade so far has been **their 20s**.
 
-### Step a1
+#### Step a1
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Chart type:** One big grid of 301 small squares.
@@ -476,7 +504,7 @@ Big number: 301
 
 Here are all 301 readers again, sorted by how old they are now. The outlined square is our reader.
 
-### Step a2
+#### Step a2
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Chart type:** Clusters of squares.
@@ -496,7 +524,7 @@ Sort them into clusters by the decade they’re in now. Readers in their 30s are
 
 Note: Our reader is in the 40s cluster.
 
-### Step a3
+#### Step a3
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Same clusters as a2.**
@@ -514,7 +542,7 @@ Bright squares: yes, it’s the decade they’re in now. Label: % of each group
 <!-- id: a3.card -->
 Almost half of readers (**49%**) said their happiest decade so far is ==the one they’re in now==: the bright squares. Most of the rest named an earlier one.
 
-### Step a4
+#### Step a4
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Chart type:** Clusters of squares.
@@ -537,7 +565,7 @@ Note: Our reader moves to the 20s.
 ---
 ---
 
-# SECTION 3 · WHAT MAKES A DECADE GOOD
+## SECTION 3 · WHAT MAKES A DECADE GOOD
 
 ✏️ **TEXT · Section heading**
 <!-- id: s3.heading -->
@@ -547,7 +575,7 @@ What makes a decade good
 <!-- id: s3.intro -->
 Next, what made that happiest decade what it was.
 
-## Question 5
+### Question 5
 
 > 🖼️ **ILLUSTRATION · Scene beside the question** — ⛔ context only, don't edit
 > A scene with icons (freedom, family, money, work, health, learning) that light up for the reader's picks.
@@ -578,9 +606,9 @@ You picked **{choice}** ({pct}% of readers did too) and **{choice}** ({pct}% of 
 <!-- id: ask.good.response-other -->
 You picked something else. Readers’ top pick was freedom, at 47%.
 
-## Scrollytelling: what defined it (5 steps)
+### Scrollytelling: what defined it (5 steps)
 
-### Step e1
+#### Step e1
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Chart type:** One cluster of squares.
@@ -602,7 +630,7 @@ These are the readers who told us what defined their happiest decade. Overall, *
 
 Note: Most picked two things. Each reader is one square, coloured by their age now.
 
-### Step e2
+#### Step e2
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **What changes at this step:** the cluster splits by the decade readers named as their happiest.
@@ -621,7 +649,7 @@ Now sort them by the decade they named as their happiest. The answer changes wit
 
 Note: Our reader is in the 20s cluster.
 
-### Step e3
+#### Step e3
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Same clusters as e2.**
@@ -641,7 +669,7 @@ If your best decade was your teens or your 20s, it was about ==freedom==: almost
 
 Note: Our reader picked freedom too, along with work.
 
-### Step e4
+#### Step e4
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Same clusters as e2.**
@@ -659,7 +687,7 @@ Bright: picked relationships or family. Clusters: the decade readers named as th
 <!-- id: e4.card -->
 If it was your 30s, it was about ==people==. 61% of those readers picked relationships or family, more than anything else.
 
-### Step e5
+#### Step e5
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Same clusters as e2.**
@@ -686,7 +714,7 @@ Then, at some point, something changes.
 ---
 ---
 
-# SECTION 4 · THE DAY YOU FELT MIDDLE-AGED
+## SECTION 4 · THE DAY YOU FELT MIDDLE-AGED
 
 ✏️ **TEXT · Section heading**
 <!-- id: s4.heading -->
@@ -696,7 +724,7 @@ The day you felt middle-aged
 <!-- id: s4.intro -->
 Middle age doesn’t start on a fixed date. It’s more a feeling, and for many of you it arrived suddenly.
 
-## Question 6
+### Question 6
 
 > 🖼️ **ILLUSTRATION · Scene beside the question** — ⛔ context only, don't edit
 > An "uncle moment" scene. If the reader says "No, not yet", it switches to a character captioned "Not yet!".
@@ -727,9 +755,9 @@ You have, like **{pct}%** of {readers in your decade}. Scroll on to see where yo
 <!-- id: ask.mid.response-no -->
 Not yet. **{pct}%** of {readers in your decade} haven’t either. Scroll on to see when it hit everyone else.
 
-## Scrollytelling: have you felt it? (2 steps)
+### Scrollytelling: have you felt it? (2 steps)
 
-### Step b0
+#### Step b0
 
 > 🖼️ **ILLUSTRATION (in the chart's place)** — ⛔ context only, don't edit
 > Our reader at 43, with tags: "Felt middle-aged: yes" and "Why: their health".
@@ -756,7 +784,7 @@ You first felt middle-aged at **{age}**. Our reader felt it at 43.
 <!-- id: b0.card -->
 Remember our reader? They first felt middle-aged at **43**. What gave it away was their health.
 
-### Step b1
+#### Step b1
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Chart type:** Bars made of stacked squares, one bar per decade readers are in now.
@@ -777,7 +805,7 @@ Readers by the decade they are in now. Bright: said yes. Label: % who said yes
 
 Note: Each bar is the decade readers are in now. The bright squares said yes.
 
-## Question 7
+### Question 7
 
 > 🔘 **ANSWER INPUT · Age slider** — ⛔ context only, don't edit
 > A slider from 15 to 75. Only shown if the reader said yes to Q6.
@@ -804,9 +832,9 @@ You felt it at **{age}**. That was {n} years ago. Half of readers had felt it by
 
 *(Other versions: "…later than most." / "That’s exactly the median: half of readers had felt it by 43.")*
 
-## Scrollytelling: the age it hit (3 steps)
+### Scrollytelling: the age it hit (3 steps)
 
-### Step b2
+#### Step b2
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Chart type:** Histogram made of stacked squares.
@@ -828,7 +856,7 @@ Half of them had felt it by **43**, exactly when our reader did.
 
 Note: 124 readers gave an age. Each square is one of them, at the age they first felt it.
 
-### Step b3
+#### Step b3
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Same histogram as b2.**
@@ -848,7 +876,7 @@ Now look at the colours. The darker, older squares sit further right: readers in
 
 Note: Those are the medians for each group. Only four readers in their 20s, and four in their 70s or beyond, gave an age.
 
-### Step b4
+#### Step b4
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Same histogram as b2.**
@@ -869,7 +897,7 @@ Look at the tall stacks: ==35, 40, 45, 50, 55==. More than half of all the ages 
 ---
 ---
 
-# SECTION 5 · “KIDS STARTED CALLING ME UNCLE”
+## SECTION 5 · “KIDS STARTED CALLING ME UNCLE”
 
 ✏️ **TEXT · Section heading**
 <!-- id: s5.heading -->
@@ -879,7 +907,7 @@ Look at the tall stacks: ==35, 40, 45, 50, 55==. More than half of all the ages 
 <!-- id: s5.intro -->
 What gave it away? For almost half of you, it was **your own body**.
 
-## Question 8
+### Question 8
 
 > 🔘 **ANSWER INPUT · Option buttons, pick one** — ⛔ context only, don't edit
 > Body · Kids · Parents · Work · Older than the room · Milestone birthday · Something else
@@ -910,9 +938,9 @@ Pick the closest. You’ll be placed in its cluster below.
 - Milestone birthday: 9% of readers pinned it on a milestone birthday.
 - Something else: Something else, like the 12 readers whose moments didn’t fit a theme.
 
-## Scrollytelling: what gave it away (4 steps)
+### Scrollytelling: what gave it away (4 steps)
 
-### Step d1
+#### Step d1
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Chart type:** One cluster of squares.
@@ -934,7 +962,7 @@ These are the readers who told us what happened, each one a square coloured by t
 
 Note: 128 readers described the moment; 116 named something we could sort into a theme.
 
-### Step d2
+#### Step d2
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **What changes at this step:** splits into two clusters: "Their body" and "Something else".
@@ -953,7 +981,7 @@ For almost half of them, it was ==their own body==: an injury that wouldn’t he
 
 Note: Our reader is one of them.
 
-### Step d3
+#### Step d3
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **What changes at this step:** four clusters: Their body · Kids growing up · Parents ageing · Something else.
@@ -970,7 +998,7 @@ Readers grouped by what gave it away
 <!-- id: d3.card -->
 Next came ==children growing up== and ==parents growing old==. And again and again, one moment: a child calling you “uncle”.
 
-### Step d4
+#### Step d4
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **What changes at this step:** all six clusters: Their body · Kids growing up · Parents ageing · Work · Older than the room · A milestone birthday.
@@ -989,7 +1017,7 @@ The rest are smaller moments: work, a milestone birthday, and feeling older than
 
 Note: 24 readers mentioned more than one thing. Each sits with the first theme, in the order the clusters appear.
 
-## Reader quotes
+### Reader quotes
 
 ✏️ **TEXT · Paragraph above the quotes**
 <!-- id: quotes.mid.intro -->
@@ -1017,7 +1045,7 @@ So what comes next?
 ---
 ---
 
-# SECTION 6 · IS THE BEST YET TO COME?
+## SECTION 6 · IS THE BEST YET TO COME?
 
 ✏️ **TEXT · Section heading**
 <!-- id: s6.heading -->
@@ -1027,7 +1055,7 @@ Is the best yet to come?
 <!-- id: s6.intro -->
 Finally, we asked you to look ahead.
 
-## Question 9
+### Question 9
 
 > 🖼️ **ILLUSTRATION · Character beside the question** — ⛔ context only, don't edit
 > Changes to the decade the reader expects to be happiest.
@@ -1057,9 +1085,9 @@ The decade you expect to be your happiest · It’s behind me
 - Behind: You think it’s behind you. Only **{pct}%** of {readers in your decade} agree.
 - Not yet answered Q3: You said **{answer}**. Answer question 3 above to see how you compare.
 
-## Scrollytelling: looking ahead (2 steps)
+### Scrollytelling: looking ahead (2 steps)
 
-### Step a5
+#### Step a5
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **Chart type:** Clusters of squares.
@@ -1079,7 +1107,7 @@ The answers move later. The **50s** get more votes than any other decade. Only 1
 
 Note: Our reader expects their 50s to be their best.
 
-### Step a6
+#### Step a6
 
 > 📊 **INTERACTIVE CHART** — ⛔ context only, don't edit
 > **What changes at this step:** squares regroup into three clusters: Still ahead · Right now · Behind me. Each is labelled "% of readers".
@@ -1098,7 +1126,7 @@ Put the two answers together. **6 in 10** readers think their best decade is ==s
 
 Note: Our reader, in their 40s with the 50s to look forward to, is in “still ahead”.
 
-## After the chart: character strip and wrap-up
+### After the chart: character strip and wrap-up
 
 > 🖼️ **ILLUSTRATION · Row of characters** — ⛔ context only, don't edit
 > Four drawn characters (20s, 40s, 50s, 60s), each with a speech bubble showing the % of that group who say their best is "still ahead".
@@ -1121,7 +1149,7 @@ Put together, the answers show a pattern. Most of you think your happiest decade
 ---
 ---
 
-# SECTION 7 · YOUR TURN
+## SECTION 7 · YOUR TURN
 
 ✏️ **TEXT · Section heading**
 <!-- id: s7.heading -->
@@ -1180,7 +1208,7 @@ Want the full version? The quiz asks all nine questions readers answered and bui
 ---
 ---
 
-# ABOUT THE DATA
+## ABOUT THE DATA
 
 ✏️ **TEXT · Section heading**
 <!-- id: method.heading -->
@@ -1197,3 +1225,7 @@ Percentages leave out readers who skipped a question or said it was too close to
 ✏️ **TEXT · Page footer** (separated by ·)
 <!-- id: footer -->
 Graphic by Anuj Debnath, 12 Oct '26 · Source: First Principles reader survey
+
+---
+
+> ✅ **End of page content.**
