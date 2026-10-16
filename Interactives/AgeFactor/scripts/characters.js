@@ -1,11 +1,11 @@
 // Flat SVG characters for the Age Factor story. Everything is drawn in a 200×200 square.
-// Character(age, opts) returns an <svg> string showing the portrait for that age; Scene(name, opts) adds props on top.
+// Character(age, opts) returns an <svg> string showing a generated character for that age; Scene(name, opts) adds props on top.
 // figure() is the older flat drawing, kept for reference.
 (function () {
   const INK = '#1A1208';
   const BGS = ['#F2D7C9', '#E7D3C1', '#E9CFCB', '#D9DCCB', '#D3DDD9', '#E3DACB', '#E6DDE3'];
   const SHIRTS = ['#4A9E9A', '#C8423A', '#4A7A5A', '#3D3D3D', '#7A9E4A', '#A89880', '#4A7A5A'];
-  const SKINS = ['#C98E62', '#B97A4F', '#D9A27A'];
+  const SKINS = (window.FP_CHARS && window.FP_CHARS.skins) || ['#C98E62', '#B97A4F', '#D9A27A']; // lightest to deepest
 
   function hairColor(age) {
     if (age < 38) return '#24170F';
@@ -77,16 +77,78 @@
   }
 
   const wrap = (inner, bg, label) =>
-    `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img"${label ? ` aria-label="${label}"` : ''}><rect width="200" height="200" fill="${bg}"/>${inner}</svg>`;
+    `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img"${label ? ` aria-label="${label}"` : ''}><rect x="-100" y="-100" width="400" height="400" fill="${bg}"/>${inner}</svg>`;
 
-  // Illustrated portraits (imgs/characters/web). Each decade lists the portraits that can stand for it, best fit first.
-  const PORTRAIT_DIR = 'imgs/characters/web/';
-  const BY_DECADE = [[2, 1], [1, 4, 2], [4, 3, 1], [3, 5, 4], [5, 7, 3], [7, 5, 8], [8, 7]];
-  function portraitId(age, o = {}) {
-    const list = BY_DECADE[decadeOf(age)], avoid = o.avoid || [];
-    return list.find(n => !avoid.includes(n)) || list[0];
+  // Generated characters: character-kit/build_fp.py layers the FP survey parts into scripts/fp-characters.js.
+  // Each decade has ten, half female-presenting. o.hair ('long'|'short'), o.mood and o.skin pick the closest match;
+  // o.avoid skips ids; o.pick takes the nth equal match; o.id picks one exactly (the fixed "anchor" reader too).
+  const FP = window.FP_CHARS || { dir: '', skins: SKINS, chars: [] };
+  const PORTRAIT_DIR = FP.dir + 'web/', CUT_DIR = FP.dir + 'cut/', LAYER_DIR = FP.dir + 'layers/';
+  const STORY = FP.chars.filter(c => !c.fixed);
+  const BY_DECADE = [0, 1, 2, 3, 4, 5, 6].map(d => STORY.filter(c => c.decade === d));
+  const MOODS = { joy: ['joy'], smile: ['smile', 'joy'], neutral: ['neutral', 'smile'], worried: ['worried', 'neutral'], tired: ['worried', 'neutral'] };
+  function pick(age, o = {}) {
+    if (o.id) { const c = FP.chars.find(c => c.id === o.id); if (c) return c; }
+    const list = BY_DECADE[decadeOf(age)], avoid = o.avoid || [], skin = FP.skins.indexOf(o.skin);
+    const score = c => (o.hair && c.hair === o.hair ? 4 : 0) + (o.mood && (MOODS[o.mood] || [o.mood]).includes(c.mood) ? 2 : 0) + (skin >= 0 && c.skin === skin ? 1 : 0) - (avoid.includes(c.id) ? 10 : 0);
+    const ranked = list.map((c, i) => [c, score(c), i]).sort((a, b) => b[1] - a[1] || a[2] - b[2]);
+    const best = ranked.filter(r => r[1] === ranked[0][1]);
+    return best[(o.pick || 0) % best.length][0];
   }
-  const portrait = (age, o = {}) => `<image href="${PORTRAIT_DIR}p${o.id || portraitId(age, o)}.jpg" width="200" height="200" preserveAspectRatio="xMidYMid slice"/>`;
+  const portraitId = (age, o = {}) => pick(age, o).id;
+  const portraitSrcOf = (age, o = {}) => `${PORTRAIT_DIR}${portraitId(age, o)}.png`;
+
+  // The reader's own character, stacked from pre-coloured layers so any combination works.
+  // o.you = { length: 'long'|'short', curl: 'straight'|'curly', facial: null|'moustache'|'beard1'|'beard2'|'beard3', skin: 0-5 }
+  // Readers pick only length and curl; age picks the hairstyle (long straight hair goes braid, loose, waves, bob, bun;
+  // short hair thins to balding). Hair and beards grey with age, specs arrive in the 50s, and teens get the big eyes.
+  const HAIR_LENGTHS = [['long', 'Long'], ['short', 'Short']];
+  const HAIR_TYPES = [['straight', 'Straight'], ['curly', 'Curly']];
+  const FACIAL = [[null, 'None'], ['moustache', 'Moustache'], ['beard3', 'Goatee'], ['beard2', 'Chin strap'], ['beard1', 'Full beard']];
+  // Hair part per decade (Teens..70s+). Parts: 1-2 long waves, 3 braid, 4 bun, 5 curls, 6 bob, 7 short curls, 8 short, 9 quiff, 10 balding, 0 bald
+  const HAIR_BY_AGE = {
+    'long-straight': [3, 2, 1, 6, 6, 4, 4], 'long-curly': [5, 5, 5, 5, 5, 7, 7],
+    'short-straight': [9, 9, 8, 8, 10, 10, 0], 'short-curly': [7, 7, 7, 7, 7, 10, 10],
+  };
+  const hairTone = age => age < 38 ? 0 : age < 48 ? 1 : age < 58 ? 2 : age < 68 ? 3 : 4;
+  const YOU_FACE = { smile: 4, neutral: 4, joy: 5, worried: 8, tired: 8 };
+  function youLayers(age, you, mood) {
+    const d = decadeOf(age), tone = hairTone(age);
+    const style = (HAIR_BY_AGE[`${you.length || 'short'}-${you.curl || 'straight'}`] || HAIR_BY_AGE['short-straight'])[d];
+    const face = d === 0 ? 1 : YOU_FACE[mood] || 4;
+    const L = [`base-${you.skin ?? 2}`, 'shirt-3', `face-${face}`];
+    if (d >= 4 && face !== 1) L.push('specs-2');
+    if (style) L.push(`hair-${style}-${tone}`);
+    if (you.facial && d >= 1) L.push(`beard-${you.facial}-${tone}`); // over the hair, so long hair never hides it
+    return L.map(n => `${LAYER_DIR}${n}.png`);
+  }
+  const youLooksFem = you => !you.facial && you.length === 'long';
+  // Layers are 500px copies of the 1000px canvas; the portrait shows the square from (80,40) to (940,900), the chart cut-out (215,70)-(805,660)
+  const youInner = (age, o) => `<g transform="translate(-18.6 -9.3) scale(.232558)">${youLayers(age, o.you, o.mood).map(h => `<image href="${h}" width="1000" height="1000"/>`).join('')}</g>`;
+  const portrait = (age, o = {}) => o.you ? youInner(age, o) : `<image href="${portraitSrcOf(age, o)}" width="200" height="200" preserveAspectRatio="xMidYMid slice"/>`;
+  const portraitSrc = (age, o = {}) => portraitSrcOf(age, o);
+
+  const IMG = {};
+  const loadLayer = src => IMG[src] || (IMG[src] = new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = no; im.src = src; }));
+  // Draws the reader's character into a canvas square (for the share card)
+  async function drawYou(ctx, x, y, size, age, you, mood) {
+    const ims = await Promise.all(youLayers(age, you, mood).map(loadLayer));
+    ims.forEach(im => ctx.drawImage(im, 40, 20, 430, 430, x, y, size, size));
+  }
+  // A small cut-out of the reader's character for their chart square. Built once per look on a canvas; null until ready,
+  // and null for good where the browser won't export the canvas (pages opened straight from disk)
+  const CUTS = {};
+  function youCut(age, you, onReady) {
+    const key = youLayers(age, you, 'smile').join('|');
+    if (key in CUTS) return CUTS[key];
+    CUTS[key] = null;
+    Promise.all(youLayers(age, you, 'smile').map(loadLayer)).then(ims => {
+      const cv = document.createElement('canvas'); cv.width = cv.height = 128;
+      const c = cv.getContext('2d'); ims.forEach(im => c.drawImage(im, 107.5, 35, 295, 295, 0, 0, 128, 128));
+      try { CUTS[key] = cv.toDataURL('image/png'); if (onReady) onReady(); } catch (e) { /* tainted canvas: keep the plain square */ }
+    }).catch(() => {});
+    return null;
+  }
 
   function Character(age, o = {}) {
     let inner = portrait(age, o);
@@ -100,9 +162,9 @@
   }
 
   function Scene(name, o = {}) {
-    const age = o.age || 40, hair = o.hair || 'short';
+    const age = o.age || 40;
     if (name === 'uncle') {
-      const word = hair === 'long' ? 'Hi aunty!' : 'Hi uncle!';
+      const word = (o.you ? youLooksFem(o.you) : pick(age, o).hair === 'long') ? 'Hi aunty!' : 'Hi uncle!';
       return wrap(portrait(age, o) + bubble(118, 10, 76, 34, word, 186, 62, 13), '#E9CFCB', 'Someone calls the character uncle');
     }
     if (name === 'pill') {
@@ -131,11 +193,10 @@
     return Character(age, o);
   }
 
-  // Transparent head-and-shoulders cut-outs of the same portraits, for chart marks
-  const CUT_DIR = 'imgs/characters/cut/';
-  const ALL_IDS = [2, 1, 4, 3, 5, 7, 8];
-  // A stable, varied cut-out for mark i: drawn from the reader's decade when known, otherwise from all seven
-  const cutFor = (i, dec) => { const list = dec >= 0 ? BY_DECADE[dec] : ALL_IDS; return `${CUT_DIR}c${list[(i * 7 + (i >> 3)) % list.length]}.png`; };
+  // Transparent head-and-shoulders cut-outs of the same characters, for chart marks
+  const cutSrc = id => `${CUT_DIR}${id}.png`;
+  // A stable, varied cut-out for mark i: drawn from the reader's decade when known, otherwise from all of them
+  const cutFor = (i, dec) => { const list = dec >= 0 ? BY_DECADE[dec] : STORY; return cutSrc(list[(i * 7 + (i >> 3)) % list.length].id); };
 
-  window.AGE_ART = { Character, Scene, figure, decadeOf, SKINS, portraitId, PORTRAIT_DIR, cutFor };
+  window.AGE_ART = { Character, Scene, figure, decadeOf, SKINS, portraitId, portraitSrc, PORTRAIT_DIR, cutFor, cutSrc, HAIR_LENGTHS, HAIR_TYPES, FACIAL, youLayers, drawYou, youCut };
 })();

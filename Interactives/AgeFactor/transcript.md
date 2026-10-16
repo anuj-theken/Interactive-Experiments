@@ -94,7 +94,7 @@ Most sections are **scrollytelling**: a chart stays pinned on screen while text 
 ## PAGE HEADER
 
 > 🖼️ **ILLUSTRATION · Lede image** — ⛔ context only, don't edit
-> Five women of different ages, from a young girl to an older woman, among daisies. Full width at the top of the page.
+> A crowd of illustrated people of all ages, from teenagers to grey-haired elders, with the words "The best decade of our lives" across the top. Full width at the top of the page.
 
 ✏️ **TEXT · Small label above the headline**
 <!-- id: head.tag -->
@@ -118,7 +118,7 @@ We asked 301 readers which decade of their life has been the happiest, when they
 
 ✏️ **TEXT · Lede image description for screen readers (not visible)**
 <!-- id: head.lede-alt -->
-Illustration of five women of different ages, from a young girl to an older woman, among daisies
+Illustration of a crowd of people of all ages, from teenagers to grey-haired elders, under the words: The best decade of our lives
 
 ---
 

@@ -14,6 +14,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="assets/ken-echarts.js"></script>
 <script src="data/readers.js"></script>
+<script src="scripts/fp-characters.js"></script>
 <script src="scripts/characters.js"></script>
 <style>
   :root { --red: #C8423A; --char: #3D3D3D; --teal: #4A9E9A; --dot: #C4AAAA; --ink: #1A1208; --card: #FBF8F7; }
@@ -117,6 +118,25 @@
   .opt .mini svg { width: 100%; height: 100%; display: block; }
   .opt .tick { margin-left: auto; font-family: var(--ken-font-bold); font-size: 13px; opacity: 0; }
   .opt[aria-pressed=true] .tick { opacity: 1; }
+  .look { margin-top: 16px; padding-top: 14px; border-top: 1px dashed rgba(59,42,38,.3); }
+  .look-lab { font-family: var(--ken-font-bold); font-weight: bold; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ken-text); margin-bottom: 8px; }
+  .look-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .look-row + .look-row { margin-top: 10px; }
+  .lk-btn { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; width: 68px; background: #fff; border: 2px solid var(--ink); border-radius: 3px; padding: 4px 3px 3px; color: var(--ink); }
+  .lk-btn small { font-size: 10.5px; line-height: 1.15; text-align: center; }
+  .look-row { gap: 6px; }
+  .look-row + .look-lab { margin-top: 12px; }
+  .look-pair { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .look-pair + .look-lab { margin-top: 12px; }
+  .look-pair .look-row { flex-wrap: nowrap; }
+  .look-row .sw { width: 34px; height: 34px; }
+  .lk-btn:hover { background: #F6E9E7; }
+  .lk-btn[aria-pressed=true] { background: var(--red); border-color: var(--red); color: #fff; }
+  .lk-btn .lk { width: 44px; height: 44px; border: 1.5px solid var(--ink); overflow: hidden; display: block; background: #fff; flex-shrink: 0; }
+  .lk-btn .lk svg { width: 100%; height: 100%; display: block; }
+  .sw { width: 38px; height: 38px; border: 2px solid var(--ink); border-radius: 3px; background: var(--sk); padding: 0; color: #fff; font-weight: bold; text-shadow: 0 0 3px rgba(0,0,0,.6); }
+  .sw[aria-pressed=true] { outline: 3px solid var(--red); outline-offset: 2px; }
+  .sw[aria-pressed=true]::before { content: '✓'; }
   .actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 18px; }
   .btn { background: var(--ink); color: var(--ken-bg); border: 0; border-radius: 3px; padding: 12px 18px; font-family: var(--ken-font-bold); font-weight: bold; font-size: 15px; transition: background .15s, transform .15s; }
   .btn:hover { background: var(--red); transform: translateY(-1px); }
@@ -162,6 +182,28 @@
 
   .foot { max-width: 1280px; margin: 0 auto; padding: 0 24px 24px; }
   .foot .note { max-width: 60em; }
+  /* ===== Card design, after imgs/Reference/card.png: pink panel, question in a white rounded box, thin pill slider,
+     rounded options that fill with ink once picked; the character drops its border for a warm grey offset shadow ===== */
+  .prompt, .prompt.on { background: #E9C6C4; border: 0; border-radius: 0; box-shadow: none; padding: 22px 20px 20px; }
+  .p-head { background: #fff; border: 1.5px solid var(--ink); border-radius: 14px; padding: 12px 16px 14px; margin-bottom: 14px; }
+  .p-head .p-k { font-family: var(--ken-font-body); font-weight: normal; font-size: 14px; letter-spacing: 0; text-transform: none; color: var(--ink); }
+  .p-head .p-q { font-family: var(--ken-font-display); font-size: 25px; line-height: 1.12; margin: 4px 0 0; }
+  .p-t { color: #333; }
+  .big-num { font-family: var(--ken-font-bold); font-size: 48px; color: var(--ink); }
+  input[type=range] { height: 10px; background: #fff; border: 1.5px solid var(--ink); border-radius: 6px; }
+  input[type=range]::-webkit-slider-thumb { width: 30px; height: 20px; border-radius: 10px; background: #fff; border: 1.5px solid var(--ink); }
+  input[type=range]::-moz-range-thumb { width: 28px; height: 18px; border-radius: 10px; background: #fff; border: 1.5px solid var(--ink); }
+  .opt { border: 1.5px solid var(--ink); border-radius: 14px; }
+  .opt:hover { background: #fff; }
+  .opt[aria-pressed=true], .lk-btn[aria-pressed=true] { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .opt .mini { border-radius: 8px; border-width: 1px; }
+  .lk-btn { border: 1.5px solid var(--ink); border-radius: 14px; }
+  .lk-btn .lk { border-radius: 9px; border-width: 1px; }
+  .sw { border: 1.5px solid var(--ink); border-radius: 50%; }
+  .sw[aria-pressed=true] { outline: 2.5px solid var(--ink); outline-offset: 2px; }
+  .btn { border-radius: 999px; padding: 11px 22px; }
+  .btn:hover { background: #3a2d22; }
+  .hero-frame { border: 0; box-shadow: 14px 14px 0 #746362; }
 </style>
 </head>
 <body>
@@ -201,7 +243,9 @@
 const { Character, Scene, decadeOf, SKINS } = window.AGE_ART;
 const P = window.READERS, N = P.length, YI = N;
 const { C, F } = KEN;
-const RED = '#C8423A', CHAR = '#3D3D3D', TEAL = '#4A9E9A', DOT = '#C4AAAA', INK = '#1A1208';
+const RED = '#C8423A', INK = '#1A1208';
+// Chart colours, from imgs/Colour Palette.jpg: HI is the highlighted group, DOT everyone else, CHAR and TEAL the contrasts
+const HI = '#3863CC', DOT = '#BFE9E8', CHAR = '#8940B5', TEAL = '#7CC6F3';
 const DEC = ['Teens', '20s', '30s', '40s', '50s', '60s', '70s+'];
 const YOUR = ['your teens', 'your 20s', 'your 30s', 'your 40s', 'your 50s', 'your 60s', 'your 70s or beyond'];
 const THEIR = ['their teens', 'their 20s', 'their 30s', 'their 40s', 'their 50s', 'their 60s', 'their 70s or beyond'];
@@ -214,12 +258,27 @@ const $ = id => document.getElementById(id);
 
 /* ---------------- Reader state. SKIP marks a skipped question; undefined = not reached yet ---------------- */
 const SKIP = 'skip';
-const me = { age: 35, hair: 'short', skin: SKINS[0], dec: 2 };
+const me = { age: 35, look: null, dec: 2 }; // look: { length: 'long'|'short', curl: 'straight'|'curly', facial: null|'moustache'|'beard1-3', skin: 0-5 } once picked
 const val = k => me[k] === SKIP ? undefined : me[k];
 const youRow = () => [me.dec, val('hap') ?? -1, val('exp') ?? -1, val('mid') ?? -1, val('midAge') ?? null, val('pill') ?? null, val('trig') || 0, val('fact') || 0];
 const ALL = () => P.concat([youRow()]);
 const peers = () => { const g = P.filter(p => p[0] === me.dec); return g.length >= 10 ? { g, label: `readers in ${THEIR[me.dec]}` } : { g: P, label: 'all readers' }; };
-const art = (age, o = {}) => Character(age, o);
+// The reader's character: once they pick hair or skin on the first card, every "you" drawing uses it,
+// keeping the skin and greying and shortening the hair with age
+const mine = (o = {}) => me.look ? { ...o, you: me.look } : o;
+const art = (age, o = {}) => Character(age, mine(o));
+const { HAIR_LENGTHS, HAIR_TYPES, FACIAL } = window.AGE_ART;
+const lookTile = (attr, v, label, on) => `<button type="button" class="lk-btn" ${attr}="${v}" aria-pressed="${on}" title="${label}"><span class="lk"></span><small>${label}</small></button>`;
+// Same order as the story's age card: hair and hair type side by side, then skin, then beard
+const lookPick = () => `<div class="look">
+  <div class="look-pair">
+    <div><div class="look-lab">Your hair</div><div class="look-row" id="lookLength">${HAIR_LENGTHS.map(([v, t]) => lookTile('data-length', v, t, !!me.look && me.look.length === v)).join('')}</div></div>
+    <div><div class="look-lab">Hair type</div><div class="look-row" id="lookCurl">${HAIR_TYPES.map(([v, t]) => lookTile('data-curl', v, t, !!me.look && me.look.curl === v)).join('')}</div></div>
+  </div>
+  <div class="look-lab">Skin</div>
+  <div class="look-row" id="lookSkin">${SKINS.map((c, i) => `<button type="button" class="sw" data-skin="${i}" aria-pressed="${!!me.look && me.look.skin === i}" aria-label="Skin tone ${i + 1} of ${SKINS.length}" style="--sk:${c}"></button>`).join('')}</div>
+  <div class="look-lab">Beard or moustache</div>
+  <div class="look-row" id="lookFacial">${FACIAL.map(([v, t], i) => lookTile('data-facial', i, t, !!me.look && me.look.facial === v)).join('')}</div></div>`;
 const outlook = p => (p[0] < 0 || p[2] === -1) ? null : p[2] === -2 ? 'behind' : p[2] > p[0] ? 'ahead' : p[2] === p[0] ? 'now' : 'behind';
 const decAge = i => i === 0 ? 16 : Math.min(i * 10 + 15, 78);
 
@@ -299,7 +358,7 @@ function initCharts() {
     xAxis: { type: 'value', show: false, min: 0, max: 1 }, yAxis: { type: 'value', show: false, inverse: true, min: 0, max: 1 },
     tooltip: { ...KEN.tooltip, trigger: 'item' },
     series: [
-      { id: 'bands', type: 'custom', silent: true, data: [], renderItem: (pr, api) => { const a = api.coord([api.value(0), api.value(1)]), b = api.coord([api.value(2), api.value(3)]); return { type: 'rect', shape: { x: a[0], y: a[1], width: b[0] - a[0], height: b[1] - a[1] }, style: { fill: 'rgba(196,170,170,0.20)' } }; } },
+      { id: 'bands', type: 'custom', silent: true, data: [], renderItem: (pr, api) => { const a = api.coord([api.value(0), api.value(1)]), b = api.coord([api.value(2), api.value(3)]); return { type: 'rect', shape: { x: a[0], y: a[1], width: b[0] - a[0], height: b[1] - a[1] }, style: { fill: 'rgba(56,150,204,0.12)' } }; } },
       { id: 'dots', type: 'scatter', symbol: 'rect', data: [], animationDelayUpdate: i => i === YI ? 450 : (i % 97) * 3.5,
         emphasis: { scale: false, itemStyle: { borderColor: INK, borderWidth: 1.5 } },
         tooltip: { formatter: pr => visible[pr.dataIndex] ? readerTip(ALL()[pr.dataIndex], pr.dataIndex === YI) : '' } },
@@ -340,7 +399,7 @@ function drawBars(rows, picked) {
     xAxis: { type: 'value', show: false, max: 60 },
     yAxis: { type: 'category', data: sorted.map(r => r[0]), axisLine: { show: false }, axisTick: { show: false }, axisLabel: { ...KEN.axisLabelBold, fontSize: 13 } },
     series: [{ type: 'bar', barMaxWidth: 26, animationDuration: 1000, animationDelay: i => (sorted.length - i) * 80,
-      data: sorted.map(r => ({ value: r[1], itemStyle: { color: picked(r) ? RED : DOT } })),
+      data: sorted.map(r => ({ value: r[1], itemStyle: { color: picked(r) ? HI : DOT } })),
       label: { show: true, position: 'right', fontFamily: F.bold, fontWeight: 'bold', fontSize: 12, color: C.text, formatter: p => p.value + '%' + (picked(sorted[p.dataIndex]) ? '  ← you' : '') } }]
   });
 }
@@ -381,7 +440,7 @@ function renderProfile(flash) {
 /* ---------------- Prompt helpers ---------------- */
 const K = () => CARDS[cur].k;
 function promptHTML({ q, body = '', primary, skip = true, k = K() }) {
-  return `<div class="p-k">${k}</div>${q ? `<div class="p-q">${q}</div>` : ''}${body}
+  return `${q ? `<div class="p-head"><div class="p-k">${k}</div><div class="p-q">${q}</div></div>` : `<div class="p-k">${k}</div>`}${body}
     <div class="actions">${skip ? '<button class="skip" data-act="skip">Skip this question</button>' : '<span></span>'}${primary ? `<button class="btn" data-act="go" ${primary.disabled ? 'disabled' : ''}>${primary.label}</button>` : ''}</div>`;
 }
 const optBtn = (label, attrs = '', mini = '') => `<button class="opt" ${attrs} aria-pressed="false">${mini ? `<span class="mini">${mini}</span>` : ''}<span>${label}</span><span class="tick">✓</span></button>`;
@@ -408,17 +467,31 @@ const CARDS = [
     art: () => `<div class="frame hero-frame" id="meFrame">${art(me.age)}<div class="cap" id="meCap">You, at ${me.age}</div></div>`,
     ask() {
       $('prompt').innerHTML = promptHTML({ q: 'How old are you?', skip: false, primary: { label: 'That’s me →' },
-        body: slider('ageIn', 13, 90, me.age) });
+        body: slider('ageIn', 13, 90, me.age) + lookPick() });
       const repaint = pop => { const f = $('meFrame'); f.querySelector('svg').outerHTML = art(me.age); $('meCap').textContent = `You, at ${me.age}`; if (pop) gsap.fromTo(f, { scale: .97 }, { scale: 1, duration: .35, ease: 'back.out(3)' }); };
-      $('ageIn').oninput = e => { const d = decadeOf(me.age); me.age = +e.target.value; $('ageInVal').textContent = me.age; repaint(decadeOf(me.age) !== d); };
+      const head = svg => svg.replace('viewBox="0 0 200 200"', 'viewBox="52 10 96 96"');
+      const paintLook = () => {
+        const base = { length: 'short', curl: 'straight', facial: null, skin: 2, ...me.look };
+        $('lookLength').querySelectorAll('.lk').forEach((el, i) => el.innerHTML = head(Character(me.age, { you: { ...base, length: HAIR_LENGTHS[i][0] } })));
+        $('lookCurl').querySelectorAll('.lk').forEach((el, i) => el.innerHTML = head(Character(me.age, { you: { ...base, curl: HAIR_TYPES[i][0] } })));
+        const fa = Math.max(me.age, 25);
+        $('lookFacial').querySelectorAll('.lk').forEach((el, i) => el.innerHTML = head(Character(fa, { you: { ...base, facial: FACIAL[i][0] } })));
+      };
+      const setLook = (k, v, btn) => { me.look = { length: 'short', curl: 'straight', facial: null, skin: 2, ...me.look, [k]: v }; btn.parentNode.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === btn)); paintLook(); repaint(true); renderProfile(); };
+      $('lookLength').onclick = e => { const b = e.target.closest('button'); if (b) setLook('length', b.dataset.length, b); };
+      $('lookCurl').onclick = e => { const b = e.target.closest('button'); if (b) setLook('curl', b.dataset.curl, b); };
+      $('lookFacial').onclick = e => { const b = e.target.closest('button'); if (b) setLook('facial', FACIAL[+b.dataset.facial][0], b); };
+      $('lookSkin').onclick = e => { const b = e.target.closest('button'); if (b) setLook('skin', +b.dataset.skin, b); };
+      paintLook();
+      $('ageIn').oninput = e => { const d = decadeOf(me.age); me.age = +e.target.value; $('ageInVal').textContent = me.age; if (decadeOf(me.age) !== d) paintLook(); repaint(decadeOf(me.age) !== d); };
       return () => { me.dec = decadeOf(me.age); me.started = true; return ['age']; };
     } },
 
   { id: 'meet', k: 'The readers', title: 'You, and 301 others', info: true,
     lede: 'In September 2026, 301 readers answered our survey about getting older. Each square is one of them. The white square outlined in black is you.',
     reveal(fresh) {
-      chartMeta('Readers by the decade they are in now', 'One square per reader', [[RED, 'Your decade'], [DOT, 'Other decades'], ['you', 'You']]);
-      const grouped = inst => drawDots((W, H, A) => groupLayout(W, H, A, p => p[0], DEC, p => p[0] === me.dec ? RED : DOT, [RED, DOT], m => m.length), inst);
+      chartMeta('Readers by the decade they are in now', 'One square per reader', [[HI, 'Your decade'], [DOT, 'Other decades'], ['you', 'You']]);
+      const grouped = inst => drawDots((W, H, A) => groupLayout(W, H, A, p => p[0], DEC, p => p[0] === me.dec ? HI : DOT, [HI, DOT], m => m.length), inst);
       if (fresh) { drawDots((W, H, A) => gridLayout(W, H, A), true); later(() => grouped(false), 900); } else grouped(true);
       const same = P.filter(p => p[0] === me.dec).length;
       return [me.dec === 0
@@ -437,8 +510,8 @@ const CARDS = [
       return () => { me.hap = pick; return ['hap']; };
     },
     reveal(fresh) {
-      chartMeta('Readers by their happiest decade so far', 'One square per reader who named a decade', [[RED, 'The decade they’re in now'], [CHAR, 'An earlier decade'], ['you', 'You']]);
-      const go = inst => drawDots((W, H, A) => groupLayout(W, H, A, p => p[1], DEC, p => p[1] === p[0] ? RED : CHAR, [RED, CHAR], m => m.length), inst);
+      chartMeta('Readers by their happiest decade so far', 'One square per reader who named a decade', [[HI, 'The decade they’re in now'], [CHAR, 'An earlier decade'], ['you', 'You']]);
+      const go = inst => drawDots((W, H, A) => groupLayout(W, H, A, p => p[1], DEC, p => p[1] === p[0] ? HI : CHAR, [HI, CHAR], m => m.length), inst);
       if (fresh) { drawDots((W, H, A) => gridLayout(W, H, A), true); later(() => go(false), 600); } else go(true);
       const i = val('hap'), { g, label } = peers(), named = g.filter(p => p[1] >= 0);
       const counts = DEC.map((_, d) => named.filter(p => p[1] === d).length), mode = counts.indexOf(Math.max(...counts));
@@ -467,8 +540,8 @@ const CARDS = [
       const byDec = inst => { chartMeta('Readers by the decade they expect to be happiest', 'One square per reader', [[CHAR, 'Named a decade'], [TEAL, 'Said “it’s behind me”'], ['you', 'You']], tabs);
         drawDots((W, H, A) => groupLayout(W, H, A, p => p[2] === -2 ? 7 : p[2], [...DEC, 'Behind'], p => p[2] === -2 ? TEAL : CHAR, [CHAR, TEAL], m => m.length), inst); };
       const byOut = () => { $('ct').textContent = 'Is your happiest decade ahead of you?'; $('cs').textContent = 'Readers by the decade they are in now. Label: % who say it is still ahead';
-        setLegend([[RED, 'Still ahead'], [CHAR, 'It’s now'], [TEAL, 'Behind them'], ['you', 'You']]);
-        drawDots((W, H, A) => groupLayout(W, H, A, p => outlook(p) ? p[0] : null, DEC, p => ({ ahead: RED, now: CHAR, behind: TEAL })[outlook(p)], [RED, CHAR, TEAL], m => pct(m.filter(i => outlook(P[i]) === 'ahead').length, m.length) + '%')); };
+        setLegend([[HI, 'Still ahead'], [CHAR, 'It’s now'], [TEAL, 'Behind them'], ['you', 'You']]);
+        drawDots((W, H, A) => groupLayout(W, H, A, p => outlook(p) ? p[0] : null, DEC, p => ({ ahead: HI, now: CHAR, behind: TEAL })[outlook(p)], [HI, CHAR, TEAL], m => pct(m.filter(i => outlook(P[i]) === 'ahead').length, m.length) + '%')); };
       const tabs = [{ label: 'Which decade', go: () => byDec(false) }, { label: 'Ahead or behind?', go: byOut }];
       byDec(!fresh);
       const i = val('exp'), { g, label } = peers(), gg = g.filter(outlook), share = k => pct(gg.filter(p => outlook(p) === k).length, gg.length);
@@ -485,7 +558,7 @@ const CARDS = [
 
   { id: 'mid', q: true, title: 'The moment it hits',
     lede: 'For a lot of readers, middle age didn’t arrive with a birthday. It arrived with a moment: a knee that didn’t recover, a younger colleague, a child calling them “uncle”.',
-    art: () => `<div class="frame hero-frame">${Scene('uncle', { age: me.age, hair: me.hair })}<div class="cap">The moment</div></div>`,
+    art: () => `<div class="frame hero-frame">${Scene('uncle', mine({ age: me.age, mood: 'worried' }))}<div class="cap">The moment</div></div>`,
     ask() {
       const { label } = peers();
       let finish, pick = null;
@@ -504,9 +577,9 @@ const CARDS = [
       return { custom: true, setFinish: f => finish = f, keys: ['mid'] };
     },
     reveal(fresh) {
-      chartMeta('Have you ever felt middle-aged?', 'Readers by the decade they are in now. Label: % who said yes', [[RED, 'Yes'], [DOT, 'Not yet'], ['you', 'You']]);
-      const go = inst => drawDots((W, H, A) => groupLayout(W, H, A, p => p[3] >= 0 ? p[0] : null, DEC, p => p[3] === 1 ? RED : DOT, [RED, DOT], m => pct(m.filter(i => P[i][3] === 1).length, m.length) + '%'), inst);
-      if (fresh) { drawDots((W, H, A) => gridLayout(W, H, A, p => p[3] === 1 ? RED : DOT, [RED, DOT]), true); later(() => go(false), 700); } else go(true);
+      chartMeta('Have you ever felt middle-aged?', 'Readers by the decade they are in now. Label: % who said yes', [[HI, 'Yes'], [DOT, 'Not yet'], ['you', 'You']]);
+      const go = inst => drawDots((W, H, A) => groupLayout(W, H, A, p => p[3] >= 0 ? p[0] : null, DEC, p => p[3] === 1 ? HI : DOT, [HI, DOT], m => pct(m.filter(i => P[i][3] === 1).length, m.length) + '%'), inst);
+      if (fresh) { drawDots((W, H, A) => gridLayout(W, H, A, p => p[3] === 1 ? HI : DOT, [HI, DOT]), true); later(() => go(false), 700); } else go(true);
       const { g, label } = peers(), ans = g.filter(p => p[3] >= 0), real = pct(ans.filter(p => p[3] === 1).length, ans.length), out = [];
       if (me.guess != null && me.mid !== SKIP) { const d = me.guess - real; out.push(`You guessed <b>${me.guess}%</b>. The real figure for ${label} is <b>${real}%</b>. ${Math.abs(d) <= 5 ? 'Very close.' : d > 0 ? `You overestimated by ${d} points.` : `You underestimated by ${-d} points.`}`); }
       else out.push(`Among ${label}, <b>${real}%</b> have felt middle-aged.`);
@@ -524,8 +597,8 @@ const CARDS = [
       return () => { me.midAge = +$('midIn').value; return ['midAge']; };
     },
     reveal(fresh) {
-      chartMeta('The age readers first felt middle-aged', 'One square per reader who gave an age', [[RED, 'Ends in 0 or 5'], [DOT, 'Other ages'], ['you', 'You']]);
-      drawDots((W, H, A) => histLayout(W, H, A, p => p[4] == null ? null : Math.max(20, Math.min(61, p[4])), 20, 61, p => p[4] % 5 === 0 ? RED : DOT, [RED, DOT],
+      chartMeta('The age readers first felt middle-aged', 'One square per reader who gave an age', [[HI, 'Ends in 0 or 5'], [DOT, 'Other ages'], ['you', 'You']]);
+      drawDots((W, H, A) => histLayout(W, H, A, p => p[4] == null ? null : Math.max(20, Math.min(61, p[4])), 20, 61, p => p[4] % 5 === 0 ? HI : DOT, [HI, DOT],
         [[20, '≤20'], [25, '25'], [30, '30'], [35, '35'], [40, '40'], [45, '45'], [50, '50'], [55, '55'], [60, '60+']], [{ v: 43, t: 'Median: 43' }]), !fresh);
       const ages = P.filter(p => p[4] != null).map(p => p[4]), v = val('midAge'), out = [];
       if (v !== undefined) {
@@ -547,7 +620,7 @@ const CARDS = [
       return () => { me.trig = me._trig || 0; return ['trig']; };
     },
     reveal() {
-      chartMeta('What made readers feel middle-aged', '% of the 128 written answers that mention each theme', [[RED, 'Your picks'], [DOT, 'Other themes']]);
+      chartMeta('What made readers feel middle-aged', '% of the 128 written answers that mention each theme', [[HI, 'Your picks'], [DOT, 'Other themes']]);
       drawBars(THEMES, r => (val('trig') || 0) & r[2]);
       const mine = THEMES.filter(t => (val('trig') || 0) & t[2]).map(t => t[0].toLowerCase()), out = [];
       if (mine.length) out.push(`You picked <b>${mine.join(', ')}</b>.`);
@@ -562,7 +635,7 @@ const CARDS = [
 
   { id: 'pill', q: true, title: 'Would you stop the clock?',
     lede: 'Imagine a pill that stops biological ageing in its tracks. Whatever age you are when you take it, you stay that age.',
-    art: () => `<div class="frame hero-frame">${Scene('pill', { age: me.age, hair: me.hair, skin: me.skin })}<div class="cap">The pill</div></div>`,
+    art: () => `<div class="frame hero-frame">${Scene('pill', mine({ age: me.age }))}<div class="cap">The pill</div></div>`,
     ask() {
       $('prompt').innerHTML = promptHTML({ q: 'At what age would you take it?', primary: { label: 'Compare →' },
         body: slider('pillIn', 10, 100, Math.min(100, Math.max(10, me.age))) + `<div class="opts" style="margin-top:12px">${optBtn('I wouldn’t take it', 'data-v="no"')}</div>` });
@@ -573,11 +646,11 @@ const CARDS = [
     },
     reveal(fresh) {
       const ticks = [[10, '10'], [20, '20'], [30, '30'], [40, '40'], [50, '50'], [60, '60'], [70, '70'], [81, '80+']];
-      const all = inst => { chartMeta('At what age readers would take the pill', 'One square per reader. Answers over 80 are grouped', [[RED, '35, the most common answer'], [DOT, 'Other ages'], ['you', 'You']], tabs);
-        drawDots((W, H, A) => histLayout(W, H, A, p => p[5], 10, 81, p => p[5] === 35 ? RED : DOT, [RED, DOT], ticks, [{ v: 35, t: '35' }]), inst); };
+      const all = inst => { chartMeta('At what age readers would take the pill', 'One square per reader. Answers over 80 are grouped', [[HI, '35, the most common answer'], [DOT, 'Other ages'], ['you', 'You']], tabs);
+        drawDots((W, H, A) => histLayout(W, H, A, p => p[5], 10, 81, p => p[5] === 35 ? HI : DOT, [HI, DOT], ticks, [{ v: 35, t: '35' }]), inst); };
       const rows = () => { $('ct').textContent = 'Pill age by the decade readers are in now'; $('cs').textContent = 'Shaded bands: the decade each group is in now';
-        setLegend([[RED, 'Would go back to an age they’ve passed'], [CHAR, 'Would stop now or later'], ['you', 'You']]);
-        drawDots((W, H, A) => rowsLayout(W, H, A, p => p[0] - 1, DEC.slice(1), p => p[5], 10, 81, p => p[5] < (p[0] + 1) * 10 ? RED : CHAR, [RED, CHAR], r => [(r + 2) * 10, Math.min(81, (r + 2) * 10 + 9)])); };
+        setLegend([[HI, 'Would go back to an age they’ve passed'], [CHAR, 'Would stop now or later'], ['you', 'You']]);
+        drawDots((W, H, A) => rowsLayout(W, H, A, p => p[0] - 1, DEC.slice(1), p => p[5], 10, 81, p => p[5] < (p[0] + 1) * 10 ? HI : CHAR, [HI, CHAR], r => [(r + 2) * 10, Math.min(81, (r + 2) * 10 + 9)])); };
       const tabs = [{ label: 'All readers', go: () => all(false) }, { label: 'By age', go: rows }];
       all(!fresh);
       const vals = P.filter(p => p[5] != null).map(p => p[5]), v = val('pill'), { g, label } = peers(), md = median(g.filter(p => p[5] != null).map(p => p[5])), out = [];
@@ -600,14 +673,14 @@ const CARDS = [
 
   { id: 'fact', k: 'Bonus question', title: 'What makes a decade good?',
     lede: 'Think about your best decade so far. What made it good?',
-    art: () => `<div class="frame hero-frame">${Scene('decade', { age: me.age, hair: me.hair })}<div class="cap">A good decade</div></div>`,
+    art: () => `<div class="frame hero-frame">${Scene('decade', mine({ age: me.age, mood: 'joy' }))}<div class="cap">A good decade</div></div>`,
     ask() {
       $('prompt').innerHTML = promptHTML({ q: 'What made your best decade good? Pick any.', primary: { label: 'Compare →' }, body: `<div class="opts col">${FACTS.map(t => optBtn(t[0], `data-bit="${t[2]}"`)).join('')}</div>` });
       wireMulti('fact');
       return () => { me.fact = me._fact || 0; return ['fact']; };
     },
     reveal() {
-      chartMeta('What a good decade needs', '% of the 271 readers who picked at least one option', [[RED, 'Your picks'], [DOT, 'Other options']]);
+      chartMeta('What a good decade needs', '% of the 271 readers who picked at least one option', [[HI, 'Your picks'], [DOT, 'Other options']]);
       drawBars(FACTS, r => (val('fact') || 0) & r[2]);
       const mine = FACTS.filter(f => (val('fact') || 0) & f[2]).map(f => f[0].toLowerCase());
       return [(mine.length ? `You picked <b>${mine.join(', ')}</b>. ` : '') + `Readers put <b>freedom and fewer obligations</b> first (47%), just ahead of relationships or family (45%). Work is in the middle of the list. Learning comes last.`];
@@ -653,10 +726,10 @@ const QUOTES_PILL = [
   ['Would stop at 45', 4, 'long', 'Bengaluru', 'I get 5 years more to take better care of myself - never prioritised myself till 50.'],
 ];
 function panels(list, mood) {
-  let prev = null; // neighbouring panels never show the same portrait
+  const used = []; // no character appears twice in a set of panels
   return `<div class="panels">${list.map(([tag, d, hair, city, q], i) => {
-    const pid = prev = window.AGE_ART.portraitId(decAge(d), { avoid: [prev] });
-    const svg = Character(decAge(d), { id: pid }).replace('viewBox="0 0 200 200"', 'viewBox="15 8 170 136" preserveAspectRatio="xMidYMid slice"');
+    const pid = window.AGE_ART.portraitId(decAge(d), { hair, mood, avoid: used }); used.push(pid);
+    const svg = Character(decAge(d), { id: pid }).replace('viewBox="0 0 200 200"', 'viewBox="-14 6 228 112" preserveAspectRatio="xMidYMin slice"');
     return `<div class="qp"><div class="art">${svg}</div><div class="txt"><div class="qt">“${esc(q)}”</div><div class="who"><b>${esc(tag)}</b>${DEC[d]}, ${esc(city)}</div></div></div>`;
   }).join('')}</div>`;
 }
