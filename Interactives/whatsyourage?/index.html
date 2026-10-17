@@ -49,6 +49,7 @@
   .QW4K-art-by a { color: var(--red); text-decoration: none; font-family: var(--ken-font-body); font-size: 12px; }
   .QW4K-art-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--ken-bg); font-size: 13px; padding: 8px 14px; border-radius: 3px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 60; }
   .QW4K-art-reading { border: 1px solid #D5C9C7; margin: 44px 0 0; padding: 16px 22px; font-family: var(--ken-font-body); font-size: 13.5px; line-height: 1.6; color: var(--ken-body); text-align: center; }
+  .QW4K-art-reading p + p { margin-top: .7em; }
   .QW4K-art-reading b { font-family: var(--ken-font-bold); font-weight: bold; }
 
   /* ===== Newsletter body (First Principles) ===== */
@@ -211,6 +212,15 @@
   .QW4K-qp .QW4K-who { font-size: 11px; color: var(--ken-text); }
   .QW4K-qp .QW4K-who b { font-family: var(--ken-font-bold); color: var(--red); letter-spacing: .06em; text-transform: uppercase; font-size: 10px; margin-right: 6px; }
   @media (max-width: 480px) { .QW4K-qp { aspect-ratio: auto; grid-template-rows: 150px auto; } .QW4K-qp .QW4K-txt { min-height: 110px; } }
+  /* Quotes run long and short, so the panels flow in balanced columns at their own height */
+  .QW4K-panels { display: block; columns: 3 260px; column-gap: 24px; }
+  .QW4K-panels .QW4K-qp { aspect-ratio: auto; grid-template-rows: 150px auto; break-inside: avoid; margin: 0 0 24px; }
+  .QW4K-panels .QW4K-qp .QW4K-txt { gap: 12px; }
+  @media (max-width: 820px) { .QW4K-panels { column-gap: 14px; } .QW4K-panels .QW4K-qp { margin-bottom: 14px; } }
+  .QW4K-panel-note { padding-bottom: 8px; }
+  .QW4K-panels-more { display: none; text-align: center; padding: 4px 20px 0; }
+  @media (max-width: 560px) { .QW4K-panels:not(.QW4K-all) .QW4K-qp-more { display: none; } .QW4K-panels-more { display: block; } }
+  .QW4K-nl p.QW4K-note { font-size: 15px; }
 
 
   .QW4K-interlude { min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 0 20px; }
@@ -317,7 +327,13 @@
   .QW4K-sf-bottom { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 32px; padding: 20px 0; border-top: 1.5px solid var(--ken-rule); border-bottom: 1.5px solid var(--ken-rule); }
   .QW4K-sf-logo { height: 18px; display: block; flex: none; }
   .QW4K-sf-credit { font-family: var(--ken-font-body); font-style: italic; font-size: 15px; color: var(--ken-text); text-align: right; }
-  .QW4K-site-foot { padding-bottom: 36px; }
+  .QW4K-sf-refs { font-family: var(--ken-font-body); font-size: 14px; color: var(--ken-text); margin-top: 16px; }
+  .QW4K-sf-refs b { font-family: var(--ken-font-bold); color: var(--ink); margin-right: 6px; }
+  .QW4K-sf-refs a { color: var(--red); }
+  .QW4K-site-foot { position: relative; padding-bottom: 36px; overflow: hidden; }
+  /* Footer field: a dot per reader around the text that opens into a card near the cursor (see footerPile) */
+  .QW4K-sf-pile { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+  .QW4K-sf-inner { position: relative; z-index: 1; }
   @media (max-width: 480px) { .QW4K-sf-bottom { flex-direction: column; text-align: center; gap: 10px; } .QW4K-sf-credit { text-align: center; } }
   /* Age-profile card: styles live in scripts/profile-card.js so the page and the downloaded image share them */
   /* Buttons: one corner radius everywhere (skin swatches stay round) */
@@ -335,18 +351,14 @@
 <header class="QW4K-art-head">
   <div class="QW4K-art-tag">First Principles</div>
   <figure class="QW4K-art-lede" id="ledeArt"><img src="imgs/FP_Best_Decade.png" alt="Illustration of a crowd of people of all ages, from teenagers to grey-haired elders, under the words: The best decade of our lives" width="1760" height="990"></figure>
-  <div class="QW4K-art-meta"><span>Special edition</span><span>12 Oct 2026</span><span>8 min read</span></div>
+  <div class="QW4K-art-meta"><span>Special edition</span><span>18 Oct 2026</span></div>
   <h1 class="QW4K-art-title">Are your best years behind you?</h1>
-  <p class="QW4K-art-strap">We asked 301 readers which decade of their life has been the happiest, when they first felt middle-aged, and at what age they would stop ageing if they could</p>
+  <p class="QW4K-art-strap">Few questions throw us off-balance like being asked to rank the decades of our life. Not just the ones we’ve lived, but also the ones we’ve yet to. How well do you know yourself? Compare yourself against 301 readers of The Ken.</p>
   <p class="QW4K-art-by"><i>by</i><a href="https://the-ken.com/writers/rohin/" target="_blank" rel="noopener">Rohin Dharmakumar</a> and <a href="https://the-ken.com/writers/anuj_269/" target="_blank" rel="noopener">Anuj Debnath</a></p>
-  <div class="QW4K-art-reading"><b>You are reading <i>First Principles</i></b>—A community-powered Sunday newsletter on mental models, self-reflection, learning, growth, photos, books, and more</div>
+  <div class="QW4K-art-reading"><p>This is an interactive story. The charts move as you scroll, and you can hover over or tap them to see each reader’s answers. <b>Pro tip:</b> grab a cup of coffee or tea and settle down. This will make you think, smile and, perhaps, sigh.</p><p>Your responses are both private and anonymous. They stay within your browser till the end, where we’ll ask you if you’d like to contribute them to our ongoing survey.</p></div>
 </header>
 <div class="QW4K-art-toast" id="artToast">Link copied</div>
 
-<!-- ===== INTRO LETTER ===== -->
-<section class="QW4K-nl QW4K-nl-intro">
-  <p class="QW4K-howto">The charts move as you scroll, and you can hover over or tap them to see each reader’s answers.</p>
-</section>
 
 <!-- ===== YOUR AGE: asked first, used by every answer after it ===== -->
 <section class="QW4K-ask QW4K-age-ask">
@@ -356,7 +368,7 @@
       <div class="QW4K-qhead"><div class="QW4K-qlabel">Before we start</div><div class="QW4K-qtext">How old are you?</div></div>
       <div class="QW4K-qform" id="formAge"></div>
       <div class="QW4K-qyou" id="youAge" aria-live="polite"></div>
-      <div class="QW4K-qfoot">We use it to place you among the 301 readers. It stays on this page.</div>
+      <div class="QW4K-qfoot">This interactive story is best experienced by comparing your responses against others. It’s less fun without that.</div>
     </div>
   </div>
 </section>
@@ -364,8 +376,7 @@
 <!-- ===== 1. THE PILL ===== -->
 <section class="QW4K-nl QW4K-sec" id="s-pill">
   <div class="QW4K-sec-mark"></div>
-  <h2>The pill that stops the clock</h2>
-  <p>We started with the biggest question of all: what if you could stop getting older?</p>
+  <h2>The pill that stops the body clock</h2>
 </section>
 <section class="QW4K-ask">
   <div class="QW4K-qcard QW4K-has-art">
@@ -388,7 +399,7 @@
   <div class="QW4K-steps">
     <div class="QW4K-step" data-step="c0"><div class="QW4K-card">Meet one reader. They are in their 40s, and they would take the pill at <b>30</b>, going back more than ten years.<span class="QW4K-hint">The illustration is ours; the answers are real. We’ll follow this reader all the way through.</span></div></div>
     <div class="QW4K-step" data-step="c0b"><div class="QW4K-card"><span class="QW4K-big">301</span>Our reader is one of 301 readers who took the survey. Here they all are, one square each, coloured by how old they are now: the darker, the older.<span class="QW4K-hint">The teal-outlined square is our reader.</span></div></div>
-    <div class="QW4K-step" data-step="c1"><div class="QW4K-card">Now sort them. Each column is how old readers are now; the higher a square, the older they’d be when they took the pill. The red line is the <span class="QW4K-hl QW4K-med">median: 35</span>. Half of readers would stop at 35 or younger, half at 35 or older.<span class="QW4K-hint">The dotted diagonal marks their age now. Our reader would stop at 30.</span></div></div>
+    <div class="QW4K-step" data-step="c1"><div class="QW4K-card">Now sort them. Each column is how old readers are now; the higher a square, the older they’d be when they took the pill. Half would stop the clock by <span class="QW4K-hl QW4K-med">35</span>, the red line.<span class="QW4K-hint">The dotted diagonal marks their age now. Our reader would stop at 30.</span></div></div>
     <div class="QW4K-step" data-step="c2"><div class="QW4K-card"><b>117 readers</b>, 43%, would <span class="QW4K-hl QW4K-ink">go back</span>: they’d take the pill at an age younger than they are now. The older the reader, the more likely: 12% of readers in their 20s, but 60% of those in their 50s.<span class="QW4K-hint">Our reader is one of them. We only know each reader’s decade, so “younger than now” means before the decade they’re in.</span></div></div>
     <div class="QW4K-step" data-step="c3"><div class="QW4K-card">Only <b>43</b> would <span class="QW4K-hl QW4K-ink">wait</span>, picking an age older than they are now. Most of them are young: 41% of readers in their 20s would wait, but just 5% of those in their 50s.<span class="QW4K-hint">The other 106 would stop somewhere in the decade they’re in now.</span></div></div>
     <div class="QW4K-step" data-step="c4"><div class="QW4K-card">And then there are the <span class="QW4K-hl QW4K-ink">four readers</span> who said 99, 100 or 110. One of them wrote: “Wouldn’t take the pill actually.”</div></div>
@@ -400,12 +411,18 @@
   <div class="QW4K-strip" id="stripPill" style="--n:6"></div>
   <p class="QW4K-strip-note">Median age at which readers in each decade would take the pill. Illustrations, not portraits of real readers.</p>
 </section>
+<section class="QW4K-nl">
+  <p>The “perfect age”, it would seem from responses, is ahead of you when you’re young. Then, as you approach middle age, it’s close to where you are. Then, as you get older, it’s behind you.</p>
+</section>
 
 <section class="QW4K-ask QW4K-solo">
   <div class="QW4K-qcard">
     <div class="QW4K-qhead"><div class="QW4K-qlabel">Question 2 · We asked</div><div class="QW4K-qtext">Why that age?</div></div>
-    <div class="QW4K-qfoot">Some of your answers. We quote only readers who agreed to be quoted, and identify them by decade and city.</div>
+    <div class="QW4K-qfoot">Some of the most evocative answers we got. We quote only readers who agreed to be quoted, and identify them by their first name, decade and city.</div>
   </div>
+</section>
+<section class="QW4K-nl QW4K-panel-note">
+  <p class="QW4K-note">Take your time to scroll, read and reflect on the specific years of their lives readers reminisce fondly about, and their reasons. We’ve tried to pick a diverse enough sample across ages.</p>
 </section>
 <div class="QW4K-panels" id="panelsPill"></div>
 
@@ -415,7 +432,6 @@
 <section class="QW4K-nl QW4K-sec" id="s-happiest">
   <div class="QW4K-sec-mark"></div>
   <h2>The happiest decade</h2>
-  <p>Then we asked about the years you’ve already lived.</p>
 </section>
 <section class="QW4K-ask">
   <div class="QW4K-qcard QW4K-has-art">
@@ -448,7 +464,6 @@
 <section class="QW4K-nl QW4K-sec" id="s-good">
   <div class="QW4K-sec-mark"></div>
   <h2>What makes a decade good</h2>
-  <p>Next, what made that happiest decade what it was.</p>
 </section>
 <section class="QW4K-ask">
   <div class="QW4K-qcard QW4K-has-art">
@@ -482,7 +497,7 @@
 <section class="QW4K-nl QW4K-sec" id="s-middle">
   <div class="QW4K-sec-mark"></div>
   <h2>The day you felt middle-aged</h2>
-  <p>Middle age doesn’t start on a fixed date. It’s more a feeling, and for many of you it arrived suddenly.</p>
+  <p>Middle age doesn’t start on a fixed date. It’s more a feeling, and for many of us it arrives suddenly.</p>
 </section>
 <section class="QW4K-ask">
   <div class="QW4K-qcard QW4K-has-art">
@@ -534,7 +549,6 @@
 <section class="QW4K-nl QW4K-sec" id="s-uncle">
   <div class="QW4K-sec-mark"></div>
   <h2>“Kids started calling me uncle”</h2>
-  <p>What gave it away? For almost half of you, it was <b>your own body</b>.</p>
 </section>
 <section class="QW4K-ask QW4K-solo">
   <div class="QW4K-qcard">
@@ -559,7 +573,7 @@
   </div>
 </section>
 <section class="QW4K-nl">
-  <p>Some of the moments you described. We quote only readers who agreed to be quoted, and identify them by decade and city.</p>
+  <p class="QW4K-note">Some of the most evocative answers we got. We quote only readers who agreed to be quoted, and identify them by their first name, decade and city.</p>
 </section>
 <div class="QW4K-panels" id="panelsMid"></div>
 
@@ -569,7 +583,6 @@
 <section class="QW4K-nl QW4K-sec" id="s-ahead">
   <div class="QW4K-sec-mark"></div>
   <h2>Is the best yet to come?</h2>
-  <p>Finally, we asked you to look ahead.</p>
 </section>
 <section class="QW4K-ask">
   <div class="QW4K-qcard QW4K-has-art">
@@ -601,10 +614,7 @@
   <p class="QW4K-strip-note">Share of readers in each decade who say their happiest decade is still ahead of them. Illustrations, not portraits of real readers.</p>
 </section>
 <section class="QW4K-nl">
-  <p>Put together, the answers show a pattern. Most of you think your happiest decade so far is a recent one, and most expect the happiest one to come later still. And middle age doesn’t come with a particular birthday. It comes when your knees, your children or your younger colleagues start to remind you of your age.</p>
-</section>
-<section class="QW4K-strip-sec">
-  <div class="QW4K-strip" id="stripEnd" style="--n:7"></div>
+  <p>When I wrote about this in September, I leaned on the U-bend: the finding, repeated country after country, that happiness is high in our 20s, sinks through our 30s and 40s, bottoms out somewhere around the mid-life crisis, and then climbs again, even as we lose the things we spend our youth protecting. Laura Carstensen tells her Stanford undergrads every year that these are not the best years of their lives, and watches the relief on their faces. <i>The Economist</i> put it more bluntly: life is not a long slow decline from sunlit uplands towards the valley of death.</p>
 </section>
 
 <!-- ===== 6. YOUR TURN ===== -->
@@ -617,18 +627,17 @@
   <div class="QW4K-pcard" id="profileCard" aria-live="polite"></div>
   <div class="QW4K-share-side">
     <h3>Share your card</h3>
-    <p>Send it to a friend and see whether they think their best years are ahead of them too.</p>
+    <p>Send it to a friend and see whether they think their best years are ahead of them too. Or add your answers to the survey itself.</p>
     <div class="QW4K-share-actions">
       <button type="button" class="QW4K-sbtn QW4K-primary" id="btnShare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg>Share</button>
       <button type="button" class="QW4K-sbtn" id="btnDl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></svg>Download image</button>
     </div>
     <p class="QW4K-share-msg" id="shareMsg" aria-live="polite"></p>
-    <p class="QW4K-share-note">Your answers stay on this page. Nothing is saved or sent anywhere unless you share the card.</p>
+    <p class="QW4K-share-note">Your answers stay on this page. Nothing is saved or sent anywhere unless you share the card or fill in the survey.</p>
   </div>
 </section>
 <section class="QW4K-nl">
-  <p>Want the full version? The quiz asks all nine questions readers answered and builds your age profile as you go.</p>
-  <div class="QW4K-cta"><a href="survey/" id="quizLink"><div class="QW4K-av" id="ctaAv"></div><div><b>Take the quiz →</b><span>Nine questions, the same ones readers answered. Your answers stay in your browser.</span></div></a></div>
+  <div class="QW4K-cta"><a href="survey/" id="quizLink"><div class="QW4K-av" id="ctaAv"></div><div><b>Add my answers to the survey →</b><span>Nine questions, the same ones readers answered. Your answers stay in your browser.</span></div></a></div>
 </section>
 
 <!-- ===== ABOUT THE DATA ===== -->
@@ -654,7 +663,9 @@
       <img src="assets/logo.png" alt="The Ken" class="QW4K-sf-logo">
       <p class="QW4K-sf-credit">With support from Kavipriya OG, Sakshi Modi and Kashvi Bansal.</p>
     </div>
+    <p class="QW4K-sf-refs"><b>References</b> <a href="https://the-ken.com/newsletter/first-principles/the-best-decade-of-our-lives/" target="_blank" rel="noopener">“The best decade of our lives”</a>, The Ken</p>
   </div>
+  <canvas class="QW4K-sf-pile" id="sfPile" aria-hidden="true"></canvas>
 </footer>
 
 <script>
@@ -1005,31 +1016,79 @@ function stripFrames(id, items) {
   gsap.from(`#${id} .QW4K-bubble`, { scale: 0, transformOrigin: '50% 0%', duration: .4, stagger: .12, delay: .5, ease: 'back.out(2)', scrollTrigger: { trigger: '#' + id, start: 'top 80%' } });
 }
 const QUOTES_MID = [
-  ['Felt it at 30', 2, 'short', 'Bengaluru', 'Kids started calling me and uncle :(', true],
-  ['Felt it at 51', 4, 'short', 'Bengaluru', 'Losing badminton matches to my son', true],
-  ['Felt it at 42', 4, 'short', 'Manila', 'I didn’t like the new music anymore', true],
-  ['Felt it at 50', 4, 'short', 'Delhi', 'I started to realise that my team is younger than my nieces and nephews'],
-  ['Felt it at 40', 3, 'long', 'Singapore', 'A switch seems to have been turned off as soon as I turned 40 - metabolism isn\'t the same anymore…'],
-  ['Felt it at 49', 4, 'short', 'Bengaluru', 'Changed from salt pepper to salt', true],
-  ['Felt it at 47', 3, 'short', 'Gurugram', '…having to start counting my beers and pegs..', true],
-  ['Felt it at 59', 5, 'long', 'Kolkata', 'Approaching my 60th birthday, being called a \'veteran\''],
-  ['Felt it at 40', 3, 'short', 'Mumbai', 'Inability to run 5k run within 30 min'],
+  ["", "long", 2, "Delhi", "Depression. Anxiety. Self-set expectations to thrive in society."],
+  ["", "long", 2, "Delhi", "Random aches, injuries that don't heal completely"],
+  ["", "long", 2, "San Diego", "My medicines that worked well in my 20s started being less effective, basically"],
+  ["Anuradha", "long", 2, "Kochi", "Felt I hit perimenopause 😄"],
+  ["", "long", 2, "Mumbai", "Kid being born and the responsibility of another human being"],
+  ["Ray", "short", 2, "Bangalore", "Kids started calling me uncle :("],
+  ["Arpit", "short", 2, "Kolkata", "Just being hyperaware of my mortality. Also my dad passed away at 62 so that probably contributed."],
+  ["Varun", "short", 2, "", "My friend had a child - I suddenly realised I am just 3 years away from being 40 - I can't still live a carefree, \"not responsible for anything\" life"],
+  ["", "long", 3, "Singapore", "A switch seems to have been turned off as soon as I turned 40 - metabolism isn't the same anymore and no matter how much I exercise or do portion control, I cannot seem to regain my lean frame."],
+  ["", "long", 3, "Gurgaon", "While the world reminds you are middle aged when you turn 40, several other changes like a minimum sleep requirement, energy levels, recovery periods, dark spots and the slowing down of metabolism made me feel it."],
+  ["Puneet Kumar", "short", 3, "", "Slip disc and pain that I stopped picking up anything heavy"],
+  ["Darshan R", "short", 3, "", "Vipassana"],
+  ["", "short", 3, "Mumbai", "Inability to run 5k within 30 min"],
+  ["Arjuna Srinidhi", "short", 3, "Bangalore", "Constantly getting injured while running, and a growing waistline despite best efforts to control it!"],
+  ["", "short", 3, "Bangalore", "My diabetes came back"],
+  ["", "short", 3, "", "I was the oldest person in most professional and social groups."],
+  ["", "short", 3, "Gurgaon", "Started having loose stomach next day of having my favourite mutton dish; having to start counting my beers and pegs.."],
+  ["", "long", 4, "Bangalore", "Teenage daughter having meltdowns"],
+  ["Erwin", "short", 4, "Manila", "I didn't like the new music anymore"],
+  ["Nikhil", "short", 4, "Bangalore", "Career at crossroads, kids growing up way too quickly, health issues and life regrets knowing that some missed opportunities will never come again."],
+  ["Priyank", "short", 4, "New Delhi", "Kids started calling me uncle; also realised that our parents were approaching this age when we got married"],
+  ["Ashok", "short", 4, "", "Frozen shoulder"],
+  ["Umesh", "short", 4, "", "Growing bald"],
+  ["Sanjeev", "short", 4, "Bangalore", "Changed from salt pepper to salt"],
+  ["", "short", 4, "Delhi", "I started to realise that my team is younger than my nieces and nephews"],
+  ["Phaneesh", "short", 4, "Bangalore", "Losing badminton matches to my son"],
+  ["", "long", 5, "Kolkata", "Approaching my 60th birthday, being called a 'veteran'"],
+  ["Anil", "short", 5, "Bangalore", "Knee arthritis."],
+  ["", "short", 6, "Singapore", "Not being able to work with full concentration for long hours"],
 ];
 const QUOTES_PILL = [
-  ['Would stop at 35', 2, 'long', 'Delhi', 'Knees would get creaky after that', true],
-  ['Would stop at 25', 2, 'long', 'Mysuru', 'That is a sweet spot. You have seen a fair bit of world, enough to know what life expects from you…'],
-  ['Would stop at 25', 1, 'short', 'Bengaluru', 'fully developed pre frontal cortex', true],
-  ['Would stop at 30', 2, 'long', 'Mumbai', 'Great career , healthy parents , no kids'],
-  ['Would stop at 40', 4, 'short', 'Bengaluru', 'You have 10-20 good years to spend before your kids get too busy with their lives'],
-  ['Would stop at 45', 4, 'long', 'Bengaluru', 'I get 5 years more to take better care of myself - never prioritised myself till 50.'],
+  ["R J", "short", 0, "", "Childhood is really the best age to experience love, care and softness. The school life was really beautiful,then with teachers who were too soft to kids while very tough to high school students. I remember that at that time my family life was even more cheering since I had not lost my Grandfather and Maternal Grandmother, and I had no reason to see my Grandmother weeping in 60 year long memories."],
+  ["Pawan", "short", 1, "", "I had the most raw energy and I almost never felt that anything was impossible. I knew less but I did more. I prided myself studying straight away for hours without stopping. You tell me what to do and I would make it a point to do in less time"],
+  ["", "long", 1, "Solapur", "I was living with my family enjoying studying, going to school, getting pampered. Suddenly after 10th std moving outside thinking about job, money & savings doing the adult stuff feels like life was so much better without these thoughts."],
+  ["Arpita", "long", 1, "Kozhikode", "Feels young enough to be reckless sometimes and old enough to be taken seriously"],
+  ["", "long", 1, "Bengaluru", "I am not 36 yet, but I hypothesize at that age I would have began building something I like. Been financially secure enough to fund a family (either parents or adopt a child). I think around that time I will also take my fitness more seriously than I do now, which means more discipline and consistent energy while reaping benefits of what I sow."],
+  ["Dinesh", "short", 2, "Chennai", "I had dreams, I had my grandparents in right emotional state, my dad was alive & healthy..that's all I actually wanted"],
+  ["", "short", 2, "Hyderabad", "Not too old to be stubborn and not too young and kind of mature enough"],
+  ["Swastik", "short", 2, "", "I have got a feeling that with age I have become much wiser and more mature in thinking. I am quite sure it'll have even more impact as I age. However, the downside is health and fitness. So, there's a trade-off between maturity and fitness. I am trying to keep myself as fit as possible to be able to keep trekking as long as possible. Perhaps, close to the age of 50, the combined score of my fitness and maturity will reach its highest point."],
+  ["", "short", 2, "Bengaluru", "I believe it is the peak of mental ability before memory issues start kicking. You have accumulated enough understanding of the world to build your own opinions. You have better financial security after having worked for 15-20 years. Physically this the last decade when you can push your body."],
+  ["", "short", 2, "Geneva", "Got into my best shape and that unlocked the face card effect and I felt a change in energy generally"],
+  ["", "long", 2, "San Diego", "before i got diagnosed with a host of autoimmune conditions but also when i felt more like a person"],
+  ["Madhuri", "long", 2, "Mysore", "That is a sweet spot. You have seen a fair bit of world, enough to know what life expects from you and also not so much that you have lived it."],
+  ["Vartika", "long", 2, "Mumbai", "I think you know who you are largely by 35, you know the deal breakers and compromises both professionally and personally, you also get to a point of being financially independent than you were in your 20s while still being away from the health ailments, I turn 35 in a couple of months, and maybe I wont mind staying here for quite some time."],
+  ["", "long", 2, "Delhi", "Knees would get creaky after that"],
+  ["", "short", 3, "Gurugram", "Felt the most energetic, could eat and drink whatever I want, slept like a log, no ache, no anxiety more excited and upbeat about what's coming next"],
+  ["Nik", "short", 3, "New Delhi", "Local maxima of wisdom, energy, security while having most family and friends around (still)"],
+  ["Jagbir", "short", 3, "Gurugram", "I feel that at 45, I have the perfect balance of energy, wisdom, and money. My lifelong learnings help me spend wisely, and my energy lets me enjoy it fully. From here, energy will slowly decline, regardless of how much money or wisdom I gain."],
+  ["Sandeep", "short", 3, "Bengaluru", "Single and ready to mingle"],
+  ["", "short", 3, "Singapore", "Kids are yooung enough to enjoy them as kids, you are at the prime health stage and hopefully have also made enough money that you can start enjoying a bit of splurging. And finally, your parents are also hopefully healthy and mobile!"],
+  ["", "long", 3, "Bengaluru", "I had finished \"training\", was setting up something new, was naive and super happy and energetic, possibilities seemed limitless. My body was great and responding to how I took care of it."],
+  ["Rajeshwari", "long", 3, "Bengaluru", "I'm getting fitter, happier and more successful with each passing year. In 2 years from now, I expect I might be at the peak of what a fulfilling life looks like. With kids still at home and both sets of parents still alive and healthy."],
+  ["Phaneesh", "short", 4, "Bengaluru", "You have 10-20 good years to spend before your kids get too busy with their lives"],
+  ["", "short", 4, "Manchester", "Enough wisdom to know when to stop"],
+  ["Puneet", "short", 4, "Singapore", "I was financially secure, my parents were healthy and moved in with me and my kids seemed well set for what they had to do. I was finally doing the things I wanted to do and was not a slave if what I had to do!!"],
+  ["", "short", 4, "Gurugram", "Health issues come up post 40, ageism at the workforce appears, you start to lose some intellectual faculties"],
+  ["", "long", 4, "Bengaluru", "Physically that's an age where my body and mind were both at their best - I had great energy, was never tired, and great positivity. This is not when I was happiest, but when I was at my best physically and mentally"],
+  ["", "long", 4, "Bengaluru", "I get 5 years more to take better care of myself - never prioritised myself till 50."],
+  ["", "long", 5, "Kolkata", "I was happily married with a toddler and work and hobbies were great"],
+  ["Ajit", "short", 6, "", "Never felt better or played better golf no worries despite having prostate cancer"],
 ];
+// Quotes: [first name ('' if they gave none), hair, decade now, city, words]
 function quotePanels(id, list, mood) {
   const used = []; // no character appears twice in a set of panels
-  $(id).innerHTML = list.map(([tag, d, hair, city, q, lg], i) => {
+  // Phones show six, spread across the list so every age is there, with a button for the rest
+  const keep = new Set([0, 1, 2, 3, 4, 5].map(k => Math.round(k * (list.length - 1) / 5)));
+  $(id).innerHTML = list.map(([name, hair, d, city, q], i) => {
     const pid = window.AGE_ART.portraitId(decAge(d), { hair, mood, avoid: used }); used.push(pid);
     const svg = Character(decAge(d), { id: pid }).replace('viewBox="0 0 200 200"', 'viewBox="-14 6 228 112" preserveAspectRatio="xMidYMin slice"');
-    return `<div class="QW4K-qp${lg ? ' QW4K-lg' : ''}"><div class="QW4K-art">${svg}</div><div class="QW4K-txt"><div class="QW4K-qt">“${esc(q)}”</div><div class="QW4K-who"><b>${esc(tag)}</b>${DEC[d]}, ${esc(city)}</div></div></div>`;
+    return `<div class="QW4K-qp${q.length < 70 ? ' QW4K-lg' : ''}${keep.has(i) ? '' : ' QW4K-qp-more'}"><div class="QW4K-art">${svg}</div><div class="QW4K-txt"><div class="QW4K-qt">“${esc(q)}”</div><div class="QW4K-who"><b>${esc(name || 'Anonymous')}</b>${DEC[d]}${city ? ', ' + esc(city) : ''}</div></div></div>`;
   }).join('');
+  $(id).insertAdjacentHTML('afterend', `<div class="QW4K-panels-more"><button type="button" class="QW4K-sf-btn">Show all ${list.length} answers</button></div>`);
+  $(id).nextElementSibling.querySelector('button').addEventListener('click', e => { $(id).classList.add('QW4K-all'); e.currentTarget.parentNode.remove(); ScrollTrigger.refresh(); });
   gsap.utils.toArray(`#${id} .QW4K-qp`).forEach((q, i) => gsap.from(q, { y: 50, autoAlpha: 0, rotate: i % 2 ? 2 : -2, duration: .8, ease: 'power3.out', scrollTrigger: { trigger: q, start: 'top 92%' } }));
 }
 
@@ -1500,6 +1559,92 @@ function setupShare() {
   $('btnDl').addEventListener('click', async () => { try { download(await cardBlob()); say('Image downloaded.'); } catch (e) { say(BLOCKED); } });
 }
 
+/* ---------- Footer field: a grid of tiny dots around the footer text, one reader each, in the colour of their age now (yours is yellow).
+   Near the cursor the dots open into small reader cards, bigger the closer they are, and leave a long trail that settles back to dots.
+   Reaching the end of the page sends a wave of cards up from the bottom; keep scrolling past the end and it rises higher.
+   Every second or so a card slowly opens and closes on its own, so the field never sits quite still. ---------- */
+function footerPile() {
+  const cv = $('sfPile'), foot = cv.parentNode, inner = foot.querySelector('.QW4K-sf-inner'), ctx = cv.getContext('2d');
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const IMG = {}, load = src => IMG[src] || (IMG[src] = new Promise(ok => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ok(null); im.src = src; }));
+  const PITCH = 22, DOT = 3, CARD = PITCH, REACH = 130; // grid step, dot size, card size (full cards touch: no gap), cursor reach (px)
+  let cells = [], W = 0, H = 0, ptr = null, prev = null, tide = 0, swell = 0, raf = 0, visible = false, built = false, builtW = 0, lastBlink = 0;
+  async function build() {
+    W = foot.clientWidth; H = foot.clientHeight; builtW = W;
+    const dpr = Math.min(2, devicePixelRatio || 1); cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const fb = foot.getBoundingClientRect(), ib = inner.getBoundingClientRect();
+    const tx0 = ib.left - fb.left - 18, tx1 = ib.right - fb.left + 18, ty0 = ib.top - fb.top - 14, ty1 = ib.bottom - fb.top + 10; // keep clear of the text
+    const cols = Math.floor(W / PITCH), rows = Math.floor(H / PITCH), ox = (W - (cols - 1) * PITCH) / 2, oy = (H - (rows - 1) * PITCH) / 2;
+    const ids = [...Array(N).keys()].concat(youIn() ? [YI] : []);
+    const list = [];
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const x = ox + c * PITCH, y = oy + r * PITCH;
+      if (x > tx0 && x < tx1 && y > ty0 && y < ty1) continue;
+      list.push({ x, y, e: 0, bt: -1e5 });
+    }
+    // Readers spread over the grid in a shuffled order, so ages mix; you land somewhere near the bottom left
+    list.forEach((q, k) => { const i = ids[(k * 89 + 17) % ids.length]; q.i = i; });
+    if (youIn()) { const you = list.filter(q => q.y > H * .6).sort((a, b) => a.x - b.x)[2]; if (you) you.i = YI; }
+    await Promise.all(list.map(async q => {
+      const p = PX[q.i], you = q.i === YI;
+      q.c = you ? MARK_Y : ageC(p); q.you = you;
+      q.im = await load(you ? (youSquare() || window.AGE_ART.cutFor(0, ans.now ?? 2)) : window.AGE_ART.cutFor(q.i, p[0] >= 0 ? p[0] : 2));
+    }));
+    cells = list; built = true; kick();
+  }
+  function frame(now) {
+    ctx.clearRect(0, 0, W, H);
+    // Ambient blink: every second or so one card eases open and shut over three seconds
+    if (!still && now - lastBlink > 1100 && cells.length) { lastBlink = now; cells[Math.floor(Math.random() * cells.length)].bt = now; }
+    // The wave swells towards what the scrolling asked for, then ebbs away
+    tide += (swell - tide) * .07; swell *= .975; if (swell < .002 && tide < .002) swell = tide = 0;
+    const wave = tide * (H + 60);
+    const segDist = (q, a, b) => { const vx = b.x - a.x, vy = b.y - a.y, l = vx * vx + vy * vy, t = l ? Math.max(0, Math.min(1, ((q.x - a.x) * vx + (q.y - a.y) * vy) / l)) : 0; return Math.hypot(q.x - a.x - t * vx, q.y - a.y - t * vy); };
+    cells.forEach(q => {
+      let target = 0;
+      // Distance to the path the cursor took since the last frame, so a fast swipe still lights every card it crossed
+      if (ptr) { const d = segDist(q, prev || ptr, ptr); if (d < REACH) { const f = 1 - d / REACH; target = f * f * (3 - 2 * f); } }
+      const bp = (now - q.bt) / 3000; if (bp > 0 && bp < 1) target = Math.max(target, .75 * Math.sin(Math.PI * bp) ** 2);
+      if (tide) { const db = H - q.y, edge = wave + Math.sin(q.x * .035 + now * .004) * 22; if (db < edge) target = Math.max(target, Math.min(1, (edge - db) / 70)); }
+      q.e = target > q.e ? q.e + (target - q.e) * .3 : Math.max(target, q.e * .975); // open fast, close slowly: the cursor leaves a trail
+      const z = DOT + (CARD - DOT) * q.e;
+      ctx.save(); ctx.translate(q.x, q.y);
+      if (z < 7) { ctx.beginPath(); ctx.arc(0, 0, z / 2 + .3, 0, Math.PI * 2); ctx.fillStyle = q.c; ctx.fill(); }
+      else {
+        const h = z / 2; ctx.fillStyle = q.c; ctx.fillRect(-h, -h, z, z);
+        if (q.im && z > 10) { ctx.globalAlpha = Math.min(1, (z - 10) / 6); ctx.drawImage(q.im, -h, -h, z, z); ctx.globalAlpha = 1; }
+        ctx.lineWidth = q.you ? 2 : 1; ctx.strokeStyle = q.you ? INK : 'rgba(26,18,8,.6)'; ctx.strokeRect(-h, -h, z, z);
+      }
+      ctx.restore();
+    });
+    prev = ptr;
+  }
+  // Keep drawing while the footer is on screen (the blinks need it); stop when it's out of view
+  const loop = now => { raf = 0; if (!visible || !built) return; frame(now); raf = requestAnimationFrame(loop); };
+  const kick = () => { if (!raf && visible && built) raf = requestAnimationFrame(loop); };
+  const at = e => { const b = cv.getBoundingClientRect(); return { x: e.clientX - b.left, y: e.clientY - b.top }; };
+  foot.addEventListener('pointermove', e => { ptr = at(e); kick(); });
+  foot.addEventListener('pointerleave', () => { ptr = prev = null; });
+  foot.addEventListener('pointerup', e => { if (e.pointerType === 'touch') ptr = null; });
+  // The end of the page: arriving sends one wave up; scrolling (or swiping) on past the end pushes it higher
+  const atEnd = () => innerHeight + scrollY >= document.documentElement.scrollHeight - 4;
+  const push = amt => { if (still) return; swell = Math.min(1.2, swell + amt); kick(); }; // before the field is built, the wave waits for it
+  addEventListener('wheel', e => { if (e.deltaY > 0 && atEnd()) push(Math.min(e.deltaY, 120) / 900); }, { passive: true });
+  let ty = null;
+  addEventListener('touchstart', e => { ty = e.touches[0].clientY; }, { passive: true });
+  addEventListener('touchmove', e => { const y = e.touches[0].clientY; if (ty != null && atEnd() && ty - y > 0) push((ty - y) / 500); ty = y; }, { passive: true });
+  let wasEnd = false;
+  addEventListener('scroll', () => { const end = atEnd(); if (end && !wasEnd) push(1); wasEnd = end; }, { passive: true });
+  let started = false;
+  const start = async () => {
+    if (started) return; started = true;
+    new IntersectionObserver(([en]) => { visible = en.isIntersecting; kick(); }).observe(foot);
+    visible = true; await build();
+    let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { if (Math.abs(foot.clientWidth - builtW) > 40) build(); }, 300); });
+  };
+  ScrollTrigger.create({ trigger: foot, start: 'top 90%', once: true, onEnter: start });
+}
+
 /* ---------- Boot ---------- */
 KEN.whenFontsReady(() => {
   gsap.to('.QW4K-progress', { scaleX: 1, ease: 'none', scrollTrigger: { start: 0, end: 'max', scrub: .3 } });
@@ -1539,7 +1684,6 @@ KEN.whenFontsReady(() => {
   stripFrames('stripAhead', [1, 3, 4, 5].map((d, i) => ({ svg: Character(decAge(d), { hair: i % 2 ? 'long' : 'short', mood: d < 4 ? 'joy' : d < 5 ? 'smile' : 'neutral', skin: SKINS[i % 3] }), cap: 'In ' + THEIR[d], bubble: `<b>${ahead[d]}%</b>still ahead` })));
   const pillMed = [[1, 28], [2, 34], [3, 38], [4, 45], [5, 50], [6, 60]]; // [decade now, median stop age]
   stripFrames('stripPill', pillMed.map(([d, a], i) => ({ svg: Character(a, { hair: i % 2 ? 'long' : 'short', mood: 'smile' }), cap: 'Now ' + DEC[d], tag: 'Stop at ' + a })));
-  stripFrames('stripEnd', DEC.map((d, i) => ({ svg: Character(decAge(i), { hair: 'long', mood: i < 3 ? 'joy' : 'smile', skin: SKINS[1] }), cap: d })));
   $('ctaAv').innerHTML = Character(35, { hair: 'short', mood: 'joy' });
 
   // Prose fade-ups and interludes
@@ -1552,6 +1696,7 @@ KEN.whenFontsReady(() => {
   const KEY = `<div class="QW4K-age-key" aria-label="Colour key: age now"><b>Age now</b>${DEC.map((d, i) => `<span><i style="background:${AGEC[i]}"></i>${d}</span>`).join('')}</div>`;
   document.querySelectorAll('.QW4K-scrolly .QW4K-g-sub').forEach(el => el.insertAdjacentHTML('afterend', KEY));
   document.querySelectorAll('.QW4K-scrolly').forEach(setupScrolly);
+  footerPile();
   quotePanels('panelsMid', QUOTES_MID, 'worried');
   quotePanels('panelsPill', QUOTES_PILL, 'smile');
   ScrollTrigger.refresh();

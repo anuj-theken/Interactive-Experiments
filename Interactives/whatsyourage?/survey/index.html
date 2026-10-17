@@ -47,12 +47,12 @@
     .QW4K-stage { min-height: 0; padding: 18px 16px 14px; }
     .QW4K-side { position: static; }
     .QW4K-brand { font-size: 18px; } .QW4K-count { display: none; }
-    /* Mobile: the question card comes first, so every question is answerable without scrolling;
-       the illustration / chart follows, and the age profile goes last */
+    /* Mobile: the illustration / chart comes first, sized to fit the screen so nothing is cut off;
+       the question card follows, and the age profile goes last */
     .QW4K-app { gap: 16px; }
     .QW4K-side { display: contents; }
-    .QW4K-prompt { order: 1; box-shadow: 5px 5px 0 var(--red); padding: 16px 16px 14px; }
-    .QW4K-stage { order: 2; }
+    .QW4K-stage { order: 1; }
+    .QW4K-prompt { order: 2; box-shadow: 5px 5px 0 var(--red); padding: 16px 16px 14px; }
     .QW4K-profile { order: 3; }
     .QW4K-stage h1 { font-size: 26px; letter-spacing: -.5px; margin: 6px 0 6px; }
     .QW4K-lede { font-size: 14.5px; }
@@ -206,6 +206,13 @@
   .QW4K-btn { border-radius: 999px; padding: 11px 22px; }
   .QW4K-btn:hover { background: #3a2d22; }
   .QW4K-hero-frame { border: 3px solid var(--ink); box-shadow: 14px 14px 0 #746362; }
+  /* Mobile: the picture or chart sits on top (see the app grid), so keep it small enough to leave room for the question */
+  @media (max-width: 960px) {
+    .QW4K-visual { min-height: 0; margin-top: 12px; }
+    .QW4K-art-layer { padding: 4px 0 18px; }
+    .QW4K-hero-frame { width: min(240px, 66%); box-shadow: 9px 9px 0 #746362; }
+    #dots, #bars { flex: none; height: min(52vh, 380px); min-height: 260px; }
+  }
   /* Rules borrowed from assets/ken-chart.css, renamed with the page prefix */
   .QW4K-note { font-style: italic; font-size: 12px; color: var(--ken-text); line-height: 1.45; }
   .QW4K-footer { border-top: 1.5px solid var(--ken-rule); display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 24px 0 16px; margin-top: 4px; }

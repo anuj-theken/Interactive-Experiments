@@ -57,7 +57,8 @@ def recipe(decade, i, rng):
     hair = hairs[(i // 2 + decade) % len(hairs)]
     face = faces[(i + decade * 3) % len(faces)]
     beard = None
-    if not fem and decade >= 1 and face not in OPEN_MOUTH and rng.random() < 0.7:
+    # No facial hair with long hair, a braid or a bun (checked after the draw, so the other characters keep their looks)
+    if not fem and decade >= 1 and face not in OPEN_MOUTH and rng.random() < 0.7 and hair not in LONG_STYLES:
         beard = BEARDS[(i // 2 + decade * 3) % len(BEARDS)]
     specs = None
     if decade >= 1 and rng.random() < (0.15 if decade <= 1 else 0.3 if decade <= 2 else 0.55):
