@@ -101,12 +101,14 @@
   const portraitSrcOf = (age, o = {}) => `${PORTRAIT_DIR}${portraitId(age, o)}.png`;
 
   // The reader's own character, stacked from pre-coloured layers so any combination works.
-  // o.you = { length: 'long'|'short', curl: 'straight'|'curly'|'braid'|'bun', facial: null|'moustache'|'beard1'|'beard2', skin: 0-5 }
+  // o.you = { length: 'long'|'short', curl: 'straight'|'curly'|'braid'|'bun', facial: null|'moustache'|'beard1'|'beard2', skin: 0-5, shirt?: 1-8 }
   // Readers pick only length and curl; age picks the hairstyle (long straight hair goes braid, loose, waves, bob, bun;
   // short hair thins to balding). Hair and beards grey with age and specs arrive in the 50s.
   const HAIR_LENGTHS = [['long', 'Long'], ['short', 'Short']];
   const HAIR_TYPES = [['straight', 'Straight'], ['curly', 'Curly'], ['braid', 'Braid'], ['bun', 'Bun']];
   const FACIAL = [[null, 'None'], ['moustache', 'Moustache'], ['beard2', 'Chin strap'], ['beard1', 'Full beard']];
+  // The eight shirts in character-kit/FP survey characters/shirts, as layers shirt-1..8
+  const SHIRTS_YOU = [[1, 'Turtleneck'], [2, 'Blazer'], [3, 'Shirt'], [4, 'White shirt'], [5, 'Hoodie'], [6, 'Stripes'], [7, 'Jumper'], [8, 'Jacket']];
   // Hair part per decade (Teens..70s+). Parts: 1-2 long waves, 3 braid, 4 bun, 5 curls, 6 bob, 7 short curls, 8 short, 9 quiff, 10 balding, 0 bald
   const HAIR_BY_AGE = {
     'long-straight': [3, 2, 1, 6, 6, 4, 4], 'long-curly': [5, 5, 5, 5, 5, 7, 7],
@@ -120,11 +122,20 @@
   const YOU_FACE_YOUNG = { smile: 3, neutral: 3, joy: 3, worried: 3, tired: 3 };
   const YOU_FACE = { smile: 1, neutral: 1, joy: 2, worried: 1, tired: 1 };
   const YOU_FACE_60 = { smile: 4, neutral: 4, joy: 2, worried: 4, tired: 4 };
+  // The reader's pick (you.shirt, 1-8) if they made one; until then the outfit follows their mix of features: each
+  // combination of hair length, hair type, facial hair and skin wears the same shirt, and changing any of them changes it
+  // (weights 1, 2, 3, 5 mod 8: no single change of one feature can add up to a multiple of 8)
+  const youShirt = you => {
+    if (you.shirt >= 1 && you.shirt <= 8) return you.shirt;
+    const len = you.length === 'long' ? 1 : 0, curl = Math.max(0, HAIR_TYPES.findIndex(([k]) => k === (you.curl || 'straight')));
+    const facial = Math.max(0, FACIAL.findIndex(([k]) => k === (you.facial || null))), skin = you.skin ?? 2;
+    return ((len + curl * 2 + facial * 3 + skin * 5) % 8) + 1;
+  };
   function youLayers(age, you, mood) {
     const d = decadeOf(age), tone = hairTone(age);
     const style = (HAIR_BY_AGE[`${you.length || 'short'}-${you.curl || 'straight'}`] || HAIR_BY_AGE['short-straight'])[d];
     const face = (d >= 5 ? YOU_FACE_60 : d <= 1 && !(you.facial && d >= 1) ? YOU_FACE_YOUNG : YOU_FACE)[mood] || 1; // a beard would cover the open mouth
-    const L = [`base-${you.skin ?? 2}`, 'shirt-3', `face-${face}`];
+    const L = [`base-${you.skin ?? 2}`, `shirt-${youShirt(you)}`, `face-${face}`];
     if (d >= 4) L.push('specs-2');
     if (style) L.push(`hair-${style}-${tone}`);
     if (you.facial && d >= 1) L.push(`beard-${you.facial}-${tone}`); // over the hair, so long hair never hides it
@@ -206,5 +217,5 @@
   // A stable, varied cut-out for mark i: drawn from the reader's decade when known, otherwise from all of them
   const cutFor = (i, dec) => { const list = dec >= 0 ? BY_DECADE[dec] : STORY; return cutSrc(list[(i * 7 + (i >> 3)) % list.length].id); };
 
-  window.AGE_ART = { Character, Scene, figure, decadeOf, SKINS, portraitId, portraitSrc, PORTRAIT_DIR, cutFor, cutSrc, HAIR_LENGTHS, HAIR_TYPES, FACIAL, youLayers, drawYou, youCut };
+  window.AGE_ART = { Character, Scene, figure, decadeOf, SKINS, portraitId, portraitSrc, PORTRAIT_DIR, cutFor, cutSrc, HAIR_LENGTHS, HAIR_TYPES, FACIAL, SHIRTS_YOU, youShirt, youLayers, drawYou, youCut };
 })();

@@ -80,14 +80,14 @@
   .QW4K-qcard.QW4K-has-art > .QW4K-frame { max-width: 210px; margin-top: 4px; }
   /* The age card is landscape: slider and hair on one line, beard and skin on the next */
   .QW4K-ask.QW4K-age-ask { max-width: 1040px; }
-  /* Age card picker: age across the top; hair and hair type side by side; beard and skin below */
+  /* Age card picker: age across the top; hair and hair type side by side; beard and skin (one line) below; clothes last */
   .QW4K-lk-grid { display: flex; flex-wrap: wrap; align-items: flex-start; column-gap: 28px; }
   .QW4K-lk-grid > .QW4K-qrow { margin-top: 12px; }
-  .QW4K-lk-age { flex: 1 1 100%; } .QW4K-lk-len { order: 1; } .QW4K-lk-curl { order: 2; } .QW4K-lk-break { order: 3; } .QW4K-lk-beard { order: 4; } .QW4K-lk-skin { order: 5; }
+  .QW4K-lk-age { flex: 1 1 100%; } .QW4K-lk-len { order: 1; } .QW4K-lk-curl { order: 2; } .QW4K-lk-break { order: 3; } .QW4K-lk-beard { order: 4; } .QW4K-lk-skin { order: 5; } .QW4K-lk-shirt { order: 6; flex: 1 1 100%; }
   .QW4K-lk-break { flex-basis: 100%; height: 0; }
-  .QW4K-lk-skin .QW4K-qskin { gap: 6px; } .QW4K-lk-skin .QW4K-qskin button { width: 36px; height: 36px; }
+  .QW4K-lk-skin .QW4K-qskin { display: flex; flex-wrap: nowrap; gap: 8px; } .QW4K-lk-skin .QW4K-qskin button { width: 36px; height: 36px; }
   @media (max-width: 760px) { .QW4K-qcard.QW4K-has-art { grid-template-columns: 1fr; gap: 18px; } .QW4K-qcard.QW4K-has-art > .QW4K-frame { max-width: 200px; } }
-  @media (max-width: 480px) { .QW4K-lk-grid { column-gap: 14px; } .QW4K-qlook button { width: 60px; } .QW4K-qlook .QW4K-lk { width: 40px; height: 40px; } }
+  @media (max-width: 480px) { .QW4K-lk-skin .QW4K-qskin { gap: 6px; } .QW4K-lk-skin .QW4K-qskin button { width: 32px; height: 32px; } .QW4K-lk-grid { column-gap: 14px; } .QW4K-qlook button { width: 60px; } .QW4K-qlook .QW4K-lk { width: 40px; height: 40px; } }
   .QW4K-qcard { background: #fff; border: 3px solid var(--ink); border-radius: 4px; box-shadow: 8px 8px 0 var(--red); padding: 22px 24px 18px; }
   .QW4K-qlabel { font-family: var(--ken-font-bold); font-weight: bold; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--ken-text); }
   .QW4K-qtext { font-family: var(--ken-font-display); font-weight: bold; font-size: clamp(26px, 3.4vw, 38px); line-height: 1.08; color: var(--ink); margin: 10px 0 16px; letter-spacing: -.5px; }
@@ -137,11 +137,11 @@
   .QW4K-qscale { display: flex; justify-content: space-between; font-size: 12px; color: var(--ken-text); }
   .QW4K-qnever { margin-top: 12px; display: flex; align-items: center; gap: 8px; }
   /* ===== Question cards =====
-     A soft pink panel; the character on the left with a warm grey offset shadow; the question in a white rounded box;
+     A soft pink panel; the character on the left in an ink outline with a warm grey offset shadow; the question in a white rounded box;
      plain instructions, a thin slider with a pill handle, and white pill buttons that fill with ink once picked. */
   .QW4K-qcard { --card: #E9C6C4; --card-shadow: #746362; background: var(--card); border: 0; border-radius: 0; box-shadow: none; padding: 34px 32px 28px; }
   .QW4K-qcard.QW4K-has-art { gap: 32px; }
-  .QW4K-qcard.QW4K-has-art > .QW4K-frame { border: 0; box-shadow: 12px 12px 0 var(--card-shadow); }
+  .QW4K-qcard.QW4K-has-art > .QW4K-frame { border: 3px solid var(--ink); box-shadow: 12px 12px 0 var(--card-shadow); }
   .QW4K-qhead { background: #fff; border: 1.5px solid var(--ink); border-radius: 16px; padding: 14px 22px 18px; }
   .QW4K-qhead .QW4K-qlabel { font-family: var(--ken-font-body); font-weight: normal; font-size: 15px; letter-spacing: 0; text-transform: none; color: var(--ink); }
   .QW4K-qhead .QW4K-qtext { margin: 4px 0 0; }
@@ -319,27 +319,7 @@
   .QW4K-sf-credit { font-family: var(--ken-font-body); font-style: italic; font-size: 15px; color: var(--ken-text); text-align: right; }
   .QW4K-site-foot { padding-bottom: 36px; }
   @media (max-width: 480px) { .QW4K-sf-bottom { flex-direction: column; text-align: center; gap: 10px; } .QW4K-sf-credit { text-align: center; } }
-  /* ===== Age-profile card (scripts/profile-card.js): same on the story and the quiz ===== */
-  .QW4K-final { width: 100%; display: grid; grid-template-columns: 240px minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: 28px; row-gap: 18px; align-items: start; border: 3px solid var(--ink); background: #fff; padding: 22px; box-shadow: 8px 8px 0 var(--red); text-align: left; }
-  .QW4K-final > .QW4K-frame { grid-column: 1; grid-row: 1; }
-  .QW4K-final > dl { grid-column: 2; grid-row: 1 / span 2; margin: 0; display: grid; grid-template-columns: 1fr 1fr; grid-auto-flow: row dense; gap: 14px 22px; }
-  .QW4K-final-logo { grid-column: 1; grid-row: 2; align-self: end; height: 20px; width: auto; }
-  .QW4K-final dt { font-family: var(--ken-font-bold); font-weight: bold; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ken-text); }
-  .QW4K-final dd { margin: 3px 0 0; font-family: var(--ken-font-body); font-size: 18px; color: var(--ink); line-height: 1.3; }
-  .QW4K-final dd small { display: block; font-size: 12.5px; color: var(--ken-text); margin-top: 2px; }
-  .QW4K-final .QW4K-pc-blank { color: #9A8E7A; }
-  .QW4K-final .QW4K-wide { grid-column: 1 / -1; }
-  .QW4K-final .QW4K-wide q { font-family: var(--ken-font-body); font-style: italic; font-size: 17px; line-height: 1.4; quotes: '“' '”'; }
-  .QW4K-final .QW4K-pc-tag { font-family: var(--ken-font-display); font-weight: bold; font-size: 30px; line-height: 1.05; color: var(--ink); grid-column: 1 / -1; }
-  /* iPad portrait and phones: character on top, answers below, logo at the foot of the card */
-  @media (max-width: 760px) {
-    .QW4K-final { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; padding: 18px; box-shadow: 6px 6px 0 var(--red); }
-    .QW4K-final > .QW4K-frame { max-width: 200px; }
-    .QW4K-final > dl { grid-column: 1; grid-row: 2; }
-    .QW4K-final-logo { grid-column: 1; grid-row: 3; align-self: start; margin-top: 4px; }
-    .QW4K-final .QW4K-pc-tag { font-size: 26px; }
-  }
-  @media (max-width: 480px) { .QW4K-final > dl { grid-template-columns: 1fr; gap: 12px; } .QW4K-final > .QW4K-frame { max-width: 160px; } }
+  /* Age-profile card: styles live in scripts/profile-card.js so the page and the downloaded image share them */
   /* Buttons: one corner radius everywhere (skin swatches stay round) */
   .QW4K-qopts button, .QW4K-qlook button, .QW4K-sbtn, .QW4K-sf-btn, .QW4K-cta a { border-radius: 12px; }
   .QW4K-qlook .QW4K-lk { border-radius: 8px; }
@@ -1055,7 +1035,7 @@ function quotePanels(id, list, mood) {
 
 /* ---------- Your answers: optional chips on each question card. They place a "You" square in the charts
    and rewrite the opening card of the section that follows. Nothing is stored or sent anywhere. ---------- */
-const ans = { age: null, now: null, hap: null, exp: null, mid: null, midAge: null, trig: null, trigText: '', why: '', pill: null, fact: 0, lookSet: false, length: null, curl: null, facial: null, skin: null };
+const ans = { age: null, now: null, hap: null, exp: null, mid: null, midAge: null, trig: null, trigText: '', why: '', pill: null, fact: 0, lookSet: false, length: null, curl: null, facial: null, skin: null, shirt: null };
 const FACTORS = [['Freedom and fewer obligations', 8], ['Relationships or family', 2], ['Financial security', 16], ['Work or building something', 1], ['Health and energy', 4], ['Learning or discovery', 32]];
 const TRIGS = [['My body or health', 1], ['Kids growing up', 2], ['Parents ageing', 4], ['Work', 8], ['Feeling older than the room', 16], ['A milestone birthday', 32], ['Something else', 0]];
 const OTHER = 64; // "Other" on question 5: counted as an answer, not drawn in the chart
@@ -1068,9 +1048,9 @@ const qrow = (label, inner, hide) => `<div class="QW4K-qrow"${hide ? ' hidden' :
 // The reader's own character: hair and skin picked on the age card. Every question card then draws them
 // at that question's age, so the same person greys and loses hair as the story moves through their life.
 const SKIN_NAMES = ['Light', 'Medium', 'Deep'];
-const look = () => ans.lookSet ? { length: ans.length || 'short', curl: ans.curl || 'straight', facial: ans.facial, skin: ans.skin ?? 2 } : null;
+const look = () => ans.lookSet ? { length: ans.length || 'short', curl: ans.curl || 'straight', facial: ans.facial, skin: ans.skin ?? 2, shirt: ans.shirt } : null;
 const asMe = (o = {}) => { const l = look(); return l ? { ...o, you: l } : o; };
-const { HAIR_LENGTHS, HAIR_TYPES, FACIAL } = window.AGE_ART;
+const { HAIR_LENGTHS, HAIR_TYPES, FACIAL, SHIRTS_YOU } = window.AGE_ART;
 const lookBtn = (v, label) => `<button type="button" data-v="${v}" aria-pressed="false" title="${label}"><span class="QW4K-lk"></span><small>${label}</small></button>`;
 // Readers pick only length and curl; their age picks the hairstyle
 const pickRow = (cls, label, inner) => `<div class="QW4K-qrow QW4K-${cls}"><span class="QW4K-qlab">${label}</span>${inner}</div>`;
@@ -1081,14 +1061,17 @@ const lookGridHTML = () => `<div class="QW4K-lk-grid">
   ${pickRow('lk-curl', 'Hair type', `<div class="QW4K-qopts QW4K-qlook" id="optCurl">${HAIR_TYPES.map(([, t], i) => lookBtn(i, t)).join('')}</div>`)}
   ${pickRow('lk-skin', 'Skin', `<div class="QW4K-qopts QW4K-qskin" id="optSkin">${SKINS.map((c, i) => `<button type="button" data-v="${i}" aria-pressed="false" aria-label="Skin tone ${i + 1} of ${SKINS.length}" style="--sk:${c}"></button>`).join('')}</div>`)}
   ${pickRow('lk-beard', 'Beard or moustache', `<div class="QW4K-qopts QW4K-qlook" id="optFacial">${FACIAL.map(([, t], i) => lookBtn(i, t)).join('')}</div>`)}
+  ${pickRow('lk-shirt', 'Clothes', `<div class="QW4K-qopts QW4K-qlook" id="optShirt">${SHIRTS_YOU.map(([, t], i) => lookBtn(i, t)).join('')}</div>`)}
 </div>`;
 // Previews show the reader at their own age with each option, so they see exactly what they'll get
 function paintLook() {
-  const age = ans.age ?? 35, base = { length: ans.length || 'short', curl: ans.curl || 'straight', facial: ans.facial, skin: ans.skin ?? 2 };
+  const age = ans.age ?? 35, base = { length: ans.length || 'short', curl: ans.curl || 'straight', facial: ans.facial, skin: ans.skin ?? 2, shirt: ans.shirt };
   const head = svg => svg.replace('viewBox="0 0 200 200"', 'viewBox="52 10 96 96"');
+  const body = svg => svg.replace('viewBox="0 0 200 200"', 'viewBox="28 64 144 144"'); // shoulders and shirt
   $('optLength').querySelectorAll('.QW4K-lk').forEach((el, i) => el.innerHTML = head(Character(age, { you: { ...base, length: HAIR_LENGTHS[i][0] } })));
   $('optCurl').querySelectorAll('.QW4K-lk').forEach((el, i) => el.innerHTML = head(Character(age, { you: { ...base, curl: HAIR_TYPES[i][0] } })));
   $('optFacial').querySelectorAll('.QW4K-lk').forEach((el, i) => el.innerHTML = head(Character(Math.max(age, 25), { you: { ...base, facial: FACIAL[i][0] } })));
+  $('optShirt').querySelectorAll('.QW4K-lk').forEach((el, i) => el.innerHTML = body(Character(age, { you: { ...base, shirt: SHIRTS_YOU[i][0] } })));
 }
 const chipsHTML = (opts, id) => `<div class="QW4K-qopts" id="${id}">${opts.map(([t, v]) => `<button type="button" data-v="${v}" aria-pressed="false">${t}</button>`).join('')}</div>`;
 const slideHTML = (id, min, max, val) => `<div class="QW4K-qslide"><div class="QW4K-qval QW4K-idle" id="${id}Val">Drag the slider</div><input class="QW4K-qr" id="${id}" type="range" min="${min}" max="${max}" step="1" value="${val}" aria-label="Age"><div class="QW4K-qscale"><span>${min}</span><span>${max}</span></div></div>`;
@@ -1333,7 +1316,7 @@ function syncCards() {
 // The illustration beside each question changes with the reader's answer
 const AV = {};
 function setAvatar(id, key, svg, cap) {
-  const l = look(); key += l ? '|' + [l.length, l.curl, l.facial, l.skin].join('.') : '';
+  const l = look(); key += l ? '|' + [l.length, l.curl, l.facial, l.skin, l.shirt].join('.') : '';
   if (AV[id] === key) return;
   AV[id] = key;
   const fr = $(id); fr.querySelector('svg').outerHTML = svg; fr.querySelector('.QW4K-cap').textContent = cap;
@@ -1391,10 +1374,14 @@ function buildForms() {
   const wireAge = () => {
   $('formAge').innerHTML = turnHTML('Drag the slider. Your age shapes the answers that follow.', 'Thanks. Scroll on') + lookGridHTML();
   paintLook();
-  onChips('optLength', v => { ans.lookSet = true; ans.length = HAIR_LENGTHS[v][0]; paintLook(); syncYou(); });
-  onChips('optCurl', v => { ans.lookSet = true; ans.curl = HAIR_TYPES[v][0]; paintLook(); syncYou(); });
-  onChips('optFacial', v => { ans.lookSet = true; ans.facial = FACIAL[v][0]; paintLook(); syncYou(); });
-  onChips('optSkin', v => { ans.lookSet = true; ans.skin = v; paintLook(); syncYou(); });
+  // A look pick redraws the character straight away; the option previews follow on the next frame (clothes don't
+  // show in the head previews, so they skip it) and the charts and card wait a moment, as they do for the sliders
+  const setLook = (k, v) => { ans.lookSet = true; ans[k] = v; syncYou(true); if (k !== 'shirt') requestAnimationFrame(paintLook); };
+  onChips('optLength', v => setLook('length', HAIR_LENGTHS[v][0]));
+  onChips('optCurl', v => setLook('curl', HAIR_TYPES[v][0]));
+  onChips('optFacial', v => setLook('facial', FACIAL[v][0]));
+  onChips('optSkin', v => setLook('skin', v));
+  onChips('optShirt', v => setLook('shirt', SHIRTS_YOU[v][0]));
   onSlide('inAge', v => {
     ans.age = v; ans.now = decadeOf(v); paintLook();
     // Q3 is answered by your age; you can still change it there
@@ -1466,17 +1453,23 @@ function cardSpec() {
   const out = ans.exp == null || ans.now == null ? null : ans.exp === -2 ? 'behind' : ans.exp > ans.now ? 'ahead' : ans.exp === ans.now ? 'now' : 'behind';
   const row = (label, set, value, sub = '', wide = false) => ({ label, value: set ? value() : '', state: set ? 'set' : 'empty', sub, wide });
   const picked = FACTORS.filter(([, b]) => ans.fact & b);
+  // A line of context under the pill age and the happiest decade, worked out like the notes under each question
+  const pills = P.filter(p => p[5] != null);
+  const pillSub = ans.pill == null ? '' : ans.pill === WOULDNT ? `Only ${pills.filter(p => p[5] > 80).length} of ${pills.length} readers said the same`
+    : `${pct(pills.filter(p => p[5] < ans.pill).length, pills.length)}% of readers would stop younger, ${pct(pills.filter(p => p[5] > ans.pill).length, pills.length)}% older`;
+  const { g, who } = peers(), named = g.filter(p => p[1] >= 0);
+  const hapSub = ans.hap == null ? '' : ans.hap === -1 ? 'Only 11 readers said the same' : `${pct(named.filter(p => p[1] === ans.hap).length, named.length)}% of ${who} said the same`;
   const rows = [
     row('Your decade', ans.now != null, () => DEC[ans.now]),
-    row('Would take the pill at', ans.pill != null, () => ans.pill === WOULDNT ? 'Wouldn’t take it' : String(ans.pill)),
-    ...(ans.pill === WOULDNT ? [] : [row('Why that age', !!ans.why, () => ans.why, '', true)]),
-    row('Happiest so far', ans.hap != null, () => ans.hap === -1 ? 'Too close to call' : DEC[ans.hap]),
+    row('Would take the pill at', ans.pill != null, () => ans.pill === WOULDNT ? 'Wouldn’t take it' : String(ans.pill), pillSub),
+    ...(ans.pill === WOULDNT ? [] : [row('Why that age', !!ans.why, () => ans.why)]),
+    row('Happiest so far', ans.hap != null, () => ans.hap === -1 ? 'Too close to call' : DEC[ans.hap], hapSub),
     row('A good decade needs', ans.fact > 0, () => picked.length ? picked.map(([n, b]) => FACT_SHORT[b] || n).join(' & ') : 'Something else', 'Readers’ top pick: freedom'),
     row('Felt middle-aged', ans.mid != null, () => ans.mid ? (ans.midAge != null ? `Yes, at ${ans.midAge}` : 'Yes') : 'Not yet', '47% of readers have'),
+    // In your words if you wrote them, otherwise the answer you picked; next to 'Felt middle-aged'
+    ...(ans.mid === 1 ? [row('What gave it away', !!ans.trigText || ans.trig != null, () => ans.trigText || (TRIGS.find(([, v]) => v === ans.trig) || ['Something else'])[0])] : []),
     row('Your best decade is', !!out, () => ({ ahead: 'Still ahead', now: 'Right now', behind: 'Behind you' })[out]),
   ];
-  // In your words if you wrote them, otherwise the answer you picked
-  if (ans.mid === 1) rows.push(row('What gave it away', !!ans.trigText || ans.trig != null, () => ans.trigText || (TRIGS.find(([, v]) => v === ans.trig) || ['Something else'])[0], '', true));
   const age = ans.age ?? (ans.now != null ? decAge(ans.now) : null);
   return { tag: cardTag(out), cap: ans.age != null ? `You, ${ans.age}` : 'You', age, you: look(), rows,
            art: Character(age ?? 35, asMe({ mood: 'joy', question: !anyAnswer() })) };

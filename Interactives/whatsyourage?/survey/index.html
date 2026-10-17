@@ -135,8 +135,11 @@
   .QW4K-look-row + .QW4K-look-lab { margin-top: 12px; }
   .QW4K-look-pair { display: flex; flex-wrap: wrap; gap: 6px 18px; }
   .QW4K-look-pair + .QW4K-look-lab { margin-top: 12px; }
+  .QW4K-look > .QW4K-look-step:not([hidden]) { margin-top: 12px; }
+  .QW4K-look-step[hidden] { display: none; }
   .QW4K-look-pair .QW4K-look-row { flex-wrap: nowrap; }
   .QW4K-look-row .QW4K-sw { width: 34px; height: 34px; }
+  #lookSkin { flex-wrap: nowrap; gap: 8px; }
   .QW4K-lk-btn:hover { background: #F6E9E7; }
   .QW4K-lk-btn[aria-pressed=true] { background: var(--red); border-color: var(--red); color: #fff; }
   .QW4K-lk-btn .QW4K-lk { width: 44px; height: 44px; border: 1.5px solid var(--ink); overflow: hidden; display: block; background: #fff; flex-shrink: 0; }
@@ -182,7 +185,7 @@
   .QW4K-foot { max-width: 1280px; margin: 0 auto; padding: 0 24px 24px; }
   .QW4K-foot .QW4K-note { max-width: 60em; }
   /* ===== Card design: pink panel, question in a white rounded box, thin pill slider,
-     rounded options that fill with ink once picked; the character drops its border for a warm grey offset shadow ===== */
+     rounded options that fill with ink once picked; the character keeps its ink outline with a warm grey offset shadow ===== */
   .QW4K-prompt, .QW4K-prompt.QW4K-on { background: #E9C6C4; border: 0; border-radius: 0; box-shadow: none; padding: 22px 20px 20px; }
   .QW4K-p-head { background: #fff; border: 1.5px solid var(--ink); border-radius: 14px; padding: 12px 16px 14px; margin-bottom: 14px; }
   .QW4K-p-head .QW4K-p-k { font-family: var(--ken-font-body); font-weight: normal; font-size: 14px; letter-spacing: 0; text-transform: none; color: var(--ink); }
@@ -202,7 +205,7 @@
   .QW4K-sw[aria-pressed=true] { outline: 2.5px solid var(--ink); outline-offset: 2px; }
   .QW4K-btn { border-radius: 999px; padding: 11px 22px; }
   .QW4K-btn:hover { background: #3a2d22; }
-  .QW4K-hero-frame { border: 0; box-shadow: 14px 14px 0 #746362; }
+  .QW4K-hero-frame { border: 3px solid var(--ink); box-shadow: 14px 14px 0 #746362; }
   /* Rules borrowed from assets/ken-chart.css, renamed with the page prefix */
   .QW4K-note { font-style: italic; font-size: 12px; color: var(--ken-text); line-height: 1.45; }
   .QW4K-footer { border-top: 1.5px solid var(--ken-rule); display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 24px 0 16px; margin-top: 4px; }
@@ -217,7 +220,16 @@
   .QW4K-free-meta { display: flex; justify-content: space-between; gap: 10px; margin-top: 6px; font-size: 12px; color: var(--ken-text); }
   .QW4K-p-t i { font-family: var(--ken-font-body); }
   /* Final card: Ken logo bottom left; download and share */
-  .QW4K-final-actions { justify-content: flex-start; gap: 10px; margin-top: 14px; }
+  .QW4K-final-actions { justify-content: flex-start; flex-wrap: wrap; gap: 14px; margin-top: 18px; }
+  /* Share and download: the same buttons as the story's "Share your card" */
+  .QW4K-sbtn { font-family: var(--ken-font-bold); font-weight: bold; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; border: 3px solid var(--ink); border-radius: 12px; padding: 12px 20px; background: #fff; color: var(--ink); cursor: pointer; box-shadow: 4px 4px 0 var(--ink); transition: transform .12s, box-shadow .12s; text-decoration: none; }
+  .QW4K-sbtn svg { width: 20px; height: 20px; flex: none; }
+  .QW4K-sbtn.QW4K-primary { background: var(--red); color: #fff; }
+  .QW4K-sbtn:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+  .QW4K-sbtn:active:not(:disabled) { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+  .QW4K-sbtn:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; }
+  .QW4K-sbtn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  @media (max-width: 560px) { .QW4K-final-actions { flex-direction: column; align-items: stretch; } }
   .QW4K-q-msg { min-height: 1.2em; margin: 8px 0 0; font-size: 13px; font-style: italic; color: var(--ken-text); }
   /* Footer: the same as the story's */
   .QW4K-site-foot { margin-top: 48px; background: #EFE4E3; padding: 44px 20px 36px; }
@@ -233,27 +245,7 @@
   .QW4K-sf-logo { height: 18px; display: block; flex: none; }
   .QW4K-sf-credit { font-family: var(--ken-font-body); font-style: italic; font-size: 15px; color: var(--ken-text); text-align: right; }
   @media (max-width: 480px) { .QW4K-sf-bottom { flex-direction: column; text-align: center; gap: 10px; } .QW4K-sf-credit { text-align: center; } }
-  /* ===== Age-profile card (scripts/profile-card.js): same on the story and the quiz ===== */
-  .QW4K-final { width: 100%; display: grid; grid-template-columns: 240px minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: 28px; row-gap: 18px; align-items: start; border: 3px solid var(--ink); background: #fff; padding: 22px; box-shadow: 8px 8px 0 var(--red); text-align: left; }
-  .QW4K-final > .QW4K-frame { grid-column: 1; grid-row: 1; }
-  .QW4K-final > dl { grid-column: 2; grid-row: 1 / span 2; margin: 0; display: grid; grid-template-columns: 1fr 1fr; grid-auto-flow: row dense; gap: 14px 22px; }
-  .QW4K-final-logo { grid-column: 1; grid-row: 2; align-self: end; height: 20px; width: auto; }
-  .QW4K-final dt { font-family: var(--ken-font-bold); font-weight: bold; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ken-text); }
-  .QW4K-final dd { margin: 3px 0 0; font-family: var(--ken-font-body); font-size: 18px; color: var(--ink); line-height: 1.3; }
-  .QW4K-final dd small { display: block; font-size: 12.5px; color: var(--ken-text); margin-top: 2px; }
-  .QW4K-final .QW4K-pc-blank { color: #9A8E7A; }
-  .QW4K-final .QW4K-wide { grid-column: 1 / -1; }
-  .QW4K-final .QW4K-wide q { font-family: var(--ken-font-body); font-style: italic; font-size: 17px; line-height: 1.4; quotes: '“' '”'; }
-  .QW4K-final .QW4K-pc-tag { font-family: var(--ken-font-display); font-weight: bold; font-size: 30px; line-height: 1.05; color: var(--ink); grid-column: 1 / -1; }
-  /* iPad portrait and phones: character on top, answers below, logo at the foot of the card */
-  @media (max-width: 760px) {
-    .QW4K-final { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; padding: 18px; box-shadow: 6px 6px 0 var(--red); }
-    .QW4K-final > .QW4K-frame { max-width: 200px; }
-    .QW4K-final > dl { grid-column: 1; grid-row: 2; }
-    .QW4K-final-logo { grid-column: 1; grid-row: 3; align-self: start; margin-top: 4px; }
-    .QW4K-final .QW4K-pc-tag { font-size: 26px; }
-  }
-  @media (max-width: 480px) { .QW4K-final > dl { grid-template-columns: 1fr; gap: 12px; } .QW4K-final > .QW4K-frame { max-width: 160px; } }
+  /* Age-profile card: styles live in scripts/profile-card.js so the page and the downloaded image share them */
   /* Buttons: one corner radius everywhere (skin swatches stay round) */
   .QW4K-back, .QW4K-reset, .QW4K-btn, .QW4K-btn.QW4K-ghost, .QW4K-opt, .QW4K-lk-btn, .QW4K-chip, .QW4K-sf-btn { border-radius: 12px; }
   .QW4K-lk-btn .QW4K-lk, .QW4K-opt .QW4K-mini { border-radius: 8px; }
@@ -332,7 +324,7 @@ const $ = id => document.getElementById(id);
 
 /* ---------------- Reader state. SKIP marks a skipped question; undefined = not reached yet ---------------- */
 const SKIP = 'skip';
-const me = { age: 35, look: null, dec: 2 }; // look: { length: 'long'|'short', curl: 'straight'|'curly', facial: null|'moustache'|'beard1-3', skin: 0-5 } once picked
+const me = { age: 35, look: null, dec: 2 }; // look: { length: 'long'|'short', curl: 'straight'|'curly', facial: null|'moustache'|'beard1-3', skin: 0-5, shirt?: 1-8 } once picked
 const val = k => me[k] === SKIP ? undefined : me[k];
 // Written answers are sorted into themes by keyword matching, as the survey's were. Bits match THEMES.
 const THEME_RX = {
@@ -355,18 +347,23 @@ const peers = () => { const g = P.filter(p => p[0] === me.dec); return g.length 
 // keeping the skin and greying and shortening the hair with age
 const mine = (o = {}) => me.look ? { ...o, you: me.look } : o;
 const art = (age, o = {}) => Character(age, mine(o));
-const { HAIR_LENGTHS, HAIR_TYPES, FACIAL } = window.AGE_ART;
+const { HAIR_LENGTHS, HAIR_TYPES, FACIAL, SHIRTS_YOU } = window.AGE_ART;
 const lookTile = (attr, v, label, on) => `<button type="button" class="QW4K-lk-btn" ${attr}="${v}" aria-pressed="${on}" title="${label}"><span class="QW4K-lk"></span><small>${label}</small></button>`;
-// Same order as the story's age card: hair and hair type side by side, then skin, then beard
+// Same order as the story's age card: hair and hair type side by side, then skin (one line), beard, clothes.
+// One group at a time: each pick reveals the next, so the first screen stays short and its button stays in view
+const LOOK_STEPS = ['length', 'curl', 'skin', 'facial', 'shirt'];
+const lookStep = (k, inner) => { const i = LOOK_STEPS.indexOf(k); return `<div class="QW4K-look-step" data-step="${i}"${i > (me.lookStep || 0) ? ' hidden' : ''}>${inner}</div>`; };
 const lookPick = () => `<div class="QW4K-look">
   <div class="QW4K-look-pair">
-    <div><div class="QW4K-look-lab">Your hair</div><div class="QW4K-look-row" id="lookLength">${HAIR_LENGTHS.map(([v, t]) => lookTile('data-length', v, t, !!me.look && me.look.length === v)).join('')}</div></div>
-    <div><div class="QW4K-look-lab">Hair type</div><div class="QW4K-look-row" id="lookCurl">${HAIR_TYPES.map(([v, t]) => lookTile('data-curl', v, t, !!me.look && me.look.curl === v)).join('')}</div></div>
+    ${lookStep('length', `<div class="QW4K-look-lab">Your hair</div><div class="QW4K-look-row" id="lookLength">${HAIR_LENGTHS.map(([v, t]) => lookTile('data-length', v, t, !!me.look && me.look.length === v)).join('')}</div>`)}
+    ${lookStep('curl', `<div class="QW4K-look-lab">Hair type</div><div class="QW4K-look-row" id="lookCurl">${HAIR_TYPES.map(([v, t]) => lookTile('data-curl', v, t, !!me.look && me.look.curl === v)).join('')}</div>`)}
   </div>
-  <div class="QW4K-look-lab">Skin</div>
-  <div class="QW4K-look-row" id="lookSkin">${SKINS.map((c, i) => `<button type="button" class="QW4K-sw" data-skin="${i}" aria-pressed="${!!me.look && me.look.skin === i}" aria-label="Skin tone ${i + 1} of ${SKINS.length}" style="--sk:${c}"></button>`).join('')}</div>
-  <div class="QW4K-look-lab">Beard or moustache</div>
-  <div class="QW4K-look-row" id="lookFacial">${FACIAL.map(([v, t], i) => lookTile('data-facial', i, t, !!me.look && me.look.facial === v)).join('')}</div></div>`;
+  ${lookStep('skin', `<div class="QW4K-look-lab">Skin</div>
+  <div class="QW4K-look-row" id="lookSkin">${SKINS.map((c, i) => `<button type="button" class="QW4K-sw" data-skin="${i}" aria-pressed="${!!me.look && me.look.skin === i}" aria-label="Skin tone ${i + 1} of ${SKINS.length}" style="--sk:${c}"></button>`).join('')}</div>`)}
+  ${lookStep('facial', `<div class="QW4K-look-lab">Beard or moustache</div>
+  <div class="QW4K-look-row" id="lookFacial">${FACIAL.map(([v, t], i) => lookTile('data-facial', i, t, !!me.look && me.look.facial === v)).join('')}</div>`)}
+  ${lookStep('shirt', `<div class="QW4K-look-lab">Clothes</div>
+  <div class="QW4K-look-row" id="lookShirt">${SHIRTS_YOU.map(([v, t]) => lookTile('data-shirt', v, t, !!me.look && me.look.shirt === v)).join('')}</div>`)}</div>`;
 const outlook = p => (p[0] < 0 || p[2] === -1) ? null : p[2] === -2 ? 'behind' : p[2] > p[0] ? 'ahead' : p[2] === p[0] ? 'now' : 'behind';
 const decAge = i => i === 0 ? 16 : Math.min(i * 10 + 15, 78);
 
@@ -566,12 +563,22 @@ const CARDS = [
         $('lookCurl').querySelectorAll('.QW4K-lk').forEach((el, i) => el.innerHTML = head(Character(me.age, { you: { ...base, curl: HAIR_TYPES[i][0] } })));
         const fa = Math.max(me.age, 25);
         $('lookFacial').querySelectorAll('.QW4K-lk').forEach((el, i) => el.innerHTML = head(Character(fa, { you: { ...base, facial: FACIAL[i][0] } })));
+        const body = svg => svg.replace('viewBox="0 0 200 200"', 'viewBox="28 64 144 144"'); // shoulders and shirt
+        $('lookShirt').querySelectorAll('.QW4K-lk').forEach((el, i) => el.innerHTML = body(Character(me.age, { you: { ...base, shirt: SHIRTS_YOU[i][0] } })));
       };
-      const setLook = (k, v, btn) => { me.look = { length: 'short', curl: 'straight', facial: null, skin: 2, ...me.look, [k]: v }; btn.parentNode.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === btn)); paintLook(); repaint(true); renderProfile(); };
+      // Show the next group of options (once), with a short slide-in
+      const revealLook = n => {
+        if (n <= (me.lookStep || 0)) return;
+        me.lookStep = n;
+        const el = document.querySelector(`.QW4K-look-step[data-step="${n}"]`);
+        if (el && el.hidden) { el.hidden = false; gsap.from(el, { y: 8, autoAlpha: 0, duration: .3, ease: 'power2.out', clearProps: 'all' }); }
+      };
+      const setLook = (k, v, btn) => { me.look = { length: 'short', curl: 'straight', facial: null, skin: 2, ...me.look, [k]: v }; revealLook(LOOK_STEPS.indexOf(k) + 1); btn.parentNode.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === btn)); repaint(true); if (k !== 'shirt') requestAnimationFrame(paintLook); setTimeout(renderProfile, 0); };
       $('lookLength').onclick = e => { const b = e.target.closest('button'); if (b) setLook('length', b.dataset.length, b); };
       $('lookCurl').onclick = e => { const b = e.target.closest('button'); if (b) setLook('curl', b.dataset.curl, b); };
       $('lookFacial').onclick = e => { const b = e.target.closest('button'); if (b) setLook('facial', FACIAL[+b.dataset.facial][0], b); };
       $('lookSkin').onclick = e => { const b = e.target.closest('button'); if (b) setLook('skin', +b.dataset.skin, b); };
+      $('lookShirt').onclick = e => { const b = e.target.closest('button'); if (b) setLook('shirt', +b.dataset.shirt, b); };
       paintLook();
       $('ageIn').oninput = e => { const d = decadeOf(me.age); me.age = +e.target.value; $('ageInVal').textContent = me.age; if (decadeOf(me.age) !== d) paintLook(); repaint(decadeOf(me.age) !== d); };
       return () => { me.dec = decadeOf(me.age); me.started = true; return ['age']; };
@@ -832,16 +839,22 @@ const FACT_SHORT = { 8: 'Freedom', 2: 'Relationships', 16: 'Financial security',
 const finalTag = o => o === 'ahead' ? 'The best is yet to come.' : o === 'now' ? 'Living your best decade.' : o === 'behind' ? 'Looking back fondly.' : 'Keeping your options open.';
 function finalRows() {
   const st = profileState, o = outlook(youRow());
-  const row = (k, label, value, sub = '', wide = false) => ({ k, label, value: st(k) === 'set' ? value() : '', state: st(k), sub, wide });
+  const row = (k, label, value, sub = '', wide = false) => ({ k, label, value: st(k) === 'set' ? value() : '', state: st(k), sub: st(k) === 'set' ? sub : '', wide });
+  // A line of context under the pill age and the happiest decade, worked out like the notes after each question
+  const pills = P.filter(p => p[5] != null);
+  const pillSub = typeof me.pill !== 'number' ? '' : me.pill > 80 ? `Only ${pills.filter(p => p[5] > 80).length} of ${pills.length} readers said the same`
+    : `${pct(pills.filter(p => p[5] < me.pill).length, pills.length)}% of readers would stop younger, ${pct(pills.filter(p => p[5] > me.pill).length, pills.length)}% older`;
+  const { g, label } = peers(), named = g.filter(p => p[1] >= 0);
+  const hapSub = typeof me.hap !== 'number' ? '' : me.hap === -1 ? 'Only 11 readers said the same' : `${pct(named.filter(p => p[1] === me.hap).length, named.length)}% of ${label} said the same`;
   return [
     row('age', 'Your decade', () => DEC[me.dec]),
-    row('pill', 'Would take the pill at', () => me.pill > 80 ? 'Wouldn’t take it' : String(me.pill)),
-    row('why', 'Why that age', () => me.why || '', '', true),
-    row('hap', 'Happiest so far', () => me.hap === -1 ? 'Too close to call' : DEC[me.hap]),
+    row('pill', 'Would take the pill at', () => me.pill > 80 ? 'Wouldn’t take it' : String(me.pill), pillSub),
+    row('why', 'Why that age', () => me.why || ''),
+    row('hap', 'Happiest so far', () => me.hap === -1 ? 'Too close to call' : DEC[me.hap], hapSub),
     row('fact', 'A good decade needs', () => FACTS.filter(f => me.fact & f[2]).map(f => FACT_SHORT[f[2]] || f[0]).join(' & ') || 'Nothing listed', 'Readers’ top pick: freedom'),
     row('mid', 'Felt middle-aged', () => me.mid ? (typeof me.midAge === 'number' ? `Yes, at ${me.midAge}` : 'Yes') : 'Not yet', '47% of readers have'),
+    row('trig', 'What gave it away', () => me.trigText || ''),
     row('out', 'Your best decade is', () => ({ ahead: 'Still ahead', now: 'Right now', behind: 'Behind you' })[o] || '—'),
-    row('trig', 'What gave it away', () => me.trigText || '', '', true),
   ].filter(r => r.state !== 'na');
 }
 // Pages sit in folders served as folder/index.html; opened from disk, link the file itself
@@ -914,7 +927,7 @@ function reveal(c, fresh) {
   if (c.artOnly) gsap.from('#art .QW4K-qp, #art .QW4K-final', { y: 24, autoAlpha: 0, duration: .5, stagger: .06, ease: 'power3.out' });
   if (c.final) {
     $('prompt').innerHTML = `<div class="QW4K-p-k">${c.k}</div>${paras.map(p => `<p class="QW4K-p-t" style="margin-top:10px">${p}</p>`).join('')}
-      <div class="QW4K-actions QW4K-final-actions"><button class="QW4K-btn" id="qDl" type="button">Download image</button><button class="QW4K-btn QW4K-ghost" id="qShare" type="button">Share</button></div>
+      <div class="QW4K-actions QW4K-final-actions"><button type="button" class="QW4K-sbtn QW4K-primary" id="qShare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg>Share</button><button type="button" class="QW4K-sbtn" id="qDl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></svg>Download image</button></div>
       <p class="QW4K-q-msg" id="qMsg" aria-live="polite"></p>
       <div class="QW4K-actions" style="justify-content:flex-start"><button class="QW4K-btn QW4K-ghost" id="again">Start over</button><a class="QW4K-btn QW4K-ghost" href="${STORY}">Read the story →</a></div>`;
     $('again').onclick = () => location.reload();
