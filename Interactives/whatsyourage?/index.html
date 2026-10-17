@@ -49,7 +49,7 @@
   .QW4K-art-by a { color: var(--red); text-decoration: none; font-family: var(--ken-font-body); font-size: 12px; }
   .QW4K-art-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--ken-bg); font-size: 13px; padding: 8px 14px; border-radius: 3px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 60; }
   .QW4K-art-reading { border: 1px solid #D5C9C7; margin: 44px 0 0; padding: 16px 22px; font-family: var(--ken-font-body); font-size: 13.5px; line-height: 1.6; color: var(--ken-body); text-align: center; }
-  .QW4K-art-reading p + p { margin-top: .7em; }
+  .QW4K-art-reading p + p { margin-top: 1em; }
   .QW4K-art-reading b { font-family: var(--ken-font-bold); font-weight: bold; }
 
   /* ===== Newsletter body (First Principles) ===== */
@@ -323,15 +323,38 @@
   .QW4K-sf-links { display: flex; flex-wrap: wrap; gap: 8px; }
   .QW4K-sf-btn { font-family: var(--ken-font-bold); font-weight: bold; font-size: 14px; color: var(--ink); background: #fff; border: 1.5px solid var(--ink); border-radius: 12px; padding: 8px 18px; text-decoration: none; cursor: pointer; }
   .QW4K-sf-btn:hover { background: var(--ink); color: #fff; }
-  .QW4K-sf-about { margin-top: 36px; }
-  .QW4K-sf-about p { font-family: var(--ken-font-body); font-size: 14.5px; line-height: 1.6; color: var(--ken-text); }
-  .QW4K-sf-about p + p { margin-top: .8em; }
+  /* Footer sections: Share, Credits, About the data, Reference, each a heading and body */
+  .QW4K-sf-sec { margin-top: 36px; }
+  .QW4K-sf-sec p { font-family: var(--ken-font-body); font-size: 14.5px; line-height: 1.6; color: var(--ken-text); }
+  .QW4K-sf-sec p + p { margin-top: .8em; }
+  /* Reference: a newsletter link, picture then author, headline and opening line, sized to match the footer.
+     On hover the picture eases in closer and the headline turns red */
+  .QW4K-sf-ref { display: flex; align-items: flex-start; gap: 18px; margin-top: 18px; text-decoration: none; color: var(--ink); }
+  .QW4K-sf-ref img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; transform: scale(1); transition: transform .6s cubic-bezier(.2, .7, .2, 1); }
+  .QW4K-sf-ref-pic { display: block; overflow: hidden; flex: 0 0 220px; }
+  .QW4K-sf-ref:hover img { transform: scale(1.05); }
+  .QW4K-sf-ref-body { min-width: 0; }
+  @media (max-width: 520px) { .QW4K-sf-ref { flex-direction: column; gap: 10px; } .QW4K-sf-ref-pic { flex: none; width: 100%; } }
+  .QW4K-sf-ref .QW4K-sf-ref-by { display: block; font-family: var(--ken-font-body); font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--red); }
+  .QW4K-sf-ref b { display: block; font-family: var(--ken-font-display); font-weight: bold; font-size: 18px; line-height: 1.2; margin-top: 4px; transition: color .2s; }
+  .QW4K-sf-ref:hover b { color: var(--red); }
+  .QW4K-sf-ref .QW4K-sf-ref-dek { display: block; font-family: var(--ken-font-body); font-size: 14.5px; line-height: 1.6; color: var(--ken-text); margin-top: 6px; }
+  .QW4K-sf-ref small { display: block; font-family: var(--ken-font-body); font-size: 12.5px; color: var(--ken-text); margin-top: 6px; }
+  /* Site footer, as on the-ken.com: legal links and copyright, then the wordmark, huge and pale, cut off by the page edge */
+  .QW4K-sf-bottom { justify-content: space-between !important; align-items: center !important; border-bottom: 0 !important; padding: 22px 0 !important; margin-top: 44px !important; }
+  .QW4K-sf-legal, .QW4K-sf-copy { font-family: var(--ken-font-body); font-size: 9.5px; letter-spacing: .03em; text-transform: uppercase; color: #8A7B78; }
+  .QW4K-sf-legal { display: flex; align-items: center; gap: 12px; flex: none; white-space: nowrap; }
+  .QW4K-sf-copy { text-align: right; }
+  @media (max-width: 480px) { .QW4K-sf-bottom { align-items: flex-start !important; text-align: left; gap: 8px !important; } .QW4K-sf-copy { text-align: left; } }
+  .QW4K-sf-legal span { font-size: 7px; opacity: .6; }
+  .QW4K-sf-legal a { color: inherit; text-decoration: none; }
+  .QW4K-sf-legal a:hover { color: var(--ink); }
+  .QW4K-sf-mark { aspect-ratio: 500 / 50; overflow: hidden; margin-top: 6px; }
+  .QW4K-sf-mark img { display: block; width: 100%; height: auto; opacity: .07; }
+  .QW4K-site-foot { padding-bottom: 0 !important; }
   .QW4K-sf-bottom { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 32px; padding: 20px 0; border-top: 1.5px solid var(--ken-rule); border-bottom: 1.5px solid var(--ken-rule); }
   .QW4K-sf-logo { height: 18px; display: block; flex: none; }
   .QW4K-sf-credit { font-family: var(--ken-font-body); font-style: italic; font-size: 15px; color: var(--ken-text); text-align: right; }
-  .QW4K-sf-refs { font-family: var(--ken-font-body); font-size: 14px; color: var(--ken-text); margin-top: 16px; }
-  .QW4K-sf-refs b { font-family: var(--ken-font-bold); color: var(--ink); margin-right: 6px; }
-  .QW4K-sf-refs a { color: var(--red); }
   .QW4K-site-foot { position: relative; padding-bottom: 36px; overflow: hidden; }
   /* Footer field: a dot per reader around the text that opens into a card near the cursor (see footerPile) */
   .QW4K-sf-pile { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
@@ -357,7 +380,7 @@
   <h1 class="QW4K-art-title">Are your best years behind you?</h1>
   <p class="QW4K-art-strap">Few questions throw us off-balance like being asked to rank the decades of our life. Not just the ones we’ve lived, but also the ones we’ve yet to. How well do you know yourself? Compare yourself against 301 readers of The Ken.</p>
   <p class="QW4K-art-by"><i>by</i><a href="https://the-ken.com/writers/rohin/" target="_blank" rel="noopener">Rohin Dharmakumar</a> and <a href="https://the-ken.com/writers/anuj_269/" target="_blank" rel="noopener">Anuj Debnath</a></p>
-  <div class="QW4K-art-reading"><p>This is an interactive story. The charts move as you scroll, and you can hover over or tap them to see each reader’s answers. <b>Pro tip:</b> grab a cup of coffee or tea and settle down. This will make you think, smile and, perhaps, sigh.</p><p>Your responses are both private and anonymous. They stay within your browser till the end, where we’ll ask you if you’d like to contribute them to our ongoing survey.</p></div>
+  <div class="QW4K-art-reading"><p>This is an interactive story. The charts move as you scroll, and you can hover over or tap them to see each reader’s answers.</p><p>Your responses are both private and anonymous. They stay within your browser.</p><p><b>Pro tip:</b> grab a cup of coffee or tea and settle down. This will make you think, smile and, perhaps, sigh.</p></div>
 </header>
 <div class="QW4K-art-toast" id="artToast">Link copied</div>
 
@@ -618,7 +641,9 @@
   <p class="QW4K-strip-note">Share of readers in each decade who say their happiest decade is still ahead of them. Illustrations, not portraits of real readers.</p>
 </section>
 <section class="QW4K-nl">
-  <p>When I wrote about this in September, I leaned on the U-bend: the finding, repeated country after country, that happiness is high in our 20s, sinks through our 30s and 40s, bottoms out somewhere around the mid-life crisis, and then climbs again, even as we lose the things we spend our youth protecting. Laura Carstensen tells her Stanford undergrads every year that these are not the best years of their lives, and watches the relief on their faces. <i>The Economist</i> put it more bluntly: life is not a long slow decline from sunlit uplands towards the valley of death.</p>
+  <p>A widely-cited study from Stanford found that our bodies do not age very smoothly or linearly. The two big shift years are 44 and 60.</p>
+  <p>When we wrote about this in September, we leaned on the “U-bend”: the finding, repeated country after country, that happiness is high in our 20s, sinks through our 30s and 40s, bottoms out somewhere around the mid-life crisis, and then climbs again, even as we lose the things we spend our youth protecting.</p>
+  <p>The future is happier, even if it takes us a few detours and pit stops to get to.</p>
 </section>
 
 <!-- ===== 6. YOUR TURN ===== -->
@@ -641,14 +666,14 @@
   </div>
 </section>
 <section class="QW4K-nl">
-  <div class="QW4K-cta"><a href="survey/" id="quizLink"><div class="QW4K-av" id="ctaAv"></div><div><b>Add my answers to the survey →</b><span>Nine questions, the same ones readers answered. Your answers stay in your browser.</span></div></a></div>
+  <div class="QW4K-cta"><a href="survey/" id="quizLink"><div class="QW4K-av" id="ctaAv"></div><div><b>Let me answer just the questions →</b><span>Nine questions, the same ones readers answered. The fastest way to remake your card. Your answers stay in your browser.</span></div></a></div>
 </section>
 
 <!-- ===== ABOUT THE DATA ===== -->
 <!-- ===== FOOTER: share, about the data, credits ===== -->
 <footer class="QW4K-site-foot" id="s-about">
   <div class="QW4K-sf-inner">
-    <div class="QW4K-sf-share">
+    <div class="QW4K-sf-share QW4K-sf-sec" style="margin-top:0">
       <h2 class="QW4K-sf-h">Share this</h2>
       <div class="QW4K-sf-links">
         <a class="QW4K-sf-btn" id="sfWa" target="_blank" rel="noopener">WhatsApp</a>
@@ -658,16 +683,26 @@
         <button type="button" class="QW4K-sf-btn" id="sfMore" hidden>More…</button>
       </div>
     </div>
-    <div class="QW4K-sf-about">
+    <div class="QW4K-sf-sec">
+      <h2 class="QW4K-sf-h">Credits</h2>
+      <p>Designed and developed by Anuj Debnath. Survey and research by Rohin Dharmakumar.</p>
+      <p>With design support from Kavipriya OG, Sakshi Modi and Kashvi Bansal.</p>
+    </div>
+    <div class="QW4K-sf-sec">
       <h2 class="QW4K-sf-h">About the data</h2>
       <p>301 readers of First Principles answered the survey between 13 and 22 September 2026. It is not a representative sample. 72% of respondents are men, and most live in Bengaluru, Mumbai or Delhi NCR.</p>
       <p>Percentages leave out readers who skipped a question or said it was too close to call. If a reader said they expected their happiest decade to be “the one I'm in now”, we counted it as the decade they are in. Themes in the middle-age answers were assigned by keyword matching, so a single answer can count towards more than one theme. We quote only readers who agreed to be quoted, and identify them only by decade and city. The characters are illustrations, not portraits of real readers.</p>
     </div>
-    <div class="QW4K-sf-bottom">
-      <img src="assets/logo.png" alt="The Ken" class="QW4K-sf-logo">
-      <p class="QW4K-sf-credit">With support from Kavipriya OG, Sakshi Modi and Kashvi Bansal.</p>
+    <div class="QW4K-sf-sec">
+      <h2 class="QW4K-sf-h">Reference</h2>
+      <p>This interactive story is based on a survey taken by readers of The Ken’s free Sunday newsletter, First Principles. The survey appeared in the 13th September edition of the newsletter. You can read it for free.</p>
+      <a class="QW4K-sf-ref" href="https://the-ken.com/newsletter/first-principles/the-best-decade-of-our-lives/" target="_blank" rel="noopener"><span class="QW4K-sf-ref-pic"><img src="imgs/fp-best-decade-newsletter.jpg" alt="A person walks a dog on a wet beach, their reflection in the sand" loading="lazy" width="1200" height="662"></span><div class="QW4K-sf-ref-body"><span class="QW4K-sf-ref-by">Rohin Dharmakumar</span><b>The best decade of our lives</b><span class="QW4K-sf-ref-dek">The U-shaped curve of happiness may be the answer to it</span><small>13th September, 2026 • Edition #164</small></div></a>
     </div>
-    <p class="QW4K-sf-refs"><b>References</b> <a href="https://the-ken.com/newsletter/first-principles/the-best-decade-of-our-lives/" target="_blank" rel="noopener">“The best decade of our lives”</a>, The Ken</p>
+    <div class="QW4K-sf-bottom">
+      <div class="QW4K-sf-legal"><a href="https://the-ken.com/terms-and-conditions/" target="_blank" rel="noopener">Terms &amp; Conditions</a><span aria-hidden="true">•</span><a href="https://the-ken.com/privacy-policy/" target="_blank" rel="noopener">Privacy</a></div>
+      <div class="QW4K-sf-copy">© 2026 Kenrise Media Private Limited. All rights reserved</div>
+    </div>
+    <div class="QW4K-sf-mark"><img src="assets/logo.png" alt="The Ken"></div>
   </div>
   <canvas class="QW4K-sf-pile" id="sfPile" aria-hidden="true"></canvas>
 </footer>
@@ -1549,11 +1584,11 @@ const shareText = () => `${cardSpec().tag} Are your best years behind you? Take 
 const cardBlob = () => PROFILE_CARD.blob(cardSpec());
 const say = msg => { $('shareMsg').textContent = msg; gsap.fromTo('#shareMsg', { autoAlpha: 0 }, { autoAlpha: 1, duration: .3 }); };
 const BLOCKED = 'Your browser won’t export the image from a file opened on this computer. It works once the page is published.';
-function download(blob) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'my-age-factor-card.png'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+function download(blob) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'my-best-decade.png'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
 function setupShare() {
   $('btnShare').addEventListener('click', async () => {
     let blob; try { blob = await cardBlob(); } catch (e) { return say(BLOCKED); }
-    const file = new File([blob], 'my-age-factor-card.png', { type: 'image/png' });
+    const file = new File([blob], 'my-best-decade.png', { type: 'image/png' });
     const data = { files: [file], title: 'The Age Factor', text: shareText() + ' ' + SHARE_URL() };
     if (navigator.canShare && navigator.canShare(data)) { try { await navigator.share(data); say('Shared.'); } catch (e) { if (e.name !== 'AbortError') say('Couldn’t open sharing. Try Download image instead.'); } return; }
     // Desktop browsers without file sharing: save the image and copy the link

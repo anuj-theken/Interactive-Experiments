@@ -32,6 +32,8 @@
   .QW4K-pc-row small { display: block; margin-top: 5px; font-family: var(--ken-font-body); font-style: italic; font-size: 12.5px; line-height: 1.3; color: var(--ken-text); }
   .QW4K-pc-foot { grid-area: foot; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
   .QW4K-pc-foot img { height: 22px; width: auto; display: block; flex: none; }
+  .QW4K-pc-brand { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; flex: none; }
+  .QW4K-pc-url { font-family: var(--ken-font-body); font-weight: 300; font-size: 13px; color: var(--ink); }
   .QW4K-pc-credit { font-family: var(--ken-font-body); font-style: italic; font-size: 12.5px; line-height: 1.45; color: var(--ken-text); text-align: right; }
   /* Landscape: character on the left, headline and answers on the right */
   @container (min-width: 700px) {
@@ -66,7 +68,7 @@
       <div class="QW4K-frame">${d.art}<div class="QW4K-cap">${esc(d.cap)}</div></div>
       <div class="QW4K-pc-head"><div class="QW4K-pc-tag">${esc(d.tag)}</div><div class="QW4K-pc-rule"></div>${hero ? `<dl style="margin:0">${row(hero, ' QW4K-pc-hero')}</dl>` : ''}</div>
       <dl class="QW4K-pc-grid">${rest.map(r => row(r)).join('')}</dl>
-      <div class="QW4K-pc-foot"><img src="${LOGO}" alt="The Ken"><div class="QW4K-pc-credit">Survey of 301 First Principles readers, September 2026<br>Illustration, not a photo</div></div>
+      <div class="QW4K-pc-foot"><div class="QW4K-pc-brand"><img src="${LOGO}" alt="The Ken"><span class="QW4K-pc-url">the-ken.com/interactives</span></div><div class="QW4K-pc-credit">Survey of 301 First Principles readers, September 2026</div></div>
     </div></div>`;
   }
 

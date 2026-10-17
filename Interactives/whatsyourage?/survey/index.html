@@ -245,9 +245,35 @@
   .QW4K-sf-links { display: flex; flex-wrap: wrap; gap: 8px; }
   .QW4K-sf-btn { font-family: var(--ken-font-bold); font-weight: bold; font-size: 14px; color: var(--ink); background: #fff; border: 1.5px solid var(--ink); border-radius: 12px; padding: 8px 18px; text-decoration: none; cursor: pointer; }
   .QW4K-sf-btn:hover { background: var(--ink); color: #fff; }
-  .QW4K-sf-about { margin-top: 36px; }
-  .QW4K-sf-about p { font-family: var(--ken-font-body); font-size: 14.5px; line-height: 1.6; color: var(--ken-text); }
-  .QW4K-sf-about p + p { margin-top: .8em; }
+  /* Footer sections: Share, Credits, About the data, Reference, each a heading and body */
+  .QW4K-sf-sec { margin-top: 36px; }
+  .QW4K-sf-sec p { font-family: var(--ken-font-body); font-size: 14.5px; line-height: 1.6; color: var(--ken-text); }
+  .QW4K-sf-sec p + p { margin-top: .8em; }
+  /* Reference: a newsletter link, picture then author, headline and opening line, sized to match the footer.
+     On hover the picture eases in closer and the headline turns red */
+  .QW4K-sf-ref { display: flex; align-items: flex-start; gap: 18px; margin-top: 18px; text-decoration: none; color: var(--ink); }
+  .QW4K-sf-ref img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; transform: scale(1); transition: transform .6s cubic-bezier(.2, .7, .2, 1); }
+  .QW4K-sf-ref-pic { display: block; overflow: hidden; flex: 0 0 220px; }
+  .QW4K-sf-ref:hover img { transform: scale(1.05); }
+  .QW4K-sf-ref-body { min-width: 0; }
+  @media (max-width: 520px) { .QW4K-sf-ref { flex-direction: column; gap: 10px; } .QW4K-sf-ref-pic { flex: none; width: 100%; } }
+  .QW4K-sf-ref .QW4K-sf-ref-by { display: block; font-family: var(--ken-font-body); font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--red); }
+  .QW4K-sf-ref b { display: block; font-family: var(--ken-font-display); font-weight: bold; font-size: 18px; line-height: 1.2; margin-top: 4px; transition: color .2s; }
+  .QW4K-sf-ref:hover b { color: var(--red); }
+  .QW4K-sf-ref .QW4K-sf-ref-dek { display: block; font-family: var(--ken-font-body); font-size: 14.5px; line-height: 1.6; color: var(--ken-text); margin-top: 6px; }
+  .QW4K-sf-ref small { display: block; font-family: var(--ken-font-body); font-size: 12.5px; color: var(--ken-text); margin-top: 6px; }
+  /* Site footer, as on the-ken.com: legal links and copyright, then the wordmark, huge and pale, cut off by the page edge */
+  .QW4K-sf-bottom { justify-content: space-between !important; align-items: center !important; border-bottom: 0 !important; padding: 22px 0 !important; margin-top: 44px !important; }
+  .QW4K-sf-legal, .QW4K-sf-copy { font-family: var(--ken-font-body); font-size: 9.5px; letter-spacing: .03em; text-transform: uppercase; color: #8A7B78; }
+  .QW4K-sf-legal { display: flex; align-items: center; gap: 12px; flex: none; white-space: nowrap; }
+  .QW4K-sf-copy { text-align: right; }
+  @media (max-width: 480px) { .QW4K-sf-bottom { align-items: flex-start !important; text-align: left; gap: 8px !important; } .QW4K-sf-copy { text-align: left; } }
+  .QW4K-sf-legal span { font-size: 7px; opacity: .6; }
+  .QW4K-sf-legal a { color: inherit; text-decoration: none; }
+  .QW4K-sf-legal a:hover { color: var(--ink); }
+  .QW4K-sf-mark { aspect-ratio: 500 / 50; overflow: hidden; margin-top: 6px; }
+  .QW4K-sf-mark img { display: block; width: 100%; height: auto; opacity: .07; }
+  .QW4K-site-foot { padding-bottom: 0 !important; }
   .QW4K-sf-bottom { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 32px; padding: 20px 0; border-top: 1.5px solid var(--ken-rule); border-bottom: 1.5px solid var(--ken-rule); }
   .QW4K-sf-logo { height: 18px; display: block; flex: none; }
   .QW4K-sf-credit { font-family: var(--ken-font-body); font-style: italic; font-size: 15px; color: var(--ken-text); text-align: right; }
@@ -290,7 +316,7 @@
 <!-- ===== FOOTER: share, about the data, credits (same as the story) ===== -->
 <footer class="QW4K-site-foot">
   <div class="QW4K-sf-inner">
-    <div class="QW4K-sf-share">
+    <div class="QW4K-sf-share QW4K-sf-sec" style="margin-top:0">
       <h2 class="QW4K-sf-h">Share this</h2>
       <div class="QW4K-sf-links">
         <a class="QW4K-sf-btn" id="sfWa" target="_blank" rel="noopener">WhatsApp</a>
@@ -300,15 +326,26 @@
         <button type="button" class="QW4K-sf-btn" id="sfMore" hidden>More…</button>
       </div>
     </div>
-    <div class="QW4K-sf-about">
+    <div class="QW4K-sf-sec">
+      <h2 class="QW4K-sf-h">Credits</h2>
+      <p>Designed and developed by Anuj Debnath. Survey and research by Rohin Dharmakumar.</p>
+      <p>With design support from Kavipriya OG, Sakshi Modi and Kashvi Bansal.</p>
+    </div>
+    <div class="QW4K-sf-sec">
       <h2 class="QW4K-sf-h">About the data</h2>
       <p>301 readers of First Principles answered the survey between 13 and 22 September 2026. It is not a representative sample. 72% of respondents are men, and most live in Bengaluru, Mumbai or Delhi NCR.</p>
       <p>Percentages leave out readers who skipped a question or said it was too close to call. If a reader said they expected their happiest decade to be “the one I'm in now”, we counted it as the decade they are in. Themes in the middle-age answers were assigned by keyword matching, so a single answer can count towards more than one theme. We quote only readers who agreed to be quoted, and identify them only by decade and city. The characters are illustrations, not portraits of real readers.</p>
     </div>
-    <div class="QW4K-sf-bottom">
-      <img src="../assets/logo.png" alt="The Ken" class="QW4K-sf-logo">
-      <p class="QW4K-sf-credit">With support from Kavipriya OG, Sakshi Modi and Kashvi Bansal.</p>
+    <div class="QW4K-sf-sec">
+      <h2 class="QW4K-sf-h">Reference</h2>
+      <p>This interactive story is based on a survey taken by readers of The Ken’s free Sunday newsletter, First Principles. The survey appeared in the 13th September edition of the newsletter. You can read it for free.</p>
+      <a class="QW4K-sf-ref" href="https://the-ken.com/newsletter/first-principles/the-best-decade-of-our-lives/" target="_blank" rel="noopener"><span class="QW4K-sf-ref-pic"><img src="../imgs/fp-best-decade-newsletter.jpg" alt="A person walks a dog on a wet beach, their reflection in the sand" loading="lazy" width="1200" height="662"></span><div class="QW4K-sf-ref-body"><span class="QW4K-sf-ref-by">Rohin Dharmakumar</span><b>The best decade of our lives</b><span class="QW4K-sf-ref-dek">The U-shaped curve of happiness may be the answer to it</span><small>13th September, 2026 • Edition #164</small></div></a>
     </div>
+    <div class="QW4K-sf-bottom">
+      <div class="QW4K-sf-legal"><a href="https://the-ken.com/terms-and-conditions/" target="_blank" rel="noopener">Terms &amp; Conditions</a><span aria-hidden="true">•</span><a href="https://the-ken.com/privacy-policy/" target="_blank" rel="noopener">Privacy</a></div>
+      <div class="QW4K-sf-copy">© 2026 Kenrise Media Private Limited. All rights reserved</div>
+    </div>
+    <div class="QW4K-sf-mark"><img src="../assets/logo.png" alt="The Ken"></div>
   </div>
 </footer>
 
@@ -870,14 +907,14 @@ const STORY = pageHref('../');
 const cardSpec = () => ({ tag: finalTag(outlook(youRow())), cap: `You, ${me.age}`, age: me.age, you: me.look ? mine({}).you : null, art: art(me.age, { mood: 'joy' }), rows: finalRows() });
 const cardBlob = () => PROFILE_CARD.blob(cardSpec());
 const BLOCKED = 'Your browser won’t export the image from a file opened on this computer. It works once the page is published.';
-function saveBlob(blob) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'my-age-profile.png'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+function saveBlob(blob) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'my-best-decade.png'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
 function wireFinalShare() {
   const say = m => { $('qMsg').textContent = m; };
   $('qDl').onclick = async () => { try { saveBlob(await cardBlob()); say('Image downloaded.'); } catch (e) { say(BLOCKED); } };
   $('qShare').onclick = async () => {
     const url = location.protocol.startsWith('http') ? location.href : 'https://the-ken.com', text = `${finalTag(outlook(youRow()))} How does your age profile compare with 301 readers?`;
     let blob; try { blob = await cardBlob(); } catch (e) { say(BLOCKED); return; }
-    const file = new File([blob], 'my-age-profile.png', { type: 'image/png' }), data = { files: [file], title: 'The Age Factor', text: text + ' ' + url };
+    const file = new File([blob], 'my-best-decade.png', { type: 'image/png' }), data = { files: [file], title: 'The Age Factor', text: text + ' ' + url };
     if (navigator.canShare && navigator.canShare(data)) { try { await navigator.share(data); say('Shared.'); } catch (e) { if (e.name !== 'AbortError') say('Couldn’t open sharing. Try Download image instead.'); } return; }
     saveBlob(blob);
     try { await navigator.clipboard.writeText(text + ' ' + url); say('Image downloaded and link copied. Attach the image and paste the link anywhere.'); } catch (e) { say('Image downloaded.'); }
