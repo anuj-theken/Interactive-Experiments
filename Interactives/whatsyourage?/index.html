@@ -17,6 +17,7 @@
 <script src="data/readers.js"></script>
 <script src="scripts/fp-characters.js"></script>
 <script src="scripts/characters.js"></script>
+<script src="scripts/profile-card.js"></script>
 <style>
   :root { --red: #C8423A; --char: #3D3D3D; --teal: #4A9E9A; --dot: #C4AAAA; --ink: #1A1208; --fp-text: #3B2A26; --fp-box: #EAE0DF; --fp-line: #D5C9C7; }
   body { display: block; overflow-x: hidden; }
@@ -46,11 +47,6 @@
   .QW4K-art-by { font-family: var(--ken-font-body); font-size: 12.5px; color: var(--ken-text); margin-top: 12px; }
   .QW4K-art-by i { margin-right: 4px; }
   .QW4K-art-by a { color: var(--red); text-decoration: none; font-family: var(--ken-font-body); font-size: 12px; }
-  .QW4K-art-actions { display: flex; justify-content: flex-end; gap: 14px; border-top: 1px dashed #D5C9C7; margin-top: 18px; padding-top: 12px; }
-  .QW4K-art-actions button { background: none; border: 0; padding: 2px; color: var(--ken-text); display: inline-flex; }
-  .QW4K-art-actions button:hover, .QW4K-art-actions button[aria-pressed=true] { color: var(--ink); }
-  .QW4K-art-actions button[aria-pressed=true] svg path { fill: currentColor; }
-  .QW4K-art-actions svg { width: 17px; height: 17px; }
   .QW4K-art-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--ken-bg); font-size: 13px; padding: 8px 14px; border-radius: 3px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 60; }
   .QW4K-art-reading { border: 1px solid #D5C9C7; margin: 44px 0 0; padding: 16px 22px; font-family: var(--ken-font-body); font-size: 13.5px; line-height: 1.6; color: var(--ken-body); text-align: center; }
   .QW4K-art-reading b { font-family: var(--ken-font-bold); font-weight: bold; }
@@ -140,7 +136,7 @@
   .QW4K-qr:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
   .QW4K-qscale { display: flex; justify-content: space-between; font-size: 12px; color: var(--ken-text); }
   .QW4K-qnever { margin-top: 12px; display: flex; align-items: center; gap: 8px; }
-  /* ===== Question cards, after imgs/Reference/card.png =====
+  /* ===== Question cards =====
      A soft pink panel; the character on the left with a warm grey offset shadow; the question in a white rounded box;
      plain instructions, a thin slider with a pill handle, and white pill buttons that fill with ink once picked. */
   .QW4K-qcard { --card: #E9C6C4; --card-shadow: #746362; background: var(--card); border: 0; border-radius: 0; box-shadow: none; padding: 34px 32px 28px; }
@@ -178,6 +174,10 @@
   /* A hand that taps the first option until the reader tries it */
   .QW4K-qhand { position: absolute; width: 34px; height: 34px; pointer-events: none; z-index: 3; filter: drop-shadow(2px 2px 0 rgba(26,18,8,.25)); }
   .QW4K-qrow { margin-top: 12px; }
+  .QW4K-free { display: block; width: 100%; min-height: 96px; resize: vertical; background: #fff; border: 1.5px solid var(--ink); border-radius: 14px; padding: 12px 14px; font-family: var(--ken-font-body); font-size: 16px; line-height: 1.45; color: var(--ink); box-sizing: border-box; }
+  .QW4K-free::placeholder { color: #8A7B78; font-style: italic; }
+  .QW4K-free:focus { outline: 2.5px solid var(--ink); outline-offset: 2px; }
+  .QW4K-free-meta { display: flex; justify-content: space-between; gap: 10px; margin-top: 6px; font-size: 12px; color: var(--ken-text); }
   .QW4K-qopts .QW4K-qor { border: 0; background: none; padding: 0 2px; font-size: 13px; font-style: italic; color: var(--ken-text); }
   .QW4K-qrow[hidden] { display: none; }
   .QW4K-qlab { display: block; font-family: var(--ken-font-bold); font-weight: bold; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ken-text); margin-bottom: 7px; }
@@ -247,7 +247,7 @@
   .QW4K-age-key b { font-family: var(--ken-font-bold); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; margin-right: 2px; }
   .QW4K-age-key span { display: inline-flex; align-items: center; gap: 4px; }
   .QW4K-age-key i { width: 12px; height: 12px; display: inline-block; }
-  .QW4K-hl.QW4K-red { background: var(--red); } .QW4K-hl.QW4K-char { background: var(--char); } .QW4K-hl.QW4K-teal { background: #3E8783; } .QW4K-hl.QW4K-dot { background: var(--dot); color: var(--ink); }
+  .QW4K-hl.QW4K-red { background: var(--red); } .QW4K-hl.QW4K-med { background: #E0201B; } .QW4K-hl.QW4K-char { background: var(--char); } .QW4K-hl.QW4K-teal { background: #3E8783; } .QW4K-hl.QW4K-dot { background: var(--dot); color: var(--ink); }
   @media (max-width: 720px) {
     .QW4K-scrolly { padding: 0 14px; }
     .QW4K-graphic { padding-top: 14px; }
@@ -267,7 +267,7 @@
 
   /* Your card: one shareable image of the reader's answers */
   .QW4K-share-sec { max-width: 940px; margin: 0 auto; padding: 18px 20px 8px; }
-  .QW4K-share-card { display: block; width: 100%; height: auto; }
+  .QW4K-pcard { max-width: 860px; margin: 0 auto; }
   .QW4K-share-side { max-width: 820px; margin: 22px auto 0; text-align: center; }
   .QW4K-share-side h3 { font-family: var(--ken-font-display); font-size: 30px; line-height: 1.05; margin: 0 0 8px; color: var(--ink); }
   .QW4K-share-side p { font-family: var(--ken-font-body); font-size: 16px; line-height: 1.5; color: var(--fp-text); margin: 0 0 18px; }
@@ -309,7 +309,7 @@
   .QW4K-sf-inner { max-width: 640px; margin: 0 auto; }
   .QW4K-sf-h { font-family: var(--ken-font-display); font-weight: bold; font-size: 26px; line-height: 1.15; color: var(--ink); margin: 0 0 14px; }
   .QW4K-sf-links { display: flex; flex-wrap: wrap; gap: 8px; }
-  .QW4K-sf-btn { font-family: var(--ken-font-bold); font-weight: bold; font-size: 14px; color: var(--ink); background: #fff; border: 1.5px solid var(--ink); border-radius: 999px; padding: 8px 18px; text-decoration: none; cursor: pointer; }
+  .QW4K-sf-btn { font-family: var(--ken-font-bold); font-weight: bold; font-size: 14px; color: var(--ink); background: #fff; border: 1.5px solid var(--ink); border-radius: 12px; padding: 8px 18px; text-decoration: none; cursor: pointer; }
   .QW4K-sf-btn:hover { background: var(--ink); color: #fff; }
   .QW4K-sf-about { margin-top: 36px; }
   .QW4K-sf-about p { font-family: var(--ken-font-body); font-size: 14.5px; line-height: 1.6; color: var(--ken-text); }
@@ -319,13 +319,34 @@
   .QW4K-sf-credit { font-family: var(--ken-font-body); font-style: italic; font-size: 15px; color: var(--ken-text); text-align: right; }
   .QW4K-site-foot { padding-bottom: 36px; }
   @media (max-width: 480px) { .QW4K-sf-bottom { flex-direction: column; text-align: center; gap: 10px; } .QW4K-sf-credit { text-align: center; } }
+  /* ===== Age-profile card (scripts/profile-card.js): same on the story and the quiz ===== */
+  .QW4K-final { width: 100%; display: grid; grid-template-columns: 240px minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: 28px; row-gap: 18px; align-items: start; border: 3px solid var(--ink); background: #fff; padding: 22px; box-shadow: 8px 8px 0 var(--red); text-align: left; }
+  .QW4K-final > .QW4K-frame { grid-column: 1; grid-row: 1; }
+  .QW4K-final > dl { grid-column: 2; grid-row: 1 / span 2; margin: 0; display: grid; grid-template-columns: 1fr 1fr; grid-auto-flow: row dense; gap: 14px 22px; }
+  .QW4K-final-logo { grid-column: 1; grid-row: 2; align-self: end; height: 20px; width: auto; }
+  .QW4K-final dt { font-family: var(--ken-font-bold); font-weight: bold; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ken-text); }
+  .QW4K-final dd { margin: 3px 0 0; font-family: var(--ken-font-body); font-size: 18px; color: var(--ink); line-height: 1.3; }
+  .QW4K-final dd small { display: block; font-size: 12.5px; color: var(--ken-text); margin-top: 2px; }
+  .QW4K-final .QW4K-pc-blank { color: #9A8E7A; }
+  .QW4K-final .QW4K-wide { grid-column: 1 / -1; }
+  .QW4K-final .QW4K-wide q { font-family: var(--ken-font-body); font-style: italic; font-size: 17px; line-height: 1.4; quotes: '“' '”'; }
+  .QW4K-final .QW4K-pc-tag { font-family: var(--ken-font-display); font-weight: bold; font-size: 30px; line-height: 1.05; color: var(--ink); grid-column: 1 / -1; }
+  /* iPad portrait and phones: character on top, answers below, logo at the foot of the card */
+  @media (max-width: 760px) {
+    .QW4K-final { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; padding: 18px; box-shadow: 6px 6px 0 var(--red); }
+    .QW4K-final > .QW4K-frame { max-width: 200px; }
+    .QW4K-final > dl { grid-column: 1; grid-row: 2; }
+    .QW4K-final-logo { grid-column: 1; grid-row: 3; align-self: start; margin-top: 4px; }
+    .QW4K-final .QW4K-pc-tag { font-size: 26px; }
+  }
+  @media (max-width: 480px) { .QW4K-final > dl { grid-template-columns: 1fr; gap: 12px; } .QW4K-final > .QW4K-frame { max-width: 160px; } }
 </style>
 </head>
 <body>
 <div class="QW4K-progress"></div>
 
 <!-- ===== ARTICLE HEADER (template) =====
-     Newsletter tag · lede image · meta (edition, date, read time) · headline · strap · byline · share/bookmark.
+     Newsletter tag · lede image · meta (edition, date, read time) · headline · strap · byline.
      Lede image: imgs/FP_Best_Decade.png (1760×990, 16:9). Swap the file for another lede; keep the same shape or update .QW4K-art-lede's aspect-ratio. -->
 <header class="QW4K-art-head">
   <div class="QW4K-art-tag">First Principles</div>
@@ -334,10 +355,6 @@
   <h1 class="QW4K-art-title">Are your best years behind you?</h1>
   <p class="QW4K-art-strap">We asked 301 readers which decade of their life has been the happiest, when they first felt middle-aged, and at what age they would stop ageing if they could</p>
   <p class="QW4K-art-by"><i>by</i><a href="#">Rohin Dharmakumar</a> and <a href="#">Anuj Debnath</a></p>
-  <div class="QW4K-art-actions">
-    <button type="button" id="artShare" aria-label="Share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg></button>
-    <button type="button" id="artSave" aria-label="Bookmark" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M6 3.5h12v17l-6-4.5-6 4.5z"/></svg></button>
-  </div>
   <div class="QW4K-art-reading"><b>You are reading <i>First Principles</i></b>—A community-powered Sunday newsletter on mental models, self-reflection, learning, growth, photos, books, and more</div>
 </header>
 <div class="QW4K-art-toast" id="artToast">Link copied</div>
@@ -387,7 +404,7 @@
   <div class="QW4K-steps">
     <div class="QW4K-step" data-step="c0"><div class="QW4K-card">Meet one reader. They are in their 40s, and they would take the pill at <b>30</b>, going back more than ten years.<span class="QW4K-hint">The illustration is ours; the answers are real. We’ll follow this reader all the way through.</span></div></div>
     <div class="QW4K-step" data-step="c0b"><div class="QW4K-card"><span class="QW4K-big">301</span>Our reader is one of 301 readers who took the survey. Here they all are, one square each, coloured by how old they are now: the darker, the older.<span class="QW4K-hint">The teal-outlined square is our reader.</span></div></div>
-    <div class="QW4K-step" data-step="c1"><div class="QW4K-card">Now sort them. Each column is how old readers are now; the higher a square, the older they’d be when they took the pill. Half would stop the clock by <b>35</b>, the red line.<span class="QW4K-hint">The dotted diagonal marks their age now. Our reader would stop at 30.</span></div></div>
+    <div class="QW4K-step" data-step="c1"><div class="QW4K-card">Now sort them. Each column is how old readers are now; the higher a square, the older they’d be when they took the pill. The red line is the <span class="QW4K-hl QW4K-med">median: 35</span>. Half of readers would stop at 35 or younger, half at 35 or older.<span class="QW4K-hint">The dotted diagonal marks their age now. Our reader would stop at 30.</span></div></div>
     <div class="QW4K-step" data-step="c2"><div class="QW4K-card"><b>117 readers</b>, 43%, would <span class="QW4K-hl QW4K-ink">go back</span>: they’d take the pill at an age younger than they are now. The older the reader, the more likely: 12% of readers in their 20s, but 60% of those in their 50s.<span class="QW4K-hint">Our reader is one of them. We only know each reader’s decade, so “younger than now” means before the decade they’re in.</span></div></div>
     <div class="QW4K-step" data-step="c3"><div class="QW4K-card">Only <b>43</b> would <span class="QW4K-hl QW4K-ink">wait</span>, picking an age older than they are now. Most of them are young: 41% of readers in their 20s would wait, but just 5% of those in their 50s.<span class="QW4K-hint">The other 106 would stop somewhere in the decade they’re in now.</span></div></div>
     <div class="QW4K-step" data-step="c4"><div class="QW4K-card">And then there are the <span class="QW4K-hl QW4K-ink">four readers</span> who said 99, 100 or 110. One of them wrote: “Wouldn’t take the pill actually.”</div></div>
@@ -613,22 +630,21 @@
   <p id="turnIntro"></p>
 </section>
 <section class="QW4K-share-sec" id="yourCards">
-  <canvas class="QW4K-share-card" id="shareCard" width="1600" height="900" role="img" aria-label="Your answers card"></canvas>
+  <div class="QW4K-pcard" id="profileCard" aria-live="polite"></div>
   <div class="QW4K-share-side">
     <h3>Share your card</h3>
-    <p>Send it to a friend and see whether they think their best years are ahead of them too. Or add your answers to the survey itself.</p>
+    <p>Send it to a friend and see whether they think their best years are ahead of them too.</p>
     <div class="QW4K-share-actions">
       <button type="button" class="QW4K-sbtn QW4K-primary" id="btnShare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg>Share</button>
       <button type="button" class="QW4K-sbtn" id="btnDl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></svg>Download image</button>
-      <a class="QW4K-sbtn" id="btnForm" href="https://form.typeform.com/to/iWERYZkh" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Add my answers on Typeform</a>
     </div>
     <p class="QW4K-share-msg" id="shareMsg" aria-live="polite"></p>
-    <p class="QW4K-share-note">Your answers stay on this page. Nothing is saved or sent anywhere unless you share the card or fill in the survey.</p>
+    <p class="QW4K-share-note">Your answers stay on this page. Nothing is saved or sent anywhere unless you share the card.</p>
   </div>
 </section>
 <section class="QW4K-nl">
   <p>Want the full version? The quiz asks all nine questions readers answered and builds your age profile as you go.</p>
-  <div class="QW4K-cta"><a href="quiz.html"><div class="QW4K-av" id="ctaAv"></div><div><b>Take the quiz →</b><span>Nine questions, the same ones readers answered. Your answers stay in your browser.</span></div></a></div>
+  <div class="QW4K-cta"><a href="survey/" id="quizLink"><div class="QW4K-av" id="ctaAv"></div><div><b>Take the quiz →</b><span>Nine questions, the same ones readers answered. Your answers stay in your browser.</span></div></a></div>
 </section>
 
 <!-- ===== ABOUT THE DATA ===== -->
@@ -713,7 +729,7 @@ function groupLayout(W, H, groupFn, names, colorFn, order, topLabel) {
 }
 /* ---------- Colour = the reader's age now (light to dark), the same in every chart.
    Highlights keep that colour; everything else fades. ---------- */
-const AGEC = ['#BFE9E8', '#9AD5FF', '#7CC6F3', '#3896CC', '#3863CC', '#815CDF', '#8940B5'], UNK = '#B8BEC6'; // imgs/Colour Palette.jpg
+const AGEC = ['#BFE9E8', '#9AD5FF', '#7CC6F3', '#3896CC', '#3863CC', '#815CDF', '#8940B5'], UNK = '#B8BEC6'; // the First Principles palette
 const ageC = p => p[0] >= 0 ? AGEC[p[0]] : UNK;
 const toFade = hex => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},0.2)`; };
 const FADE = Object.fromEntries([...AGEC, UNK].map(c => [c, toFade(c)]));
@@ -873,6 +889,8 @@ function setupScrolly(section) {
   const st = { step: null, visible: [], delays: null };
   // The square the illustration grows out of / shrinks into: yours once you've answered this section, otherwise our reader's
   const focusOf = L => youOn(section.dataset.chart) && L && L.dots[YI] && L.dots[YI].o > 0 ? YI : ANCHOR;
+  // Once you're in the chart, the story is about you: our reader goes back to being an ordinary square
+  const anchorOn = () => !youOn(section.dataset.chart);
   chart.setOption({
     animationDurationUpdate: 900, animationEasingUpdate: 'cubicInOut',
     grid: { left: 0, right: 0, top: 0, bottom: 0 },
@@ -887,7 +905,7 @@ function setupScrolly(section) {
         return { type: 'rect', shape: { x: a[0], y: a[1], width: b[0] - a[0], height: b[1] - a[1] }, style: kind ? { fill: 'rgba(255,255,255,0.55)', stroke: '#1A1208', lineWidth: 1.5, lineDash: [5, 3] } : { fill: `rgba(56,150,204,${(api.value(4) || 0.22) * .6})` } };
       } },
       { id: 'dots', type: 'scatter', symbol: 'rect', data: [], animationDelayUpdate: i => st.delays ? st.delays[i] : (i % 97) * 3.5, animationDurationUpdate: 800, emphasis: { scale: false, itemStyle: { borderColor: INK, borderWidth: 1.5 } },
-        tooltip: { formatter: pr => st.visible[pr.dataIndex] ? readerTip(PX[pr.dataIndex], pr.dataIndex === ANCHOR, pr.dataIndex === YI) : '' } },
+        tooltip: { formatter: pr => st.visible[pr.dataIndex] ? readerTip(PX[pr.dataIndex], pr.dataIndex === ANCHOR && anchorOn(), pr.dataIndex === YI) : '' } },
       { id: 'faces', type: 'scatter', silent: true, data: [], animationDelayUpdate: i => st.delays ? st.delays[i] : (i % 97) * 3.5, animationDurationUpdate: 800, tooltip: { show: false } },
       { id: 'labels', type: 'scatter', silent: true, symbolSize: 0, data: [], tooltip: { show: false } }
     ]
@@ -896,7 +914,7 @@ function setupScrolly(section) {
   // Each reader is a coloured square (the data) with a character on top (variety). Characters show once squares are big enough to read.
   const FACE_MIN = 12;
   const dotsData = (L, opacity) => L.dots.map((d, i) => {
-    const o = typeof opacity === 'function' ? opacity(i, d) : d.o, isA = i === ANCHOR, isY = i === YI;
+    const o = typeof opacity === 'function' ? opacity(i, d) : d.o, isA = i === ANCHOR && anchorOn(), isY = i === YI;
     const mark = isA || isY;
     return { value: [d.x, d.y], symbol: 'rect', symbolSize: mark ? Math.max(L.s * 1.25, 10) : L.s + 0.6,
       itemStyle: mark
@@ -904,8 +922,8 @@ function setupScrolly(section) {
         : { color: d.c, opacity: o, borderWidth: 0 } };
   });
   const facesData = (L, opacity) => L.dots.map((d, i) => {
-    const o = typeof opacity === 'function' ? opacity(i, d) : d.o, sz = isMark(i) ? Math.max(L.s * 1.25, 10) : L.s;
-    const face = i === ANCHOR ? window.AGE_ART.cutSrc(ANCHOR_ART.id) : i === YI ? youSquare() : cutFor(i, PX[i][0]);
+    const aOn = i === ANCHOR && anchorOn(), o = typeof opacity === 'function' ? opacity(i, d) : d.o, sz = i === YI || aOn ? Math.max(L.s * 1.25, 10) : L.s;
+    const face = aOn ? window.AGE_ART.cutSrc(ANCHOR_ART.id) : i === YI ? youSquare() : cutFor(i, PX[i][0]);
     return { value: [d.x, d.y], symbol: face ? 'image://' + face : 'rect', symbolSize: face && L.s >= FACE_MIN ? sz * .9 : 0, itemStyle: { opacity: isFaded(d.c) ? o * .25 : o } };
   });
   const dotSeries = (L, opacity) => [{ id: 'dots', data: dotsData(L, opacity) }, { id: 'faces', data: facesData(L, opacity) }];
@@ -914,7 +932,7 @@ function setupScrolly(section) {
     const a = L.dots[ANCHOR], y = L.dots[YI], h = Math.max(L.s * 1.25, 10) / 2, out = [];
     const tag = { padding: [4, 8], borderRadius: 3, fontSize: 12, borderColor: '#fff', borderWidth: 2, shadowBlur: 8, shadowColor: 'rgba(26,18,8,.35)', shadowOffsetY: 2 };
     if (y.o > 0) out.push(lbl(y.x, y.y - h - 15, 'You', { ...tag, color: INK, backgroundColor: MARK_Y }));
-    if (a.o > 0) {
+    if (a.o > 0 && anchorOn()) {
       const near = y.o > 0 && Math.abs(a.x - y.x) < 50 && Math.abs(a.y - y.y) < 34;
       const st = { ...tag, color: '#fff', backgroundColor: MARK_A };
       // Side by side with you: put our reader's tag on the side away from you (below if there's no room sideways)
@@ -987,7 +1005,7 @@ function setupScrolly(section) {
     layout = L;
   }
   window.addEventListener('resize', () => { chart.resize(); if (st.step && !STEPS[st.step].art) render(st.step, true); });
-  REFRESH.push(() => { foot.textContent = 'Each square is one reader. The teal-outlined square is our reader.' + (youIn() ? ' The yellow square is you.' : ''); if (st.step) render(st.step, !!STEPS[st.step].art); });
+  REFRESH.push(() => { foot.textContent = 'Each square is one reader. ' + (anchorOn() ? 'The teal-outlined square is our reader.' + (youIn() ? ' The yellow square is you.' : '') : 'The yellow square is you.'); if (st.step) render(st.step, !!STEPS[st.step].art); });
   const steps = [...section.querySelectorAll('.QW4K-step')];
   render(steps[0].dataset.step, true);
   steps.forEach(step => ScrollTrigger.create({ trigger: step, start: 'top 80%', end: 'bottom 80%', // the chart changes as soon as the next card comes into view
@@ -1009,7 +1027,7 @@ const QUOTES_MID = [
   ['Felt it at 50', 4, 'short', 'Delhi', 'I started to realise that my team is younger than my nieces and nephews'],
   ['Felt it at 40', 3, 'long', 'Singapore', 'A switch seems to have been turned off as soon as I turned 40 - metabolism isn\'t the same anymore…'],
   ['Felt it at 49', 4, 'short', 'Bengaluru', 'Changed from salt pepper to salt', true],
-  ['Felt it at 47', 3, 'short', 'Gurugram', '…having to start counting my beers and pegs..'],
+  ['Felt it at 47', 3, 'short', 'Gurugram', '…having to start counting my beers and pegs..', true],
   ['Felt it at 59', 5, 'long', 'Kolkata', 'Approaching my 60th birthday, being called a \'veteran\''],
   ['Felt it at 40', 3, 'short', 'Mumbai', 'Inability to run 5k run within 30 min'],
 ];
@@ -1033,12 +1051,15 @@ function quotePanels(id, list, mood) {
 
 /* ---------- Your answers: optional chips on each question card. They place a "You" square in the charts
    and rewrite the opening card of the section that follows. Nothing is stored or sent anywhere. ---------- */
-const ans = { age: null, now: null, hap: null, exp: null, mid: null, midAge: null, trig: null, pill: null, fact: 0, lookSet: false, length: null, curl: null, facial: null, skin: null };
+const ans = { age: null, now: null, hap: null, exp: null, mid: null, midAge: null, trig: null, trigText: '', why: '', pill: null, fact: 0, lookSet: false, length: null, curl: null, facial: null, skin: null };
 const FACTORS = [['Freedom and fewer obligations', 8], ['Relationships or family', 2], ['Financial security', 16], ['Work or building something', 1], ['Health and energy', 4], ['Learning or discovery', 32]];
 const TRIGS = [['My body or health', 1], ['Kids growing up', 2], ['Parents ageing', 4], ['Work', 8], ['Feeling older than the room', 16], ['A milestone birthday', 32], ['Something else', 0]];
 const OTHER = 64; // "Other" on question 5: counted as an answer, not drawn in the chart
 const WOULDNT = 100; // "I wouldn't take it" sits with the readers who answered 99+
 const MED_MID = 43;
+// Free-text answers, written the same way as the quiz's; they go on your card in quotes
+const textBox = (id, placeholder) => `<textarea class="QW4K-free" id="${id}" rows="3" maxlength="280" placeholder="${placeholder}"></textarea><div class="QW4K-free-meta"><span>Your answer stays in your browser.</span><span id="${id}N">0/280</span></div>`;
+function wireText(id, fn) { const t = $(id); t.addEventListener('input', () => { $(id + 'N').textContent = `${t.value.length}/280`; fn(t.value.trim()); renderCards(); }); }
 const qrow = (label, inner, hide) => `<div class="QW4K-qrow"${hide ? ' hidden' : ''}><span class="QW4K-qlab">${label}</span>${inner}</div>`;
 // The reader's own character: hair and skin picked on the age card. Every question card then draws them
 // at that question's age, so the same person greys and loses hair as the story moves through their life.
@@ -1222,7 +1243,7 @@ const YOU_CARD = {
     const when = a == null ? '' : v < a ? `, going back <b>${yrs(a - v)}</b>` : v > a ? `, <b>${yrs(v - a)}</b> from now` : ', today';
     return `Meet you. You’d take the pill at <b>${v}</b>${when}.${hint('Next: where that puts you among everyone who answered.')}`;
   },
-  c0b: o => youOn('C') && youIn() ? withHint(o.replace('Our reader is one of 301 readers who took the survey.', 'You’re about to join 301 readers who took the survey.'), 'You’re the yellow square; the teal-outlined one is our reader.') : null,
+  c0b: o => youOn('C') && youIn() ? withHint(o.replace('Our reader is one of 301 readers who took the survey.', 'You’re about to join 301 readers who took the survey.'), 'You’re the yellow square.') : null,
   c1: o => {
     if (!youOn('C')) return null;
     const all = P.filter(p => p[5] != null);
@@ -1384,9 +1405,10 @@ function buildForms() {
   };
 
   // Q1: the pill
-  $('formPill').innerHTML = turnHTML('Drag the slider to pick an age. You’ll appear in the charts below.', OK) + qrow('I’d take it at', slideHTML('inPill', 10, 99, 35) + `<div class="QW4K-qopts QW4K-qnever"><span class="QW4K-qor">or</span><button type="button" id="btnNever" aria-pressed="false">I wouldn’t take it</button></div>`);
+  $('formPill').innerHTML = turnHTML('Drag the slider to pick an age. You’ll appear in the charts below.', OK) + qrow('I’d take it at', slideHTML('inPill', 10, 99, 35) + `<div class="QW4K-qopts QW4K-qnever"><span class="QW4K-qor">or</span><button type="button" id="btnNever" aria-pressed="false">I wouldn’t take it</button></div>`) + qrow('Why that age?', textBox('inWhy', 'What makes that age the one to keep?'));
   const pillSl = onSlide('inPill', v => { ans.pill = v; $('btnNever').setAttribute('aria-pressed', 'false'); syncYou(true); }, 'years old');
-  $('btnNever').addEventListener('click', () => { const on = $('btnNever').getAttribute('aria-pressed') !== 'true'; $('btnNever').setAttribute('aria-pressed', on); if (on) pillSl.reset(); ans.pill = on ? WOULDNT : null; syncYou(); });
+  wireText('inWhy', v => { ans.why = v; });
+  $('btnNever').addEventListener('click', () => { const on = $('btnNever').getAttribute('aria-pressed') !== 'true'; $('btnNever').setAttribute('aria-pressed', on); if (on) pillSl.reset(); ans.pill = on ? WOULDNT : null; $('inWhy').closest('.QW4K-qrow').hidden = on; syncYou(); });
 
   // Q3 and Q4: decade now, happiest so far
   $('formHap').innerHTML = turnHTML(IN, OK) + qrow('Which decade are you in now?', chipsHTML(decs, 'optNow')) + qrow('Your happiest so far', chipsHTML([...decs, ['Too close to call', -1]], 'optHap'), true);
@@ -1419,10 +1441,11 @@ function buildForms() {
   const sayYes = () => { if (ans.mid !== 1) { ans.mid = 1; $('optMid').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x.dataset.v === '1')); } };
   $('formMid').innerHTML = turnHTML(IN, OK) + qrow('Have you felt it?', chipsHTML([['Yes', 1], ['No, not yet', 0]], 'optMid'));
   $('formMidAge').innerHTML = turnHTML('Drag the slider to the age it first happened.', OK) + qrow('I first felt it at', slideHTML('inMidAge', 15, 75, 40));
-  $('formTrig').innerHTML = turnHTML('Pick the closest. You’ll be placed in its cluster below.', OK) + qrow('What gave it away?', chipsHTML(TRIGS, 'optTrig'));
+  $('formTrig').innerHTML = turnHTML('Pick the closest. You’ll be placed in its cluster below.', OK) + qrow('What gave it away?', chipsHTML(TRIGS, 'optTrig')) + qrow('In your own words', textBox('inTrig', 'A sentence or two: a moment, a comment, a change…'));
   const midSl = onSlide('inMidAge', v => { sayYes(); ans.midAge = v; syncYou(true); }, 'years old');
   onChips('optMid', v => { ans.mid = v; if (v) midSl.start(Math.min(ans.age ?? (ans.now != null ? decAge(ans.now) : 40), 45)); syncYou(); });
   onChips('optTrig', v => { sayYes(); ans.trig = v; syncYou(); });
+  wireText('inTrig', v => { ans.trigText = v; if (v) sayYes(); });
 
   wireAge();
   ['formAge', 'formPill', 'formHap', 'formGood', 'formMid', 'formMidAge', 'formTrig', 'formExp'].forEach(id => tapHint($(id)));
@@ -1430,108 +1453,40 @@ function buildForms() {
 
 /* ---------- Your card: one shareable 1600x900 landscape image of the reader's answers.
    The page shows the same canvas that gets shared, so what you see is what you send. ---------- */
-const CW = 1600, CH = 900;
-const imgCache = {};
-const loadImg = src => imgCache[src] || (imgCache[src] = new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; }));
 const SHARE_URL = () => location.protocol.startsWith('http') ? location.origin + location.pathname : 'https://the-ken.com';
 const anyAnswer = () => ans.age != null || ans.now != null || ans.mid != null || ans.pill != null || ans.fact > 0;
-function cardData() {
-  const { g, who } = peers();
+// Your card: the same age-profile card as the quiz's final screen (scripts/profile-card.js)
+const FACT_SHORT = { 8: 'Freedom', 2: 'Relationships', 16: 'Financial security', 1: 'Work', 4: 'Health', 32: 'Learning' };
+const cardTag = out => !anyAnswer() ? 'Are your best years behind you?' : out === 'ahead' ? 'The best is yet to come.' : out === 'now' ? 'Living your best decade.' : out === 'behind' ? 'Looking back fondly.' : 'Keeping your options open.';
+function cardSpec() {
   const out = ans.exp == null || ans.now == null ? null : ans.exp === -2 ? 'behind' : ans.exp > ans.now ? 'ahead' : ans.exp === ans.now ? 'now' : 'behind';
-  const verdict = !anyAnswer() ? 'Are your best years behind you?' : { ahead: 'My best years are still ahead', now: 'I’m living my best decade', behind: 'My best years are behind me' }[out] || 'How I see my years';
-  const rows = [];
-  // Happiest so far
-  if (ans.hap == null) rows.push(['My happiest decade so far', null]);
-  else { const named = g.filter(p => p[1] >= 0); rows.push(['My happiest decade so far', ans.hap === -1 ? 'Too close to call' : 'My ' + DEC[ans.hap], ans.hap === -1 ? 'Only 11 of 301 readers said that' : `${pct(named.filter(p => p[1] === ans.hap).length, named.length)}% of ${who} said the same`]); }
-  // Middle age
-  if (ans.mid == null) rows.push(['I first felt middle-aged', null]);
-  else {
-    const said = g.filter(p => p[3] >= 0), yes = pct(said.filter(p => p[3] === 1).length, said.length), d = ans.midAge != null ? ans.midAge - MED_MID : null;
-    rows.push(['I first felt middle-aged', !ans.mid ? 'Not yet' : ans.midAge != null ? 'At ' + ans.midAge : 'Yes, I have',
-      !ans.mid ? `${100 - yes}% of ${who} haven’t either` : d == null ? `Like ${yes}% of ${who}` : d === 0 ? 'Exactly when the median reader did' : `${yrs(Math.abs(d))} ${d < 0 ? 'earlier' : 'later'} than the median reader`]);
-  }
-  // Pill
-  if (ans.pill == null) rows.push(['I’d stop ageing at', null]);
-  else {
-    const all = P.filter(p => p[5] != null), v = ans.pill;
-    rows.push(['I’d stop ageing at', v === WOULDNT ? 'Never' : String(v), v === WOULDNT ? 'Only 4 of 272 readers said the same' : `${pct(all.filter(p => p[5] < v).length, all.length)}% of readers would stop younger, ${pct(all.filter(p => p[5] > v).length, all.length)}% older`]);
-  }
-  // Good decade
+  const row = (label, set, value, sub = '', wide = false) => ({ label, value: set ? value() : '', state: set ? 'set' : 'empty', sub, wide });
   const picked = FACTORS.filter(([, b]) => ans.fact & b);
-  rows.push(['My happiest decade was about', picked.length ? picked.map(([n]) => n.split(' ')[0]).join(', ') : ans.fact & OTHER ? 'Something else' : null, ans.fact & 8 ? 'Freedom was readers’ top pick too' : 'Readers’ top pick was freedom (47%)']);
-  return { verdict, rows: [rows[2], rows[0], rows[3], rows[1]], decade: ans.now };
+  const rows = [
+    row('Your decade', ans.now != null, () => DEC[ans.now]),
+    row('Would take the pill at', ans.pill != null, () => ans.pill === WOULDNT ? 'Wouldn’t take it' : String(ans.pill)),
+    ...(ans.pill === WOULDNT ? [] : [row('Why that age', !!ans.why, () => ans.why, '', true)]),
+    row('Happiest so far', ans.hap != null, () => ans.hap === -1 ? 'Too close to call' : DEC[ans.hap]),
+    row('A good decade needs', ans.fact > 0, () => picked.length ? picked.map(([n, b]) => FACT_SHORT[b] || n).join(' & ') : 'Something else', 'Readers’ top pick: freedom'),
+    row('Felt middle-aged', ans.mid != null, () => ans.mid ? (ans.midAge != null ? `Yes, at ${ans.midAge}` : 'Yes') : 'Not yet', '47% of readers have'),
+    row('Your best decade is', !!out, () => ({ ahead: 'Still ahead', now: 'Right now', behind: 'Behind you' })[out]),
+  ];
+  // In your words if you wrote them, otherwise the answer you picked
+  if (ans.mid === 1) rows.push(row('What gave it away', !!ans.trigText || ans.trig != null, () => ans.trigText || (TRIGS.find(([, v]) => v === ans.trig) || ['Something else'])[0], '', true));
+  const age = ans.age ?? (ans.now != null ? decAge(ans.now) : null);
+  return { tag: cardTag(out), cap: ans.age != null ? `You, ${ans.age}` : 'You', age, you: look(), rows,
+           art: Character(age ?? 35, asMe({ mood: 'joy', question: !anyAnswer() })) };
 }
-function wrapText(ctx, text, x, y, maxW, lineH, maxLines = 9) {
-  const words = text.split(' '); let line = '', n = 0;
-  for (let i = 0; i < words.length; i++) {
-    const test = line ? line + ' ' + words[i] : words[i];
-    if (ctx.measureText(test).width > maxW && line) { ctx.fillText(line, x, y + n * lineH); n++; line = words[i]; if (n === maxLines - 1) { line = words.slice(i).join(' '); break; } }
-    else line = test;
-  }
-  ctx.fillText(line, x, y + n * lineH); return n + 1;
-}
-const fitFont = (ctx, text, weightFamily, size, maxW) => { for (; size > 18; size -= 2) { ctx.font = `${size}px ${weightFamily}`; if (ctx.measureText(text).width <= maxW) break; } return size; };
-const spacing = (ctx, v) => { if ('letterSpacing' in ctx) ctx.letterSpacing = v; };
-let drawToken = 0;
 async function renderCards() {
   $('turnIntro').innerHTML = anyAnswer() ? 'Here’s your card: your answers next to the 301 readers who took the survey. Change an answer above and the card updates.' : 'You haven’t answered any of the questions yet. Scroll back up and tap an answer; your card fills in as you go.';
   ['btnShare', 'btnDl'].forEach(id => $(id).disabled = !anyAnswer());
-  const token = ++drawToken, D = cardData();
-  const [portrait, logo] = await Promise.all([D.decade != null ? loadImg(PORTRAIT_SRC(D.decade)) : null, loadImg('assets/logo.png')]);
-  await document.fonts.ready;
-  if (token !== drawToken) return; // a newer answer arrived while images loaded
-  const cv = $('shareCard'), ctx = cv.getContext('2d');
-  const INKC = '#1A1208', REDC = '#C8423A', MUTED = '#6B5B57', SERIF = '"GT America", Arial, sans-serif', DISP = '"Jazmin Alt", Georgia, serif', BOLD = '"GT America Bold", Arial, sans-serif';
-  ctx.clearRect(0, 0, CW, CH); ctx.textBaseline = 'alphabetic'; spacing(ctx, '0px');
-  ctx.fillStyle = '#F7F2F2'; ctx.fillRect(0, 0, CW, CH); // same as the page, so the card sits flush on screen
-  ctx.fillStyle = REDC; ctx.fillRect(62, 62, 1500, 800);
-  ctx.fillStyle = '#fff'; ctx.fillRect(40, 40, 1500, 800);
-  ctx.lineWidth = 6; ctx.strokeStyle = INKC; ctx.strokeRect(40, 40, 1500, 800);
-  // Left column: tag, portrait, call to action, logo
-  const LX = 96, LW = 400;
-  ctx.fillStyle = REDC; ctx.font = `24px ${BOLD}`; spacing(ctx, '3px'); ctx.fillText('FIRST PRINCIPLES', LX, 112); spacing(ctx, '0px');
-  const PY = 140, PS = LW;
-  ctx.fillStyle = '#EAE0DF'; ctx.fillRect(LX, PY, PS, PS);
-  if (look()) { try { await window.AGE_ART.drawYou(ctx, LX, PY, PS, ans.age ?? decAge(D.decade ?? 2), look(), 'smile'); } catch (e) { /* layers missing: leave the panel plain */ } }
-  else if (portrait) ctx.drawImage(portrait, LX, PY, PS, PS);
-  else { ctx.fillStyle = 'rgba(26,18,8,.35)'; ctx.font = `220px ${DISP}`; ctx.textAlign = 'center'; ctx.fillText('?', LX + PS / 2, PY + PS / 2 + 76); ctx.textAlign = 'left'; }
-  ctx.lineWidth = 5; ctx.strokeStyle = INKC; ctx.strokeRect(LX, PY, PS, PS);
-  const cap = ans.age != null ? 'ME, AT ' + ans.age : D.decade != null ? 'ME, IN ' + THEIR[D.decade].replace('their', 'MY').toUpperCase() : 'ME';
-  ctx.font = `22px ${BOLD}`; spacing(ctx, '2px'); const cw = ctx.measureText(cap).width + 26;
-  ctx.fillStyle = INKC; ctx.fillRect(LX, PY, cw, 44); ctx.fillStyle = '#fff'; ctx.fillText(cap, LX + 13, PY + 31); spacing(ctx, '0px');
-  ctx.fillStyle = INKC; fitFont(ctx, 'Where do you stand?', DISP, 44, LW); ctx.fillText('Where do you stand?', LX, 618);
-  ctx.fillStyle = REDC; ctx.font = `24px ${BOLD}`;
-  let url = SHARE_URL().replace(/^https?:\/\//, ''); while (ctx.measureText(url + ' →').width > LW && url.length > 12) url = url.slice(0, -2);
-  ctx.fillText(url + ' →', LX, 660);
-  if (logo) { const lh = 46, lw = logo.width * lh / logo.height; ctx.drawImage(logo, LX, 752, lw, lh); }
-  // Divider between columns
-  ctx.strokeStyle = 'rgba(26,18,8,.18)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(550, 96); ctx.lineTo(550, 790); ctx.stroke();
-  // Right column: verdict, then the four answers in a 2x2 grid
-  const RX = 604, RW = 880;
-  ctx.fillStyle = MUTED; ctx.font = `22px ${BOLD}`; spacing(ctx, '3px'); ctx.fillText('THE AGE FACTOR · MY ANSWERS', RX, 112); spacing(ctx, '0px');
-  ctx.fillStyle = INKC; const vs = fitFont(ctx, D.verdict, DISP, 82, RW); ctx.fillText(D.verdict, RX, 112 + vs + 6);
-  ctx.fillStyle = MUTED; ctx.font = `italic 27px ${SERIF}`; ctx.fillText('Compared with the 301 First Principles readers who took the survey', RX, 112 + vs + 56);
-  const GY = 300, CWID = 410, GAPX = 60, CH2 = 240;
-  D.rows.forEach(([label, answer, stat], i) => {
-    const x = RX + (i % 2) * (CWID + GAPX), y = GY + Math.floor(i / 2) * CH2;
-    ctx.strokeStyle = INKC; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + CWID, y); ctx.stroke();
-    ctx.fillStyle = MUTED; ctx.font = `21px ${BOLD}`; spacing(ctx, '2px'); ctx.fillText(label.toUpperCase(), x, y + 42); spacing(ctx, '0px');
-    if (answer == null) {
-      ctx.fillStyle = 'rgba(26,18,8,.3)'; ctx.font = `64px ${DISP}`; ctx.fillText('—', x, y + 116);
-      ctx.font = `italic 27px ${SERIF}`; ctx.fillText('Not answered', x, y + 162);
-      return;
-    }
-    ctx.fillStyle = REDC; fitFont(ctx, answer, DISP, 66, CWID); ctx.fillText(answer, x, y + 116);
-    ctx.fillStyle = INKC; ctx.font = `28px ${SERIF}`; wrapText(ctx, stat, x, y + 162, CWID, 36, 2);
-  });
-  ctx.fillStyle = MUTED; ctx.font = `italic 20px ${SERIF}`; ctx.fillText('Survey of 301 First Principles readers, September 2026. Illustration, not a photo.', RX, 806);
-  cv.setAttribute('aria-label', `Your answers card. ${D.verdict}. ` + D.rows.map(([l, a, st]) => `${l}: ${a ?? 'not answered'}${a ? ' (' + st + ')' : ''}`).join('. '));
+  $('profileCard').innerHTML = PROFILE_CARD.html(cardSpec());
 }
 const PORTRAIT_SRC = dec => window.AGE_ART.portraitSrc(ans.age ?? decAge(dec));
 // The reader's chart square: their own face once it's built (it rebuilds the charts when ready), the plain square until then
 const youSquare = () => { const l = look(); return (l && window.AGE_ART.youCut(ans.age ?? decAge(ans.now ?? 2), l, () => REFRESH.forEach(f => f()))) || null; };
-const shareText = () => `${cardData().verdict}. Are your best years behind you? Take the First Principles quiz:`;
-const cardBlob = () => new Promise((res, rej) => { try { $('shareCard').toBlob(b => b ? res(b) : rej(new Error('empty')), 'image/png'); } catch (e) { rej(e); } });
+const shareText = () => `${cardSpec().tag} Are your best years behind you? Take the First Principles quiz:`;
+const cardBlob = () => PROFILE_CARD.blob(cardSpec());
 const say = msg => { $('shareMsg').textContent = msg; gsap.fromTo('#shareMsg', { autoAlpha: 0 }, { autoAlpha: 1, duration: .3 }); };
 const BLOCKED = 'Your browser won’t export the image from a file opened on this computer. It works once the page is published.';
 function download(blob) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'my-age-factor-card.png'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
@@ -1554,12 +1509,9 @@ KEN.whenFontsReady(() => {
 
   gsap.from('#ledeArt img', { scale: 1.06, autoAlpha: 0, duration: 1.1, ease: 'power2.out', delay: .1 });
 
-  // Share and bookmark (no comments on this edition)
   const toast = msg => { const t = $('artToast'); t.textContent = msg; t.style.opacity = 1; clearTimeout(t._h); t._h = setTimeout(() => t.style.opacity = 0, 1600); };
-  $('artShare').addEventListener('click', async () => {
-    const data = { title: document.title, url: location.href };
-    try { if (navigator.share) await navigator.share(data); else { await navigator.clipboard.writeText(location.href); toast('Link copied'); } } catch (e) {}
-  });
+  // The quiz is survey/index.html: the server serves the folder; from disk, link the file
+  if (location.protocol === 'file:') $('quizLink').href = 'survey/index.html';
   // Footer share links
   { const url = SHARE_URL(), title = 'Are your best years behind you?', u = encodeURIComponent(url), t = encodeURIComponent(title);
     $('sfWa').href = `https://wa.me/?text=${t}%20${u}`;
@@ -1567,12 +1519,11 @@ KEN.whenFontsReady(() => {
     $('sfLi').href = `https://www.linkedin.com/sharing/share-offsite/?url=${u}`;
     $('sfCopy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(url); toast('Link copied'); } catch (e) { toast('Copy the link from your address bar'); } });
     if (navigator.share) { $('sfMore').hidden = false; $('sfMore').addEventListener('click', () => navigator.share({ title, url }).catch(() => {})); } }
-  $('artSave').addEventListener('click', e => { const b = e.currentTarget, on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', on); toast(on ? 'Saved' : 'Removed from saved'); });
 
   buildForms();
   renderCards();
   setupShare();
-  ScrollTrigger.create({ trigger: '#yourCards', start: 'top 80%', once: true, onEnter: () => gsap.fromTo('#shareCard', { y: 50, rotate: -4, autoAlpha: 0 }, { y: 0, rotate: 0, autoAlpha: 1, duration: .9, ease: 'back.out(1.4)', clearProps: 'transform,opacity,visibility' }) });
+  ScrollTrigger.create({ trigger: '#yourCards', start: 'top 80%', once: true, onEnter: () => gsap.fromTo('#profileCard', { y: 50, rotate: -4, autoAlpha: 0 }, { y: 0, rotate: 0, autoAlpha: 1, duration: .9, ease: 'back.out(1.4)', clearProps: 'transform,opacity,visibility' }) });
   // Question panels next to each question card
   $('askHap').insertAdjacentHTML('afterbegin', Character(44, { hair: 'long', mood: 'smile', skin: SKINS[1] }));
   $('askMid').insertAdjacentHTML('afterbegin', Scene('uncle', { age: 42, hair: 'short' }));

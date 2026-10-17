@@ -83,7 +83,9 @@
   // Each decade has ten, half female-presenting. o.hair ('long'|'short'), o.mood and o.skin pick the closest match;
   // o.avoid skips ids; o.pick takes the nth equal match; o.id picks one exactly (the fixed "anchor" reader too).
   const FP = window.FP_CHARS || { dir: '', skins: SKINS, chars: [] };
-  const PORTRAIT_DIR = FP.dir + 'web/', CUT_DIR = FP.dir + 'cut/', LAYER_DIR = FP.dir + 'layers/';
+  // Pages in a subfolder (the quiz, at survey/) set window.AGE_BASE = '../' so image paths still resolve
+  const BASE = window.AGE_BASE || '';
+  const PORTRAIT_DIR = BASE + FP.dir + 'web/', CUT_DIR = BASE + FP.dir + 'cut/', LAYER_DIR = BASE + FP.dir + 'layers/';
   const STORY = FP.chars.filter(c => !c.fixed);
   const BY_DECADE = [0, 1, 2, 3, 4, 5, 6].map(d => STORY.filter(c => c.decade === d));
   const MOODS = { joy: ['joy'], smile: ['smile', 'joy'], neutral: ['neutral', 'smile'], worried: ['worried', 'neutral'], tired: ['worried', 'neutral'] };
@@ -99,12 +101,12 @@
   const portraitSrcOf = (age, o = {}) => `${PORTRAIT_DIR}${portraitId(age, o)}.png`;
 
   // The reader's own character, stacked from pre-coloured layers so any combination works.
-  // o.you = { length: 'long'|'short', curl: 'straight'|'curly'|'braid'|'bun', facial: null|'moustache'|'beard1'|'beard2'|'beard3', skin: 0-5 }
+  // o.you = { length: 'long'|'short', curl: 'straight'|'curly'|'braid'|'bun', facial: null|'moustache'|'beard1'|'beard2', skin: 0-5 }
   // Readers pick only length and curl; age picks the hairstyle (long straight hair goes braid, loose, waves, bob, bun;
-  // short hair thins to balding). Hair and beards grey with age, specs arrive in the 50s, and teens get the big eyes.
+  // short hair thins to balding). Hair and beards grey with age and specs arrive in the 50s.
   const HAIR_LENGTHS = [['long', 'Long'], ['short', 'Short']];
   const HAIR_TYPES = [['straight', 'Straight'], ['curly', 'Curly'], ['braid', 'Braid'], ['bun', 'Bun']];
-  const FACIAL = [[null, 'None'], ['moustache', 'Moustache'], ['beard3', 'Goatee'], ['beard2', 'Chin strap'], ['beard1', 'Full beard']];
+  const FACIAL = [[null, 'None'], ['moustache', 'Moustache'], ['beard2', 'Chin strap'], ['beard1', 'Full beard']];
   // Hair part per decade (Teens..70s+). Parts: 1-2 long waves, 3 braid, 4 bun, 5 curls, 6 bob, 7 short curls, 8 short, 9 quiff, 10 balding, 0 bald
   const HAIR_BY_AGE = {
     'long-straight': [3, 2, 1, 6, 6, 4, 4], 'long-curly': [5, 5, 5, 5, 5, 7, 7],
@@ -113,15 +115,17 @@
     'short-braid': [3, 3, 3, 3, 3, 4, 4], 'short-bun': [4, 4, 4, 4, 4, 10, 10],  // a braid is a braid; a short-haired bun is a man bun that thins later
   };
   const hairTone = age => age < 38 ? 0 : age < 48 ? 1 : age < 58 ? 2 : age < 68 ? 3 : 4;
-  // Faces by mood. Under 60 there are no wrinkles; from 60 the content and worried faces carry them. Teens get the big eyes.
-  const YOU_FACE = { smile: 4, neutral: 4, joy: 5, worried: 6, tired: 6 };
-  const YOU_FACE_60 = { smile: 7, neutral: 7, joy: 7, worried: 8, tired: 8 };
+  // Faces: 1 smile, 2 happy, 3 open mouth with big eyes, 4 worried with lines. Face by age first, then mood:
+  // teens and 20s wear the young face (3), 30s-50s smile (1, or 2 for joy), 60+ the lined face (4, or 2 for joy).
+  const YOU_FACE_YOUNG = { smile: 3, neutral: 3, joy: 3, worried: 3, tired: 3 };
+  const YOU_FACE = { smile: 1, neutral: 1, joy: 2, worried: 1, tired: 1 };
+  const YOU_FACE_60 = { smile: 4, neutral: 4, joy: 2, worried: 4, tired: 4 };
   function youLayers(age, you, mood) {
     const d = decadeOf(age), tone = hairTone(age);
     const style = (HAIR_BY_AGE[`${you.length || 'short'}-${you.curl || 'straight'}`] || HAIR_BY_AGE['short-straight'])[d];
-    const face = d === 0 ? 1 : d >= 5 ? YOU_FACE_60[mood] || 7 : YOU_FACE[mood] || 4;
+    const face = (d >= 5 ? YOU_FACE_60 : d <= 1 && !(you.facial && d >= 1) ? YOU_FACE_YOUNG : YOU_FACE)[mood] || 1; // a beard would cover the open mouth
     const L = [`base-${you.skin ?? 2}`, 'shirt-3', `face-${face}`];
-    if (d >= 4 && face !== 1) L.push('specs-2');
+    if (d >= 4) L.push('specs-2');
     if (style) L.push(`hair-${style}-${tone}`);
     if (you.facial && d >= 1) L.push(`beard-${you.facial}-${tone}`); // over the hair, so long hair never hides it
     return L.map(n => `${LAYER_DIR}${n}.png`);

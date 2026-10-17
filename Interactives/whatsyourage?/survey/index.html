@@ -1,0 +1,941 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>
+  // Opened as ".../AgeFactor" (no trailing slash)? Relative links would resolve one folder too high, so add the slash first.
+  if (location.protocol.startsWith('http') && !/\/$|\.[a-z0-9]+$/i.test(location.pathname)) location.replace(location.pathname + '/' + location.search + location.hash);
+</script>
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Old Do You Feel?</title>
+<link rel="stylesheet" href="../assets/ken-chart.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../assets/ken-echarts.js"></script>
+<script src="../data/readers.js"></script>
+<script>window.AGE_BASE = '../'; // this page lives in survey/; shared files sit one level up</script>
+<script src="../scripts/fp-characters.js"></script>
+<script src="../scripts/characters.js"></script>
+<script src="../scripts/profile-card.js"></script>
+<style>
+  :root { --red: #C8423A; --char: #3D3D3D; --teal: #4A9E9A; --dot: #C4AAAA; --ink: #1A1208; --card: #FBF8F7; }
+  body { display: block; }
+  p { margin: 0; }
+  button { font: inherit; cursor: pointer; }
+
+  /* Top bar */
+  .QW4K-topbar { position: sticky; top: 0; z-index: 30; background: var(--ken-bg); border-bottom: 1.5px solid var(--ken-rule); }
+  .QW4K-topbar-in { max-width: 1280px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 18px; }
+  .QW4K-brand { font-family: var(--ken-font-display); font-weight: bold; font-size: 22px; color: var(--ink); white-space: nowrap; letter-spacing: -.5px; }
+  .QW4K-segs { flex: 1; display: flex; gap: 4px; }
+  .QW4K-segs i { flex: 1; height: 5px; border-radius: 3px; background: var(--ken-rule); transition: background .3s; }
+  .QW4K-segs i.QW4K-done { background: var(--ink); } .QW4K-segs i.QW4K-cur { background: var(--red); } .QW4K-segs i.QW4K-off { display: none; }
+  .QW4K-count { font-family: var(--ken-font-bold); font-weight: bold; font-size: 11px; letter-spacing: .08em; color: var(--ken-text); white-space: nowrap; }
+  .QW4K-back { background: var(--ink); border: 1.5px solid var(--ink); border-radius: 999px; padding: 8px 16px; font-family: var(--ken-font-bold); font-weight: bold; font-size: 14px; color: #fff; cursor: pointer; transition: background .15s, transform .15s; }
+  .QW4K-back:hover:not(:disabled) { background: var(--red); border-color: var(--red); transform: translateX(-2px); }
+  .QW4K-back:disabled { background: none; color: var(--ink); opacity: .25; cursor: default; }
+  .QW4K-reset { background: #fff; border: 1.5px solid var(--ink); border-radius: 999px; padding: 8px 16px; font-family: var(--ken-font-bold); font-weight: bold; font-size: 14px; color: var(--ink); cursor: pointer; transition: background .15s, color .15s; }
+  .QW4K-reset:hover { background: var(--ink); color: #fff; }
+
+  /* App grid: stage card on the left, prompt + profile on the right */
+  .QW4K-app { max-width: 1280px; margin: 0 auto; padding: 22px 24px 28px; display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; align-items: start; }
+  .QW4K-stage { background: var(--card); border: 1.5px solid var(--ken-rule); border-radius: 4px; padding: 24px 26px 18px; min-height: calc(100vh - 110px); display: flex; flex-direction: column; }
+  .QW4K-side { position: sticky; top: 74px; display: flex; flex-direction: column; gap: 18px; }
+  @media (max-width: 960px) {
+    .QW4K-app { grid-template-columns: 1fr; padding: 14px 14px 24px; }
+    .QW4K-stage { min-height: 0; padding: 18px 16px 14px; }
+    .QW4K-side { position: static; }
+    .QW4K-brand { font-size: 18px; } .QW4K-count { display: none; }
+    /* Mobile: the question card comes first, so every question is answerable without scrolling;
+       the illustration / chart follows, and the age profile goes last */
+    .QW4K-app { gap: 16px; }
+    .QW4K-side { display: contents; }
+    .QW4K-prompt { order: 1; box-shadow: 5px 5px 0 var(--red); padding: 16px 16px 14px; }
+    .QW4K-stage { order: 2; }
+    .QW4K-profile { order: 3; }
+    .QW4K-stage h1 { font-size: 26px; letter-spacing: -.5px; margin: 6px 0 6px; }
+    .QW4K-lede { font-size: 14.5px; }
+  }
+
+  .QW4K-kicker { font-family: var(--ken-font-bold); font-weight: bold; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--red); }
+  .QW4K-stage h1 { font-family: var(--ken-font-display); font-weight: bold; color: var(--ink); letter-spacing: -1px; line-height: 1; font-size: clamp(32px, 4.6vw, 54px); margin: 8px 0 10px; }
+  .QW4K-lede { font-size: clamp(15px, 1.6vw, 18px); line-height: 1.5; color: var(--ken-body); max-width: 42em; }
+  .QW4K-visual { flex: 1; position: relative; margin-top: 18px; min-height: 380px; display: flex; flex-direction: column; }
+  .QW4K-art-layer { flex: 1; display: flex; align-items: center; justify-content: center; }
+  .QW4K-chart-layer { flex: 1; display: none; flex-direction: column; }
+  .QW4K-chart-meta { border-top: 1.5px solid var(--ken-rule); padding-top: 10px; display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: flex-start; justify-content: space-between; }
+  .QW4K-ct { font-family: var(--ken-font-display); font-weight: bold; font-size: 19px; line-height: 1.15; color: var(--ink); }
+  .QW4K-cs { font-size: 12.5px; color: var(--ken-text); margin-top: 2px; }
+  .QW4K-tap-hint { display: inline-flex; align-items: center; gap: 6px; margin-top: 7px; padding: 3px 9px 3px 7px; border-radius: 3px; background: rgba(200,66,58,.1); color: #C8423A; font-family: var(--ken-font-bold); font-weight: bold; font-size: 11.5px; letter-spacing: .02em; line-height: 1.4; }
+  .QW4K-tap-hint svg { width: 13px; height: 13px; flex: none; }
+  .QW4K-tap-hint.QW4K-pulse { animation: hintPulse 1.6s ease-in-out 2; }
+  @keyframes hintPulse { 50% { background: rgba(200,66,58,.24); } }
+  .QW4K-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 7px; font-size: 12.5px; color: var(--ken-text-soft); }
+  .QW4K-legend i { display: inline-block; width: 11px; height: 11px; margin-right: 5px; vertical-align: -1px; }
+  .QW4K-legend i.QW4K-you { background: #fff; box-shadow: inset 0 0 0 2px var(--ink); }
+  .QW4K-tabs { display: flex; border: 1.5px solid var(--ink); border-radius: 3px; overflow: hidden; }
+  .QW4K-tabs button { background: none; border: 0; padding: 6px 11px; font-family: var(--ken-font-bold); font-weight: bold; font-size: 12px; color: var(--ink); }
+  .QW4K-tabs button[aria-pressed=true] { background: var(--ink); color: var(--ken-bg); }
+  #dots, #bars { flex: 1; min-height: 340px; }
+  #bars { display: none; }
+
+  /* Frames */
+  .QW4K-frame { position: relative; aspect-ratio: 1; border: 3px solid var(--ink); background: #fff; overflow: hidden; box-shadow: 6px 6px 0 var(--ink); }
+  .QW4K-frame svg { display: block; width: 100%; height: 100%; }
+  .QW4K-frame .QW4K-cap { position: absolute; left: 0; top: 0; background: var(--ink); color: var(--ken-bg); font-family: var(--ken-font-bold); font-weight: bold; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; padding: 5px 9px; }
+  .QW4K-hero-frame { width: min(360px, 80%); }
+  .QW4K-strip { width: 100%; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; }
+  .QW4K-strip .QW4K-frame { box-shadow: 4px 4px 0 var(--ink); border-width: 2.5px; transition: border-color .2s, box-shadow .2s; }
+  .QW4K-strip .QW4K-dl { display: block; text-align: center; font-family: var(--ken-font-bold); font-weight: bold; font-size: 13px; color: var(--ink); margin-top: 9px; }
+  .QW4K-strip .QW4K-dl.QW4K-now { color: var(--red); }
+  .QW4K-strip .QW4K-picked .QW4K-frame { border-color: var(--red); box-shadow: 5px 5px 0 var(--red); }
+  @media (max-width: 640px) { .QW4K-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; } }
+
+  /* Quote panels */
+  .QW4K-panels { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; align-content: start; }
+  @media (max-width: 760px) { .QW4K-panels { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } }
+  .QW4K-qp { aspect-ratio: 1; border: 3px solid var(--ink); background: #fff; display: grid; grid-template-rows: 46% 1fr; box-shadow: 4px 4px 0 var(--ink); overflow: hidden; }
+  .QW4K-qp .QW4K-art { overflow: hidden; border-bottom: 3px solid var(--ink); }
+  .QW4K-qp .QW4K-art svg { width: 100%; height: 100%; display: block; }
+  .QW4K-qp .QW4K-txt { padding: 10px 12px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; }
+  .QW4K-qp .QW4K-qt { font-size: 14.5px; line-height: 1.32; color: var(--ink); }
+  /* Only the funny quotes go big; the rest share one size */
+  .QW4K-qp.QW4K-lg .QW4K-qt { font-family: var(--ken-font-display); font-weight: bold; font-size: 20px; line-height: 1.1; }
+  .QW4K-qp .QW4K-who { font-size: 11px; color: var(--ken-text); }
+  .QW4K-qp .QW4K-who b { font-family: var(--ken-font-bold); color: var(--red); letter-spacing: .06em; text-transform: uppercase; font-size: 10px; margin-right: 5px; }
+  @media (max-width: 480px) { .QW4K-qp { aspect-ratio: auto; grid-template-rows: 110px auto; } .QW4K-qp .QW4K-qt { font-size: 13.5px; } }
+
+  /* Prompt card */
+  .QW4K-prompt { background: #fff; border: 3px solid var(--ink); border-radius: 4px; box-shadow: 7px 7px 0 var(--red); padding: 20px 20px 18px; }
+  .QW4K-p-k { font-family: var(--ken-font-bold); font-weight: bold; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ken-text); }
+  .QW4K-p-q { font-family: var(--ken-font-bold); font-weight: bold; font-size: 20px; line-height: 1.28; color: var(--ink); margin: 8px 0 14px; }
+  .QW4K-p-t { font-size: 15.5px; line-height: 1.5; color: var(--ken-body); }
+  .QW4K-p-t b { font-family: var(--ken-font-bold); color: var(--ink); }
+  .QW4K-p-t + .QW4K-p-t { margin-top: 10px; }
+  .QW4K-yours { display: inline-block; background: var(--ink); color: var(--ken-bg); font-family: var(--ken-font-bold); font-weight: bold; font-size: 12px; padding: 4px 8px; border-radius: 3px; margin: 10px 0 12px; }
+  .QW4K-yours.QW4K-skip { background: var(--ken-rule); color: var(--ken-text); }
+  .QW4K-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .QW4K-opts.QW4K-col { flex-direction: column; }
+  .QW4K-opts.QW4K-grid2 { display: grid; grid-template-columns: 1fr 1fr; }
+  .QW4K-opt { background: #fff; border: 2px solid var(--ink); border-radius: 3px; padding: 8px 12px; font-size: 15px; color: var(--ink); text-align: left; display: flex; align-items: center; gap: 10px; transition: background .15s, transform .15s; }
+  .QW4K-opt:hover { background: #F6E9E7; transform: translateX(2px); }
+  .QW4K-opt[aria-pressed=true] { background: var(--red); border-color: var(--red); color: #fff; }
+  .QW4K-opt .QW4K-mini { width: 32px; height: 32px; border: 1.5px solid var(--ink); flex-shrink: 0; overflow: hidden; background: #fff; }
+  .QW4K-opt .QW4K-mini svg { width: 100%; height: 100%; display: block; }
+  .QW4K-opt .QW4K-tick { margin-left: auto; font-family: var(--ken-font-bold); font-size: 13px; opacity: 0; }
+  .QW4K-opt[aria-pressed=true] .QW4K-tick { opacity: 1; }
+  .QW4K-look { margin-top: 16px; padding-top: 14px; border-top: 1px dashed rgba(59,42,38,.3); }
+  .QW4K-look-lab { font-family: var(--ken-font-bold); font-weight: bold; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ken-text); margin-bottom: 8px; }
+  .QW4K-look-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .QW4K-look-row + .QW4K-look-row { margin-top: 10px; }
+  .QW4K-lk-btn { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; width: 68px; background: #fff; border: 2px solid var(--ink); border-radius: 3px; padding: 4px 3px 3px; color: var(--ink); }
+  .QW4K-lk-btn small { font-size: 10.5px; line-height: 1.15; text-align: center; }
+  .QW4K-look-row { gap: 6px; }
+  .QW4K-look-row + .QW4K-look-lab { margin-top: 12px; }
+  .QW4K-look-pair { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .QW4K-look-pair + .QW4K-look-lab { margin-top: 12px; }
+  .QW4K-look-pair .QW4K-look-row { flex-wrap: nowrap; }
+  .QW4K-look-row .QW4K-sw { width: 34px; height: 34px; }
+  .QW4K-lk-btn:hover { background: #F6E9E7; }
+  .QW4K-lk-btn[aria-pressed=true] { background: var(--red); border-color: var(--red); color: #fff; }
+  .QW4K-lk-btn .QW4K-lk { width: 44px; height: 44px; border: 1.5px solid var(--ink); overflow: hidden; display: block; background: #fff; flex-shrink: 0; }
+  .QW4K-lk-btn .QW4K-lk svg { width: 100%; height: 100%; display: block; }
+  .QW4K-sw { width: 38px; height: 38px; border: 2px solid var(--ink); border-radius: 3px; background: var(--sk); padding: 0; color: #fff; font-weight: bold; text-shadow: 0 0 3px rgba(0,0,0,.6); }
+  .QW4K-sw[aria-pressed=true] { outline: 3px solid var(--red); outline-offset: 2px; }
+  .QW4K-sw[aria-pressed=true]::before { content: '✓'; }
+  .QW4K-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 18px; }
+  .QW4K-btn { background: var(--ink); color: var(--ken-bg); border: 0; border-radius: 3px; padding: 12px 18px; font-family: var(--ken-font-bold); font-weight: bold; font-size: 15px; transition: background .15s, transform .15s; }
+  .QW4K-btn:hover { background: var(--red); transform: translateY(-1px); }
+  .QW4K-btn:disabled { opacity: .3; pointer-events: none; }
+  .QW4K-btn.QW4K-ghost { background: #fff; color: var(--ink); border: 2px solid var(--ink); text-decoration: none; }
+  .QW4K-skip { background: none; border: 0; color: var(--ken-text); text-decoration: underline; text-underline-offset: 3px; font-size: 14px; padding: 6px 2px; }
+  .QW4K-skip:hover { color: var(--red); }
+  .QW4K-big-read { display: flex; align-items: baseline; gap: 10px; }
+  .QW4K-big-num { font-family: var(--ken-font-display); font-weight: bold; font-size: 64px; line-height: 1; color: var(--red); }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; background: var(--ken-rule); border-radius: 3px; outline: none; margin: 12px 0 4px; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; border-radius: 4px; background: var(--red); border: 3px solid var(--ink); cursor: grab; }
+  input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 4px; background: var(--red); border: 3px solid var(--ink); cursor: grab; }
+  .QW4K-scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--ken-text); }
+  .QW4K-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+  .QW4K-row .QW4K-lab { font-family: var(--ken-font-bold); font-weight: bold; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ken-text); min-width: 44px; }
+  .QW4K-chip { background: #fff; border: 2px solid var(--ink); border-radius: 3px; padding: 6px 12px; font-size: 14px; color: var(--ink); }
+  .QW4K-chip[aria-pressed=true] { background: var(--ink); color: #fff; }
+
+  /* Profile card */
+  .QW4K-profile { background: var(--card); border: 1.5px solid var(--ken-rule); border-radius: 4px; padding: 14px 16px; }
+  .QW4K-pf-head { display: flex; align-items: center; gap: 12px; padding-bottom: 10px; border-bottom: 1.5px solid var(--ken-rule); }
+  .QW4K-pf-av { width: 46px; height: 46px; border: 2px solid var(--ink); overflow: hidden; flex-shrink: 0; background: #fff; }
+  .QW4K-pf-av svg { width: 100%; height: 100%; display: block; }
+  .QW4K-pf-title { font-family: var(--ken-font-display); font-weight: bold; font-size: 18px; line-height: 1.15; color: var(--ink); }
+  .QW4K-pf-sub { font-size: 12px; color: var(--ken-text); }
+  .QW4K-pf-list { list-style: none; margin: 6px 0 0; padding: 0; }
+  .QW4K-pf-list li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px dashed var(--ken-grid); font-size: 13px; }
+  .QW4K-pf-list li:last-child { border-bottom: 0; }
+  .QW4K-pf-list .QW4K-k { color: var(--ken-text); }
+  .QW4K-pf-list .QW4K-v { font-family: var(--ken-font-bold); font-weight: bold; color: var(--ink); text-align: right; display: inline-block; }
+  .QW4K-pf-list .QW4K-v.QW4K-empty { font-family: var(--ken-font-body); font-weight: normal; color: #CDBDBD; }
+  .QW4K-pf-list .QW4K-v.QW4K-skipped { font-family: var(--ken-font-body); font-weight: normal; font-style: italic; color: var(--ken-text); }
+
+  /* Final profile */
+
+  .QW4K-foot { max-width: 1280px; margin: 0 auto; padding: 0 24px 24px; }
+  .QW4K-foot .QW4K-note { max-width: 60em; }
+  /* ===== Card design: pink panel, question in a white rounded box, thin pill slider,
+     rounded options that fill with ink once picked; the character drops its border for a warm grey offset shadow ===== */
+  .QW4K-prompt, .QW4K-prompt.QW4K-on { background: #E9C6C4; border: 0; border-radius: 0; box-shadow: none; padding: 22px 20px 20px; }
+  .QW4K-p-head { background: #fff; border: 1.5px solid var(--ink); border-radius: 14px; padding: 12px 16px 14px; margin-bottom: 14px; }
+  .QW4K-p-head .QW4K-p-k { font-family: var(--ken-font-body); font-weight: normal; font-size: 14px; letter-spacing: 0; text-transform: none; color: var(--ink); }
+  .QW4K-p-head .QW4K-p-q { font-family: var(--ken-font-display); font-size: 25px; line-height: 1.12; margin: 4px 0 0; }
+  .QW4K-p-t { color: #333; }
+  .QW4K-big-num { font-family: var(--ken-font-bold); font-size: 48px; color: var(--ink); }
+  input[type=range] { height: 10px; background: #fff; border: 1.5px solid var(--ink); border-radius: 6px; }
+  input[type=range]::-webkit-slider-thumb { width: 30px; height: 20px; border-radius: 10px; background: #fff; border: 1.5px solid var(--ink); }
+  input[type=range]::-moz-range-thumb { width: 28px; height: 18px; border-radius: 10px; background: #fff; border: 1.5px solid var(--ink); }
+  .QW4K-opt { border: 1.5px solid var(--ink); border-radius: 14px; }
+  .QW4K-opt:hover { background: #fff; }
+  .QW4K-opt[aria-pressed=true], .QW4K-lk-btn[aria-pressed=true] { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .QW4K-opt .QW4K-mini { border-radius: 8px; border-width: 1px; }
+  .QW4K-lk-btn { border: 1.5px solid var(--ink); border-radius: 14px; }
+  .QW4K-lk-btn .QW4K-lk { border-radius: 9px; border-width: 1px; }
+  .QW4K-sw { border: 1.5px solid var(--ink); border-radius: 50%; }
+  .QW4K-sw[aria-pressed=true] { outline: 2.5px solid var(--ink); outline-offset: 2px; }
+  .QW4K-btn { border-radius: 999px; padding: 11px 22px; }
+  .QW4K-btn:hover { background: #3a2d22; }
+  .QW4K-hero-frame { border: 0; box-shadow: 14px 14px 0 #746362; }
+  /* Rules borrowed from assets/ken-chart.css, renamed with the page prefix */
+  .QW4K-note { font-style: italic; font-size: 12px; color: var(--ken-text); line-height: 1.45; }
+  .QW4K-footer { border-top: 1.5px solid var(--ken-rule); display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 24px 0 16px; margin-top: 4px; }
+  .QW4K-footer-logo { height: 18px; display: block; }
+  .QW4K-footer-center { font-size: 14px; color: var(--ken-text); text-align: center; flex: 1; }
+  .QW4K-footer-right { font-size: 14px; color: var(--ken-text); text-align: right; max-width: 170px; flex-shrink: 0; }
+  @media (max-width: 480px) { .QW4K-footer { flex-direction: column; justify-content: center; gap: 6px; padding: 20px 0 16px; } .QW4K-footer-center, .QW4K-footer-right { font-size: 12px; text-align: center; max-width: none; flex: none; } }
+  /* Written answers: a white rounded text box inside the pink prompt card */
+  .QW4K-free { display: block; width: 100%; min-height: 112px; resize: vertical; background: #fff; border: 1.5px solid var(--ink); border-radius: 14px; padding: 12px 14px; font-family: var(--ken-font-body); font-size: 16px; line-height: 1.45; color: var(--ink); }
+  .QW4K-free::placeholder { color: #8A7B78; font-style: italic; }
+  .QW4K-free:focus { outline: 2.5px solid var(--ink); outline-offset: 2px; }
+  .QW4K-free-meta { display: flex; justify-content: space-between; gap: 10px; margin-top: 6px; font-size: 12px; color: var(--ken-text); }
+  .QW4K-p-t i { font-family: var(--ken-font-body); }
+  /* Final card: Ken logo bottom left; download and share */
+  .QW4K-final-actions { justify-content: flex-start; gap: 10px; margin-top: 14px; }
+  .QW4K-q-msg { min-height: 1.2em; margin: 8px 0 0; font-size: 13px; font-style: italic; color: var(--ken-text); }
+  /* Footer: the same as the story's */
+  .QW4K-site-foot { margin-top: 48px; background: #EFE4E3; padding: 44px 20px 36px; }
+  .QW4K-sf-inner { max-width: 640px; margin: 0 auto; }
+  .QW4K-sf-h { font-family: var(--ken-font-display); font-weight: bold; font-size: 26px; line-height: 1.15; color: var(--ink); margin: 0 0 14px; }
+  .QW4K-sf-links { display: flex; flex-wrap: wrap; gap: 8px; }
+  .QW4K-sf-btn { font-family: var(--ken-font-bold); font-weight: bold; font-size: 14px; color: var(--ink); background: #fff; border: 1.5px solid var(--ink); border-radius: 12px; padding: 8px 18px; text-decoration: none; cursor: pointer; }
+  .QW4K-sf-btn:hover { background: var(--ink); color: #fff; }
+  .QW4K-sf-about { margin-top: 36px; }
+  .QW4K-sf-about p { font-family: var(--ken-font-body); font-size: 14.5px; line-height: 1.6; color: var(--ken-text); }
+  .QW4K-sf-about p + p { margin-top: .8em; }
+  .QW4K-sf-bottom { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 32px; padding: 20px 0; border-top: 1.5px solid var(--ken-rule); border-bottom: 1.5px solid var(--ken-rule); }
+  .QW4K-sf-logo { height: 18px; display: block; flex: none; }
+  .QW4K-sf-credit { font-family: var(--ken-font-body); font-style: italic; font-size: 15px; color: var(--ken-text); text-align: right; }
+  @media (max-width: 480px) { .QW4K-sf-bottom { flex-direction: column; text-align: center; gap: 10px; } .QW4K-sf-credit { text-align: center; } }
+  /* ===== Age-profile card (scripts/profile-card.js): same on the story and the quiz ===== */
+  .QW4K-final { width: 100%; display: grid; grid-template-columns: 240px minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: 28px; row-gap: 18px; align-items: start; border: 3px solid var(--ink); background: #fff; padding: 22px; box-shadow: 8px 8px 0 var(--red); text-align: left; }
+  .QW4K-final > .QW4K-frame { grid-column: 1; grid-row: 1; }
+  .QW4K-final > dl { grid-column: 2; grid-row: 1 / span 2; margin: 0; display: grid; grid-template-columns: 1fr 1fr; grid-auto-flow: row dense; gap: 14px 22px; }
+  .QW4K-final-logo { grid-column: 1; grid-row: 2; align-self: end; height: 20px; width: auto; }
+  .QW4K-final dt { font-family: var(--ken-font-bold); font-weight: bold; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ken-text); }
+  .QW4K-final dd { margin: 3px 0 0; font-family: var(--ken-font-body); font-size: 18px; color: var(--ink); line-height: 1.3; }
+  .QW4K-final dd small { display: block; font-size: 12.5px; color: var(--ken-text); margin-top: 2px; }
+  .QW4K-final .QW4K-pc-blank { color: #9A8E7A; }
+  .QW4K-final .QW4K-wide { grid-column: 1 / -1; }
+  .QW4K-final .QW4K-wide q { font-family: var(--ken-font-body); font-style: italic; font-size: 17px; line-height: 1.4; quotes: '“' '”'; }
+  .QW4K-final .QW4K-pc-tag { font-family: var(--ken-font-display); font-weight: bold; font-size: 30px; line-height: 1.05; color: var(--ink); grid-column: 1 / -1; }
+  /* iPad portrait and phones: character on top, answers below, logo at the foot of the card */
+  @media (max-width: 760px) {
+    .QW4K-final { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; padding: 18px; box-shadow: 6px 6px 0 var(--red); }
+    .QW4K-final > .QW4K-frame { max-width: 200px; }
+    .QW4K-final > dl { grid-column: 1; grid-row: 2; }
+    .QW4K-final-logo { grid-column: 1; grid-row: 3; align-self: start; margin-top: 4px; }
+    .QW4K-final .QW4K-pc-tag { font-size: 26px; }
+  }
+  @media (max-width: 480px) { .QW4K-final > dl { grid-template-columns: 1fr; gap: 12px; } .QW4K-final > .QW4K-frame { max-width: 160px; } }
+</style>
+</head>
+<body>
+<div class="QW4K-topbar"><div class="QW4K-topbar-in">
+  <button class="QW4K-back" id="back" disabled>← Back</button>
+  <div class="QW4K-segs" id="segs"></div>
+  <span class="QW4K-count" id="count"></span>
+  <button class="QW4K-reset" id="reset" type="button">Reset</button>
+</div></div>
+
+<main class="QW4K-app">
+  <section class="QW4K-stage" id="stage">
+    <div class="QW4K-kicker" id="sKicker"></div>
+    <h1 id="sTitle"></h1>
+    <p class="QW4K-lede" id="sLede"></p>
+    <div class="QW4K-visual">
+      <div class="QW4K-art-layer" id="art"></div>
+      <div class="QW4K-chart-layer" id="chartLayer">
+        <div class="QW4K-chart-meta"><div><div class="QW4K-ct" id="ct"></div><div class="QW4K-cs" id="cs"></div><div class="QW4K-tap-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V11m0-.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3.6 14.6a1.5 1.5 0 0 1 2.5-1.7L9 16"/></svg>Hover or tap on the chart for details</div><div class="QW4K-legend" id="legend"></div></div><div class="QW4K-tabs" id="tabs"></div></div>
+        <div id="dots"></div>
+        <div id="bars"></div>
+      </div>
+    </div>
+  </section>
+  <aside class="QW4K-side">
+    <div class="QW4K-prompt" id="prompt"></div>
+    <div class="QW4K-profile" id="profile"></div>
+  </aside>
+</main>
+
+<!-- ===== FOOTER: share, about the data, credits (same as the story) ===== -->
+<footer class="QW4K-site-foot">
+  <div class="QW4K-sf-inner">
+    <div class="QW4K-sf-share">
+      <h2 class="QW4K-sf-h">Share this</h2>
+      <div class="QW4K-sf-links">
+        <a class="QW4K-sf-btn" id="sfWa" target="_blank" rel="noopener">WhatsApp</a>
+        <a class="QW4K-sf-btn" id="sfX" target="_blank" rel="noopener">X</a>
+        <a class="QW4K-sf-btn" id="sfLi" target="_blank" rel="noopener">LinkedIn</a>
+        <button type="button" class="QW4K-sf-btn" id="sfCopy">Copy link</button>
+        <button type="button" class="QW4K-sf-btn" id="sfMore" hidden>More…</button>
+      </div>
+    </div>
+    <div class="QW4K-sf-about">
+      <h2 class="QW4K-sf-h">About the data</h2>
+      <p>301 readers of First Principles answered the survey between 13 and 22 September 2026. It is not a representative sample. 72% of respondents are men, and most live in Bengaluru, Mumbai or Delhi NCR.</p>
+      <p>Percentages leave out readers who skipped a question or said it was too close to call. If a reader said they expected their happiest decade to be “the one I'm in now”, we counted it as the decade they are in. Themes in the middle-age answers were assigned by keyword matching, so a single answer can count towards more than one theme. We quote only readers who agreed to be quoted, and identify them only by decade and city. The characters are illustrations, not portraits of real readers.</p>
+    </div>
+    <div class="QW4K-sf-bottom">
+      <img src="../assets/logo.png" alt="The Ken" class="QW4K-sf-logo">
+      <p class="QW4K-sf-credit">With support from Kavipriya OG, Sakshi Modi and Kashvi Bansal.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+const { Character, Scene, decadeOf, SKINS } = window.AGE_ART;
+const P = window.READERS, N = P.length, YI = N;
+const { C, F } = KEN;
+const RED = '#C8423A', INK = '#1A1208';
+// Chart colours, from the First Principles palette: HI is the highlighted group, DOT everyone else, CHAR and TEAL the contrasts
+const HI = '#3863CC', DOT = '#BFE9E8', CHAR = '#8940B5', TEAL = '#7CC6F3';
+const DEC = ['Teens', '20s', '30s', '40s', '50s', '60s', '70s+'];
+const YOUR = ['your teens', 'your 20s', 'your 30s', 'your 40s', 'your 50s', 'your 60s', 'your 70s or beyond'];
+const THEIR = ['their teens', 'their 20s', 'their 30s', 'their 40s', 'their 50s', 'their 60s', 'their 70s or beyond'];
+const THEMES = [['Body and health', 48, 1], ['Kids growing up', 20, 2], ['Parents ageing or dying', 13, 4], ['Work and career', 13, 8], ['Feeling older than the room', 12, 16], ['A milestone birthday', 9, 32]];
+const FACTS = [['Freedom and fewer obligations', 47, 8], ['Relationships or family', 45, 2], ['Financial security', 40, 16], ['Work or building something', 37, 1], ['Health and energy', 34, 4], ['Learning or discovery', 31, 32]];
+const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const median = a => { const s = [...a].sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const $ = id => document.getElementById(id);
+
+/* ---------------- Reader state. SKIP marks a skipped question; undefined = not reached yet ---------------- */
+const SKIP = 'skip';
+const me = { age: 35, look: null, dec: 2 }; // look: { length: 'long'|'short', curl: 'straight'|'curly', facial: null|'moustache'|'beard1-3', skin: 0-5 } once picked
+const val = k => me[k] === SKIP ? undefined : me[k];
+// Written answers are sorted into themes by keyword matching, as the survey's were. Bits match THEMES.
+const THEME_RX = {
+  1: /body|bodies|health|knee|back ?pain|backache|weigh|belly|paunch|metabolism|diabet|sugar levels?|\bbp\b|blood pressure|cholesterol|injur|pain|aches?\b|grey|gray|white hair|hair|bald|salt|fit\b|fitness|tired|energy|stamina|eyes|eyesight|spectacles|reading glasses|sleep|doctor|surgery|heal|recover|\brun|gym|badminton|sport|physical|joint|heart|medic|diet|beer|drink|hangover|pegs?\b|menopause|shoulder|\bill\b|illness|sperm|arthritis|covid|flexib|creak|skin|wrinkle|teeth|tooth|bones?\b|weak|spondyl|gastro|mirror|slow(?:ing)? down|late nights/,
+  2: /\bkids?\b|child|\bsons?\b|daughter|teen|school|college|uncle|aunty|aunt\b|baby|parenting|nephew|niece|empty nest/,
+  4: /parent(?!ing)|father|mother|\bdad\b|\bmom\b|\bmum\b|passed away|died|death|mortality/,
+  8: /\bwork\b|\bjob\b|career|office|colleague|\bteam\b|\bboss|promotion|manager|retire|corporate|company|junior/,
+  16: /younger|youngest|oldest|older than|gen ?z|millennial|music|slang|trend|young people|youngsters|\bpeers?\b|veteran|reels|instagram/,
+  32: /birthday|turn(?:ed|ing)? (?:30|40|50|60|thirty|forty|fifty|sixty)|\b(?:30|40|50|60)th\b|milestone|hit (?:30|40|50)|(?:cusp|closeness) of (?:30|40|50|60)|\d0s to \d0s/,
+};
+const themesOf = text => Object.entries(THEME_RX).reduce((bits, [b, rx]) => rx.test(String(text || '').toLowerCase()) ? bits | +b : bits, 0);
+const clip = (t, n = 46) => t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t;
+// A text box for written answers, in the card's white rounded style
+const textBox = (id, placeholder, value = '') => `<textarea class="QW4K-free" id="${id}" rows="4" maxlength="280" placeholder="${placeholder}">${esc(value)}</textarea><div class="QW4K-free-meta"><span>Your answer stays in your browser.</span><span id="${id}N">${value.length}/280</span></div>`;
+const wireText = (id, go) => { const t = $(id), n = $(id + 'N'), b = $('prompt').querySelector('[data-act=go]'); const upd = () => { n.textContent = `${t.value.length}/280`; b.disabled = !t.value.trim(); }; t.oninput = upd; upd(); setTimeout(() => t.focus({ preventScroll: true }), 300); };
+const youRow = () => [me.dec, val('hap') ?? -1, val('exp') ?? -1, val('mid') ?? -1, val('midAge') ?? null, val('pill') ?? null, val('trig') || 0, val('fact') || 0];
+const ALL = () => P.concat([youRow()]);
+const peers = () => { const g = P.filter(p => p[0] === me.dec); return g.length >= 10 ? { g, label: `readers in ${THEIR[me.dec]}` } : { g: P, label: 'all readers' }; };
+// The reader's character: once they pick hair or skin on the first card, every "you" drawing uses it,
+// keeping the skin and greying and shortening the hair with age
+const mine = (o = {}) => me.look ? { ...o, you: me.look } : o;
+const art = (age, o = {}) => Character(age, mine(o));
+const { HAIR_LENGTHS, HAIR_TYPES, FACIAL } = window.AGE_ART;
+const lookTile = (attr, v, label, on) => `<button type="button" class="QW4K-lk-btn" ${attr}="${v}" aria-pressed="${on}" title="${label}"><span class="QW4K-lk"></span><small>${label}</small></button>`;
+// Same order as the story's age card: hair and hair type side by side, then skin, then beard
+const lookPick = () => `<div class="QW4K-look">
+  <div class="QW4K-look-pair">
+    <div><div class="QW4K-look-lab">Your hair</div><div class="QW4K-look-row" id="lookLength">${HAIR_LENGTHS.map(([v, t]) => lookTile('data-length', v, t, !!me.look && me.look.length === v)).join('')}</div></div>
+    <div><div class="QW4K-look-lab">Hair type</div><div class="QW4K-look-row" id="lookCurl">${HAIR_TYPES.map(([v, t]) => lookTile('data-curl', v, t, !!me.look && me.look.curl === v)).join('')}</div></div>
+  </div>
+  <div class="QW4K-look-lab">Skin</div>
+  <div class="QW4K-look-row" id="lookSkin">${SKINS.map((c, i) => `<button type="button" class="QW4K-sw" data-skin="${i}" aria-pressed="${!!me.look && me.look.skin === i}" aria-label="Skin tone ${i + 1} of ${SKINS.length}" style="--sk:${c}"></button>`).join('')}</div>
+  <div class="QW4K-look-lab">Beard or moustache</div>
+  <div class="QW4K-look-row" id="lookFacial">${FACIAL.map(([v, t], i) => lookTile('data-facial', i, t, !!me.look && me.look.facial === v)).join('')}</div></div>`;
+const outlook = p => (p[0] < 0 || p[2] === -1) ? null : p[2] === -2 ? 'behind' : p[2] > p[0] ? 'ahead' : p[2] === p[0] ? 'now' : 'behind';
+const decAge = i => i === 0 ? 16 : Math.min(i * 10 + 15, 78);
+
+/* ---------------- Unit-square layouts (pixels). Squares tile with no gap; the reader (index YI) sits on top of its stack ---------------- */
+const PAD = { t: 30, b: 40, l: 4, r: 4 };
+const lbl = (x, y, text, style = {}) => ({ value: [x, y], name: text, label: { show: true, position: 'inside', formatter: '{b}', fontFamily: F.bold, fontWeight: 'bold', fontSize: 12, color: C.text, ...style } });
+const hidden = (W, H) => ({ x: W / 2, y: H + 30, c: DOT, o: 0 });
+const rankSort = (ids, A, colorFn, order) => ids.slice().sort((a, b) => (a === YI) - (b === YI) || order.indexOf(colorFn(A[a])) - order.indexOf(colorFn(A[b])) || a - b);
+
+function gridLayout(W, H, A, colorFn = () => DOT, order = [DOT]) {
+  const n = A.length, aw = W - PAD.l - PAD.r, ah = H - PAD.t - PAD.b;
+  const cols = Math.ceil(Math.sqrt(n * aw / ah)), rows = Math.ceil(n / cols), s = Math.floor(Math.min(aw / cols, ah / rows, 30));
+  const x0 = PAD.l + (aw - cols * s) / 2 + s / 2, y0 = PAD.t + (ah - rows * s) / 2 + s / 2;
+  const dots = new Array(n);
+  rankSort([...Array(n).keys()], A, colorFn, order).forEach((id, i) => { dots[id] = { x: x0 + (i % cols) * s, y: y0 + Math.floor(i / cols) * s, c: colorFn(A[id]), o: 1 }; });
+  return { dots, s, labels: [] };
+}
+function groupLayout(W, H, A, groupFn, names, colorFn, order, topLabel) {
+  const aw = W - PAD.l - PAD.r, ah = H - PAD.t - PAD.b - 20, G = names.length, colW = aw / G;
+  const members = names.map(() => []);
+  A.forEach((p, id) => { const g = groupFn(p, id); if (g != null && g >= 0 && g < G) members[g].push(id); });
+  const max = Math.max(...members.map(m => m.length));
+  let s = 30, k = 1;
+  for (; s > 2; s -= 0.5) { k = Math.max(1, Math.floor(colW * 0.78 / s)); if (Math.ceil(max / k) * s <= ah) break; }
+  s = Math.floor(s);
+  const base = PAD.t + 20 + ah, dots = A.map(() => hidden(W, H)), labels = [];
+  members.forEach((m, g) => {
+    const cx = PAD.l + colW * (g + 0.5);
+    rankSort(m, A, colorFn, order).forEach((id, i) => { dots[id] = { x: cx - (k - 1) * s / 2 + (i % k) * s, y: base - Math.floor(i / k) * s - s / 2, c: colorFn(A[id]), o: 1 }; });
+    labels.push(lbl(cx, base + 15, names[g], { fontSize: 12.5, color: C.ink }));
+    if (topLabel && m.length) labels.push(lbl(cx, base - Math.ceil(m.length / k) * s - (m.includes(YI) ? 32 : 11), topLabel(m.filter(i => i !== YI), g), { fontSize: 12 }));
+  });
+  return { dots, s, labels };
+}
+function histLayout(W, H, A, valueFn, lo, hi, colorFn, order, ticks, extra = []) {
+  const aw = W - PAD.l - PAD.r, ah = H - PAD.t - PAD.b, nb = hi - lo + 1, bw = aw / nb;
+  const bins = Array.from({ length: nb }, () => []);
+  A.forEach((p, id) => { const v = valueFn(p); if (v != null) bins[Math.min(hi, Math.max(lo, v)) - lo].push(id); });
+  const max = Math.max(...bins.map(b => b.length)), s = Math.min(bw, ah / max, 18), base = PAD.t + ah;
+  const xOf = v => PAD.l + (v - lo + 0.5) * bw, dots = A.map(() => hidden(W, H)), labels = [];
+  bins.forEach((b, i) => rankSort(b, A, colorFn, order).forEach((id, j) => { dots[id] = { x: xOf(lo + i), y: base - j * s - s / 2, c: colorFn(A[id]), o: 1 }; }));
+  ticks.forEach(([v, t]) => labels.push(lbl(xOf(v), base + 15, t, { fontFamily: F.body, fontWeight: 'normal', fontSize: 12 })));
+  extra.forEach(e => labels.push(lbl(xOf(e.v), base - bins[e.v - lo].length * s - (bins[e.v - lo].includes(YI) ? 34 : 13), e.t, { color: C.ink, backgroundColor: 'rgba(251,248,247,0.92)', padding: [2, 4] })));
+  return { dots, s, labels };
+}
+function rowsLayout(W, H, A, rowFn, names, valueFn, lo, hi, colorFn, order, bandFn) {
+  const LW = 44, aw = W - PAD.l - PAD.r - LW, ah = H - PAD.t - PAD.b, R = names.length, uw = aw / (hi - lo + 1), GAP = 12;
+  const cells = {}, rowMax = new Array(R).fill(0);
+  A.forEach((p, id) => { const r = rowFn(p), v = valueFn(p); if (r == null || r < 0 || r >= R || v == null) return; const key = r + ':' + Math.min(hi, v); (cells[key] = cells[key] || []).push(id); rowMax[r] = Math.max(rowMax[r], cells[key].length); });
+  const units = rowMax.map(m => Math.max(m, 5));
+  const s = Math.min(uw, (ah - GAP * R) / units.reduce((a, b) => a + b, 0), 14);
+  const rowBase = []; let y = PAD.t; units.forEach((u, r) => { y += u * s + GAP; rowBase[r] = y - GAP / 2; });
+  const xOf = v => PAD.l + LW + (v - lo + 0.5) * uw, dots = A.map(() => hidden(W, H)), labels = [], bands = [];
+  Object.entries(cells).forEach(([key, ids]) => { const [r, v] = key.split(':').map(Number); rankSort(ids, A, colorFn, order).forEach((id, j) => { dots[id] = { x: xOf(v), y: rowBase[r] - j * s - s / 2, c: colorFn(A[id]), o: 1 }; }); });
+  names.forEach((n, r) => {
+    labels.push(lbl(PAD.l + LW / 2, rowBase[r] - s / 2, n, { fontSize: 12.5, color: C.ink }));
+    const b = bandFn(r); if (b) bands.push([xOf(b[0]) - uw / 2, rowBase[r] - units[r] * s, xOf(b[1]) + uw / 2, rowBase[r]]);
+  });
+  for (let v = lo; v <= hi; v += 10) labels.push(lbl(xOf(v), PAD.t + ah + 15, v >= 80 ? '80+' : String(v), { fontFamily: F.body, fontWeight: 'normal', fontSize: 12 }));
+  return { dots, s, labels, bands };
+}
+
+/* ---------------- Charts ---------------- */
+function readerTip(p, isYou) {
+  const d = i => i >= 0 ? DEC[i] : 'No answer';
+  return KEN.tt.name(isYou ? 'You' : p[0] >= 0 ? 'A reader in ' + THEIR[p[0]] : 'A reader') +
+    KEN.tt.line('Happiest so far', d(p[1])) + KEN.tt.line('Expects happiest', p[2] === -2 ? 'Behind them' : d(p[2])) +
+    KEN.tt.line('Felt middle-aged', p[3] === 1 ? (p[4] ? 'At ' + p[4] : 'Yes') : p[3] === 0 ? 'Not yet' : 'No answer') +
+    KEN.tt.line('Would take the pill at', p[5] == null ? 'No answer' : p[5] > 80 ? 'Wouldn’t take it' : p[5]);
+}
+let dotChart, barChart, lastDraw = null, visible = [], timers = [];
+function initCharts() {
+  dotChart = echarts.init($('dots'), null, { width: 600, height: 400 });
+  dotChart.setOption({
+    animationDurationUpdate: 900, animationEasingUpdate: 'cubicInOut',
+    grid: { left: 0, right: 0, top: 0, bottom: 0 },
+    xAxis: { type: 'value', show: false, min: 0, max: 1 }, yAxis: { type: 'value', show: false, inverse: true, min: 0, max: 1 },
+    tooltip: { ...KEN.tooltip, trigger: 'item' },
+    series: [
+      { id: 'bands', type: 'custom', silent: true, data: [], renderItem: (pr, api) => { const a = api.coord([api.value(0), api.value(1)]), b = api.coord([api.value(2), api.value(3)]); return { type: 'rect', shape: { x: a[0], y: a[1], width: b[0] - a[0], height: b[1] - a[1] }, style: { fill: 'rgba(56,150,204,0.12)' } }; } },
+      { id: 'dots', type: 'scatter', symbol: 'rect', data: [], animationDelayUpdate: i => i === YI ? 450 : (i % 97) * 3.5,
+        emphasis: { scale: false, itemStyle: { borderColor: INK, borderWidth: 1.5 } },
+        tooltip: { formatter: pr => visible[pr.dataIndex] ? readerTip(ALL()[pr.dataIndex], pr.dataIndex === YI) : '' } },
+      { id: 'labels', type: 'scatter', silent: true, symbolSize: 0, data: [], tooltip: { show: false } }
+    ]
+  });
+  barChart = echarts.init($('bars'), null, { width: 600, height: 400 });
+  window.addEventListener('resize', () => { if (lastDraw) lastDraw(true); else if ($('bars').style.display !== 'none') barChart.resize({ width: 'auto', height: 'auto' }); });
+}
+function drawDots(layoutFn, instant) {
+  $('dots').style.display = ''; $('bars').style.display = 'none';
+  dotChart.resize({ width: 'auto', height: 'auto' });
+  lastDraw = inst => drawDots(layoutFn, inst);
+  const W = dotChart.getWidth(), H = dotChart.getHeight(), A = ALL(), L = layoutFn(W, H, A);
+  visible = L.dots.map(d => d.o > 0);
+  const you = L.dots[YI], labels = L.labels.slice();
+  if (you.o > 0) labels.push(lbl(you.x, you.y - Math.max(L.s, 9) / 2 - 12, 'You', { color: '#fff', backgroundColor: INK, padding: [3, 6], borderRadius: 2, fontSize: 11 }));
+  dotChart.setOption({
+    animation: !instant, xAxis: { max: W }, yAxis: { max: H },
+    series: [
+      { id: 'bands', data: L.bands || [] },
+      { id: 'dots', data: L.dots.map((d, i) => i === YI
+        ? { value: [d.x, d.y], symbolSize: Math.max(L.s, 9), itemStyle: { color: '#fff', opacity: d.o, borderColor: INK, borderWidth: Math.max(2, Math.round(L.s / 5)) } }
+        : { value: [d.x, d.y], symbolSize: L.s + 0.6, itemStyle: { color: d.c, opacity: d.o } }) },
+      { id: 'labels', data: labels }
+    ]
+  });
+}
+function drawBars(rows, picked) {
+  $('dots').style.display = 'none'; $('bars').style.display = 'block';
+  barChart.resize({ width: 'auto', height: 'auto' });
+  lastDraw = null;
+  const sorted = [...rows].sort((a, b) => a[1] - b[1]);
+  barChart.clear();
+  barChart.setOption({
+    grid: { left: 8, right: 76, top: 6, bottom: 6, containLabel: true },
+    tooltip: { ...KEN.tooltip, formatter: p => KEN.tt.name(p.name) + KEN.tt.line('Readers', p.value + '%') + (picked(sorted[p.dataIndex]) ? KEN.tt.meta('You picked this') : '') },
+    xAxis: { type: 'value', show: false, max: 60 },
+    yAxis: { type: 'category', data: sorted.map(r => r[0]), axisLine: { show: false }, axisTick: { show: false }, axisLabel: { ...KEN.axisLabelBold, fontSize: 13 } },
+    series: [{ type: 'bar', barMaxWidth: 26, animationDuration: 1000, animationDelay: i => (sorted.length - i) * 80,
+      data: sorted.map(r => ({ value: r[1], itemStyle: { color: picked(r) ? HI : DOT } })),
+      label: { show: true, position: 'right', fontFamily: F.bold, fontWeight: 'bold', fontSize: 12, color: C.text, formatter: p => p.value + '%' + (picked(sorted[p.dataIndex]) ? '  ← you' : '') } }]
+  });
+}
+function chartMeta(t, s, legend = [], tabs = null) {
+  $('ct').textContent = t; $('cs').textContent = s; setLegend(legend);
+  const tb = $('tabs'); tb.innerHTML = ''; tb.style.display = tabs ? '' : 'none';
+  if (tabs) tabs.forEach((t, i) => { const b = document.createElement('button'); b.textContent = t.label; b.setAttribute('aria-pressed', i === 0); b.onclick = () => { tb.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); t.go(); }; tb.appendChild(b); });
+}
+const setLegend = legend => $('legend').innerHTML = legend.map(([c, l]) => c === 'you' ? `<span><i class="QW4K-you"></i>${l}</span>` : `<span><i style="background:${c}"></i>${l}</span>`).join('');
+const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+
+/* ---------------- Profile (builds as you answer) ---------------- */
+const PROFILE = [
+  ['age', 'Age', () => me.age],
+  ['pill', 'Pill age', () => me.pill > 80 ? 'Wouldn’t take it' : me.pill],
+  ['why', 'Why that age', () => clip(me.why || '', 28)],
+  ['hap', 'Happiest so far', () => me.hap === -1 ? 'Too close to call' : DEC[me.hap]],
+  ['fact', 'A good decade needs', () => FACTS.filter(f => me.fact & f[2]).map(f => f[0].split(' ')[0]).join(', ') || 'Nothing listed'],
+  ['mid', 'Felt middle-aged', () => me.mid ? 'Yes' : 'Not yet'],
+  ['midAge', 'First felt it at', () => me.midAge],
+  ['trig', 'What gave it away', () => clip(me.trigText || '', 28)],
+  ['exp', 'Happiest ever', () => DEC[me.exp]],
+  ['out', 'Best decade is', () => ({ ahead: 'Still ahead', now: 'Right now', behind: 'Behind me' })[outlook(youRow())]],
+];
+function profileState(key) {
+  if (key === 'age') return me.started ? 'set' : 'empty';
+  if (key === 'out') key = 'exp';
+  if ((key === 'midAge' || key === 'trig') && (me.mid === 0 || me.mid === SKIP)) return 'na';
+  if (key === 'why' && (me.pill === SKIP || me.pill > 80)) return 'na';
+  return me[key] === undefined ? 'empty' : me[key] === SKIP ? 'skipped' : 'set';
+}
+function renderProfile(flash) {
+  const rows = PROFILE.filter(([k]) => profileState(k) !== 'na');
+  const done = rows.filter(([k]) => profileState(k) !== 'empty').length;
+  $('profile').innerHTML = `<div class="QW4K-pf-head"><div class="QW4K-pf-av">${art(me.age, { mood: 'smile' })}</div><div><div class="QW4K-pf-title">Your age profile</div><div class="QW4K-pf-sub">${done} of ${rows.length} filled in</div></div></div>
+    <ul class="QW4K-pf-list">${rows.map(([k, l, v]) => { const st = profileState(k); return `<li data-k="${k}"><span class="QW4K-k">${l}</span><span class="QW4K-v ${st === 'set' ? '' : 'QW4K-' + st}">${st === 'set' ? esc(v()) : st === 'skipped' ? 'Skipped' : '—'}</span></li>`; }).join('')}</ul>`;
+  (flash || []).forEach(k => { const el = $('profile').querySelector(`[data-k="${k}"] .QW4K-v`); if (el) gsap.fromTo(el, { scale: 1.3, color: RED }, { scale: 1, color: el.classList.contains('QW4K-skipped') ? '#5C4A4A' : INK, duration: .7, ease: 'back.out(3)' }); });
+}
+
+/* ---------------- Prompt helpers ---------------- */
+const K = () => CARDS[cur].k;
+function promptHTML({ q, body = '', primary, skip = true, k = K() }) {
+  return `${q ? `<div class="QW4K-p-head"><div class="QW4K-p-k">${k}</div><div class="QW4K-p-q">${q}</div></div>` : `<div class="QW4K-p-k">${k}</div>`}${body}
+    <div class="QW4K-actions">${skip ? '<button class="QW4K-skip" data-act="skip">Skip this question</button>' : '<span></span>'}${primary ? `<button class="QW4K-btn" data-act="go" ${primary.disabled ? 'disabled' : ''}>${primary.label}</button>` : ''}</div>`;
+}
+const optBtn = (label, attrs = '', mini = '') => `<button class="QW4K-opt" ${attrs} aria-pressed="false">${mini ? `<span class="QW4K-mini">${mini}</span>` : ''}<span>${label}</span><span class="QW4K-tick">✓</span></button>`;
+function wireSingle(onPick) {
+  const p = $('prompt');
+  p.querySelectorAll('.QW4K-opt').forEach(b => b.onclick = () => { p.querySelectorAll('.QW4K-opt').forEach(x => x.setAttribute('aria-pressed', x === b)); onPick(b); const go = p.querySelector('[data-act=go]'); if (go) go.disabled = false; });
+}
+function wireMulti(key) {
+  const p = $('prompt'); me['_' + key] = me['_' + key] || 0;
+  p.querySelectorAll('.QW4K-opt').forEach(b => { const bit = +b.dataset.bit; b.setAttribute('aria-pressed', !!(me['_' + key] & bit)); b.onclick = () => { me['_' + key] ^= bit; b.setAttribute('aria-pressed', !!(me['_' + key] & bit)); }; });
+}
+const slider = (id, min, max, value, unit = '') => `<div class="QW4K-big-read"><span class="QW4K-big-num" id="${id}Val">${value}${unit}</span></div>
+  <input type="range" id="${id}" min="${min}" max="${max}" value="${value}" aria-label="Choose a value"><div class="QW4K-scale"><span>${min}${unit}</span><span>${max}${unit}</span></div>`;
+const stripHTML = futureQ => `<div class="QW4K-strip">${DEC.map((d, i) => {
+  const fut = i > me.dec;
+  return `<div><div class="QW4K-frame">${art(decAge(i), { mood: i === me.dec ? 'smile' : fut ? 'neutral' : 'joy', question: futureQ && fut })}</div><span class="QW4K-dl${i === me.dec ? ' QW4K-now' : ''}">${d}${i === me.dec ? ' · now' : ''}</span></div>`;
+}).join('')}</div>`;
+const pickStrip = i => $('art').querySelectorAll('.QW4K-strip > div').forEach((d, j) => d.classList.toggle('QW4K-picked', j === i));
+
+/* ---------------- Cards ---------------- */
+const CARDS = [
+  { id: 'age', k: 'Start here', title: 'How old are you?',
+    lede: 'This is a story about getting older, and it starts with you. Set your age, then answer the questions 301 readers of First Principles answered. After each one, you’ll see how you compare.',
+    art: () => `<div class="QW4K-frame QW4K-hero-frame" id="meFrame">${art(me.age)}<div class="QW4K-cap" id="meCap">You, at ${me.age}</div></div>`,
+    ask() {
+      $('prompt').innerHTML = promptHTML({ q: 'How old are you?', skip: false, primary: { label: 'That’s me →' },
+        body: slider('ageIn', 13, 90, me.age) + lookPick() });
+      const repaint = pop => { const f = $('meFrame'); f.querySelector('svg').outerHTML = art(me.age); $('meCap').textContent = `You, at ${me.age}`; if (pop) gsap.fromTo(f, { scale: .97 }, { scale: 1, duration: .35, ease: 'back.out(3)' }); };
+      const head = svg => svg.replace('viewBox="0 0 200 200"', 'viewBox="52 10 96 96"');
+      const paintLook = () => {
+        const base = { length: 'short', curl: 'straight', facial: null, skin: 2, ...me.look };
+        $('lookLength').querySelectorAll('.QW4K-lk').forEach((el, i) => el.innerHTML = head(Character(me.age, { you: { ...base, length: HAIR_LENGTHS[i][0] } })));
+        $('lookCurl').querySelectorAll('.QW4K-lk').forEach((el, i) => el.innerHTML = head(Character(me.age, { you: { ...base, curl: HAIR_TYPES[i][0] } })));
+        const fa = Math.max(me.age, 25);
+        $('lookFacial').querySelectorAll('.QW4K-lk').forEach((el, i) => el.innerHTML = head(Character(fa, { you: { ...base, facial: FACIAL[i][0] } })));
+      };
+      const setLook = (k, v, btn) => { me.look = { length: 'short', curl: 'straight', facial: null, skin: 2, ...me.look, [k]: v }; btn.parentNode.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === btn)); paintLook(); repaint(true); renderProfile(); };
+      $('lookLength').onclick = e => { const b = e.target.closest('button'); if (b) setLook('length', b.dataset.length, b); };
+      $('lookCurl').onclick = e => { const b = e.target.closest('button'); if (b) setLook('curl', b.dataset.curl, b); };
+      $('lookFacial').onclick = e => { const b = e.target.closest('button'); if (b) setLook('facial', FACIAL[+b.dataset.facial][0], b); };
+      $('lookSkin').onclick = e => { const b = e.target.closest('button'); if (b) setLook('skin', +b.dataset.skin, b); };
+      paintLook();
+      $('ageIn').oninput = e => { const d = decadeOf(me.age); me.age = +e.target.value; $('ageInVal').textContent = me.age; if (decadeOf(me.age) !== d) paintLook(); repaint(decadeOf(me.age) !== d); };
+      return () => { me.dec = decadeOf(me.age); me.started = true; return ['age']; };
+    } },
+
+  { id: 'meet', k: 'The readers', title: 'You, and 301 others', info: true,
+    lede: 'In September 2026, 301 readers answered our survey about getting older. Each square is one of them. The white square outlined in black is you.',
+    reveal(fresh) {
+      chartMeta('Readers by the decade they are in now', 'One square per reader', [[HI, 'Your decade'], [DOT, 'Other decades'], ['you', 'You']]);
+      const grouped = inst => drawDots((W, H, A) => groupLayout(W, H, A, p => p[0], DEC, p => p[0] === me.dec ? HI : DOT, [HI, DOT], m => m.length), inst);
+      if (fresh) { drawDots((W, H, A) => gridLayout(W, H, A), true); later(() => grouped(false), 900); } else grouped(true);
+      const same = P.filter(p => p[0] === me.dec).length;
+      return [me.dec === 0
+        ? `You're in ${YOUR[0]}. Only <b>3 readers</b> are, so for most comparisons we'll set you against all readers.`
+        : `You're in <b>${YOUR[me.dec]}</b>, along with <b>${same} readers</b>: ${pct(same, N)}% of everyone who answered.${me.dec === 2 ? ' That makes it the largest group.' : ''}`,
+        `Most readers (77%) are in their 30s, 40s or 50s. Hover over any square to see that reader's answers.`];
+    } },
+
+  { id: 'pill', q: true, title: 'Would you stop the clock?',
+    lede: 'Imagine a pill that stops biological ageing in its tracks. Whatever age you are when you take it, you stay that age.',
+    art: () => `<div class="QW4K-frame QW4K-hero-frame">${Scene('pill', mine({ age: me.age }))}<div class="QW4K-cap">The pill</div></div>`,
+    ask() {
+      $('prompt').innerHTML = promptHTML({ q: 'At what age would you take it?', primary: { label: 'Compare →' },
+        body: slider('pillIn', 10, 100, Math.min(100, Math.max(10, me.age))) + `<div class="QW4K-opts" style="margin-top:12px">${optBtn('I wouldn’t take it', 'data-v="no"')}</div>` });
+      let no = false;
+      $('pillIn').oninput = e => { $('pillInVal').textContent = e.target.value; };
+      $('prompt').querySelector('[data-v=no]').onclick = e => { no = !no; e.currentTarget.setAttribute('aria-pressed', no); $('pillIn').disabled = no; $('pillInVal').style.opacity = no ? .3 : 1; };
+      return () => { me.pill = no ? 110 : +$('pillIn').value; return ['pill']; };
+    },
+    reveal(fresh) {
+      const ticks = [[10, '10'], [20, '20'], [30, '30'], [40, '40'], [50, '50'], [60, '60'], [70, '70'], [81, '80+']];
+      const all = inst => { chartMeta('At what age readers would take the pill', 'One square per reader. Answers over 80 are grouped', [[HI, '35, the most common answer'], [DOT, 'Other ages'], ['you', 'You']], tabs);
+        drawDots((W, H, A) => histLayout(W, H, A, p => p[5], 10, 81, p => p[5] === 35 ? HI : DOT, [HI, DOT], ticks, [{ v: 35, t: '35' }]), inst); };
+      const rows = () => { $('ct').textContent = 'Pill age by the decade readers are in now'; $('cs').textContent = 'Shaded bands: the decade each group is in now';
+        setLegend([[HI, 'Would go back to an age they’ve passed'], [CHAR, 'Would stop now or later'], ['you', 'You']]);
+        drawDots((W, H, A) => rowsLayout(W, H, A, p => p[0] - 1, DEC.slice(1), p => p[5], 10, 81, p => p[5] < (p[0] + 1) * 10 ? HI : CHAR, [HI, CHAR], r => [(r + 2) * 10, Math.min(81, (r + 2) * 10 + 9)])); };
+      const tabs = [{ label: 'All readers', go: () => all(false) }, { label: 'By age', go: rows }];
+      all(!fresh);
+      const vals = P.filter(p => p[5] != null).map(p => p[5]), v = val('pill'), { g, label } = peers(), md = median(g.filter(p => p[5] != null).map(p => p[5])), out = [];
+      if (v !== undefined) {
+        if (v > 80) out.push(`You'd let the clock keep running. Only <b>4 readers</b> said anything similar.`);
+        else {
+          out.push(`You'd stop at <b>${v}</b>. ${pct(vals.filter(x => x < v).length, vals.length)}% of readers would stop younger than that.`);
+          const d = v - md, ad = Math.round(Math.abs(d));
+          out.push(`${label[0].toUpperCase() + label.slice(1)} would stop at <b>${md}</b> (the median)${ad === 0 ? ', about where you would.' : `, so you'd stop ${d % 1 ? 'about ' : ''}${ad} year${ad === 1 ? '' : 's'} ${d < 0 ? 'earlier' : 'later'} than them.`}`);
+        }
+      }
+      out.push(`The most common answer, and the median, is <b>35</b>. The older readers are, the further back they'd go: readers in their 20s would stop at about 28, readers in their 50s at 45. Switch to <b>By age</b> to see it.`);
+      return out;
+    },
+    yours: () => me.pill > 80 ? 'Wouldn’t take it' : String(me.pill) },
+
+  { id: 'why', q: true, title: 'Why that age?', artOnly: true, when: () => me.pill !== undefined && me.pill !== SKIP && me.pill <= 80,
+    lede: 'Readers on the age at which they would stop the clock. Tell us yours, then read theirs.',
+    art: () => `<div class="QW4K-frame QW4K-hero-frame">${Scene('pill', mine({ age: me.pill || me.age }))}<div class="QW4K-cap">Stopped at ${me.pill}</div></div>`,
+    ask() {
+      $('prompt').innerHTML = promptHTML({ q: `Why ${me.pill}?`, primary: { label: 'See what readers said →', disabled: true },
+        body: textBox('whyIn', 'What makes that age the one to keep?', typeof me.why === 'string' ? me.why : '') });
+      wireText('whyIn');
+      return () => { me.why = $('whyIn').value.trim(); return ['why']; };
+    },
+    reveal() {
+      $('art').innerHTML = panels(QUOTES_PILL, 'smile');
+      const out = [];
+      if (val('why')) out.push(`You wrote: <i>“${esc(me.why)}”</i>`);
+      out.push(`Most readers’ reasons come down to balance: old enough to know what you want, young enough to do it, and before the knees, the kids or the parents need more of you.`);
+      return out;
+    },
+    yours: () => clip(me.why || '') },
+
+  { id: 'hap', q: true, title: 'Your happiest decade, so far',
+    lede: 'Here you are at every stage of your life. The decades you haven’t reached yet are question marks.',
+    art: () => stripHTML(true),
+    ask() {
+      $('prompt').innerHTML = promptHTML({ q: 'Which decade of your life has been your happiest so far?', primary: { label: 'Compare →', disabled: true },
+        body: `<div class="QW4K-opts QW4K-col">${DEC.slice(0, me.dec + 1).map((d, i) => optBtn(d + (i === me.dec ? ' (now)' : ''), `data-v="${i}"`, art(decAge(i), { mood: 'joy' }))).join('')}${optBtn('Too close to call', 'data-v="-1"')}</div>` });
+      let pick = null; wireSingle(b => { pick = +b.dataset.v; pickStrip(pick); });
+      return () => { me.hap = pick; return ['hap']; };
+    },
+    reveal(fresh) {
+      chartMeta('Readers by their happiest decade so far', 'One square per reader who named a decade', [[HI, 'The decade they’re in now'], [CHAR, 'An earlier decade'], ['you', 'You']]);
+      const go = inst => drawDots((W, H, A) => groupLayout(W, H, A, p => p[1], DEC, p => p[1] === p[0] ? HI : CHAR, [HI, CHAR], m => m.length), inst);
+      if (fresh) { drawDots((W, H, A) => gridLayout(W, H, A), true); later(() => go(false), 600); } else go(true);
+      const i = val('hap'), { g, label } = peers(), named = g.filter(p => p[1] >= 0);
+      const counts = DEC.map((_, d) => named.filter(p => p[1] === d).length), mode = counts.indexOf(Math.max(...counts));
+      const out = [];
+      if (i === undefined) out.push(`The most common answer among ${label} is <b>${THEIR[mode]}</b> (${pct(counts[mode], named.length)}%).`);
+      else if (i === -1) out.push(`You couldn't pick one. <b>11 readers</b> felt the same way.`);
+      else {
+        out.push(i === me.dec ? `You picked <b>the decade you're in now</b>. ${pct(counts[i], named.length)}% of ${label} said the same.` : `You picked <b>${YOUR[i]}</b>. ${pct(counts[i], named.length)}% of ${label} made the same pick.`);
+        if (mode !== i) out.push(`Their most common answer was ${THEIR[mode]} (${pct(counts[mode], named.length)}%).`);
+      }
+      out.push(`Across all readers, almost half (49%) say their happiest decade so far is the one they're in now. Overall, the <b>20s and 30s</b> win, with 58% of the votes between them.`);
+      return out;
+    },
+    yours: () => me.hap === -1 ? 'Too close to call' : DEC[me.hap] },
+
+  { id: 'fact', q: true, title: 'What makes a decade good?',
+    lede: 'Think about your best decade so far. What made it good?',
+    art: () => `<div class="QW4K-frame QW4K-hero-frame">${Scene('decade', mine({ age: me.age, mood: 'joy' }))}<div class="QW4K-cap">A good decade</div></div>`,
+    ask() {
+      $('prompt').innerHTML = promptHTML({ q: 'What made your best decade good? Pick any.', primary: { label: 'Compare →' }, body: `<div class="QW4K-opts QW4K-col">${FACTS.map(t => optBtn(t[0], `data-bit="${t[2]}"`)).join('')}</div>` });
+      wireMulti('fact');
+      return () => { me.fact = me._fact || 0; return ['fact']; };
+    },
+    reveal() {
+      chartMeta('What a good decade needs', '% of the 271 readers who picked at least one option', [[HI, 'Your picks'], [DOT, 'Other options']]);
+      drawBars(FACTS, r => (val('fact') || 0) & r[2]);
+      const mine = FACTS.filter(f => (val('fact') || 0) & f[2]).map(f => f[0].toLowerCase());
+      return [(mine.length ? `You picked <b>${mine.join(', ')}</b>. ` : '') + `Readers put <b>freedom and fewer obligations</b> first (47%), just ahead of relationships or family (45%). Work is in the middle of the list. Learning comes last.`];
+    },
+    yours: () => { const n = FACTS.filter(f => me.fact & f[2]).length; return n ? `${n} picked` : 'None picked'; } },
+
+  { id: 'mid', q: true, title: 'The moment it hits',
+    lede: 'For a lot of readers, middle age didn’t arrive with a birthday. It arrived with a moment: a knee that didn’t recover, a younger colleague, a child calling them “uncle”.',
+    art: () => `<div class="QW4K-frame QW4K-hero-frame">${Scene('uncle', mine({ age: me.age, mood: 'worried' }))}<div class="QW4K-cap">The moment</div></div>`,
+    ask() {
+      const { label } = peers();
+      let finish, pick = null;
+      $('prompt').innerHTML = promptHTML({ q: 'Have you ever felt middle-aged?', primary: { label: 'Next →', disabled: true },
+        body: `<div class="QW4K-opts QW4K-col">${optBtn('Yes, I have', 'data-v="1"')}${optBtn('Not yet', 'data-v="0"')}</div>` });
+      wireSingle(b => { pick = +b.dataset.v; });
+      $('prompt').querySelector('[data-act=go]').onclick = () => {
+        me.mid = pick; renderProfile(['mid']);
+        $('prompt').innerHTML = promptHTML({ k: K() + ' · Guess', q: `Before you see the data: what share of ${label} do you think have felt middle-aged?`, primary: { label: 'Show me →' }, skip: false,
+          body: slider('guessIn', 0, 100, 50, '%') + `<div class="QW4K-actions" style="margin-top:6px"><button class="QW4K-skip" data-act="noguess">Skip the guess</button><span></span></div>` });
+        gsap.from('#prompt > *', { y: 10, autoAlpha: 0, stagger: .05, duration: .4 });
+        me.guess = 50; $('guessIn').oninput = e => { me.guess = +e.target.value; $('guessInVal').textContent = me.guess + '%'; };
+        $('prompt').querySelector('[data-act=noguess]').onclick = () => { me.guess = null; finish(); };
+        $('prompt').querySelector('[data-act=go]').onclick = () => finish();
+      };
+      return { custom: true, setFinish: f => finish = f, keys: ['mid'] };
+    },
+    reveal(fresh) {
+      chartMeta('Have you ever felt middle-aged?', 'Readers by the decade they are in now. Label: % who said yes', [[HI, 'Yes'], [DOT, 'Not yet'], ['you', 'You']]);
+      const go = inst => drawDots((W, H, A) => groupLayout(W, H, A, p => p[3] >= 0 ? p[0] : null, DEC, p => p[3] === 1 ? HI : DOT, [HI, DOT], m => pct(m.filter(i => P[i][3] === 1).length, m.length) + '%'), inst);
+      if (fresh) { drawDots((W, H, A) => gridLayout(W, H, A, p => p[3] === 1 ? HI : DOT, [HI, DOT]), true); later(() => go(false), 700); } else go(true);
+      const { g, label } = peers(), ans = g.filter(p => p[3] >= 0), real = pct(ans.filter(p => p[3] === 1).length, ans.length), out = [];
+      if (me.guess != null && me.mid !== SKIP) { const d = me.guess - real; out.push(`You guessed <b>${me.guess}%</b>. The real figure for ${label} is <b>${real}%</b>. ${Math.abs(d) <= 5 ? 'Very close.' : d > 0 ? `You overestimated by ${d} points.` : `You underestimated by ${-d} points.`}`); }
+      else out.push(`Among ${label}, <b>${real}%</b> have felt middle-aged.`);
+      out.push(`Across all readers it's 47%, rising from about one in six in their 20s to more than two in three in their 50s.` + (me.mid === 1 ? ` You're one of them.` : me.mid === 0 ? ` You're not one of them, yet.` : ''));
+      return out;
+    },
+    yours: () => me.mid ? 'Yes, I have' : 'Not yet' },
+
+  { id: 'midAge', q: true, title: 'When did it happen?', when: () => me.mid === 1,
+    lede: 'Slide to the age you first felt middle-aged. Your character ages with you.',
+    art: () => `<div class="QW4K-frame QW4K-hero-frame" id="midFrame">${art(Math.min(40, me.age), { mood: 'worried' })}<div class="QW4K-cap" id="midCap">You, at ${Math.min(40, me.age)}</div></div>`,
+    ask() {
+      $('prompt').innerHTML = promptHTML({ q: 'How old were you when you first felt middle-aged?', primary: { label: 'Compare →' }, body: slider('midIn', 12, Math.max(13, me.age), Math.min(40, me.age)) });
+      $('midIn').oninput = e => { const v = +e.target.value; $('midInVal').textContent = v; $('midFrame').querySelector('svg').outerHTML = art(v, { mood: 'worried' }); $('midCap').textContent = `You, at ${v}`; };
+      return () => { me.midAge = +$('midIn').value; return ['midAge']; };
+    },
+    reveal(fresh) {
+      chartMeta('The age readers first felt middle-aged', 'One square per reader who gave an age', [[HI, 'Ends in 0 or 5'], [DOT, 'Other ages'], ['you', 'You']]);
+      drawDots((W, H, A) => histLayout(W, H, A, p => p[4] == null ? null : Math.max(20, Math.min(61, p[4])), 20, 61, p => p[4] % 5 === 0 ? HI : DOT, [HI, DOT],
+        [[20, '≤20'], [25, '25'], [30, '30'], [35, '35'], [40, '40'], [45, '45'], [50, '50'], [55, '55'], [60, '60+']], [{ v: 43, t: 'Median: 43' }]), !fresh);
+      const ages = P.filter(p => p[4] != null).map(p => p[4]), v = val('midAge'), out = [];
+      if (v !== undefined) {
+        out.push(`You first felt it at <b>${v}</b>. ${pct(ages.filter(a => a < v).length, ages.length)}% of readers who have felt middle-aged got there earlier than you, and ${pct(ages.filter(a => a > v).length, ages.length)}% later.`);
+        if (v % 5 === 0) out.push(`Your answer ends in a ${v % 10}, like more than half of the ages readers gave. Milestone birthdays seem to do a lot of the work.`);
+      }
+      out.push(`Half of these readers had felt it by <b>43</b>. Look at the red stacks at 35, 40, 45 and 50: more than half of all the answers end in a 0 or a 5.`);
+      return out;
+    },
+    yours: () => String(me.midAge) },
+
+  { id: 'trig', q: true, title: 'What gave it away?', when: () => me.mid === 1, // skipped, like the age it happened, if you haven't felt it yet
+    lede: 'We asked readers what happened at that age. Their written answers fall into a handful of themes.',
+    art: () => `<div class="QW4K-frame QW4K-hero-frame">${art(me.midAge || Math.max(me.age, 38), { mood: 'tired' })}<div class="QW4K-cap">Hmm.</div></div>`,
+    ask() {
+      $('prompt').innerHTML = promptHTML({ q: 'What happened at that age that made you feel it?', primary: { label: 'Compare →', disabled: true },
+        body: textBox('trigIn', 'A sentence or two: a moment, a comment, a change…', typeof me.trigText === 'string' ? me.trigText : '') });
+      wireText('trigIn');
+      return () => { me.trigText = $('trigIn').value.trim(); me.trig = themesOf(me.trigText); return ['trig']; };
+    },
+    reveal() {
+      chartMeta('What made readers feel middle-aged', '% of the 128 written answers that mention each theme', [[HI, 'Themes in your answer'], [DOT, 'Other themes']]);
+      drawBars(THEMES, r => (val('trig') || 0) & r[2]);
+      const mine = THEMES.filter(t => (val('trig') || 0) & t[2]).map(t => t[0].toLowerCase()), out = [];
+      if (me.trigText && val('trig') !== undefined) out.push(`You wrote: <i>“${esc(me.trigText)}”</i> ` + (mine.length ? `That reads as <b>${mine.join(' and ')}</b>, so those bars light up.` : 'That doesn’t fall into any of the themes readers’ answers did.'));
+      out.push(`For readers, the body comes first by a long way. Injuries that don't heal, diabetes, a metabolism that “switched off at 40”: body and health come up in <b>48%</b> of the written answers, more than twice as often as children growing up.` + ((val('trig') || 0) & 1 ? ` You're in good company.` : ''));
+      return out;
+    },
+    yours: () => clip(me.trigText || '') },
+
+  { id: 'qmid', k: 'In their words', title: '“Kids started calling me uncle”', info: true, artOnly: true,
+    lede: 'What made readers feel middle-aged. We quote only readers who agreed to be quoted, and identify them by decade and city.',
+    reveal() { $('art').innerHTML = panels(QUOTES_MID, 'worried'); return [`Nine moments from readers. Notice how many are about the body, and how many are about someone younger.`]; } },
+
+  { id: 'exp', q: true, title: 'Your happiest decade, ever',
+    lede: 'Now look at your whole life, including the decades you haven’t lived yet.',
+    art: () => stripHTML(false),
+    ask() {
+      $('prompt').innerHTML = promptHTML({ q: 'Which decade do you expect will be your happiest?', primary: { label: 'Compare →', disabled: true },
+        body: `<div class="QW4K-opts QW4K-grid2">${DEC.map((d, i) => optBtn(d + (i === me.dec ? ' (now)' : ''), `data-v="${i}"`, art(decAge(i), { mood: 'joy' }))).join('')}</div>` });
+      let pick = null; wireSingle(b => { pick = +b.dataset.v; pickStrip(pick); });
+      return () => { me.exp = pick; return ['exp', 'out']; };
+    },
+    reveal(fresh) {
+      const byDec = inst => { chartMeta('Readers by the decade they expect to be happiest', 'One square per reader', [[CHAR, 'Named a decade'], [TEAL, 'Said “it’s behind me”'], ['you', 'You']], tabs);
+        drawDots((W, H, A) => groupLayout(W, H, A, p => p[2] === -2 ? 7 : p[2], [...DEC, 'Behind'], p => p[2] === -2 ? TEAL : CHAR, [CHAR, TEAL], m => m.length), inst); };
+      const byOut = () => { $('ct').textContent = 'Is your happiest decade ahead of you?'; $('cs').textContent = 'Readers by the decade they are in now. Label: % who say it is still ahead';
+        setLegend([[HI, 'Still ahead'], [CHAR, 'It’s now'], [TEAL, 'Behind them'], ['you', 'You']]);
+        drawDots((W, H, A) => groupLayout(W, H, A, p => outlook(p) ? p[0] : null, DEC, p => ({ ahead: HI, now: CHAR, behind: TEAL })[outlook(p)], [HI, CHAR, TEAL], m => pct(m.filter(i => outlook(P[i]) === 'ahead').length, m.length) + '%')); };
+      const tabs = [{ label: 'Which decade', go: () => byDec(false) }, { label: 'Ahead or behind?', go: byOut }];
+      byDec(!fresh);
+      const i = val('exp'), { g, label } = peers(), gg = g.filter(outlook), share = k => pct(gg.filter(p => outlook(p) === k).length, gg.length);
+      const out = [];
+      if (i !== undefined) {
+        const named = g.filter(p => p[2] >= 0 || p[2] === -2);
+        out.push(`You expect <b>${YOUR[i]}</b> to be your happiest. ${pct(named.filter(p => p[2] === i).length, named.length)}% of ${label} picked the same decade.`);
+        out.push({ ahead: `So you think your best decade is <b>still ahead</b>, like 6 in 10 readers.`, now: `So you think you're living your best decade <b>right now</b>, like about a third of readers (34%).`, behind: `So you think your best decade is <b>behind you</b>. That's rare: only 17 readers, about 6%, agree.` }[outlook(youRow())]);
+      }
+      out.push(`Across all readers, the most popular answer is <b>the 50s</b> (31%). Among ${label}, ${share('ahead')}% say their best decade is ahead, ${share('now')}% say it's now and ${share('behind')}% say it's behind them. Switch the chart to <b>Ahead or behind?</b> to compare every decade.`);
+      return out;
+    },
+    yours: () => DEC[me.exp] },
+
+  { id: 'end', k: 'Your age profile', title: 'How you compare', info: true, artOnly: true, final: true,
+    lede: 'Here’s the profile you built, set against 301 readers.',
+    reveal() {
+      $('art').innerHTML = PROFILE_CARD.html(cardSpec());
+      return [`Thanks for playing. Your answers stay in your browser.`, `Save your card as an image, or share it. Want the whole picture, with every chart? Read the full story.`];
+    } },
+];
+
+const QUOTES_MID = [
+  ['Felt it at 30', 2, 'short', 'Bengaluru', 'Kids started calling me and uncle :(', true],
+  ['Felt it at 51', 4, 'short', 'Bengaluru', 'Losing badminton matches to my son', true],
+  ['Felt it at 42', 4, 'short', 'Manila', 'I didn’t like the new music anymore', true],
+  ['Felt it at 50', 4, 'short', 'Delhi', 'I started to realise that my team is younger than my nieces and nephews'],
+  ['Felt it at 40', 3, 'long', 'Singapore', 'A switch seems to have been turned off as soon as I turned 40 - metabolism isn\'t the same anymore…'],
+  ['Felt it at 49', 4, 'short', 'Bengaluru', 'Changed from salt pepper to salt', true],
+  ['Felt it at 47', 3, 'short', 'Gurugram', '…having to start counting my beers and pegs..', true],
+  ['Felt it at 59', 5, 'long', 'Kolkata', 'Approaching my 60th birthday, being called a \'veteran\''],
+  ['Felt it at 40', 3, 'short', 'Mumbai', 'Inability to run 5k run within 30 min'],
+];
+const QUOTES_PILL = [
+  ['Would stop at 35', 2, 'long', 'Delhi', 'Knees would get creaky after that', true],
+  ['Would stop at 25', 2, 'long', 'Mysuru', 'That is a sweet spot. You have seen a fair bit of world, enough to know what life expects from you…'],
+  ['Would stop at 25', 1, 'short', 'Bengaluru', 'fully developed pre frontal cortex', true],
+  ['Would stop at 30', 2, 'long', 'Mumbai', 'Great career , healthy parents , no kids'],
+  ['Would stop at 40', 4, 'short', 'Bengaluru', 'You have 10-20 good years to spend before your kids get too busy with their lives'],
+  ['Would stop at 45', 4, 'long', 'Bengaluru', 'I get 5 years more to take better care of myself - never prioritised myself till 50.'],
+];
+function panels(list, mood) {
+  const used = []; // no character appears twice in a set of panels
+  return `<div class="QW4K-panels">${list.map(([tag, d, hair, city, q, lg], i) => {
+    const pid = window.AGE_ART.portraitId(decAge(d), { hair, mood, avoid: used }); used.push(pid);
+    const svg = Character(decAge(d), { id: pid }).replace('viewBox="0 0 200 200"', 'viewBox="-14 6 228 112" preserveAspectRatio="xMidYMin slice"');
+    return `<div class="QW4K-qp${lg ? ' QW4K-lg' : ''}"><div class="QW4K-art">${svg}</div><div class="QW4K-txt"><div class="QW4K-qt">“${esc(q)}”</div><div class="QW4K-who"><b>${esc(tag)}</b>${DEC[d]}, ${esc(city)}</div></div></div>`;
+  }).join('')}</div>`;
+}
+
+/* ---------------- Final card: one list of rows for the screen and the image ---------------- */
+const FACT_SHORT = { 8: 'Freedom', 2: 'Relationships', 16: 'Financial security', 1: 'Work', 4: 'Health', 32: 'Learning' };
+const finalTag = o => o === 'ahead' ? 'The best is yet to come.' : o === 'now' ? 'Living your best decade.' : o === 'behind' ? 'Looking back fondly.' : 'Keeping your options open.';
+function finalRows() {
+  const st = profileState, o = outlook(youRow());
+  const row = (k, label, value, sub = '', wide = false) => ({ k, label, value: st(k) === 'set' ? value() : '', state: st(k), sub, wide });
+  return [
+    row('age', 'Your decade', () => DEC[me.dec]),
+    row('pill', 'Would take the pill at', () => me.pill > 80 ? 'Wouldn’t take it' : String(me.pill)),
+    row('why', 'Why that age', () => me.why || '', '', true),
+    row('hap', 'Happiest so far', () => me.hap === -1 ? 'Too close to call' : DEC[me.hap]),
+    row('fact', 'A good decade needs', () => FACTS.filter(f => me.fact & f[2]).map(f => FACT_SHORT[f[2]] || f[0]).join(' & ') || 'Nothing listed', 'Readers’ top pick: freedom'),
+    row('mid', 'Felt middle-aged', () => me.mid ? (typeof me.midAge === 'number' ? `Yes, at ${me.midAge}` : 'Yes') : 'Not yet', '47% of readers have'),
+    row('out', 'Your best decade is', () => ({ ahead: 'Still ahead', now: 'Right now', behind: 'Behind you' })[o] || '—'),
+    row('trig', 'What gave it away', () => me.trigText || '', '', true),
+  ].filter(r => r.state !== 'na');
+}
+// Pages sit in folders served as folder/index.html; opened from disk, link the file itself
+const pageHref = dir => location.protocol === 'file:' ? dir + 'index.html' : dir;
+const STORY = pageHref('../');
+const cardSpec = () => ({ tag: finalTag(outlook(youRow())), cap: `You, ${me.age}`, age: me.age, you: me.look ? mine({}).you : null, art: art(me.age, { mood: 'joy' }), rows: finalRows() });
+const cardBlob = () => PROFILE_CARD.blob(cardSpec());
+const BLOCKED = 'Your browser won’t export the image from a file opened on this computer. It works once the page is published.';
+function saveBlob(blob) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'my-age-profile.png'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+function wireFinalShare() {
+  const say = m => { $('qMsg').textContent = m; };
+  $('qDl').onclick = async () => { try { saveBlob(await cardBlob()); say('Image downloaded.'); } catch (e) { say(BLOCKED); } };
+  $('qShare').onclick = async () => {
+    const url = location.protocol.startsWith('http') ? location.href : 'https://the-ken.com', text = `${finalTag(outlook(youRow()))} How does your age profile compare with 301 readers?`;
+    let blob; try { blob = await cardBlob(); } catch (e) { say(BLOCKED); return; }
+    const file = new File([blob], 'my-age-profile.png', { type: 'image/png' }), data = { files: [file], title: 'The Age Factor', text: text + ' ' + url };
+    if (navigator.canShare && navigator.canShare(data)) { try { await navigator.share(data); say('Shared.'); } catch (e) { if (e.name !== 'AbortError') say('Couldn’t open sharing. Try Download image instead.'); } return; }
+    saveBlob(blob);
+    try { await navigator.clipboard.writeText(text + ' ' + url); say('Image downloaded and link copied. Attach the image and paste the link anywhere.'); } catch (e) { say('Image downloaded.'); }
+  };
+}
+
+/* ---------------- Card engine ---------------- */
+let cur = 0;
+const active = () => CARDS.map((c, i) => i).filter(i => !CARDS[i].when || CARDS[i].when());
+const answered = c => c.info || (c.id === 'age' ? me.started : me[c.id] !== undefined);
+function numberQuestions() { let n = 0; active().forEach(i => { if (CARDS[i].q) CARDS[i].k = `Question ${++n}`; }); }
+
+function renderSegs() {
+  const act = active();
+  $('segs').innerHTML = CARDS.map((c, i) => `<i class="${i === cur ? 'QW4K-cur' : answered(c) && act.includes(i) && act.indexOf(i) < act.indexOf(cur) + 1 ? 'QW4K-done' : ''}${act.includes(i) ? '' : ' QW4K-off'}"></i>`).join('');
+  $('count').textContent = `${act.indexOf(cur) + 1} / ${act.length}`;
+  $('back').disabled = false; // on the first card, Back returns to the story
+  $('back').textContent = act.indexOf(cur) <= 0 ? '← Story' : '← Back';
+}
+
+function show(i, dir = 1) {
+  timers.forEach(clearTimeout); timers = []; lastDraw = null;
+  cur = i; numberQuestions();
+  const c = CARDS[i];
+  $('sKicker').textContent = c.k; $('sTitle').textContent = c.title; $('sLede').textContent = c.lede;
+  renderSegs();
+  if (c.id !== 'age' && answered(c)) reveal(c, false); else ask(c);
+  gsap.fromTo('#stage', { x: 40 * dir, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: .5, ease: 'power3.out' });
+  gsap.fromTo('#prompt', { y: 18, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .5, delay: .1, ease: 'power3.out' });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function ask(c) {
+  $('chartLayer').style.display = 'none'; $('art').style.display = '';
+  $('art').innerHTML = c.art ? c.art() : '';
+  gsap.from('#art .QW4K-frame, #art .QW4K-strip > div', { scale: .9, autoAlpha: 0, duration: .5, stagger: .05, ease: 'back.out(1.6)', delay: .15 });
+  const commit = c.ask();
+  const finish = () => {
+    const keys = typeof commit === 'function' ? commit() : commit.keys;
+    renderProfile(keys);
+    if (c.id === 'age') return next();
+    reveal(c, true); renderSegs();
+  };
+  if (commit && commit.custom) commit.setFinish(finish);
+  else { const go = $('prompt').querySelector('[data-act=go]'); if (go) go.onclick = finish; }
+  const sk = $('prompt').querySelector('[data-act=skip]');
+  if (sk) sk.onclick = () => { me[c.id] = SKIP; renderProfile(c.id === 'exp' ? ['exp', 'out'] : [c.id]); reveal(c, true); renderSegs(); };
+}
+
+function reveal(c, fresh) {
+  if (c.artOnly) { $('chartLayer').style.display = 'none'; $('art').style.display = ''; }
+  else { $('art').style.display = 'none'; $('chartLayer').style.display = 'flex'; }
+  const paras = c.reveal(fresh) || [];
+  if (c.artOnly) gsap.from('#art .QW4K-qp, #art .QW4K-final', { y: 24, autoAlpha: 0, duration: .5, stagger: .06, ease: 'power3.out' });
+  if (c.final) {
+    $('prompt').innerHTML = `<div class="QW4K-p-k">${c.k}</div>${paras.map(p => `<p class="QW4K-p-t" style="margin-top:10px">${p}</p>`).join('')}
+      <div class="QW4K-actions QW4K-final-actions"><button class="QW4K-btn" id="qDl" type="button">Download image</button><button class="QW4K-btn QW4K-ghost" id="qShare" type="button">Share</button></div>
+      <p class="QW4K-q-msg" id="qMsg" aria-live="polite"></p>
+      <div class="QW4K-actions" style="justify-content:flex-start"><button class="QW4K-btn QW4K-ghost" id="again">Start over</button><a class="QW4K-btn QW4K-ghost" href="${STORY}">Read the story →</a></div>`;
+    $('again').onclick = () => location.reload();
+    wireFinalShare();
+    return;
+  }
+  const yours = !c.yours ? '' : me[c.id] === SKIP ? `<span class="QW4K-yours QW4K-skip">You skipped this</span>` : `<span class="QW4K-yours">You: ${esc(c.yours())}</span>`;
+  const act = active(), isLastBeforeEnd = CARDS[act[act.indexOf(cur) + 1]]?.final;
+  $('prompt').innerHTML = `<div class="QW4K-p-k">${c.k}</div>${yours ? '<div>' + yours + '</div>' : ''}${paras.map(p => `<p class="QW4K-p-t">${p}</p>`).join('')}
+    <div class="QW4K-actions"><span></span><button class="QW4K-btn" data-act="next">${isLastBeforeEnd ? 'See your profile →' : 'Next →'}</button></div>`;
+  $('prompt').querySelector('[data-act=next]').onclick = next;
+  if (fresh) gsap.fromTo('#prompt .QW4K-p-t, #prompt .QW4K-yours', { x: -8, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: .5, stagger: .1 });
+}
+
+function next() { const act = active(), j = act[act.indexOf(cur) + 1]; if (j != null) show(j, 1); }
+// Reset starts the quiz again; answers only live on this page, so a reload clears them
+$('reset').onclick = () => { if (active().indexOf(cur) > 0 && !confirm('Start over? Your answers will be cleared.')) return; location.reload(); };
+$('back').onclick = () => { const act = active(), j = act[act.indexOf(cur) - 1]; if (j != null) show(j, -1); else location.href = STORY; };
+
+// Footer share links
+{ const url = location.protocol.startsWith('http') ? location.href : 'https://the-ken.com', title = 'The Age Factor: build your age profile', u = encodeURIComponent(url), t = encodeURIComponent(title);
+  $('sfWa').href = `https://wa.me/?text=${t}%20${u}`; $('sfX').href = `https://twitter.com/intent/tweet?text=${t}&url=${u}`; $('sfLi').href = `https://www.linkedin.com/sharing/share-offsite/?url=${u}`;
+  $('sfCopy').onclick = async () => { try { await navigator.clipboard.writeText(url); $('sfCopy').textContent = 'Copied'; setTimeout(() => $('sfCopy').textContent = 'Copy link', 1600); } catch (e) {} };
+  if (navigator.share) { $('sfMore').hidden = false; $('sfMore').onclick = () => navigator.share({ title, url }).catch(() => {}); } }
+KEN.whenFontsReady(() => { initCharts(); renderProfile(); show(0); });
+</script>
+</body>
+</html>

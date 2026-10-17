@@ -305,7 +305,7 @@ Their age now · ↑ Would wait: older than now · ↓ Would go back: younger th
 
 ✏️ **TEXT · Card that scrolls over the chart**
 <!-- id: c1.card -->
-Now sort them. Each column is how old readers are now; the higher a square, the older they’d be when they took the pill. Half would stop the clock by **35**, the red line.
+Now sort them. Each column is how old readers are now; the higher a square, the older they’d be when they took the pill. The red line is the median, **35**: line up all 272 answers from youngest to oldest, and 35 is the one in the middle. So half of readers would take the pill at 35 or younger, and half at 35 or older.
 
 Note: The dotted diagonal marks their age now. Our reader would stop at 30.
 

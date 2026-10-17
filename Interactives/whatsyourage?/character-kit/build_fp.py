@@ -3,6 +3,7 @@
 #   base face (skin) -> shirt -> expression -> specs -> hair -> beard/moustache (on top, so long hair never hides it)
 # Hair and beards are drawn as plain shapes and recoloured here by age: black, then grey, then white.
 #
+# Parts are drawn as SVG; the build reads the PNG render saved beside each SVG (same name, 1000x1000, transparent).
 # Run after adding or changing parts (needs Pillow: pip3 install pillow):
 #   python3 character-kit/build_fp.py
 #
@@ -22,12 +23,10 @@ PARTS = os.path.join(HERE, 'FP survey characters')
 OUT = os.path.join(ROOT, 'imgs', 'characters', 'fp')
 
 PER_DECADE = 10           # half female-presenting, half male-presenting
-FILL_NECK = True          # the base face's neck is white; paint it the skin colour
 DECADE_AGE = [16, 25, 35, 45, 55, 65, 75]
 DECADES = ['Teens', '20s', '30s', '40s', '50s', '60s', '70s+']
 
 INK = (0, 0, 0)
-BASE_SKIN = (208, 139, 91)  # the skin colour drawn in Base Face.png
 SKINS = [(246, 214, 189), (232, 185, 146), (208, 139, 91), (176, 112, 70), (140, 86, 52), (98, 60, 36)]  # lightest to deepest
 HAIR_COLOURS = [(35, 26, 21), (66, 56, 50), (128, 121, 115), (184, 178, 172), (240, 237, 232)]           # black to white
 
@@ -36,13 +35,11 @@ def hair_tone(age):
     return 0 if age < 38 else 1 if age < 48 else 2 if age < 58 else 3 if age < 68 else 4
 
 # Parts. Hair: 1-2 long waves, 3 braid, 4 bun, 5 curls, 6 bob, 7 short curls, 8 short, 9 quiff, 10 balding; 0 = bald.
-# Faces: 1 big eyes (teens only), 2-3 grins, 4 smile, 5 happy, 6 open mouth, 7 content (wrinkles), 8 worried (wrinkles). Wrinkled faces are for 60+ only.
-OPEN_MOUTH = {2, 3, 6}       # beards cover these mouths, so they never get one
-BIG_EYES = {1, 2, 3}         # Face1 has its own glasses; specs clash with the big eyes of 2 and 3
-TEEN_FACE = 1                # everyone 13-19 gets the big eyes
-MOOD = {1: 'smile', 2: 'joy', 3: 'joy', 4: 'smile', 5: 'joy', 6: 'neutral', 7: 'smile', 8: 'worried'}
-SHIRTS = [1, 2, 3, 4, 5, 6]
-BEARDS = ['Beard1', 'Beard2', 'Beard3', 'Moustache']
+# Faces: 1 smile, 2 happy, 3 open mouth (big eyes, reads young: teens and 20s), 4 worried (lines on the face: 60+).
+OPEN_MOUTH = {3}             # beards cover this mouth, so it never gets one
+MOOD = {1: 'smile', 2: 'joy', 3: 'neutral', 4: 'worried'}
+SHIRTS = [1, 2, 3, 4, 5, 6, 7, 8]
+BEARDS = ['Beard1', 'Beard2', 'Moustache']
 LONG_STYLES = {1, 2, 3, 4, 5, 6}
 
 def options(decade, fem):
@@ -51,7 +48,7 @@ def options(decade, fem):
         hair = [1, 2, 3, 5, 6, 4, 7] if decade <= 2 else [6, 4, 1, 3, 5, 7, 2] if decade <= 4 else [4, 6, 3, 7, 4]
     else:
         hair = [7, 8, 9, 4, 5] if decade <= 1 else [8, 7, 9, 10, 4, 5] if decade <= 3 else [10, 8, 0, 9, 7] if decade <= 4 else [10, 0, 10, 8, 4]
-    faces = [TEEN_FACE] if decade == 0 else [4, 5, 3, 6, 2] if decade <= 3 else [4, 5, 6, 3] if decade <= 4 else [7, 8, 7, 7, 8]  # big eyes for teens, wrinkles for 60+
+    faces = [3, 3, 2] if decade <= 1 else [1, 2] if decade <= 4 else [4, 4, 1]  # young face to 29, lined face from 60
     return hair, faces
 
 def recipe(decade, i, rng):
@@ -63,7 +60,7 @@ def recipe(decade, i, rng):
     if not fem and decade >= 1 and face not in OPEN_MOUTH and rng.random() < 0.7:
         beard = BEARDS[(i // 2 + decade * 3) % len(BEARDS)]
     specs = None
-    if face not in BIG_EYES and rng.random() < (0.15 if decade <= 1 else 0.3 if decade <= 2 else 0.55):
+    if decade >= 1 and rng.random() < (0.15 if decade <= 1 else 0.3 if decade <= 2 else 0.55):
         specs = 'Specs1' if (i + decade) % 2 else 'Specs2'
     return {
         'id': f'd{decade}-{i + 1:02d}', 'decade': decade, 'age': DECADE_AGE[decade],
@@ -74,7 +71,7 @@ def recipe(decade, i, rng):
     }
 
 # The one real reader the story follows: fixed, so they look the same whatever else changes
-ANCHOR = {'id': 'anchor', 'decade': 3, 'age': 45, 'hair': 'long', 'hairStyle': 5, 'face': 6, 'mood': 'neutral',
+ANCHOR = {'id': 'anchor', 'decade': 3, 'age': 45, 'hair': 'long', 'hairStyle': 5, 'face': 1, 'mood': 'smile',
           'beard': None, 'specs': None, 'shirt': 5, 'skin': 4, 'fixed': True}
 
 _cache = {}
@@ -106,10 +103,7 @@ def skinned(rgb):
         for x in range(im.width):
             r, g, b, a = px[x, y]
             if not a: continue
-            if r > 235 and g > 235 and b > 235:
-                if FILL_NECK: px[x, y] = rgb + (a,)
-                continue
-            t = min(1.0, r / BASE_SKIN[0])  # 0 = ink, 1 = skin
+            t = r / 255  # 0 = ink, 1 = white (skin)
             px[x, y] = tuple(round(c * t) for c in rgb) + (a,)
     _cache[key] = im
     return im
@@ -142,7 +136,7 @@ def export_layers():
     half = lambda im: im.resize((500, 500), Image.LANCZOS)
     for i, rgb in enumerate(SKINS): save_small(half(skinned(rgb)), os.path.join(d, f'base-{i}.png'))
     for n in SHIRTS: save_small(half(part(f'shirts/Shirt{n}.png')), os.path.join(d, f'shirt-{n}.png'))
-    for n in range(1, 9): save_small(half(part(f'faces/Face{n}.png')), os.path.join(d, f'face-{n}.png'))
+    for n in range(1, 5): save_small(half(part(f'faces/Face{n}.png')), os.path.join(d, f'face-{n}.png'))
     for n in (1, 2): save_small(half(part(f'beard/Specs{n}.png')), os.path.join(d, f'specs-{n}.png'))
     for tone in range(len(HAIR_COLOURS)):
         for s in range(1, 11): save_small(half(hair_layer(s, tone)), os.path.join(d, f'hair-{s}-{tone}.png'))
@@ -182,7 +176,7 @@ main{max-width:1100px;margin:0 auto}h1{font-size:28px;margin:0 0 4px}p{color:var
 h2{font-size:16px;margin:28px 0 10px}.row{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
 figure{margin:0}img{width:100%;display:block;border:2px solid var(--ink)}figcaption{font-size:12px;color:var(--muted);margin-top:4px}
 </style></head><body><main><h1>FP survey characters</h1>
-<p>{{N}} characters generated by <code>build_fp.py</code> from the parts in <code>FP survey characters/</code>. Teens get the big eyes; hair turns grey with age; beards only go on closed-mouth faces. The story picks from these by decade. Readers build their own character on the page from the pre-coloured layers in <code>imgs/characters/fp/layers/</code>.</p>
+<p>{{N}} characters generated by <code>build_fp.py</code> from the parts in <code>FP survey characters/</code>. Hair turns grey with age; the open-mouthed face is for teens and 20s, the lined, worried face for 60+; beards only go on closed-mouth faces. The story picks from these by decade. Readers build their own character on the page from the pre-coloured layers in <code>imgs/characters/fp/layers/</code>.</p>
 {{ROWS}}</main></body></html>'''
 
 if __name__ == '__main__':
