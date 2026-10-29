@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gift Tag Kit</title>
+<link rel="stylesheet" href="../assets/ken-chart.css">
+<script src="../data/gifting-data.js"></script>
+<script src="../scripts/tag-theme.js"></script>
+<script src="../scripts/gift-tag.js"></script>
+<style>
+  /* The tag kit: change any element of the gift tag and see it on real gifts.
+     Controls are built from GiftTag.SCHEMA in scripts/gift-tag.js. */
+  :root { --ink: #1A1208; --red: #C8423A; --muted: #5C4A4A; --line: #D5C9C7; --gt-bg: #F7F2F2; }
+  body { display: block; background: var(--ken-bg); color: var(--ink); }
+  .kit { display: grid; grid-template-columns: 360px minmax(0, 1fr); min-height: 100vh; }
+  .panel { border-right: 1.5px solid var(--ken-rule); padding: 22px 22px 60px; height: 100vh; overflow: auto; position: sticky; top: 0; background: #FBF8F8; }
+  h1 { font-family: var(--ken-font-display); font-style: italic; font-size: 30px; line-height: 1.05; }
+  .intro { font-size: 13.5px; line-height: 1.5; color: var(--muted); margin-top: 8px; }
+  .label { font-family: var(--ken-font-bold); font-weight: bold; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  .grp { margin-top: 22px; padding-top: 14px; border-top: 1.5px solid var(--ken-rule); }
+  .grp > .label { display: block; margin-bottom: 10px; }
+  .row { display: grid; grid-template-columns: 130px 1fr; gap: 10px; align-items: center; margin: 9px 0; font-size: 13.5px; }
+  .row.wide { grid-template-columns: 1fr; gap: 4px; }
+  .seg { display: flex; flex-wrap: wrap; gap: 4px; }
+  .seg button, .btn { font: inherit; font-family: var(--ken-font-bold); font-weight: bold; font-size: 12px; border: 1.5px solid var(--ink); border-radius: 10px; padding: 4px 9px; background: #fff; color: var(--ink); cursor: pointer; }
+  .seg button[aria-pressed=true] { background: var(--ink); color: #fff; }
+  .sw { display: flex; flex-wrap: wrap; gap: 5px; }
+  .sw button { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--ink); cursor: pointer; position: relative; }
+  .sw button[aria-pressed=true] { outline: 2.5px solid var(--red); outline-offset: 2px; }
+  .sw button.word { width: auto; border-radius: 10px; padding: 0 8px; font-family: var(--ken-font-bold); font-size: 11px; background: #fff; }
+  input[type=range] { width: 100%; accent-color: var(--ink); }
+  input[type=text], input[type=number], select, textarea { width: 100%; font: inherit; font-size: 13.5px; border: 1.5px solid var(--ink); border-radius: 10px; padding: 6px 9px; background: #fff; color: var(--ink); }
+  textarea { resize: vertical; min-height: 54px; }
+  .pal { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+  .pal label { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .pal input[type=color] { width: 30px; height: 24px; border: 1.5px solid var(--ink); border-radius: 6px; padding: 0; background: none; }
+  .secs .row { grid-template-columns: 1fr 110px; margin: 5px 0; font-size: 12.5px; }
+  .scope { display: flex; gap: 0; border: 1.5px solid var(--ink); border-radius: 12px; overflow: hidden; margin-top: 14px; }
+  .scope button { flex: 1; font-family: var(--ken-font-bold); font-size: 12.5px; padding: 8px; background: #fff; cursor: pointer; border: 0; }
+  .scope button[aria-pressed=true] { background: var(--red); color: #fff; }
+  .scope-note { font-size: 12px; font-style: italic; color: var(--muted); margin-top: 6px; }
+  .stage { padding: 28px clamp(16px, 4vw, 48px) 60px; }
+  .acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .btn.solid { background: var(--ink); color: #fff; }
+  .btn.red { background: var(--red); border-color: var(--red); color: #fff; }
+  .btn { font-size: 13.5px; padding: 8px 14px; border-radius: 12px; }
+  .hero { display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap; margin-top: 26px; padding: 34px 30px 30px; background: var(--gt-bg); border: 1.5px dashed var(--line); position: relative; }
+  .hero::before { content: ""; position: absolute; left: 0; right: 0; top: 30px; height: 2px; background: var(--ink); }
+  .hero .main svg { display: block; overflow: visible; }
+  .hero .side { flex: 1; min-width: 220px; padding-top: 30px; }
+  .hero .side p { font-size: 13.5px; line-height: 1.55; color: var(--muted); }
+  .hero .side p + p { margin-top: 8px; }
+  .hero .side b { font-family: var(--ken-font-bold); color: var(--ink); }
+  .bgs { display: flex; gap: 6px; margin-top: 10px; }
+  .line { position: relative; display: flex; gap: 16px; overflow-x: auto; padding: 32px 4px 20px; margin-top: 14px; }
+  .line::before { content: ""; position: absolute; left: 0; top: 30px; height: 2px; width: var(--lw, 100%); background: var(--ink); }
+  .line .t { flex: 0 0 auto; cursor: pointer; transform: rotate(var(--r)); transform-origin: 50% 0; transition: transform .25s; }
+  .line .t:hover { transform: none; }
+  .line .t svg { display: block; overflow: visible; }
+  .line .t.on { outline: 2.5px solid var(--red); outline-offset: 6px; }
+  .out { margin-top: 30px; }
+  .out pre { margin-top: 10px; background: #fff; border: 1.5px solid var(--ken-rule); padding: 12px 14px; font-size: 11.5px; line-height: 1.45; max-height: 260px; overflow: auto; white-space: pre-wrap; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: #F7F2F2; font-size: 13px; padding: 9px 14px; border-radius: 3px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.on { opacity: 1; }
+  @media (max-width: 860px) { .kit { grid-template-columns: 1fr; } .panel { position: static; height: auto; border-right: 0; border-bottom: 1.5px solid var(--ken-rule); } }
+</style>
+</head>
+<body>
+<div class="kit">
+  <aside class="panel">
+    <h1>Gift tag kit</h1>
+    <p class="intro">Change any part of the tag. The preview uses real gifts from the survey. When it looks right, copy <b>tag-theme.js</b> and paste it over <code>scripts/tag-theme.js</code>. Every tag on the site follows it.</p>
+    <div class="scope" role="group" aria-label="What your changes apply to">
+      <button id="scAll" aria-pressed="true">All tags</button><button id="scOne" aria-pressed="false">Only this gift</button>
+    </div>
+    <p class="scope-note" id="scopeNote"></p>
+    <div id="controls"></div>
+    <div class="grp" id="variety"></div>
+    <div class="grp"><span class="label">Palette</span><div class="pal" id="pal"></div></div>
+    <div class="grp secs"><span class="label">Colour of each section</span><div id="secs"></div></div>
+  </aside>
+
+  <main class="stage">
+    <div class="acts">
+      <button class="btn red" id="copyTheme">Copy tag-theme.js</button>
+      <button class="btn" id="dlSvg">Download SVG</button>
+      <button class="btn" id="dlPng">Download PNG</button>
+      <button class="btn" id="preview">Preview on the site</button>
+      <button class="btn" id="reset">Reset to saved theme</button>
+    </div>
+
+    <section class="hero">
+      <div class="main" id="main"></div>
+      <div class="side">
+        <span class="label">This tag says</span>
+        <div class="row wide" style="margin-top:10px"><select id="pick"></select></div>
+        <div class="row wide"><span class="label">Section label</span><input type="text" id="cKicker"></div>
+        <div class="row wide"><span class="label">Headline (the reader’s words)</span><textarea id="cHead"></textarea></div>
+        <div class="row wide"><span class="label">Credit</span><input type="text" id="cCredit"></div>
+        <div class="row wide"><span class="label">It was</span><input type="text" id="cItem"></div>
+        <div class="row"><span class="label">Price band</span><select id="cBand"></select></div>
+        <div class="row"><span class="label">Came up ×</span><input type="number" id="cCount" min="0"></div>
+        <div class="row"><span class="label">Tag width</span><input type="range" id="cWidth" min="180" max="300" step="2"></div>
+        <span class="label" style="display:block;margin-top:14px">Backdrop</span>
+        <div class="bgs" id="bgs"></div>
+      </div>
+    </section>
+
+    <div class="out"><span class="label">Two gifts from every section · tap one to edit it</span><div class="line" id="line"></div></div>
+    <div class="out"><span class="label">tag-theme.js</span><pre id="code"></pre></div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const { G, C } = window.GIFT_DATA;
+  const $ = s => document.querySelector(s);
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const SAVED = clone(window.TAG_THEME);
+  let theme = clone(SAVED);
+  try { const p = JSON.parse(localStorage.getItem('gf_tag_kit') || 'null'); if (p) theme = Object.assign(clone(SAVED), p, { palette: Object.assign({}, SAVED.palette, p.palette) }); } catch (e) {}
+  let scope = 'all', bg = '#F7F2F2';
+  const gifts = G.filter(g => !g.pageonly);
+  let cur = gifts.find(g => g.id === 'watch') || gifts[0];
+  let content = null, width = 240, widthTouched = false;
+  const BANDS = ['0', '1', '2', '3', '4', '0–2', '1–2', '1–3', '2–3', '1–4', '0–3'];
+
+  function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2200); }
+  const fromGift = g => { const c = C.find(x => x.id === g.c); return { kicker: c.n + ' · ' + c.name, headline: g.h, editorial: !!g.ed, credit: g.w, item: g.it, band: g.b, count: g.n, section: g.c }; };
+
+  // the value a control shows: the gift's override in "only this gift" mode, else the theme
+  const val = k => scope === 'one' && (theme.overrides[cur.id] || {})[k] !== undefined ? theme.overrides[cur.id][k] : theme[k];
+  function set(k, v) {
+    if (scope === 'one') { theme.overrides[cur.id] = Object.assign(theme.overrides[cur.id] || {}, { [k]: v }); }
+    else theme[k] = v;
+    draw();
+  }
+
+  function controls() {
+    const colours = Object.keys(theme.palette);
+    const groups = { Shape: ['shape', 'layout', 'border', 'borderColour', 'shadow', 'shadowOffset', 'tilt'], Colour: ['fill', 'accent', 'accentStyle'], 'Hole and string': ['hole', 'string', 'stub'], 'Price': ['price', 'priceCaption'], 'Words': ['showKicker', 'showCredit', 'showCount', 'quoteMarks'] };
+    const S = Object.fromEntries(GiftTag.SCHEMA.map(s => [s.key, s]));
+    $('#controls').innerHTML = Object.entries(groups).map(([name, keys]) => `<div class="grp"><span class="label">${name}</span>${keys.map(k => {
+      const s = S[k]; if (!s) return ''; const v = val(k);
+      let ui = '';
+      if (s.type === 'choice') ui = `<div class="seg">${s.options.map(o => `<button aria-pressed="${v === o}" data-k="${k}" data-v="${o}">${o}</button>`).join('')}</div>`;
+      if (s.type === 'toggle') ui = `<div class="seg"><button aria-pressed="${!!v}" data-k="${k}" data-v="true">on</button><button aria-pressed="${!v}" data-k="${k}" data-v="false">off</button></div>`;
+      if (s.type === 'range') ui = `<input type="range" min="${s.min}" max="${s.max}" step="${s.step}" value="${v}" data-k="${k}"><span style="font-size:11px;color:var(--muted)">${v}</span>`;
+      if (s.type === 'colour') ui = `<div class="sw">${(s.extra || []).map(o => `<button class="word" aria-pressed="${v === o}" data-k="${k}" data-v="${o}">${o}</button>`).join('')}${colours.map(c => `<button title="${c}" aria-pressed="${v === c}" data-k="${k}" data-v="${c}" style="background:${theme.palette[c]}"></button>`).join('')}</div>`;
+      return `<div class="row"><span>${s.label}</span><div>${ui}</div></div>`;
+    }).join('')}</div>`).join('');
+    $('#controls').querySelectorAll('button[data-k]').forEach(b => b.onclick = () => { const s = S[b.dataset.k]; set(b.dataset.k, s.type === 'toggle' ? b.dataset.v === 'true' : b.dataset.v); controls(); });
+    $('#controls').querySelectorAll('input[type=range]').forEach(r => r.oninput = () => { set(r.dataset.k, +r.value); r.nextElementSibling.textContent = r.value; });
+    $('#scopeNote').textContent = scope === 'one' ? `Changes apply only to “${cur.it}”. Saved as an override in tag-theme.js.` : (theme.variety && theme.variety.on ? 'Changes apply to every tag. Variety is on, so shape, layout, colour, accent and price style come from the pools below.' : 'Changes apply to every tag on the site.');
+  }
+  // variety: each gift picks its own shape, layout, colour, accent, price style and width from these pools
+  function variety() {
+    const v = theme.variety = theme.variety || { on: false, shapes: [], layouts: [], fills: [], accentStyles: [], prices: [], widths: [200, 240] };
+    const pools = [['shapes', 'Shapes', GiftTag.POOLS.shapes], ['layouts', 'Layouts', GiftTag.POOLS.layouts], ['fills', 'Tag colours', ['section', ...Object.keys(theme.palette)]], ['accentStyles', 'Accent sits', GiftTag.POOLS.accentStyles], ['prices', 'Price shown as', ['coins', 'rupees', 'label', 'stamp']]];
+    v.widths = v.widths || [200, 240];
+    $('#variety').innerHTML = `<span class="label">Variety · so the string looks like a shop</span>
+      <div class="row"><span>Mix it up</span><div class="seg"><button aria-pressed="${!!v.on}" data-on="1">on</button><button aria-pressed="${!v.on}" data-on="0">off</button></div></div>
+      <p class="scope-note" style="margin:0 0 6px">${v.on ? 'Each gift picks one of the ticked options below, the same one every visit. Pick an option twice as often by ticking it, then using “×2”.' : 'Off: every tag uses the single look set above.'}</p>
+      ${v.on ? pools.map(([k, label, opts]) => `<div class="row"><span>${label}</span><div class="seg">${opts.map(o => { const n = (v[k] || []).filter(x => x === o).length; return `<button aria-pressed="${n > 0}" data-pool="${k}" data-v="${o}" title="Click to add, again for ×2, again to remove">${o}${n > 1 ? ' ×' + n : ''}</button>`; }).join('')}</div></div>`).join('')
+        + `<div class="row"><span>Widths</span><div style="display:flex;gap:6px;align-items:center"><input type="number" min="170" max="300" value="${v.widths[0]}" data-w="0" style="width:70px"> to <input type="number" min="170" max="300" value="${v.widths[1]}" data-w="1" style="width:70px"></div></div>` : ''}`;
+    $('#variety').querySelectorAll('[data-on]').forEach(b => b.onclick = () => { v.on = b.dataset.on === '1'; variety(); controls(); draw(); });
+    // click cycles: off → on → ×2 → off
+    $('#variety').querySelectorAll('[data-pool]').forEach(b => b.onclick = () => {
+      const k = b.dataset.pool, o = b.dataset.v, arr = v[k] = v[k] || [], n = arr.filter(x => x === o).length;
+      if (n === 0) arr.push(o); else if (n === 1) arr.push(o); else v[k] = arr.filter(x => x !== o);
+      if (!v[k].length) v[k] = [o];
+      variety(); draw();
+    });
+    $('#variety').querySelectorAll('[data-w]').forEach(i => i.onchange = () => { v.widths[+i.dataset.w] = +i.value; draw(); });
+  }
+  function palette() {
+    $('#pal').innerHTML = Object.entries(theme.palette).map(([k, v]) => `<label><input type="color" value="${v}" data-p="${k}">${k}</label>`).join('');
+    $('#pal').querySelectorAll('input').forEach(i => i.oninput = () => { theme.palette[i.dataset.p] = i.value; draw(); controls(); });
+    const opts = Object.keys(theme.palette);
+    $('#secs').innerHTML = C.map(c => `<div class="row"><span>${c.n} · ${c.name}</span><select data-s="${c.id}">${opts.map(o => `<option ${theme.sections[c.id] === o ? 'selected' : ''}>${o}</option>`).join('')}</select></div>`).join('');
+    $('#secs').querySelectorAll('select').forEach(s => s.onchange = () => { theme.sections[s.dataset.s] = s.value; draw(); });
+  }
+  function fields() {
+    $('#pick').innerHTML = C.map(c => `<optgroup label="${c.n} · ${c.name}">${gifts.filter(g => g.c === c.id).map(g => `<option value="${g.id}" ${g.id === cur.id ? 'selected' : ''}>${g.it}</option>`).join('')}</optgroup>`).join('');
+    $('#cBand').innerHTML = BANDS.map(b => `<option value="${b}">${b} · ${GiftTag.priceLabel(b)}</option>`).join('');
+    fill();
+    $('#pick').onchange = () => { cur = gifts.find(g => g.id === $('#pick').value); fill(); controls(); draw(); };
+    [['cKicker', 'kicker'], ['cHead', 'headline'], ['cCredit', 'credit'], ['cItem', 'item'], ['cBand', 'band'], ['cCount', 'count']].forEach(([id, k]) => $('#' + id).oninput = e => { content[k] = e.target.value; draw(); });
+    $('#cWidth').value = width; $('#cWidth').oninput = e => { width = +e.target.value; widthTouched = true; draw(); };
+    $('#bgs').innerHTML = [['#F7F2F2', 'page'], ['#E9C6C4', 'pink'], ['#1A1208', 'ink'], ['#FFFFFF', 'white']].map(([c, n]) => `<button class="btn" data-bg="${c}" style="background:${c};color:${c === '#1A1208' ? '#fff' : 'var(--ink)'}">${n}</button>`).join('');
+    $('#bgs').querySelectorAll('button').forEach(b => b.onclick = () => { bg = b.dataset.bg; draw(); });
+  }
+  function fill() {
+    content = fromGift(cur);
+    $('#cKicker').value = content.kicker; $('#cHead').value = content.headline; $('#cCredit').value = content.credit;
+    $('#cItem').value = content.item; $('#cBand').value = content.band; $('#cCount').value = content.count;
+  }
+
+  function draw() {
+    document.documentElement.style.setProperty('--gt-bg', bg);
+    $('#main').innerHTML = GiftTag.svg(content, GiftTag.style(cur.id, cur.c, theme), { width: widthTouched ? width : undefined, bg });
+    // one gift from each section, so the theme can be judged across colours
+    const row = C.flatMap(c => gifts.filter(g => g.c === c.id).slice(0, 2));
+    $('#line').style.setProperty('--lw', row.length * 216 + 'px');
+    $('#line').innerHTML = row.map((g, i) => `<div class="t ${g.id === cur.id ? 'on' : ''}" data-id="${g.id}" style="--r:${(((i * 37) % 9) / 8 * 2 - 1) * (theme.tilt || 0)}deg">${GiftTag.svg(fromGift(g), GiftTag.style(g.id, g.c, theme), { bg })}</div>`).join('');
+    $('#line').querySelectorAll('.t').forEach(t => t.onclick = () => { cur = gifts.find(g => g.id === t.dataset.id); $('#pick').value = cur.id; fill(); controls(); draw(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    $('#code').textContent = themeJS();
+    try { localStorage.setItem('gf_tag_kit', JSON.stringify(theme)); } catch (e) {}
+  }
+  function themeJS() {
+    const t = clone(theme);
+    Object.keys(t.overrides).forEach(k => { if (!Object.keys(t.overrides[k]).length) delete t.overrides[k]; });
+    return `// How every gift tag on the page looks. Generated by tag-kit/index.html: change the tag there,\n// press "Copy tag-theme.js" and paste the result over this file. Hand edits are fine too.\nwindow.TAG_THEME = ${JSON.stringify(t, null, 2)};\n`;
+  }
+
+  // export: fonts are embedded when the page is served over http; opened from disk, the SVG falls back to system fonts
+  async function fontCSS() {
+    const files = [['Jazmin Alt', 'JazminAlt-Bold.otf', 'opentype', 'bold'], ['GT America Bold', 'GT-America-Standard-Black.ttf', 'truetype', 'bold'], ['GT America', 'GT-America-Standard-Light.ttf', 'truetype', '300']];
+    try {
+      const parts = await Promise.all(files.map(async ([fam, f, fmt, w]) => {
+        const buf = await (await fetch('../assets/fonts/' + f)).arrayBuffer();
+        let bin = ''; new Uint8Array(buf).forEach(b => bin += String.fromCharCode(b));
+        return `@font-face{font-family:'${fam}';src:url(data:font/${f.endsWith('otf') ? 'otf' : 'ttf'};base64,${btoa(bin)}) format('${fmt}');font-weight:${w}}`;
+      }));
+      return parts.join('');
+    } catch (e) { toast('Fonts not embedded: open the kit from a local server for exact type'); return ''; }
+  }
+  async function exportSVG() {
+    const svg = GiftTag.svg(content, GiftTag.style(cur.id, cur.c, theme), { width: widthTouched ? width : undefined, bg }).replace(/var\(--gt-bg, #F7F2F2\)/g, bg);
+    const css = await fontCSS();
+    return svg.replace('<defs>', `<defs><style>${css}</style>`);
+  }
+  function download(name, href) { const a = document.createElement('a'); a.href = href; a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
+  $('#dlSvg').onclick = async () => { const s = await exportSVG(); download(`tag-${cur.id}.svg`, URL.createObjectURL(new Blob([s], { type: 'image/svg+xml' }))); };
+  $('#dlPng').onclick = async () => {
+    const s = await exportSVG(); const img = new Image();
+    img.onload = () => { const k = 3, c = document.createElement('canvas'); c.width = img.width * k; c.height = img.height * k; const x = c.getContext('2d'); x.scale(k, k); x.drawImage(img, 0, 0); c.toBlob(b => download(`tag-${cur.id}.png`, URL.createObjectURL(b))); };
+    img.onerror = () => toast('PNG export failed in this browser; try SVG');
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+  };
+  $('#copyTheme').onclick = () => { const t = themeJS(); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('Copied. Paste over scripts/tag-theme.js'), () => { $('#code').scrollIntoView(); toast('Select the code below and copy it'); }); };
+  $('#preview').onclick = () => { try { localStorage.setItem('gf_tag_preview', JSON.stringify(theme)); } catch (e) {} window.open('../index.html?tagpreview#/recommendations', '_blank'); };
+  $('#reset').onclick = () => { theme = clone(SAVED); try { localStorage.removeItem('gf_tag_kit'); } catch (e) {} palette(); variety(); controls(); draw(); toast('Back to scripts/tag-theme.js'); };
+  $('#scAll').onclick = () => { scope = 'all'; $('#scAll').setAttribute('aria-pressed', 'true'); $('#scOne').setAttribute('aria-pressed', 'false'); controls(); };
+  $('#scOne').onclick = () => { scope = 'one'; $('#scOne').setAttribute('aria-pressed', 'true'); $('#scAll').setAttribute('aria-pressed', 'false'); controls(); };
+
+  theme.overrides = theme.overrides || {};
+  GiftTag.ready().then(() => { fields(); palette(); variety(); controls(); draw(); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What Makes a Gift Land?</title>
+<link rel="stylesheet" href="assets/ken-chart.css">
+<link rel="stylesheet" href="styles.css">
+<script src="data/gifting-data.js"></script>
+<script src="scripts/tag-theme.js"></script>
+<script src="scripts/gift-tag.js"></script>
+<script>/* ?tagpreview shows the tag kit's unsaved look (tag-kit/index.html → "Preview on the site") */
+if (/[?&]tagpreview/.test(location.search)) { try { Object.assign(window.TAG_THEME, JSON.parse(localStorage.getItem('gf_tag_preview') || '{}')); } catch (e) {} }</script>
+</head>
+<body class="locked">
+<div class="progress" id="progress"></div>
+
+<!-- ===== LANDING: one screen, no scroll. Pick a side; it opens into its story. ===== -->
+<div class="land" id="land">
+  <header class="land-head" id="landHead">
+    <div class="kicker-tag">Gifting · Special edition</div>
+    <div class="land-meta"><span>Two surveys</span><span>Three years</span><span>29 Oct 2026</span></div>
+    <h1 class="land-title">What makes a gift land?</h1>
+    <p class="land-strap">For three years we’ve asked readers of The Ken two things: what they gave that worked, and what they believe a gift is for. Pick a side.</p>
+    <p class="land-by"><i>by</i> <a href="https://the-ken.com/writers/anuj_269/" target="_blank" rel="noopener">Anuj Debnath</a></p>
+  </header>
+  <div class="split" id="split">
+    <button class="side side-r" data-go="recommendations" aria-label="Open Recommendations: what to give">
+      <div class="side-art" id="artR"></div>
+      <div class="side-copy">
+        <div class="label">01 · Recommendations</div>
+        <h2>What to give</h2>
+        <p id="sideRp"></p>
+        <span class="go">See the gifts <span aria-hidden="true">→</span></span>
+      </div>
+    </button>
+    <div class="ribbon" aria-hidden="true">
+      <svg class="bow" viewBox="0 0 92 70"><path d="M46 35 C30 10 6 6 6 22 C6 38 30 40 46 35 Z" fill="#C8423A" stroke="#1A1208" stroke-width="2.5" stroke-linejoin="round"/><path d="M46 35 C62 10 86 6 86 22 C86 38 62 40 46 35 Z" fill="#C8423A" stroke="#1A1208" stroke-width="2.5" stroke-linejoin="round"/><path d="M43 37 L30 66 L38 62 L42 68 L46 40 Z M49 37 L62 66 L54 62 L50 68 L46 40 Z" fill="#A9352E" stroke="#1A1208" stroke-width="2" stroke-linejoin="round"/><rect x="38" y="27" width="16" height="16" rx="4" fill="#C8423A" stroke="#1A1208" stroke-width="2.5"/></svg>
+      <span class="or">OR</span>
+    </div>
+    <button class="side side-p" data-go="philosophies" aria-label="Open Philosophies: why we give">
+      <div class="side-art" id="artP"></div>
+      <div class="side-copy">
+        <div class="label">02 · Philosophies</div>
+        <h2>Why we give</h2>
+        <p id="sidePp"></p>
+        <span class="go">Read the beliefs <span aria-hidden="true">→</span></span>
+      </div>
+    </button>
+  </div>
+  <footer class="land-foot">
+    <img src="assets/logo.png" alt="The Ken">
+    <div class="legal"><a href="https://the-ken.com/terms-and-conditions/" target="_blank" rel="noopener">Terms &amp; Conditions</a><span aria-hidden="true">•</span><a href="https://the-ken.com/privacy-policy/" target="_blank" rel="noopener">Privacy</a><span aria-hidden="true">•</span><span>© 2026 Kenrise Media Private Limited</span></div>
+  </footer>
+</div>
+
+<!-- ===== THE TWO STORIES (filled by scripts/app.js) ===== -->
+<main class="story" id="story"></main>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true"></div>
+<button class="checkout" id="checkout" hidden onclick="GF.openDock()" aria-label="Open your gift box"></button>
+<div class="toast" id="toast" aria-live="polite"></div>
+
+<script src="scripts/app.js"></script>
+</body>
+</html>
