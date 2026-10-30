@@ -8,29 +8,26 @@
     <div class="kicker-tag">Gifting · Special edition</div>
     <figure class="lede"><img src="<?php echo esc_url( $gk26_url ); ?>/assets/lede.jpg" alt="Illustration: a reader holds up a speech bubble among a crowd of colourful patterned shapes" width="683" height="535"></figure>
     <div class="land-meta"><span>Two surveys</span><span>Three years</span><span>29 Oct 2026</span></div>
-    <h1 class="land-title">What makes a gift land?</h1>
-    <p class="land-strap">For three years we’ve asked readers of The Ken two things: what they gave that worked, and what they believe a gift is for. Pick a side.</p>
+    <h1 class="land-title">The Ken’s 2026 guide to thoughtful gifting</h1>
+    <p class="land-strap">We’ve been asking our readers about gifts for three years. Their perceptive and honest answers form everything in this guide. There’s a reason people say, “it’s the thought that counts.”</p>
     <p class="land-by"><i>by</i> <a href="https://the-ken.com/writers/rohin/" target="_blank" rel="noopener">Rohin Dharmakumar</a></p>
   </header>
   <div class="split" id="split">
-    <button class="side side-r" data-go="recommendations" aria-label="Open Recommendations: what to give">
+    <button class="side side-p" data-go="philosophies" aria-label="Open Philosophies">
       <div class="side-copy">
-        <div class="label">01 · Recommendations</div>
-        <h2>What to give</h2>
-        <p id="sideRp"></p>
-        <span class="go">See the gifts <span aria-hidden="true">→</span></span>
+        <h2>Philosophies</h2>
+        <p id="sidePp"></p>
+        <span class="go">Read the beliefs <span aria-hidden="true">→</span></span>
       </div>
     </button>
     <div class="ribbon" aria-hidden="true">
       <svg class="bow" viewBox="0 0 92 70"><path d="M46 35 C30 10 6 6 6 22 C6 38 30 40 46 35 Z" fill="#C8423A" stroke="#1A1208" stroke-width="2.5" stroke-linejoin="round"/><path d="M46 35 C62 10 86 6 86 22 C86 38 62 40 46 35 Z" fill="#C8423A" stroke="#1A1208" stroke-width="2.5" stroke-linejoin="round"/><path d="M43 37 L30 66 L38 62 L42 68 L46 40 Z M49 37 L62 66 L54 62 L50 68 L46 40 Z" fill="#A9352E" stroke="#1A1208" stroke-width="2" stroke-linejoin="round"/><rect x="38" y="27" width="16" height="16" rx="4" fill="#C8423A" stroke="#1A1208" stroke-width="2.5"/></svg>
-      <span class="or">OR</span>
     </div>
-    <button class="side side-p" data-go="philosophies" aria-label="Open Philosophies: why we give">
+    <button class="side side-r" data-go="recommendations" aria-label="Open Recommendations">
       <div class="side-copy">
-        <div class="label">02 · Philosophies</div>
-        <h2>Why we give</h2>
-        <p id="sidePp"></p>
-        <span class="go">Read the beliefs <span aria-hidden="true">→</span></span>
+        <h2>Recommendations</h2>
+        <p id="sideRp"></p>
+        <span class="go">See the gifts <span aria-hidden="true">→</span></span>
       </div>
     </button>
   </div>

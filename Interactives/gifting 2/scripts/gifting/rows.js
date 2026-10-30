@@ -37,6 +37,7 @@ function thoughtRow(type, cat, value) { return { type, cat_id: cat, card_id: 0, 
 export function toRow(data, key, value) {
   const [kind, id] = key.split(':');
   if (kind === 'plus') return beliefRow(data, id, value);
+  if (kind === 'belief') { const ids = beliefIds(data, id); return ids && { ...ids, ...thought(value) }; }
   if (kind === 'keep') return tagRow(data, id, vote(value));
   if (kind === 'how') return tagRow(data, id, thought(value));
   if (kind === 'landed') return tagRow(data, id, thought(value ? LANDED : ''));

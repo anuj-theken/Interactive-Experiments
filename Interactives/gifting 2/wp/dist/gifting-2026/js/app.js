@@ -16,7 +16,7 @@ loadData().then(start).catch(err => {
 });
 
 function start(DATA) {
-  const { SECS, B, FEEL, OCC, TIER, C, ORDER, G, SAMPLES, BUDGET } = toPageData(DATA);
+  const { SECS, B, FEEL, OCC, TIER, C, ORDER, G, SAMPLES, BUDGET, BUDGETS, YEAR_SHARE } = toPageData(DATA);
   const $ = s => document.querySelector(s);
   const E = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const cById = id => C.find(c => c.id === id);
@@ -28,7 +28,7 @@ function start(DATA) {
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
   // What the reader has done lives in the store (gk26_* keys): drafts until they sign in, then sent as they go
-  let picks = store.picks(), kept = store.keeps();
+  let picks = store.picks().filter(id => B.some(b => b.id === id)), kept = store.keeps();
   let matches = [], forIds = [];
   const mine = () => store.mine();
   // Each question's key in the database contract (rows.js) and how it's listed while waiting to be sent
@@ -98,7 +98,7 @@ function start(DATA) {
   const TAG_COUNT = G.reduce((a, g) => a + 1 + g.q.length, 0);
 
   /* ---------- belief cards ----------
-     One card per belief, on a ruled note, in a grid under each section's question. */
+     One card per belief, sized by how many readers said it, dealt loosely under each section's question. */
   const size = n => n >= 100 ? 'L' : n >= 25 ? 'M' : 'S';
   // other readers who said the same belief in their own words
   const againFor = b => { const seen = new Set([b.h.toLowerCase().replace(/[^a-z]/g, '').slice(0, 30)]); return [...b.q, ...(SAMPLES[b.id] || [])].filter(q => { const k = q[0].toLowerCase().replace(/[^a-z]/g, '').slice(0, 30); if (seen.has(k)) return false; seen.add(k); return true; }); };
@@ -107,10 +107,10 @@ function start(DATA) {
     const quote = b.vs ? `“${E(b.h)}”<span class="or">OR</span>“${E(b.h2)}”` : `“${E(b.h)}”`;
     const count = b.vs
       ? `<b>${b.n}</b><span class="vs">VS</span><b>${b.n2}</b><small>readers disagree</small>`
-      : `<b>${b.n}</b><small>${b.n === 1 ? 'reader said this' : 'readers said something like this'}</small>${b.n === 1 ? '<span class="one">ONE OF ONE</span>' : ''}`;
-    return `<button class="bcard v-index ${size(tot)} ${picks.includes(b.id) ? 'picked' : ''} ${matches.includes(b.id) ? 'match' : ''}" style="--sc:${SC[b.s]}" data-id="${b.id}" data-card="${b.id}" ${idAttrs(beliefIds(DATA, b.id))} onclick="GF.openCard('${b.id}',null,this)">
-      <div class="quote">${quote}</div>
-      <div class="credit">${E(b.vs ? b.w + ' · and · ' + b.w2 : b.w)}</div>
+      : `<b>${b.n}</b><small>${b.n === 1 ? 'reader' : 'readers'}</small>${b.n === 1 ? '<span class="one">ONE OF ONE</span>' : ''}`;
+    return `<button class="bcard ${size(tot)} ${picks.includes(b.id) ? 'picked' : ''} ${matches.includes(b.id) ? 'match' : ''}" style="--sc:${SC[b.s]};--r:${(rnd() * 4 - 2).toFixed(1)}deg" data-id="${b.id}" data-card="${b.id}" ${idAttrs(beliefIds(DATA, b.id))} onclick="GF.openCard('${b.id}',null,this)">
+      ${b.vs ? '<div class="lab">Readers disagree</div>' : ''}<div class="quote">${quote}</div>
+      ${b.tr ? `<div class="tr">${E(b.tr)}</div>` : ''}<div class="credit">${E(b.vs ? b.w + ' · and · ' + b.w2 : b.w)}</div>
       <div class="count">${count}</div></button>`;
   }
   const cardsFor = sid => shuffle(B.filter(b => b.s === sid)).map(b => cardHTML(b));
@@ -126,8 +126,8 @@ function start(DATA) {
       <div class="qacts"><button class="pill solid" onclick="GF.submit('${o.id}')">${E(o.submit || 'Send')}</button>${o.skip ? `<button class="skip" onclick="GF.skip('${o.id}')">${E(o.skip)}</button>` : ''}</div>`;
     const key = QKEY[o.id] || (o.kinds ? 'missed' : '');
     return `<section class="ask" id="ask-${o.id}" ${key ? `data-key="${key}"` : ''} ${idAttrs(QKEY[o.id] && questionIds(DATA, QKEY[o.id]))}><div class="qcard ${o.dark ? 'dark' : ''}">
-      <span class="qnum">Question ${o.n}</span>
-      <div class="qhead"><div class="qlabel">${E(o.label)}</div><div class="qtext">${E(o.q)}</div></div>
+      ${o.n ? `<span class="qnum">Question ${o.n}</span>` : ''}
+      <div class="qhead">${o.label ? `<div class="qlabel">${E(o.label)}</div>` : ''}<div class="qtext">${E(o.q)}</div></div>
       <div class="qform">${o.why ? `<div class="qwhy">${o.why}</div>` : ''}${form}</div>
       <div class="qyou" id="you-${o.id}" aria-live="polite"></div>
       ${o.foot ? `<div class="qfoot">${o.foot}</div>` : ''}</div></section>`;
@@ -137,10 +137,10 @@ function start(DATA) {
   function bar(side) {
     const idx = side === 'r'
       ? ORDER.map(id => { const c = cById(id); return `<a data-to="${id}" onclick="GF.jump('${id}')"><small>${c.n}</small>${E(c.name)}</a>`; }).join('')
-      : SECS.map(s => `<a data-to="${s.slug}" onclick="GF.jump('${s.slug}')"><small>${s.n}</small>${E(s.name)}</a>`).join('');
+      : SECS.map(s => `<a data-to="${s.slug}" onclick="GF.${currentView() === 'belief' ? 'toPSec' : 'jump'}('${s.slug}')">${E(s.name)}</a>`).join('');
     // the other half of the guide, as the bar's one prominent button
     const other = side === 'r' ? { go: 'philosophies', k: 'Why we give', t: 'Philosophies' } : { go: 'recommendations', k: 'What to give', t: 'Recommendations' };
-    return `<nav class="bar" aria-label="Gifting"><button class="back" onclick="GF.home()" aria-label="Back to the start"><span aria-hidden="true">←</span> Back</button><div class="idx" id="idx">${idx}</div>
+    return `<nav class="bar" aria-label="Gifting"><button class="back" onclick="GF.back()" aria-label="Back"><span aria-hidden="true">←</span> Back</button><div class="idx" id="idx">${idx}</div>
       <button class="switch" onclick="GF.go('${other.go}')"><small>${other.k}</small><b>${other.t}</b><span aria-hidden="true">→</span></button></nav>`;
   }
   // the same header as the landing: lede illustration, then kicker, meta, title, strap and byline
@@ -153,13 +153,22 @@ function start(DATA) {
       <p class="art-strap">${o.strap}</p>
       <p class="art-by"><i>by</i> <a href="https://the-ken.com/writers/rohin/" target="_blank" rel="noopener">Rohin Dharmakumar</a></p></div></header>`;
   }
+  // the end of each half: the landing page's two panels again, so the guide closes the way it opens.
+  // The other half's panel crosses over with the colour wipe; this half's goes back to the top.
+  function otherHalf() {
+    return `<div class="split end-split">${$('#split').innerHTML.replace(/ id="[^"]*"/g, '')}</div>`;
+  }
+  document.addEventListener('click', e => {
+    const side = e.target.closest && e.target.closest('.end-split .side'); if (!side) return;
+    const name = side.dataset.go;
+    if (name === (currentSide === 'r' ? 'recommendations' : 'philosophies') && currentView() !== 'belief') window.scrollTo({ top: 0, behavior: 'smooth' });
+    else if (name === 'philosophies' && currentSide === 'p') go('philosophies');
+    else toOther(name);
+  });
+  // with the same colour wipe as the cross-links, landing at the top of the other half
+  function toOther(name) { crossTo(name, () => window.scrollTo(0, 0), () => {}); }
   function footer(side) {
-    const other = side === 'r'
-      ? { go: 'philosophies', k: '02 · Philosophies', t: 'Why we give: 41 beliefs, agree with three' }
-      : { go: 'recommendations', k: '01 · Recommendations', t: 'What to give: 64 gifts readers actually gave' };
     return `<footer class="site-foot"><div class="sf-inner">
-      <div class="sf-sec"><h2 class="sf-h">The other half</h2>
-        <button class="sf-other" onclick="GF.go('${other.go}')"><span><span class="label">${other.k}</span><b>${other.t}</b></span><span class="arrow">→</span></button></div>
       <div class="sf-sec"><h2 class="sf-h">Share this</h2><div class="sf-links">
         <a class="sf-btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('What makes a gift land? ' + location.href)}">WhatsApp</a>
         <a class="sf-btn" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?url=${encodeURIComponent(location.href)}">X</a>
@@ -183,8 +192,8 @@ function start(DATA) {
     const sample = shuffle(LIVE_G.filter(g => g.n >= 40)).slice(0, 3);
     return bar('r') + artHead({
       band: 'var(--side-r)', ink: 'var(--ink)', tag: 'Gifting · Recommendations', meta: `${TAG_COUNT} tags`,
-      title: 'Every gift here came with a person attached',
-      strap: 'We asked readers what to give and kept only the gifts that came with a reason. So the reason is the headline. The thing itself is in the small print.',
+      title: 'Gifts with a person attached',
+      strap: 'Sixty-four gifts readers have given or received, each with the reason it worked.',
       art: sample.map((g, i) => tagHTML(g, { static: true, width: 200, r: [-5, 2, 6][i], stringH: 26, bg: 'var(--side-r)', onBg: SIDE_R })).join('')
     }) + `
     <section class="nl context">
@@ -199,6 +208,7 @@ function start(DATA) {
     ${qcard({ id: 'missed', n: 2, label: 'Your turn', q: 'What gift is missing from these strings?', why: 'One you gave that landed: the gift, who it was for, and why it worked. One line is enough.', kind: 'text', kinds: true, placeholder: 'A fountain pen for my sister, because…', submit: 'Send' })}
     <section class="sec" id="end"><div class="sec-head"><div class="sec-num"><b>END</b><span></span></div><h2>Your gift box</h2><p class="dek">Every gift you add gets a box. Bigger price, bigger box.</p></div>
       <div class="ask"><div class="endcard boxcard" id="endcard">${boxPanel()}</div></div></section>
+    ${otherHalf('r')}
     ${footer('r')}`;
   }
   function legend() {
@@ -229,7 +239,7 @@ function start(DATA) {
     r.scrollTo({ left, behavior: smooth === false ? 'auto' : 'smooth' });
   }
   document.addEventListener('pointerenter', e => {
-    const t = e.target.closest && e.target.closest('.rail .gtag, .wall .bcard');
+    const t = e.target.closest && e.target.closest('.rail .gtag, .wall .bcard, .bpage .gtag, .bpage .bcard');
     if (t && e.pointerType === 'mouse' && !t.classList.contains('swinging')) t.classList.add('swinging', 'hung');
   }, true);
   document.addEventListener('animationend', e => {
@@ -312,7 +322,7 @@ function start(DATA) {
   const shade = (hex, f) => { const [r, g, b] = [1, 3, 5].map(k => parseInt(hex.slice(k, k + 2), 16)); return '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v * f)))).map(v => v.toString(16).padStart(2, '0')).join(''); };
   function boxesSVG(gs, opts) {
     opts = opts || {};
-    if (!gs.length) return `<svg class="pile" viewBox="0 0 300 170" role="img" aria-label="An empty gift box"><ellipse cx="150" cy="150" rx="100" ry="9" fill="#1A1208" opacity=".07"/><path d="M95 70 h100 l26 -20 h-100 z" fill="none" stroke="#B9A9A7" stroke-width="2.5" stroke-dasharray="7 6" stroke-linejoin="round"/><path d="M95 70 v76 h100 v-76 M195 146 l26 -20 v-76" fill="none" stroke="#B9A9A7" stroke-width="2.5" stroke-dasharray="7 6" stroke-linejoin="round"/><text x="145" y="114" text-anchor="middle" font-family="GT America, Arial" font-size="12" fill="#8A7B78">empty</text></svg>`;
+    if (!gs.length) return `<svg class="pile" viewBox="0 0 300 170" role="img" aria-label="An empty gift box"><ellipse cx="150" cy="150" rx="100" ry="9" fill="#1A1208" opacity=".07"/><path d="M95 70 h100 l26 -20 h-100 z" fill="none" stroke="#B9A9A7" stroke-width="2.5" stroke-dasharray="7 6" stroke-linejoin="round"/><path d="M95 70 v76 h100 v-76 M195 146 l26 -20 v-76" fill="none" stroke="#B9A9A7" stroke-width="2.5" stroke-dasharray="7 6" stroke-linejoin="round"/><text x="145" y="114" text-anchor="middle" font-family="Archivo, Arial" font-size="12" fill="#8A7B78">empty</text></svg>`;
     const SZ = [70, 76, 90, 106, 122];
     const items = gs.map(g => { const hi = GiftTag.bandRange(g.b)[1], h0 = GiftTag.hash(g.id); return { g, w: SZ[hi], hr: .62 + (h0 % 4) * .08, rot: ((h0 >> 3) % 7) - 3, col: tagColour(g.c) }; })
       .sort((a, b) => b.w - a.w);
@@ -346,7 +356,7 @@ function start(DATA) {
     return `<svg class="pile" viewBox="${cx - W / 2} ${minY} ${W} ${maxY - minY}" role="img" aria-label="${gs.length} wrapped gift boxes in a pile">
       <ellipse cx="${cx + 10}" cy="${Math.max(...placed.map(b => b.bottom)) + 4}" rx="${(maxX - minX) / 2}" ry="10" fill="#1A1208" opacity=".1"/>
       ${placed.slice().sort((a, b) => a.z - b.z).map(boxSVG).join('')}
-      ${extra > 0 ? `<text x="${maxX - 10}" y="${maxY - 4}" text-anchor="end" font-family="GT America Bold, Arial" font-weight="bold" font-size="13" fill="#1A1208">+${extra} more</text>` : ''}</svg>`;
+      ${extra > 0 ? `<text x="${maxX - 10}" y="${maxY - 4}" text-anchor="end" font-family="Archivo Bold, Arial" font-weight="bold" font-size="13" fill="#1A1208">+${extra} more</text>` : ''}</svg>`;
   }
   /* ---------- the generated card: the picture and every answer at once ----------
      Each answer sits under the question it answers, so the card reads on its own when shared. */
@@ -354,27 +364,55 @@ function start(DATA) {
     ? `<div class="gc-qa"><span class="q">${E(q)}</span><span class="a">${plain ? E(a) : '“' + E(a) + '”'}</span></div>`
     : `<div class="gc-qa todo"><span class="q">${E(q)}</span><button class="skip" onclick="GF.closeOv();GF.jump('${to}')">${cta || 'Answer it'} ↑</button></div>`;
   const givenGifts = () => store.landed().map(id => G.find(g => g.id === id)).filter(Boolean);
+  // the end cards are a plain list, like a calling card: what you picked, then anything you wrote in your own words
+  function wordsFor(side) {
+    const m = mine(), rows = side === 'p' ? [
+      ['My philosophy', m.q01], ['A great gift is one that…', m.q02], ['The feeling I want a gift to create', m.q06], ['Hardest to buy for, and what worked', m.q09], ['What I’d love but never buy myself', m.q16], ['What I’d spend on someone close', m.q20],
+      ...Object.keys(m).filter(k => k.startsWith('belief:')).map(k => { const b = B.find(x => x.id === k.slice(7)); return b ? [`My version of “${b.h.length > 40 ? b.h.slice(0, 38) + '…' : b.h}”`, m[k]] : null; }).filter(Boolean)
+    ] : [
+      ['Hard to buy for this year', m['hero:recommendations']],
+      ...givenGifts().flatMap(g => { const h = m[`how:${g.id}`] || {}; return [[`I gave ${g.it}. It was for`, h.who], [`How ${g.it.replace(/^an? /i, '')} went`, h.how]]; }),
+      ...Object.keys(m).filter(k => k.startsWith('missed:') && cById(k.split(':')[1])).map(k => [`A gift I’d add to ${cById(k.split(':')[1]).name}`, m[k]])
+    ];
+    return rows.filter(r => r[1] != null && String(r[1]).trim() !== '');
+  }
+  function myWords(side) {
+    const done = wordsFor(side);
+    // typed answers are quoted; a picked feeling or a slider amount isn't
+    const plain = v => /^₹/.test(v) || FEEL.some(f => f[0] === v);
+    return done.length ? `<div class="call-words"><span class="label">My answers</span>${done.map(r => `<p><small>${E(r[0])}</small>${plain(String(r[1])) ? E(r[1]) : `“${E(r[1])}”`}</p>`).join('')}</div>` : '';
+  }
   function giftCard(animate) {
-    const gs = inBox(), m = mine(), given = givenGifts(), added = Object.keys(m).filter(k => k.startsWith('missed:') && cById(k.split(':')[1]));
-    return `<div class="gc">
+    const gs = inBox();
+    return `<div class="gc call">
       <div class="gc-art">${boxesSVG(gs, { animate })}<p class="gc-cap">${gs.length ? `${gs.length} ${gs.length === 1 ? 'gift' : 'gifts'} · roughly <b>${boxTotal(gs)}</b>` : 'Your gift box is empty'}</p></div>
-      <div class="gc-body"><span class="label gc-k">My gift card · The Ken’s Gifting 2026</span>
-        ${qa('Who’s hard to buy for this year?', m['hero:recommendations'], 'ask-who', 'Tell us')}
-        <div class="gc-sec"><span class="label">In my gift box · ${gs.length}</span>
-          ${gs.length ? `<ol class="box-list">${gs.map(g => `<li style="--sc:${tagColour(g.c)}" data-card="${g.id}"><i></i><span>${E(g.it)}<small>${GiftTag.priceLabel(g.b)} · ${E(cById(g.c).name)}</small></span><button onclick="GF.unbox('${g.id}')" aria-label="Take ${E(g.it)} out">×</button></li>`).join('')}</ol>` : '<p class="note">Tap a tag, then Keep.</p>'}</div>
-        <div class="gc-sec"><span class="label">Gifts I gave that landed · ${given.length}</span>
-          ${given.length ? `<ol class="gave-list">${given.map(g => { const h = m[`how:${g.id}`] || {}; return `<li style="--sc:${tagColour(g.c)}" data-card="${g.id}"><i></i><div><b>${E(g.it)}</b>
-            ${h.who ? `<span><em>For</em>${E(h.who)}</span>` : ''}${h.how ? `<span><em>How it went</em>“${E(h.how)}”</span>` : ''}
-            ${!h.who && !h.how ? `<button class="skip" onclick="GF.closeOv();GF.toTag('${g.id}')">Add who it was for →</button>` : ''}</div></li>`; }).join('')}</ol>` : '<p class="note">Gave one of these? Open its tag and tap “I gave this, it landed”.</p>'}</div>
-        ${added.length ? `<div class="gc-sec"><span class="label">A gift I’d add to the strings</span>${added.map(k => qa(`For ${cById(k.split(':')[1]).name}`, m[k])).join('')}</div>` : ''}
-      </div></div>`;
+      <div class="gc-body"><span class="label gc-k">My gift shortlist</span>
+        ${gs.length ? `<ol class="call-list">${gs.map(g => `<li data-card="${g.id}"><span>${E(g.it)}<small>${GiftTag.priceLabel(g.b)} · ${E(cById(g.c).name)}</small></span><button onclick="GF.unbox('${g.id}')" aria-label="Take ${E(g.it)} out">×</button></li>`).join('')}</ol>` : '<p class="note">Tap a tag, then Keep.</p>'}
+        ${myWords('r')}
+        <div class="imp">The Ken · Gifting 2026</div></div></div>`;
   }
-  function sendCta() {
-    const n = waitingCount();
-    return store.user() ? `<span class="note">Saved to ${E(store.user())}</span>` : n ? `<button class="pill red" onclick="GF.openDock()">Send ${n} to The Ken →</button>` : '';
+  // Email me the shortlist (signs you in with a code, which also sends your answers), and Copy text
+  function sendCta(side) {
+    const n = (side === 'p' ? picks.length : inBox().length) + wordsFor(side).length;
+    if (!n) return '';
+    return `<button class="pill red" onclick="GF.emailList('${side}')">Email me the shortlist</button><button class="pill" onclick="GF.copyList('${side}')">Copy text</button>`;
   }
+  function listText(side) {
+    const head = side === 'p' ? 'My gifting philosophy' : 'My gift shortlist';
+    const rows = side === 'p'
+      ? picks.map(id => B.find(b => b.id === id)).filter(Boolean).map((b, i) => `${i + 1}. “${b.h}” (with ${b.n - 1} other readers)`)
+      : inBox().map((g, i) => `${i + 1}. ${g.it} (${GiftTag.priceLabel(g.b)}, ${cById(g.c).name})`);
+    const words = wordsFor(side).map(r => `${r[0]}: ${/^₹/.test(r[1]) || FEEL.some(f => f[0] === r[1]) ? r[1] : `“${r[1]}”`}`);
+    return `${head}${rows.length ? `\n\n${rows.join('\n')}` : ''}${words.length ? `\n\nMy answers\n${words.join('\n')}` : ''}\n\nFrom ${GUIDE}: ${location.origin + location.pathname}`;
+  }
+  function emailList(side) {
+    if (store.user()) return toast(`Shortlist emailed to ${store.user()}`);
+    if (!$('#dockSheet')) openDock(side);
+    const f = $('#send-email'); if (f) { f.scrollIntoView({ behavior: 'smooth', block: 'center' }); f.focus({ preventScroll: true }); }
+  }
+  function copyList(side) { copy(listText(side), 'Copied. Paste it anywhere.'); }
   function boxPanel(animate, inSheet) {
-    return `${giftCard(animate)}${inSheet ? '' : `<div class="acts">${sendCta()}</div>`}`;
+    return `${giftCard(animate)}<div class="acts">${sendCta('r')}</div>`;
   }
   // the checkout button, bottom centre, always in view on Recommendations
   function checkoutHTML() {
@@ -412,48 +450,80 @@ function start(DATA) {
 
   /* ================= PHILOSOPHIES ================= */
   const ASK = {
-    s1: { q: 'In one line: a great gift is one that…', label: 'We asked', kind: 'text', placeholder: '…they use every day', foot: '159 readers answered in 2026', echo: true },
-    s2: { q: 'What feeling do you most want a gift to create?', label: 'We asked', kind: 'tap', options: FEEL.map(f => f[0]), why: 'Pick one to see how readers answered.', foot: '154 readers answered in 2026' },
-    s3: { q: 'Who is hardest for you to buy for, and what finally worked?', label: 'We asked', kind: 'text', placeholder: 'My mother-in-law. A…', foot: '152 readers answered in 2026', echo: true },
-    s4: { q: 'What would you love to get, but never buy yourself?', label: 'We asked', kind: 'text', placeholder: 'A really good…, because…', why: 'And why not?', foot: '143 readers answered in 2026', echo: true },
-    s5: { q: 'What would you spend on a gift for a close friend or family member?', label: 'We asked', kind: 'slider', max: 20000, step: 500, why: 'Drag the slider. Your marker moves against what readers said.', foot: '638 readers answered in 2024 and 2026' }
-  };
-  const SDEK = {
-    s1: 'What readers think a gift is actually for.',
-    s2: 'The feeling a gift should leave behind.',
-    s3: 'The people nobody knows how to buy for, and the occasions that make us try.',
-    s4: 'The things readers want, but won’t buy for themselves.',
-    s5: 'What a good gift should cost, and who gets the budget.'
+    s1: { q: 'In one line: a great gift is one that…', kind: 'text', placeholder: '…they use every day', echo: true },
+    s2: { q: 'What feeling do you most want a gift to create?', kind: 'tap', options: FEEL.map(f => f[0]) },
+    s3: { q: 'Who is hardest for you to buy for, and what finally worked?', kind: 'text', placeholder: 'My mother-in-law. A…', echo: true },
+    s4: { q: 'What would you love to get, but never buy yourself? Why not?', kind: 'text', placeholder: 'A really good…, because…', echo: true },
+    s5: { q: 'What would you spend on a close friend or family member?', kind: 'slider', max: 20000, step: 500 }
   };
   const FEEL_N = FEEL.reduce((a, f) => a + f[1], 0);
   function philosophies() {
     return bar('p') + artHead({
       band: 'var(--side-p)', ink: '#F7F2F2', tag: 'Gifting · Philosophies', meta: `${B.length} beliefs`,
-      title: 'Every gift has two people in it',
-      strap: 'One is trying to say something. The other is trying to work out what. Here is what readers of The Ken believe about giving.',
-      art: `<div class="art-hand">${shuffle(B.filter(b => !b.vs && b.h.length < 60 && b.n > 20)).slice(0, 3).map((b, i) => `<div class="bcard v-index M" style="--sc:${SC[b.s]};--i:${i};pointer-events:none"><div class="quote">“${E(b.h)}”</div><div class="count"><b>${b.n}</b><small>readers</small></div></div>`).join('')}</div>`
+      title: 'Thoughtful gifting is hard, but worth it.',
+      strap: 'Browse through a rich, diverse and carefully curated selection of thoughts about gifting from The Ken’s readers. Find the ones that speak to you.'
     }) + `
-    <section class="nl context">
+    ${qcard({ id: 'mine', q: 'Before we start, do you have a personal philosophy about gifting?', kind: 'text', placeholder: 'Yes, it is…', submit: 'Submit', skip: 'I don’t. Show me theirs ↓', dark: true })}
+    <section class="nl context" id="intro">
       <span class="ph">PLACEHOLDER COPY</span>
-      <p>Ask readers about the best gift they ever gave and they remember a face. Ask about the best one they got and they tell you how often they use it.</p>
-      <p>We’ve asked The Ken’s subscribers and readers about giving for three years now. Their answers settled into <b>${B.length} beliefs</b> about what a gift is for, who makes it hard, and what it should cost.</p>
-      <p>Each card is one belief, in one reader’s words. The big number is how many readers said something like it.</p>
-      <div class="pick3" role="note"><span class="pick3-slots" aria-hidden="true"><i></i><i></i><i></i></span><div><b>Pick three. Only three.</b><p>Tap the beliefs you agree with and +1 them. Your three fill up at the bottom of the screen, and at the end we’ll tell you what kind of giver you are.</p></div></div>
-      <div class="reading"><p>This is an interactive story. Answer the questions as you go: they all end up on your card at the end.</p><p>Your answers wait in this browser until you sign in. Nothing is sent before that.</p></div>
+      <h2 class="intro-h">Thoughtful gifting is like clapping. It takes two.</h2>
+      <p>The gifter wants to say something. The giftee tries to work out what. When we asked our readers about the best gift they ever gave, most described the look on someone’s face. But when we asked them about the best gift they got, they told us how often they used it.</p>
+      <p>We narrowed their answers into ${B.length} beliefs, which we then sorted into five sections.</p>
     </section>
-    ${qcard({ id: 'mine', n: 1, label: 'Before we start', q: 'Do you have a philosophy about gifting?', why: 'Write it in a line. We’ll find the readers who think like you.', kind: 'text', placeholder: 'Mine is…', submit: 'That’s mine', skip: 'I don’t. Show me theirs ↓', dark: true })}
-    ${SECS.map((s, i) => {
-      const cards = cardsFor(s.id);
-      return `<section class="sec" id="${s.slug}" style="--sc:${SC[s.id]}"><div class="sec-head"><div class="sec-num"><b>${s.n}</b><span></span></div><h2>${E(s.name)}</h2>
-        <p class="dek">${SDEK[s.id]}</p><p class="note meta">${cards.length} beliefs · shuffled</p></div>
-        ${qcard(Object.assign({ id: s.id, n: i + 2 }, ASK[s.id]))}
-        <div class="wall">${cards.join('')}</div></section>`; }).join('')}
-    <section class="sec" id="end"><div class="sec-head"><div class="sec-num"><b>END</b><span></span></div><h2>Your gifting philosophy</h2><p class="dek">Three beliefs, in other readers’ words, and what they say about you.</p></div>
+    ${SECS.map(s => `<section class="sec" id="${s.slug}" style="--sc:${SC[s.id]}"><div class="sec-head"><h2>${E(s.name)}</h2></div>
+        ${s.id === 's5' ? statsHTML() : ''}
+        ${qcard(Object.assign({ id: s.id }, ASK[s.id]))}
+        <div class="wall">${cardsFor(s.id).join('')}</div></section>`).join('')}
+    <section class="sec" id="end"><div class="sec-head"><h2>Your gifting philosophy</h2><p class="dek">The three beliefs you feel most strongly about.</p></div>
       <div class="ask"><div class="endcard boxcard" id="endcard">${threePanel()}</div></div></section>
+    ${otherHalf('p')}
     ${footer('p')}`;
   }
+
   // budget slider: your marker moves against the medians as you drag
   const MED_GIVE = BUDGET.give, MED_GET = BUDGET.get, fmtR = x => '₹' + Math.round(x).toLocaleString('en-IN');
+  // two quiet charts at the top of "How much should a gift cost?": what readers would spend and want spent,
+  // and how a year's gifting splits between people. Hover (or tap) a bar for its numbers; the table is under each.
+  const pc = (x, n) => Math.round(100 * x / n);
+  const vizTable = (head, rows) => `<details class="vt"><summary>See the numbers</summary><table><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</table></details>`;
+  function statsHTML() {
+    const S = BUDGETS, Y = YEAR_SHARE; if (!S || !Y) return '';
+    const gp = S.give.map(x => pc(x, S.answeredGive)), tp = S.get.map(x => pc(x, S.answeredGet)), mx = Math.max(...gp, ...tp);
+    const short = ['Under ₹1K', '₹1K–3K', '₹3K–5K', '₹5K–10K', '₹10K+'], P = S.paired, np = P.answered;
+    const a = `<figure class="viz" aria-label="Budgets to give and to receive">
+      <figcaption><h4>Half our readers want the same spent on them as they’d spend. Most of the rest would rather spend more than they get.</h4>
+        <p class="vsub">What readers would spend on a close friend or family member, and what they’d want spent on them. Share of readers in each band.</p></figcaption>
+      <div class="vlegend"><span><i class="give"></i>To give · median ${fmtR(S.medians.give)}</span><span><i class="get"></i>To get · median ${fmtR(S.medians.get)}</span></div>
+      <div class="vbars">${S.bands.map((b, i) => `<div class="vgrp"><div class="vpair">
+        <div class="vb give" style="height:${gp[i] / mx * 100}%" data-tip="${b} · to give: ${gp[i]}% of readers (${S.give[i]})">${i === 1 ? `<em>${gp[i]}%</em>` : ''}</div>
+        <div class="vb get" style="height:${tp[i] / mx * 100}%" data-tip="${b} · to get: ${tp[i]}% of readers (${S.get[i]})">${i === 1 ? `<em>${tp[i]}%</em>` : ''}</div></div>
+        <span class="vx">${short[i]}</span></div>`).join('')}</div>
+      <div class="vsplit"><span style="flex:${P.same}" data-tip="${pc(P.same, np)}% want the same spent on them as they’d spend"></span><span class="give" style="flex:${P.giveMore}" data-tip="${pc(P.giveMore, np)}% would spend more than they’d want spent on them"></span><span class="get" style="flex:${P.getMore}" data-tip="${pc(P.getMore, np)}% would want more spent on them than they’d spend"></span></div>
+      <p class="vsplitk"><b>${pc(P.same, np)}%</b> want the same · <b>${pc(P.giveMore, np)}%</b> would give more than they get · <b>${pc(P.getMore, np)}%</b> would want more than they give</p>
+      <p class="vsrc">${S.answeredGive} readers answered.</p>
+      ${vizTable(['Budget', 'To give', 'To get'], S.bands.map((b, i) => [b, gp[i] + '%', tp[i] + '%']))}</figure>`;
+    const R = Object.entries(Y.byRecipient).map(([k, v]) => { const n = v.reduce((x, y) => x + y, 0); return { k, v, n, p: v.map(x => pc(x, n)), hi: pc(v[2] + v[3], n) }; }).sort((x, y) => y.hi - x.hi);
+    const b = `<figure class="viz" aria-label="Share of a year’s gifting by recipient">
+      <figcaption><h4>One in three readers spends more than a tenth of their gifting on themselves.</h4>
+        <p class="vsub">How much of a year’s gifting goes to each person. Share of readers choosing each band.</p></figcaption>
+      <div class="vlegend">${Y.bands.map((x, i) => `<span><i class="s${i + 1}"></i>${x}</span>`).join('')}<span class="vnote">of a year’s gifting</span></div>
+      <div class="vstack">${R.map(r => `<div class="vrow ${r.k === 'Yourself' ? 'me' : ''}"><span class="vk">${E(r.k)}</span>
+        <div class="vseg">${r.v.map((x, i) => `<span class="s${i + 1}" style="flex:${x}" data-tip="${E(r.k)} · ${Y.bands[i]} of a year’s gifting: ${r.p[i]}% of readers (${x})">${r.p[i] >= 12 ? r.p[i] + '%' : ''}</span>`).join('')}</div></div>`).join('')}</div>
+      <p class="vsrc">About ${Math.round(R.reduce((x, r) => x + r.n, 0) / R.length)} readers answered for each.</p>
+      ${vizTable(['Who', ...Y.bands], R.map(r => [E(r.k), ...r.p.map(x => x + '%')]))}</figure>`;
+    return `<div class="vizwrap">${a}${b}</div>`;
+  }
+  // chart tooltips
+  const vtip = document.createElement('div'); vtip.className = 'vtip'; vtip.setAttribute('role', 'tooltip'); ($('#gk-root') || document.body).appendChild(vtip);
+  const showTip = el => {
+    if (!el) { vtip.classList.remove('on'); return; }
+    vtip.textContent = el.dataset.tip; vtip.classList.add('on');
+    const r = el.getBoundingClientRect();
+    vtip.style.left = Math.min(innerWidth - vtip.offsetWidth - 8, Math.max(8, r.left + r.width / 2 - vtip.offsetWidth / 2)) + 'px';
+    vtip.style.top = Math.max(8, r.top - vtip.offsetHeight - 8) + 'px';
+  };
+  document.addEventListener('pointerover', e => showTip(e.target.closest && e.target.closest('.viz [data-tip]')));
+  addEventListener('scroll', () => vtip.classList.remove('on'), { passive: true });
   function budgetChart(v) {
     const max = 20000, X = x => 4 + Math.min(x, max) / max * 92;
     return `<div class="strip"><div class="axis">${[0, 5000, 10000, 15000, 20000].map(t => `<span style="left:${X(t)}%">${t ? '₹' + t / 1000 + 'K' : '₹0'}</span>`).join('')}</div>
@@ -492,23 +562,17 @@ function start(DATA) {
       : `<div class="hcard empty" style="--i:${i}"><span>${i + 1}</span><small>+1 a card</small></div>`).join('')}</div>`;
   }
   function threePanel(animate, inSheet) {
-    const bs = picks.map(id => B.find(b => b.id === id)).filter(Boolean), t = myType(), m = mine();
-    const agree = bs.reduce((a, b) => a + b.n - 1, 0);
-    return `<div class="gc">
-      <div class="gc-art">${handHTML(animate)}<p class="gc-cap">${t ? `<b>${t[0]}</b>` : `${bs.length} of 3 picked`}</p></div>
-      <div class="gc-body"><span class="label gc-k">My gifting philosophy · The Ken’s Gifting 2026</span>
-        ${t ? `<h3 class="type">${t[0]}</h3><p class="box-total">${t[1]}</p><p class="note">Between them, my three beliefs are shared by ${agree} other readers.</p>`
-          : `<p class="box-total">${bs.length ? `Pick ${3 - bs.length} more to see what kind of giver you are.` : 'Tap a card and +1 it. Three cards make your philosophy.'}</p>`}
-        ${qa('My philosophy, in one line', m.q01, 'ask-mine', 'Write it')}
-        <div class="gc-sec"><span class="label">The three beliefs I +1’d · ${bs.length}/3</span>
-          ${bs.length ? `<ol class="box-list">${bs.map(b => `<li style="--sc:${SC[b.s]}" data-card="${b.id}"><i></i><span>“${E(b.h)}”<small>${b.n} readers · ${E(SECS.find(s => s.id === b.s).name)}</small></span><button onclick="GF.plus('${b.id}')" aria-label="Take back your +1">×</button></li>`).join('')}</ol>` : '<p class="note">Tap a card, then +1.</p>'}</div>
-        <div class="gc-sec"><span class="label">What I told The Ken</span>
-          ${qa('A great gift is one that…', m.q02, 'ask-s1')}${qa('The feeling I want a gift to create', m.q06, 'ask-s2', 'Pick one', true)}
-          ${qa('Hardest to buy for, and what finally worked', m.q09, 'ask-s3')}${qa('What I’d love to get but never buy myself', m.q16, 'ask-s4')}
-          ${qa('What I’d spend on someone close', m.q20, 'ask-s5', 'Set it', true)}</div>
-      </div></div>
-      ${inSheet ? '' : `<div class="acts">${sendCta()}</div>`}`;
+    const bs = picks.map(id => B.find(b => b.id === id)).filter(Boolean);
+    return `<div class="gc call">
+      <div class="gc-body"><span class="label gc-k">My gifting philosophy</span>
+        <ol class="call-list big-q">${[0, 1, 2].map(k => { const b = bs[k]; return b
+          ? `<li data-card="${b.id}"><span>“${E(b.h)}”<small>with ${b.n - 1} other ${b.n - 1 === 1 ? 'reader' : 'readers'}</small></span><button onclick="GF.plus('${b.id}')" aria-label="Take back your +1">×</button></li>`
+          : `<li class="empty"><span>${k === bs.length ? 'Tap a card you believe in, then “I believe this too”.' : ''}</span></li>`; }).join('')}</ol>
+        ${myWords('p')}
+        <div class="imp">The Ken · Gifting 2026</div></div></div>
+      <div class="acts">${sendCta('p')}</div>`;
   }
+
   function dockThreeHTML() {
     const n = picks.length;
     return `<span class="ck-slots">${[0, 1, 2].map(i => { const b = B.find(x => x.id === picks[i]); return `<i style="${b ? `background:${SC[b.s]}` : ''}" class="${b ? 'f' : ''}"></i>`; }).join('')}</span>
@@ -535,7 +599,7 @@ function start(DATA) {
       const t = v.toLowerCase();
       matches = B.filter(b => b.kw && b.kw.some(k => t.includes(k))).slice(0, 3).map(b => b.id);
       document.querySelectorAll('.wall .bcard').forEach(c => c.classList.toggle('match', matches.includes(c.dataset.id)));
-      you(id, matches.length ? `Yours sounds like <b>${matches.length} of theirs</b>. They’re marked “Sounds like you” on the lines below.` : 'Nobody has said it quite like that. Have a look at theirs below.');
+      you(id, matches.length ? `Noted. <b>${matches.length} of theirs ${matches.length === 1 ? 'is' : 'are'}</b> close to yours, marked below ↓` : 'Noted. Nobody has put it quite like that yet. Confirm your email to be considered for showing up here.');
       const first = matches.length && document.querySelector(`.wall .bcard[data-id="${matches[0]}"]`);
       setTimeout(() => { (first ? first.closest('.sec') : $('#' + SECS[0].slug)).scrollIntoView({ behavior: 'smooth', block: 'start' }); if (first) railShow(first); }, 900);
     } else if (id === 'who') {
@@ -552,7 +616,7 @@ function start(DATA) {
     }
   }
   function skip(id) {
-    if (id === 'who') jump(ORDER[0]); else jump(SECS[0].slug);
+    if (id === 'who') jump(ORDER[0]); else jump('intro');
   }
   function tap(btn, id, v, restoring) {
     btn.parentNode.querySelectorAll('.pill').forEach(p => p.setAttribute('aria-pressed', 'false'));
@@ -573,43 +637,58 @@ function start(DATA) {
     const max = Math.max(...rows.map(r => r[1]));
     return `<div class="bars">${rows.map(r => `<span>${E(r[0])}</span><i style="width:${(r[1] / max * 100).toFixed(0)}%"></i><b>${total ? Math.round(r[1] / total * 100) + '%' : r[1]}</b>`).join('')}</div>`;
   }
-  // the back of a card: the words, how many readers agree, one decision
+  // the back of a card: the belief, other readers' words, what the numbers say, one decision
   let lastCard = null;
-  function openCard(id, qi, el, deep) {
+  function openCard(id, qi, el) {
     if (el) lastCard = el;
-    const b = B.find(x => x.id === id), sec = SECS.find(s => s.id === b.s), sib = B.filter(x => x.s === b.s), i = sib.indexOf(b);
-    const q = qi != null ? againFor(b)[qi] : null, on = picks.includes(id), full = !on && picks.length >= 3;
-    const words = q ? `<blockquote class="first">“${E(q[0])}”<span class="credit">${E(q[1])}</span></blockquote>`
-      : b.vs ? `<blockquote class="first">“${E(b.h)}”<span class="credit">${E(b.w)}</span></blockquote><p class="label" style="margin:10px 0 0 14px">or</p><blockquote class="first">“${E(b.h2)}”<span class="credit">${E(b.w2)}</span></blockquote>`
-      : `<blockquote class="first">“${E(b.h)}”<span class="credit">${E(b.w)}</span></blockquote>`;
-    const pct = Math.min(100, b.n / B[0].n * 100);
-    ov(`<div class="big cardpop" role="document"><button class="x" onclick="GF.closeOv()" aria-label="Close">×</button>
-      <div class="top"><span></span><span class="pn"><button onclick="GF.openCard('${sib[(i - 1 + sib.length) % sib.length].id}')" aria-label="Previous belief">‹</button>${i + 1} / ${sib.length}<button onclick="GF.openCard('${sib[(i + 1) % sib.length].id}')" aria-label="Next belief">›</button></span></div>
-      ${words}
-      <div class="agree">${b.vs ? `<b>${b.n}</b> vs <b>${b.n2}</b> readers` : `<b>${b.n}</b> ${b.n === 1 ? 'reader said this' : 'readers said something like this'}`}<span class="meter"><i style="width:${pct.toFixed(0)}%"></i></span></div>
-      <div class="acts"><button class="pill ${on ? '' : 'red'}" ${full ? 'disabled' : ''} onclick="GF.plus('${id}')">${on ? 'Take back my +1' : '+1 · I believe this too'}</button>${deep ? '' : `<button class="pill deeper-btn" onclick="GF.openCard('${id}',${qi == null ? 'null' : qi},null,true)">Go deeper ↓</button>`}</div>
-      ${full ? `<p class="warn">That’s three already. Take one back from <button class="skip" onclick="GF.openThree()">your three</button> to add this.</p>` : `<p class="note" style="margin-top:10px">${3 - picks.length} of 3 left</p>`}
-      ${deep ? deeper(b) : ''}</div>`, SC[b.s]);
-    if (deep) { const d = $('#deep'); d && setTimeout(() => d.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60); }
+    const b = B.find(x => x.id === id), sec = SECS.find(x => x.id === b.s), sib = B.filter(x => x.s === b.s), i = sib.indexOf(b);
+    const on = picks.includes(id), full = !on && picks.length >= 3;
+    const head = b.vs ? `“${E(b.h)}”<span class="or">OR</span>“${E(b.h2)}”` : `“${E(b.h)}”`;
+    ov(`<div class="big cardpop" role="document" data-card="${b.id}"><button class="x" onclick="GF.closeOv()" aria-label="Close">×</button>
+      <div class="top"><span class="label">${E(sec.name)}</span><span class="pn"><button onclick="GF.openCard('${sib[(i - 1 + sib.length) % sib.length].id}')" aria-label="Previous belief">‹</button>${i + 1} / ${sib.length}<button onclick="GF.openCard('${sib[(i + 1) % sib.length].id}')" aria-label="Next belief">›</button></span></div>
+      <h2>${head}</h2>${b.tr ? `<div class="tr">${E(b.tr)}</div>` : ''}<div class="who">${E(b.vs ? b.w + ' · and · ' + b.w2 : b.w)}</div>
+      ${b.q.length ? `<div class="voices">${b.q.map(q => `<blockquote>“${E(q[0])}”<span class="credit">${E(q[1])}</span></blockquote>`).join('')}</div>` : ''}
+      <div class="acts"><button class="pill ${on ? 'solid' : 'red'}" ${full ? 'disabled' : ''} onclick="GF.plus('${id}')">${on ? 'I believe this too ✓' : 'I believe this too'}</button><button class="pill deeper-btn" onclick="GF.deeper('${id}')">Read more →</button></div>
+      ${full ? `<p class="warn">Pick just the three that you feel most strongly about. Take one back from <button class="skip" onclick="GF.openThree()">your three</button> to add this.</p>` : `<p class="note" style="margin-top:10px">${store.user() ? '' : 'Counts once you confirm your email · '}${3 - picks.length} of 3 left</p>`}</div>`, SC[b.s]);
   }
-  // Go deeper: a short opening line, the readers' own answers in a tinted box, then what the numbers say and
-  // where to go next, each as one plain sentence. No headers: each part says what it is in its first words.
-  function deeper(b) {
-    const sec = SECS.find(s => s.id === b.s), more = againFor(b), pct = (a, t) => Math.round(a / t * 100);
-    const out = [];
-    if (more.length) out.push(`<p class="deep-lead">${b.vs ? 'Here’s how both sides put it.' : `Here’s how ${more.length === 1 ? 'another reader' : 'other readers'} who believe this put it.`}</p>`);
-    if (more.length) out.push(`<div class="deep-voices">${more.slice(0, 6).map(q => `<blockquote>“${E(q[0])}”<span class="credit">${E(q[1])}</span></blockquote>`).join('')}</div>`);
-    if (b.yrs) out.push(`<p class="deep-p">${b.yrs[2] > b.yrs[0] ? 'More' : 'Fewer'} readers say this every year: <b>${b.yrs[0]}%</b> of philosophies in 2024, <b>${b.yrs[1]}%</b> in 2025 and <b>${b.yrs[2]}%</b> in 2026.</p><div class="yrs">${b.yrs.map((v, k) => `<div style="height:${Math.max(4, v * 1.6)}px"><b>${v}%</b><span>20${24 + k}</span></div>`).join('')}</div>`);
-    else if (b.chart === 'feeling') { const n = FEEL.reduce((t, f) => t + f[1], 0); out.push(`<p class="deep-p">Asked what feeling a gift should leave, most readers said <b>${E(FEEL[0][0].toLowerCase())}</b> (${pct(FEEL[0][1], n)}%).</p>${bars(FEEL, n)}`); }
-    else if (b.chart === 'occasions') out.push(`<p class="deep-p"><b>${E(OCC[0][0])}</b> drive the most gifting: ${OCC[0][1]} readers named them, then ${E(OCC[1][0].toLowerCase())} and ${E(OCC[2][0].toLowerCase())}.</p>${bars(OCC)}`);
-    else if (b.chart === 'budget') out.push(`<p class="deep-p">The typical reader would spend <b>₹${BUDGET.give.toLocaleString('en-IN')}</b> on someone close, but only wants <b>₹${BUDGET.get.toLocaleString('en-IN')}</b> spent on them.</p>`);
-    else if (b.chart === 'recipientShare') out.push(`<p class="deep-p"><b>${E(TIER[0][0])}</b> get the biggest share of a reader’s yearly gifting, usually ${E(TIER[0][1])}. Readers spend about as much on themselves as on colleagues.</p><div class="bars">${TIER.map(t => `<span>${E(t[0])}</span><i style="width:${({ '25%+': 100, '10–25%': 58, '1–5%': 14 })[t[1]] || 10}%"></i><b>${E(t[1])}</b>`).join('')}</div>`);
-    const tags = DATA.tagsForBelief(b.id).map(t => G.find(g => g.id === t.id)).filter(Boolean), kinds = (b.gifts || []).map(cByName).filter(Boolean);
-    if (tags.length || kinds.length) out.push(`<p class="deep-p">If you believe this too, readers would point you to these gifts:</p><div class="chips">${tags.map(g => `<button class="chip" onclick="GF.toTag('${g.id}')">${E(g.it)}</button>`).join('')}${kinds.map(c => `<button class="chip" onclick="GF.toSection('${c.id}')">${E(c.name)} →</button>`).join('')}</div>`);
-    const others = B.filter(x => x.s === b.s && x.id !== b.id).sort((x, y) => y.n - x.n).slice(0, 4);
-    if (others.length) out.push(`<p class="deep-p">Other readers who answered “${E(sec.name)}” believe:</p><div class="chips">${others.map(o => `<button class="chip" onclick="GF.openCard('${o.id}',null,null,true)">“${E(o.h.length > 56 ? o.h.slice(0, 54) + '…' : o.h)}”</button>`).join('')}</div>`);
-    return `<div class="deep" id="deep">${out.join('')}</div>`;
+
+  // Go deeper: a page of its own. Every reader's words, the numbers, the gifts as tags, and the beliefs next to it as cards.
+  function beliefPage(id) {
+    const b = B.find(x => x.id === id);
+    if (!b) return bar('p') + `<div class="bpage"><p class="crumb"><a onclick="GF.go('philosophies')">Philosophies</a></p><h1 class="sec-head">We couldn’t find that belief.</h1></div>`;
+    const sec = SECS.find(s => s.id === b.s), on = picks.includes(id), full = !on && picks.length >= 3;
+    const words = [[b.h, b.w], ...(b.vs ? [[b.h2, b.w2]] : []), ...againFor(b)];
+    const tags = DATA.tagsForBelief(b.id).map(t => G.find(g => g.id === t.id)).filter(g => g && !g.pageonly);
+    const kinds = (b.gifts || []).map(cByName).filter(Boolean);
+    const rel = B.filter(x => x.s === b.s && x.id !== id).slice(0, 4);
+    const kcard = c => { const n = G.filter(g => g.c === c.id).length; return `<button class="bcard M" style="--sc:${tagColour(c.id)};--r:0deg" onclick="GF.toSection('${c.id}')"><div class="lab">Recommendations</div><div class="quote">${E(c.name)} →</div><div class="credit">${E(c.enemy)}</div><div class="count"><b>${n}</b><small>${n === 1 ? 'gift' : 'gifts'}</small></div></button>`; };
+    return bar('p') + `<article class="bpage" style="--sc:${SC[b.s]}">
+      <div class="bhero"><div class="crumb"><a onclick="GF.home()">Gifting</a> / <a onclick="GF.backToWall('${id}')">Philosophies</a> / <a onclick="GF.toPSec('${sec.slug}')">${E(sec.name)}</a></div>
+      <header class="phead"><div><h1>${b.vs ? `“${E(b.h)}”<span class="or">OR</span>“${E(b.h2)}”` : `“${E(b.h)}”`}</h1>${b.tr ? `<div class="tr">${E(b.tr)}</div>` : ''}<div class="who">${E(b.vs ? b.w + ' · and · ' + b.w2 : b.w)}</div></div>
+        <div class="side-n"><div class="big2">${b.vs ? `${b.n}<small>VS</small>${b.n2}` : b.n}</div><p class="deep-p">${b.n === 1 ? 'reader believes' : 'readers believe'} some version of this.</p>
+          <div class="acts"><button class="pill ${on ? 'solid' : 'red'}" ${full ? 'disabled' : ''} onclick="GF.plus('${id}')">${on ? 'I believe this too ✓' : 'I believe this too'}</button><span class="note">${full ? 'That’s your three.' : `${3 - picks.length} of 3 left`}</span></div></div></header></div>
+      <div class="pgrid"><div class="alist"><div class="h5">In their words</div>
+          ${words.map(q => `<blockquote class="slip">“${E(q[0])}”<span class="credit">${E(q[1])}</span></blockquote>`).join('')}
+          <form class="your" onsubmit="event.preventDefault();GF.sayIt('${id}')"><input id="in-belief" placeholder="Believe some version of this? Say it your way…" autocomplete="off"><button class="pill solid" type="submit">Send</button></form></div>
+        <div>
+          <div class="pblock"><div class="h5">Gifts for people who believe this</div>
+            ${tags.length ? `<div class="ptags">${tags.map(g => tagHTML(g, { r: (rnd() * 6 - 3).toFixed(1) })).join('')}</div>` : ''}
+            ${kinds.length ? `<div class="pcards">${kinds.map(kcard).join('')}</div>` : ''}
+            ${!tags.length && !kinds.length ? '<p class="note">No gifts map to this belief. That is deliberate.</p>' : ''}</div>
+          ${rel.length ? `<div class="pblock"><div class="h5">More from “${E(sec.name)}”</div><div class="pcards">${rel.map(cardHTML).join('')}</div></div>` : ''}
+        </div></div></article>${otherHalf('p')}${footer('p')}`;
   }
+
+  function deeper(id) { closeOv(); go('belief', { b: id }); }
+  function sayIt(id) {
+    const el = $('#in-belief'), v = el && el.value.trim(); if (!v) return;
+    const b = B.find(x => x.id === id);
+    saveAnswer(`belief:${id}`, `Your version of “${b.h.slice(0, 50)}${b.h.length > 50 ? '…' : ''}”`, v, 'text');
+    el.value = '';
+  }
+  // back to the wall, with the card in view
+  function backToWall(id) { after = () => { const el = document.querySelector(`.wall .bcard[data-id="${id}"]`); if (el) el.scrollIntoView({ block: 'center' }); }; go('philosophies'); }
+  function toPSec(slug) { after = () => { const el = document.getElementById(slug); if (el) el.scrollIntoView({ block: 'start' }); }; go('philosophies'); }
 
 
   function plus(id) {
@@ -620,7 +699,8 @@ function start(DATA) {
     lastPicked = adding ? id : null;
     const sheetOpen = !!$('#dockSheet');
     if (!sheetOpen) closeOv();
-    document.querySelectorAll('.wall .bcard').forEach(c => c.classList.toggle('picked', picks.includes(c.dataset.id)));
+    document.querySelectorAll('.wall .bcard, .pcards .bcard').forEach(c => c.classList.toggle('picked', picks.includes(c.dataset.id)));
+    if (currentView() === 'belief') { const y = scrollY; story.innerHTML = beliefPage(id); syncTags(); footerPile(); window.scrollTo(0, y); }
     const el = lastCard && lastCard.isConnected && lastCard.dataset.id === id ? lastCard : document.querySelector(`.wall .bcard[data-id="${id}"]`);
     const ck = $('#checkout');
     const done = () => { refreshThree(adding); if (ck) { ck.classList.remove('bump', 'shake'); void ck.offsetWidth; ck.classList.add(adding ? 'bump' : 'shake'); } };
@@ -733,11 +813,13 @@ function start(DATA) {
   let currentSide = null;
   function jump(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   // Views by ?view= on the page's own URL (the 2026 architecture), without reloading
-  const VIEWS = ['landing', 'philosophies', 'recommendations'];
-  const viewUrl = v => { const u = new URL((wp && wp.baseUrl) || location.href, location.href); u.hash = ''; u.searchParams.delete('view'); if (v && v !== 'landing') u.searchParams.set('view', v); return u.pathname + u.search; };
+  const VIEWS = ['landing', 'philosophies', 'recommendations', 'belief'];
+  const viewUrl = (v, extra) => { const u = new URL((wp && wp.baseUrl) || location.href, location.href); u.hash = ''; u.searchParams.delete('view'); u.searchParams.delete('b'); if (v && v !== 'landing') u.searchParams.set('view', v); Object.entries(extra || {}).forEach(([k, x]) => u.searchParams.set(k, x)); return u.pathname + u.search; };
   const currentView = () => { const v = new URLSearchParams(location.search).get('view'); return VIEWS.includes(v) ? v : 'landing'; };
-  function go(name) { closeOv(); const url = viewUrl(name); if (location.pathname + location.search !== url) history.pushState({ view: name }, '', url); route(); }
+  function go(name, extra) { closeOv(); const url = viewUrl(name, extra); if (location.pathname + location.search !== url) history.pushState({ view: name }, '', url); route(); }
   function home() { go('landing'); }
+  // from a belief's own page, back goes to the wall; from a story, to the start
+  function back() { const b = new URLSearchParams(location.search).get('b'); if (currentView() === 'belief' && b) backToWall(b); else home(); }
   let after = null; // runs once the story has rendered (cross-links between stories)
   // Crossing to the other half from a pop-up: a wipe in that half's colour covers the screen, the other story
   // renders and scrolls to the card underneath it, the wipe lifts, then the card's pop-up opens.
@@ -747,7 +829,7 @@ function start(DATA) {
     if (reduce) { after = () => { place(); open(); }; go(name); return; }
     const w = document.createElement('div');
     w.className = 'wipe ' + (name === 'recommendations' ? 'r' : 'p');
-    w.innerHTML = `<span>${name === 'recommendations' ? 'What to give' : 'Why we give'}</span>`;
+    w.innerHTML = `<span>${name === 'recommendations' ? 'Recommendations' : 'Philosophies'}</span>`;
     ($('#gk-root') || document.body).appendChild(w);
     requestAnimationFrame(() => w.classList.add('in'));
     setTimeout(() => {
@@ -770,29 +852,33 @@ function start(DATA) {
     if (currentSide === 'p') { closeOv(); place(); open(); } else crossTo('philosophies', place, open);
   }
 
+  const GUIDE = 'The Ken’s 2026 Thoughtful Gifting Guide';
   const land_ = $('#land'), split = $('#split'), story = $('#story');
   function showLanding() {
     destroyPile();
     currentSide = null; story.classList.remove('on'); story.innerHTML = ''; $('#checkout').hidden = true;
-    land_.style.display = ''; land_.classList.remove('opening', 'gone'); split.classList.remove('opening');
+    land_.style.display = ''; land_.style.top = ''; land_.classList.remove('opening', 'gone', 'lifting'); split.classList.remove('opening');
     split.querySelectorAll('.side').forEach(s => s.classList.remove('picked'));
-    document.body.classList.add('locked'); window.scrollTo(0, 0); $('#progress').style.transform = 'scaleX(0)';
+    document.body.classList.add('locked'); window.scrollTo(0, 0); document.title = GUIDE; $('#progress').style.transform = 'scaleX(0)';
   }
   function showStory(name, animate) {
     const side = name === 'recommendations' ? 'r' : 'p';
     const render = () => {
       currentSide = side; matches = []; forIds = [];
-      story.innerHTML = side === 'r' ? recommendations() : philosophies();
+      story.innerHTML = side === 'r' ? recommendations() : name === 'belief' ? beliefPage(new URLSearchParams(location.search).get('b')) : philosophies();
       story.classList.remove('on'); void story.offsetWidth; story.classList.add('on');
       document.body.classList.remove('locked', 'dealt'); window.scrollTo(0, 0);
       requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.add('dealt')));
-      document.title = (side === 'r' ? 'What to Give' : 'Why We Give') + ' · The Ken';
+      const bb = name === 'belief' && B.find(x => x.id === new URLSearchParams(location.search).get('b'));
+      document.title = bb ? `“${bb.h.length > 50 ? bb.h.slice(0, 48) + '…' : bb.h}” · The Ken` : `${GUIDE} - ${side === 'r' ? 'Part 2 (Recommendations)' : 'Part 1 (Philosophies)'}`;
       $('#checkout').hidden = false; $('#checkout').setAttribute('aria-label', side === 'r' ? 'Open your gift box' : 'Open your three'); if (side === 'r') refreshBox(false); else refreshThree(false); railWatch(); syncTags(); footerPile();
       restore(); watch();
       if (after) { const f = after; after = null; setTimeout(f, 60); }
     };
     if (!animate) { land_.style.display = 'none'; render(); return; }
     land_.style.setProperty('--head-h', $('#landHead').offsetHeight + 'px');
+    // the landing scrolls: pin it where it is, then let it slide up as the head folds away
+    land_.style.top = `calc(var(--gifting-nav-h, 0px) - ${scrollY}px)`; land_.classList.add('lifting'); void land_.offsetWidth; land_.style.top = '';
     split.querySelector(`[data-go="${name}"]`).classList.add('picked');
     land_.classList.add('opening'); split.classList.add('opening');
     setTimeout(() => { render(); land_.classList.add('gone'); setTimeout(() => { land_.style.display = 'none'; }, 360); }, 640);
@@ -822,7 +908,7 @@ function start(DATA) {
     const p = currentView();
     document.body.dataset.gifting = p;
     closeOv();
-    if (p === 'recommendations' || p === 'philosophies') {
+    if (p === 'recommendations' || p === 'philosophies' || p === 'belief') {
       const animate = !first && land_.style.display !== 'none';
       if (!animate && currentSide) { land_.style.display = 'none'; }
       showStory(p, animate);
@@ -836,8 +922,8 @@ function start(DATA) {
 
   /* ---------- landing art ---------- */
   function landingArt() {
-    $('#sideRp').textContent = `${LIVE_G.length} gifts readers actually gave, sorted into ${C.length} kinds. Each one comes with the person it was for.`;
-    $('#sidePp').textContent = `${B.length} beliefs about what a gift is for, who makes it hard and what it should cost. Agree with three.`;
+    $('#sideRp').textContent = 'Sixty-four gifts divided into sixteen categories. You can add yours too.';
+    $('#sidePp').textContent = `${B.length} beliefs about gifting. You can add yours too.`;
   }
 
   /* ---------- signing in ---------- */
@@ -857,6 +943,6 @@ function start(DATA) {
     refreshCards();
   });
 
-  window.GF = { openCard, openTag, closeOv, plus, keep, gave, how, unbox, openBox, openThree, openDock, dockSwitch, signIn: openSignIn, railBy, slide, submit, skip, tap, jump, go, home, toTag, toSection, toCard, copy };
+  window.GF = { toOther, toast, copyList, emailList, back, openCard, deeper, sayIt, backToWall, toPSec, openTag, closeOv, plus, keep, gave, how, unbox, openBox, openThree, openDock, dockSwitch, signIn: openSignIn, railBy, slide, submit, skip, tap, jump, go, home, toTag, toSection, toCard, copy };
   GiftTag.ready().then(() => { landingArt(); route(); pull(); });
 }

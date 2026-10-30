@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Card Templates Builder</title>
+<link rel="stylesheet" href="../assets/ken-chart.css">
+<script src="../data/gifting-data.js"></script>
+<script src="../scripts/tag-theme.js"></script>
+<script src="../scripts/gift-tag.js"></script>
+<style>
+  /* Builds design-kit/gifting-card-templates.svg from the live renderers, so the design file always matches the site.
+     Open this page in Chrome (from a local server or straight from disk) and press "Download SVG". */
+  body { display: block; background: #E6E0DF; margin: 0; }
+  .bar { position: sticky; top: 0; z-index: 2; display: flex; gap: 10px; align-items: center; padding: 10px 16px; background: #1A1208; color: #F7F2F2; font: 14px var(--ken-font-body); }
+  .bar button { font: bold 13px var(--ken-font-bold); background: #C8423A; color: #fff; border: 0; border-radius: 10px; padding: 8px 14px; cursor: pointer; }
+  #wrap { padding: 20px; overflow: auto; }
+  #board { display: block; background: #F7F2F2; box-shadow: 0 10px 30px rgba(0,0,0,.15); }
+</style>
+</head>
+<body>
+<div class="bar"><b>Card templates</b><span>Generated from scripts/gift-tag.js and the site’s card styles.</span><button id="dl">Download SVG</button></div>
+<div id="wrap"><svg id="board" xmlns="http://www.w3.org/2000/svg"></svg></div>
+<script>
+(async function () {
+  const { G, B, C, SECS } = window.GIFT_DATA;
+  const T = window.TAG_THEME, PAL = T.palette, F = GiftTag.FONT;
+  const INK = '#1A1208', TEXT = '#5C4A4A', BG = '#F7F2F2', RED = '#C8423A';
+  const SC = { s1: '#C8423A', s2: '#4A9E9A', s3: '#4A7A5A', s4: '#3D3D3D', s5: '#7A9E4A' };
+  const E = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  await GiftTag.ready();
+  const ctx = document.createElement('canvas').getContext('2d');
+  const wrap = (t, font, max) => { ctx.font = font; const out = []; let l = ''; String(t).split(/\s+/).forEach(w => { const x = l ? l + ' ' + w : w; if (ctx.measureText(x).width > max && l) { out.push(l); l = w; } else l = x; }); if (l) out.push(l); return out; };
+  const txt = (x, y, font, size, fill, s, extra) => `<text x="${x}" y="${y}" font-family='${F[font]}' font-weight="${font === 'body' ? 300 : 'bold'}" font-size="${size}" fill="${fill}" ${extra || ''}>${E(s)}</text>`;
+
+  const W = 2400; let Y = 80; const out = [];
+  const g = (id, x, y, inner, k) => `<g id="${id}" transform="translate(${x} ${y})${k ? ` scale(${k})` : ''}">${inner}</g>`;
+  function section(n, title, sub) {
+    Y += 70;
+    out.push(`<g id="section-${n}"><line x1="80" x2="${W - 80}" y1="${Y}" y2="${Y}" stroke="${INK}" stroke-width="2"/>${txt(80, Y + 40, 'bold', 14, RED, n, 'letter-spacing="2"')}${txt(130, Y + 44, 'display', 34, INK, title)}${sub ? txt(80, Y + 76, 'body', 17, TEXT, sub) : ''}</g>`);
+    Y += 110;
+  }
+  // a tag from the live renderer; returns [svg string, width, height]
+  function tag(gift, over, opts) {
+    const c = C.find(x => x.id === gift.c);
+    const content = over && over.q ? { kicker: c.n + ' · Said again', headline: over.q[0], credit: over.q[1], item: gift.it, band: gift.b, count: gift.n, section: gift.c }
+      : { kicker: c.n + ' · ' + c.name, headline: gift.h, editorial: !!gift.ed, credit: gift.w, item: gift.it, band: gift.b, count: gift.n, section: gift.c };
+    const st = Object.assign(GiftTag.style(gift.id, gift.c), over || {});
+    if (over) { const pal = st.palette; const col = v => v === 'section' ? pal[st.sections[gift.c]] : (pal[v] || v); if (over.fill) st._fill = col(over.fill); if (over.accent) st._accent = col(over.accent); }
+    const s = GiftTag.svg(content, st, Object.assign({ bg: BG }, opts || {}));
+    const m = s.match(/width="([\d.]+)" height="([\d.]+)"/);
+    return [s, +m[1], +m[2]];
+  }
+  const label = (x, y, a, b) => txt(x, y, 'bold', 12, INK, a.toUpperCase(), 'letter-spacing="1.5"') + (b ? txt(x, y + 20, 'body', 14, TEXT, b) : '');
+  const watch = G.find(x => x.id === 'watch') || G[0];
+
+  // title
+  out.push(`<g id="title">${txt(80, Y + 40, 'bold', 14, RED, 'THE KEN · GIFTING 2026', 'letter-spacing="2"')}${txt(80, Y + 104, 'display', 64, INK, 'Card templates')}
+    ${txt(80, Y + 146, 'body', 19, TEXT, 'Every card on the site, at 1× web size, drawn by the live code. Use these as the starting point for new templates.')}
+    ${txt(80, Y + 174, 'body', 19, TEXT, 'Fonts: Jazmin Alt Bold (display), GT America Light (reading), GT America Black (labels). Brief: README.md in this folder.')}</g>`);
+  Y += 200;
+
+  /* 01 · tag anatomy (callouts are added once the board is on screen and the parts can be measured) */
+  section('01', 'Gift tag · anatomy', 'The default tag: classic shape, quote layout, accent band, coins. Shown at 1.6×.');
+  { const [s] = tag(watch, { shape: 'classic', layout: 'quote', fill: 'paper', accentStyle: 'band', price: 'coins', priceCaption: true }, { width: 250 });
+    out.push(g('anatomy-tag', 120, Y + 60, s, 1.6)); out.push(`<g id="anatomy-callouts" data-y="${Y}"></g>`); Y += 900; }
+
+  /* 02 · shapes */
+  section('02', 'Gift tag · shapes', 'Seven outlines. Width varies 196–236 px on the site; height grows with the words. Hole centre 22 px from the top.');
+  GiftTag.POOLS.shapes.forEach((sh, i) => {
+    const w = 230, h = 300, d = GiftTag.shapePath(sh, w, h), x = 80 + i * 320;
+    out.push(g(`shape-${sh}`, x, Y, `<path d="${d}" transform="translate(5 5)" fill="${INK}"/><path d="${d}" fill="#fff" stroke="${INK}" stroke-width="2"/><circle cx="${w / 2}" cy="${sh === 'scallop' ? 26 : 22}" r="10.5" fill="none" stroke="${INK}" stroke-width="1.5"/><circle cx="${w / 2}" cy="${sh === 'scallop' ? 26 : 22}" r="5.5" fill="${BG}" stroke="${INK}"/>
+      <line x1="0" x2="${w}" y1="${h + 26}" y2="${h + 26}" stroke="${TEXT}" stroke-dasharray="3 3"/>${txt(w / 2, h + 44, 'body', 12, TEXT, w + ' px', 'text-anchor="middle"')}${label(0, h + 76, sh)}`));
+  });
+  Y += 420;
+
+  /* 03 · layouts */
+  section('03', 'Gift tag · layouts', 'Same gift, three ways to lead. Quote: the reader’s reason. Item: the product. Price: a shop tag.');
+  [['quote', 'Leads with the reason'], ['item', 'Leads with the product'], ['price', 'Leads with the price']].forEach(([lay, sub], i) => {
+    const [s] = tag(watch, { layout: lay, shape: 'classic', fill: 'paper', accentStyle: 'band' }, { width: 236 });
+    out.push(g(`layout-${lay}`, 80 + i * 360, Y, label(0, 0, lay, sub) + `<g transform="translate(0 50)">${s}</g>`));
+  });
+  Y += 560;
+
+  /* 04 · price */
+  section('04', 'Price, four ways', 'Bands: free · ₹ under ₹3K · ₹₹ ₹3–12K · ₹₹₹ ₹12–35K · ₹₹₹₹ ₹35–50K. A range lights more than one coin.');
+  ['coins', 'rupees', 'label', 'stamp'].forEach((p, i) => {
+    const [s] = tag(watch, { price: p, layout: 'quote', shape: 'luggage', fill: 'cream', accentStyle: 'edge' }, { width: 230 });
+    out.push(g(`price-${p}`, 80 + i * 340, Y, label(0, 0, p) + `<g transform="translate(0 30)">${s}</g>`));
+  });
+  Y += 520;
+
+  /* 05 · variety */
+  section('05', 'Variety: the string as a shop', 'On the site every gift draws its own shape, layout, colour, accent and price style from the pools in tag-theme.js.');
+  { let x = 80; const row = []; G.slice(0, 9).forEach(gift => { const [s, w] = tag(gift); row.push(`<g transform="translate(${x} 0)">${s}</g>`); x += w + 16; });
+    out.push(g('variety', 0, Y, `<line x1="60" x2="${x}" y1="8" y2="8" stroke="${INK}" stroke-width="2"/>${row.join('')}`)); }
+  Y += 520;
+
+  /* 06 · states */
+  section('06', 'Gift tag · states', 'Default · added to the gift box · matches “Who’s hard to buy for?” · another reader said the same gift.');
+  { const badge = (x, y, t, bg, rot, fg) => `<g transform="translate(${x} ${y}) rotate(${rot})"><rect x="0" y="-15" width="${t.length * 8.6 + 20}" height="24" fill="${bg}" stroke="${INK}" stroke-width="2"/>${txt(10, 2, 'bold', 11, fg || '#fff', t.toUpperCase(), 'letter-spacing="1.2"')}</g>`;
+    const base = { shape: 'classic', layout: 'quote', fill: 'paper', accentStyle: 'band' };
+    const states = [['default', '', ''], ['in-the-box', 'In the box', 'kept'], ['for-them', 'For them', 'for'], ['said-again', 'Said again', 'rep']];
+    states.forEach(([id, name, k], i) => {
+      const [s, w, h] = tag(watch, k === 'rep' ? Object.assign({ q: watch.q[0] }, base) : base, { width: 230 });
+      const b = k === 'kept' ? badge(w - 70, 66, name, RED, 8) : k === 'for' ? badge(-8, 56, name, INK, -6) : k === 'rep' ? `<g transform="translate(14 ${h - 18}) rotate(-3)"><rect x="0" y="-14" width="104" height="22" rx="11" fill="#fff" stroke="${INK}" stroke-width="1.5"/>${txt(12, 2, 'bold', 9.5, INK, 'SAID AGAIN', 'letter-spacing="1.3"')}</g>` : '';
+      out.push(g(`state-${id}`, 80 + i * 340, Y, label(0, 0, name || 'Default', k === 'kept' ? 'tag dims to 55%' : '') + `<g transform="translate(0 40)"><g opacity="${k === 'kept' ? .55 : 1}">${s}</g>${b}</g>`));
+    }); }
+  Y += 560;
+
+  /* 07 · belief note card */
+  function note(b, w, opts) {
+    opts = opts || {};
+    const sc = SC[b.s], sec = SECS.find(s => s.id === b.s), pad = 32, inner = w - pad - 18;
+    const qs = { S: 18, M: 20, L: 25 }[opts.size || 'M'];
+    const ql = wrap('“' + b.h + '”', `bold ${qs}px ${F.display}`, inner), lh = Math.round(qs * 1.14);
+    let y = 34; const p = [];
+    p.push(`<g class="nc-label">${txt(pad, y, 'bold', 10, TEXT, (sec.n + ' · ' + sec.name).toUpperCase(), 'letter-spacing="1.6"')}</g>`);
+    y += 14 + qs; p.push(`<g class="nc-quote">${ql.map((l, i) => txt(pad, y + i * lh, 'display', qs, INK, l)).join('')}</g>`); y += (ql.length - 1) * lh;
+    y += 22; p.push(`<g class="nc-credit">${txt(pad, y, 'body', 11.5, TEXT, b.w)}</g>`);
+    y += 16; p.push(`<line class="nc-rule" x1="${pad}" x2="${w - 18}" y1="${y}" y2="${y}" stroke="rgba(26,18,8,.15)" stroke-width="1.5"/>`);
+    y += 40; p.push(`<g class="nc-count">${txt(pad, y, 'display', 30, sc, String(b.n))}${txt(pad + String(b.n).length * 17 + 8, y - 2, 'body', 12, TEXT, w < 260 ? 'readers' : 'readers said something like this')}</g>`);
+    const h = y + 18;
+    const lines = []; for (let ly = 40; ly < h - 4; ly += 26) lines.push(`<line x1="2" x2="${w - 2}" y1="${ly}" y2="${ly}" stroke="rgba(74,158,154,.28)" stroke-width="1"/>`);
+    const st = opts.state === 'picked' ? `<rect x="-6" y="-6" width="${w + 12}" height="${h + 12}" fill="none" stroke="${RED}" stroke-width="3"/><g transform="translate(${w - 4} 4) rotate(-10)"><circle r="19" fill="${RED}" stroke="${INK}" stroke-width="2"/>${txt(0, 5, 'bold', 13, '#fff', '+1', 'text-anchor="middle"')}</g>`
+      : opts.state === 'match' ? `<g transform="translate(14 -12)"><rect width="138" height="22" fill="${INK}"/>${txt(8, 15, 'bold', 10, '#fff', 'SOUNDS LIKE YOU', 'letter-spacing="1.2"')}</g>` : '';
+    return [`<rect class="nc-shadow" x="5" y="5" width="${w}" height="${h}" fill="${sc}"/><rect class="nc-paper" width="${w}" height="${h}" fill="#fff"/><g class="nc-ruling">${lines.join('')}</g><line class="nc-margin" x1="24" x2="24" y1="0" y2="${h}" stroke="rgba(200,66,58,.45)" stroke-width="1.5"/><rect class="nc-border" width="${w}" height="${h}" fill="none" stroke="${INK}" stroke-width="2"/>${p.join('')}${st}`, h];
+  }
+  section('07', 'Belief note card', 'One card type: a ruled note. Width follows the grid column (about 340 px at desktop). Number and shadow take the section colour.');
+  { const useful = B.find(b => b.id === 'useful') || B[0];
+    const [s] = note(useful, 340); out.push(g('note-anatomy', 120, Y + 20, s, 1.4)); out.push(`<g id="note-callouts" data-y="${Y}"></g>`);
+    let x = 1150; [['S', B.find(b => b.n < 25)], ['M', B.find(b => b.n >= 25 && b.n < 100)], ['L', useful]].forEach(([k, b]) => { const [s2] = note(b, 300, { size: k }); out.push(g(`note-size-${k}`, x, Y + 40, label(0, -14, 'Size ' + k, k === 'S' ? 'under 25 readers' : k === 'M' ? '25–99 readers' : '100+ readers') + `<g transform="translate(0 40)">${s2}</g>`)); x += 360; });
+    Y += 560;
+    x = 1150; [['picked', '+1 · in your three'], ['match', 'Matches your philosophy']].forEach(([k, n]) => { const [s2] = note(B[3], 300, { state: k }); out.push(g(`note-state-${k}`, x, Y, label(0, -14, n) + `<g transform="translate(0 30)">${s2}</g>`)); x += 380; });
+    Y += 360; }
+
+  /* 08 · gift box + hand */
+  section('08', 'Gift box and the hand of three', 'The checkout pile: one box per gift, sized by price band. The end of Philosophies: your three notes, fanned.');
+  { const shade = (hex, f) => '#' + [1, 3, 5].map(k => Math.max(0, Math.min(255, Math.round(parseInt(hex.slice(k, k + 2), 16) * f))).toString(16).padStart(2, '0')).join('');
+    const box = (w, col, x, base) => { const h = w * .7, d = w * .34, dx = d * .62, dy = d * .5, x0 = x, y0 = base - h, rib = GiftTag.isDark(col) ? BG : RED, rw = Math.max(7, w * .12), cx = x0 + w / 2;
+      return `<g><path class="bx-side" d="M${x0 + w},${y0} l${dx},${-dy} v${h} l${-dx},${dy} z" fill="${shade(col, .72)}" stroke="${INK}" stroke-width="2"/><rect class="bx-front" x="${x0}" y="${y0}" width="${w}" height="${h}" fill="${col}" stroke="${INK}" stroke-width="2"/><path class="bx-top" d="M${x0},${y0} h${w} l${dx},${-dy} h${-w} z" fill="${shade(col, 1.18)}" stroke="${INK}" stroke-width="2"/><rect class="bx-ribbon" x="${cx - rw / 2}" y="${y0}" width="${rw}" height="${h}" fill="${rib}" stroke="${INK}" stroke-width="1.3"/><path d="M${cx - rw / 2},${y0} h${rw} l${dx},${-dy} h${-rw} z" fill="${shade(rib, .8)}" stroke="${INK}" stroke-width="1.3"/><g class="bx-bow" transform="translate(${cx + dx / 2} ${y0 - dy / 2})"><path d="M0,0 c${-w * .26},${-w * .2} ${-w * .3},${w * .03} 0,0 z M0,0 c${w * .26},${-w * .2} ${w * .3},${w * .03} 0,0 z" fill="${rib}" stroke="${INK}" stroke-width="1.6"/><circle r="${Math.max(3, w * .04)}" fill="${rib}" stroke="${INK}" stroke-width="1.4"/></g></g>`; };
+    out.push(g('box-anatomy', 80, Y, box(220, RED, 40, 260) + label(330, 90, 'Faces', 'front · top (lighter) · side (darker)') + label(330, 150, 'Ribbon + bow', 'red on light boxes, paper on dark ones') + label(330, 210, 'Colour', 'the gift’s section colour')));
+    const sizes = [70, 76, 90, 106, 122], names = ['Free', 'Under ₹3K', '₹3–12K', '₹12–35K', '₹35–50K'];
+    let x = 0; out.push(g('box-sizes', 760, Y + 40, sizes.map((w, i) => { const s = box(w, [PAL.teal, PAL.green, PAL.red, PAL.charcoal, PAL.olive][i], x, 220) + txt(x + w / 2, 250, 'body', 13, TEXT, names[i] + ' · ' + w + ' px', 'text-anchor="middle"'); x += w + 70; return s; }).join('')));
+    const three = [B[0], B[1], B[2]];
+    out.push(g('hand', 1700, Y + 30, three.map((b, i) => { const [s] = note(b, 190, { size: 'S' }); return `<g transform="translate(${100 + (i - 1) * 62} ${30 + i * 8}) rotate(${(i - 1) * 9} 95 260)">${s}</g>`; }).join('')));
+    Y += 460; }
+
+  /* 09 · colour + type */
+  section('09', 'Colour and type', 'Palette from tag-theme.js (tag fills and accents) and the Ken design system.');
+  { const sw = Object.entries(PAL).map(([k, v], i) => `<g transform="translate(${80 + i * 186} 0)"><rect width="160" height="100" fill="${v}" stroke="${INK}" stroke-width="1.5"/>${label(0, 130, k, v)}</g>`).join('');
+    out.push(g('palette', 0, Y, sw)); Y += 220;
+    const types = [['display', 'Jazmin Alt Bold', 'Titles, card quotes, big numbers', 40, 'Every gift has two people in it'], ['bold', 'GT America Black', 'Labels (caps, +0.16em), items, buttons', 22, 'IT WAS · A MECHANICAL WATCH'], ['body', 'GT America Light', 'Reading text, credits, notes', 22, 'Reader, 50–60, 2024 · came up 156×']];
+    types.forEach(([f, n, u, sz, ex], i) => out.push(g(`type-${f}`, 80, Y + i * 110, txt(0, 0, 'bold', 12, RED, n.toUpperCase(), 'letter-spacing="1.5"') + txt(0, 22, 'body', 14, TEXT, u) + txt(420, 20, f, sz, INK, ex))));
+    Y += 360; }
+
+  const board = document.getElementById('board');
+  board.setAttribute('viewBox', `0 0 ${W} ${Y}`); board.setAttribute('width', W); board.setAttribute('height', Y);
+  board.innerHTML = `<rect id="background" width="${W}" height="${Y}" fill="${BG}"/>` + out.join('');
+
+  // callouts: measure the parts on screen, then draw numbered leaders to labels on the right
+  function callouts(rootSel, boxSel, list, colX) {
+    const root = board.querySelector(rootSel), holder = board.querySelector(boxSel), br = board.getBoundingClientRect(), k = W / br.width;
+    const items = list.map(([sel, name, desc]) => { const el = root.querySelector(sel); if (!el) return null; const r = el.getBoundingClientRect(); return { name, desc, x: (r.right - br.left) * k, y: ((r.top + r.bottom) / 2 - br.top) * k }; }).filter(Boolean).sort((a, b) => a.y - b.y);
+    let last = -1e9;
+    holder.innerHTML = items.map((it, i) => { const ly = Math.max(it.y, last + 52); last = ly;
+      return `<g><circle cx="${it.x + 8}" cy="${it.y}" r="4" fill="${RED}"/><path d="M${it.x + 8},${it.y} L${colX - 30},${ly}" fill="none" stroke="${RED}" stroke-width="1.2"/><circle cx="${colX - 14}" cy="${ly}" r="12" fill="${RED}"/>${txt(colX - 14, ly + 4.5, 'bold', 12, '#fff', String(i + 1), 'text-anchor="middle"')}${txt(colX + 6, ly - 2, 'bold', 13, INK, it.name.toUpperCase(), 'letter-spacing="1.3"')}${txt(colX + 6, ly + 17, 'body', 14, TEXT, it.desc)}</g>`; }).join('');
+  }
+  callouts('#anatomy-tag', '#anatomy-callouts', [
+    ['.gt-string', 'String', 'twine (1.6 px) or ribbon (5 px)'], ['.gt-hole', 'Hole', 'punched hole + reinforcement ring'], ['.gt-band', 'Accent band', 'section colour; or an edge strip, a full fill, or none'],
+    ['.gt-kicker', 'Section label', 'GT America Black 9 px, caps'], ['.gt-headline', 'Headline', 'the reader’s words · Jazmin 17–22 px · 25–130 chars'], ['.gt-credit', 'Credit', 'initials, city, age band, year · up to 36 chars'],
+    ['.gt-perf', 'Tear line', 'dashed perforation, with notches cut at both edges'], ['.gt-label', '“It was”', 'small caps label above the item'], ['.gt-item', 'Item', 'the gift · GT America Black 14 px · up to 50 chars'],
+    ['.gt-price', 'Price', 'coins, rupees, words or a stamp'], ['.gt-caption', 'Price in words', 'e.g. ₹3–35K'], ['.gt-count', 'Came up', 'how often readers named it'], ['.gt-shadow', 'Offset shadow', '5 px, ink or section colour']
+  ], 760);
+  callouts('#note-anatomy', '#note-callouts', [
+    ['.nc-margin', 'Margin line', 'red, 45%, 24 px in'], ['.nc-ruling', 'Ruling', 'teal, 28%, every 26 px'], ['.nc-label', 'Section label', 'number · name, caps'],
+    ['.nc-quote', 'Belief', 'one reader’s words · Jazmin 18/20/25 px · 21–126 chars'], ['.nc-credit', 'Credit', 'up to 29 chars'], ['.nc-count', 'Count', 'readers who said something like it'], ['.nc-shadow', 'Shadow', '5 px, section colour']
+  ], 720);
+
+  // layer names: ids from the gt-/nc-/bx- classes, numbered so they stay unique
+  const n = {};
+  board.querySelectorAll('[class]').forEach(el => { const c = [...el.classList].find(x => /^(gt|nc|bx)-/.test(x)); if (!c || el.id) return; n[c] = (n[c] || 0) + 1; el.id = c.replace(/^(gt|nc|bx)-/, '') + '-' + n[c]; });
+  board.querySelectorAll('svg.gtag-svg').forEach((el, i) => { if (!el.id) el.id = 'tag-' + (i + 1); });
+  window.__boardReady = true;
+
+  document.getElementById('dl').onclick = () => {
+    const s = '<?xml version="1.0" encoding="UTF-8"?>\n' + board.outerHTML.replace(/var\(--gt-bg, #F7F2F2\)/g, BG);
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([s], { type: 'image/svg+xml' })); a.download = 'gifting-card-templates.svg'; a.click();
+  };
+})();
+</script>
+</body>
+</html>

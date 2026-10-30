@@ -7,31 +7,31 @@
         "id": "for",
         "key": "s1",
         "number": "01",
-        "name": "What a gift is for"
+        "name": "What should a gift mean?"
       },
       {
         "id": "moment",
         "key": "s2",
         "number": "02",
-        "name": "The moment it lands"
+        "name": "What feelings should it evoke?"
       },
       {
         "id": "people",
         "key": "s3",
         "number": "03",
-        "name": "The impossible people"
+        "name": "Who is hardest to buy for?"
       },
       {
         "id": "secret",
         "key": "s4",
         "number": "04",
-        "name": "What we won't buy ourselves"
+        "name": "What won't we buy ourselves?"
       },
       {
         "id": "cost",
         "key": "s5",
         "number": "05",
-        "name": "What it should cost"
+        "name": "How much should a gift cost?"
       }
     ],
     "beliefs": [
@@ -39,7 +39,7 @@
         "id": "useful",
         "section": "for",
         "headline": "Gift which can survive at least 15 months.",
-        "credit": "Reader, 40–50, 2026",
+        "credit": "Reader, 40–50",
         "readers": 249,
         "keywords": [
           "use",
@@ -51,62 +51,58 @@
         "quotes": [
           {
             "text": "I like to gift things that have a function, not merely decorative objects. The receiver should be able to eat it, read it or put it to some use.",
-            "credit": "Reader, Over 60, 2024"
+            "credit": "Reader, over 60"
           },
           {
             "text": "improve any aspect of their life even by 1%",
-            "credit": "S.C.S., Gurugram, 25–30, 2026"
+            "credit": "S.C.S., Gurugram, 25–30"
           },
           {
             "text": "It should be something the other person would use, not always sentimental bullshit",
-            "credit": "Reader, 25–30, 2024"
+            "credit": "Reader, 25–30"
           }
         ],
         "giftKinds": [
           "buy-it-once",
           "the-honest-upgrade"
         ],
-        "trend": {
-          "2024": 32,
-          "2025": 27,
-          "2026": 18
-        },
         "moreQuotes": [
           {
             "text": "Yes, give something that is used at least once a week.",
-            "credit": "Reader, 25–30, 2024"
+            "credit": "Reader, 25–30"
           },
           {
             "text": "Reciever should improve 1% in any aspect of life",
-            "credit": "S.C.S., Gurugram, 25–30, 2026"
+            "credit": "S.C.S., Gurugram, 25–30"
           },
           {
             "text": "I am more likely to give [a home-store] voucher than flowers to newly married couple—something that has long-term value",
-            "credit": "Reader, 20–25, 2024"
+            "credit": "Reader, 20–25"
           },
           {
             "text": "It shouldn’t be perishable (no food or flowers). Should be reusable (books can be re-read, tech can be used for a long time). Bonus - should remind the recipient of the giver when they use it.",
-            "credit": "Reader, 30–40, 2025"
+            "credit": "Reader, 30–40"
           },
           {
             "text": "Gifting something that solves a minor friction in someone's life",
-            "credit": "A., Bengaluru, 30–40, 2026"
+            "credit": "A., Bengaluru, 30–40"
           },
           {
             "text": "I am a bad gift giver and receiver.  I like to give functional stuff and recieve the same :)",
-            "credit": "Reader, 30–40, 2026"
+            "credit": "Reader, 30–40"
           },
           {
             "text": "Practically and Use. Avoid fashion and perfumes, anything that needs to assess taste and preferences of someone",
-            "credit": "Reader, 25–30, 2024"
+            "credit": "Reader, 25–30"
           }
-        ]
+        ],
+        "chartTitle": "Share of philosophies saying \"useful\", by year"
       },
       {
         "id": "about-them",
         "section": "for",
         "headline": "Personal but not ‘personalised’.",
-        "credit": "T., Kolkata, 30–40, 2026",
+        "credit": "T., Kolkata, 30–40",
         "readers": 148,
         "keywords": [
           "personal",
@@ -119,32 +115,28 @@
         "quotes": [
           {
             "text": "A book on a topic someone loves - personal. A coffee mug with you name on it - personalised technically, but just shows that you don’t know the person",
-            "credit": "T., Kolkata, 30–40, 2026"
+            "credit": "T., Kolkata, 30–40"
           },
           {
             "text": "The expression to aim for is \"oh wow! I didn't know I needed it\"",
-            "credit": "J., Mumbai, 40–50, 2026"
+            "credit": "J., Mumbai, 40–50"
           },
           {
             "text": "Do not gift something that the receiver is deeply invested in the domain, but you have only superficial knowledge of.",
-            "credit": "A., Bengaluru, 30–40, 2026"
+            "credit": "A., Bengaluru, 30–40"
           }
         ],
         "giftKinds": [
           "the-reader",
           "made-by-someone"
         ],
-        "trend": {
-          "2024": 15,
-          "2025": 17,
-          "2026": 23
-        }
+        "chartTitle": "Share saying \"about them\", by year"
       },
       {
         "id": "wouldnt",
         "section": "for",
-        "headline": "Buy what they wouldn’t, wrap it like they would",
-        "credit": "S., Hyderabad, 30–40, 2026",
+        "headline": "Buy what they wouldn’t, wrap it like they would.",
+        "credit": "S., Hyderabad, 30–40",
         "readers": 71,
         "keywords": [
           "wouldn't buy",
@@ -156,29 +148,25 @@
         ],
         "quotes": [
           {
-            "text": "It like splurging on behalf of a fried who would find the object too impractical.",
-            "credit": "Reader, 30–40, 2025"
+            "text": "It’s like splurging on behalf of a friend who would find the object too impractical.",
+            "credit": "Reader, 30–40"
           },
           {
             "text": "gets people what they were 70% sure that they want it, but would have never made efforts to search and purchase",
-            "credit": "Reader, 40–50, 2026"
+            "credit": "Reader, 40–50"
           }
         ],
         "giftKinds": [
           "buy-it-once",
           "the-honest-upgrade"
         ],
-        "trend": {
-          "2024": 6,
-          "2025": 10,
-          "2026": 11
-        }
+        "chartTitle": "Share by year"
       },
       {
         "id": "listening",
         "section": "for",
-        "headline": "Proves you were listening in March when you had to gift in December",
-        "credit": "M., Gurgaon, 20–25, 2026",
+        "headline": "Proves you were listening in March when you had to gift in December.",
+        "credit": "M., Gurgaon, 20–25",
         "readers": 82,
         "keywords": [
           "listen",
@@ -191,11 +179,11 @@
         "quotes": [
           {
             "text": "I try to gift items that people mention in passing because it ... represents not only something they liked, but also the fact that i am always interested in what they are saying",
-            "credit": "Reader, 20–25, 2024"
+            "credit": "Reader, 20–25"
           },
           {
             "text": "the “it’s the thought that counts” line gets used backwards. People say it to excuse a bad gift, but really it should raise the bar.",
-            "credit": "S.S., Nainital, 25–30, 2026"
+            "credit": "S.S., Nainital, 25–30"
           }
         ],
         "giftKinds": []
@@ -204,7 +192,7 @@
         "id": "lasts",
         "section": "for",
         "headline": "Gets the receiver to call immediately, and to remember it for a long time",
-        "credit": "Reader, 50–60, 2026",
+        "credit": "Reader, 50–60",
         "readers": 69,
         "keywords": [
           "remember",
@@ -217,11 +205,11 @@
         "quotes": [
           {
             "text": "a for life companion which the receiver shall use often and maybe a few times think about me while using it",
-            "credit": "D., Karnataka, 20–25, 2026"
+            "credit": "D., Karnataka, 20–25"
           },
           {
             "text": "I try not to gift perishables (food, alcohol etc.) coz I want people to remember me by the gift I give them.",
-            "credit": "Reader, 30–40, 2024"
+            "credit": "Reader, 30–40"
           }
         ],
         "giftKinds": [
@@ -233,7 +221,7 @@
         "id": "me",
         "section": "for",
         "headline": "Gift something that you would really love to keep if the other person is out of station :)",
-        "credit": "Reader, 40–50, 2025",
+        "credit": "Reader, 40–50",
         "readers": 42,
         "keywords": [
           "i like",
@@ -244,11 +232,11 @@
         "quotes": [
           {
             "text": "i want to gift them something that also tells about my own taste, as well as elevate's theirs",
-            "credit": "M., Gurgaon, 20–25, 2026"
+            "credit": "M., Gurgaon, 20–25"
           },
           {
             "text": "I dont go with budget or will not gift something I don't love. Many times I go without a present",
-            "credit": "V.A., Gurgaon, 50–60, 2026"
+            "credit": "V.A., Gurgaon, 50–60"
           }
         ],
         "giftKinds": []
@@ -257,8 +245,8 @@
         "id": "useless",
         "section": "for",
         "headline": "Should be completely useless for the recipient.",
-        "credit": "Reader, 30–40, 2024",
-        "readers": 27,
+        "credit": "Reader, 30–40",
+        "readers": 28,
         "keywords": [
           "joy",
           "fun",
@@ -267,12 +255,8 @@
         ],
         "quotes": [
           {
-            "text": "It should either make someone’s life easier, must smell nice, or must feel good (e.g., a fluffy house slipper)",
-            "credit": "Reader, 25–30, 2024"
-          },
-          {
-            "text": "Forces you to feel deeply, it can be any emotion, just profound.",
-            "credit": "Reader, 30–40, 2026"
+            "text": "It must smell nice, or must feel good (e.g., a fluffy house slipper)",
+            "credit": "Reader, 25–30"
           }
         ],
         "giftKinds": [
@@ -284,7 +268,7 @@
         "id": "cash",
         "section": "for",
         "headline": "Cash and gift cards are dope",
-        "credit": "M., Gurgaon, 20–25, 2026",
+        "credit": "M., Gurgaon, 20–25",
         "readers": 29,
         "keywords": [
           "cash",
@@ -296,27 +280,31 @@
         "quotes": [
           {
             "text": "Materialistic - Lifafa (money cover) rules",
-            "credit": "Reader, 30–40, 2024"
+            "credit": "Reader, 30–40"
           },
           {
-            "text": "Cash and gift cards feel like a shortcut — even if someone says they would prefer it, a real gift shows you thought about them",
-            "credit": "A.F., Bengaluru, 30–40, 2026"
+            "text": "Cash and gift cards feel like a shortcut, even if someone says they would prefer it, a real gift shows you thought about them",
+            "credit": "A.F., Bengaluru, 30–40"
+          },
+          {
+            "text": "Cash essentially means either 'I am lazy' or 'I forgot to get you a gift'.",
+            "credit": "Reader, 20–25"
           }
         ],
         "giftKinds": [
           "the-answer-is-less"
         ],
-        "opposing": {
-          "headline": "Cash essentially means either ‘I am lazy’ or ‘I forgot to get you a gift’.",
-          "credit": "Reader, 20–25, 2024",
-          "readers": 14
-        }
+        "split": {
+          "yes": 29,
+          "no": 14
+        },
+        "chart": "split"
       },
       {
         "id": "occasion",
         "section": "for",
         "headline": "A great gift is an occasion in itself",
-        "credit": "Reader, 25–30, 2026",
+        "credit": "Reader, 25–30",
         "readers": 21,
         "keywords": [
           "occasion",
@@ -327,11 +315,11 @@
         "quotes": [
           {
             "text": "I often buy books in March for people with October birthdays, because it was the right book, and gift it immediately, because who's seen tomorrow",
-            "credit": "Reader, 40–50, 2025"
+            "credit": "Reader, 40–50"
           },
           {
             "text": "Don't do it on a birthday / anniversary / occasion, it'll get lost in the crowd",
-            "credit": "T.F., Kerala, 30–40, 2026"
+            "credit": "T.F., Kerala, 30–40"
           }
         ],
         "giftKinds": []
@@ -340,8 +328,8 @@
         "id": "treat",
         "section": "for",
         "headline": "Treating is when you spend on something that you might never or rarely spend again.",
-        "credit": "S., Mumbai, 40–50, 2026",
-        "readers": 26,
+        "credit": "S., Mumbai, 40–50",
+        "readers": 34,
         "keywords": [
           "treat",
           "rare",
@@ -350,20 +338,21 @@
         "quotes": [
           {
             "text": "If I have to plan /make sacrifices to get it the delayed gratification hit is amazing",
-            "credit": "Reader, 25–30, 2026"
+            "credit": "Reader, 25–30"
           },
           {
             "text": "it should be in my wishlist for a few months at least",
-            "credit": "Reader, 25–30, 2026"
+            "credit": "Reader, 25–30"
           }
         ],
-        "giftKinds": []
+        "giftKinds": [],
+        "showIn": "secret"
       },
       {
         "id": "obligation",
         "section": "for",
         "headline": "Gifting creates unnecessary obligations. For a poor country, it’s a waste of resources. That money should go in better drainage.",
-        "credit": "V.S., Delhi-NCR, 50–60, 2026",
+        "credit": "V.S., Delhi-NCR, 50–60",
         "readers": 13,
         "keywords": [
           "obligation",
@@ -374,11 +363,11 @@
         "quotes": [
           {
             "text": "I dont accept gifts that are too expensive( meaning for which i can never return the favour) stupid middleclass conditioning that i am unable to let go.",
-            "credit": "Reader, 30–40, 2026"
+            "credit": "Reader, 30–40"
           },
           {
             "text": "I don't gift friends because it sets unrealistic expectations - gifting small items like books are fine. Buying a beer is where I stop.",
-            "credit": "Reader, 30–40, 2025"
+            "credit": "Reader, 30–40"
           }
         ],
         "giftKinds": []
@@ -387,7 +376,7 @@
         "id": "cared-for",
         "section": "moment",
         "headline": "She still sends me photographs, saying that she remembers me every time she sees it",
-        "credit": "K., Gurugram, 40–50, 2026",
+        "credit": "K., Gurugram, 40–50",
         "readers": 49,
         "keywords": [
           "care",
@@ -397,17 +386,18 @@
         "quotes": [
           {
             "text": "I gifted a glass painted bottle to my mentor, and she loved it, and she still sends me photographs, saying that she remembers me every time she sees it",
-            "credit": "K., Gurugram, 40–50, 2026"
+            "credit": "K., Gurugram, 40–50"
           }
         ],
         "giftKinds": [],
-        "chart": "feeling"
+        "chart": "feeling",
+        "chartTitle": "The feeling readers most want a gift to create (154 answers)"
       },
       {
         "id": "time",
         "section": "moment",
         "headline": "Time (or a representation of it) as a gift always wins.",
-        "credit": "T.F., Kerala, 30–40, 2026",
+        "credit": "T.F., Kerala, 30–40",
         "readers": 31,
         "keywords": [
           "handmade",
@@ -419,11 +409,11 @@
         "quotes": [
           {
             "text": "I made a colleague a pen stand from air dry clay ... she really enjoyed it and even showed it off to the entire office - which I was not expecting.",
-            "credit": "Reader, 30–40, 2026"
+            "credit": "Reader, 30–40"
           },
           {
             "text": "Painted a mural for a friend and their daughter - they watched me do the whole thing but loved it at the end",
-            "credit": "Reader, 30–40, 2026"
+            "credit": "Reader, 30–40"
           }
         ],
         "giftKinds": [
@@ -434,7 +424,7 @@
         "id": "qr",
         "section": "moment",
         "headline": "A card with a QR code that took my mother to a song that my Nana sang for her.",
-        "credit": "E.C., Mumbai, 25–30, 2026",
+        "credit": "E.C., Mumbai, 25–30",
         "readers": 56,
         "keywords": [
           "photo",
@@ -446,11 +436,11 @@
         "quotes": [
           {
             "text": "For my husband’s 30th birthday, I got everyone in his life to send photos, write him a note ... and made an album.",
-            "credit": "Reader, 40–50, 2026"
+            "credit": "Reader, 40–50"
           },
           {
             "text": "A video with personal anecdotes from over 40 people ... when he did ask for a copy of the video so that he could save it - I’d take that as a win",
-            "credit": "Reader, 30–40, 2026"
+            "credit": "Reader, 30–40"
           }
         ],
         "giftKinds": [
@@ -460,8 +450,8 @@
       {
         "id": "vinyls",
         "section": "moment",
-        "headline": "Reacted by straight away going to market to buy vinyls",
-        "credit": "V., Bengaluru, 25–30, 2026",
+        "headline": "Gramophone to father, reacted by straight away going to market to buy vinyls.",
+        "credit": "V., Bengaluru, 25–30",
         "readers": 42,
         "keywords": [
           "reaction",
@@ -471,12 +461,12 @@
         ],
         "quotes": [
           {
-            "text": "Got my mom [a new phone] (on a modest salary of 15000/month in Mumbai). She was very emotional, cried a hit. But also incredibly proud",
-            "credit": "P., Hyderabad, 30–40, 2026"
+            "text": "Got my mom [a new phone] (on a modest salary of 15000/month in Mumbai). She was very emotional, cried a bit. But also incredibly proud",
+            "credit": "P., Hyderabad, 30–40"
           },
           {
             "text": "An acquaintance liked the chain I was wearing and I gave it to him. The pendant on it was something he always wanted. He was in tears.",
-            "credit": "M., Bangalore, 50–60, 2026"
+            "credit": "M., Bangalore, 50–60"
           }
         ],
         "giftKinds": []
@@ -501,13 +491,14 @@
             "credit": "D., Karnataka, 20–25, 2026"
           }
         ],
-        "giftKinds": []
+        "giftKinds": [],
+        "hidden": true
       },
       {
         "id": "cringe",
         "section": "moment",
         "headline": "Heartfelt. Even if it’s a little cringe, I’d rather go for more feeling than less.",
-        "credit": "Reader, 30–40, 2026",
+        "credit": "Reader, 30–40",
         "readers": 27,
         "keywords": [
           "note",
@@ -518,11 +509,11 @@
         "quotes": [
           {
             "text": "Always handwritten, on a postcard that I pick up from travels.",
-            "credit": "T.F., Kerala, 30–40, 2026"
+            "credit": "T.F., Kerala, 30–40"
           },
           {
             "text": "I love writing something. it's a compulsion else you have just purchased something",
-            "credit": "Reader, 40–50, 2026"
+            "credit": "Reader, 40–50"
           }
         ],
         "giftKinds": []
@@ -547,13 +538,14 @@
             "credit": "M., Bangalore, 50–60, 2026"
           }
         ],
-        "giftKinds": []
+        "giftKinds": [],
+        "hidden": true
       },
       {
         "id": "paise",
         "section": "people",
-        "headline": "Parents: paise kyu karch karne hai",
-        "credit": "S.C.S., Gurugram, 25–30, 2026",
+        "headline": "Parents - paise kyun kharch karne hai",
+        "credit": "S.C.S., Gurugram, 25–30",
         "readers": 10,
         "keywords": [
           "parents",
@@ -562,12 +554,16 @@
         ],
         "quotes": [
           {
-            "text": "Giving the. The things they need is doesn't feel like presents that's just life . And the things they want whenever I gift them I get scolded because they know the price",
-            "credit": "Reader, 25–30, 2026"
+            "text": "Giving them the things they need doesn't feel like presents that's just life. And whenever I gift them the things they want I get scolded because they know the price",
+            "credit": "Reader, 25–30"
           },
           {
             "text": "she gets angry when I buy her a gift as I could have used that money to buy something for me",
-            "credit": "K.M., Ahmedabad, 25–30, 2026"
+            "credit": "K.M., Ahmedabad, 25–30"
+          },
+          {
+            "text": "Dad, gets angry if I spend money.",
+            "credit": "S., Jalna, 20–25"
           }
         ],
         "giftKinds": [
@@ -599,13 +595,14 @@
         "giftKinds": [
           "the-person-who-refuses",
           "the-answer-is-less"
-        ]
+        ],
+        "hidden": true
       },
       {
         "id": "spouse",
         "section": "people",
         "headline": "I know her too well for ‘safe’ to feel thoughtful",
-        "credit": "A.F., Bengaluru, 30–40, 2026",
+        "credit": "A.F., Bengaluru, 30–40",
         "readers": 27,
         "keywords": [
           "wife",
@@ -616,11 +613,11 @@
         "quotes": [
           {
             "text": "husband - cuz nothing is a surprise anymore.",
-            "credit": "Reader, 25–30, 2026"
+            "credit": "Reader, 25–30"
           },
           {
             "text": "Wife. She won't give any kind of clue before or feedback after",
-            "credit": "Reader, 50–60, 2026"
+            "credit": "Reader, 50–60"
           }
         ],
         "giftKinds": []
@@ -628,8 +625,8 @@
       {
         "id": "surgeon",
         "section": "people",
-        "headline": "He can dissect the gift and its reasoning like a surgeon.",
-        "credit": "A., Iimc Joka, 25–30, 2026",
+        "headline": "A specific friend, for he can dissect the gift and its reasoning like a surgeon.",
+        "credit": "A., Kolkata, 25–30",
         "readers": 18,
         "keywords": [
           "picky",
@@ -639,11 +636,11 @@
         "quotes": [
           {
             "text": "Bade Papa, he has very strong filters for what enters his life",
-            "credit": "Reader, 25–30, 2026"
+            "credit": "Reader, 25–30"
           },
           {
             "text": "People who do not accept graciously. They’ll find something wrong with every gift",
-            "credit": "Reader, 30–40, 2026"
+            "credit": "Reader, 30–40"
           }
         ],
         "giftKinds": []
@@ -652,7 +649,7 @@
         "id": "men",
         "section": "people",
         "headline": "Male friends: at 35–40 years they get snappy about birthdays and celebrations",
-        "credit": "Reader, 30–40, 2026",
+        "credit": "Reader, 30–40",
         "readers": 6,
         "keywords": [
           "men",
@@ -661,11 +658,11 @@
         "quotes": [
           {
             "text": "beyond the usual ideas of wallets, shirts and ties, very few things can be gifted",
-            "credit": "Reader, 20–25, 2026"
+            "credit": "Reader, 20–25"
           },
           {
             "text": "Male friends because they already have the best of everything they use and cars are expensive to buy as gifts!",
-            "credit": "Reader, 50–60, 2026"
+            "credit": "Reader, 50–60"
           }
         ],
         "giftKinds": []
@@ -692,14 +689,15 @@
             "credit": "Reader, 30–40, 2025"
           }
         ],
-        "giftKinds": []
+        "giftKinds": [],
+        "hidden": true
       },
       {
         "id": "nudges",
         "section": "people",
         "headline": "Occasions are nudges.",
-        "credit": "T.F., Kerala, 30–40, 2026",
-        "readers": 139,
+        "credit": "T.F., Kerala, 30–40",
+        "readers": 7,
         "keywords": [
           "birthday",
           "wedding",
@@ -709,21 +707,23 @@
         "quotes": [
           {
             "text": "No gifts at weddings.",
-            "credit": "N., Hyderabad, 40–50, 2026"
+            "credit": "N., Hyderabad, 40–50"
           },
           {
             "text": "It's okay for gifts to arrive slightly ... late (shipping takes time, people)",
-            "credit": "Reader, 20–25, 2026"
+            "credit": "Reader, 20–25"
           }
         ],
         "giftKinds": [],
-        "chart": "occasions"
+        "chart": "occasions",
+        "chartTitle": "Occasions that drive readers' gifting (top 5 each)",
+        "showIn": "for"
       },
       {
         "id": "self",
         "section": "people",
         "headline": "Myself. Every spend feels like it needs to be justified.",
-        "credit": "S.V., Mumbai, 30–40, 2026",
+        "credit": "S.V., Mumbai, 30–40",
         "readers": 4,
         "keywords": [
           "myself",
@@ -732,11 +732,11 @@
         "quotes": [
           {
             "text": "Myself as I am conflicted between gifting myself vs others.",
-            "credit": "Reader, 40–50, 2026"
+            "credit": "Reader, 40–50"
           },
           {
             "text": "I am really bad at \"treating myself\". Never do it.",
-            "credit": "Reader, 30–40, 2026"
+            "credit": "Reader, 30–40"
           }
         ],
         "giftKinds": []
@@ -745,7 +745,7 @@
         "id": "crush",
         "section": "people",
         "headline": "The person I have a crush on and who is also a friend",
-        "credit": "S., Hassan, 20–25, 2026",
+        "credit": "S., 20–25",
         "readers": 1,
         "keywords": [
           "crush"
@@ -753,7 +753,7 @@
         "quotes": [
           {
             "text": "I don't want to overdo it ... my gift also should give him a hint without ruining what we have",
-            "credit": "S., Hassan, 20–25, 2026"
+            "credit": "S., 20–25"
           }
         ],
         "giftKinds": []
@@ -762,7 +762,7 @@
         "id": "mom-guilt",
         "section": "secret",
         "headline": "A spa day. Reason: Mom guilt.",
-        "credit": "Reader, 30–40, 2026",
+        "credit": "Reader, 30–40",
         "readers": 7,
         "keywords": [
           "guilt",
@@ -771,11 +771,11 @@
         "quotes": [
           {
             "text": "A gold bracelet. I do not feel comfortable spending that much on myself",
-            "credit": "Reader, 20–25, 2026 (asked not to be credited)"
+            "credit": "Reader, 20–25"
           },
           {
             "text": "A meditation retreat, long pending item on my self love list. somehow i'm scared of the time away from work and family.",
-            "credit": "D., Bangalore, 30–40, 2026"
+            "credit": "D., Bangalore, 30–40"
           }
         ],
         "giftKinds": [
@@ -786,7 +786,7 @@
         "id": "bicycle",
         "section": "secret",
         "headline": "A bicycle. I want to just wander the city. But can never justify it to myself",
-        "credit": "S.V., Mumbai, 30–40, 2026",
+        "credit": "S.V., Mumbai, 30–40",
         "readers": 13,
         "keywords": [
           "justify",
@@ -795,11 +795,11 @@
         "quotes": [
           {
             "text": "RC car .. it's absolutely childish 😅. But it's something I will never be able to justify to myself for buying",
-            "credit": "Reader, 25–30, 2026"
+            "credit": "Reader, 25–30"
           },
           {
             "text": "[A flip phone with no apps]. I know that I will love it, but it feels like a bit of consumerist excess",
-            "credit": "T.F., Kerala, 30–40, 2026"
+            "credit": "T.F., Kerala, 30–40"
           }
         ],
         "giftKinds": [
@@ -811,7 +811,7 @@
         "id": "better-use",
         "section": "secret",
         "headline": "I always think there is better use for money",
-        "credit": "A., Gurgaon, 30–40, 2026",
+        "credit": "A., Gurgaon, 30–40",
         "readers": 11,
         "keywords": [
           "better use",
@@ -820,11 +820,11 @@
         "quotes": [
           {
             "text": "A designer handbag. I won’t buy one because I don’t see the point in spending 1 lakh on a purse, when I can get a very good one in 10 k",
-            "credit": "P., Hyderabad, 30–40, 2026"
+            "credit": "P., Hyderabad, 30–40"
           },
           {
             "text": "expensive pen from [a luxury pen maker], coz cheaper are functional",
-            "credit": "R.B., Bangalore, 40–50, 2026"
+            "credit": "R.B., Bangalore, 40–50"
           }
         ],
         "giftKinds": [
@@ -835,7 +835,7 @@
         "id": "wallet",
         "section": "secret",
         "headline": "Wallet - superstition; never buy your own wallet.",
-        "credit": "D., Mumbai, 50–60, 2026",
+        "credit": "D., Mumbai, 50–60",
         "readers": 2,
         "keywords": [
           "wallet",
@@ -845,7 +845,7 @@
         "quotes": [
           {
             "text": "A good luck bamboo plant because of the stupid belief that it should be gifted not bought",
-            "credit": "Reader, 40–50, 2026"
+            "credit": "Reader, 40–50"
           }
         ],
         "giftKinds": []
@@ -854,7 +854,7 @@
         "id": "too-dear",
         "section": "secret",
         "headline": "Weekly flowers: wouldn’t buy for self coz they are too expensive",
-        "credit": "T., Kolkata, 30–40, 2026",
+        "credit": "T., Kolkata, 30–40",
         "readers": 27,
         "keywords": [
           "expensive",
@@ -863,11 +863,11 @@
         "quotes": [
           {
             "text": "Calvin And Hobbes box set - too expensive",
-            "credit": "Reader, 50–60, 2026"
+            "credit": "Reader, 50–60"
           },
           {
             "text": "Expensive chocolate like [Japanese craft chocolate]. I feel it’s too expensive to buy without an occasion",
-            "credit": "Reader, 30–40, 2026"
+            "credit": "T., Kolkata, 30–40"
           }
         ],
         "giftKinds": [
@@ -878,7 +878,7 @@
         "id": "kitten",
         "section": "secret",
         "headline": "A kitten. (Adopted not purchased).",
-        "credit": "P.J., Bangalore, 30–40, 2026",
+        "credit": "P.J., Bangalore, 30–40",
         "readers": 1,
         "keywords": [
           "pet",
@@ -888,7 +888,7 @@
         "quotes": [
           {
             "text": "If my family adopts one for me, it will be them accepting the decision as well instead of a liability I have imposed on them",
-            "credit": "P.J., Bangalore, 30–40, 2026"
+            "credit": "P.J., Bangalore, 30–40"
           }
         ],
         "giftKinds": [
@@ -910,13 +910,14 @@
             "credit": "V., Pune, 50–60, 2026"
           }
         ],
-        "giftKinds": []
+        "giftKinds": [],
+        "hidden": true
       },
       {
         "id": "utne",
         "section": "cost",
-        "headline": "Utne ka hi do jitne ka tumhe samne wala de to use pressured feel na ho",
-        "credit": "Reader, 30–40, 2025",
+        "headline": "Utne ka hi do, jitne ka tumhe saamne wala de, toh use pressured feel na ho.",
+        "credit": "Reader, 30–40",
         "readers": 7,
         "keywords": [
           "reciproc",
@@ -926,17 +927,19 @@
         "quotes": [
           {
             "text": "buy a gift worth a price that someone else gifting you never feels pressured that its too expensive ... ideal range is 2k to 8k",
-            "credit": "Reader, 30–40, 2025"
+            "credit": "Reader, 30–40"
           }
         ],
         "giftKinds": [],
-        "chart": "budget"
+        "chart": "budget",
+        "translation": "Give only as much as the other person could give you, so they don’t feel pressured.",
+        "chartTitle": "Median ideal budget, give vs. receive"
       },
       {
         "id": "chocolate",
         "section": "cost",
         "headline": "If your budget is Rs.1,000, gift the best chocolate bar you can find, rather than the cheapest headphones.",
-        "credit": "Reader, 40–50, 2024",
+        "credit": "Reader, 40–50",
         "readers": 15,
         "keywords": [
           "budget",
@@ -946,11 +949,11 @@
         "quotes": [
           {
             "text": "Dont be stingy in cost and send a thoughful one than generalising with a bottle of wine.",
-            "credit": "P.G., Gurgaon, 50–60, 2026"
+            "credit": "P.G., Gurgaon, 50–60"
           },
           {
             "text": "Spend the extra $$$ if it’ll make the gift memorable",
-            "credit": "Reader, 30–40, 2026"
+            "credit": "Reader, 30–40"
           }
         ],
         "giftKinds": []
@@ -959,8 +962,8 @@
         "id": "ramen",
         "section": "cost",
         "headline": "A pack of ramen with meaning loaded behind it is a better gift than a costly set of gourmet cookies.",
-        "credit": "Reader, 30–40, 2025",
-        "readers": 24,
+        "credit": "Reader, 30–40",
+        "readers": 23,
         "keywords": [
           "price",
           "cost",
@@ -969,7 +972,7 @@
         "quotes": [
           {
             "text": "Don't look at the money. Gift what the other person wants or has been dreaming to buy since long but haven't yet.",
-            "credit": "Reader, 30–40, 2025"
+            "credit": "Reader, 30–40"
           }
         ],
         "giftKinds": []
@@ -978,7 +981,7 @@
         "id": "tiers",
         "section": "cost",
         "headline": "Rank relationships in tiers (D-tier right up to S-tier)",
-        "credit": "Reader, 30–40, 2025",
+        "credit": "Reader, 30–40",
         "readers": 9,
         "keywords": [
           "close",
@@ -988,17 +991,18 @@
         "quotes": [
           {
             "text": "For me, if it’s a family member, I will find a way to gift them what they want",
-            "credit": "Reader, 25–30, 2025"
+            "credit": "Reader, 25–30"
           }
         ],
         "giftKinds": [],
-        "chart": "recipientShare"
+        "chart": "recipientShare",
+        "chartTitle": "Share of yearly gifting each group gets (most common answer)"
       },
       {
         "id": "thirtieth",
         "section": "cost",
         "headline": "30th birthday will have more budget than 31st. 50th even more.",
-        "credit": "Reader, 30–40, 2025",
+        "credit": "Reader, 30–40",
         "readers": 14,
         "keywords": [
           "milestone",
@@ -1008,7 +1012,7 @@
         "quotes": [
           {
             "text": "Occasion of gifting. Higher for birthdays, personal occasions vs. Diwali gifting",
-            "credit": "Reader, 25–30, 2025"
+            "credit": "Reader, 25–30"
           }
         ],
         "giftKinds": []
@@ -1030,7 +1034,8 @@
             "credit": "D.G., Virar West, 40–50, 2026"
           }
         ],
-        "giftKinds": []
+        "giftKinds": [],
+        "hidden": true
       },
       {
         "id": "kitty",
@@ -1048,7 +1053,8 @@
             "credit": "Reader, 25–30, 2025"
           }
         ],
-        "giftKinds": []
+        "giftKinds": [],
+        "hidden": true
       }
     ]
   },
@@ -1189,7 +1195,7 @@
         "slug": "watch",
         "kind": "buy-it-once",
         "reason": "First gift from child’s first income",
-        "credit": "Reader, 50–60, 2024",
+        "credit": "Reader, 50–60",
         "itWas": "A mechanical or automatic watch",
         "price": {
           "min": 2,
@@ -1206,11 +1212,11 @@
         "quotes": [
           {
             "text": "It's the watch I wanted for a long time, but not convinced t spend money on it.",
-            "credit": "Reader, 30–40, 2024 · best gift received"
+            "credit": "Reader, 30–40 · best gift received"
           },
           {
             "text": "[A Swiss watch], BEST FEELING, milestone for me to gift a watch",
-            "credit": "Reader, 25–30, 2026 · best gift given"
+            "credit": "Reader, 25–30 · best gift given"
           }
         ],
         "editorsPick": false,
@@ -1223,7 +1229,7 @@
         "slug": "backpack",
         "kind": "buy-it-once",
         "reason": "People usually have terrible backpacks",
-        "credit": "Reader, 40–50, 2024",
+        "credit": "Reader, 40–50",
         "itWas": "A good everyday bag",
         "price": {
           "min": 1,
@@ -1239,7 +1245,7 @@
         "quotes": [
           {
             "text": "The [good] laptop bag from my office collegues on my farewell in 2021 Nov which i use to this day",
-            "credit": "Reader, 50–60, 2026 · best gift received"
+            "credit": "Reader, 50–60 · best gift received"
           }
         ],
         "editorsPick": false,
@@ -1252,7 +1258,7 @@
         "slug": "shoes",
         "kind": "buy-it-once",
         "reason": "As a very financially strapped person I couldn’t justify buying it for myself. They look amazing.",
-        "credit": "Reader, 40–50, 2024",
+        "credit": "Reader, 40–50",
         "itWas": "A pair of shoes they would never buy at that price",
         "price": {
           "min": 2,
@@ -1267,7 +1273,7 @@
         "quotes": [
           {
             "text": "A pair of golden shoes for Rakshabandhan … It's something I really wanted because it's my signature style",
-            "credit": "Reader, 40–50, 2024 · best gift received"
+            "credit": "Reader, 40–50 · best gift received"
           }
         ],
         "editorsPick": false,
@@ -1280,7 +1286,7 @@
         "slug": "pen",
         "kind": "buy-it-once",
         "reason": "Will never buy on their own but like to use it",
-        "credit": "Reader, 30–40, 2024",
+        "credit": "Reader, 30–40",
         "itWas": "A fountain pen (or a very good pen)",
         "price": {
           "min": 1,
@@ -1296,7 +1302,7 @@
         "quotes": [
           {
             "text": "It was unexpected and something I would not have purchased on my own",
-            "credit": "Reader, 40–50, 2024 · best gift received"
+            "credit": "Reader, 40–50 · best gift received"
           }
         ],
         "editorsPick": false,
@@ -1309,7 +1315,7 @@
         "slug": "knife",
         "kind": "buy-it-once",
         "reason": "Gifted a knife to my sister. Her hubby got into veggie chopping after this. Loved that.",
-        "credit": "Reader, 40–50, 2026",
+        "credit": "Reader, 40–50",
         "itWas": "A kitchen knife",
         "price": {
           "min": 1,
@@ -1324,7 +1330,7 @@
         "quotes": [
           {
             "text": "It is beautiful and useful",
-            "credit": "Reader, 40–50, 2024 · best gift received"
+            "credit": "Reader, 40–50 · best gift received"
           }
         ],
         "editorsPick": false,
@@ -1337,7 +1343,7 @@
         "slug": "journal",
         "kind": "analog",
         "reason": "It will be nostalgic after a few years if they write the journal",
-        "credit": "Reader, 50–60, 2024",
+        "credit": "Reader, 50–60",
         "itWas": "A paper journal or notebook",
         "price": {
           "min": 1,
@@ -1354,7 +1360,7 @@
         "quotes": [
           {
             "text": "I write a lot. And I love analog writing.",
-            "credit": "Reader, 30–40, 2024 · a gift I want"
+            "credit": "Reader, 30–40 · a gift I want"
           }
         ],
         "editorsPick": false,
@@ -1367,7 +1373,7 @@
         "slug": "ereader",
         "kind": "analog",
         "reason": "It’s your buddy for life.",
-        "credit": "Reader, 40–50, 2024",
+        "credit": "Reader, 40–50",
         "itWas": "An e-reader",
         "price": {
           "min": 2,
@@ -1383,7 +1389,7 @@
         "quotes": [
           {
             "text": "Replaces scrolling with a more beneficial activity",
-            "credit": "Reader, 25–30, 2024 · a gift to give"
+            "credit": "Reader, 25–30 · a gift to give"
           }
         ],
         "editorsPick": false,
@@ -1396,7 +1402,7 @@
         "slug": "vinyl",
         "kind": "analog",
         "reason": "Feels like home to me. Wish to build a vinyl collection as I grow old.",
-        "credit": "Reader, 25–30, 2024",
+        "credit": "Reader, 25–30",
         "itWas": "A record player, or records",
         "price": {
           "min": 1,
@@ -1411,7 +1417,7 @@
         "quotes": [
           {
             "text": "Gramophone to father, reacted by straight away going to market to buy vinyls",
-            "credit": "V., Bengaluru, 25–30, 2026 · best gift given"
+            "credit": "V., Bengaluru, 25–30 · best gift given"
           }
         ],
         "editorsPick": false,
@@ -1424,7 +1430,7 @@
         "slug": "puzzle",
         "kind": "analog",
         "reason": "If one table in my house is dedicated to a puzzle that I can come back to and do in my downtime",
-        "credit": "Reader, 20–25, 2024",
+        "credit": "Reader, 20–25",
         "itWas": "A jigsaw or puzzle",
         "price": {
           "min": 1,
@@ -1447,7 +1453,7 @@
         "slug": "flip",
         "kind": "analog",
         "reason": "I know that I will love it, but it feels like a bit of consumerist excess",
-        "credit": "T.F., Kerala, 30–40, 2026",
+        "credit": "T.F., Kerala, 30–40",
         "itWas": "A dumb phone",
         "price": {
           "min": 2,
@@ -1470,7 +1476,7 @@
         "slug": "chocolate",
         "kind": "the-senses",
         "reason": "Anything from her, even a toffee wrapper, is something I cherish.",
-        "credit": "Reader, 20–25, 2025",
+        "credit": "Reader, 20–25",
         "itWas": "Good chocolate (the giver was out of work)",
         "price": {
           "min": 1,
@@ -1486,7 +1492,7 @@
         "quotes": [
           {
             "text": "Expensive chocolate like [Japanese craft chocolate]. I feel it’s too expensive to buy without an occasion",
-            "credit": "Reader, 30–40, 2026 · never buy myself"
+            "credit": "Reader, 30–40 · never buy myself"
           }
         ],
         "editorsPick": false,
@@ -1499,7 +1505,7 @@
         "slug": "perfume",
         "kind": "the-senses",
         "reason": "They mentioned it in passing but I made a mental note of it, and I know they ran out of it",
-        "credit": "Reader, 30–40, 2024",
+        "credit": "Reader, 30–40",
         "itWas": "Their perfume, again",
         "price": {
           "min": 1,
@@ -1515,11 +1521,11 @@
         "quotes": [
           {
             "text": "wouldn't have got it for myself",
-            "credit": "Reader, 25–30, 2024 · best gift received"
+            "credit": "Reader, 25–30 · best gift received"
           },
           {
             "text": "It lasts for a while. You really use it",
-            "credit": "Reader, 30–40, 2024 · best gift received"
+            "credit": "Reader, 30–40 · best gift received"
           }
         ],
         "editorsPick": false,
@@ -1532,7 +1538,7 @@
         "slug": "brewer",
         "kind": "the-senses",
         "reason": "Make their own coffee and serve you one when you visit their place",
-        "credit": "Reader, 30–40, 2025",
+        "credit": "Reader, 30–40",
         "itWas": "A manual brewer and good beans",
         "price": {
           "min": 1,
@@ -1555,7 +1561,7 @@
         "slug": "cheese",
         "kind": "the-senses",
         "reason": "Nice to pick and try different types of cheese and something to look forward to",
-        "credit": "Reader, age not given, 2026",
+        "credit": "Reader, age not given",
         "itWas": "Edibles from a place (a cheese subscription)",
         "price": {
           "min": 1,
@@ -1570,7 +1576,7 @@
         "quotes": [
           {
             "text": "Famous snacks from Rajasthan. It was liked and appreciated.",
-            "credit": "D.G., Virar West, 40–50, 2026 · best gift given"
+            "credit": "D.G., Virar West, 40–50 · best gift given"
           }
         ],
         "editorsPick": false,
@@ -1582,7 +1588,7 @@
         "slug": "headphones",
         "kind": "the-senses",
         "reason": "I desperately needed one (which I didn’t realise) and the utility plus ease is brilliant",
-        "credit": "Reader, 40–50, 2024",
+        "credit": "Reader, 40–50",
         "itWas": "Good headphones",
         "price": {
           "min": 2,
@@ -1604,7 +1610,7 @@
         "slug": "childhood",
         "kind": "the-eternal-beginner",
         "reason": "My gift choices signify the inner childhood dreams that were never pursued.",
-        "credit": "Reader, 25–30, 2024",
+        "credit": "Reader, 25–30",
         "itWas": "Kit for a sport they never got to play",
         "price": {
           "min": 1,
@@ -1621,7 +1627,7 @@
         "quotes": [
           {
             "text": "I have to buy one so it would be great if somebody gifted it😅",
-            "credit": "Reader, 30–40, 2024 · a gift I want"
+            "credit": "Reader, 30–40 · a gift I want"
           }
         ],
         "editorsPick": false,
@@ -1633,7 +1639,7 @@
         "slug": "lessons",
         "kind": "the-eternal-beginner",
         "reason": "Great for self-esteem and confidence, plus you’re learning a new art or skill",
-        "credit": "Reader, 30–40, 2024",
+        "credit": "Reader, 30–40",
         "itWas": "A month of lessons (this one: pole dance)",
         "price": {
           "min": 1,
@@ -1655,7 +1661,7 @@
         "slug": "craft",
         "kind": "the-eternal-beginner",
         "reason": "To experience the joy of creation",
-        "credit": "Reader, 30–40, 2025",
+        "credit": "Reader, 30–40",
         "itWas": "A craft or art kit",
         "price": {
           "min": 1,
@@ -1671,7 +1677,7 @@
         "quotes": [
           {
             "text": "I loved that I used the gift to make something extremely personalised to my life.",
-            "credit": "Reader, 25–30, 2024 · best gift received"
+            "credit": "Reader, 25–30 · best gift received"
           }
         ],
         "editorsPick": false,
@@ -1683,7 +1689,7 @@
         "slug": "cycle",
         "kind": "the-eternal-beginner",
         "reason": "I mentioned some old memory as a kid when I loved cycling",
-        "credit": "Reader, 25–30, 2025",
+        "credit": "Reader, 25–30",
         "itWas": "A bicycle",
         "price": {
           "min": 2,
@@ -1706,7 +1712,7 @@
         "slug": "saree",
         "kind": "made-by-someone",
         "reason": "Because I know the source, appreciate the effort that went into making it and so will the recipient",
-        "credit": "Reader, 50–60, 2024",
+        "credit": "Reader, 50–60",
         "itWas": "A handloom saree from a known weaver",
         "price": {
           "min": 1,
@@ -1722,7 +1728,7 @@
         "quotes": [
           {
             "text": "An exclusive saree from a weaver and it is not longer available in that shade of colour",
-            "credit": "Reader, Over 60, 2026 · best gift given"
+            "credit": "Reader, Over 60 · best gift given"
           }
         ],
         "editorsPick": false,
@@ -1734,7 +1740,7 @@
         "slug": "crochet",
         "kind": "made-by-someone",
         "reason": "It was a direct product of one’s time",
-        "credit": "Reader, 20–25, 2024",
+        "credit": "Reader, 20–25",
         "itWas": "Something they made (a crocheted cloth)",
         "price": {
           "min": 1,
@@ -1750,7 +1756,7 @@
         "quotes": [
           {
             "text": "hand-made pipecleaner flowers because a friend made it with her hand in the middle of classes and very busy schedule",
-            "credit": "S., Jalna, 20–25, 2026 · best gift received"
+            "credit": "S., Jalna, 20–25 · best gift received"
           }
         ],
         "editorsPick": false,
@@ -1763,7 +1769,7 @@
         "slug": "ceramics",
         "kind": "made-by-someone",
         "reason": "Handmade and small scale is more and more precious these days.",
-        "credit": "Reader, 30–40, 2025",
+        "credit": "Reader, 30–40",
         "itWas": "Hand-painted pottery",
         "price": {
           "min": 1,
@@ -1785,7 +1791,7 @@
         "slug": "goolak",
         "kind": "made-by-someone",
         "reason": "It was not perfect, it was not like another ready-made item, it had uneven curves",
-        "credit": "S.P., Brahmapur, age not given, 2026",
+        "credit": "S.P., Brahmapur, age not given",
         "itWas": "A cast cat-shaped piggy bank from a market stall",
         "price": {
           "min": 1,
@@ -1806,7 +1812,7 @@
         "slug": "tanjore",
         "kind": "made-by-someone",
         "reason": "Tanjore painting. Was well received, but not with the over-the-top elation I expected!",
-        "credit": "V., Pune, 50–60, 2026",
+        "credit": "V., Pune, 50–60",
         "itWas": "Indian folk or classical art",
         "price": {
           "min": 1,
@@ -1827,7 +1833,7 @@
         "slug": "wallet",
         "kind": "patina",
         "reason": "Wallet - superstition; never buy your own wallet.",
-        "credit": "D., Mumbai, 50–60, 2026",
+        "credit": "D., Mumbai, 50–60",
         "itWas": "A leather wallet that will soften",
         "price": {
           "min": 1,
@@ -1872,7 +1878,7 @@
         "slug": "boxset",
         "kind": "patina",
         "reason": "They just stay with you and you can revisit them from time to time",
-        "credit": "Reader, Over 60, 2024",
+        "credit": "Reader, Over 60",
         "itWas": "A hardbound collectible edition",
         "price": {
           "min": 2,
@@ -1894,7 +1900,7 @@
         "slug": "qr",
         "kind": "the-archive",
         "reason": "A card with a QR code that took my mother to a song that my Nana sang for her.",
-        "credit": "E.C., Mumbai, 25–30, 2026",
+        "credit": "E.C., Mumbai, 25–30",
         "itWas": "A song or recording, made for them",
         "price": {
           "min": 0,
@@ -1910,7 +1916,7 @@
         "quotes": [
           {
             "text": "It was a song this person held very close to their heart. It took me a long time to find that music box",
-            "credit": "Reader, 20–25, 2024 · a gift to give"
+            "credit": "Reader, 20–25 · a gift to give"
           }
         ],
         "editorsPick": false,
@@ -1923,7 +1929,7 @@
         "slug": "letter",
         "kind": "the-archive",
         "reason": "It was personal contextual and relevant. It always stays with me even today.",
-        "credit": "Reader, 25–30, 2024",
+        "credit": "Reader, 25–30",
         "itWas": "A letter",
         "price": {
           "min": 0,
@@ -1939,7 +1945,7 @@
         "quotes": [
           {
             "text": "A handwritten letter from my girlfriend … It was so personal and not something that could be bought",
-            "credit": "Reader, 25–30, 2024 · best gift received"
+            "credit": "Reader, 25–30 · best gift received"
           }
         ],
         "editorsPick": false,
@@ -1952,7 +1958,7 @@
         "slug": "album",
         "kind": "the-archive",
         "reason": "I got everyone in his life to send photos, write him a note (like everyone I could think of) and made an album.",
-        "credit": "Reader, 40–50, 2026",
+        "credit": "Reader, 40–50",
         "itWas": "A photo book with notes from everyone",
         "price": {
           "min": 1,
@@ -1969,7 +1975,7 @@
         "quotes": [
           {
             "text": "It was a farewell gift for a coworker, a card / handmade album put together at the last minute. She loved it and almost cried.",
-            "credit": "Reader, 20–25, 2026 · best gift given"
+            "credit": "Reader, 20–25 · best gift given"
           }
         ],
         "editorsPick": false,
@@ -1981,7 +1987,7 @@
         "slug": "newspaper",
         "kind": "the-archive",
         "reason": "Gifted a close friend a copy of the actual newspaper of their date of birth",
-        "credit": "D., Mumbai, 50–60, 2026",
+        "credit": "D., Mumbai, 50–60",
         "itWas": "The newspaper from the day they were born",
         "price": {
           "min": 1,
@@ -2004,7 +2010,7 @@
         "slug": "clapper",
         "kind": "the-archive",
         "reason": "Customised Film Clapperboard to someone who loved movies",
-        "credit": "A., New Delhi, 25–30, 2026",
+        "credit": "A., New Delhi, 25–30",
         "itWas": "Personalised memorabilia",
         "price": {
           "min": 1,
@@ -2026,7 +2032,7 @@
         "slug": "kashmir",
         "kind": "in-the-room",
         "reason": "They have been meaning to go for quite some time now but haven’t been able to.",
-        "credit": "Reader, 25–30, 2024",
+        "credit": "Reader, 25–30",
         "itWas": "A trip",
         "price": {
           "min": 2,
@@ -2043,7 +2049,7 @@
         "quotes": [
           {
             "text": "he'd walk away with memories, far more valuable than gold sitting in a locker.",
-            "credit": "A.F., Bengaluru, 30–40, 2026 · best gift given"
+            "credit": "A.F., Bengaluru, 30–40 · best gift given"
           }
         ],
         "editorsPick": false,
@@ -2056,7 +2062,7 @@
         "slug": "sleep",
         "kind": "in-the-room",
         "reason": "It’s thoughtful and something money cannot buy and can never get myself",
-        "credit": "Reader, 30–40, 2024",
+        "credit": "Reader, 30–40",
         "itWas": "A day off (or a month of sleep)",
         "price": {
           "min": 0,
@@ -2079,7 +2085,7 @@
         "slug": "spa",
         "kind": "in-the-room",
         "reason": "As women, we rarely take timeout for ourselves.",
-        "credit": "Reader, 40–50, 2024",
+        "credit": "Reader, 40–50",
         "itWas": "A spa day",
         "price": {
           "min": 2,
@@ -2103,7 +2109,7 @@
         "slug": "meal",
         "kind": "in-the-room",
         "reason": "Been wanting to go there for a long time but it is very expensive to casually go on my own.",
-        "credit": "Reader, 50–60, 2024",
+        "credit": "Reader, 50–60",
         "itWas": "A meal they would not book themselves",
         "price": {
           "min": 2,
@@ -2118,7 +2124,7 @@
         "quotes": [
           {
             "text": "You've thought about them and planned way in advance to get them the reservation",
-            "credit": "Reader, 30–40, 2024 · a gift to give"
+            "credit": "Reader, 30–40 · a gift to give"
           }
         ],
         "editorsPick": false,
@@ -2130,7 +2136,7 @@
         "slug": "hotwheels",
         "kind": "permission-to-play",
         "reason": "I gave a friend (22 year old man) a pack of 2 Hotwheels cars and he loved it.",
-        "credit": "Reader, 20–25, 2026",
+        "credit": "Reader, 20–25",
         "itWas": "Toys for a grown-up",
         "price": {
           "min": 1,
@@ -2146,7 +2152,7 @@
         "quotes": [
           {
             "text": "I filmed his reaction and he was so incredibly happy about it.",
-            "credit": "Reader, 20–25, 2026 · best gift given"
+            "credit": "Reader, 20–25 · best gift given"
           }
         ],
         "editorsPick": false,
@@ -2158,7 +2164,7 @@
         "slug": "lego",
         "kind": "permission-to-play",
         "reason": "It gave me something to do with my hands.",
-        "credit": "A., Bengaluru, 30–40, 2026",
+        "credit": "A., Bengaluru, 30–40",
         "itWas": "A building set",
         "price": {
           "min": 1,
@@ -2174,7 +2180,7 @@
         "quotes": [
           {
             "text": "My partner is sweet and thoughtful about her choices. I love Lego and they were flowers for perpetuity.",
-            "credit": "Reader, 30–40, 2024 · best gift received"
+            "credit": "Reader, 30–40 · best gift received"
           }
         ],
         "editorsPick": false,
@@ -2186,7 +2192,7 @@
         "slug": "rc",
         "kind": "permission-to-play",
         "reason": "I wanted an RC car ever since I was a kid but never got one and lost interest eventually. It was a callback to that nostalgia",
-        "credit": "Reader, 25–30, 2025",
+        "credit": "Reader, 25–30",
         "itWas": "An RC car",
         "price": {
           "min": 1,
@@ -2209,7 +2215,7 @@
         "slug": "boardgame",
         "kind": "permission-to-play",
         "reason": "My friend is clueless but did the research to get me something I didn’t know about",
-        "credit": "Reader, 30–40, 2026",
+        "credit": "Reader, 30–40",
         "itWas": "A strategy board game",
         "price": {
           "min": 1,
@@ -2231,7 +2237,7 @@
         "slug": "favbook",
         "kind": "the-reader",
         "reason": "So that I get to see the world from a similar lens",
-        "credit": "Reader, 20–25, 2024",
+        "credit": "Reader, 20–25",
         "itWas": "Your favourite book",
         "price": {
           "min": 1,
@@ -2255,7 +2261,7 @@
         "slug": "print",
         "kind": "the-reader",
         "reason": "There’s something wonderfully nostalgic in the act of receiving something in the mail",
-        "credit": "Reader, 30–40, 2024",
+        "credit": "Reader, 30–40",
         "itWas": "A print subscription",
         "price": {
           "min": 1,
@@ -2278,7 +2284,7 @@
         "slug": "kidsnews",
         "kind": "the-reader",
         "reason": "A newspaper for kids. Hopefully something they’d look forward to every week",
-        "credit": "Reader, 40–50, 2024",
+        "credit": "Reader, 40–50",
         "itWas": "A weekly paper for a child",
         "price": {
           "min": 1,
@@ -2302,7 +2308,7 @@
         "slug": "ken",
         "kind": "the-reader",
         "reason": "A lifetime subscription to The Ken. From Ken.",
-        "credit": "V.S., Delhi-NCR, 50–60, 2026",
+        "credit": "V.S., Delhi-Ncr, 50–60",
         "itWas": "Ahem",
         "price": {
           "min": 2,
@@ -2322,7 +2328,7 @@
         "slug": "eyemask",
         "kind": "the-body",
         "reason": "It makes him feel like a rich floof.",
-        "credit": "Reader, 30–40, 2026",
+        "credit": "Reader, 30–40",
         "itWas": "A mulberry silk eye mask",
         "price": {
           "min": 1,
@@ -2338,7 +2344,7 @@
         "quotes": [
           {
             "text": "He loves it and has been using it for 5 years now. He said he never would have thought of it although light disturbs his sleep",
-            "credit": "Reader, 30–40, 2026 · best gift given"
+            "credit": "Reader, 30–40 · best gift given"
           }
         ],
         "editorsPick": false,
@@ -2351,7 +2357,7 @@
         "slug": "shirt",
         "kind": "the-body",
         "reason": "Fit me well and I liked it instantly, even though I had a very similar shirt already",
-        "credit": "Reader, 50–60, 2024",
+        "credit": "Reader, 50–60",
         "itWas": "A well-made basic",
         "price": {
           "min": 1,
@@ -2366,7 +2372,7 @@
         "quotes": [
           {
             "text": "Most men in my circle find it hard to make the change to a premium tailored shirt, but once experienced it is game changing",
-            "credit": "Reader, 30–40, 2024 · a gift to give"
+            "credit": "Reader, 30–40 · a gift to give"
           }
         ],
         "editorsPick": false,
@@ -2378,7 +2384,7 @@
         "slug": "massager",
         "kind": "the-body",
         "reason": "All my friends are getting old",
-        "credit": "Reader, 30–40, 2024",
+        "credit": "Reader, 30–40",
         "itWas": "A massager pillow",
         "price": {
           "min": 1,
@@ -2400,7 +2406,7 @@
         "slug": "pillows",
         "kind": "the-body",
         "reason": "Pillows given by my flatmates (since I didn’t have any)",
-        "credit": "A., New Delhi, 25–30, 2026",
+        "credit": "A., New Delhi, 25–30",
         "itWas": "Good pillows",
         "price": {
           "min": 1,
@@ -2422,7 +2428,7 @@
         "slug": "flowers",
         "kind": "life-is-outside",
         "reason": "Got weekly flowers for 3 months, made our home look good all the time",
-        "credit": "Reader, 25–30, 2024",
+        "credit": "Reader, 25–30",
         "itWas": "A flower subscription",
         "price": {
           "min": 1,
@@ -2438,7 +2444,7 @@
         "quotes": [
           {
             "text": "Weekly flowers - wouldn’t buy for self coz they are too expensive",
-            "credit": "T., Kolkata, 30–40, 2026 · never buy myself"
+            "credit": "T., Kolkata, 30–40 · never buy myself"
           }
         ],
         "editorsPick": false,
@@ -2451,7 +2457,7 @@
         "slug": "onepiece",
         "kind": "life-is-outside",
         "reason": "I like plants and think many of my friends could use some. (I can’t make them watch One Piece forcefully)",
-        "credit": "Reader, 25–30, 2024",
+        "credit": "Reader, 25–30",
         "itWas": "A plant",
         "price": {
           "min": 1,
@@ -2466,7 +2472,7 @@
         "quotes": [
           {
             "text": "Caring for it and seeing it grow everyday is a reminder to the ever growing nature of the self.",
-            "credit": "Reader, 30–40, 2024 · best gift received"
+            "credit": "Reader, 30–40 · best gift received"
           }
         ],
         "editorsPick": false,
@@ -2478,7 +2484,7 @@
         "slug": "telescope",
         "kind": "life-is-outside",
         "reason": "You get to see the planets!",
-        "credit": "Reader, 30–40, 2024",
+        "credit": "Reader, 30–40",
         "itWas": "A telescope",
         "price": {
           "min": 2,
@@ -2501,7 +2507,7 @@
         "slug": "dognecklace",
         "kind": "pets",
         "reason": "Her attachment to her dog.",
-        "credit": "Reader, 25–30, 2024",
+        "credit": "Reader, 25–30",
         "itWas": "A necklace with a photo of their dog",
         "price": {
           "min": 1,
@@ -2516,7 +2522,7 @@
         "quotes": [
           {
             "text": "A dog! Always wanted one (& I'm a dog person - but never taken the plunge!)",
-            "credit": "Reader, 30–40, 2024"
+            "credit": "Reader, 30–40"
           }
         ],
         "editorsPick": false,
@@ -2529,7 +2535,7 @@
         "slug": "purifier",
         "kind": "the-honest-upgrade",
         "reason": "An air purifier. It made me feel understood",
-        "credit": "M., Gurgaon, 20–25, 2026",
+        "credit": "M., Gurgaon, 20–25",
         "itWas": "An air purifier",
         "price": {
           "min": 2,
@@ -2553,7 +2559,7 @@
         "slug": "airfryer",
         "kind": "the-honest-upgrade",
         "reason": "I use it extensively but had never thought that I would use it before I had it",
-        "credit": "Reader, 30–40, 2025",
+        "credit": "Reader, 30–40",
         "itWas": "The appliance they keep putting off",
         "price": {
           "min": 2,
@@ -2569,7 +2575,7 @@
         "quotes": [
           {
             "text": "I recently gave [an air fryer] as a housewarming gift to my sister-in-law. I felt contented, knowing that they often use it for their netflix and chill",
-            "credit": "Reader, 20–25, 2026 · best gift given"
+            "credit": "Reader, 20–25 · best gift given"
           }
         ],
         "editorsPick": false,
@@ -2581,7 +2587,7 @@
         "slug": "desk",
         "kind": "the-honest-upgrade",
         "reason": "Not many people gift furniture",
-        "credit": "Reader, 30–40, 2025",
+        "credit": "Reader, 30–40",
         "itWas": "A standing desk",
         "price": {
           "min": 3,
@@ -2604,7 +2610,7 @@
         "slug": "laptop",
         "kind": "the-honest-upgrade",
         "reason": "I wanted it for the last 4–5 years but it was kinda expensive for me. Finally we took the plunge and bought it by contributing for it.",
-        "credit": "Reader, 25–30, 2024",
+        "credit": "Reader, 25–30",
         "itWas": "The laptop they keep postponing",
         "price": {
           "min": 4,
@@ -2626,7 +2632,7 @@
         "slug": "ac",
         "kind": "the-person-who-refuses",
         "reason": "For them the AC was a deliverance from the stifling and humid Chennai heat",
-        "credit": "Reader, 50–60, 2026",
+        "credit": "Reader, 50–60",
         "itWas": "An AC for the parents",
         "price": {
           "min": 4,
@@ -2651,7 +2657,7 @@
         "slug": "ytp",
         "kind": "the-person-who-refuses",
         "reason": "As she is hooked on YouTube videos, it felt good to reduce her irritation with ads",
-        "credit": "Reader, 40–50, 2026",
+        "credit": "Reader, 40–50",
         "itWas": "Ad-free video for mum",
         "price": {
           "min": 1,
@@ -2674,7 +2680,7 @@
         "slug": "ipad",
         "kind": "the-person-who-refuses",
         "reason": "It has been tough for my mom to watch videos and do research on mobile screen regarding farming.",
-        "credit": "Reader, 25–30, 2024",
+        "credit": "Reader, 25–30",
         "itWas": "A tablet with a bigger screen",
         "price": {
           "min": 3,
@@ -2696,7 +2702,7 @@
         "slug": "stand",
         "kind": "the-person-who-refuses",
         "reason": "She had seen me struggle to get the desired height on a video call a year ago. She waited till my birthday",
-        "credit": "Reader, Over 60, 2026",
+        "credit": "Reader, Over 60",
         "itWas": "A laptop stand",
         "price": {
           "min": 1,
@@ -2720,7 +2726,7 @@
         "slug": "cash",
         "kind": "the-answer-is-less",
         "reason": "I can spend it how I want",
-        "credit": "Reader, 30–40, 2024",
+        "credit": "Reader, 30–40",
         "itWas": "Cash, done well",
         "price": {
           "min": 0,
@@ -2744,7 +2750,7 @@
         "slug": "donation",
         "kind": "the-answer-is-less",
         "reason": "The symbolic nature of it makes it memorable despite not receiving ‘stuff’.",
-        "credit": "Reader, 30–40, 2024",
+        "credit": "Reader, 30–40",
         "itWas": "A donation in their name",
         "price": {
           "min": 1,
@@ -2767,7 +2773,7 @@
         "slug": "library",
         "kind": "the-answer-is-less",
         "reason": "Someone gifted their library as they are getting old",
-        "credit": "Reader, 50–60, 2024",
+        "credit": "Reader, 50–60",
         "itWas": "Passing something on",
         "price": {
           "min": 0,
@@ -2783,7 +2789,7 @@
         "quotes": [
           {
             "text": "Mindful choices that don’t create waste in the name of fancy",
-            "credit": "Reader, 30–40, 2024 · best gift received"
+            "credit": "Reader, 30–40 · best gift received"
           }
         ],
         "editorsPick": false,
@@ -2795,7 +2801,7 @@
         "slug": "nothing",
         "kind": "the-answer-is-less",
         "reason": "Nothing really. Just their love and consideration",
-        "credit": "Reader, 20–25, 2024",
+        "credit": "Reader, 20–25",
         "itWas": "Nothing, or just presence",
         "price": {
           "min": 0,
@@ -2810,7 +2816,7 @@
         "quotes": [
           {
             "text": "Because I need it more rn than any other material thing",
-            "credit": "Reader, 20–25, 2024 · a gift I want"
+            "credit": "Reader, 20–25 · a gift I want"
           }
         ],
         "editorsPick": false,
@@ -2886,11 +2892,11 @@
     "recipientShare": [
       {
         "label": "Immediate family",
-        "share": "25%+"
+        "share": "10–25%"
       },
       {
         "label": "Closest friends",
-        "share": "10–25%"
+        "share": "5–10%"
       },
       {
         "label": "Friends",
@@ -2906,9 +2912,89 @@
       }
     ],
     "budget": {
-      "give": 3000,
-      "get": 2000,
-      "year": 2026
+      "give": 2500,
+      "get": 2000
+    },
+    "budgets": {
+      "bands": [
+        "Under ₹1,000",
+        "₹1,000–2,999",
+        "₹3,000–4,999",
+        "₹5,000–9,999",
+        "₹10,000 or more"
+      ],
+      "give": [
+        42,
+        288,
+        82,
+        154,
+        72
+      ],
+      "get": [
+        82,
+        297,
+        63,
+        118,
+        58
+      ],
+      "answeredGive": 638,
+      "answeredGet": 618,
+      "paired": {
+        "answered": 613,
+        "giveMore": 229,
+        "same": 302,
+        "getMore": 82
+      },
+      "medians": {
+        "give": 2500,
+        "get": 2000
+      }
+    },
+    "yearShare": {
+      "bands": [
+        "1–5%",
+        "5–10%",
+        "10–25%",
+        "25%+"
+      ],
+      "byRecipient": {
+        "Yourself": [
+          143,
+          98,
+          75,
+          47
+        ],
+        "Immediate family": [
+          44,
+          99,
+          127,
+          102
+        ],
+        "Closest friends": [
+          97,
+          139,
+          93,
+          36
+        ],
+        "Friends": [
+          229,
+          80,
+          31,
+          6
+        ],
+        "Extended family": [
+          194,
+          107,
+          31,
+          4
+        ],
+        "Colleagues": [
+          262,
+          67,
+          7,
+          3
+        ]
+      }
     }
   }
 }

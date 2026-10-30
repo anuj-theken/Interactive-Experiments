@@ -34,7 +34,7 @@ function stageEmail(host, { title } = {}) {
   const words = keys.filter((k) => drafts[k].kind === 'text').length;
   host.className = 'send';
   host.innerHTML = `<div class="send-head"><span class="label">Step 1 of 2 · ${n ? `${n} waiting in this browser` : 'Nothing waiting yet'}</span>
-      <h4>${esc(title || (n ? 'Send these to The Ken' : 'Sign in to save as you go'))}</h4></div>
+      <h4>${esc(title || (n ? 'Email me the shortlist' : 'Sign in to save as you go'))}</h4></div>
     <p class="send-p">${n ? 'Nothing leaves your browser until you confirm your email. One free Ken account, no password: we send you a 6-digit code.' : 'Answer anything and it waits here. Or sign in now, and your answers save as you go.'}</p>
     ${keys.length ? `<details class="send-list"><summary>See what’s waiting (${keys.length} ${keys.length === 1 ? 'answer' : 'answers'}${words ? `, ${words} in words` : ''})</summary><ul>${keys.map((k) => {
       const d = drafts[k], v = String(d.value), show = d.kind !== 'tap' || d.value !== 1;

@@ -34,8 +34,12 @@ export function toPageData(data) {
   const kindName = Object.fromEntries(r.kinds.map((k) => [k.id, k.name]));
   return {
     SECS: p.sections.map((s) => ({ id: s.key, n: s.number, name: s.name, slug: s.id })),
-    B: p.beliefs.map((b) => ({
-      id: b.id, s: keyOf[b.section], h: b.headline, w: b.credit, n: b.readers, kw: b.keywords || [], q: pairs(b.quotes),
+    // hidden beliefs stay in the JSON (their place sets the database card ids) but aren't shown;
+    // showIn puts a belief under another section on the page without moving its id
+    B: p.beliefs.filter((b) => !b.hidden).map((b) => ({
+      id: b.id, s: keyOf[b.showIn || b.section], h: b.headline, w: b.credit, n: b.readers, kw: b.keywords || [], q: pairs(b.quotes),
+      ...(b.translation ? { tr: b.translation } : {}),
+      ...(b.split ? { split: [b.split.yes, b.split.no] } : {}),
       gifts: (b.giftKinds || []).map((k) => kindName[k]).filter(Boolean),
       ...(b.opposing ? { vs: true, h2: b.opposing.headline, w2: b.opposing.credit, n2: b.opposing.readers } : {}),
       ...(b.trend ? { yrs: ['2024', '2025', '2026'].map((y) => b.trend[y]) } : {}),
@@ -51,6 +55,8 @@ export function toPageData(data) {
     FEEL: ch.feeling.map((x) => [x.label, x.count]),
     OCC: ch.occasions.map((x) => [x.label, x.count]),
     TIER: ch.recipientShare.map((x) => [x.label, x.share]),
-    BUDGET: ch.budget
+    BUDGET: ch.budget,
+    BUDGETS: ch.budgets,
+    YEAR_SHARE: ch.yearShare
   };
 }

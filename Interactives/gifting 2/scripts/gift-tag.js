@@ -53,16 +53,16 @@
   }
 
   const FONT = {
-    display: '"Jazmin Alt", Georgia, serif',
-    body: '"GT America", Arial, sans-serif',
-    bold: '"GT America Bold", Arial, sans-serif'
+    display: '"Reckless", Georgia, serif',
+    body: '"Archivo", Arial, sans-serif',
+    bold: '"Archivo Bold", Arial, sans-serif'
   };
   function ready() {
     if (!document.fonts) return Promise.resolve();
     return Promise.all([
-      document.fonts.load('bold 20px "Jazmin Alt"'),
-      document.fonts.load('bold 14px "GT America Bold"'),
-      document.fonts.load('300 12px "GT America"')
+      document.fonts.load('bold 20px "Reckless"'),
+      document.fonts.load('bold 14px "Archivo Bold"'),
+      document.fonts.load('300 12px "Archivo"')
     ]).catch(() => {});
   }
 

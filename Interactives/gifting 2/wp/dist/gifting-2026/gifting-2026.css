@@ -1,12 +1,14 @@
 /* Gifting · The Ken. Scoped to body.gifting-2026 .gk (the page's root) so it can sit inside the-ken.com's
    header and footer, as the 2026 build does. Fonts and tokens are the Ken design system's (assets/fonts). */
-@font-face { font-family: 'Jazmin Alt'; src: url('assets/fonts/JazminAlt-Bold.otf') format('opentype'); font-weight: bold; font-display: swap; }
-@font-face { font-family: 'GT America Bold'; src: url('assets/fonts/GT-America-Standard-Black.ttf') format('truetype'); font-weight: bold; font-display: swap; }
-@font-face { font-family: 'GT America'; src: url('assets/fonts/GT-America-Standard-Light.ttf') format('truetype'); font-weight: 300; font-display: swap; }
+@font-face { font-family: 'Reckless'; src: url('assets/fonts/Reckless-Bold.woff2') format('woff2'); font-weight: bold; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Reckless'; src: url('assets/fonts/Reckless-BoldItalic.woff2') format('woff2'); font-weight: bold; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Archivo Bold'; src: url('assets/fonts/Archivo-ExtraBold.ttf') format('truetype'); font-weight: bold; font-display: swap; }
+@font-face { font-family: 'Archivo'; src: url('assets/fonts/Archivo-Regular.ttf') format('truetype'); font-weight: 300 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Archivo'; src: url('assets/fonts/Archivo-Italic.ttf') format('truetype'); font-weight: 300 400; font-style: italic; font-display: swap; }
 body.gifting-2026 {
   --ken-bg: #F7F2F2; --ken-rule: #DCCFCF; --ken-grid: #E0D4D4; --ken-outline: #C4AAAA;
   --ken-ink: #1A1208; --ken-text: #5C4A4A; --ken-text-soft: #4A3535; --ken-body: #3A2E20; --ken-na: #9A8E7A;
-  --ken-font-display: 'Jazmin Alt', Georgia, serif; --ken-font-body: 'GT America', Arial, sans-serif; --ken-font-bold: 'GT America Bold', Arial, sans-serif;
+  --ken-font-display: 'Reckless', Georgia, serif; --ken-font-body: 'Archivo', Arial, sans-serif; --ken-font-bold: 'Archivo Bold', Arial, sans-serif;
   margin: 0;
 }
 :where(body.gifting-2026 .gk *, body.gifting-2026 .gk *::before, body.gifting-2026 .gk *::after) { box-sizing: border-box; margin: 0; padding: 0; }
@@ -15,13 +17,13 @@ body.gifting-2026 .gk { font-family: var(--ken-font-body); color: var(--ken-ink)
 /* Gifting · The Ken. Tokens and fonts come from assets/ken-chart.css (the Ken design system).
 
    Reading order, top to bottom. Each level has one job and one look:
-     1  Story title       Jazmin italic, largest        .art-title
-     2  Section heading   Jazmin italic + number tag    .sec-head h2
-     3  Question          Jazmin, in its own card       .qtext
-     4  Reader's words    Jazmin on cards and tags      .bcard .quote, tag headline
-     5  Reading text      GT America Light 17.5px       .nl p
-     6  Labels            GT America Black, caps 10px   .label
-     7  Notes, credits    GT America Light italic 13px  .note, .credit                         */
+     1  Story title       Reckless italic, largest        .art-title
+     2  Section heading   Reckless italic + number tag    .sec-head h2
+     3  Question          Reckless, in its own card       .qtext
+     4  Reader's words    Reckless on cards and tags      .bcard .quote, tag headline
+     5  Reading text      Archivo 17.5px               .nl p
+     6  Labels            Archivo ExtraBold, caps 10px  .label
+     7  Notes, credits    Archivo italic 13px           .note, .credit                         */
 
 body.gifting-2026 {
   --red: #C8423A; --ink: #1A1208; --char: #3D3D3D; --teal: #4A9E9A; --green: #4A7A5A; --olive: #7A9E4A; --taupe: #A89880;
@@ -32,7 +34,7 @@ body.gifting-2026 {
   --ease: cubic-bezier(.2, .8, .2, 1);
 }
 body.gifting-2026 { display: block; overflow-x: hidden; background: var(--ken-bg); color: var(--ink); }
-body.gifting-2026.locked { overflow: hidden; height: 100svh; }
+
 body.gifting-2026 .gk p { margin: 0; }
 body.gifting-2026 .gk button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
 body.gifting-2026 .gk a { color: inherit; }
@@ -45,25 +47,27 @@ body.gifting-2026 .gk .credit { font-family: var(--ken-font-body); font-size: 11
 body.gifting-2026 .gk .kicker-tag { display: inline-block; background: #8A7B78; color: #fff; font-family: var(--ken-font-bold); font-weight: bold; font-size: 9px; letter-spacing: .06em; text-transform: uppercase; padding: 5px 7px 4px; transform: rotate(-2deg); }
 
 /* ================= LANDING: one screen, split down the middle ================= */
-body.gifting-2026 .gk .land { position: fixed; inset: var(--gifting-nav-h, 0px) 0 0 0; display: flex; flex-direction: column; background: var(--ken-bg); z-index: 5; }
-body.gifting-2026 .gk .land-head { text-align: center; padding: clamp(18px, 4vh, 44px) 20px clamp(14px, 3vh, 28px); transition: margin .6s var(--ease), opacity .35s; }
-body.gifting-2026 .gk .land-meta { margin-top: 12px; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+body.gifting-2026 .gk .land { position: relative; display: flex; flex-direction: column; background: var(--ken-bg); z-index: 5; }
+body.gifting-2026 .gk .land.lifting { position: fixed; top: var(--gifting-nav-h, 0px); left: 0; right: 0; bottom: 0; transition: top .6s var(--ease); }
+body.gifting-2026 .gk .land.lifting .split { flex: 1; }
+body.gifting-2026 .gk .land-head { text-align: center; padding: clamp(36px, 7vh, 72px) 24px clamp(44px, 8vh, 80px); transition: margin .6s var(--ease), opacity .35s; }
+body.gifting-2026 .gk .land-meta { margin-top: 22px; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
 body.gifting-2026 .gk .land-meta span + span::before { content: "•"; margin: 0 7px; }
-body.gifting-2026 .gk .land-title { font-family: var(--ken-font-display); font-weight: bold; font-style: italic; font-size: clamp(32px, min(6vw, 7vh), 60px); line-height: 1.04; letter-spacing: -1px; margin: 8px auto 0; max-width: 14em; text-wrap: balance; }
-body.gifting-2026 .gk .land-strap { font-size: clamp(14px, 2vh, 17px); line-height: 1.45; color: var(--muted); max-width: 36em; margin: 10px auto 0; text-wrap: balance; }
-body.gifting-2026 .gk .land-by { font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+body.gifting-2026 .gk .land-title { font-family: var(--ken-font-display); font-weight: bold; font-style: italic; font-size: clamp(32px, min(6vw, 7vh), 60px); line-height: 1.04; letter-spacing: -1px; margin: 8px auto 0; max-width: 14em; text-wrap: balance; margin-top: 12px; }
+body.gifting-2026 .gk .land-strap { font-size: 17px; line-height: 1.55; color: var(--muted); max-width: 34em; margin: 16px auto 0; text-wrap: balance; }
+body.gifting-2026 .gk .land-by { font-size: 12.5px; color: var(--muted); margin-top: 16px; }
 body.gifting-2026 .gk .land-by a { color: var(--red); text-decoration: none; }
 
-body.gifting-2026 .gk .split { flex: 1; min-height: 0; display: flex; position: relative; border-top: 3px solid var(--ink); }
-body.gifting-2026 .gk .side { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; padding: clamp(18px, 3.5vh, 36px) clamp(20px, 4vw, 52px); text-align: left; cursor: pointer; transition: flex-grow .6s var(--ease), background .3s; }
+body.gifting-2026 .gk .split { flex: none; min-height: clamp(360px, 58vh, 520px); display: flex; position: relative; border-top: 3px solid var(--ink); }
+body.gifting-2026 .gk .side { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; padding: clamp(32px, 6vh, 56px) clamp(24px, 5vw, 64px); text-align: left; cursor: pointer; transition: flex-grow .6s var(--ease), background .3s; }
 body.gifting-2026 .gk .side-r { background: var(--side-r); color: var(--ink); }
 body.gifting-2026 .gk .side-p { background: var(--side-p); color: #F7F2F2; }
 body.gifting-2026 .gk .split:not(.opening) .side:hover { flex-grow: 1.18; }
 body.gifting-2026 .gk .side-art { position: absolute; left: 0; right: 0; top: 0; bottom: calc(clamp(18px, 3.5vh, 36px) + 220px); display: flex; align-items: flex-end; justify-content: center; pointer-events: none; }
 body.gifting-2026 .gk .side .label { color: inherit; opacity: .75; }
 body.gifting-2026 .gk .side h2 { font-family: var(--ken-font-display); font-weight: bold; font-style: italic; font-size: clamp(30px, min(4.6vw, 6vh), 56px); line-height: 1; letter-spacing: -.8px; margin-top: 8px; }
-body.gifting-2026 .gk .side p { font-size: clamp(14px, 1.9vh, 16.5px); line-height: 1.45; margin-top: 10px; max-width: 30em; opacity: .9; }
-body.gifting-2026 .gk .side .go { display: inline-flex; align-items: center; gap: 10px; margin-top: 16px; font-family: var(--ken-font-bold); font-weight: bold; font-size: 15px; border: 1.5px solid currentColor; border-radius: 12px; padding: 9px 18px; transition: background .2s, color .2s; }
+body.gifting-2026 .gk .side p { font-size: 16px; line-height: 1.5; margin-top: 14px; max-width: 30em; opacity: .9; }
+body.gifting-2026 .gk .side .go { display: inline-flex; align-items: center; gap: 10px; margin-top: 22px; font-family: var(--ken-font-bold); font-weight: bold; font-size: 13px; border: 1.5px solid currentColor; border-radius: 12px; padding: 7px 14px; transition: background .2s, color .2s; }
 body.gifting-2026 .gk .side-r .go { background: var(--ink); color: #fff; border-color: var(--ink); }
 body.gifting-2026 .gk .side-p .go { background: #F7F2F2; color: var(--ink); border-color: #F7F2F2; }
 body.gifting-2026 .gk .side:hover .go { transform: translateY(-1px); }
@@ -71,13 +75,12 @@ body.gifting-2026 .gk .side-copy { position: relative; z-index: 1; transition: o
 
 /* the ribbon between the two sides, with a bow */
 body.gifting-2026 .gk .ribbon { position: relative; flex: 0 0 14px; background: var(--red); z-index: 3; box-shadow: inset 3px 0 0 rgba(0,0,0,.12), inset -3px 0 0 rgba(0,0,0,.12); transition: opacity .3s; }
-body.gifting-2026 .gk .ribbon .bow { position: absolute; left: 50%; top: 34%; width: 92px; height: 70px; transform: translate(-50%, -50%); }
-body.gifting-2026 .gk .ribbon .or { position: absolute; left: 50%; top: calc(34% + 52px); transform: translateX(-50%); background: var(--ken-bg); border: 2px solid var(--ink); border-radius: 12px; font-family: var(--ken-font-bold); font-weight: bold; font-size: 11px; letter-spacing: .12em; padding: 4px 9px; }
+body.gifting-2026 .gk .ribbon .bow { position: absolute; left: 50%; top: 50%; width: 92px; height: 70px; transform: translate(-50%, -50%); }
 
 
 /* opening: the picked side takes the screen, then the story fades in under it */
 body.gifting-2026 .gk .land.opening .land-head { margin-top: calc(-1 * var(--head-h, 260px)); opacity: 0; }
-body.gifting-2026 .gk .split.opening .ribbon, body.gifting-2026 .gk .split.opening .or { opacity: 0; }
+body.gifting-2026 .gk .split.opening .ribbon { opacity: 0; }
 body.gifting-2026 .gk .split.opening .side { flex-grow: .0001; padding-left: 0; padding-right: 0; }
 body.gifting-2026 .gk .split.opening .side.picked { flex-grow: 1; }
 body.gifting-2026 .gk .split.opening .side-copy { opacity: 0; }
@@ -116,7 +119,7 @@ body.gifting-2026 .gk .lede-head .lede { border-color: var(--band-ink, var(--ink
 body.gifting-2026 .gk .lede-head { padding: 44px 20px 46px; background: var(--band, transparent); color: var(--band-ink, var(--ink)); border-bottom: 3px solid var(--ink); }
 body.gifting-2026 .gk .lede { margin: 16px auto 0; max-width: 640px; aspect-ratio: 16 / 9; overflow: hidden; border: 2px solid var(--ink); }
 body.gifting-2026 .gk .lede img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
-body.gifting-2026 .gk .land-head .lede { height: clamp(150px, calc(100vh - var(--gifting-nav-h, 0px) - 500px), 500px); width: auto; max-width: calc(100vw - 40px); aspect-ratio: 16 / 9; margin: 12px auto 0; }
+body.gifting-2026 .gk .land-head .lede { height: clamp(200px, 44vh, 440px); width: auto; max-width: calc(100vw - 40px); aspect-ratio: 16 / 9; margin: 12px auto 0; }
 body.gifting-2026 .gk .art-head { max-width: 680px; margin: 0 auto; text-align: center; }
 body.gifting-2026 .gk .art-meta { margin-top: 18px; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase; opacity: .8; }
 body.gifting-2026 .gk .art-meta span + span::before { content: "•"; margin: 0 7px; }
@@ -192,31 +195,28 @@ body.gifting-2026 .gk .sec-head .dek em { font-family: var(--ken-font-display); 
 body.gifting-2026 .gk .sec-head .meta { margin-top: 10px; }
 body.gifting-2026 .gk .sec-head .meta a { cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 
-/* philosophies: belief cards on ruled notes, in a grid that flows in balanced columns */
-body.gifting-2026 .gk .wall { max-width: 1100px; margin: 30px auto 0; padding: 0 20px; columns: 3 280px; column-gap: 22px; }
-body.gifting-2026 .gk .wall .bcard, body.gifting-2026 .gk .wall .bcard.S, body.gifting-2026 .gk .wall .bcard.L { width: 100%; margin: 0 0 22px; break-inside: avoid; transform: none; }
-body.gifting-2026 .gk .wall .bcard:hover { box-shadow: 7px 7px 0 var(--sc, var(--ink)); }
-body.gifting-2026 .gk .wall .bcard.swinging { transform-origin: 50% 0; animation: gk-sway 1.2s ease-in-out; }
+/* philosophies: belief cards like calling cards, sized by readers, dealt loosely onto the table */
+body.gifting-2026 .gk .wall { max-width: 1160px; margin: 34px auto 0; padding: 0 20px; display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 30px 22px; }
+body.gifting-2026 .gk .wall .bcard.swinging, body.gifting-2026 .gk .bpage .bcard.swinging { transform-origin: 50% 0; animation: gk-sway 1.2s ease-in-out; }
 @keyframes gk-sway { 0%, 100% { transform: rotate(0); } 18% { transform: rotate(1.4deg); } 40% { transform: rotate(-1deg); } 62% { transform: rotate(.5deg); } 82% { transform: rotate(-.2deg); } }
 
-body.gifting-2026 .gk .bcard { position: relative; display: flex; flex-direction: column; width: 250px; flex: 0 0 auto; margin-top: 16px; background: #fff; border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--sc, var(--ink)); padding: 18px 18px 14px; cursor: pointer; text-align: left; color: var(--ink); transform: rotate(var(--r, 0deg)); transform-origin: 50% 0; transition: transform .25s var(--ease), box-shadow .2s; }
-body.gifting-2026 .gk .bcard:hover { transform: rotate(0) translateY(-4px); }
-body.gifting-2026 .gk .bcard.S { width: 228px; } body.gifting-2026 .gk .bcard.L { width: 290px; }
+body.gifting-2026 .gk .bcard { position: relative; display: flex; flex-direction: column; width: 250px; min-height: 250px; flex: 0 0 auto; background: color-mix(in srgb, var(--sc, var(--red)) 7%, #FFFDF8); border: 0; border-radius: 3px; box-shadow: 0 1px 0 rgba(26,18,8,.05), 0 16px 24px -16px rgba(40,30,10,.5), 0 2px 4px -2px rgba(40,30,10,.22); padding: 18px 20px 16px; cursor: pointer; text-align: left; color: var(--ink); transform: rotate(var(--r, 0deg)); transition: transform .25s var(--ease), box-shadow .25s; }
+body.gifting-2026 .gk .bcard:hover { transform: rotate(0) translateY(-6px); box-shadow: 0 1px 0 rgba(26,18,8,.05), 0 24px 30px -16px rgba(40,30,10,.55), 0 2px 4px -2px rgba(40,30,10,.22); }
+body.gifting-2026 .gk .bcard.S { width: 210px; min-height: 210px; } body.gifting-2026 .gk .bcard.L { width: 300px; min-height: 300px; }
+body.gifting-2026 .gk .bcard .lab { font-family: var(--ken-font-bold); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--sc, var(--red)); margin-bottom: 10px; }
 body.gifting-2026 .gk .bcard .top { display: flex; justify-content: space-between; gap: 10px; }
-body.gifting-2026 .gk .bcard .quote { font-family: var(--ken-font-display); font-weight: bold; color: var(--ink); line-height: 1.14; margin-top: 10px; font-size: 20px; text-wrap: pretty; }
+body.gifting-2026 .gk .bcard .quote { font-family: var(--ken-font-display); font-weight: bold; color: var(--ink); line-height: 1.14; margin-top: 0; font-size: 20px; text-wrap: pretty; }
 body.gifting-2026 .gk .bcard.S .quote { font-size: 18px; } body.gifting-2026 .gk .bcard.L .quote { font-size: 25px; }
-body.gifting-2026 .gk .bcard .or { display: block; font-family: var(--ken-font-bold); font-size: 10px; letter-spacing: .16em; color: var(--muted); margin: 10px 0; padding-top: 8px; border-top: 1.5px solid var(--line); }
+body.gifting-2026 .gk .bcard .or { display: block; font-family: var(--ken-font-bold); font-size: 10px; letter-spacing: .16em; color: var(--muted); margin: 8px 0; }
 body.gifting-2026 .gk .bcard .credit { margin-top: 8px; }
-body.gifting-2026 .gk .bcard .count { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 12px; }
-body.gifting-2026 .gk .bcard .quote + .credit + .count { border-top: 1.5px solid rgba(26,18,8,.15); margin-top: 14px; }
+body.gifting-2026 .gk .bcard .count { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 16px; }
 body.gifting-2026 .gk .bcard .count b { font-family: var(--ken-font-display); font-size: 30px; line-height: 1; color: var(--sc, var(--red)); }
 body.gifting-2026 .gk .bcard.L .count b { font-size: 40px; }
 body.gifting-2026 .gk .bcard .count .vs { font-family: var(--ken-font-bold); font-size: 10px; letter-spacing: .1em; color: var(--muted); }
 body.gifting-2026 .gk .bcard .count small { font-size: 12px; color: var(--muted); }
 body.gifting-2026 .gk .bcard .one { margin-left: auto; font-family: var(--ken-font-bold); font-size: 9px; letter-spacing: .12em; color: var(--sc); border: 1.5px solid var(--sc); border-radius: 999px; padding: 3px 7px; }
 /* index card: ruled lines, red margin */
-body.gifting-2026 .gk .bcard.v-index { background: #fff linear-gradient(90deg, transparent 22px, rgba(200,66,58,.45) 22px, rgba(200,66,58,.45) 23.5px, transparent 23.5px), #fff; background-image: linear-gradient(90deg, transparent 22px, rgba(200,66,58,.45) 22px, rgba(200,66,58,.45) 23.5px, transparent 23.5px), repeating-linear-gradient(180deg, transparent 0 25px, rgba(74,158,154,.28) 25px 26.5px); background-position: 0 0, 0 14px; padding-left: 32px; }
-body.gifting-2026 .gk .bcard.picked { outline: 3px solid var(--red); outline-offset: 5px; }
+body.gifting-2026 .gk .bcard.picked { box-shadow: 0 0 0 2.5px var(--red), 0 16px 24px -16px rgba(40,30,10,.5); }
 body.gifting-2026 .gk .bcard.picked::after { content: "+1"; position: absolute; top: -12px; right: -14px; z-index: 3; width: 38px; height: 38px; border-radius: 50%; background: var(--red); color: #fff; border: 2px solid var(--ink); font: bold 13px/34px var(--ken-font-bold); text-align: center; transform: rotate(-10deg); }
 body.gifting-2026 .gk .bcard.match::before { content: "Sounds like you"; position: absolute; top: -12px; left: 14px; z-index: 3; background: var(--ink); color: #fff; font-family: var(--ken-font-bold); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; padding: 4px 8px; }
 body.gifting-2026.dealt .gk .wall .bcard:not(.hung):not(.swinging) { animation: gk-pegin .6s cubic-bezier(.3, 1.4, .4, 1) both; }
@@ -229,6 +229,99 @@ body.gifting-2026 .gk .art-hand .bcard .count b { font-size: 24px; }
 
 /* the slim back of a card */
 body.gifting-2026 .gk .cardpop blockquote.first { font-size: clamp(19px, 2.4vw, 22px); }
+/* charts: quiet, on the page's paper. Give is red, get is warm grey; shares run light to dark red */
+body.gifting-2026 .gk .vizwrap { --v-give: #C8423A; --v-get: #A89880; --v-s1: #F3D9D6; --v-s2: #E3A39C; --v-s3: #C9655B; --v-s4: #8E2C25; max-width: 1060px; margin: 48px auto 64px; padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 72px; }
+body.gifting-2026 .gk .vizwrap.one { grid-template-columns: 1fr; max-width: 620px; }
+body.gifting-2026 .gk .viz .bars { margin-top: 4px; }
+body.gifting-2026 .gk .viz .bars i { background: var(--v-give); border-radius: 0 3px 3px 0; height: 12px; }
+body.gifting-2026 .gk .viz .bars:hover i:not(:hover) { opacity: .55; }
+body.gifting-2026 .gk .vsplit.tall { height: 22px; margin-top: 6px; }
+body.gifting-2026 .gk .vsplit.tall span:first-child { background: var(--v-give); }
+body.gifting-2026 .gk .viz { margin: 0; padding-top: 22px; border-top: 2px solid var(--ink); }
+body.gifting-2026 .gk .viz .ph { margin-bottom: 8px; }
+body.gifting-2026 .gk .viz h4 { font-family: var(--ken-font-display); font-weight: bold; font-size: 20px; line-height: 1.22; color: var(--ink); text-wrap: pretty; }
+body.gifting-2026 .gk .vsub { font-size: 14px; line-height: 1.5; color: var(--muted); margin: 10px 0 22px; }
+body.gifting-2026 .gk .vlegend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 18px; font-size: 12.5px; color: var(--text); }
+body.gifting-2026 .gk .vlegend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+body.gifting-2026 .gk .vnote { color: var(--muted); }
+body.gifting-2026 .gk .viz .give { background: var(--v-give); } body.gifting-2026 .gk .viz .get { background: var(--v-get); }
+body.gifting-2026 .gk .viz .s1 { background: var(--v-s1); color: var(--ink); } body.gifting-2026 .gk .viz .s2 { background: var(--v-s2); color: var(--ink); } body.gifting-2026 .gk .viz .s3 { background: var(--v-s3); color: #fff; } body.gifting-2026 .gk .viz .s4 { background: var(--v-s4); color: #fff; }
+body.gifting-2026 .gk .vbars { display: flex; gap: 12px; height: 160px; align-items: stretch; border-bottom: 1px solid var(--line); padding-top: 18px; margin-bottom: 26px; }
+body.gifting-2026 .gk .vgrp { flex: 1; position: relative; }
+body.gifting-2026 .gk .vpair { display: flex; gap: 2px; align-items: flex-end; height: 100%; }
+body.gifting-2026 .gk .vb { flex: 1; border-radius: 3px 3px 0 0; position: relative; min-height: 2px; transition: opacity .15s; }
+body.gifting-2026 .gk .vbars:hover .vb:not(:hover) { opacity: .55; }
+body.gifting-2026 .gk .vb em { position: absolute; top: -17px; left: 50%; transform: translateX(-50%); font-family: var(--ken-font-bold); font-size: 11px; font-style: normal; color: var(--ink); }
+body.gifting-2026 .gk .vx { position: absolute; bottom: -21px; left: 0; right: 0; text-align: center; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+body.gifting-2026 .gk .vsplit { display: flex; gap: 2px; height: 8px; margin-top: 8px; }
+body.gifting-2026 .gk .vsplit span:first-child { background: var(--line); border-radius: 4px 0 0 4px; } body.gifting-2026 .gk .vsplit span:last-child { border-radius: 0 4px 4px 0; }
+body.gifting-2026 .gk .vsplitk { font-size: 13px; line-height: 1.5; color: var(--text); margin-top: 8px; }
+body.gifting-2026 .gk .vsplitk b { font-family: var(--ken-font-bold); color: var(--ink); }
+body.gifting-2026 .gk .vstack { display: grid; gap: 7px; }
+body.gifting-2026 .gk .vrow { display: grid; grid-template-columns: 124px 1fr; align-items: center; gap: 10px; }
+body.gifting-2026 .gk .vk { font-size: 13px; color: var(--text); }
+body.gifting-2026 .gk .vrow.me .vk { font-family: var(--ken-font-bold); font-weight: bold; color: var(--ink); }
+body.gifting-2026 .gk .vseg { display: flex; gap: 2px; height: 22px; }
+body.gifting-2026 .gk .vseg span { display: flex; align-items: center; justify-content: center; font-family: var(--ken-font-bold); font-size: 10.5px; min-width: 2px; }
+body.gifting-2026 .gk .vseg span:first-child { border-radius: 3px 0 0 3px; } body.gifting-2026 .gk .vseg span:last-child { border-radius: 0 3px 3px 0; }
+body.gifting-2026 .gk .vrow.me .vseg { box-shadow: 0 0 0 1.5px var(--ink); border-radius: 3px; }
+body.gifting-2026 .gk .vsrc { font-size: 12px; color: var(--muted); margin-top: 12px; }
+body.gifting-2026 .gk .vt { margin-top: 6px; font-size: 12px; color: var(--text); }
+body.gifting-2026 .gk .vt summary { cursor: pointer; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+body.gifting-2026 .gk .vt table { border-collapse: collapse; width: 100%; margin-top: 8px; }
+body.gifting-2026 .gk .vt th, body.gifting-2026 .gk .vt td { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: left; font-size: 12px; }
+body.gifting-2026 .gk .vt th { font-family: var(--ken-font-bold); }
+body.gifting-2026 .gk .vtip { position: fixed; z-index: 1100; pointer-events: none; background: var(--ink); color: #fff; font-size: 12px; line-height: 1.35; padding: 6px 9px; border-radius: 6px; max-width: 260px; opacity: 0; transition: opacity .12s; }
+body.gifting-2026 .gk .vtip.on { opacity: 1; }
+/* translations of readers' words, and the small charts in a pop-up */
+body.gifting-2026 .gk .tr { font-style: italic; font-size: 14px; line-height: 1.4; color: var(--text); opacity: .8; margin-top: 6px; }
+body.gifting-2026 .gk .data-t { font-size: 13px; color: var(--muted); }
+body.gifting-2026 .gk .medians { display: flex; gap: 26px; flex-wrap: wrap; }
+body.gifting-2026 .gk .medians span { display: grid; font-size: 12.5px; color: var(--muted); }
+body.gifting-2026 .gk .medians b { font-family: var(--ken-font-display); font-size: 30px; line-height: 1.05; color: var(--sc, var(--red)); }
+body.gifting-2026 .gk .context .intro-h { font-family: var(--ken-font-display); font-weight: bold; font-size: clamp(26px, 3.4vw, 36px); line-height: 1.12; color: var(--ink); margin: 6px 0 14px; text-wrap: balance; }
+body.gifting-2026 .gk .cardpop h2 { font-family: var(--ken-font-display); font-weight: bold; font-size: clamp(24px, 3.4vw, 30px); line-height: 1.12; margin-top: 10px; text-wrap: pretty; }
+body.gifting-2026 .gk .cardpop h2 .or { display: block; font-family: var(--ken-font-bold); font-size: 11px; letter-spacing: .16em; color: var(--muted); margin: 8px 0; }
+body.gifting-2026 .gk .cardpop .who { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+body.gifting-2026 .gk .cardpop .voices blockquote { font-size: 16px; }
+body.gifting-2026 .gk .cardpop .data { margin-top: 20px; padding-top: 16px; border-top: 2px solid var(--ink); display: grid; gap: 14px; }
+body.gifting-2026 .gk .cardpop .data .deep-p { margin-top: 0; font-size: 15px; }
+body.gifting-2026 .gk .cardpop .data .yrs { margin: 18px 0 20px; }
+body.gifting-2026 .gk .bars b.me, body.gifting-2026 .gk .bars span.me { color: var(--ink); }
+body.gifting-2026 .gk .bars i.dim { opacity: .3; }
+/* Go deeper: a page of its own for one belief */
+body.gifting-2026 .gk .bpage { max-width: 1120px; margin: 0 auto; padding: 34px 24px 80px; }
+body.gifting-2026 .gk .crumb { font-size: 13px; color: var(--muted); }
+body.gifting-2026 .gk .crumb a { color: var(--ink); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+body.gifting-2026 .gk .phead { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 56px; margin-top: 20px; padding-bottom: 26px; border-bottom: 3px solid var(--ink); }
+body.gifting-2026 .gk .phead h1 { font-family: var(--ken-font-display); font-weight: bold; font-size: clamp(28px, 3.4vw, 40px); line-height: 1.12; letter-spacing: -.5px; text-wrap: pretty; }
+body.gifting-2026 .gk .phead h1 .or { display: block; font-family: var(--ken-font-bold); font-size: 13px; letter-spacing: .16em; color: var(--muted); margin: 12px 0; }
+body.gifting-2026 .gk .phead .who { font-size: 13px; color: var(--muted); margin-top: 14px; }
+body.gifting-2026 .gk .phead .side-n { align-self: end; display: grid; gap: 14px; }
+body.gifting-2026 .gk .phead .big2 { font-family: var(--ken-font-display); font-weight: bold; font-size: 52px; line-height: .9; color: var(--sc, var(--red)); }
+body.gifting-2026 .gk .phead .big2 small { font-family: var(--ken-font-bold); font-size: 14px; letter-spacing: .1em; color: var(--muted); margin: 0 10px; vertical-align: middle; }
+body.gifting-2026 .gk .phead .side-n .deep-p { margin-top: 0; font-size: 15px; }
+body.gifting-2026 .gk .phead .yrs { margin: 16px 0 18px; }
+body.gifting-2026 .gk .phead .acts { margin-top: 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+/* belief page: readers' words on plain paper slips */
+body.gifting-2026 .gk .alist blockquote.slip { position: relative; background: #FFFDF8; border-left: 0; padding: 16px 20px 14px 42px; margin: 0 0 12px; box-shadow: 0 1px 0 rgba(26,18,8,.05), 0 10px 18px -14px rgba(40,30,10,.4); }
+body.gifting-2026 .gk .alist blockquote.slip::before { content: "“"; position: absolute; left: 14px; top: 8px; font-family: var(--ken-font-display); font-weight: bold; font-size: 34px; line-height: 1; color: var(--muted); opacity: .45; }
+body.gifting-2026 .gk .pgrid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 56px; margin-top: 34px; }
+body.gifting-2026 .gk .h5 { font-family: var(--ken-font-bold); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink); margin: 0 0 14px; }
+body.gifting-2026 .gk .pgrid .h5 + .note { margin: -8px 0 16px; }
+body.gifting-2026 .gk .alist blockquote { font-size: 18px; line-height: 1.5; color: var(--ink); padding: 16px 0 16px 16px; border-left: 3px solid var(--sc, var(--red)); margin-bottom: 10px; background: color-mix(in srgb, var(--sc, var(--red)) 5%, transparent); }
+body.gifting-2026 .gk .alist blockquote .credit { display: block; margin-top: 6px; font-size: 12px; color: var(--muted); }
+body.gifting-2026 .gk .alist .your { margin-top: 26px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+body.gifting-2026 .gk .alist .your input { flex: 1; min-width: 200px; border: 0; border-bottom: 2px solid var(--ink); background: transparent; font: inherit; font-size: 17px; padding: 8px 2px; outline: none; color: var(--ink); }
+body.gifting-2026 .gk .ptags { display: flex; flex-wrap: wrap; gap: 26px 18px; padding: 22px 0 6px; position: relative; }
+body.gifting-2026 .gk .ptags::before { content: ""; position: absolute; left: -8px; right: -8px; top: 8px; height: 2px; background: var(--ink); opacity: .55; }
+body.gifting-2026 .gk .ptags .gtag svg { width: 168px; height: auto; }
+body.gifting-2026 .gk .pcards { display: flex; flex-wrap: wrap; gap: 22px 18px; margin-top: 8px; }
+body.gifting-2026 .gk .pcards .bcard { width: calc(50% - 9px); min-height: 170px; }
+body.gifting-2026 .gk .pcards .bcard .quote { font-size: 18px; }
+body.gifting-2026 .gk .pcards .bcard .count b { font-size: 24px; }
+body.gifting-2026 .gk .pblock + .pblock { margin-top: 40px; }
+
 body.gifting-2026 .gk .agree { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 18px; padding-top: 14px; border-top: 2px solid var(--ink); font-size: 15px; color: var(--text); }
 body.gifting-2026 .gk .agree b { font-family: var(--ken-font-display); font-size: 26px; color: var(--sc, var(--red)); }
 body.gifting-2026 .gk .agree .meter { flex: 1; min-width: 120px; height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
@@ -396,6 +489,23 @@ body.gifting-2026 .gk .gc-cap { font-size: 14px; color: var(--text); text-align:
 body.gifting-2026 .gk .gc-cap b { font-family: var(--ken-font-display); font-size: 20px; color: var(--ink); }
 body.gifting-2026 .gk .gc-body { padding: 20px 24px 22px; display: grid; gap: 14px; align-content: start; min-width: 0; }
 body.gifting-2026 .gk .gc-k { color: var(--red); }
+/* the end cards: a calling card with a short list */
+body.gifting-2026 .gk .gc.call { background: #FBF8F3; max-width: 560px; margin-left: auto; margin-right: auto; }
+body.gifting-2026 .gk .gc.call .gc-body { padding: 26px 28px 22px; gap: 10px; }
+body.gifting-2026 .gk .call-list { list-style: none; margin: 4px 0 0; padding: 0; counter-reset: c; }
+body.gifting-2026 .gk .call-list li { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--line); counter-increment: c; }
+body.gifting-2026 .gk .call-list li::before { content: counter(c); font-family: var(--ken-font-bold); font-size: 11px; color: var(--red); padding-top: 4px; min-width: 12px; }
+body.gifting-2026 .gk .call-list li > span { flex: 1; font-family: var(--ken-font-bold); font-weight: bold; font-size: 16px; line-height: 1.3; color: var(--ink); }
+body.gifting-2026 .gk .call-list.big-q li > span { font-family: var(--ken-font-display); font-size: 20px; line-height: 1.22; }
+body.gifting-2026 .gk .call-list small { display: block; margin-top: 4px; font-family: var(--ken-font-body); font-weight: 300; font-size: 12.5px; color: var(--muted); }
+body.gifting-2026 .gk .call-list li > button { font-size: 18px; line-height: 1; color: var(--muted); padding: 2px 4px; }
+body.gifting-2026 .gk .call-list li.empty > span { min-height: 24px; font-family: var(--ken-font-body); font-weight: 300; font-size: 14px; color: var(--muted); }
+body.gifting-2026 .gk .call-words { display: grid; gap: 10px; padding-top: 14px; border-top: 1px solid var(--line); }
+body.gifting-2026 .gk .call-words > .label { color: var(--muted); }
+body.gifting-2026 .gk .call-words p { font-size: 15px; line-height: 1.45; color: var(--ink); overflow-wrap: anywhere; }
+body.gifting-2026 .gk .call-words small { display: block; font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+body.gifting-2026 .gk .gc.call .imp { font-family: var(--ken-font-bold); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); text-align: right; padding-top: 10px; border-top: 1px solid var(--line); }
+body.gifting-2026 .gk .endcard > .acts, body.gifting-2026 .gk #sheetCard > .acts { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 18px; }
 body.gifting-2026 .gk .gc-sec { display: grid; gap: 8px; padding-top: 12px; border-top: 1.5px solid var(--line); }
 body.gifting-2026 .gk .gc-sec > .label { display: block; }
 body.gifting-2026 .gk .gc-sec > .note { font-size: 13.5px; }
@@ -542,6 +652,9 @@ body.gifting-2026 .gk .sf-sec p + p { margin-top: .8em; }
 body.gifting-2026 .gk .sf-links { display: flex; flex-wrap: wrap; gap: 8px; }
 body.gifting-2026 .gk .sf-btn { font-family: var(--ken-font-bold); font-weight: bold; font-size: 14px; background: #fff; border: 1.5px solid var(--ink); border-radius: 12px; padding: 8px 18px; text-decoration: none; cursor: pointer; }
 body.gifting-2026 .gk .sf-btn:hover { background: var(--ink); color: #fff; }
+/* the end of each half: the landing's panels, full width, right before the footer */
+body.gifting-2026 .gk .end-split { margin-top: 72px; }
+body.gifting-2026 .gk .end-split + .site-foot { margin-top: 0; }
 body.gifting-2026 .gk .sf-other { display: flex; align-items: center; gap: 16px; margin-top: 4px; text-decoration: none; background: #fff; border: 1.5px solid var(--ink); padding: 14px 16px; cursor: pointer; text-align: left; width: 100%; }
 body.gifting-2026 .gk .sf-other b { display: block; font-family: var(--ken-font-display); font-size: 21px; line-height: 1.15; margin-top: 3px; }
 body.gifting-2026 .gk .sf-other:hover b { color: var(--red); }
@@ -563,17 +676,16 @@ body.gifting-2026 .gk .pbox svg { display: block; overflow: visible; }
 /* ================= PHONE ================= */
 @media (max-width: 760px) {
   body.gifting-2026 .gk .split { flex-direction: column; }
-  body.gifting-2026 .gk .side { padding: 16px 20px 18px; }
+  body.gifting-2026 .gk .side { padding: 32px 20px 30px; min-height: 240px; }
   body.gifting-2026 .gk .side-art { display: none; }
-  body.gifting-2026 .gk .land-head .lede { height: clamp(96px, 26vh, 240px); margin-top: 8px; }
-  body.gifting-2026 .gk .land-strap { display: none; }
-  body.gifting-2026 .gk .land-head { padding-top: 14px; padding-bottom: 12px; }
+  body.gifting-2026 .gk .land-head .lede { height: auto; width: 100%; margin-top: 14px; }
+  body.gifting-2026 .gk .land-head { padding-top: 28px; padding-bottom: 36px; }
+  body.gifting-2026 .gk .split { min-height: 0; }
   body.gifting-2026 .gk .side h2 { font-size: clamp(26px, 4.6vh, 38px); }
-  body.gifting-2026 .gk .side p { font-size: 14px; margin-top: 6px; }
-  body.gifting-2026 .gk .side .go { margin-top: 10px; padding: 7px 14px; font-size: 14px; }
+  body.gifting-2026 .gk .side p { font-size: 15px; margin-top: 10px; }
+  body.gifting-2026 .gk .side .go { margin-top: 16px; }
   body.gifting-2026 .gk .ribbon { flex: 0 0 12px; box-shadow: inset 0 3px 0 rgba(0,0,0,.12), inset 0 -3px 0 rgba(0,0,0,.12); }
-  body.gifting-2026 .gk .ribbon .bow { left: 72%; top: 50%; width: 76px; height: 58px; transform: translate(-50%, -50%) rotate(90deg); }
-  body.gifting-2026 .gk .ribbon .or { left: 30%; top: 50%; transform: translate(-50%, -50%); }
+  body.gifting-2026 .gk .ribbon .bow { left: 50%; top: 50%; width: 76px; height: 58px; transform: translate(-50%, -50%) rotate(90deg); }
   body.gifting-2026 .gk .split:not(.opening) .side:hover { flex-grow: 1; }
   body.gifting-2026 .gk .bar { gap: 8px; padding: 7px 12px; }
   body.gifting-2026 .gk .bar .back { padding: 6px 10px; font-size: 13px; }
@@ -586,13 +698,24 @@ body.gifting-2026 .gk .pbox svg { display: block; overflow: visible; }
   body.gifting-2026 .gk .art-art .gtag svg { width: 160px; height: auto; }
   body.gifting-2026 .gk .qcard { padding: 26px 16px 20px; }
   body.gifting-2026 .gk .qhead { padding: 12px 16px 14px; }
-  body.gifting-2026 .gk .wall { columns: 1; }
+  body.gifting-2026 .gk .wall { gap: 22px; padding: 0 16px; }
+  body.gifting-2026 .gk .wall .bcard { width: 100%; min-height: 0; }
   body.gifting-2026 .gk .hb { grid-template-columns: 96px 1fr 40px; font-size: 12.5px; }
   body.gifting-2026 .gk .hand { --w: 140px; --sp: 52px; height: 270px; }
   body.gifting-2026 .gk .gc-art .hand { --w: 112px; --sp: 104px; height: 250px; }
   body.gifting-2026 .gk .gc-art .hcard { padding: 10px 9px 9px; min-height: 180px; }
   body.gifting-2026 .gk .gc-art .hcard .quote { font-size: 12px; }
   body.gifting-2026 .gk .deeper-btn { margin-left: 0; }
+  body.gifting-2026 .gk .bpage { padding: 24px 16px 60px; }
+  body.gifting-2026 .gk .vizwrap { grid-template-columns: 1fr; gap: 52px; padding: 0 16px; margin: 36px auto 48px; }
+  body.gifting-2026 .gk .vbars { gap: 6px; height: 140px; }
+  body.gifting-2026 .gk .vx { font-size: 10px; white-space: normal; line-height: 1.15; bottom: -26px; }
+  body.gifting-2026 .gk .vbars { margin-bottom: 32px; }
+  body.gifting-2026 .gk .vrow { grid-template-columns: 100px 1fr; }
+  body.gifting-2026 .gk .phead, body.gifting-2026 .gk .pgrid { grid-template-columns: 1fr; gap: 26px; }
+  body.gifting-2026 .gk .phead .big2 { font-size: 44px; }
+  body.gifting-2026 .gk .pcards .bcard { width: 100%; }
+  body.gifting-2026 .gk .ptags .gtag svg { width: 140px; }
   body.gifting-2026 .gk .art-hand { transform: scale(.8); transform-origin: 50% 0; }
   /* phones: smaller tags and a shorter strip, so a vertical swipe mostly lands on the page, not the strip */
   body.gifting-2026 .gk .strand { padding: 0 16px; gap: 10px; }
@@ -618,8 +741,6 @@ body.gifting-2026 .gk .pbox svg { display: block; overflow: visible; }
   body.gifting-2026 .gk .sf-copy { text-align: left; }
   body.gifting-2026 .gk .legend { grid-template-columns: 1fr; }
 }
-@media (max-height: 640px) and (min-width: 761px) { body.gifting-2026 .gk .land-strap, body.gifting-2026 .gk .land-by { display: none; } body.gifting-2026 .gk .side-art { display: none; } }
-@media (max-height: 720px) and (max-width: 760px) { body.gifting-2026 .gk .land-strap { display: none; } body.gifting-2026 .gk .side p { display: none; } }
 @media (prefers-reduced-motion: reduce) {
   body.gifting-2026 .gk *, body.gifting-2026 .gk *::before, body.gifting-2026 .gk *::after { animation: none !important; transition: none !important; }
 }
