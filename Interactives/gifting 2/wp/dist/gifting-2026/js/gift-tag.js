@@ -11,7 +11,7 @@
    The kit builds its controls from those lists. Call GiftTag.ready() (fonts loaded) before the first render. */
 (function () {
   const SHAPES = ['classic', 'arch', 'luggage', 'swallowtail', 'pointed', 'scallop', 'ticket'];
-  const LAYOUTS = ['quote', 'item', 'price'];
+  const LAYOUTS = ['frame', 'quote', 'item', 'price'];
   const ACCENTS = ['band', 'edge', 'fill', 'none'];
   const SCHEMA = [
     { key: 'shape', label: 'Shape', type: 'choice', options: SHAPES },
@@ -41,6 +41,9 @@
   const LO = [0, 0, 3, 12, 35], HI = [0, 3, 12, 35, 50];
   function bandRange(b) { const p = String(b).split(/[–-]/).map(Number); return [p[0], p.length > 1 ? p[1] : p[0]]; }
   function priceRange(b) { const [lo, hi] = bandRange(b); return [LO[lo], HI[hi]]; } // ₹ thousands
+  // the price as symbols, as on the card frames: ₹, ₹–₹₹, Free
+  const SYM = ['Free', '₹', '₹₹', '₹₹₹', '₹₹₹₹'];
+  function priceSymbols(b) { const [lo, hi] = bandRange(b); return lo === hi ? SYM[hi] : `${SYM[lo]}–${SYM[hi]}`; }
   function priceLabel(b) {
     const [lo, hi] = bandRange(b);
     if (hi === 0) return 'Free';
@@ -103,6 +106,7 @@
     t._fill = col(t.fill); t._accent = col(t.accent); t._border = col(t.borderColour);
     t._shadow = t.shadow === 'none' ? null : col(t.shadow);
     t._ink = pal.ink || '#1A1208';
+    t._fillInk = (t.fillInk || {})[t.fill] || '';
     // an accent the same colour as the tag disappears: use the section colour (or ink) instead
     if (t._accent.toLowerCase() === t._fill.toLowerCase() && t.accentStyle !== 'fill') t._accent = t.fill === 'section' ? t._ink : col('section');
     return t;
@@ -170,7 +174,33 @@
     }
     function perf(gap) { y += gap; perfY = y; y += S.stub ? 22 : 10; if (!S.stub) parts.push(`<line x1="${P}" x2="${W - P}" y1="${perfY}" y2="${perfY}" stroke="${soft}" stroke-width="1" opacity=".5"/>`); }
 
-    if (layout === 'item') {
+    let frameH = 0;
+    if (layout === 'frame') {
+      // the card frames (design-kit / imgs/cards/sample.png): words centred at the top, then the credit, the gift's
+      // icon and its name in blue, and price + "came up" along the bottom edge. Every card is at least 1.3× as tall as wide.
+      const cx = W / 2, GREY = '#707070', BLUE = S._fillInk || '#1150BD', fin = W - 36, qs = opts.headSize || (W >= 240 ? 19 : 17.5), qlh = Math.round(qs * 1.16);
+      const mid = (str, yy, font, size, colour, extra) => text(cx, yy, font, size, colour, str, `text-anchor="middle" ${extra || ''}`);
+      let at = parts.length;
+      const ql = wrap(quote, `bold ${qs}px ${FONT.display}`, fin);
+      y = holeY + 24 + qs * .8;
+      ql.forEach((l, i) => parts.push(mid(l, y + i * qlh, 'display', qs, txt))); y += (ql.length - 1) * qlh; layer(at, 'headline');
+      if (S.showCredit && content.credit) {
+        at = parts.length; y += 17;
+        const cl = wrap(String(content.credit).toUpperCase(), `bold 8.5px ${FONT.bold}`, fin - 8, 2);
+        cl.forEach((l, i) => parts.push(mid(l, y + i * 12, 'bold', 8.5, GREY, 'letter-spacing=".6"'))); y += (cl.length - 1) * 12; layer(at, 'credit');
+      }
+      const ICON = Math.round(W * .3), il = content.item ? wrap(String(content.item).toUpperCase(), `bold 12px ${FONT.bold}`, fin, 3) : [];
+      const blockH = (content.icon ? ICON + 12 : 0) + il.length * 15, ROW = 34;
+      frameH = Math.max(Math.round(W * 1.3), Math.ceil(y + 18 + blockH + 18 + ROW));
+      let by = y + Math.max(18, (frameH - ROW - y - blockH) / 2);
+      // the icon, tinted to the card's text colour (the icons are line art on transparent backgrounds)
+      if (content.icon) { parts.push(`<filter id="${id}t"><feFlood flood-color="${BLUE}"/><feComposite in2="SourceAlpha" operator="in"/></filter><image class="gt-icon" href="${E(content.icon)}" x="${cx - ICON / 2}" y="${by.toFixed(1)}" width="${ICON}" height="${ICON}" preserveAspectRatio="xMidYMid meet" filter="url(#${id}t)"/>`); by += ICON + 12; }
+      at = parts.length; il.forEach((l, i) => parts.push(mid(l, by + 10 + i * 15, 'bold', 12, BLUE, 'letter-spacing=".4"'))); layer(at, 'item');
+      const fy = frameH - 16 - (S.shape === 'scallop' ? 5 : 0);
+      if (hasBand) parts.push(`<g class="gt-price">${text(P, fy, 'bold', 10, GREY, priceSymbols(content.band))}</g>`);
+      if (S.showCount && content.count) parts.push(`<g class="gt-count">${text(W - P, fy, 'bold', 9, GREY, `CAME UP X${content.count}`, 'text-anchor="end" letter-spacing=".6"')}</g>`);
+      y = frameH - 14;
+    } else if (layout === 'item') {
       // the product leads: item in display type, price right under it, the reader's reason below the tear
       y += hSize * 0.82;
       let at = parts.length;
@@ -235,7 +265,7 @@
       y = fy + 22;
       if (S.priceCaption && hasBand && (S.price === 'coins' || S.price === 'rupees')) { parts.push(`<g class="gt-caption">${text(P, y + 8, 'body', 10.5, soft, priceLabel(content.band))}</g>`); y += 14; }
     }
-    const H = Math.ceil(y + 14 + (S.shape === 'swallowtail' ? 16 : 0) + (S.shape === 'scallop' ? 8 : 0));
+    const H = frameH || Math.ceil(y + 14 + (S.shape === 'swallowtail' ? 16 : 0) + (S.shape === 'scallop' ? 8 : 0));
 
     // shape, accent, holes, string
     const d = shapePath(S.shape, W, H);
@@ -265,5 +295,5 @@ ${bw ? `<path class="gt-border" d="${d}" fill="none" stroke="${S._border}" strok
 ${hole}${str}${parts.join('')}</svg>`;
   }
 
-  window.GiftTag = { SCHEMA, POOLS, svg, style, ready, priceLabel, priceRange, bandRange, isDark, hash, shapePath, FONT };
+  window.GiftTag = { SCHEMA, POOLS, svg, style, ready, priceLabel, priceSymbols, priceRange, bandRange, isDark, hash, shapePath, FONT };
 })();

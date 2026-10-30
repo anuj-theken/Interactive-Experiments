@@ -57,25 +57,27 @@ function start(DATA) {
 
   /* ---------- gift tags ----------
      Each gift has its own tag. Readers who recommended the same gift again (g.q) get a tag each too,
-     marked "Said again": same item and price, their own words, and a look of their own. */
+     with the same item and price, their own words, and a look of their own. */
+  const NO_ICON = new Set(['patina--castiron']);
+  const iconFor = g => NO_ICON.has(g.id) ? '' : `${ASSETS}assets/icons/${g.id}.png`;
   function tagContent(g, q) {
-    const c = cById(g.c);
-    return q ? { kicker: c.n + ' · Said again', headline: q[0], editorial: false, credit: q[1], item: g.it, band: g.b, count: g.n, section: g.c }
-      : { kicker: c.n + ' · ' + c.name, headline: g.h, editorial: !!g.ed, credit: g.w, item: g.it, band: g.b, count: g.n, section: g.c };
+    const c = cById(g.c), icon = iconFor(g);
+    return q ? { kicker: c.n + ' · ' + c.name, headline: q[0], editorial: false, credit: q[1], item: g.it, band: g.b, count: g.n, section: g.c, icon }
+      : { kicker: c.n + ' · ' + c.name, headline: g.h, editorial: !!g.ed, credit: g.w, item: g.it, band: g.b, count: g.n, section: g.c, icon };
   }
   // data-card="<json id>" plus the database ids (type, cat_id, card_id) the card's answers are saved under
   const INST_KEY = 'gk26_tag_at';
   const tagAt = () => { try { return JSON.parse(localStorage.getItem(INST_KEY)) || {}; } catch (e) { return {}; } };
-  const setTagAt = (id, inst) => { const m = tagAt(); if (inst) m[id] = inst; else delete m[id]; try { localStorage.setItem(INST_KEY, JSON.stringify(m)); } catch (e) {} };
-  // the tag that shows a gift's state: the one tapped, or the gift's own tag if none was recorded
-  const showsState = (el) => { const at = tagAt()[el.dataset.id]; return at ? at === el.dataset.inst : !el.classList.contains('rep'); };
+  const setTagAt = (key, inst) => { const m = tagAt(); if (inst) m[key] = inst; else delete m[key]; try { localStorage.setItem(INST_KEY, JSON.stringify(m)); } catch (e) {} };
+  // the tag that shows a state ('keep' or 'gave'): the one it was done on, else the gift's own tag
+  const marks = (id, inst, what) => { const at = tagAt()[`${id}|${what}`]; return at ? at === inst : inst === id; };
   // a tag drawn on a coloured panel must never melt into it: a face too close to the panel turns to paper,
   // an accent band too close turns to ink
   const rgb = h => [1, 3, 5].map(k => parseInt(String(h).slice(k, k + 2), 16));
-  const near = (a, b) => { const x = rgb(a), y = rgb(b); return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]) < 70; };
+  const near = (a, b) => { const x = rgb(a), y = rgb(b); return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]) < 42; };
   function standOut(st, bg) {
-    const pal = st.palette || {};
-    if (near(st.accentStyle === 'fill' ? st._accent : st._fill, bg)) { if (st.accentStyle === 'fill') st.accentStyle = 'band'; st._fill = pal.paper || '#FFFFFF'; }
+    const pal = st.palette || {}, pool = ((st.variety || {}).fills || []).map(k => pal[k]).filter(Boolean);
+    if (near(st.accentStyle === 'fill' ? st._accent : st._fill, bg)) { if (st.accentStyle === 'fill') st.accentStyle = 'none'; st._fill = pool.find(c => !near(c, bg)) || pal.paper || '#FFFFFF'; }
     if ((st.accentStyle === 'band' || st.accentStyle === 'edge') && near(st._accent, bg)) st._accent = pal.ink || '#1A1208';
   }
   const SIDE_R = '#E9C6C4'; // the Recommendations panel (--side-r)
@@ -87,9 +89,9 @@ function start(DATA) {
     if (opts.onBg) standOut(st, opts.onBg);
     const r = ((rnd() * 2 - 1) * (+st.tilt || 0)).toFixed(1);
     const open = `GF.openTag('${g.id}',${q ? qi : 'null'},this)`;
-    const inst = q ? `${g.id}~${qi}` : g.id, at = tagAt()[g.id], mineTag = at ? at === inst : !q;
-    const gave = mineTag && store.landed().includes(g.id), isKept = mineTag && kept.includes(g.id);
-    return `<div class="gtag ${q ? 'rep' : ''} ${isKept ? 'kept' : ''} ${gave ? 'gave' : ''} ${forIds.includes(g.id) ? 'for' : ''}" style="--r:${opts.r ?? r}deg;--d:${(rnd() * .35).toFixed(2)}s" data-id="${g.id}" data-inst="${inst}" data-card="${g.id}" ${idAttrs(tagIds(DATA, g.id))} ${opts.static ? '' : `role="button" tabindex="0" onclick="${open}" onkeydown="if(event.key==='Enter')${open}"`}>${GiftTag.svg(tagContent(g, q), st, opts)}${q ? '<span class="said">Said again</span>' : ''}<span class="gave-mark" aria-hidden="true">You gave this</span></div>`;
+    const inst = q ? `${g.id}~${qi}` : g.id;
+    const gave = store.landed().includes(g.id) && marks(g.id, inst, 'gave'), isKept = kept.includes(g.id) && marks(g.id, inst, 'keep');
+    return `<div class="gtag ${q ? 'rep' : ''} ${isKept ? 'kept' : ''} ${gave ? 'gave' : ''} ${forIds.includes(g.id) ? 'for' : ''}" style="--r:${opts.r ?? r}deg;--d:${(rnd() * .35).toFixed(2)}s" data-id="${g.id}" data-inst="${inst}" data-card="${g.id}" ${idAttrs(tagIds(DATA, g.id))} ${opts.static ? '' : `role="button" tabindex="0" onclick="${open}" onkeydown="if(event.key==='Enter')${open}"`}>${GiftTag.svg(tagContent(g, q), st, opts)}<span class="gave-mark" aria-hidden="true">You gave this</span></div>`;
   }
   // a section's tags: each gift, then the readers who said it again
   const tagsFor = cid => shuffle(G.filter(g => g.c === cid)).flatMap(g => [{ g }, ...g.q.map((q, i) => ({ g, qi: i }))]);
@@ -141,14 +143,15 @@ function start(DATA) {
     return `<nav class="bar" aria-label="Gifting"><button class="back" onclick="GF.home()" aria-label="Back to the start"><span aria-hidden="true">←</span> Back</button><div class="idx" id="idx">${idx}</div>
       <button class="switch" onclick="GF.go('${other.go}')"><small>${other.k}</small><b>${other.t}</b><span aria-hidden="true">→</span></button></nav>`;
   }
+  // the same header as the landing: lede illustration, then kicker, meta, title, strap and byline
+  const LEDE = () => `<figure class="lede"><img src="${ASSETS}assets/lede.jpg" alt="Illustration: a reader holds up a speech bubble among a crowd of colourful patterned shapes" width="683" height="535"></figure>`;
   function artHead(o) {
-    return `<header class="art-band" style="--band:${o.band};--band-ink:${o.ink}"><div class="art-head">
-      <div class="kicker-tag">${o.tag}</div>
+    return `<header class="lede-head" style="--band:${o.band};--band-ink:${o.ink}"><div class="art-head">
+      <div class="kicker-tag">${o.tag}</div>${LEDE()}
       <div class="art-meta"><span>Special edition</span><span>29 Oct 2026</span><span>${o.meta}</span></div>
       <h1 class="art-title">${o.title}</h1>
       <p class="art-strap">${o.strap}</p>
-      <p class="art-by"><i>by</i><a href="https://the-ken.com/writers/anuj_269/" target="_blank" rel="noopener">Anuj Debnath</a></p>
-      ${o.art ? `<div class="art-art">${o.art}</div>` : ''}</div></header>`;
+      <p class="art-by"><i>by</i> <a href="https://the-ken.com/writers/rohin/" target="_blank" rel="noopener">Rohin Dharmakumar</a></p></div></header>`;
   }
   function footer(side) {
     const other = side === 'r'
@@ -187,7 +190,7 @@ function start(DATA) {
     <section class="nl context">
       <span class="ph">PLACEHOLDER COPY</span>
       <p>Three years of answers, sorted into <b>sixteen kinds of gift</b>. No brands on the front, no product photos, nothing above about ₹50,000.</p>
-      <p>Each tag is one reader and one gift. When more readers recommended the same thing, each of them gets a tag too, marked <b>Said again</b>. That’s ${TAG_COUNT} tags for ${G.length} gifts. Some tags lead with why a reader gave it, some with the thing itself, some with the price.</p>
+      <p>Each tag is one reader and one gift. When more readers recommended the same thing, each of them gets a tag too. That’s ${TAG_COUNT} tags for ${G.length} gifts. Some tags lead with why a reader gave it, some with the thing itself, some with the price.</p>
       ${legend()}
       <div class="reading"><p>This is an interactive story. Each kind of gift has its own string: scroll it sideways. Tap a tag to keep it, or to tell us you gave it. Your gift box at the bottom of the screen fills as you go.</p><p>Your answers wait in this browser until you sign in at checkout. Nothing is sent before that.</p></div>
     </section>
@@ -209,7 +212,7 @@ function start(DATA) {
     const ts = tagsFor(c.id), gifts = G.filter(g => g.c === c.id).length, again = ts.length - gifts;
     return `<section class="sec" id="${c.id}" style="--sc:${tagColour(c.id)}"><div class="sec-head">
       <div class="sec-num"><b>${c.n}</b><span></span></div><h2>${E(c.name)}</h2><p class="dek"><em>${E(c.enemy)}</em></p>
-      <p class="note meta">${gifts} ${gifts === 1 ? 'gift' : 'gifts'}${again ? `, ${again} said again by other readers` : ''} · ${c.total} kinds came up in all</p></div>
+      <p class="note meta">${gifts} ${gifts === 1 ? 'gift' : 'gifts'}${again ? `, ${again} more readers said the same` : ''} · ${c.total} kinds came up in all</p></div>
       <div class="rail-wrap at-start">
         <button class="rail-arrow prev" onclick="GF.railBy('${c.id}',-1)" aria-label="Scroll ${E(c.name)} left">←</button>
         <div class="rail" id="r-${c.id}" tabindex="0" aria-label="${E(c.name)}: ${ts.length} tags. Scroll sideways."><div class="strand" style="--sc:${tagColour(c.id)}">${ts.map(t => tagHTML(t.g, { qi: t.qi })).join('')}</div></div>
@@ -581,7 +584,7 @@ function start(DATA) {
       : `<blockquote class="first">“${E(b.h)}”<span class="credit">${E(b.w)}</span></blockquote>`;
     const pct = Math.min(100, b.n / B[0].n * 100);
     ov(`<div class="big cardpop" role="document"><button class="x" onclick="GF.closeOv()" aria-label="Close">×</button>
-      <div class="top"><span class="label">${q ? 'Said again · ' : ''}${sec.n} · ${E(sec.name)}</span><span class="pn"><button onclick="GF.openCard('${sib[(i - 1 + sib.length) % sib.length].id}')" aria-label="Previous belief">‹</button>${i + 1} / ${sib.length}<button onclick="GF.openCard('${sib[(i + 1) % sib.length].id}')" aria-label="Next belief">›</button></span></div>
+      <div class="top"><span></span><span class="pn"><button onclick="GF.openCard('${sib[(i - 1 + sib.length) % sib.length].id}')" aria-label="Previous belief">‹</button>${i + 1} / ${sib.length}<button onclick="GF.openCard('${sib[(i + 1) % sib.length].id}')" aria-label="Next belief">›</button></span></div>
       ${words}
       <div class="agree">${b.vs ? `<b>${b.n}</b> vs <b>${b.n2}</b> readers` : `<b>${b.n}</b> ${b.n === 1 ? 'reader said this' : 'readers said something like this'}`}<span class="meter"><i style="width:${pct.toFixed(0)}%"></i></span></div>
       <div class="acts"><button class="pill ${on ? '' : 'red'}" ${full ? 'disabled' : ''} onclick="GF.plus('${id}')">${on ? 'Take back my +1' : '+1 · I believe this too'}</button>${deep ? '' : `<button class="pill deeper-btn" onclick="GF.openCard('${id}',${qi == null ? 'null' : qi},null,true)">Go deeper ↓</button>`}</div>
@@ -631,16 +634,17 @@ function start(DATA) {
   function openTag(id, qi, el, opts) {
     opts = opts || {};
     if (el) lastTag = el;
+    else if (!(lastTag && lastTag.isConnected && lastTag.dataset.id === id)) lastTag = document.querySelector(`.rail .gtag[data-inst="${id}"]`);
     const g = G.find(x => x.id === id), c = cById(g.c), sib = G.filter(x => x.c === g.c), i = Math.max(0, sib.indexOf(g));
     const q = qi != null && g.q[qi] ? g.q[qi] : null, words = q ? '“' + E(q[0]) + '”' : (g.ed ? E(g.h) : '“' + E(g.h) + '”'), who = q ? q[1] : g.w;
     const [lo, hi] = GiftTag.bandRange(g.b), has = kept.includes(id), gave = store.landed().includes(id), how = mine()[`how:${id}`] || {};
     const coins = hi === 0 ? '' : [1, 2, 3, 4].map(n => `<i class="${n >= Math.max(1, lo) && n <= hi ? 'on' : ''}">₹</i>`).join('');
     ov(`<div class="big tagpop" role="document" data-card="${g.id}" ${idAttrs(tagIds(DATA, g.id))}><button class="x" onclick="GF.closeOv()" aria-label="Close">×</button>
-      <div class="top"><span class="label">${c.n} · ${E(c.name)}</span>${sib.length > 1 ? `<span class="pn"><button onclick="GF.openTag('${sib[(i - 1 + sib.length) % sib.length].id}')" aria-label="Previous gift">‹</button>${i + 1} / ${sib.length}<button onclick="GF.openTag('${sib[(i + 1) % sib.length].id}')" aria-label="Next gift">›</button></span>` : ''}</div>
+      <div class="top"><span></span>${sib.length > 1 ? `<span class="pn"><button onclick="GF.openTag('${sib[(i - 1 + sib.length) % sib.length].id}')" aria-label="Previous gift">‹</button>${i + 1} / ${sib.length}<button onclick="GF.openTag('${sib[(i + 1) % sib.length].id}')" aria-label="Next gift">›</button></span>` : ''}</div>
       <h3>${E(g.it)}</h3>
       <div class="price-line"><span class="coins">${coins}</span><b>${GiftTag.priceLabel(g.b)}</b></div>
       <blockquote class="first">${words}<span class="credit">${E(who)}</span></blockquote>
-      ${g.q.length ? `<p class="note said-n">${q ? 'Said again. ' : ''}${g.q.length + 1} readers recommended this, in their own words.</p>` : ''}
+      ${g.q.length ? `<p class="note said-n">${g.q.length + 1} readers recommended this, in their own words.</p>` : ''}
       <div class="acts two"><button class="pill ${has ? 'solid' : 'red'}" aria-pressed="${has}" onclick="GF.keep('${id}')">${has ? 'Kept · take it out' : 'Keep'}</button>
         <button class="pill ${gave ? 'solid' : ''}" aria-pressed="${gave}" onclick="GF.gave('${id}')">${gave ? 'You gave this' : 'I gave this, it landed'}</button></div>
       ${gave ? `<form class="how" onsubmit="event.preventDefault();GF.how('${id}')" novalidate>
@@ -654,7 +658,7 @@ function start(DATA) {
   // Keep: the pop-up closes and the tag flies into the gift box
   function keep(id) {
     const adding = store.toggleKeep(id);
-    kept = store.keeps(); rememberTag(id);
+    kept = store.keeps(); rememberTag(id, 'keep', adding);
     lastAdded = adding ? id : null;
     const sheetOpen = !!$('#dockSheet');
     if (!sheetOpen) closeOv();
@@ -672,12 +676,12 @@ function start(DATA) {
   function gave(id) {
     const g = G.find(x => x.id === id);
     if (store.landed().includes(id)) {
-      store.unmarkLanded(id); store.setMine(`how:${id}`, null); rememberTag(id);
+      store.unmarkLanded(id); store.setMine(`how:${id}`, null); rememberTag(id, 'gave', false);
       syncTags(); refreshBox(false); toast(`Took back “${g.it}”`);
       openTag(id);
       return;
     }
-    store.markLanded(id); rememberTag(id);
+    store.markLanded(id); rememberTag(id, 'gave', true);
     saveAnswer(`landed:${id}`, `It landed: ${g.it}`, 1, 'tap', true);
     syncTags();
     openTag(id, null, null, { justGave: true });
@@ -698,13 +702,12 @@ function start(DATA) {
   }
   function syncTags() {
     const landed = store.landed();
-    document.querySelectorAll('.rail .gtag').forEach(t => { const on = showsState(t); t.classList.toggle('kept', on && kept.includes(t.dataset.id)); t.classList.toggle('gave', on && landed.includes(t.dataset.id)); });
+    document.querySelectorAll('.rail .gtag').forEach(t => { const id = t.dataset.id, inst = t.dataset.inst; t.classList.toggle('kept', kept.includes(id) && marks(id, inst, 'keep')); t.classList.toggle('gave', landed.includes(id) && marks(id, inst, 'gave')); });
   }
   // remember which tag was used, when it's the first choice made for that gift
-  function rememberTag(id) {
+  function rememberTag(id, what, on) {
     const el = lastTag && lastTag.isConnected && lastTag.dataset.id === id ? lastTag : null;
-    if (!kept.includes(id) && !store.landed().includes(id)) { setTagAt(id, null); return; }
-    if (el && !tagAt()[id]) setTagAt(id, el.dataset.inst);
+    setTagAt(`${id}|${what}`, on ? (el ? el.dataset.inst : id) : null);
   }
   function bump(up) { const ck = $('#checkout'); if (!ck) return; ck.classList.remove('bump', 'shake'); void ck.offsetWidth; ck.classList.add(up ? 'bump' : 'shake'); }
   function unbox(id) { if (kept.includes(id)) keep(id); }
@@ -736,9 +739,36 @@ function start(DATA) {
   function go(name) { closeOv(); const url = viewUrl(name); if (location.pathname + location.search !== url) history.pushState({ view: name }, '', url); route(); }
   function home() { go('landing'); }
   let after = null; // runs once the story has rendered (cross-links between stories)
-  function toTag(id) { after = () => { const el = document.querySelector(`.rail .gtag[data-id="${id}"]`); el.closest('.sec').scrollIntoView({ block: 'start' }); railShow(el, false); openTag(id, null, el); }; if (currentSide === 'r') { closeOv(); after(); after = null; } else go('recommendations'); }
-  function toSection(cid) { after = () => jump(cid); if (currentSide === 'r') { closeOv(); after(); after = null; } else go('recommendations'); }
-  function toCard(id) { after = () => { const el = document.querySelector(`.wall .bcard[data-id="${id}"]`); if (el) { el.closest('.sec').scrollIntoView({ block: 'start' }); railShow(el, false); } openCard(id, null, el); }; if (currentSide === 'p') { closeOv(); after(); after = null; } else go('philosophies'); }
+  // Crossing to the other half from a pop-up: a wipe in that half's colour covers the screen, the other story
+  // renders and scrolls to the card underneath it, the wipe lifts, then the card's pop-up opens.
+  function crossTo(name, place, open) {
+    closeOv();
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { after = () => { place(); open(); }; go(name); return; }
+    const w = document.createElement('div');
+    w.className = 'wipe ' + (name === 'recommendations' ? 'r' : 'p');
+    w.innerHTML = `<span>${name === 'recommendations' ? 'What to give' : 'Why we give'}</span>`;
+    ($('#gk-root') || document.body).appendChild(w);
+    requestAnimationFrame(() => w.classList.add('in'));
+    setTimeout(() => {
+      after = () => {
+        place();
+        setTimeout(() => { w.classList.add('out'); setTimeout(() => { w.remove(); open(); }, 520); }, 120);
+      };
+      go(name);
+    }, 560);
+  }
+  function toTag(id) {
+    const place = () => { const el = document.querySelector(`.rail .gtag[data-inst="${id}"]`) || document.querySelector(`.rail .gtag[data-id="${id}"]`); if (el) { el.closest('.sec').scrollIntoView({ block: 'start' }); railShow(el, false); lastTag = el; } };
+    const open = () => openTag(id, null, lastTag && lastTag.dataset.id === id ? lastTag : null);
+    if (currentSide === 'r') { closeOv(); place(); open(); } else crossTo('recommendations', place, open);
+  }
+  function toSection(cid) { if (currentSide === 'r') { closeOv(); jump(cid); } else crossTo('recommendations', () => { const el = document.getElementById(cid); el && el.scrollIntoView({ block: 'start' }); }, () => {}); }
+  function toCard(id) {
+    const place = () => { const el = document.querySelector(`.wall .bcard[data-id="${id}"]`); if (el) el.scrollIntoView({ block: 'center' }); };
+    const open = () => openCard(id, null, document.querySelector(`.wall .bcard[data-id="${id}"]`));
+    if (currentSide === 'p') { closeOv(); place(); open(); } else crossTo('philosophies', place, open);
+  }
 
   const land_ = $('#land'), split = $('#split'), story = $('#story');
   function showLanding() {
@@ -808,10 +838,6 @@ function start(DATA) {
   function landingArt() {
     $('#sideRp').textContent = `${LIVE_G.length} gifts readers actually gave, sorted into ${C.length} kinds. Each one comes with the person it was for.`;
     $('#sidePp').textContent = `${B.length} beliefs about what a gift is for, who makes it hard and what it should cost. Agree with three.`;
-    const gs = shuffle(LIVE_G.filter(g => g.n >= 40 && g.h.length < 60)).slice(0, 3);
-    $('#artR').innerHTML = `<div style="display:flex;gap:22px;align-items:flex-start;margin-bottom:-8px">${gs.map((g, i) => tagHTML(g, { static: true, width: 180, r: [-6, 3, 7][i], stringH: 60, onBg: SIDE_R, bg: 'var(--side-r)' })).join('')}</div>`;
-    const bs = shuffle(B.filter(b => !b.vs && b.h.length < 64 && b.n > 10)).slice(0, 3);
-    $('#artP').innerHTML = `<div style="position:relative;width:340px;height:200px;margin-bottom:6px">${bs.map((b, i) => `<div class="bcard M" style="position:absolute;left:${[0, 70, 140][i]}px;top:${[30, 0, 40][i]}px;width:200px;transform:rotate(${[-7, 2, 8][i]}deg);--sc:${SC[b.s]};pointer-events:none"><div class="quote" style="font-size:16px;margin-top:0">“${E(b.h)}”</div><div class="count"><b style="font-size:24px">${b.n}</b><small>readers</small></div></div>`).join('')}</div>`;
   }
 
   /* ---------- signing in ---------- */

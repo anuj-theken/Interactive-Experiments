@@ -59,7 +59,7 @@ body.gifting-2026 .gk .side { position: relative; flex: 1 1 0; min-width: 0; ove
 body.gifting-2026 .gk .side-r { background: var(--side-r); color: var(--ink); }
 body.gifting-2026 .gk .side-p { background: var(--side-p); color: #F7F2F2; }
 body.gifting-2026 .gk .split:not(.opening) .side:hover { flex-grow: 1.18; }
-body.gifting-2026 .gk .side-art { position: absolute; left: 0; right: 0; top: 0; bottom: 44%; display: flex; align-items: flex-end; justify-content: center; pointer-events: none; }
+body.gifting-2026 .gk .side-art { position: absolute; left: 0; right: 0; top: 0; bottom: calc(clamp(18px, 3.5vh, 36px) + 220px); display: flex; align-items: flex-end; justify-content: center; pointer-events: none; }
 body.gifting-2026 .gk .side .label { color: inherit; opacity: .75; }
 body.gifting-2026 .gk .side h2 { font-family: var(--ken-font-display); font-weight: bold; font-style: italic; font-size: clamp(30px, min(4.6vw, 6vh), 56px); line-height: 1; letter-spacing: -.8px; margin-top: 8px; }
 body.gifting-2026 .gk .side p { font-size: clamp(14px, 1.9vh, 16.5px); line-height: 1.45; margin-top: 10px; max-width: 30em; opacity: .9; }
@@ -72,16 +72,11 @@ body.gifting-2026 .gk .side-copy { position: relative; z-index: 1; transition: o
 /* the ribbon between the two sides, with a bow */
 body.gifting-2026 .gk .ribbon { position: relative; flex: 0 0 14px; background: var(--red); z-index: 3; box-shadow: inset 3px 0 0 rgba(0,0,0,.12), inset -3px 0 0 rgba(0,0,0,.12); transition: opacity .3s; }
 body.gifting-2026 .gk .ribbon .bow { position: absolute; left: 50%; top: 34%; width: 92px; height: 70px; transform: translate(-50%, -50%); }
-body.gifting-2026 .gk .ribbon .or { position: absolute; left: 50%; top: calc(34% + 52px); transform: translateX(-50%); background: var(--ken-bg); border: 2px solid var(--ink); border-radius: 999px; font-family: var(--ken-font-bold); font-weight: bold; font-size: 11px; letter-spacing: .12em; padding: 4px 9px; }
+body.gifting-2026 .gk .ribbon .or { position: absolute; left: 50%; top: calc(34% + 52px); transform: translateX(-50%); background: var(--ken-bg); border: 2px solid var(--ink); border-radius: 12px; font-family: var(--ken-font-bold); font-weight: bold; font-size: 11px; letter-spacing: .12em; padding: 4px 9px; }
 
-body.gifting-2026 .gk .land-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px clamp(16px, 3vw, 32px); border-top: 1.5px solid var(--ken-rule); background: var(--ken-bg); }
-body.gifting-2026 .gk .land-foot img { height: 16px; display: block; }
-body.gifting-2026 .gk .land-foot .legal { font-size: 9.5px; letter-spacing: .03em; text-transform: uppercase; color: #8A7B78; display: flex; gap: 12px; align-items: center; }
-body.gifting-2026 .gk .land-foot .legal a { text-decoration: none; }
 
 /* opening: the picked side takes the screen, then the story fades in under it */
 body.gifting-2026 .gk .land.opening .land-head { margin-top: calc(-1 * var(--head-h, 260px)); opacity: 0; }
-body.gifting-2026 .gk .land.opening .land-foot { display: none; }
 body.gifting-2026 .gk .split.opening .ribbon, body.gifting-2026 .gk .split.opening .or { opacity: 0; }
 body.gifting-2026 .gk .split.opening .side { flex-grow: .0001; padding-left: 0; padding-right: 0; }
 body.gifting-2026 .gk .split.opening .side.picked { flex-grow: 1; }
@@ -100,7 +95,7 @@ body.gifting-2026 .gk .bar .back { font-family: var(--ken-font-bold); font-weigh
 body.gifting-2026 .gk .bar .back:hover { background: var(--ink); color: #fff; }
 body.gifting-2026 .gk .bar .idx { flex: 1; display: flex; overflow-x: auto; scrollbar-width: none; gap: 4px; mask-image: linear-gradient(90deg, #000 92%, transparent); }
 body.gifting-2026 .gk .bar .idx::-webkit-scrollbar { display: none; }
-body.gifting-2026 .gk .bar .idx a { white-space: nowrap; font-size: 13.5px; padding: 6px 12px; border: 1.5px solid transparent; border-radius: 999px; text-decoration: none; cursor: pointer; color: var(--text); }
+body.gifting-2026 .gk .bar .idx a { white-space: nowrap; font-size: 13.5px; padding: 6px 12px; border: 1.5px solid transparent; border-radius: 12px; text-decoration: none; cursor: pointer; color: var(--text); }
 body.gifting-2026 .gk .bar .idx a:hover { border-color: var(--ink); }
 body.gifting-2026 .gk .bar .idx a.on { background: var(--ink); border-color: var(--ink); color: #fff; }
 body.gifting-2026 .gk .bar .idx a small { font-family: var(--ken-font-bold); font-size: 10px; letter-spacing: .06em; margin-right: 6px; color: var(--red); }
@@ -115,6 +110,13 @@ body.gifting-2026 .gk .bar .switch > span { grid-column: 2; grid-row: 1 / 3; fon
 
 /* 1. header: tag, meta, title, strap, byline, then how to read it */
 body.gifting-2026 .gk .art-band { background: var(--band, var(--side-r)); color: var(--band-ink, var(--ink)); padding: 54px 20px 46px; border-bottom: 3px solid var(--ink); }
+/* the shared header: lede illustration on the landing and at the top of both stories */
+/* each story's header carries its side's colour from the landing: pink for Recommendations, ink for Philosophies */
+body.gifting-2026 .gk .lede-head .lede { border-color: var(--band-ink, var(--ink)); }
+body.gifting-2026 .gk .lede-head { padding: 44px 20px 46px; background: var(--band, transparent); color: var(--band-ink, var(--ink)); border-bottom: 3px solid var(--ink); }
+body.gifting-2026 .gk .lede { margin: 16px auto 0; max-width: 640px; aspect-ratio: 16 / 9; overflow: hidden; border: 2px solid var(--ink); }
+body.gifting-2026 .gk .lede img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
+body.gifting-2026 .gk .land-head .lede { height: clamp(150px, calc(100vh - var(--gifting-nav-h, 0px) - 500px), 500px); width: auto; max-width: calc(100vw - 40px); aspect-ratio: 16 / 9; margin: 12px auto 0; }
 body.gifting-2026 .gk .art-head { max-width: 680px; margin: 0 auto; text-align: center; }
 body.gifting-2026 .gk .art-meta { margin-top: 18px; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase; opacity: .8; }
 body.gifting-2026 .gk .art-meta span + span::before { content: "•"; margin: 0 7px; }
@@ -226,7 +228,7 @@ body.gifting-2026 .gk .art-hand .bcard .quote { font-size: 16px; margin-top: 0; 
 body.gifting-2026 .gk .art-hand .bcard .count b { font-size: 24px; }
 
 /* the slim back of a card */
-body.gifting-2026 .gk .cardpop blockquote.first { font-size: clamp(22px, 3vw, 27px); }
+body.gifting-2026 .gk .cardpop blockquote.first { font-size: clamp(19px, 2.4vw, 22px); }
 body.gifting-2026 .gk .agree { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 18px; padding-top: 14px; border-top: 2px solid var(--ink); font-size: 15px; color: var(--text); }
 body.gifting-2026 .gk .agree b { font-family: var(--ken-font-display); font-size: 26px; color: var(--sc, var(--red)); }
 body.gifting-2026 .gk .agree .meter { flex: 1; min-width: 120px; height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
@@ -323,7 +325,7 @@ body.gifting-2026 .gk .gtag .gave-mark { display: none; position: absolute; left
 body.gifting-2026 .gk .gtag.gave .gave-mark { display: block; }
 body.gifting-2026 .gk .gtag svg { display: block; overflow: visible; }
 body.gifting-2026 .gk .gtag.kept::after { content: "In the box"; position: absolute; top: 58px; right: -4px; z-index: 2; font-family: var(--ken-font-bold); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: #fff; background: var(--red); border: 2px solid var(--ink); padding: 4px 8px; transform: rotate(8deg); }
-body.gifting-2026 .gk .gtag.kept svg { opacity: .55; }
+body.gifting-2026 .gk .gtag.kept svg, body.gifting-2026 .gk .gtag.gave svg { opacity: .55; }
 body.gifting-2026 .gk .gtag.for::before { content: "For them"; position: absolute; top: 46px; left: -8px; z-index: 2; font-family: var(--ken-font-bold); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #fff; background: var(--ink); padding: 4px 8px; transform: rotate(-6deg); }
 body.gifting-2026 .gk .gtag.pop { animation: gk-tagpop .5s var(--ease); }
 @keyframes gk-tagpop { 40% { transform: rotate(0) scale(.94) translateY(6px); } }
@@ -342,7 +344,7 @@ body.gifting-2026 .gk .tagpop blockquote.first { margin-top: 18px; }
 body.gifting-2026 .gk .tagpop .acts { margin-top: 22px; }
 
 /* checkout: bottom centre, always in view on Recommendations */
-body.gifting-2026 .gk .checkout { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 1030; display: flex; align-items: center; gap: 12px; background: #fff; color: var(--ink); border: 2.5px solid var(--ink); border-radius: 16px; box-shadow: 5px 5px 0 var(--red); padding: 8px 10px 8px 12px; text-align: left; transition: box-shadow .2s; }
+body.gifting-2026 .gk .checkout { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 1030; display: flex; align-items: center; gap: 12px; background: #fff; color: var(--ink); border: 2.5px solid var(--ink); border-radius: 12px; box-shadow: 5px 5px 0 var(--red); padding: 8px 10px 8px 12px; text-align: left; transition: box-shadow .2s; }
 body.gifting-2026 .gk .checkout[hidden] { display: none; }
 body.gifting-2026 .gk .checkout:hover { box-shadow: 7px 7px 0 var(--red); }
 body.gifting-2026 .gk .ck-icon { position: relative; width: 34px; height: 30px; }
@@ -350,7 +352,7 @@ body.gifting-2026 .gk .ck-icon svg { width: 34px; height: 30px; display: block; 
 body.gifting-2026 .gk .ck-icon b { position: absolute; top: -9px; right: -10px; min-width: 20px; height: 20px; border-radius: 10px; background: var(--ink); color: #fff; font: bold 11px/20px var(--ken-font-bold); text-align: center; padding: 0 5px; }
 body.gifting-2026 .gk .ck-txt b { display: block; font-family: var(--ken-font-bold); font-size: 14px; }
 body.gifting-2026 .gk .ck-txt small { display: block; font-size: 12px; color: var(--muted); white-space: nowrap; }
-body.gifting-2026 .gk .ck-go { font-family: var(--ken-font-bold); font-size: 13px; background: var(--red); color: #fff; border-radius: 10px; padding: 8px 12px; white-space: nowrap; }
+body.gifting-2026 .gk .ck-go { font-family: var(--ken-font-bold); font-size: 13px; background: var(--red); color: #fff; border-radius: 12px; padding: 8px 12px; white-space: nowrap; }
 body.gifting-2026 .gk .checkout.bump { animation: gk-bump .6s var(--ease); }
 @keyframes gk-bump { 0% { transform: translateX(-50%) scale(1); } 30% { transform: translateX(-50%) scale(1.12) rotate(-2deg); } 60% { transform: translateX(-50%) scale(.97); } 100% { transform: translateX(-50%) scale(1); } }
 body.gifting-2026 .gk .checkout.shake { animation: gk-shake .4s; }
@@ -359,6 +361,15 @@ body.gifting-2026:has(.checkout:not([hidden])) .toast { bottom: 96px; }
 
 /* the gift box pile */
 body.gifting-2026 .gk .box-sheet { width: min(980px, 100%); }
+/* the wipe between the two halves: the other half's colour rises over the screen, then lifts away */
+body.gifting-2026 .gk .wipe { position: fixed; inset: 0; z-index: 1080; display: flex; align-items: center; justify-content: center; transform: translateY(100%); transition: transform .55s cubic-bezier(.7, 0, .3, 1); pointer-events: all; }
+body.gifting-2026 .gk .wipe.r { background: var(--side-r); color: var(--ink); }
+body.gifting-2026 .gk .wipe.p { background: var(--side-p); color: #F7F2F2; }
+body.gifting-2026 .gk .wipe span { font-family: var(--ken-font-display); font-style: italic; font-weight: bold; font-size: clamp(36px, 7vw, 72px); opacity: 0; transition: opacity .25s .25s; }
+body.gifting-2026 .gk .wipe.in { transform: none; }
+body.gifting-2026 .gk .wipe.in span { opacity: 1; }
+body.gifting-2026 .gk .wipe.out { transform: translateY(-100%); }
+body.gifting-2026 .gk .wipe.out span { opacity: 0; transition-delay: 0s; }
 /* pop-up scrollbar: a slim ink pill on a ruled track, like the rest of the page's lines */
 body.gifting-2026 .gk .big { scrollbar-width: thin; scrollbar-color: var(--ink) var(--box); }
 body.gifting-2026 .gk .big::-webkit-scrollbar { width: 12px; }
@@ -366,7 +377,7 @@ body.gifting-2026 .gk .big::-webkit-scrollbar-track { background: var(--ken-bg);
 body.gifting-2026 .gk .big::-webkit-scrollbar-thumb { background: var(--ink); border-radius: 999px; border: 3px solid var(--ken-bg); }
 body.gifting-2026 .gk .big::-webkit-scrollbar-thumb:hover { background: var(--red); }
 body.gifting-2026 .gk .box-sheet.narrow { width: min(560px, 100%); }
-body.gifting-2026 .gk .dock-tabs { display: inline-flex; border: 2px solid var(--ink); border-radius: 14px; overflow: hidden; margin-right: 44px; }
+body.gifting-2026 .gk .dock-tabs { display: inline-flex; border: 2px solid var(--ink); border-radius: 12px; overflow: hidden; margin-right: 44px; }
 body.gifting-2026 .gk .dock-tabs button { display: grid; gap: 1px; text-align: left; padding: 8px 18px 9px; font-family: var(--ken-font-bold); font-size: 15px; color: var(--ink); background: #fff; }
 body.gifting-2026 .gk .dock-tabs button + button { border-left: 2px solid var(--ink); }
 body.gifting-2026 .gk .dock-tabs button small { font-family: var(--ken-font-body); font-size: 12px; color: var(--muted); }
@@ -484,12 +495,12 @@ body.gifting-2026 .gk .big .thing { display: flex; justify-content: space-betwee
 body.gifting-2026 .gk .big .thing .price { text-align: right; font-size: 12px; color: var(--muted); white-space: nowrap; }
 body.gifting-2026 .gk .big .thing .price b { display: block; font-family: var(--ken-font-display); font-size: 24px; color: var(--ink); }
 body.gifting-2026 .gk .big blockquote { font-size: 16.5px; line-height: 1.5; color: var(--text); margin-top: 14px; padding-left: 14px; border-left: 3px solid var(--line); }
-body.gifting-2026 .gk .big blockquote.first { font-family: var(--ken-font-display); font-weight: bold; font-size: 22px; line-height: 1.2; color: var(--ink); border-color: var(--sc, var(--red)); }
+body.gifting-2026 .gk .big blockquote.first { font-family: var(--ken-font-body); font-weight: 300; font-size: 20px; line-height: 1.45; color: var(--ink); border-color: var(--sc, var(--red)); }
 body.gifting-2026 .gk .big blockquote .credit { display: block; margin-top: 4px; font-family: var(--ken-font-body); font-weight: 300; }
 body.gifting-2026 .gk .big .more-h { margin-top: 20px; }
 /* go deeper: plain reading; a lead line, the readers' answers on a tinted panel, then sentences and links */
 body.gifting-2026 .gk .deep { margin-top: 22px; padding-top: 20px; border-top: 2px solid var(--ink); display: grid; gap: 12px; animation: gk-rise .35s var(--ease); }
-body.gifting-2026 .gk .deep-lead { font-family: var(--ken-font-display); font-weight: bold; font-size: 21px; line-height: 1.3; color: var(--ink); }
+body.gifting-2026 .gk .deep-lead { font-family: var(--ken-font-bold); font-weight: bold; font-size: 15px; line-height: 1.3; color: var(--ink); }
 body.gifting-2026 .gk .deep-lead b { color: var(--sc, var(--red)); }
 body.gifting-2026 .gk .deep-voices { background: var(--box); padding: 6px 18px 16px; display: grid; gap: 4px; }
 body.gifting-2026 .gk .deep-voices blockquote { margin-top: 10px; padding-left: 12px; border-left: 3px solid var(--sc, var(--red)); font-size: 15.5px; line-height: 1.5; color: var(--text); }
@@ -512,7 +523,7 @@ body.gifting-2026 .gk .bigs { display: flex; gap: 26px; flex-wrap: wrap; align-i
 body.gifting-2026 .gk .bigs b { font-family: var(--ken-font-display); font-size: 36px; color: var(--sc, var(--red)); line-height: 1; margin-right: 6px; }
 body.gifting-2026 .gk .links { margin-top: 18px; border: 1.5px dashed var(--muted); padding: 12px 14px; }
 body.gifting-2026 .gk .links .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-body.gifting-2026 .gk .chip { font-size: 13.5px; border: 1.5px solid var(--ink); border-radius: 999px; padding: 4px 12px; background: #fff; cursor: pointer; }
+body.gifting-2026 .gk .chip { font-size: 13.5px; border: 1.5px solid var(--ink); border-radius: 12px; padding: 4px 12px; background: #fff; cursor: pointer; }
 body.gifting-2026 .gk .chip:hover { background: var(--ink); color: #fff; }
 body.gifting-2026 .gk .big .acts { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 18px; }
 body.gifting-2026 .gk .big .acts .note { font-size: 12.5px; }
@@ -554,6 +565,9 @@ body.gifting-2026 .gk .pbox svg { display: block; overflow: visible; }
   body.gifting-2026 .gk .split { flex-direction: column; }
   body.gifting-2026 .gk .side { padding: 16px 20px 18px; }
   body.gifting-2026 .gk .side-art { display: none; }
+  body.gifting-2026 .gk .land-head .lede { height: clamp(96px, 26vh, 240px); margin-top: 8px; }
+  body.gifting-2026 .gk .land-strap { display: none; }
+  body.gifting-2026 .gk .land-head { padding-top: 14px; padding-bottom: 12px; }
   body.gifting-2026 .gk .side h2 { font-size: clamp(26px, 4.6vh, 38px); }
   body.gifting-2026 .gk .side p { font-size: 14px; margin-top: 6px; }
   body.gifting-2026 .gk .side .go { margin-top: 10px; padding: 7px 14px; font-size: 14px; }
@@ -561,7 +575,6 @@ body.gifting-2026 .gk .pbox svg { display: block; overflow: visible; }
   body.gifting-2026 .gk .ribbon .bow { left: 72%; top: 50%; width: 76px; height: 58px; transform: translate(-50%, -50%) rotate(90deg); }
   body.gifting-2026 .gk .ribbon .or { left: 30%; top: 50%; transform: translate(-50%, -50%); }
   body.gifting-2026 .gk .split:not(.opening) .side:hover { flex-grow: 1; }
-  body.gifting-2026 .gk .land-foot .legal { display: none; }
   body.gifting-2026 .gk .bar { gap: 8px; padding: 7px 12px; }
   body.gifting-2026 .gk .bar .back { padding: 6px 10px; font-size: 13px; }
   body.gifting-2026 .gk .bar .switch { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; }

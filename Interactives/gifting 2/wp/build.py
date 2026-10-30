@@ -34,5 +34,7 @@ shutil.copy(ROOT / 'data' / 'gifting-2026.json', OUT / 'data' / 'gifting-2026.js
 (OUT / 'assets').mkdir()
 shutil.copytree(ROOT / 'assets' / 'fonts', OUT / 'assets' / 'fonts')
 shutil.copy(ROOT / 'assets' / 'logo.png', OUT / 'assets' / 'logo.png')
+shutil.copy(ROOT / 'assets' / 'lede.jpg', OUT / 'assets' / 'lede.jpg')
+shutil.copytree(ROOT / 'assets' / 'icons', OUT / 'assets' / 'icons')
 (OUT / 'VERSION').write_text(time.strftime('%Y%m%d%H%M') + '\n')
 print('Built', OUT.relative_to(ROOT), 'and wp/gifting-2026-views.php')
