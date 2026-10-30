@@ -5,15 +5,19 @@
 <link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>What Makes a Gift Land?</title>
-<link rel="stylesheet" href="assets/ken-chart.css">
+<meta name="description" content="The Ken’s gifting guide, written by readers: what they gave, and what they believe about giving.">
+<!-- Static preview of the page. On the-ken.com the same markup (between the views markers) is printed by
+     wp/page-gifting-2026-3-0.php, which also sets window.gk26Config so answers go to the gifting_2026_* endpoints.
+     Here there's no config, so sign-in runs in a local mock: any email, code 000000. Serve over http (modules). -->
 <link rel="stylesheet" href="styles.css">
-<script src="data/gifting-data.js"></script>
 <script src="scripts/tag-theme.js"></script>
 <script src="scripts/gift-tag.js"></script>
 <script>/* ?tagpreview shows the tag kit's unsaved look (tag-kit/index.html → "Preview on the site") */
 if (/[?&]tagpreview/.test(location.search)) { try { Object.assign(window.TAG_THEME, JSON.parse(localStorage.getItem('gf_tag_preview') || '{}')); } catch (e) {} }</script>
 </head>
-<body class="locked">
+<body class="gifting-2026 locked">
+<!-- views:start -->
+<div class="gk" id="gk-root">
 <div class="progress" id="progress"></div>
 
 <!-- ===== LANDING: one screen, no scroll. Pick a side; it opens into its story. ===== -->
@@ -61,7 +65,8 @@ if (/[?&]tagpreview/.test(location.search)) { try { Object.assign(window.TAG_THE
 <div class="ov" id="ov" role="dialog" aria-modal="true"></div>
 <button class="checkout" id="checkout" hidden onclick="GF.openDock()" aria-label="Open your gift box"></button>
 <div class="toast" id="toast" aria-live="polite"></div>
-
-<script src="scripts/app.js"></script>
+</div>
+<!-- views:end -->
+<script type="module" src="scripts/app.js"></script>
 </body>
 </html>

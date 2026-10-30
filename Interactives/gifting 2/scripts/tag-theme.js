@@ -55,10 +55,10 @@ window.TAG_THEME = {
   "variety": {
     "on": true,
     "shapes": ["classic", "arch", "luggage", "swallowtail", "pointed", "scallop", "ticket"],
-    "layouts": ["quote", "quote", "item", "price"],
+    "layouts": ["quote"],
     "fills": ["paper", "paper", "cream", "kraft", "blush", "section"],
     "accentStyles": ["band", "band", "edge", "none"],
-    "prices": ["coins", "coins", "rupees", "stamp"],
+    "prices": ["coins"],
     "widths": [196, 236]
   },
   "overrides": {}
