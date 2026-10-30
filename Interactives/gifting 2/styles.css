@@ -540,15 +540,11 @@ body.gifting-2026 .gk .sf-legal a:hover { color: var(--ink); }
 body.gifting-2026 .gk .sf-copy { text-align: right; }
 body.gifting-2026 .gk .sf-mark { aspect-ratio: 500 / 50; overflow: hidden; margin-top: 10px; }
 body.gifting-2026 .gk .sf-mark img { display: block; width: 100%; height: auto; opacity: .07; }
-/* the pile along the bottom edge: boxes sit on the page's last pixel and hop when touched */
-body.gifting-2026 .gk .sf-pile { position: absolute; left: 0; right: 0; bottom: 0; height: 0; pointer-events: none; z-index: 2; }
-body.gifting-2026 .gk .fbox-slot { position: absolute; bottom: 0; }
-body.gifting-2026 .gk .fbox { position: relative; pointer-events: auto; cursor: pointer; transform-origin: 40% 100%; }
-body.gifting-2026 .gk .fbox svg { display: block; overflow: visible; }
-body.gifting-2026 .gk .fbox-on { position: absolute; bottom: calc(100% - var(--top) - 2px); }
-body.gifting-2026 .gk .fbox.hop { animation: gk-hop .75s cubic-bezier(.3, .7, .4, 1); }
-body.gifting-2026 .gk .fbox.wave { animation: gk-hop .75s cubic-bezier(.3, .7, .4, 1) var(--dl, 0s) both; }
-@keyframes gk-hop { 0% { transform: none; } 30% { transform: translateY(-22px) rotate(-5deg); } 55% { transform: translateY(0) rotate(2deg) scaleY(.94); } 72% { transform: translateY(-6px) rotate(-1deg); } 100% { transform: none; } }
+/* the physics pile: a band along the bottom; only the boxes take the pointer */
+body.gifting-2026 .gk .sf-pile { position: absolute; left: 0; right: 0; bottom: 0; height: 340px; pointer-events: none; z-index: 2; }
+body.gifting-2026 .gk .pbox { position: absolute; left: 0; top: 0; pointer-events: auto; cursor: grab; touch-action: none; will-change: transform; }
+body.gifting-2026 .gk .pbox.held { cursor: grabbing; }
+body.gifting-2026 .gk .pbox svg { display: block; overflow: visible; }
 
 /* ================= PHONE ================= */
 @media (max-width: 760px) {

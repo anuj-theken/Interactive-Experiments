@@ -28,6 +28,7 @@ shutil.copy(ROOT / 'styles.css', OUT / 'gifting-2026.css')
 for f in ('app.js', 'gift-tag.js', 'tag-theme.js'):
     shutil.copy(ROOT / 'scripts' / f, OUT / 'js' / f)
 shutil.copytree(ROOT / 'scripts' / 'gifting', OUT / 'js' / 'gifting')
+shutil.copytree(ROOT / 'scripts' / 'vendor', OUT / 'js' / 'vendor')  # Matter.js for the footer pile
 (OUT / 'data').mkdir()
 shutil.copy(ROOT / 'data' / 'gifting-2026.json', OUT / 'data' / 'gifting-2026.json')
 (OUT / 'assets').mkdir()

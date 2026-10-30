@@ -56,10 +56,10 @@ window.TAG_THEME = {
     "on": true,
     "shapes": ["classic", "arch", "luggage", "swallowtail", "pointed", "scallop", "ticket"],
     "layouts": ["quote"],
-    "fills": ["paper", "paper", "cream", "kraft", "blush", "section"],
-    "accentStyles": ["band", "band", "edge", "none"],
+    "fills": ["paper", "paper", "cream"],
+    "accentStyles": ["band", "band", "edge"],
     "prices": ["coins"],
-    "widths": [196, 236]
+    "widths": [220, 220]
   },
   "overrides": {}
 };

@@ -7,6 +7,7 @@ import { loadData, toPageData } from './gifting/data.js';
 import { beliefIds, tagIds, questionIds } from './gifting/rows.js';
 import { store } from './gifting/store.js';
 import { renderSignIn, configureSignIn, pull, waitingCount } from './gifting/signin.js';
+import { mountPile, destroyPile } from './gifting/pile.js';
 
 loadData().then(start).catch(err => {
   const box = document.getElementById('story');
@@ -68,11 +69,22 @@ function start(DATA) {
   const setTagAt = (id, inst) => { const m = tagAt(); if (inst) m[id] = inst; else delete m[id]; try { localStorage.setItem(INST_KEY, JSON.stringify(m)); } catch (e) {} };
   // the tag that shows a gift's state: the one tapped, or the gift's own tag if none was recorded
   const showsState = (el) => { const at = tagAt()[el.dataset.id]; return at ? at === el.dataset.inst : !el.classList.contains('rep'); };
+  // a tag drawn on a coloured panel must never melt into it: a face too close to the panel turns to paper,
+  // an accent band too close turns to ink
+  const rgb = h => [1, 3, 5].map(k => parseInt(String(h).slice(k, k + 2), 16));
+  const near = (a, b) => { const x = rgb(a), y = rgb(b); return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]) < 70; };
+  function standOut(st, bg) {
+    const pal = st.palette || {};
+    if (near(st.accentStyle === 'fill' ? st._accent : st._fill, bg)) { if (st.accentStyle === 'fill') st.accentStyle = 'band'; st._fill = pal.paper || '#FFFFFF'; }
+    if ((st.accentStyle === 'band' || st.accentStyle === 'edge') && near(st._accent, bg)) st._accent = pal.ink || '#1A1208';
+  }
+  const SIDE_R = '#E9C6C4'; // the Recommendations panel (--side-r)
   const idAttrs = ids => ids ? `data-type="${ids.type}" data-cat-id="${ids.cat_id}" data-card-id="${ids.card_id}"` : '';
   function tagHTML(g, opts) {
     opts = opts || {};
     const qi = opts.qi, q = qi != null ? g.q[qi] : null;
     const st = GiftTag.style(q ? g.id + '~' + qi : g.id, g.c);
+    if (opts.onBg) standOut(st, opts.onBg);
     const r = ((rnd() * 2 - 1) * (+st.tilt || 0)).toFixed(1);
     const open = `GF.openTag('${g.id}',${q ? qi : 'null'},this)`;
     const inst = q ? `${g.id}~${qi}` : g.id, at = tagAt()[g.id], mineTag = at ? at === inst : !q;
@@ -167,12 +179,11 @@ function start(DATA) {
   // One section per kind of gift; each section's tags hang on their own string that scrolls sideways
   function recommendations() {
     const sample = shuffle(LIVE_G.filter(g => g.n >= 40)).slice(0, 3);
-    const ap = ORDER.filter(id => cById(id).apart), main = ORDER.filter(id => !ap.includes(id));
     return bar('r') + artHead({
       band: 'var(--side-r)', ink: 'var(--ink)', tag: 'Gifting · Recommendations', meta: `${TAG_COUNT} tags`,
       title: 'Every gift here came with a person attached',
       strap: 'We asked readers what to give and kept only the gifts that came with a reason. So the reason is the headline. The thing itself is in the small print.',
-      art: sample.map((g, i) => tagHTML(g, { static: true, width: 200, r: [-5, 2, 6][i], stringH: 26, bg: 'var(--side-r)' })).join('')
+      art: sample.map((g, i) => tagHTML(g, { static: true, width: 200, r: [-5, 2, 6][i], stringH: 26, bg: 'var(--side-r)', onBg: SIDE_R })).join('')
     }) + `
     <section class="nl context">
       <span class="ph">PLACEHOLDER COPY</span>
@@ -182,8 +193,7 @@ function start(DATA) {
       <div class="reading"><p>This is an interactive story. Each kind of gift has its own string: scroll it sideways. Tap a tag to keep it, or to tell us you gave it. Your gift box at the bottom of the screen fills as you go.</p><p>Your answers wait in this browser until you sign in at checkout. Nothing is sent before that.</p></div>
     </section>
     ${qcard({ id: 'who', n: 1, label: 'Before we start', q: 'Who’s hard to buy for this year?', why: 'Tell us who. We’ll mark the gifts readers gave to someone like them.', kind: 'text', placeholder: 'My dad, who wants nothing…', submit: 'Show me', skip: 'Just browsing ↓', foot: '152 readers told us who is hardest to buy for' })}
-    ${main.map(id => sectionHTML(cById(id))).join('')}
-    <div class="apart"><div class="apart-h"><span class="label" style="color:#D9CECD">Set apart</span><p class="note" style="margin-top:6px;font-size:16px">Two more. One is a person; the other is not buying.</p></div>${ap.map(id => sectionHTML(cById(id))).join('')}</div>
+    ${ORDER.map(id => sectionHTML(cById(id))).join('')}
     ${qcard({ id: 'missed', n: 2, label: 'Your turn', q: 'What gift is missing from these strings?', why: 'One you gave that landed: the gift, who it was for, and why it worked. One line is enough.', kind: 'text', kinds: true, placeholder: 'A fountain pen for my sister, because…', submit: 'Send' })}
     <section class="sec" id="end"><div class="sec-head"><div class="sec-num"><b>END</b><span></span></div><h2>Your gift box</h2><p class="dek">Every gift you add gets a box. Bigger price, bigger box.</p></div>
       <div class="ask"><div class="endcard boxcard" id="endcard">${boxPanel()}</div></div></section>
@@ -274,79 +284,28 @@ function start(DATA) {
     { x: 238, y: -8, z: 5, s: .8 },
     { x: 0, y: 34, z: 16, s: .62 }
   ];
-  /* ---------- the footer pile: wrapped boxes along the bottom edge that hop when you touch them ----------
-     On Recommendations your kept gifts are in it (bigger, in their kind's colour, named on hover).
-     Every box opens your checkout. Boxes stacked on a box hop with it. */
+  /* ---------- the footer pile: flat gift boxes with physics (scripts/gifting/pile.js) ----------
+     They fill the margins beside the footer's centre column. On Recommendations your kept gifts are in it,
+     bigger and in their kind's colour, named on hover. Clicking a box opens your checkout. */
   const PILE_COLS = ['#C8423A', '#4A9E9A', '#4A7A5A', '#7A9E4A', '#3D3D3D', '#A89880', '#E9C6C4', '#D9B98A', '#F3E9D2', '#2F5D8A', '#B0475F'];
-  // one box: shape 'cube' (any height, flat parcel to tall box) or 'round' (a hatbox); --top is where a box on it rests
-  function fbox(w, col, opts, child) {
-    opts = opts || {};
-    const shape = opts.shape || 'cube', hr = opts.hr || .66, title = opts.title || '';
-    const rib = GiftTag.isDark(col) ? '#F7F2F2' : '#C8423A', ribS = shade(rib, .8), rw = Math.max(5, w * .12), bow = w * .2;
-    const bowSVG = (cx, cy) => `<g transform="translate(${cx} ${cy})"><path d="M0,0 c${-w * .26},${-w * .2} ${-w * .3},${w * .03} 0,0 z M0,0 c${w * .26},${-w * .2} ${w * .3},${w * .03} 0,0 z" fill="${rib}" stroke="#1A1208" stroke-width="1.5" stroke-linejoin="round"/><circle r="${Math.max(2.5, w * .04)}" fill="${rib}" stroke="#1A1208" stroke-width="1.3"/></g>`;
-    let W, H, top, body;
-    if (shape === 'round') {
-      const h = Math.round(w * hr), ry = w * .17, x0 = 2, y0 = bow + ry + 2, cx = x0 + w / 2;
-      W = w + 4; H = y0 + h + ry + 2; top = y0;
-      body = `<path d="M${x0},${y0} v${h} a${w / 2},${ry} 0 0 0 ${w},0 v${-h} z" fill="${col}" stroke="#1A1208" stroke-width="2" stroke-linejoin="round"/>
-        <rect x="${cx - rw / 2}" y="${y0}" width="${rw}" height="${h + ry}" fill="${rib}" stroke="#1A1208" stroke-width="1.2"/>
-        <ellipse cx="${cx}" cy="${y0}" rx="${w / 2}" ry="${ry}" fill="${shade(col, 1.18)}" stroke="#1A1208" stroke-width="2"/>
-        <path d="M${cx - rw / 2},${y0 - ry} h${rw} v${ry * 2} h${-rw} z" fill="${ribS}" stroke="#1A1208" stroke-width="1.2"/>${bowSVG(cx, y0)}`;
-    } else {
-      const h = Math.round(w * hr), d = w * .34, dx = d * .62, dy = d * .5, x0 = 2, y0 = dy + bow + 2, cx = x0 + w / 2;
-      W = w + dx + 4; H = y0 + h + 2; top = dy + bow;
-      body = `<path d="M${x0 + w},${y0} l${dx},${-dy} v${h} l${-dx},${dy} z" fill="${shade(col, .72)}" stroke="#1A1208" stroke-width="2" stroke-linejoin="round"/>
-        <rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="${col}" stroke="#1A1208" stroke-width="2"/>
-        <path d="M${x0},${y0} h${w} l${dx},${-dy} h${-w} z" fill="${shade(col, 1.18)}" stroke="#1A1208" stroke-width="2" stroke-linejoin="round"/>
-        <rect x="${cx - rw / 2}" y="${y0}" width="${rw}" height="${h}" fill="${rib}" stroke="#1A1208" stroke-width="1.2"/>
-        <path d="M${cx - rw / 2},${y0} h${rw} l${dx},${-dy} h${-rw} z" fill="${ribS}" stroke="#1A1208" stroke-width="1.2" stroke-linejoin="round"/>${bowSVG(cx + dx / 2, y0 - dy / 2)}`;
-    }
-    return `<div class="fbox" style="width:${W.toFixed(0)}px;height:${H.toFixed(0)}px;--top:${top.toFixed(0)}px;--dl:${(opts.dl || 0).toFixed(2)}s" ${title ? `title="${E(title)}" aria-label="${E(title)}"` : ''} role="button" tabindex="-1" onclick="GF.openDock()">
-      <svg viewBox="0 0 ${W.toFixed(1)} ${H.toFixed(1)}" width="${W.toFixed(0)}" height="${H.toFixed(0)}" aria-hidden="true">${body}</svg>${child || ''}</div>`;
-  }
   function footerPile() {
     const host = $('#sfPile'); if (!host) return;
-    // only in the empty margins beside the footer's centre column, never over the text or the logo
-    const W = host.clientWidth, inner = host.parentNode.querySelector('.sf-inner').getBoundingClientRect(), left = host.getBoundingClientRect().left;
-    const CLEAR = 48, zones = [[-12, inner.left - left - CLEAR], [inner.right - left + CLEAR, W + 12]].filter(([a, b]) => b - a >= 90);
-    if (!zones.length) { host.innerHTML = ''; return; }
-    let sd = 11; const r = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
-    const pick = () => PILE_COLS[Math.floor(r() * PILE_COLS.length)];
-    // a mix of shapes: flat parcels, cubes, tall boxes, hatboxes
-    const look = () => { const v = r(); return v < .2 ? { shape: 'round', hr: .45 + r() * .4 } : v < .4 ? { hr: .38 + r() * .14 } : v < .6 ? { hr: 1 + r() * .3 } : { hr: .55 + r() * .3 }; };
-    const mine = currentSide === 'r' ? inBox() : [];
-    const out = []; let i = 0, m = 0;
-    // a stack: each box sits on the one below, a bit narrower, until it runs out of height or luck
-    function stack(w, level, x) {
-      if (level > 3 || w < 24 || r() > [.95, .85, .7, .5][level]) return '';
-      const w2 = Math.round(w * (.6 + r() * .25)), off = Math.round((w - w2) * r());
-      return `<div class="fbox-on" style="left:${off}px">${fbox(w2, pick(), Object.assign(look(), { dl: x + level * .06 }), stack(w2, level + 1, x))}</div>`;
+    const inner = host.parentNode.querySelector('.sf-inner').getBoundingClientRect(), hr = host.getBoundingClientRect();
+    const CLEAR = 40, zones = [[0, inner.left - hr.left - CLEAR], [inner.right - hr.left + CLEAR, hr.width]].filter(([a, b]) => b - a >= 110);
+    if (!zones.length) { destroyPile(); host.innerHTML = ''; return; }
+    // enough boxes to make a messy heap in each margin
+    const area = zones.reduce((a, [x0, x1]) => a + (x1 - x0), 0) * hr.height, mine = currentSide === 'r' ? inBox() : [];
+    const n = Math.max(6, Math.min(46, Math.round(area / 5200)));
+    const boxes = [];
+    for (let k = 0; k < n; k++) {
+      const g = mine[k], v = Math.random();
+      const w = Math.round(g ? 84 + Math.random() * 18 : 34 + Math.random() * 58);
+      const h = Math.round(w * (g ? .72 : v < .3 ? .45 + Math.random() * .15 : v < .6 ? .9 + Math.random() * .5 : .65 + Math.random() * .2));
+      boxes.push({ w, h, round: !g && Math.random() < .18, col: g ? tagColour(g.c) : PILE_COLS[Math.floor(Math.random() * PILE_COLS.length)], title: g ? `${g.it} · in your gift box` : '' });
     }
-    for (const [z0, z1] of zones) for (let x = z0; ;) {
-      const g = i % 2 === 1 && m < mine.length ? mine[m] : null;
-      const w = Math.round(g ? 84 + r() * 14 : 46 + r() * 40), lk = g ? { hr: .66 } : look();
-      if (x + w + w * .22 > z1) break;
-      if (g) m++;
-      const dl = (x / Math.max(W, 1)) * .5;
-      out.push(`<div class="fbox-slot" style="left:${x}px">${fbox(w, g ? tagColour(g.c) : pick(), Object.assign(lk, { title: g ? `${g.it} · in your gift box` : 'Open your gift box', dl }), stack(w, 0, dl + .06))}</div>`);
-      x += w + Math.round(w * .2 + r() * 6); i++;
-    }
-    host.innerHTML = out.join('');
-    watchEnd();
+    mountPile(host, { zones, boxes, onClick: () => openDock() });
   }
-  // reaching the end of the page: every box jumps, in a wave, every time
-  let endIO = null;
-  function watchEnd() {
-    if (endIO) endIO.disconnect();
-    const mark = document.querySelector('.site-foot .sf-mark');
-    if (!mark || !('IntersectionObserver' in window)) return;
-    endIO = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) document.querySelectorAll('.sf-pile .fbox').forEach(b => { b.classList.remove('hop', 'wave'); void b.offsetWidth; b.classList.add('wave'); }); }), { threshold: .9 });
-    endIO.observe(mark);
-  }
-  let pileT; addEventListener('resize', () => { clearTimeout(pileT); pileT = setTimeout(footerPile, 200); });
-  // a box hops when the pointer arrives (or on tap), plays out, lands; boxes on it go along
-  document.addEventListener('pointerenter', e => { const b = e.target.closest && e.target.closest('.fbox'); if (b && e.target === b && !b.classList.contains('hop')) b.classList.add('hop'); }, true);
-  document.addEventListener('animationend', e => { if (e.animationName === 'gk-hop') e.target.classList.remove('hop', 'wave'); });
+  let pileT; addEventListener('resize', () => { clearTimeout(pileT); pileT = setTimeout(footerPile, 250); });
 
   const shade = (hex, f) => { const [r, g, b] = [1, 3, 5].map(k => parseInt(hex.slice(k, k + 2), 16)); return '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v * f)))).map(v => v.toString(16).padStart(2, '0')).join(''); };
   function boxesSVG(gs, opts) {
@@ -786,6 +745,7 @@ function start(DATA) {
 
   const land_ = $('#land'), split = $('#split'), story = $('#story');
   function showLanding() {
+    destroyPile();
     currentSide = null; story.classList.remove('on'); story.innerHTML = ''; $('#checkout').hidden = true;
     land_.style.display = ''; land_.classList.remove('opening', 'gone'); split.classList.remove('opening');
     split.querySelectorAll('.side').forEach(s => s.classList.remove('picked'));
@@ -852,7 +812,7 @@ function start(DATA) {
     $('#sideRp').textContent = `${LIVE_G.length} gifts readers actually gave, sorted into ${C.length} kinds. Each one comes with the person it was for.`;
     $('#sidePp').textContent = `${B.length} beliefs about what a gift is for, who makes it hard and what it should cost. Agree with three.`;
     const gs = shuffle(LIVE_G.filter(g => g.n >= 40 && g.h.length < 60)).slice(0, 3);
-    $('#artR').innerHTML = `<div style="display:flex;gap:22px;align-items:flex-start;margin-bottom:-8px">${gs.map((g, i) => tagHTML(g, { static: true, width: 180, r: [-6, 3, 7][i], stringH: 60, bg: 'var(--side-r)' })).join('')}</div>`;
+    $('#artR').innerHTML = `<div style="display:flex;gap:22px;align-items:flex-start;margin-bottom:-8px">${gs.map((g, i) => tagHTML(g, { static: true, width: 180, r: [-6, 3, 7][i], stringH: 60, onBg: SIDE_R, bg: 'var(--side-r)' })).join('')}</div>`;
     const bs = shuffle(B.filter(b => !b.vs && b.h.length < 64 && b.n > 10)).slice(0, 3);
     $('#artP').innerHTML = `<div style="position:relative;width:340px;height:200px;margin-bottom:6px">${bs.map((b, i) => `<div class="bcard M" style="position:absolute;left:${[0, 70, 140][i]}px;top:${[30, 0, 40][i]}px;width:200px;transform:rotate(${[-7, 2, 8][i]}deg);--sc:${SC[b.s]};pointer-events:none"><div class="quote" style="font-size:16px;margin-top:0">“${E(b.h)}”</div><div class="count"><b style="font-size:24px">${b.n}</b><small>readers</small></div></div>`).join('')}</div>`;
   }

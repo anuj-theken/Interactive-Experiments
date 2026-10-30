@@ -9,7 +9,7 @@
     <div class="land-meta"><span>Two surveys</span><span>Three years</span><span>29 Oct 2026</span></div>
     <h1 class="land-title">What makes a gift land?</h1>
     <p class="land-strap">For three years we’ve asked readers of The Ken two things: what they gave that worked, and what they believe a gift is for. Pick a side.</p>
-    <p class="land-by"><i>by</i> <a href="https://the-ken.com/writers/anuj_269/" target="_blank" rel="noopener">Anuj Debnath</a></p>
+    <p class="land-by"><i>by</i> <a href="https://the-ken.com/writers/rohin/" target="_blank" rel="noopener">Rohin Dharmakumar</a></p>
   </header>
   <div class="split" id="split">
     <button class="side side-r" data-go="recommendations" aria-label="Open Recommendations: what to give">
