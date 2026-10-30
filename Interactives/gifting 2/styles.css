@@ -487,14 +487,17 @@ body.gifting-2026 .gk .big blockquote { font-size: 16.5px; line-height: 1.5; col
 body.gifting-2026 .gk .big blockquote.first { font-family: var(--ken-font-display); font-weight: bold; font-size: 22px; line-height: 1.2; color: var(--ink); border-color: var(--sc, var(--red)); }
 body.gifting-2026 .gk .big blockquote .credit { display: block; margin-top: 4px; font-family: var(--ken-font-body); font-weight: 300; }
 body.gifting-2026 .gk .big .more-h { margin-top: 20px; }
-body.gifting-2026 .gk .deep { margin-top: 22px; border-top: 2px solid var(--ink); animation: gk-rise .35s var(--ease); }
-body.gifting-2026 .gk .deep-sec { padding: 16px 0; border-bottom: 1.5px solid var(--line); }
-body.gifting-2026 .gk .deep-sec > .label { display: block; margin-bottom: 10px; }
-body.gifting-2026 .gk .deep-cap { font-size: 13.5px; color: var(--muted); margin-bottom: 14px; }
-body.gifting-2026 .gk .deep .yrs { margin: 26px 0 22px; }
-body.gifting-2026 .gk .deep blockquote { margin-top: 10px; font-size: 16px; }
+/* go deeper: plain reading; a lead line, the readers' answers on a tinted panel, then sentences and links */
+body.gifting-2026 .gk .deep { margin-top: 22px; padding-top: 20px; border-top: 2px solid var(--ink); display: grid; gap: 12px; animation: gk-rise .35s var(--ease); }
+body.gifting-2026 .gk .deep-lead { font-family: var(--ken-font-display); font-weight: bold; font-size: 21px; line-height: 1.3; color: var(--ink); }
+body.gifting-2026 .gk .deep-lead b { color: var(--sc, var(--red)); }
+body.gifting-2026 .gk .deep-voices { background: var(--box); padding: 6px 18px 16px; display: grid; gap: 4px; }
+body.gifting-2026 .gk .deep-voices blockquote { margin-top: 10px; padding-left: 12px; border-left: 3px solid var(--sc, var(--red)); font-size: 15.5px; line-height: 1.5; color: var(--text); }
+body.gifting-2026 .gk .deep-voices .credit { display: block; margin-top: 3px; font-size: 11.5px; }
+body.gifting-2026 .gk .deep-p { font-size: 16px; line-height: 1.5; color: var(--text); margin-top: 10px; }
+body.gifting-2026 .gk .deep-p b { font-family: var(--ken-font-bold); color: var(--ink); }
+body.gifting-2026 .gk .deep .yrs { margin: 22px 0 22px; }
 body.gifting-2026 .gk .deep .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-body.gifting-2026 .gk .deep .bigs span { font-size: 14px; color: var(--text); }
 body.gifting-2026 .gk .deeper-btn { margin-left: auto; }
 body.gifting-2026 .gk .data { margin-top: 18px; background: var(--box); padding: 14px 16px; }
 body.gifting-2026 .gk .data .label { margin-bottom: 10px; display: block; }

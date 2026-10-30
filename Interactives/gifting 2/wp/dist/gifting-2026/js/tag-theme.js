@@ -15,7 +15,7 @@ window.TAG_THEME = {
   "stub": true,
   "price": "coins",
   "priceCaption": true,
-  "showKicker": true,
+  "showKicker": false,
   "showCredit": true,
   "showCount": true,
   "quoteMarks": true,

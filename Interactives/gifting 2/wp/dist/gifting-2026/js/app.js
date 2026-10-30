@@ -107,7 +107,6 @@ function start(DATA) {
       ? `<b>${b.n}</b><span class="vs">VS</span><b>${b.n2}</b><small>readers disagree</small>`
       : `<b>${b.n}</b><small>${b.n === 1 ? 'reader said this' : 'readers said something like this'}</small>${b.n === 1 ? '<span class="one">ONE OF ONE</span>' : ''}`;
     return `<button class="bcard v-index ${size(tot)} ${picks.includes(b.id) ? 'picked' : ''} ${matches.includes(b.id) ? 'match' : ''}" style="--sc:${SC[b.s]}" data-id="${b.id}" data-card="${b.id}" ${idAttrs(beliefIds(DATA, b.id))} onclick="GF.openCard('${b.id}',null,this)">
-      <div class="top"><span class="label">${sec.n} · ${E(sec.name)}</span></div>
       <div class="quote">${quote}</div>
       <div class="credit">${E(b.vs ? b.w + ' · and · ' + b.w2 : b.w)}</div>
       <div class="count">${count}</div></button>`;
@@ -486,7 +485,7 @@ function start(DATA) {
   function handHTML(animate) {
     const bs = [0, 1, 2].map(i => B.find(b => b.id === picks[i]));
     return `<div class="hand">${bs.map((b, i) => b
-      ? `<div class="hcard v-index ${animate && b.id === lastPicked ? 'new' : ''}" style="--i:${i};--sc:${SC[b.s]}"><span class="label">${SECS.find(s => s.id === b.s).n} · ${E(SECS.find(s => s.id === b.s).name)}</span><div class="quote">“${E(b.h.length > 110 ? b.h.slice(0, 108) + '…' : b.h)}”</div><small>with ${b.n - 1} other readers</small></div>`
+      ? `<div class="hcard v-index ${animate && b.id === lastPicked ? 'new' : ''}" style="--i:${i};--sc:${SC[b.s]}"><div class="quote">“${E(b.h.length > 110 ? b.h.slice(0, 108) + '…' : b.h)}”</div><small>with ${b.n - 1} other readers</small></div>`
       : `<div class="hcard empty" style="--i:${i}"><span>${i + 1}</span><small>+1 a card</small></div>`).join('')}</div>`;
   }
   function threePanel(animate, inSheet) {
@@ -585,33 +584,31 @@ function start(DATA) {
       <div class="top"><span class="label">${q ? 'Said again · ' : ''}${sec.n} · ${E(sec.name)}</span><span class="pn"><button onclick="GF.openCard('${sib[(i - 1 + sib.length) % sib.length].id}')" aria-label="Previous belief">‹</button>${i + 1} / ${sib.length}<button onclick="GF.openCard('${sib[(i + 1) % sib.length].id}')" aria-label="Next belief">›</button></span></div>
       ${words}
       <div class="agree">${b.vs ? `<b>${b.n}</b> vs <b>${b.n2}</b> readers` : `<b>${b.n}</b> ${b.n === 1 ? 'reader said this' : 'readers said something like this'}`}<span class="meter"><i style="width:${pct.toFixed(0)}%"></i></span></div>
-      <div class="acts"><button class="pill ${on ? '' : 'red'}" ${full ? 'disabled' : ''} onclick="GF.plus('${id}')">${on ? 'Take back my +1' : '+1 · I believe this too'}</button><button class="pill" onclick="GF.closeOv()">Not for me</button>
-        ${deep ? '' : `<button class="pill deeper-btn" onclick="GF.openCard('${id}',${qi == null ? 'null' : qi},null,true)">Go deeper ↓</button>`}</div>
+      <div class="acts"><button class="pill ${on ? '' : 'red'}" ${full ? 'disabled' : ''} onclick="GF.plus('${id}')">${on ? 'Take back my +1' : '+1 · I believe this too'}</button>${deep ? '' : `<button class="pill deeper-btn" onclick="GF.openCard('${id}',${qi == null ? 'null' : qi},null,true)">Go deeper ↓</button>`}</div>
       ${full ? `<p class="warn">That’s three already. Take one back from <button class="skip" onclick="GF.openThree()">your three</button> to add this.</p>` : `<p class="note" style="margin-top:10px">${3 - picks.length} of 3 left</p>`}
       ${deep ? deeper(b) : ''}</div>`, SC[b.s]);
     if (deep) { const d = $('#deep'); d && setTimeout(() => d.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60); }
   }
-  // Go deeper: the numbers behind a belief, more readers in their own words, gifts for people who hold it,
-  // and the rest of its section. Same content as the old belief page, kept to one simple column.
+  // Go deeper: a short opening line, the readers' own answers in a tinted box, then what the numbers say and
+  // where to go next, each as one plain sentence. No headers: each part says what it is in its first words.
   function deeper(b) {
-    const sec = SECS.find(s => s.id === b.s), more = againFor(b);
-    let data = '';
-    if (b.yrs) data = `<p class="deep-cap">Share of readers’ philosophies that said this, by survey year</p><div class="yrs">${b.yrs.map((v, k) => `<div style="height:${Math.max(4, v * 1.8)}px"><b>${v}%</b><span>20${24 + k}</span></div>`).join('')}</div>`;
-    else if (b.vs) data = `<p class="deep-cap">Readers split on this</p><div class="bigs"><span><b>${b.n}</b>say cash is fine</span><span><b>${b.n2}</b>say never</span></div>`;
-    else if (b.chart === 'feeling') data = `<p class="deep-cap">The feeling readers most want a gift to create, 2026</p>${bars(FEEL, FEEL_N)}`;
-    else if (b.chart === 'occasions') data = `<p class="deep-cap">Readers who named each occasion as one that drives their gifting, 2026</p>${bars(OCC)}`;
-    else if (b.chart === 'budget') data = `<p class="deep-cap">Median ideal budget for a close friend or family member, ${BUDGET.year}</p><div class="bigs"><span><b>₹${BUDGET.give.toLocaleString('en-IN')}</b>to give</span><span><b>₹${BUDGET.get.toLocaleString('en-IN')}</b>to get</span></div>`;
-    else if (b.chart === 'recipientShare') data = `<p class="deep-cap">Share of a year’s gifting each group gets, most common answer, 2026</p><div class="bars">${TIER.map(t => `<span>${E(t[0])}</span><i style="width:${({ '25%+': 100, '10–25%': 58, '1–5%': 14 })[t[1]] || 10}%"></i><b>${E(t[1])}</b>`).join('')}</div>`;
-    const tags = DATA.tagsForBelief(b.id).map(t => G.find(g => g.id === t.id)).filter(Boolean);
-    const kinds = (b.gifts || []).map(cByName).filter(Boolean);
+    const sec = SECS.find(s => s.id === b.s), more = againFor(b), pct = (a, t) => Math.round(a / t * 100);
+    const out = [];
+    if (more.length) out.push(`<p class="deep-lead">${b.vs ? 'Here’s how both sides put it.' : `Here’s how ${more.length === 1 ? 'another reader' : 'other readers'} who believe this put it.`}</p>`);
+    if (more.length) out.push(`<div class="deep-voices">${more.slice(0, 6).map(q => `<blockquote>“${E(q[0])}”<span class="credit">${E(q[1])}</span></blockquote>`).join('')}</div>`);
+    if (b.yrs) out.push(`<p class="deep-p">${b.yrs[2] > b.yrs[0] ? 'More' : 'Fewer'} readers say this every year: <b>${b.yrs[0]}%</b> of philosophies in 2024, <b>${b.yrs[1]}%</b> in 2025 and <b>${b.yrs[2]}%</b> in 2026.</p><div class="yrs">${b.yrs.map((v, k) => `<div style="height:${Math.max(4, v * 1.6)}px"><b>${v}%</b><span>20${24 + k}</span></div>`).join('')}</div>`);
+    else if (b.chart === 'feeling') { const n = FEEL.reduce((t, f) => t + f[1], 0); out.push(`<p class="deep-p">Asked what feeling a gift should leave, most readers said <b>${E(FEEL[0][0].toLowerCase())}</b> (${pct(FEEL[0][1], n)}%).</p>${bars(FEEL, n)}`); }
+    else if (b.chart === 'occasions') out.push(`<p class="deep-p"><b>${E(OCC[0][0])}</b> drive the most gifting: ${OCC[0][1]} readers named them, then ${E(OCC[1][0].toLowerCase())} and ${E(OCC[2][0].toLowerCase())}.</p>${bars(OCC)}`);
+    else if (b.chart === 'budget') out.push(`<p class="deep-p">The typical reader would spend <b>₹${BUDGET.give.toLocaleString('en-IN')}</b> on someone close, but only wants <b>₹${BUDGET.get.toLocaleString('en-IN')}</b> spent on them.</p>`);
+    else if (b.chart === 'recipientShare') out.push(`<p class="deep-p"><b>${E(TIER[0][0])}</b> get the biggest share of a reader’s yearly gifting, usually ${E(TIER[0][1])}. Readers spend about as much on themselves as on colleagues.</p><div class="bars">${TIER.map(t => `<span>${E(t[0])}</span><i style="width:${({ '25%+': 100, '10–25%': 58, '1–5%': 14 })[t[1]] || 10}%"></i><b>${E(t[1])}</b>`).join('')}</div>`);
+    const tags = DATA.tagsForBelief(b.id).map(t => G.find(g => g.id === t.id)).filter(Boolean), kinds = (b.gifts || []).map(cByName).filter(Boolean);
+    if (tags.length || kinds.length) out.push(`<p class="deep-p">If you believe this too, readers would point you to these gifts:</p><div class="chips">${tags.map(g => `<button class="chip" onclick="GF.toTag('${g.id}')">${E(g.it)}</button>`).join('')}${kinds.map(c => `<button class="chip" onclick="GF.toSection('${c.id}')">${E(c.name)} →</button>`).join('')}</div>`);
     const others = B.filter(x => x.s === b.s && x.id !== b.id).sort((x, y) => y.n - x.n).slice(0, 4);
-    return `<div class="deep" id="deep">
-      <div class="deep-sec"><span class="label">The numbers</span>${data || `<div class="bigs"><span><b>${b.n}</b>${b.n === 1 ? 'reader said this' : 'readers said something like this'}, of ${B.filter(x => x.s === b.s).reduce((a, x) => a + x.n + (x.n2 || 0), 0)} in “${E(sec.name)}”</span></div>`}</div>
-      ${more.length ? `<div class="deep-sec"><span class="label">More readers, in their own words · ${more.length}</span>${more.map(q => `<blockquote>“${E(q[0])}”<span class="credit">${E(q[1])}</span></blockquote>`).join('')}</div>` : ''}
-      ${tags.length || kinds.length ? `<div class="deep-sec"><span class="label">Gifts for people who believe this</span><div class="chips">${tags.map(g => `<button class="chip" onclick="GF.toTag('${g.id}')">${E(g.it)}</button>`).join('')}${kinds.map(c => `<button class="chip" onclick="GF.toSection('${c.id}')">${E(c.name)} →</button>`).join('')}</div></div>` : ''}
-      ${others.length ? `<div class="deep-sec"><span class="label">More from ${sec.n} · ${E(sec.name)}</span><div class="chips">${others.map(o => `<button class="chip" onclick="GF.openCard('${o.id}',null,null,true)">“${E(o.h.length > 56 ? o.h.slice(0, 54) + '…' : o.h)}”</button>`).join('')}</div></div>` : ''}
-    </div>`;
+    if (others.length) out.push(`<p class="deep-p">Other readers who answered “${E(sec.name)}” believe:</p><div class="chips">${others.map(o => `<button class="chip" onclick="GF.openCard('${o.id}',null,null,true)">“${E(o.h.length > 56 ? o.h.slice(0, 54) + '…' : o.h)}”</button>`).join('')}</div>`);
+    return `<div class="deep" id="deep">${out.join('')}</div>`;
   }
+
+
   function plus(id) {
     const result = store.togglePick(id), adding = result === 'added';
     if (result === 'full') return;
