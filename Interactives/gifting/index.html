@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>We'd Rather Give</title>
+<link rel="stylesheet" href="assets/ken-chart.css">
+<script src="data/gifting.js"></script>
+<style>
+  :root {
+    --red: #C8423A; --blue: #007A99; --ink: #1A1208; --fp-text: #3B2A26; --fp-box: #EAE0DF; --fp-line: #D5C9C7;
+    --same: #C4AAAA;
+    /* sequential ramp for the budget-share bands, light -> dark */
+    --b1: #F0D3CF; --b2: #E09A92; --b3: #C8423A; --b4: #7F2620;
+  }
+  body { display: block; overflow-x: hidden; background: var(--ken-bg); }
+  p { margin: 0; }
+  .GF-progress { position: fixed; top: 0; left: 0; height: 3px; width: 100%; background: var(--red); transform-origin: 0 50%; transform: scaleX(0); z-index: 50; }
+
+  /* ===== Header ===== */
+  .GF-head { max-width: 680px; margin: 0 auto; padding: 48px 20px 0; text-align: center; }
+  .GF-tag { display: inline-block; background: #8A7B78; color: #fff; font-family: var(--ken-font-bold); font-weight: bold; font-size: 9px; letter-spacing: .06em; text-transform: uppercase; padding: 5px 7px 4px; transform: rotate(-2deg); margin-bottom: 18px; }
+  .GF-title { font-family: var(--ken-font-display); font-weight: bold; font-style: italic; font-size: clamp(36px, 7vw, 58px); line-height: 1.02; letter-spacing: -1px; color: var(--ink); margin: 0 auto; max-width: 11em; text-wrap: balance; }
+  .GF-title em { color: var(--red); }
+  .GF-strap { font-size: clamp(16px, 2.2vw, 18.5px); line-height: 1.45; color: var(--ken-text); margin: 16px auto 0; max-width: 31em; text-wrap: balance; }
+  .GF-meta { margin-top: 18px; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ken-text); }
+  .GF-meta span + span::before { content: "•"; margin: 0 7px; }
+
+  /* Hero: ribbon of gift tags, one per respondent */
+  .GF-hero { max-width: 760px; margin: 34px auto 0; padding: 0 20px; }
+  .GF-hero svg { display: block; width: 100%; height: auto; }
+
+  /* ===== Body ===== */
+  .GF-nl { max-width: 640px; margin: 0 auto; padding: 0 20px; }
+  .GF-nl p { font-size: 17.5px; line-height: 1.62; color: var(--fp-text); }
+  .GF-nl p + p { margin-top: 1.05em; }
+  .GF-nl p b { font-family: var(--ken-font-bold); font-weight: bold; color: var(--ink); }
+  .GF-intro { padding-top: 40px; }
+  .GF-sec { padding-top: 84px; }
+  .GF-num { font-family: var(--ken-font-bold); font-weight: bold; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--red); margin-bottom: 8px; }
+  .GF-h2 { font-family: var(--ken-font-display); font-weight: bold; font-size: clamp(27px, 4.6vw, 36px); line-height: 1.08; letter-spacing: -.5px; color: var(--ink); margin-bottom: 20px; text-wrap: balance; }
+  .GF-r-red { color: var(--red); font-family: var(--ken-font-bold); font-weight: bold; }
+  .GF-r-blue { color: var(--blue); font-family: var(--ken-font-bold); font-weight: bold; }
+
+  /* Chart frame */
+  .GF-fig { max-width: 720px; margin: 36px auto 0; padding: 0 20px; }
+  .GF-fig-title { font-family: var(--ken-font-bold); font-weight: bold; font-size: 17px; line-height: 1.25; color: var(--ink); margin-bottom: 4px; }
+  .GF-fig-sub { font-size: 14px; line-height: 1.45; color: var(--ken-text); margin-bottom: 14px; }
+  .GF-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; border-top: 1.5px solid var(--ken-rule); border-bottom: 1.5px solid var(--ken-rule); padding: 7px 0; margin-bottom: 14px; font-size: 13px; color: var(--ken-text-soft); }
+  .GF-legend .k { font-family: var(--ken-font-bold); font-weight: bold; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ken-text); margin-right: 2px; }
+  .GF-legend i { display: inline-block; width: 12px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  .GF-legend i.dot { width: 10px; height: 10px; border-radius: 50%; }
+  .GF-src { font-size: 11.5px; line-height: 1.45; color: var(--ken-text); margin-top: 12px; padding-top: 8px; border-top: 1.5px solid var(--ken-rule); }
+  .GF-src details { margin-top: 6px; }
+  .GF-src summary { cursor: pointer; font-family: var(--ken-font-bold); font-weight: bold; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+  .GF-src table { border-collapse: collapse; margin-top: 8px; font-size: 12.5px; width: 100%; }
+  .GF-src th, .GF-src td { text-align: left; padding: 4px 8px 4px 0; border-bottom: 1px solid var(--ken-grid); font-variant-numeric: tabular-nums; }
+  .GF-src th { font-family: var(--ken-font-bold); font-weight: bold; color: var(--ink); }
+
+  /* Horizontal bar rows (shared by most charts) */
+  .GF-rows { display: grid; gap: 9px; }
+  .GF-row { display: grid; grid-template-columns: minmax(96px, 30%) 1fr; align-items: center; gap: 12px; }
+  .GF-row-l { font-size: 14px; line-height: 1.2; color: var(--ken-text-soft); text-align: right; }
+  .GF-row-l b { font-family: var(--ken-font-bold); font-weight: bold; color: var(--ink); }
+  .GF-track { position: relative; display: flex; gap: 2px; height: 26px; }
+  .GF-seg { height: 100%; border-radius: 0; display: flex; align-items: center; justify-content: center; font-family: var(--ken-font-bold); font-weight: bold; font-size: 11.5px; color: #fff; white-space: nowrap; overflow: hidden; transform-origin: 0 50%; transform: scaleX(0); transition: transform .9s cubic-bezier(.2,.7,.2,1); }
+  .GF-seg:first-child { border-radius: 4px 0 0 4px; }
+  .GF-seg:last-child { border-radius: 0 4px 4px 0; }
+  .GF-seg.ink { color: var(--ink); }
+  .GF-seen .GF-seg, .GF-seen .GF-bar { transform: scaleX(1); }
+  .GF-bar { height: 18px; border-radius: 0 4px 4px 0; transform-origin: 0 50%; transform: scaleX(0); transition: transform .9s cubic-bezier(.2,.7,.2,1); }
+  .GF-barwrap { display: flex; align-items: center; gap: 8px; }
+  .GF-barval { font-size: 13px; color: var(--ken-text); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .GF-barval b { font-family: var(--ken-font-bold); font-weight: bold; color: var(--ink); }
+  .GF-pair { display: grid; gap: 3px; }
+  .GF-pair .GF-bar { height: 13px; }
+  .GF-hit { cursor: default; }
+  .GF-hit:hover { filter: brightness(.92); }
+  .GF-axis { display: grid; grid-template-columns: minmax(96px, 30%) 1fr; gap: 12px; margin-top: 6px; }
+  .GF-axis div:last-child { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--ken-text); }
+
+  /* Stat tiles */
+  .GF-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 1.5px solid var(--ken-rule); border-bottom: 1.5px solid var(--ken-rule); }
+  .GF-stat { padding: 18px 12px 16px; text-align: center; }
+  .GF-stat + .GF-stat { border-left: 1.5px solid var(--ken-rule); }
+  .GF-stat-v { font-family: var(--ken-font-display); font-weight: bold; font-size: clamp(42px, 9vw, 64px); line-height: 1; letter-spacing: -1px; }
+  .GF-stat-l { font-size: 13.5px; line-height: 1.35; color: var(--ken-text); margin-top: 8px; max-width: 16em; margin-left: auto; margin-right: auto; }
+
+  /* Dot grid */
+  .GF-dots { display: grid; grid-template-columns: repeat(17, 1fr); gap: 5px; max-width: 520px; margin: 0 auto; }
+  .GF-d { aspect-ratio: 1; border-radius: 50%; background: var(--fp-line); transform: scale(.2); opacity: 0; transition: transform .4s cubic-bezier(.3,1.6,.5,1), opacity .3s; }
+  .GF-d.more { background: var(--red); }
+  .GF-d.same { background: transparent; box-shadow: inset 0 0 0 2px var(--same); }
+  .GF-d.less { background: var(--blue); }
+  .GF-seen .GF-d { transform: scale(1); opacity: 1; }
+
+  /* Dumbbell */
+  .GF-db { position: relative; height: 26px; }
+  .GF-db-line { position: absolute; top: 50%; height: 2px; margin-top: -1px; background: var(--fp-line); }
+  .GF-db-dot { position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; box-shadow: 0 0 0 2px var(--ken-bg); opacity: 0; transition: opacity .5s .3s; }
+  .GF-db-lab { position: absolute; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--ken-text); white-space: nowrap; font-variant-numeric: tabular-nums; opacity: 0; transition: opacity .5s .4s; }
+  .GF-seen .GF-db-dot, .GF-seen .GF-db-lab { opacity: 1; }
+  .GF-db-lab b { font-family: var(--ken-font-bold); font-weight: bold; color: var(--ink); }
+
+  /* Quotes */
+  .GF-pull { max-width: 640px; margin: 44px auto 0; padding: 0 20px; }
+  .GF-pull blockquote { font-family: var(--ken-font-display); font-weight: bold; font-size: clamp(23px, 4vw, 30px); line-height: 1.18; color: var(--ink); border-left: 4px solid var(--red); padding: 2px 0 2px 20px; text-wrap: balance; }
+  .GF-cite { display: block; font-family: var(--ken-font-body); font-size: 12.5px; line-height: 1.4; color: var(--ken-text); margin-top: 10px; font-style: normal; }
+  .GF-cite::before { content: "— "; }
+  .GF-cards { max-width: 760px; margin: 34px auto 0; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .GF-card { background: #fff; border: 1.5px solid var(--fp-line); border-radius: 4px; padding: 16px 18px 14px; font-size: 15.5px; line-height: 1.48; color: var(--fp-text); position: relative; opacity: 0; transform: translateY(14px); transition: opacity .5s, transform .5s; }
+  .GF-card::before { content: "“"; position: absolute; top: -6px; left: 12px; font-family: var(--ken-font-display); font-size: 44px; line-height: 1; color: var(--red); }
+  .GF-card.blue::before { color: var(--blue); }
+  .GF-seen .GF-card, .GF-card.GF-seen { opacity: 1; transform: none; }
+  .GF-cards.two { grid-template-columns: 1fr 1fr; }
+  .GF-colhead { font-family: var(--ken-font-bold); font-weight: bold; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ken-text); border-bottom: 1.5px solid var(--ken-rule); padding-bottom: 6px; margin-bottom: 2px; }
+  .GF-col { display: grid; gap: 14px; align-content: start; }
+
+  /* Fill in the blank */
+  .GF-blank { max-width: 680px; margin: 44px auto 0; padding: 0 20px; text-align: center; }
+  .GF-blank-box { background: var(--fp-box); border-radius: 4px; padding: 30px 22px 22px; }
+  .GF-blank-q { font-family: var(--ken-font-display); font-weight: bold; font-size: clamp(24px, 4.4vw, 34px); line-height: 1.15; color: var(--ink); min-height: 3.5em; display: flex; align-items: center; justify-content: center; text-wrap: balance; }
+  .GF-blank-a { color: var(--red); border-bottom: 3px solid var(--red); transition: opacity .25s; }
+  .GF-btn { margin-top: 16px; font-family: var(--ken-font-bold); font-weight: bold; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; background: var(--ink); color: var(--ken-bg); border: 0; border-radius: 3px; padding: 10px 16px; cursor: pointer; }
+  .GF-btn:hover { background: var(--red); }
+  .GF-btn:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+  .GF-blank-n { font-size: 12px; color: var(--ken-text); margin-top: 10px; }
+
+  /* Dreams */
+  .GF-dreams { max-width: 760px; margin: 30px auto 0; padding: 0 20px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .GF-dream { background: #fff; border: 1.5px dashed var(--ken-outline); border-radius: 999px; padding: 8px 14px; font-size: 14px; line-height: 1.3; color: var(--fp-text); opacity: 0; transform: scale(.9); transition: opacity .4s, transform .4s; }
+  .GF-seen .GF-dream { opacity: 1; transform: none; }
+
+  /* Ending */
+  .GF-end { max-width: 720px; margin: 90px auto 0; padding: 56px 20px 60px; text-align: center; border-top: 1.5px solid var(--ken-rule); }
+  .GF-end-q { font-family: var(--ken-font-display); font-weight: bold; font-style: italic; font-size: clamp(32px, 6.4vw, 52px); line-height: 1.05; color: var(--ink); text-wrap: balance; }
+  .GF-end-q em { color: var(--red); }
+  .GF-method { max-width: 640px; margin: 0 auto; padding: 0 20px 60px; }
+  .GF-method-box { border: 1px solid var(--fp-line); padding: 16px 22px; font-size: 13px; line-height: 1.6; color: var(--ken-body); }
+  .GF-method-box b { font-family: var(--ken-font-bold); font-weight: bold; }
+  .GF-method-box p + p { margin-top: .8em; }
+  .GF-foot { text-align: center; padding: 0 20px 40px; }
+  .GF-foot img { height: 26px; opacity: .85; }
+
+  /* Tooltip */
+  .GF-tt { position: fixed; z-index: 70; pointer-events: none; background: var(--ken-bg); border: 1px solid var(--ken-rule); border-radius: 3px; box-shadow: 0 4px 20px rgba(0,0,0,.10); padding: 10px 12px; font-size: 13px; line-height: 1.5; color: var(--ken-body); max-width: 240px; opacity: 0; transition: opacity .12s; }
+  .GF-tt b { font-family: var(--ken-font-bold); font-weight: bold; color: var(--ink); }
+  .GF-tt .h { font-family: var(--ken-font-bold); font-weight: bold; font-size: 15px; color: var(--ink); margin-bottom: 4px; line-height: 1.25; }
+
+  @media (max-width: 560px) {
+    .GF-row, .GF-axis { grid-template-columns: 92px 1fr; gap: 8px; }
+    .GF-row-l { font-size: 12.5px; }
+    .GF-seg { font-size: 10.5px; }
+    .GF-dots { grid-template-columns: repeat(13, 1fr); gap: 4px; }
+    .GF-cards.two { grid-template-columns: 1fr; }
+    .GF-db-lab { font-size: 11px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .GF-seg, .GF-bar, .GF-d, .GF-card, .GF-dream, .GF-db-dot, .GF-db-lab { transition: none !important; }
+  }
+  /* ?static (screenshots, print, embeds): everything drawn, no motion */
+  .GF-static .GF-seg, .GF-static .GF-bar, .GF-static .GF-d, .GF-static .GF-card, .GF-static .GF-dream, .GF-static .GF-db-dot, .GF-static .GF-db-lab { transition: none !important; transform: none !important; opacity: 1 !important; }
+</style>
+</head>
+<body>
+<script>if (/[?&]static\b/.test(location.search)) document.body.classList.add('GF-static');</script>
+<div class="GF-progress" id="progress"></div>
+<div class="GF-tt" id="tt" role="tooltip"></div>
+
+<header class="GF-head">
+  <span class="GF-tag">Reader survey</span>
+  <h1 class="GF-title">We’d rather <em>give</em> than get</h1>
+  <p class="GF-strap">160 readers told us how they gift — who gets the money, the things they won’t buy themselves, and why the person they live with is the hardest to shop for.</p>
+  <div class="GF-meta"><span>The Ken</span><span>Survey: Aug–Sep 2026</span><span id="read-time">6 min read</span></div>
+</header>
+
+<div class="GF-hero" aria-hidden="true"><svg id="hero" viewBox="0 0 720 150"></svg></div>
+
+<main>
+  <section class="GF-nl GF-intro">
+    <p>A few weeks ago we asked you a simple question with no simple answer: <b>how do you gift?</b> Not what you buy — though we asked that too — but who you spend on, what you hope a gift does, and what you fall back on when you’re out of time.</p>
+    <p><b id="n-total">160</b> of you wrote back, many at length. What came through wasn’t a shopping list. It was a set of quiet, slightly contradictory rules most of us seem to live by. We’re generous outward and stingy inward. We believe in books and reach for cash. And the people we know best are the ones we’re most afraid of getting wrong.</p>
+  </section>
+
+  <!-- 1. Where the money goes -->
+  <section class="GF-nl GF-sec">
+    <div class="GF-num">01 · The budget</div>
+    <h2 class="GF-h2">Family first. Yourself, barely.</h2>
+    <p>We asked what share of your yearly gifting budget goes to each kind of person. The answer is a steep hierarchy. <b id="t-fam"></b> of readers send a quarter or more of it to immediate family. Colleagues, extended family and everyone else mostly get the crumbs — 1–5% each.</p>
+    <p>And you? <b id="t-self"></b> of readers spend 1–5% of their gifting budget on themselves — roughly what they set aside for a colleague.</p>
+  </section>
+  <figure class="GF-fig" id="fig-share">
+    <div class="GF-fig-title">Share of the yearly gifting budget, by who receives it</div>
+    <div class="GF-fig-sub">% of readers choosing each band. Sorted by how much each group tends to get.</div>
+    <div class="GF-legend" id="leg-share"></div>
+    <div class="GF-rows" id="chart-share"></div>
+    <div class="GF-src">Readers who skipped a row are left out of that row’s total.<details><summary>See the numbers</summary><div id="tbl-share"></div></details></div>
+  </figure>
+
+  <!-- 2. The gap -->
+  <section class="GF-nl GF-sec">
+    <div class="GF-num">02 · The gift gap</div>
+    <h2 class="GF-h2">We’d spend more on you than we’d let you spend on us</h2>
+    <p>Next, two numbers: the ideal amount to spend on a friend or family member, and the ideal amount for them to spend on you. They should, in theory, be the same. A gift is an exchange.</p>
+    <p>They weren’t.</p>
+  </section>
+  <figure class="GF-fig" id="fig-medians">
+    <div class="GF-stats">
+      <div class="GF-stat"><div class="GF-stat-v GF-r-red" id="s-give">₹3,000</div><div class="GF-stat-l">median ideal budget to spend <b>on someone else</b></div></div>
+      <div class="GF-stat"><div class="GF-stat-v GF-r-blue" id="s-get">₹2,000</div><div class="GF-stat-l">median ideal budget for someone to spend <b>on you</b></div></div>
+    </div>
+  </figure>
+  <section class="GF-nl" style="padding-top:36px">
+    <p>Line each reader’s two answers up and the pattern is lopsided. <span class="GF-r-red" id="t-more"></span> would spend more on others than they want spent on them. <span id="t-same"></span> keep it even. Just <span class="GF-r-blue" id="t-less"></span> would like to receive more than they give.</p>
+  </section>
+  <figure class="GF-fig" id="fig-dots">
+    <div class="GF-fig-title">Each dot is one reader</div>
+    <div class="GF-legend" id="leg-dots"></div>
+    <div class="GF-dots" id="chart-dots"></div>
+    <div class="GF-src" id="src-dots"></div>
+  </figure>
+  <section class="GF-nl" style="padding-top:36px">
+    <p>The gap holds at every age, but it’s widest among readers in their thirties — the decade of weddings, first homes and new babies, when the median ideal gift (₹5,000) is two and a half times what they’d want for themselves.</p>
+  </section>
+  <figure class="GF-fig" id="fig-age">
+    <div class="GF-fig-title">Median ideal budget, by age</div>
+    <div class="GF-legend"><span><i class="dot" style="background:var(--red)"></i>To spend on others</span><span><i class="dot" style="background:var(--blue)"></i>For others to spend on you</span></div>
+    <div class="GF-rows" id="chart-age"></div>
+    <div class="GF-axis"><div></div><div><span>₹0</span><span>₹2,500</span><span>₹5,000</span></div></div>
+    <div class="GF-src"><details><summary>See the numbers</summary><div id="tbl-age"></div></details></div>
+  </figure>
+  <div class="GF-pull"><blockquote><span data-q="gapNoExpensive"></span><cite class="GF-cite" data-c="gapNoExpensive"></cite></blockquote></div>
+
+  <!-- 3. Never buy for yourself -->
+  <section class="GF-nl GF-sec">
+    <div class="GF-num">03 · The wish list</div>
+    <h2 class="GF-h2">The things we want, and won’t buy</h2>
+    <p>That inward stinginess shows up again when we asked for a gift you’d love but would never buy yourself. Of the <b id="t-never-n"></b> readers who named something, <b id="t-never-price"></b> gave the price as the reason — it’s too expensive, too costly, a luxury. Others couldn’t justify it, felt guilty, or decided it was an indulgence.</p>
+    <p>The objects themselves are modest more often than you’d think: a bicycle, scented candles, a toaster, weekly flowers, a reading chair.</p>
+  </section>
+  <div class="GF-cards" id="cards-never"></div>
+  <section class="GF-nl" style="padding-top:40px">
+    <p>Which is, perhaps, the whole point of a gift. Several readers described their best recent present as precisely the thing they’d been refusing themselves.</p>
+  </section>
+  <div class="GF-cards" id="cards-recv"></div>
+
+  <!-- 4. Occasions -->
+  <section class="GF-nl GF-sec">
+    <div class="GF-num">04 · The calendar</div>
+    <h2 class="GF-h2">Birthdays, and then everything else</h2>
+    <p>Nearly everyone gifts on birthdays. After that, the list falls off quickly — weddings, housewarmings and anniversaries for about half of you; Diwali for fewer than four in ten. A typical reader ticked five occasions.</p>
+  </section>
+  <figure class="GF-fig" id="fig-occ">
+    <div class="GF-fig-title">Occasions readers usually gift for</div>
+    <div class="GF-fig-sub">% of all 160 readers. Readers could pick as many as applied.</div>
+    <div class="GF-rows" id="chart-occ"></div>
+    <div class="GF-src"><details><summary>See the numbers</summary><div id="tbl-occ"></div></details></div>
+  </figure>
+  <section class="GF-nl" style="padding-top:36px">
+    <p>But the occasion, many of you said, is the least interesting part. Some of the strongest opinions in the survey were against it.</p>
+  </section>
+  <div class="GF-cards" id="cards-occ"></div>
+
+  <!-- 5. Feeling -->
+  <section class="GF-nl GF-sec">
+    <div class="GF-num">05 · The point</div>
+    <h2 class="GF-h2">Younger readers want to be seen. Older ones want to be surprised.</h2>
+    <p>What should a gift make someone feel? The most common answer overall was <b>cared-for</b>. But split readers at 40 and the second place changes hands. Under 40, <b>seen &amp; understood</b> is a close second. Over 40, it drops to last and <b>delighted or surprised</b> takes the lead.</p>
+  </section>
+  <figure class="GF-fig" id="fig-feel">
+    <div class="GF-fig-title">The feeling readers most want a gift to create</div>
+    <div class="GF-fig-sub">% of readers in each age group</div>
+    <div class="GF-legend"><span><i style="background:var(--red)"></i>Under 40</span><span><i style="background:var(--blue)"></i>40 and over</span></div>
+    <div class="GF-rows" id="chart-feel"></div>
+    <div class="GF-src">A handful chose “nostalgic” or “spoiled”; they’re counted in the totals but not shown.<details><summary>See the numbers</summary><div id="tbl-feel"></div></details></div>
+  </figure>
+  <section class="GF-nl" style="padding-top:36px">
+    <p>We also asked you to finish a sentence. Read enough of the answers and they sort into a few camps: a gift should <b>get used</b>, it should <b>be remembered</b>, it should <b>bring joy</b>, it should <b>show you know them</b>. The best ones manage all four.</p>
+  </section>
+  <div class="GF-blank">
+    <div class="GF-blank-box">
+      <div class="GF-blank-q" aria-live="polite"><span>A great gift is one that <span class="GF-blank-a" id="blank-a"></span></span></div>
+      <button class="GF-btn" id="blank-btn" type="button">Another answer ↻</button>
+      <div class="GF-blank-n" id="blank-n"></div>
+    </div>
+  </div>
+  <div class="GF-cards" id="cards-feel"></div>
+
+  <!-- 6. Hardest person -->
+  <section class="GF-nl GF-sec">
+    <div class="GF-num">06 · The hardest person</div>
+    <h2 class="GF-h2">The people closest to you are the hardest to buy for</h2>
+    <p>We asked who you find hardest to buy for. Not the boss, not the colleague you barely know. Overwhelmingly, it’s the two people at the top of your budget: <b>your partner</b> and <b>your parents</b>, tied at <b id="t-hard-top"></b> answers each. (“Wife” came up <span id="t-wife"></span> times; “husband” <span id="t-husb"></span>.)</p>
+  </section>
+  <figure class="GF-fig" id="fig-hard">
+    <div class="GF-fig-title">Who readers find hardest to buy for</div>
+    <div class="GF-fig-sub">Number of readers, coded from free-text answers. Each answer counted once.</div>
+    <div class="GF-rows" id="chart-hard"></div>
+    <div class="GF-src">“Someone else” includes friends, specific individuals and themselves.<details><summary>See the numbers</summary><div id="tbl-hard"></div></details></div>
+  </figure>
+  <section class="GF-nl" style="padding-top:36px">
+    <p>The reasons, though, are opposites. Partners are hard because you know them too well — every safe idea is used up and expectations only rise. Parents are hard because they won’t let you: they claim to need nothing and scold you for spending.</p>
+  </section>
+  <div class="GF-cards two">
+    <div class="GF-col" id="col-partner"><div class="GF-colhead">Partners: you know them too well</div></div>
+    <div class="GF-col" id="col-parents"><div class="GF-colhead">Parents: they won’t let you</div></div>
+  </div>
+  <div class="GF-pull"><blockquote><span data-q="hardKids"></span><cite class="GF-cite" data-c="hardKids"></cite></blockquote></div>
+
+  <!-- 7. Books vs cash -->
+  <section class="GF-nl GF-sec">
+    <div class="GF-num">07 · The fallback</div>
+    <h2 class="GF-h2">We believe in books. We fall back on cash.</h2>
+    <p>Ask readers of The Ken for a gift that never misses and you will, unsurprisingly, hear “books” — <b id="t-books-safe"></b> named them. But ask what they actually do when there’s no time and no energy, and the answer shifts. Books still lead, narrowly. Cash, vouchers and gift cards jump from an afterthought to a near-tie.</p>
+  </section>
+  <figure class="GF-fig" id="fig-books">
+    <div class="GF-fig-title">The gift that never misses vs. the gift when there’s no time</div>
+    <div class="GF-fig-sub">% of readers mentioning each category. Answers could mention more than one.</div>
+    <div class="GF-legend"><span><i style="background:var(--red)"></i>“A gift that never misses”</span><span><i style="background:var(--blue)"></i>“No time, no energy — what do you fall back on?”</span></div>
+    <div class="GF-rows" id="chart-books"></div>
+    <div class="GF-src">Coded from free-text answers by keyword. Smaller categories (wine, perfume, gadgets, stationery, gold) not shown.<details><summary>See the numbers</summary><div id="tbl-books"></div></details></div>
+  </figure>
+  <section class="GF-nl" style="padding-top:36px">
+    <p>Not everyone is a believer, either.</p>
+  </section>
+  <div class="GF-cards" id="cards-books"></div>
+
+  <!-- 8. The best ones -->
+  <section class="GF-nl GF-sec">
+    <div class="GF-num">08 · The good stuff</div>
+    <h2 class="GF-h2">What the best gifts had in common</h2>
+    <p>Finally, we asked for the best gift you’ve ever given, and the best you’ve received recently. Almost none of the answers were expensive. A lot of them were handmade. Nearly all of them were proof that someone had been paying attention — sometimes for years.</p>
+  </section>
+  <div class="GF-cards" id="cards-best"></div>
+  <section class="GF-nl" style="padding-top:44px">
+    <p>And because we couldn’t resist, we asked you to dream. An extravagant gift you’d love, fat chance or not. Some of you priced it to the rupee.</p>
+  </section>
+  <div class="GF-dreams" id="dreams"></div>
+</main>
+
+<section class="GF-end">
+  <div class="GF-num">One reader’s whole philosophy, in eight words</div>
+  <p class="GF-end-q">“Buy what they wouldn’t, <em>wrap it like they would.</em>”</p>
+  <cite class="GF-cite" data-c="philWrap"></cite>
+</section>
+
+<section class="GF-method">
+  <div class="GF-method-box">
+    <p><b>About this survey.</b> <span id="m-n">160</span> readers of The Ken responded to an open survey between 16 August and 14 September 2026. It is a self-selected sample, not a representative one — skewed, as you’d expect, towards readers in their thirties and forties.</p>
+    <p>Budget figures are what readers called <i>ideal</i>, not what they actually spend. Categories for free-text answers (hardest person, safe bets, fallbacks, “a great gift is one that…”) were coded by keyword and are approximate. Quotes are lightly edited for length and clarity, and appear only where readers agreed to be published; names appear only where readers asked to be credited.</p>
+  </div>
+</section>
+<footer class="GF-foot"><img src="assets/logo.png" alt="The Ken"></footer>
+
+<script>
+(function () {
+  const G = window.GIFTING;
+  const $ = s => document.querySelector(s);
+  const pct = (a, b) => Math.round(100 * a / b);
+  const rupee = v => '₹' + Math.round(v).toLocaleString('en-IN');
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const BAND_COLORS = ['var(--b1)', 'var(--b2)', 'var(--b3)', 'var(--b4)'];
+
+  // ---------- tooltip ----------
+  const tt = $('#tt');
+  function bindTip(el, html) {
+    el.classList.add('GF-hit');
+    el.addEventListener('mousemove', e => {
+      tt.innerHTML = html; tt.style.opacity = 1;
+      const w = tt.offsetWidth, h = tt.offsetHeight;
+      let x = e.clientX + 14, y = e.clientY + 14;
+      if (x + w > innerWidth - 8) x = e.clientX - w - 14;
+      if (y + h > innerHeight - 8) y = e.clientY - h - 14;
+      tt.style.left = x + 'px'; tt.style.top = y + 'px';
+    });
+    el.addEventListener('mouseleave', () => { tt.style.opacity = 0; });
+  }
+  function table(el, head, rows) {
+    el.innerHTML = '<table><tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>' +
+      rows.map(r => '<tr>' + r.map(c => `<td>${c}</td>`).join('') + '</tr>').join('') + '</table>';
+  }
+  function cite(q) { return esc(q.who) + (q.age ? ', ' + esc(q.age) : ''); }
+  function card(key, cls) {
+    const q = G.quotes[key];
+    return `<div class="GF-card ${cls || ''}">${esc(q.text)}<cite class="GF-cite">${cite(q)}</cite></div>`;
+  }
+  function cards(sel, keys, cls) { $(sel).insertAdjacentHTML('beforeend', keys.map(k => card(k, cls)).join('')); }
+  document.querySelectorAll('[data-q]').forEach(el => { el.textContent = '“' + G.quotes[el.dataset.q].text + '”'; });
+  document.querySelectorAll('[data-c]').forEach(el => { el.innerHTML = cite(G.quotes[el.dataset.c]); });
+
+  // ---------- hero: one tag per reader ----------
+  (function hero() {
+    const svg = $('#hero'), cols = 40, n = G.n;
+    let s = '';
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r = Math.floor(i / cols);
+      const x = 8 + c * 17.6, y = 14 + r * 32 + (c % 2 ? 6 : 0);
+      const rot = ((i * 37) % 21) - 10;
+      const fill = i % 9 === 0 ? 'var(--red)' : (i % 13 === 0 ? 'var(--blue)' : '#fff');
+      s += `<g transform="translate(${x} ${y}) rotate(${rot} 6 10)"><path d="M3 0h6l3 4v14H0V4z" fill="${fill}" stroke="#1A1208" stroke-width="1.2"/><circle cx="6" cy="4.5" r="1.3" fill="var(--ken-bg)" stroke="#1A1208" stroke-width=".8"/></g>`;
+    }
+    svg.innerHTML = s;
+  })();
+  $('#n-total').textContent = G.n; $('#m-n').textContent = G.n;
+
+  // ---------- 1. share bands ----------
+  const share = G.share.map(d => ({ ...d, score: d.bands.reduce((a, v, i) => a + v * i, 0) / d.n }))
+    .sort((a, b) => b.score - a.score);
+  const fam = G.share.find(d => d.who === 'Immediate family'), self = G.share.find(d => d.who === 'Yourself');
+  $('#t-fam').textContent = pct(fam.bands[3], fam.n) + '%';
+  $('#t-self').textContent = pct(self.bands[0], self.n) + '%';
+  $('#leg-share').innerHTML = '<span class="k">Share of budget</span>' + G.bands.map((b, i) => `<span><i style="background:${BAND_COLORS[i]}"></i>${b}</span>`).join('');
+  share.forEach(d => {
+    const row = document.createElement('div'); row.className = 'GF-row';
+    const label = d.who === 'Yourself' ? `<b>${d.who}</b>` : d.who;
+    row.innerHTML = `<div class="GF-row-l">${label}</div><div class="GF-track"></div>`;
+    const track = row.querySelector('.GF-track');
+    d.bands.forEach((v, i) => {
+      const p = 100 * v / d.n; if (!v) return;
+      const seg = document.createElement('div');
+      seg.className = 'GF-seg' + (i === 0 ? ' ink' : '');
+      seg.style.cssText = `flex:${p} 1 0;background:${BAND_COLORS[i]};transition-delay:${i * 90}ms`;
+      if (p >= 9) seg.textContent = Math.round(p) + '%';
+      bindTip(seg, `<div class="h">${d.who}</div><b>${Math.round(p)}%</b> of readers (${v} of ${d.n}) give them <b>${G.bands[i]}</b> of their gifting budget`);
+      track.appendChild(seg);
+    });
+    $('#chart-share').appendChild(row);
+  });
+  table($('#tbl-share'), ['Recipient', ...G.bands, 'Readers'], share.map(d => [d.who, ...d.bands, d.n]));
+
+  // ---------- 2. gap ----------
+  const gp = G.gap;
+  $('#s-give').textContent = rupee(gp.medGive); $('#s-get').textContent = rupee(gp.medGet);
+  $('#t-more').textContent = `${gp.more} of ${gp.n}`; $('#t-same').textContent = `${gp.same}`; $('#t-less').textContent = `${gp.less}`;
+  $('#leg-dots').innerHTML = `<span><i class="dot" style="background:var(--red)"></i>Would spend more on others · <b>${gp.more}</b></span>` +
+    `<span><i class="dot" style="box-shadow:inset 0 0 0 2px var(--same)"></i>Same both ways · <b>${gp.same}</b></span>` +
+    `<span><i class="dot" style="background:var(--blue)"></i>Want more spent on them · <b>${gp.less}</b></span>`;
+  const dotLabels = { 1: ['more', 'spend more on others than they want spent on them'], 0: ['same', 'want the same both ways'], '-1': ['less', 'want more spent on them than they’d spend'] };
+  gp.dots.forEach((v, i) => {
+    const d = document.createElement('div'); const [cls, txt] = dotLabels[v];
+    d.className = 'GF-d ' + cls; d.style.transitionDelay = (i * 6) + 'ms';
+    bindTip(d, `One of <b>${{ more: gp.more, same: gp.same, less: gp.less }[cls]}</b> readers who ${txt}`);
+    $('#chart-dots').appendChild(d);
+  });
+  $('#src-dots').textContent = `${gp.n} readers who answered both budget questions. Compares each reader’s ideal budget to spend on a friend or family member with their ideal budget for others to spend on them.`;
+
+  const AGE_MAX = 5500;
+  gp.byAge.forEach(d => {
+    const row = document.createElement('div'); row.className = 'GF-row';
+    const lo = Math.min(d.give, d.get), hi = Math.max(d.give, d.get);
+    const L = v => (100 * v / AGE_MAX) + '%';
+    row.innerHTML = `<div class="GF-row-l">${d.age} <span style="color:var(--ken-text);font-size:11.5px">(${d.n})</span></div>
+      <div class="GF-db">
+        <div class="GF-db-line" style="left:${L(lo)};width:${100 * (hi - lo) / AGE_MAX}%"></div>
+        <div class="GF-db-dot" style="left:${L(d.get)};background:var(--blue)"></div>
+        <div class="GF-db-dot" style="left:${L(d.give)};background:var(--red)"></div>
+        <div class="GF-db-lab" style="left:calc(${L(d.give)} + 12px)"><b>${rupee(d.give)}</b></div>
+      </div>`;
+    bindTip(row.querySelector('.GF-db'), `<div class="h">Readers aged ${d.age}</div>Spend on others: <b>${rupee(d.give)}</b><br>Want spent on them: <b>${rupee(d.get)}</b><br><span style="color:var(--ken-text)">Median of ${d.n} readers</span>`);
+    $('#chart-age').appendChild(row);
+  });
+  table($('#tbl-age'), ['Age', 'Spend on others (median)', 'Want spent on them (median)', 'Readers'], gp.byAge.map(d => [d.age, rupee(d.give), rupee(d.get), d.n]));
+
+  // ---------- 3. never buy ----------
+  $('#t-never-n').textContent = G.never.n; $('#t-never-price').textContent = G.never.price;
+  cards('#cards-never', ['neverBike', 'neverSpa', 'neverDyson', 'neverBag', 'neverWallet']);
+  cards('#cards-recv', ['recvWatch', 'recvBirk'], 'blue');
+
+  // ---------- generic single bars ----------
+  function bars(sel, items, max, opts) {
+    items.forEach((d, i) => {
+      const row = document.createElement('div'); row.className = 'GF-row';
+      row.innerHTML = `<div class="GF-row-l">${esc(d.label)}</div><div class="GF-barwrap"><div class="GF-bar" style="width:${100 * d.v / max}%;background:${opts.color(d, i)};transition-delay:${i * 50}ms"></div><span class="GF-barval">${opts.val(d)}</span></div>`;
+      bindTip(row.querySelector('.GF-barwrap'), opts.tip(d));
+      $(sel).appendChild(row);
+    });
+  }
+
+  // ---------- 4. occasions ----------
+  const occ = G.occasions.map(d => ({ label: d.label, v: d.n }));
+  bars('#chart-occ', occ, G.n, {
+    color: (d, i) => i === 0 ? 'var(--red)' : 'var(--b2)',
+    val: d => `<b>${pct(d.v, G.n)}%</b>`,
+    tip: d => `<div class="h">${esc(d.label)}</div><b>${d.v}</b> of ${G.n} readers (${pct(d.v, G.n)}%) usually gift on this occasion`,
+  });
+  table($('#tbl-occ'), ['Occasion', 'Readers', '%'], occ.map(d => [d.label, d.v, pct(d.v, G.n) + '%']));
+  cards('#cards-occ', ['occBirthday', 'occItself', 'occMarch']);
+
+  // ---------- 5. feeling ----------
+  const F = G.feeling;
+  F.labels.forEach((label, i) => {
+    const u = F.under40.counts[i], o = F.over40.counts[i];
+    const pu = 100 * u / F.under40.n, po = 100 * o / F.over40.n;
+    const row = document.createElement('div'); row.className = 'GF-row';
+    row.innerHTML = `<div class="GF-row-l">${esc(label)}</div><div class="GF-pair">
+      <div class="GF-barwrap"><div class="GF-bar" style="width:${pu * 2}%;background:var(--red)"></div><span class="GF-barval"><b>${Math.round(pu)}%</b></span></div>
+      <div class="GF-barwrap"><div class="GF-bar" style="width:${po * 2}%;background:var(--blue);transition-delay:80ms"></div><span class="GF-barval"><b>${Math.round(po)}%</b></span></div></div>`;
+    bindTip(row.querySelector('.GF-pair'), `<div class="h">${esc(label)}</div>Under 40: <b>${Math.round(pu)}%</b> (${u} of ${F.under40.n})<br>40 and over: <b>${Math.round(po)}%</b> (${o} of ${F.over40.n})`);
+    $('#chart-feel').appendChild(row);
+  });
+  table($('#tbl-feel'), ['Feeling', 'Under 40', '40 and over'], F.labels.map((l, i) => [l, `${F.under40.counts[i]} (${pct(F.under40.counts[i], F.under40.n)}%)`, `${F.over40.counts[i]} (${pct(F.over40.counts[i], F.over40.n)}%)`]));
+
+  // fill in the blank
+  let bi = 0; const blanks = G.blanks.slice();
+  for (let i = blanks.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [blanks[i], blanks[j]] = [blanks[j], blanks[i]]; }
+  function showBlank() {
+    const a = $('#blank-a'); a.style.opacity = 0;
+    setTimeout(() => { a.textContent = blanks[bi] + (/[!.]$/.test(blanks[bi]) ? '' : '.'); a.style.opacity = 1; }, 180);
+    $('#blank-n').textContent = `Answer ${bi + 1} of ${blanks.length} we picked from readers`;
+  }
+  $('#blank-btn').addEventListener('click', () => { bi = (bi + 1) % blanks.length; showBlank(); });
+  showBlank();
+  cards('#cards-feel', ['feelListen', 'feelNever', 'feelUsed']);
+
+  // ---------- 6. hardest ----------
+  const hard = G.hard.map(d => ({ label: d.label, v: d.n }));
+  const top = Math.max(...hard.map(d => d.v));
+  $('#t-hard-top').textContent = top;
+  $('#t-wife').textContent = G.spouseWords.wife || 0; $('#t-husb').textContent = G.spouseWords.husband || 0;
+  bars('#chart-hard', hard, top * 1.15, {
+    color: d => d.v === top ? 'var(--red)' : 'var(--b2)',
+    val: d => `<b>${d.v}</b>`,
+    tip: d => `<div class="h">${esc(d.label)}</div><b>${d.v}</b> of ${G.hardN} readers who named someone`,
+  });
+  table($('#tbl-hard'), ['Hardest to buy for', 'Readers'], hard.map(d => [d.label, d.v]));
+  $('#col-partner').insertAdjacentHTML('beforeend', ['hardSpouse', 'hardSurprise'].map(k => card(k)).join(''));
+  $('#col-parents').insertAdjacentHTML('beforeend', ['hardParents', 'hardPaise'].map(k => card(k, 'blue')).join(''));
+
+  // ---------- 7. books vs cash ----------
+  const SHOW = ['Books', 'Cash, vouchers & gift cards', 'Flowers & plants', 'Chocolates, sweets & food', 'Clothes, bags & accessories', 'Home & decor', 'Experiences'];
+  const bk = SHOW.map(l => {
+    const s = G.safe.cats.find(c => c.label === l), f = G.fallback.cats.find(c => c.label === l);
+    return { label: l, s: 100 * s.n / G.safe.n, f: 100 * f.n / G.fallback.n, sn: s.n, fn: f.n };
+  });
+  $('#t-books-safe').textContent = Math.round(bk[0].s) + '%';
+  const bmax = 42;
+  bk.forEach((d, i) => {
+    const row = document.createElement('div'); row.className = 'GF-row';
+    row.innerHTML = `<div class="GF-row-l">${esc(d.label)}</div><div class="GF-pair">
+      <div class="GF-barwrap"><div class="GF-bar" style="width:${100 * d.s / bmax}%;background:var(--red);transition-delay:${i * 50}ms"></div><span class="GF-barval"><b>${Math.round(d.s)}%</b></span></div>
+      <div class="GF-barwrap"><div class="GF-bar" style="width:${100 * d.f / bmax}%;background:var(--blue);transition-delay:${i * 50 + 80}ms"></div><span class="GF-barval"><b>${Math.round(d.f)}%</b></span></div></div>`;
+    bindTip(row.querySelector('.GF-pair'), `<div class="h">${esc(d.label)}</div>Never misses: <b>${Math.round(d.s)}%</b> (${d.sn} readers)<br>No-time fallback: <b>${Math.round(d.f)}%</b> (${d.fn} readers)`);
+    $('#chart-books').appendChild(row);
+  });
+  table($('#tbl-books'), ['Category', 'Never misses', 'No-time fallback'], G.safe.cats.map((c, i) => [c.label, `${c.n} (${pct(c.n, G.safe.n)}%)`, `${G.fallback.cats[i].n} (${pct(G.fallback.cats[i].n, G.fallback.n)}%)`]));
+  cards('#cards-books', ['booksMiss', 'booksGraphic', 'booksOrder']);
+
+  // ---------- 8. best & dreams ----------
+  cards('#cards-best', ['bestQR', 'bestStand', 'bestMask', 'bestGramophone', 'bestTime']);
+  $('#dreams').innerHTML = G.dreams.map((d, i) => `<span class="GF-dream" style="transition-delay:${i * 70}ms">${esc(d)}</span>`).join('');
+
+  // ---------- reveal on scroll ----------
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('GF-seen');
+    io.unobserve(e.target);
+  }), { threshold: 0.2 });
+  document.querySelectorAll('.GF-fig, .GF-cards, .GF-dreams, .GF-col').forEach(el => io.observe(el));
+  document.querySelectorAll('.GF-cards.two .GF-card').forEach(el => io.observe(el));
+
+  const bar = $('#progress');
+  addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - innerHeight;
+    bar.style.transform = `scaleX(${h > 0 ? scrollY / h : 0})`;
+  }, { passive: true });
+})();
+</script>
+</body>
+</html>

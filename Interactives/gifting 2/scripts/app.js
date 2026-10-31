@@ -144,7 +144,7 @@ function start(DATA) {
       <button class="switch" onclick="GF.go('${other.go}')"><small>${other.k}</small><b>${other.t}</b><span aria-hidden="true">→</span></button></nav>`;
   }
   // the same header as the landing: lede illustration, then kicker, meta, title, strap and byline
-  const LEDE = () => `<figure class="lede"><img src="${ASSETS}assets/lede.jpg" alt="Illustration: a reader holds up a speech bubble among a crowd of colourful patterned shapes" width="683" height="535"></figure>`;
+  const LEDE = () => `<figure class="lede"><img src="${ASSETS}assets/lede.jpg" alt="Illustration: a group of people hold up colourful patterned speech bubbles; one carries a wrapped gift, another a bouquet of flowers" width="1600" height="900"></figure>`;
   function artHead(o) {
     return `<header class="lede-head" style="--band:${o.band};--band-ink:${o.ink}"><div class="art-head">
       <div class="kicker-tag">${o.tag}</div>${LEDE()}
