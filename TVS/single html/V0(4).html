@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Two-Wheeler Market Share</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            /* ── Moodboard literals ── */
+            --oxblood:   #770101;
+            --crimson:   #c1111e;
+            --cream:     #ffeed4;
+            --navy:      #023048;
+            --steel:     #659aba;
+
+            /* ── Semantic ── */
+            --paper:     #faf2e3;
+            --bg:        var(--paper);
+            --bg-warm:   var(--cream);
+            --surface:   #fffaf0;
+            --text:      var(--navy);
+            --ink:       var(--navy);
+            --muted:     #4f5f6b;
+            --rule:      #e6d8bf;
+            --grid:      #eadfca;
+            --primary:   var(--crimson);
+            --texture:   rgba(2, 48, 72, 0.32);
+
+            /* ── Series: TVS keeps full Crimson; the other brands are pastels, ordered so
+                  neighbouring segments stay apart (normal-vision ΔE ≥ 15; the 2px gaps,
+                  legend and hover values carry the CVD case) ── */
+            --s-tvs:     var(--crimson);   /* Crimson    */
+            --s-hero:    #a8dadc;          /* Periwinkle */
+            --s-honda:   #8ecae6;          /* Butter     */
+            --s-bajaj:   #219ebc;          /* Mint       */
+            --s-re:      #457b9d;          /* Lavender   */
+            --s-others:  #1d3557;          /* Pistachio  */
+
+            /* ── Type scale (pc) ── */
+            --type-heading:    36px;
+            --type-subheading: 22px;
+            --type-body:       18px;
+
+            --chart-h: 380px;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Archivo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 72px 32px 120px;
+        }
+
+        /* ── Frame / card ── */
+        .frame {
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-radius: 4px;
+            padding: 36px 36px 28px;
+        }
+
+        .chart-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 32px;
+            border-bottom: 1px solid var(--ink);
+            padding-bottom: 20px;
+            margin-bottom: 34px;
+        }
+
+        /* ── Legend: top-right on pc ── */
+        .legend {
+            list-style: none;
+            display: grid;
+            grid-auto-flow: column;              /* fills top-down, matching the stack */
+            grid-template-rows: repeat(3, auto);
+            gap: 9px 22px;
+            font-size: 14px;
+            flex-shrink: 0;
+            padding-top: 4px;
+        }
+
+        .legend li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: default;
+            white-space: nowrap;
+            transition: opacity .15s;
+        }
+
+        .legend li.tvs { font-weight: 600; }
+
+        .legend .sw { width: 12px; height: 12px; flex-shrink: 0; }
+
+        .legend.is-focus li:not(.on) { opacity: .35; }
+
+        /* Series focus, from the legend or a bar: one brand stays full in every year */
+        .cols.is-series .seg:not(.on) { opacity: .3; }
+        .cols.is-series .seg.on .v { opacity: 1; }
+
+        .eyebrow {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .title {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: var(--type-heading);
+            font-weight: 400;
+            line-height: 1.1;
+            letter-spacing: -0.01em;
+            max-width: 22ch;
+        }
+
+        .title em { font-style: normal; color: var(--primary); }
+
+        .sub {
+            margin-top: 12px;
+            font-size: var(--type-body);
+            line-height: 1.55;
+            color: var(--muted);
+            max-width: 52ch;
+        }
+
+        /* ── Plot ── */
+        .plot {
+            position: relative;
+            display: grid;
+            grid-template-columns: 44px minmax(0, 1fr);
+        }
+
+        .y-axis {
+            position: relative;
+            height: var(--chart-h);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10.5px;
+            color: var(--muted);
+        }
+
+        .y-axis span {
+            position: absolute;
+            right: 12px;
+            transform: translateY(50%);
+        }
+
+        .cols {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: clamp(14px, 4vw, 56px);
+            border-bottom: 1px solid var(--ink);
+            padding: 0 clamp(4px, 2vw, 24px);
+        }
+
+        .col {
+            height: var(--chart-h);
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 2px;
+            cursor: default;
+            outline: none;
+            transition: opacity .15s;
+        }
+
+        .seg {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+            outline: none;
+            transition: opacity .15s, filter .15s;
+        }
+
+        .seg .v {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            font-variant-numeric: tabular-nums;
+            color: var(--navy);
+            opacity: 0;
+            transition: opacity .15s;
+            pointer-events: none;
+        }
+
+        .seg .v small { font-size: .75em; }
+
+        .seg:hover, .seg:focus-visible { outline: 2px solid var(--navy); outline-offset: -2px; z-index: 1; }
+
+        /* TVS values are the default view */
+        .seg.tvs .v { opacity: 1; color: var(--cream); font-size: 14px; }
+
+
+
+        .x-axis {
+            grid-column: 2;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: clamp(14px, 4vw, 56px);
+            padding: 10px clamp(4px, 2vw, 24px) 0;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-align: center;
+            color: var(--text);
+        }
+
+        .x-axis .last { color: var(--primary); }
+
+        /* ── Tooltip: one value per segment ── */
+        .tip {
+            position: absolute;
+            z-index: 5;
+            background: #ffffff;
+            color:#000000;
+            border-radius: 3px;
+            padding: 10px 14px 11px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity .12s, transform .12s;
+        }
+
+        .tip.show { opacity: 1; transform: none; }
+
+        .tip-h {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10.5px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #1c1c1c;
+            margin-bottom: 5px;
+        }
+
+        .tip-row {
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+            font-size: 14px;
+        }
+
+        .tip-row b {
+            font-family: Georgia, serif;
+            font-size: 22px;
+            font-weight: 400;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .tip-row b small { font-size: .55em; }
+
+        /* ── iPad ── */
+        @media (max-width: 1023px) {
+            :root {
+                --type-heading: 32px;
+                --type-subheading: 20px;
+                --type-body: 16px;
+                --chart-h: 340px;
+            }
+            .page { padding: 56px 24px 90px; }
+        }
+
+        /* ── Mobile ── */
+        @media (max-width: 768px) {
+            :root {
+                --type-heading: 28px;
+                --type-subheading: 17px;
+                --type-body: 14px;
+                --chart-h: 320px;
+            }
+            .page { padding: 32px 16px 72px; }
+            .frame { padding: 20px 12px 18px; }
+            .chart-head { flex-direction: column; gap: 18px; }
+            .legend { grid-template-rows: repeat(2, auto); justify-content: center; align-self: stretch; font-size: 11px; }
+            .plot { grid-template-columns: 32px minmax(0, 1fr); }
+            .y-axis span { right: 6px; font-size: 9.5px; }
+            .seg .v { font-size: 10.5px; }
+            .seg.tvs .v { font-size: 12px; }
+            .x-axis { font-size: 11px; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <figure class="frame">
+        <header class="chart-head">
+            <div>
+                <div class="eyebrow">Market share · Two-wheelers</div>
+                <h1 class="title"><em>TVS</em> keeps gaining on the leaders</h1>
+                <p class="sub">
+                    TVS's share has climbed from 15% in FY23 to 19% in Q1FY27, while Hero
+                    slipped from 32% to 27%.
+                </p>
+            </div>
+            <ul class="legend" id="legend" aria-label="Legend"></ul>
+        </header>
+
+        <div class="plot" id="plot">
+            <div class="y-axis" id="yaxis" aria-hidden="true"></div>
+            <div class="cols" id="cols" role="img"
+                 aria-label="Stacked bars of two-wheeler market share, FY23 to Q1FY27. TVS: 15, 17, 18, 19, 19 percent."></div>
+            <div class="x-axis" id="xaxis" aria-hidden="true"></div>
+            <div class="tip" id="tip" role="status" aria-live="polite"></div>
+        </div>
+    </figure>
+</div>
+
+<script>
+    const periods = ['FY23', 'FY24', 'FY25', 'FY26', 'Q1FY27'];
+
+    // Stack order, baseline up — TVS sits on the baseline so its change reads cleanly.
+    const series = [
+        { key: 'tvs',    name: 'TVS',           values: [15, 17, 18, 19, 19] },
+        { key: 'hero',   name: 'Hero',          values: [32, 31, 30, 28, 27] },
+        { key: 'honda',  name: 'Honda',         values: [24, 24, 27, 25, 25] },
+        { key: 'bajaj',  name: 'Bajaj Auto',    values: [10, 12, 12, 11, 11] },
+        { key: 're',     name: 'Royal Enfield', values: [4, 5, 5, 5, 5] },
+        { key: 'others', name: 'Others',        values: [14, 11, 8, 13, 13] },
+    ];
+
+    const fill = key => `var(--s-${key})`;
+    const $ = id => document.getElementById(id);
+    const cols = $('cols'), tip = $('tip'), plot = $('plot'), legend = $('legend');
+
+    // Legend — listed top of stack first, so it reads in the same order as the bars
+    legend.innerHTML = [...series].reverse().map(s =>
+        `<li class="${s.key}" data-key="${s.key}"><span class="sw" style="background:${fill(s.key)}"></span>${s.name}</li>`
+    ).join('');
+
+    // Picks out one brand across every bar and in the legend; null clears it
+    function setSeries(key) {
+        legend.classList.toggle('is-focus', !!key);
+        legend.querySelectorAll('li').forEach(l => l.classList.toggle('on', l.dataset.key === key));
+        cols.classList.toggle('is-series', !!key);
+        cols.querySelectorAll('.seg').forEach(s => s.classList.toggle('on', s.dataset.key === key));
+    }
+
+    legend.addEventListener('pointerover', e => {
+        const li = e.target.closest('li');
+        if (li) setSeries(li.dataset.key);
+    });
+    legend.addEventListener('pointerleave', () => setSeries(null));
+
+    // Y axis — tick labels only, no gridlines
+    $('yaxis').innerHTML = [0, 25, 50, 75, 100].map(t =>
+        `<span style="bottom:${t}%">${t}%</span>`
+    ).join('');
+
+    // X axis
+    $('xaxis').innerHTML = periods.map((p, i) =>
+        `<div class="${i === periods.length - 1 ? 'last' : ''}">${p}</div>`
+    ).join('');
+
+    // Columns
+    cols.innerHTML = periods.map((p, i) => `
+        <div class="col" data-i="${i}">
+            ${series.map(s => `
+                <div class="seg ${s.key}" data-key="${s.key}" tabindex="0" aria-label="${s.name}, ${p}: ${s.values[i]}%" style="flex:${s.values[i]} 1 0;background:${fill(s.key)}">
+                    <span class="v">${s.values[i]}<small>%</small></span>
+                </div>`).join('')}
+        </div>`).join('');
+
+    // Tooltip — one per segment
+    function showTip(seg, x, y) {
+        const i = +seg.parentNode.dataset.i;
+        const s = series.find(s => s.key === seg.dataset.key);
+        tip.innerHTML = `<div class="tip-h">${periods[i]}</div>
+            <div class="tip-row"><span>${s.name}</span><b>${s.values[i]}<small>%</small></b></div>`;
+
+        const pr = plot.getBoundingClientRect();
+        const tw = tip.offsetWidth, th = tip.offsetHeight;
+        let left = x - pr.left + 16;
+        if (left + tw > pr.width) left = x - pr.left - tw - 16;
+        let top = Math.max(0, Math.min(y - pr.top - th / 2, pr.height - th));
+        tip.style.left = Math.max(0, left) + 'px';
+        tip.style.top = top + 'px';
+        tip.classList.add('show');
+    }
+
+    function clear() {
+        setSeries(null);
+        tip.classList.remove('show');
+    }
+
+    cols.addEventListener('pointermove', e => {
+        const seg = e.target.closest('.seg');
+        if (!seg) return clear();
+        setSeries(seg.dataset.key);
+        showTip(seg, e.clientX, e.clientY);
+    });
+    cols.addEventListener('pointerleave', clear);
+
+    // Keyboard
+    cols.addEventListener('focusin', e => {
+        const seg = e.target.closest('.seg');
+        if (!seg) return;
+        const r = seg.getBoundingClientRect();
+        setSeries(seg.dataset.key);
+        showTip(seg, r.right, r.top + r.height / 2);
+    });
+    cols.addEventListener('focusout', clear);
+
+</script>
+</body>
+</html>

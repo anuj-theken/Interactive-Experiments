@@ -1,0 +1,1517 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TVS — Design System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            /* ── Moodboard literals — the five swatches off the top of the board ── */
+            --oxblood:   #770101;
+            --crimson:   #c1111e;
+            --cream:     #ffeed4;
+            --navy:      #023048;
+            --steel:     #659aba;
+
+            /* ── Semantic ── */
+            --paper:     #faf2e3;
+            --bg:        var(--paper);
+            --bg-warm:   var(--cream);
+            --surface:   #fffaf0;
+            --bg-dark:   var(--navy);
+            --text:      var(--navy);
+            --ink:       var(--navy);
+            --muted:     #4f5f6b;
+            --rule:      #e6d8bf;
+            --grid:      #eadfca;
+            --text-inv:  var(--cream);
+            --muted-inv: #a9c3d6;
+            --primary:   var(--crimson);
+
+            /* ── Chart accents found across the board ── */
+            --royal:     #1f4fd1;
+            --signal:    #e8452c;
+            --mustard:   #d4982a;
+            --green:     #1e8259;
+            --texture:   rgba(2, 48, 72, 0.32);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Archivo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            font-feature-settings: "tnum" 0;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 72px 32px 120px;
+        }
+
+        /* ── Header ── */
+        .header {
+            border-bottom: 2px solid var(--ink);
+            padding-bottom: 28px;
+            margin-bottom: 18px;
+        }
+
+        .eyebrow {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin-bottom: 14px;
+        }
+
+        .header-title {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 52px;
+            font-weight: 400;
+            line-height: 1.02;
+            letter-spacing: -0.01em;
+        }
+
+        .header-sub {
+            margin-top: 14px;
+            font-size: 16px;
+            line-height: 1.55;
+            color: var(--muted);
+            max-width: 60ch;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 28px;
+            margin-bottom: 76px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        /* ── Section chrome ── */
+        section { margin-bottom: 84px; }
+
+        .sec-head {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            border-bottom: 1px solid var(--ink);
+            padding-bottom: 10px;
+            margin-bottom: 28px;
+        }
+
+        .sec-num {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--primary);
+            letter-spacing: 0.06em;
+        }
+
+        .sec-title {
+            font-family: Georgia, serif;
+            font-size: 26px;
+            font-weight: 400;
+        }
+
+        .sec-note {
+            margin-left: auto;
+            font-size: 12px;
+            color: var(--muted);
+            letter-spacing: 0.02em;
+        }
+
+        .lede {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--muted);
+            max-width: 74ch;
+            margin-bottom: 26px;
+        }
+
+        .lede strong { color: var(--text); font-weight: 600; }
+
+        .sublabel {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin: 34px 0 14px;
+        }
+
+        code, .mono {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        code {
+            background: var(--bg-warm);
+            padding: 1px 5px;
+            border-radius: 3px;
+        }
+
+        /* ── Moodboard strip ── */
+        .strip {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            border: 1px solid var(--rule);
+        }
+
+        .strip-cell { position: relative; }
+
+        /* inset hairline so the palest swatches still read as objects on the paper ground */
+        .strip-block {
+            height: 132px;
+            box-shadow: inset 0 0 0 1px rgba(2, 48, 72, 0.08);
+        }
+
+        .strip-info {
+            padding: 12px 12px 14px;
+            background: var(--surface);
+            border-top: 1px solid var(--rule);
+            border-left: 1px solid var(--rule);
+        }
+
+        .strip-cell:first-child .strip-info { border-left: none; }
+
+        .strip-name {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .strip-hex {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .strip-role {
+            margin-top: 7px;
+            font-size: 11px;
+            line-height: 1.45;
+            color: var(--muted);
+        }
+
+        /* ── Token table ── */
+        .tbl {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .tbl th {
+            text-align: left;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 0 14px 9px 0;
+            border-bottom: 1px solid var(--ink);
+            white-space: nowrap;
+        }
+
+        .tbl td {
+            padding: 11px 14px 11px 0;
+            border-bottom: 1px solid var(--rule);
+            vertical-align: middle;
+        }
+
+        .tbl tr:last-child td { border-bottom: none; }
+
+        .tbl .num {
+            font-family: 'IBM Plex Mono', monospace;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        .chip {
+            display: inline-block;
+            width: 30px;
+            height: 18px;
+            border-radius: 3px;
+            border: 1px solid rgba(0,0,0,0.14);
+            vertical-align: -4px;
+            margin-right: 9px;
+        }
+
+        .tag {
+            display: inline-block;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.04em;
+            padding: 2px 7px;
+            border-radius: 3px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .tag-ok   { background: #dce8dd; color: #235c26; }
+        .tag-fill { background: var(--bg-warm); color: #6b5530; }
+        .tag-warn { background: #f6e3cf; color: #8a4a08; }
+
+        /* ── Chart palette ── */
+        .slots {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+        }
+
+        .slot { text-align: left; }
+
+        .slot-bar {
+            height: 62px;
+            border-radius: 4px;
+            box-shadow: inset 0 0 0 1px rgba(2, 48, 72, 0.08);
+        }
+
+        .slot-n {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            margin: 8px 0 3px;
+            letter-spacing: 0.06em;
+        }
+
+        .slot-name { font-size: 12px; font-weight: 600; }
+
+        .slot-hex {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10.5px;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .ramp {
+            display: flex;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .ramp-step {
+            flex: 1;
+            height: 54px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 7px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9.5px;
+            letter-spacing: 0.04em;
+        }
+
+        .panel-dark {
+            background: var(--bg-dark);
+            border-radius: 4px;
+            padding: 26px 24px 22px;
+        }
+
+        .panel-dark .slot-n,
+        .panel-dark .slot-hex { color: var(--muted-inv); }
+
+        .panel-dark .slot-name { color: var(--text-inv); }
+
+        .panel-dark .sublabel { color: var(--muted-inv); margin-top: 0; }
+
+        .verdict {
+            margin-top: 16px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            line-height: 1.7;
+            color: var(--muted);
+            border-left: 2px solid var(--primary);
+            padding: 4px 0 4px 13px;
+        }
+
+        .verdict b { color: var(--text); font-weight: 500; }
+
+        .panel-dark .verdict { color: var(--muted-inv); }
+        .panel-dark .verdict b { color: var(--text-inv); }
+
+        /* ── Typography specimens ── */
+        .type-row {
+            display: flex;
+            gap: 34px;
+            align-items: baseline;
+            padding: 26px 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .type-row:first-of-type { border-top: 1px solid var(--ink); }
+
+        .type-meta { width: 194px; flex-shrink: 0; }
+
+        .type-role { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+
+        .type-spec {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10.5px;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        .sp-display {
+            font-family: Georgia, serif;
+            font-size: 36px;
+            line-height: 1.1;
+        }
+
+        .sp-stat {
+            font-family: Georgia, serif;
+            font-size: 72px;
+            line-height: 0.92;
+            letter-spacing: -0.02em;
+            color: var(--primary);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .sp-sub { font-size: 22px; line-height: 1.25; }
+        .sp-body { font-size: 18px; line-height: 1.6; }
+        .sp-legend { font-size: 14px; color: var(--text); }
+        .sp-foot { font-size: 13px; line-height: 1.5; color: var(--muted); }
+
+        .sp-eyebrow {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--primary);
+        }
+
+        .sp-marker {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            font-variant-numeric: tabular-nums;
+            color: var(--primary);
+        }
+
+        .note {
+            margin-top: 18px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        /* ── Motifs ── */
+        .motifs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .motif {
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .motif-demo {
+            height: 168px;
+            padding: 18px;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .motif-text { padding: 15px 17px 17px; }
+
+        .motif-name { font-size: 12.5px; font-weight: 600; margin-bottom: 6px; }
+
+        .motif-desc { font-size: 11.5px; line-height: 1.55; color: var(--muted); }
+
+        /* motif: timeline spine */
+        .m-spine { padding-left: 34px; }
+        .m-spine::before {
+            content: "";
+            position: absolute;
+            left: 22px; top: 18px; bottom: 18px;
+            width: 1px;
+            background: var(--ink);
+        }
+        .m-node {
+            position: relative;
+            margin-bottom: 17px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--primary);
+        }
+        .m-node::before {
+            content: "";
+            position: absolute;
+            left: -16px; top: 4px;
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+        .m-node span {
+            display: block;
+            font-family: 'Archivo', sans-serif;
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        /* motif: hero stat */
+        .m-stat {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .m-stat b {
+            font-family: Georgia, serif;
+            font-size: 64px;
+            font-weight: 400;
+            line-height: 0.9;
+            color: var(--primary);
+            letter-spacing: -0.02em;
+        }
+        .m-stat i {
+            font-style: normal;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--muted);
+            margin-top: 12px;
+            max-width: 24ch;
+        }
+
+        /* motif: isotype grid */
+        .m-iso {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 4px;
+            align-content: center;
+        }
+        .m-iso i {
+            aspect-ratio: 1;
+            background: repeating-linear-gradient(45deg, var(--texture) 0 1px, transparent 1px 4px);
+        }
+        .m-iso i.on { background: var(--navy); }
+        .m-iso i.hl { background: var(--primary); }
+
+        /* motif: duotone */
+        .m-duo {
+            background:
+                linear-gradient(140deg, rgba(101,154,186,0.92), rgba(2,48,72,0.96)),
+                repeating-linear-gradient(58deg, #b9b2a4 0 9px, #8e887c 9px 18px, #d6d0c2 18px 27px);
+            background-blend-mode: multiply, normal;
+        }
+        .m-duo em {
+            position: absolute;
+            left: 18px; bottom: 16px;
+            font-style: normal;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10.5px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--cream);
+        }
+
+        /* motif: graph paper */
+        .m-graph {
+            background-color: var(--paper);
+            background-image:
+                linear-gradient(var(--grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+            background-size: 22px 22px;
+        }
+        .m-graph svg { position: absolute; inset: 18px; width: calc(100% - 36px); height: calc(100% - 36px); }
+
+        /* motif: navy chapter panel */
+        .m-navy {
+            background: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .m-navy b {
+            font-family: Georgia, serif;
+            font-size: 25px;
+            font-weight: 400;
+            color: var(--text-inv);
+            line-height: 1.15;
+        }
+        .m-navy i {
+            font-style: normal;
+            font-size: 10.5px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--steel);
+            margin-bottom: 11px;
+            font-weight: 600;
+        }
+
+
+        /* motif: cut-out portrait */
+        .m-cut {
+            background: var(--cream);
+            display: flex;
+            align-items: flex-end;
+            gap: 14px;
+        }
+        .m-cut svg { width: 92px; height: 120px; flex-shrink: 0; }
+        .m-cut b {
+            font-family: Georgia, serif;
+            font-size: 40px;
+            font-weight: 400;
+            color: var(--primary);
+            line-height: 0.9;
+            letter-spacing: -0.02em;
+        }
+        .m-cut i {
+            display: block;
+            font-style: normal;
+            font-size: 10.5px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin-top: 8px;
+        }
+
+        /* motif: hatched remainder */
+        .m-hatch { display: flex; flex-direction: column; justify-content: center; gap: 7px; }
+        .m-hatch div {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--text);
+        }
+        .m-hatch span {
+            flex: 1;
+            height: 15px;
+            background: repeating-linear-gradient(45deg, var(--texture) 0 1px, transparent 1px 5px);
+            position: relative;
+        }
+        .m-hatch span::before {
+            content: "";
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: var(--w);
+            background: var(--navy);
+        }
+
+        /* motif: signboard panel */
+        .m-sign {
+            background: var(--crimson);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: inset 0 0 0 6px var(--crimson), inset 0 0 0 8px var(--cream);
+        }
+        .m-sign b {
+            font-family: Georgia, serif;
+            font-size: 25px;
+            font-weight: 400;
+            color: var(--cream);
+            line-height: 1.15;
+        }
+        .m-sign i {
+            font-style: normal;
+            font-size: 10.5px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--cream);
+            margin-bottom: 11px;
+            font-weight: 600;
+        }
+
+        /* ── Chart aesthetic specimens ── */
+        .aes {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+        .aes-card {
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .aes-demo {
+            padding: 22px 22px 18px;
+            border-bottom: 1px solid var(--rule);
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .aes-demo svg { width: 100%; height: auto; display: block; }
+        .aes-demo svg text { font-family: Georgia, serif; fill: var(--text); }
+        .aes-demo svg .u { font-size: 0.55em; }
+        .aes-demo svg .lab { font-family: 'IBM Plex Mono', monospace; font-size: 9px; fill: var(--muted); letter-spacing: 0.06em; }
+
+        .split-cap {
+            display: flex;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10.5px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+        .split-cap div { padding-left: 2px; }
+        .split {
+            display: flex;
+            gap: 2px;
+            height: 40px;
+        }
+        .split div {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--cream);
+        }
+        .split .gap { width: 10px; background: none; }
+
+        .poles { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; height: 200px; }
+        .pole { display: flex; flex-direction: column; gap: 2px; }
+        .pole div {
+            padding: 6px 8px;
+            font-size: 11px;
+            line-height: 1.3;
+        }
+        .pole-h {
+            font-size: 11px;
+            color: var(--muted);
+            margin-bottom: 6px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        .pole-h b { color: var(--text); font-weight: 600; }
+
+        /* ── Spacing & breakpoints ── */
+        .sp-demo { display: flex; gap: 20px; align-items: stretch; }
+
+        .sp-bar {
+            width: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .sp-figure {
+            font-family: Georgia, serif;
+            font-size: 30px;
+            line-height: 1;
+            margin-bottom: 7px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .sp-caption { font-size: 13px; line-height: 1.55; color: var(--muted); max-width: 62ch; }
+
+        .bp-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+        .bp {
+            border: 1px solid var(--rule);
+            border-top: 3px solid var(--primary);
+            border-radius: 3px;
+            padding: 17px 18px 19px;
+            background: var(--surface);
+        }
+
+        .bp b {
+            display: block;
+            font-family: Georgia, serif;
+            font-size: 21px;
+            font-weight: 400;
+            margin-bottom: 5px;
+        }
+
+        .bp span {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+
+        .bp em {
+            display: block;
+            font-style: normal;
+            font-size: 11.5px;
+            color: var(--muted);
+            margin-top: 9px;
+            line-height: 1.5;
+        }
+
+        .footer {
+            border-top: 1px solid var(--ink);
+            padding-top: 20px;
+            font-size: 12px;
+            line-height: 1.65;
+            color: var(--muted);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1023px) {
+            .page { padding: 56px 24px 90px; }
+            .header-title { font-size: 42px; }
+            .strip { grid-template-columns: repeat(3, 1fr); }
+            .strip-info { border-left: 1px solid var(--rule); }
+            .slots { grid-template-columns: repeat(3, 1fr); }
+            .motifs { grid-template-columns: repeat(2, 1fr); }
+            .sp-stat { font-size: 56px; }
+            .sp-display { font-size: 32px; }
+            .sp-sub { font-size: 20px; }
+            .sp-body { font-size: 16px; }
+            .sp-legend { font-size: 12px; }
+        }
+
+        @media (max-width: 768px) {
+            .page { padding: 44px 18px 72px; }
+            .header-title { font-size: 32px; }
+            .strip { grid-template-columns: repeat(2, 1fr); }
+            .slots { grid-template-columns: repeat(2, 1fr); }
+            .motifs { grid-template-columns: 1fr; }
+            .aes { grid-template-columns: 1fr; }
+            .type-row { flex-direction: column; gap: 14px; }
+            .type-meta { width: 100%; }
+            .bp-row { grid-template-columns: 1fr; }
+            .sec-note { margin-left: 0; flex-basis: 100%; }
+            .sec-head { flex-wrap: wrap; }
+            .sp-stat { font-size: 44px; }
+            .sp-display { font-size: 28px; }
+            .sp-sub { font-size: 17px; }
+            .sp-body { font-size: 14px; }
+            .sp-legend { font-size: 11px; }
+            .tbl-scroll { overflow-x: auto; }
+            .tbl { min-width: 560px; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <header class="header">
+        <div class="eyebrow">Design System</div>
+        <h1 class="header-title">TVS Interactives</h1>
+        <p class="header-sub">
+            Derived from <em>TVS Mood Board (1).png</em>. A warm-paper editorial system —
+            crimson and deep navy, printed rather than rendered, with hand-painted signboard
+            heat held in reserve. Every chart colour below has been run through the palette
+            validator, not eyeballed.
+        </p>
+    </header>
+
+    <div class="header-meta">
+        <div>Source · TVS Mood Board</div>
+        <div>Ground · Warm paper</div>
+        <div>Dominant · Crimson / Deep Navy</div>
+        <div>Rev · 2026-10-28</div>
+    </div>
+
+    <!-- 01 ───────────────────────────────── -->
+    <section>
+        <div class="sec-head">
+            <span class="sec-num">01</span>
+            <h2 class="sec-title">Moodboard palette</h2>
+            <span class="sec-note">The five swatches off the top of the board, verbatim</span>
+        </div>
+        <p class="lede">
+            These five are the board's own strip, unmodified. They are two reds, a cream ground
+            and two blues — <strong>surface, type and ornament colours</strong>, not a chart palette.
+            Oxblood and Deep Navy are too dark to read as series, Steel is too grey, and the two
+            reds are one hue (§04 covers what the charts use instead).
+        </p>
+        <div class="strip">
+            <div class="strip-cell">
+                <div class="strip-block" style="background:#770101"></div>
+                <div class="strip-info">
+                    <div class="strip-name">Oxblood</div>
+                    <div class="strip-hex">#770101</div>
+                    <div class="strip-role">Deep rules, sticker outlines, the darker signboard panel.</div>
+                </div>
+            </div>
+            <div class="strip-cell">
+                <div class="strip-block" style="background:#c1111e"></div>
+                <div class="strip-info">
+                    <div class="strip-name">Crimson</div>
+                    <div class="strip-hex">#c1111e</div>
+                    <div class="strip-role">Primary. Hero figures, year markers, links, timeline nodes.</div>
+                </div>
+            </div>
+            <div class="strip-cell">
+                <div class="strip-block" style="background:#ffeed4"></div>
+                <div class="strip-info">
+                    <div class="strip-name">Cream</div>
+                    <div class="strip-hex">#ffeed4</div>
+                    <div class="strip-role">Secondary ground, zebra, and the type colour on navy and red.</div>
+                </div>
+            </div>
+            <div class="strip-cell">
+                <div class="strip-block" style="background:#023048"></div>
+                <div class="strip-info">
+                    <div class="strip-name">Deep Navy</div>
+                    <div class="strip-hex">#023048</div>
+                    <div class="strip-role">Body text and the dark chapter ground.</div>
+                </div>
+            </div>
+            <div class="strip-cell">
+                <div class="strip-block" style="background:#659aba"></div>
+                <div class="strip-info">
+                    <div class="strip-name">Steel Blue</div>
+                    <div class="strip-hex">#659aba</div>
+                    <div class="strip-role">Fill, duotone highlight, eyebrows on navy. Never text on paper.</div>
+                </div>
+            </div>
+        </div>
+
+        <p class="sublabel">Grounds &amp; chart accents found across the board</p>
+        <div class="slots">
+            <div class="slot">
+                <div class="slot-bar" style="background:#faf2e3"></div>
+                <div class="slot-n">GROUND</div>
+                <div class="slot-name">Paper</div>
+                <div class="slot-hex">#faf2e3</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#fffaf0"></div>
+                <div class="slot-n">CARD</div>
+                <div class="slot-name">Surface</div>
+                <div class="slot-hex">#fffaf0</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#1f4fd1"></div>
+                <div class="slot-n">COOL POLE</div>
+                <div class="slot-name">Royal</div>
+                <div class="slot-hex">#1f4fd1</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#e8452c"></div>
+                <div class="slot-n">SIGNAL</div>
+                <div class="slot-name">Vermilion</div>
+                <div class="slot-hex">#e8452c</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#d4982a"></div>
+                <div class="slot-n">WARM</div>
+                <div class="slot-name">Mustard</div>
+                <div class="slot-hex">#d4982a</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#1e8259"></div>
+                <div class="slot-n">GROWTH</div>
+                <div class="slot-name">Green</div>
+                <div class="slot-hex">#1e8259</div>
+            </div>
+        </div>
+        <p class="note">
+            Paper is sampled from the board's chart backgrounds (#f6f0e4, #f2eadf) — a touch lighter than
+            the Cream swatch so a full page doesn't read peach. Vermilion is the signboard orange-red the
+            charts keep reaching for: one emphasised wedge, bar or year. Never a background, never two in a view.
+        </p>
+    </section>
+
+    <!-- 02 ───────────────────────────────── -->
+    <section>
+        <div class="sec-head">
+            <span class="sec-num">02</span>
+            <h2 class="sec-title">Tokens</h2>
+            <span class="sec-note">What goes in <code>globals.css</code></span>
+        </div>
+        <div class="tbl-scroll">
+        <table class="tbl">
+            <thead>
+                <tr><th>Variable</th><th>Value</th><th>Role</th></tr>
+            </thead>
+            <tbody>
+                <tr><td class="num">--color-bg</td><td class="num"><span class="chip" style="background:#faf2e3"></span>#faf2e3</td><td>Page ground — Paper</td></tr>
+                <tr><td class="num">--color-bg-warm</td><td class="num"><span class="chip" style="background:#ffeed4"></span>#ffeed4</td><td>Cream — secondary ground, zebra, inactive</td></tr>
+                <tr><td class="num">--color-surface</td><td class="num"><span class="chip" style="background:#fffaf0"></span>#fffaf0</td><td>Card face lifted off the paper</td></tr>
+                <tr><td class="num">--color-bg-dark</td><td class="num"><span class="chip" style="background:#023048"></span>#023048</td><td>Deep Navy chapter panel &amp; dark-mode surface</td></tr>
+                <tr><td class="num">--color-primary</td><td class="num"><span class="chip" style="background:#c1111e"></span>#c1111e</td><td>Crimson — hero figures, markers, links</td></tr>
+                <tr><td class="num">--color-secondary</td><td class="num"><span class="chip" style="background:#023048"></span>#023048</td><td>Deep Navy — headings, rules</td></tr>
+                <tr><td class="num">--color-oxblood</td><td class="num"><span class="chip" style="background:#770101"></span>#770101</td><td>Deep rules, sticker outlines, red panel</td></tr>
+                <tr><td class="num">--color-accent</td><td class="num"><span class="chip" style="background:#659aba"></span>#659aba</td><td>Steel Blue — fill on paper, type on navy</td></tr>
+                <tr><td class="num">--color-royal</td><td class="num"><span class="chip" style="background:#1f4fd1"></span>#1f4fd1</td><td>The board's chart blue — the cool pole</td></tr>
+                <tr><td class="num">--color-signal</td><td class="num"><span class="chip" style="background:#e8452c"></span>#e8452c</td><td>Vermilion — the one hot chart accent</td></tr>
+                <tr><td class="num">--color-mustard</td><td class="num"><span class="chip" style="background:#d4982a"></span>#d4982a</td><td>Warm supporting fill</td></tr>
+                <tr><td class="num">--color-text</td><td class="num"><span class="chip" style="background:#023048"></span>#023048</td><td>Body copy on Paper</td></tr>
+                <tr><td class="num">--color-muted</td><td class="num"><span class="chip" style="background:#4f5f6b"></span>#4f5f6b</td><td>Slate — footnotes, sources, axes</td></tr>
+                <tr><td class="num">--color-rule</td><td class="num"><span class="chip" style="background:#e6d8bf"></span>#e6d8bf</td><td>Hairline borders &amp; dividers</td></tr>
+                <tr><td class="num">--color-grid</td><td class="num"><span class="chip" style="background:#eadfca"></span>#eadfca</td><td>Graph-paper &amp; chart gridlines</td></tr>
+                <tr><td class="num">--color-text-invert</td><td class="num"><span class="chip" style="background:#ffeed4"></span>#ffeed4</td><td>Cream copy on the navy &amp; red panels</td></tr>
+                <tr><td class="num">--color-muted-invert</td><td class="num"><span class="chip" style="background:#a9c3d6"></span>#a9c3d6</td><td>Muted copy on the navy panel</td></tr>
+                <tr><td class="num">--texture-ink</td><td class="num"><span class="chip" style="background:repeating-linear-gradient(45deg, rgba(2,48,72,0.32) 0 1px, transparent 1px 4px)"></span>navy · 32%</td><td>Hatch / stipple for remainders</td></tr>
+            </tbody>
+        </table>
+        </div>
+
+        <p class="sublabel">Ink contrast — measured, WCAG</p>
+        <div class="tbl-scroll">
+        <table class="tbl">
+            <thead>
+                <tr><th>Colour</th><th>On Paper</th><th>On Navy</th><th>Cleared for</th></tr>
+            </thead>
+            <tbody>
+                <tr><td class="num"><span class="chip" style="background:#023048"></span>Deep Navy #023048</td><td class="num">12.43</td><td class="num">—</td><td><span class="tag tag-ok">Body text</span></td></tr>
+                <tr><td class="num"><span class="chip" style="background:#770101"></span>Oxblood #770101</td><td class="num">10.55</td><td class="num">1.18</td><td><span class="tag tag-ok">Text on Paper</span></td></tr>
+                <tr><td class="num"><span class="chip" style="background:#c1111e"></span>Crimson #c1111e</td><td class="num">5.61</td><td class="num">2.22</td><td><span class="tag tag-ok">Text on Paper</span></td></tr>
+                <tr><td class="num"><span class="chip" style="background:#4f5f6b"></span>Slate #4f5f6b</td><td class="num">5.93</td><td class="num">2.09</td><td><span class="tag tag-ok">Footnotes on Paper</span></td></tr>
+                <tr><td class="num"><span class="chip" style="background:#ffeed4"></span>Cream #ffeed4</td><td class="num">1.02</td><td class="num">12.14</td><td><span class="tag tag-ok">Text on Navy · 5.48 on Crimson</span></td></tr>
+                <tr><td class="num"><span class="chip" style="background:#a9c3d6"></span>Mist #a9c3d6</td><td class="num">1.65</td><td class="num">7.55</td><td><span class="tag tag-ok">Muted on Navy</span></td></tr>
+                <tr><td class="num"><span class="chip" style="background:#659aba"></span>Steel #659aba</td><td class="num">2.74</td><td class="num">4.53</td><td><span class="tag tag-fill">Fill · text on Navy</span></td></tr>
+                <tr><td class="num"><span class="chip" style="background:#e8452c"></span>Vermilion #e8452c</td><td class="num">3.55</td><td class="num">3.50</td><td><span class="tag tag-warn">Marks only</span></td></tr>
+            </tbody>
+        </table>
+        </div>
+        <p class="note">
+            Crimson carries type on Paper but <em>not</em> on Navy (2.22) — on the dark panel, figures
+            go Cream and eyebrows go Steel. Steel never carries copy on Paper. These are the two easiest
+            ways to misuse this board.
+        </p>
+    </section>
+
+    <!-- 03 ───────────────────────────────── -->
+    <section>
+        <div class="sec-head">
+            <span class="sec-num">03</span>
+            <h2 class="sec-title">Typography</h2>
+            <span class="sec-note">Unchanged — Reckless display · Archivo text · Plex Mono figures</span>
+        </div>
+        <p class="lede">
+            Fonts, sizes and roles carry over from the house system untouched. Only their colours
+            moved: the stat figure, eyebrow and year markers now wear <strong>Crimson</strong>.
+        </p>
+
+        <div class="type-row">
+            <div class="type-meta">
+                <div class="type-role">Eyebrow / kicker</div>
+                <div class="type-spec">Archivo 600 · 11 / 11 / 10px<br>0.14em tracking, uppercase<br>--type-eyebrow</div>
+            </div>
+            <div class="sp-eyebrow">Chapter 02 · The moped years</div>
+        </div>
+
+        <div class="type-row">
+            <div class="type-meta">
+                <div class="type-role">Stat figure</div>
+                <div class="type-spec">Reckless · 72 / 56 / 44px<br>tabular, -0.02em<br>--type-stat</div>
+            </div>
+            <div class="sp-stat">48%</div>
+        </div>
+
+        <div class="type-row">
+            <div class="type-meta">
+                <div class="type-role">Heading / chart title</div>
+                <div class="type-spec">Reckless · 36 / 32 / 28px<br>pc / iPad / mobile<br>--type-heading</div>
+            </div>
+            <div class="sp-display">How Madras put India on two wheels</div>
+        </div>
+
+        <div class="type-row">
+            <div class="type-meta">
+                <div class="type-role">Subheading</div>
+                <div class="type-spec">Archivo · 22 / 20 / 17px<br>pc / iPad / mobile<br>--type-subheading</div>
+            </div>
+            <div class="sp-sub">From bus service to motorcycles</div>
+        </div>
+
+        <div class="type-row">
+            <div class="type-meta">
+                <div class="type-role">Body / annotation</div>
+                <div class="type-spec">Archivo · 18 / 16 / 14px<br>pc / iPad / mobile<br>--type-body</div>
+            </div>
+            <div class="sp-body">Specimen copy — body text sits in Deep Navy on Paper, annotations in the same size, footnotes stepped down to Slate.</div>
+        </div>
+
+        <div class="type-row">
+            <div class="type-meta">
+                <div class="type-role">Year / data marker</div>
+                <div class="type-spec">IBM Plex Mono 500 · 15px<br>tabular figures<br>--font-mono</div>
+            </div>
+            <div class="sp-marker">1911 &nbsp; 1980 &nbsp; 2001 &nbsp; 2024</div>
+        </div>
+
+        <div class="type-row">
+            <div class="type-meta">
+                <div class="type-role">Legend / chip</div>
+                <div class="type-spec">Archivo · 14 / 12 / 11px<br>pc / iPad / mobile<br>--type-legend</div>
+            </div>
+            <div class="sp-legend">Mopeds &nbsp;·&nbsp; Scooters &nbsp;·&nbsp; Motorcycles</div>
+        </div>
+
+        <div class="type-row">
+            <div class="type-meta">
+                <div class="type-role">Footnote / source</div>
+                <div class="type-spec">Archivo · 13px<br>all breakpoints<br>--type-legend · muted</div>
+            </div>
+            <div class="sp-foot">Source: TVS Motor Annual Reports; SIAM. Specimen line only.</div>
+        </div>
+
+        <p class="note">
+            * Reckless is licensed — the specimens above fall back to a serif. Heading, subheading
+            and legend scale at the same ratio as body copy at each breakpoint; never move one alone.
+        </p>
+    </section>
+
+    <!-- 04 ───────────────────────────────── -->
+    <section>
+        <div class="sec-head">
+            <span class="sec-num">04</span>
+            <h2 class="sec-title">Chart palette</h2>
+            <span class="sec-note">Validated — fixed order, never cycled</span>
+        </div>
+        <p class="lede">
+            The board's charts are a <strong>royal blue against a red</strong>, with mustard, green and
+            steel as supporting notes. These six slots are built from those hues and stepped into the
+            legible band. Assign them <strong>in order</strong> — series 1 takes slot 1 — and never
+            generate a seventh.
+        </p>
+
+        <p class="sublabel">Categorical — light, on Paper</p>
+        <div class="slots">
+            <div class="slot">
+                <div class="slot-bar" style="background:#1f4fd1"></div>
+                <div class="slot-n">SLOT 1</div><div class="slot-name">Royal</div><div class="slot-hex">#1f4fd1</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#c1111e"></div>
+                <div class="slot-n">SLOT 2</div><div class="slot-name">Crimson</div><div class="slot-hex">#c1111e</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#3d8fc6"></div>
+                <div class="slot-n">SLOT 3</div><div class="slot-name">Steel</div><div class="slot-hex">#3d8fc6</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#d4982a"></div>
+                <div class="slot-n">SLOT 4</div><div class="slot-name">Mustard</div><div class="slot-hex">#d4982a</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#7a2e8f"></div>
+                <div class="slot-n">SLOT 5</div><div class="slot-name">Mulberry</div><div class="slot-hex">#7a2e8f</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#1e8259"></div>
+                <div class="slot-n">SLOT 6</div><div class="slot-name">Green</div><div class="slot-hex">#1e8259</div>
+            </div>
+        </div>
+        <div class="verdict">
+            <b>All checks pass.</b> Lightness band ✓ · chroma floor ✓ · CVD separation worst
+            adjacent pair ΔE <b>16.2</b> (target 8) · normal-vision floor <b>26.8</b> (floor 15).<br>
+            Contrast warns below 3:1 on <b>Mustard</b> only (2.27) — that series <b>must</b> carry a
+            direct label or a table view. Steel is steel-blue pushed to chroma 0.10 — the raw board
+            swatch reads grey as a series.
+        </div>
+
+        <div class="panel-dark" style="margin-top:28px">
+            <p class="sublabel">Categorical — dark, on Deep Navy</p>
+            <div class="slots">
+                <div class="slot">
+                    <div class="slot-bar" style="background:#5580ff"></div>
+                    <div class="slot-n">SLOT 1</div><div class="slot-name">Royal</div><div class="slot-hex">#5580ff</div>
+                </div>
+                <div class="slot">
+                    <div class="slot-bar" style="background:#ee4046"></div>
+                    <div class="slot-n">SLOT 2</div><div class="slot-name">Crimson</div><div class="slot-hex">#ee4046</div>
+                </div>
+                <div class="slot">
+                    <div class="slot-bar" style="background:#3a9fd8"></div>
+                    <div class="slot-n">SLOT 3</div><div class="slot-name">Steel</div><div class="slot-hex">#3a9fd8</div>
+                </div>
+                <div class="slot">
+                    <div class="slot-bar" style="background:#c0861a"></div>
+                    <div class="slot-n">SLOT 4</div><div class="slot-name">Mustard</div><div class="slot-hex">#c0861a</div>
+                </div>
+                <div class="slot">
+                    <div class="slot-bar" style="background:#ad62cc"></div>
+                    <div class="slot-n">SLOT 5</div><div class="slot-name">Mulberry</div><div class="slot-hex">#ad62cc</div>
+                </div>
+                <div class="slot">
+                    <div class="slot-bar" style="background:#2a9a68"></div>
+                    <div class="slot-n">SLOT 6</div><div class="slot-name">Green</div><div class="slot-hex">#2a9a68</div>
+                </div>
+            </div>
+            <div class="verdict">
+                <b>All checks pass, contrast included.</b> Same slot order as light — a series
+                keeps its identity across modes. Worst adjacent ΔE <b>14.9</b> · normal-vision
+                <b>25.3</b> · every slot ≥ 3:1 on navy. These are <b>selected</b> steps, not a
+                lightened flip of the light set.
+            </div>
+        </div>
+
+        <p class="sublabel">Sequential — magnitude, single hue (blue)</p>
+        <div class="ramp">
+            <div class="ramp-step" style="background:#88afe2;color:#023048">100</div>
+            <div class="ramp-step" style="background:#6497d3;color:#023048">200</div>
+            <div class="ramp-step" style="background:#3f7fc0;color:#ffffff">300</div>
+            <div class="ramp-step" style="background:#1468ab;color:#ffffff">400</div>
+            <div class="ramp-step" style="background:#00518c;color:#ffffff">500</div>
+            <div class="ramp-step" style="background:#003c69;color:#ffffff">600</div>
+        </div>
+        <div class="verdict">
+            Monotone lightness ✓ · even OKLCH steps (ΔL 0.08) ✓ · light end 2.03:1 on Paper ✓ ·
+            one hue, steel → navy. For choropleths, heatmaps and waffle density.
+            <b>Dark mode flips the anchor</b> —
+            <span class="mono">#215da5 · #4379bc · #6295d4 · #87b1e6 · #b1cdf2 · #d5e6fc</span>,
+            low to high, each ≥ 2:1 on navy.
+        </div>
+
+        <p class="sublabel">Diverging — polarity, neutral midpoint</p>
+        <div class="ramp">
+            <div class="ramp-step" style="background:#2b51aa;color:#ffffff">−3</div>
+            <div class="ramp-step" style="background:#5978bb;color:#ffffff">−2</div>
+            <div class="ramp-step" style="background:#8ba2ce;color:#023048">−1</div>
+            <div class="ramp-step" style="background:#e4dccd;color:#023048">0</div>
+            <div class="ramp-step" style="background:#ca918a;color:#023048">+1</div>
+            <div class="ramp-step" style="background:#c25e55;color:#ffffff">+2</div>
+            <div class="ramp-step" style="background:#b32322;color:#ffffff">+3</div>
+        </div>
+        <div class="verdict">
+            Royal against Crimson — the board's two poles — over a <b>neutral sand midpoint</b>,
+            never a hue at zero. The same arms double as the tints for a two-pole block chart
+            (§05): blue sub-groups from the left arm, red from the right.
+        </div>
+
+        <p class="sublabel">Status — reserved meaning, never a series colour</p>
+        <div class="slots">
+            <div class="slot">
+                <div class="slot-bar" style="background:#456b00;height:44px"></div>
+                <div class="slot-n">GOOD</div><div class="slot-hex">#456b00 · 5.62</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#9a6a00;height:44px"></div>
+                <div class="slot-n">WARNING</div><div class="slot-hex">#9a6a00 · 4.26</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#c75400;height:44px"></div>
+                <div class="slot-n">SERIOUS</div><div class="slot-hex">#c75400 · 4.02</div>
+            </div>
+            <div class="slot">
+                <div class="slot-bar" style="background:#770101;height:44px"></div>
+                <div class="slot-n">CRITICAL</div><div class="slot-hex">#770101 · 10.55</div>
+            </div>
+        </div>
+        <div class="verdict">
+            Critical is Oxblood (ΔE 16.8 from the nearest slot), warning 15.2, serious 10.2.
+            <b>Good sits only ΔE 8.9 from slot 6 Green</b> — never use both in one chart. Always shipped
+            with an icon <em>and</em> a label — never colour alone.
+        </div>
+    </section>
+
+    <!-- 05 ───────────────────────────────── -->
+    <section>
+        <div class="sec-head">
+            <span class="sec-num">05</span>
+            <h2 class="sec-title">Chart aesthetic</h2>
+            <span class="sec-note">Printed, not dashboard</span>
+        </div>
+        <p class="lede">
+            The board's charts look like they came off a press: <strong>flat ink, square ends,
+            hatched remainders, big numbers on leader lines</strong>. No gradients, no shadows, no
+            rounded bar caps. These four forms come straight from the references and should be the
+            first reach.
+        </p>
+        <div class="aes">
+
+            <div class="aes-card">
+                <div class="aes-demo">
+                    <svg viewBox="0 -14 330 190" role="img" aria-label="Half-donut: 48, 36 and 16 percent">
+                        <path d="M30.0,150.0 A120,120 0 0 1 142.5,30.2 L146.4,92.1 A58,58 0 0 0 92.0,150.0 Z" fill="#1f4fd1" stroke="#fffaf0" stroke-width="2"/>
+                        <path d="M142.5,30.2 A120,120 0 0 1 255.2,92.2 L200.8,122.1 A58,58 0 0 0 146.4,92.1 Z" fill="#88afe2" stroke="#fffaf0" stroke-width="2"/>
+                        <path d="M255.2,92.2 A120,120 0 0 1 270.0,150.0 L208.0,150.0 A58,58 0 0 0 200.8,122.1 Z" fill="#e8452c" stroke="#fffaf0" stroke-width="2"/>
+                        <line x1="20" y1="150.5" x2="280" y2="150.5" stroke="#023048" stroke-width="1"/>
+                        <polyline points="62.5,67.9 40,28 18,28" fill="none" stroke="#023048" stroke-width="1"/>
+                        <text x="18" y="22" font-size="22">48<tspan class="u">%</tspan></text>
+                        <polyline points="207.8,44.8 222,14 250,14" fill="none" stroke="#023048" stroke-width="1"/>
+                        <text x="226" y="9" font-size="22" dominant-baseline="auto">36<tspan class="u">%</tspan></text>
+                        <polyline points="266.2,120.2 290,108 305,108" fill="none" stroke="#023048" stroke-width="1"/>
+                        <text x="282" y="102" font-size="22">16<tspan class="u">%</tspan></text>
+                    </svg>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Half-donut with leader callouts</div>
+                    <div class="motif-desc">Share-of-whole, ≤ 4 parts. Flat edge on a 1px navy baseline, 2px paper gaps between wedges. Vermilion picks out the one part the story is about.</div>
+                </div>
+            </div>
+
+            <div class="aes-card">
+                <div class="aes-demo">
+                    <svg viewBox="0 0 330 180" role="img" aria-label="Concentric rings: 55.7, 29.9 and 14.4 percent">
+                        <defs>
+                            <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                                <line x1="0" y1="0" x2="0" y2="5" stroke="rgba(2,48,72,0.32)" stroke-width="1.2"/>
+                            </pattern>
+                        </defs>
+                        <g transform="translate(20,0)">
+                            <circle cx="90" cy="90" r="70" fill="none" stroke="url(#hatch)" stroke-width="14"/>
+                            <circle cx="90" cy="90" r="52" fill="none" stroke="url(#hatch)" stroke-width="14"/>
+                            <circle cx="90" cy="90" r="34" fill="none" stroke="url(#hatch)" stroke-width="14"/>
+                            <path d="M90.0,20.0 A70,70 0 1 1 65.5,155.6" fill="none" stroke="#023048" stroke-width="14"/>
+                            <path d="M90.0,38.0 A52,52 0 0 1 139.6,105.8" fill="none" stroke="#1f4fd1" stroke-width="14"/>
+                            <path d="M90.0,56.0 A34,34 0 0 1 116.7,69.0" fill="none" stroke="#c1111e" stroke-width="14"/>
+                            <line x1="90" y1="20" x2="300" y2="20" stroke="#023048" stroke-width="1" stroke-dasharray="2 3"/>
+                            <line x1="90" y1="38" x2="300" y2="38" stroke="#023048" stroke-width="1" stroke-dasharray="2 3" transform="translate(0,52)"/>
+                            <line x1="90" y1="56" x2="300" y2="56" stroke="#023048" stroke-width="1" stroke-dasharray="2 3" transform="translate(0,104)"/>
+                        </g>
+                        <text x="320" y="15" font-size="17" text-anchor="end">55.7<tspan class="u">%</tspan></text>
+                        <text x="320" y="85" font-size="17" text-anchor="end">29.9<tspan class="u">%</tspan></text>
+                        <text x="320" y="155" font-size="17" text-anchor="end">14.4<tspan class="u">%</tspan></text>
+                        <text x="320" y="32" class="lab" text-anchor="end">SOUTH</text>
+                        <text x="320" y="102" class="lab" text-anchor="end">WEST</text>
+                        <text x="320" y="172" class="lab" text-anchor="end">EAST</text>
+                    </svg>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Concentric rings, hatched tracks</div>
+                    <div class="motif-desc">A few independent shares, one ring each. The unfilled track is the navy hatch, not grey. Dotted 1px leaders run out to right-aligned figures.</div>
+                </div>
+            </div>
+
+            <div class="aes-card">
+                <div class="aes-demo">
+                    <div class="split-cap"><div style="flex:22">Up until 2004 ——</div><div style="flex:11;padding-left:12px">After 2004 ——</div></div>
+                    <div class="split">
+                        <div style="flex:5;background:#023048">5</div>
+                        <div style="flex:13;background:#1f4fd1">13</div>
+                        <div style="flex:4;background:#c1111e">4</div>
+                        <div class="gap"></div>
+                        <div style="flex:3;background:#023048">3</div>
+                        <div style="flex:2;background:#1f4fd1">2</div>
+                        <div style="flex:6;background:#c1111e">6</div>
+                    </div>
+                    <div class="split-cap" style="margin:14px 0 0;gap:16px">
+                        <div><span class="chip" style="background:#023048;width:10px;height:10px;vertical-align:-1px;margin-right:6px"></span>Navy</div>
+                        <div><span class="chip" style="background:#1f4fd1;width:10px;height:10px;vertical-align:-1px;margin-right:6px"></span>Royal</div>
+                        <div><span class="chip" style="background:#c1111e;width:10px;height:10px;vertical-align:-1px;margin-right:6px"></span>Crimson</div>
+                    </div>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Split stacked bar</div>
+                    <div class="motif-desc">Two periods or groups side by side on one bar. Square ends, 2px paper gaps, values labelled inside segments in Cream, mono captions above each half.</div>
+                </div>
+            </div>
+
+            <div class="aes-card">
+                <div class="aes-demo">
+                    <div class="pole-h"><div>60% in the <b>blue category</b></div><div>40% in the <b>red category</b></div></div>
+                    <div class="poles">
+                        <div class="pole">
+                            <div style="flex:12;background:#8ba2ce;color:#023048">Blue A · 12%</div>
+                            <div style="flex:12;background:#5978bb;color:#ffeed4">Blue B · 12%</div>
+                            <div style="flex:36;background:#2b51aa;color:#ffeed4">Blue C · 36%</div>
+                        </div>
+                        <div class="pole" style="justify-content:flex-end">
+                            <div style="flex:4;background:#ca918a;color:#023048;padding:1px 8px">Red A · 4%</div>
+                            <div style="flex:12;background:#c25e55;color:#ffeed4">Red B · 12%</div>
+                            <div style="flex:24;background:#b32322;color:#ffeed4">Red C · 24%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Two-pole block chart</div>
+                    <div class="motif-desc">Blue vs red is the board's core contrast. Sub-groups take tints from the diverging arms — darkest step for the largest group — so the two poles never mix.</div>
+                </div>
+            </div>
+
+        </div>
+        <p class="note">
+            Bars and segments end <strong>square</strong> (<code>borderRadius: 0</code>) — this overrides
+            the generic rounded-cap default. Gridlines are optional: prefer none plus direct labels, or
+            the graph-paper ground. When an axis is needed, draw the baseline only, 1px Deep Navy.
+        </p>
+    </section>
+
+    <!-- 06 ───────────────────────────────── -->
+    <section>
+        <div class="sec-head">
+            <span class="sec-num">06</span>
+            <h2 class="sec-title">Motifs</h2>
+            <span class="sec-note">The devices the board repeats</span>
+        </div>
+        <p class="lede">
+            The board is not a colour brief so much as a set of recurring devices. These are the
+            ones that showed up often enough to be system, not decoration.
+        </p>
+        <div class="motifs">
+
+            <div class="motif">
+                <div class="motif-demo m-spine">
+                    <div class="m-node">1911<span>The company is founded in Madurai</span></div>
+                    <div class="m-node">1980<span>The first moped rolls out</span></div>
+                    <div class="m-node">2001<span>Going it alone</span></div>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Timeline spine</div>
+                    <div class="motif-desc">A 1px rule with crimson nodes; years in mono, event copy in Archivo beneath. The board's most-used structure.</div>
+                </div>
+            </div>
+
+            <div class="motif">
+                <div class="motif-demo m-stat">
+                    <b>+98%</b>
+                    <i>specimen caption under a single hero number</i>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Hero stat</div>
+                    <div class="motif-desc">One figure at display scale in crimson, with a short caption under it. Replaces a chart whenever the story is a single number.</div>
+                </div>
+            </div>
+
+            <div class="motif">
+                <div class="motif-demo m-iso">
+                    <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
+                    <i class="on"></i><i class="on"></i><i class="hl"></i><i></i><i></i>
+                    <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
+                    <i class="on"></i><i class="hl"></i><i></i><i></i><i></i>
+                    <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+                    <i></i><i></i><i></i><i></i><i></i>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Isotype / waffle grid</div>
+                    <div class="motif-desc">Unit squares or figures, one per quantum, 10 to a row. Hatched remainder, navy for the count, crimson for the part being called out.</div>
+                </div>
+            </div>
+
+            <div class="motif">
+                <div class="motif-demo m-hatch">
+                    <div>20%<span style="--w:20%"></span></div>
+                    <div>50%<span style="--w:50%"></span></div>
+                    <div>80%<span style="--w:80%"></span></div>
+                    <div>100<span style="--w:100%"></span></div>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Hatched remainder</div>
+                    <div class="motif-desc">Any track a value fills into — "rest of total", "not yet" — is a 45° navy hatch at 32%, never a flat grey bar. The board's 0–100% ladder.</div>
+                </div>
+            </div>
+
+            <div class="motif">
+                <div class="motif-demo m-duo">
+                    <em>Archive · 1956</em>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Duotone archival photo</div>
+                    <div class="motif-desc">Black-and-white archive imagery under a Steel-to-Deep-Navy multiply, Cream mono caption. Keeps mixed-quality photography reading as one set.</div>
+                </div>
+            </div>
+
+            <div class="motif">
+                <div class="motif-demo m-cut">
+                    <svg viewBox="0 0 92 120" aria-hidden="true">
+                        <path d="M46 8c13 0 22 10 22 24 0 9-4 16-9 20 16 5 27 16 31 34l2 34H2l2-34c4-18 15-29 31-34-5-4-9-11-9-20 0-14 9-24 20-24z" fill="#4f5f6b" stroke="#c1111e" stroke-width="4" stroke-linejoin="round"/>
+                    </svg>
+                    <div><b>1911</b><i>It all starts here</i></div>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Cut-out portrait</div>
+                    <div class="motif-desc">An archival figure clipped to its silhouette with a 3px crimson sticker outline, sat on Cream beside a crimson year. For founders and first moments.</div>
+                </div>
+            </div>
+
+            <div class="motif">
+                <div class="motif-demo m-graph">
+                    <svg viewBox="0 0 200 120" preserveAspectRatio="none">
+                        <polyline points="0,104 34,92 68,74 102,52 136,34 170,16 200,8"
+                                  fill="none" stroke="#1f4fd1" stroke-width="2.5" />
+                        <circle cx="136" cy="34" r="4.5" fill="#e8452c" />
+                    </svg>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Graph paper ground</div>
+                    <div class="motif-desc">A 22px warm sand grid on Paper, standing in for chart gridlines. Recessive — the grid never competes with the mark drawn over it.</div>
+                </div>
+            </div>
+
+            <div class="motif">
+                <div class="motif-demo m-navy">
+                    <i>Chapter 03</i>
+                    <b>The road out of Madras</b>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Navy chapter panel</div>
+                    <div class="motif-desc">Full-bleed Deep Navy to break the paper run and mark a new act. Steel eyebrow, Cream heading. Charts inside switch to the dark palette.</div>
+                </div>
+            </div>
+
+            <div class="motif">
+                <div class="motif-demo m-sign">
+                    <i>Pull quote</i>
+                    <b>One line, set big, in cream on red</b>
+                </div>
+                <div class="motif-text">
+                    <div class="motif-name">Signboard panel</div>
+                    <div class="motif-desc">From the hand-painted Tamil signs: Crimson ground, Cream type, an inset cream keyline. One per story, for a pull-quote or hero stat — never a chart.</div>
+                </div>
+            </div>
+
+        </div>
+        <p class="note">
+            Cards are <strong>flat</strong> in this system — a hairline <code>--color-rule</code>
+            border on a warm surface over the Paper ground. The board's references are printed pieces;
+            drop shadows do not belong here. Keep the frame wrapper anyway (see the prompt guide) — it
+            owns the card's padding, and any module that does opt into a shadow still needs it.
+        </p>
+    </section>
+
+    <!-- 07 ───────────────────────────────── -->
+    <section>
+        <div class="sec-head">
+            <span class="sec-num">07</span>
+            <h2 class="sec-title">Spacing &amp; breakpoints</h2>
+            <span class="sec-note">Unchanged from the house system</span>
+        </div>
+        <div class="sp-demo">
+            <div class="sp-bar"></div>
+            <div>
+                <div class="sp-figure">120 / 110 / 100px</div>
+                <div class="sp-caption">
+                    Gap between every visualisation section, via <code>--spacing</code> on
+                    <code>.TK4R-spacer</code> — pc (≥1024px) / iPad (769–1023px) / mobile (≤768px).
+                </div>
+            </div>
+        </div>
+
+        <p class="sublabel">Breakpoints</p>
+        <div class="bp-row">
+            <div class="bp">
+                <b>PC</b>
+                <span>≥ 1024px</span>
+                <em>Full type scale. Legend sits top-right of the chart header.</em>
+            </div>
+            <div class="bp">
+                <b>iPad</b>
+                <span>769 – 1023px</span>
+                <em>One step down. Watch flex children overflowing the card.</em>
+            </div>
+            <div class="bp">
+                <b>Mobile</b>
+                <span>≤ 768px</span>
+                <em>Legend centres and stacks under the title. Frame padding drops to ~20px 12px.</em>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        Derived from <em>TVS Mood Board (1).png</em> (6251 × 6922). Swatch values are sampled from the
+        board directly; the chart palettes in §04 are built from the hues the board's own charts use and
+        verified with the palette validator in both modes. Update <code>styles/globals.css</code> from
+        §02 — type, spacing and breakpoints don't change.
+    </footer>
+
+</div>
+</body>
+</html>

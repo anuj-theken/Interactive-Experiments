@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EV Two-Wheeler Market Share</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            /* ── Moodboard literals ── */
+            --crimson:   #c1111e;
+            --cream:     #ffeed4;
+            --navy:      #023048;
+            --steel:     #659aba;
+
+            /* ── Dark ground: black page, cream type, mist for muted copy ── */
+            --bg:        #000000;
+            --text:      var(--cream);
+            --muted:     #a9c3d6;
+            --rule:      #2b2b2b;
+            --casing:    #f4f1ea;   /* battery outline */
+
+            /* ── Series: TVS is the charged cell green from the reference; the other companies
+                  are neons, stacked so every neighbouring pair stays apart (incl. CVD);
+                  Others is a plain grey since it isn't one company ── */
+            --s-tvs:      #6fdc8c;   /* green  */
+            --s-bajaj:    #ffff3f;   /* blue   */
+            --s-ather:    #eeef20;   /* yellow */
+            --s-heromoto: #dddf00;   /* pink   */
+            --s-ola:      #d4d700;   /* cyan   */
+            --s-greaves:  #bfd200;   /* orange */
+            --s-okinawa:  #aacc00;   /* violet */
+            --s-heroel:   #80b918;   /* red    */
+            --s-others:   #55a630;   /* grey   */
+
+            /* ── Type scale (pc) ── */
+            --type-heading: 36px;
+            --type-body:    18px;
+            --type-legend:  14px;
+
+            --chart-h: 400px;
+            --battery-w: 120px;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Archivo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 72px 32px 120px;
+        }
+
+        /* ── Header ── */
+        .chart-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 32px;
+            border-bottom: 1px solid var(--casing);
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+
+        .eyebrow {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--steel);
+            margin-bottom: 12px;
+        }
+
+        .title {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: var(--type-heading);
+            font-weight: 400;
+            line-height: 1.1;
+            letter-spacing: -0.01em;
+            max-width: 22ch;
+        }
+
+        .title em { font-style: normal; color: var(--s-tvs); }
+
+        .sub {
+            margin-top: 12px;
+            font-size: var(--type-body);
+            line-height: 1.55;
+            color: var(--muted);
+            max-width: 54ch;
+        }
+
+        /* ── Legend: top-right on pc, fills top-down to match the stack ── */
+        .legend {
+            list-style: none;
+            display: grid;
+            grid-auto-flow: column;
+            grid-template-rows: repeat(5, auto);
+            gap: 8px 22px;
+            font-size: var(--type-legend);
+            flex-shrink: 0;
+            padding-top: 4px;
+        }
+
+        .legend li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: default;
+            white-space: nowrap;
+            transition: opacity .15s;
+        }
+
+        .legend li.tvs { font-weight: 600; }
+        .legend .sw { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+        .legend.is-focus li:not(.on) { opacity: .35; }
+
+        /* ── Plot ── */
+        /* No y-axis: a full battery is 100%, and every value is on hover */
+        .plot { position: relative; }
+
+        .cols {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: clamp(10px, 3vw, 40px);
+        }
+
+        /* ── Battery: casing, terminal cap, cells ── */
+        .battery {
+            position: relative;
+            justify-self: center;
+            width: min(100%, var(--battery-w));
+            height: var(--chart-h);
+            border: 3px solid var(--casing);
+            border-radius: 12px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 4px;
+        }
+
+        .battery::before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: -17px;
+            width: 40%;
+            height: 14px;
+            transform: translateX(-50%);
+            border: 3px solid var(--casing);
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .seg {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+            border-radius: 2px;
+            outline: none;
+            transition: opacity .15s;
+        }
+
+        .seg .v {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            font-variant-numeric: tabular-nums;
+            color: #000;
+            opacity: 0;
+            transition: opacity .15s;
+            pointer-events: none;
+        }
+
+        .seg .v small { font-size: .75em; }
+
+
+        /* TVS values are the default view */
+        .seg.tvs .v { opacity: 1; font-size: 14px; font-weight: 600; }
+
+        /* Series focus, from the legend or a cell: one company stays full in every year */
+        .cols.is-series .seg:not(.on) { opacity: .25; }
+        .cols.is-series .seg.on .v { opacity: 1; }
+        .seg.on:hover, .seg.on:focus-visible { box-shadow: 0 0 0 2px var(--casing); }
+
+        .x-axis {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: clamp(10px, 3vw, 40px);
+            padding-top: 14px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-align: center;
+        }
+
+        .x-axis .last { color: var(--s-tvs); }
+
+        /* ── Tooltip: one value per cell ── */
+        .tip {
+            position: absolute;
+            z-index: 5;
+            background: #ffffff;
+            color: #000000;
+            border-radius: 3px;
+            padding: 10px 14px 11px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity .12s, transform .12s;
+        }
+
+        .tip.show { opacity: 1; transform: none; }
+
+        .tip-h {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10.5px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #1c1c1c;
+            margin-bottom: 5px;
+        }
+
+        .tip-row {
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+            font-size: 14px;
+        }
+
+        .tip-row b {
+            font-family: Georgia, serif;
+            font-size: 22px;
+            font-weight: 400;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .tip-row b small { font-size: .55em; }
+
+        /* ── iPad ── */
+        @media (max-width: 1023px) {
+            :root {
+                --type-heading: 32px;
+                --type-body: 16px;
+                --type-legend: 12px;
+                --chart-h: 360px;
+            }
+            .page { padding: 56px 24px 90px; }
+        }
+
+        /* ── Mobile: legend centres and stacks under the title ── */
+        @media (max-width: 768px) {
+            :root {
+                --type-heading: 28px;
+                --type-body: 14px;
+                --type-legend: 11px;
+                --chart-h: 330px;
+            }
+            .page { padding: 32px 16px 72px; }
+            .chart-head { flex-direction: column; gap: 18px; }
+            .legend { grid-template-rows: repeat(3, auto); justify-content: center; align-self: stretch; }
+            .battery { border-width: 2px; border-radius: 8px; padding: 4px; gap: 3px; }
+            .battery::before { border-width: 2px; top: -12px; height: 10px; }
+            .seg .v { font-size: 10px; }
+            .seg.tvs .v { font-size: 11px; }
+            .x-axis { font-size: 10.5px; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <header class="chart-head">
+        <div>
+            <div class="eyebrow">Market share · Electric two-wheelers</div>
+            <h1 class="title"><em>TVS</em> now leads India's electric two-wheeler market</h1>
+            <p class="sub">
+                TVS Motor's share rose from 4% in FY22 to 26% in CY26, as Ola Electric fell
+                from 35% at its FY24 peak to under 7%.
+            </p>
+        </div>
+        <ul class="legend" id="legend" aria-label="Legend"></ul>
+    </header>
+
+    <div class="plot" id="plot">
+        <div class="cols" id="cols" role="img"
+             aria-label="Stacked battery-shaped bars of electric two-wheeler market share, FY22 to CY26. TVS Motor: 4, 11, 19, 21 and 26 percent."></div>
+        <div class="x-axis" id="xaxis" aria-hidden="true"></div>
+        <div class="tip" id="tip" role="status" aria-live="polite"></div>
+    </div>
+</div>
+
+<script>
+    const periods = ['FY22', 'FY23', 'FY24', 'FY25', 'CY26'];
+
+    // Stack order, baseline up — TVS charges from the bottom of each battery.
+    const series = [
+        { key: 'tvs',      name: 'TVS Motor',        values: [4, 11, 19, 21, 26] },
+        { key: 'bajaj',    name: 'Bajaj Auto',       values: [3, 4, 11, 20, 22] },
+        { key: 'ather',    name: 'Ather Energy',     values: [8, 11, 12, 11, 17] },
+        { key: 'heromoto', name: 'Hero MotoCorp',    values: [0.0, 0.1, 2, 4, 11] },
+        { key: 'ola',      name: 'Ola Electric',     values: [6, 21, 35, 30, 6.6] },
+        { key: 'greaves',  name: 'Greaves Electric', values: [10, 12, 6, 4, 4] },
+        { key: 'okinawa',  name: 'Okinawa',          values: [19, 13, 2, 0.3, 0.1] },
+        { key: 'heroel',   name: 'Hero Electric',    values: [27, 12, 1, 0.2, 0.0] },
+        { key: 'others',   name: 'Others',           values: [24, 16, 12, 10, 12] },
+    ];
+
+    // Shares below this are too thin to draw as a cell — they'd only show as an extra gap.
+    const MIN_CELL = 0.5;
+
+    const fill = key => `var(--s-${key})`;
+    const $ = id => document.getElementById(id);
+    const cols = $('cols'), tip = $('tip'), plot = $('plot'), legend = $('legend');
+
+    // Legend — top of stack first, so it reads in the same order as the cells
+    legend.innerHTML = [...series].reverse().map(s =>
+        `<li class="${s.key}" data-key="${s.key}"><span class="sw" style="background:${fill(s.key)}"></span>${s.name}</li>`
+    ).join('');
+
+    // X axis
+    $('xaxis').innerHTML = periods.map((p, i) =>
+        `<div class="${i === periods.length - 1 ? 'last' : ''}">${p}</div>`
+    ).join('');
+
+    // Batteries — each column's cells fill the casing in proportion to that year's shares
+    cols.innerHTML = periods.map((p, i) => `
+        <div class="battery" data-i="${i}">
+            ${series.filter(s => s.values[i] >= MIN_CELL).map(s => `
+                <div class="seg ${s.key}" data-key="${s.key}" tabindex="0" aria-label="${s.name}, ${p}: ${s.values[i]}%" style="flex:${s.values[i]} 1 0;background:${fill(s.key)}">
+                    <span class="v">${s.values[i]}<small>%</small></span>
+                </div>`).join('')}
+        </div>`).join('');
+
+    // Picks out one company across every battery and in the legend; null clears it
+    function setSeries(key) {
+        legend.classList.toggle('is-focus', !!key);
+        legend.querySelectorAll('li').forEach(l => l.classList.toggle('on', l.dataset.key === key));
+        cols.classList.toggle('is-series', !!key);
+        cols.querySelectorAll('.seg').forEach(s => s.classList.toggle('on', s.dataset.key === key));
+    }
+
+    legend.addEventListener('pointerover', e => {
+        const li = e.target.closest('li');
+        if (li) setSeries(li.dataset.key);
+    });
+    legend.addEventListener('pointerleave', () => setSeries(null));
+
+    // Tooltip — one per cell
+    function showTip(seg, x, y) {
+        const i = +seg.parentNode.dataset.i;
+        const s = series.find(s => s.key === seg.dataset.key);
+        tip.innerHTML = `<div class="tip-h">${periods[i]}</div>
+            <div class="tip-row"><span>${s.name}</span><b>${s.values[i]}<small>%</small></b></div>`;
+
+        const pr = plot.getBoundingClientRect();
+        const tw = tip.offsetWidth, th = tip.offsetHeight;
+        let left = x - pr.left + 16;
+        if (left + tw > pr.width) left = x - pr.left - tw - 16;
+        let top = Math.max(0, Math.min(y - pr.top - th / 2, pr.height - th));
+        tip.style.left = Math.max(0, left) + 'px';
+        tip.style.top = top + 'px';
+        tip.classList.add('show');
+    }
+
+    function clear() {
+        setSeries(null);
+        tip.classList.remove('show');
+    }
+
+    cols.addEventListener('pointermove', e => {
+        const seg = e.target.closest('.seg');
+        if (!seg) return clear();
+        setSeries(seg.dataset.key);
+        showTip(seg, e.clientX, e.clientY);
+    });
+    cols.addEventListener('pointerleave', clear);
+
+    // Keyboard
+    cols.addEventListener('focusin', e => {
+        const seg = e.target.closest('.seg');
+        if (!seg) return;
+        const r = seg.getBoundingClientRect();
+        setSeries(seg.dataset.key);
+        showTip(seg, r.right, r.top + r.height / 2);
+    });
+    cols.addEventListener('focusout', clear);
+</script>
+</body>
+</html>

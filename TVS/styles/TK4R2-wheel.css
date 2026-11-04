@@ -1,0 +1,241 @@
+/* styles/TK4R2-wheel.css — TK4R2 · Wheel timeline, 1946–1961
+   Pinned stage, after imgs/reference/tire stuff.png: photo cards ride the rim of a big dark disc,
+   the tire sits to the right (never under the content), and a small ring rides the tire's rim. */
+
+.TK4R2-chart-section {
+  position: relative;
+}
+
+.TK4R2-stage {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+/* ── Masthead: chapter eyebrow, top-left ── */
+.TK4R2-masthead {
+  position: absolute;
+  inset: 0 auto auto 0;
+  z-index: 30;
+  padding: 24px clamp(20px, 5vw, 72px) 0;
+  pointer-events: none;
+}
+.TK4R2-eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin: 0;
+}
+.TK4R2-masthead-title {
+  font-family: var(--font-display);
+  font-size: var(--type-subheading);
+  color: var(--color-text);
+  margin: 6px 0 0;
+}
+
+/* ── Scroll hint: mouse icon, bottom-left ── */
+.TK4R2-hint {
+  position: absolute;
+  z-index: 30;
+  left: clamp(20px, 5vw, 72px);
+  bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: var(--type-legend);
+  color: var(--color-muted);
+}
+.TK4R2-hint svg { width: 14px; height: 22px; }
+
+/* ── The disc, the tire and the ring — all share the hub ── */
+.TK4R2-disc {
+  position: absolute;
+  z-index: 1;
+  border-radius: 50%;
+  background: var(--color-surface);
+  pointer-events: none;
+}
+.TK4R2-tire {
+  position: absolute;
+  z-index: 2;
+  will-change: transform;
+  pointer-events: none;
+  user-select: none;
+}
+.TK4R2-tire img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.TK4R2-ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--color-text);
+  border-radius: 50%;
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* ── Photo cards riding the disc's rim ── */
+.TK4R2-orbit {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+.TK4R2-shot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 4px;
+  border: 1px solid var(--color-rule);
+  background: var(--color-bg-warm);
+  will-change: transform, opacity;
+}
+.TK4R2-ph {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  padding: 10px;
+  overflow: hidden;
+  background: repeating-linear-gradient(45deg, var(--texture-ink) 0 1px, transparent 1px 6px), var(--color-bg-warm);
+}
+.TK4R2-ph img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.TK4R2-ph--contain {
+  background: #fff;
+}
+.TK4R2-ph--contain img {
+  object-fit: contain;
+  padding: 6%;
+}
+.TK4R2-ph--pair {
+  padding: 0;
+  gap: 2px;
+  background: var(--color-rule);
+}
+.TK4R2-ph--pair img {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+}
+.TK4R2-ph span {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: var(--type-eyebrow);
+  color: var(--color-muted);
+  background: var(--color-surface);
+  padding: 3px 6px;
+}
+.TK4R2-ph svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.TK4R2-map-label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  fill: var(--color-text);
+}
+.TK4R2-map-label--key {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ── Copy: each piece is placed by the JS around the card ── */
+.TK4R2-copy {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+.TK4R2-yr,
+.TK4R2-title,
+.TK4R2-statement,
+.TK4R2-num,
+.TK4R2-body {
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin: 0;
+  visibility: hidden;
+  /* a ground-coloured halo keeps type legible where it crosses the photo */
+  text-shadow: 0 0 2px var(--color-bg), 0 0 12px var(--color-bg), 0 0 24px var(--color-bg);
+}
+.TK4R2-yr {
+  font-family: var(--font-mono);
+  font-size: var(--type-legend);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+.TK4R2-title {
+  font-family: var(--font-display);
+  font-size: var(--type-stat);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.005em;
+  color: var(--color-mustard);
+  text-wrap: balance;
+}
+.TK4R2-statement {
+  font-family: var(--font-display);
+  font-size: var(--type-stat);
+  font-weight: 600;
+  line-height: 1.02;
+  color: var(--color-text);
+  text-wrap: balance;
+}
+.TK4R2-statement--light {
+  font-style: italic;
+  font-weight: 500;
+}
+.TK4R2-num {
+  font-family: var(--font-display);
+  font-size: var(--type-stat);
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-mustard);
+  white-space: nowrap;
+}
+.TK4R2-num small {
+  font-family: var(--font-mono);
+  font-size: var(--type-legend);
+  color: var(--color-muted);
+  margin-left: 4px;
+}
+.TK4R2-body {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: 1.55;
+  color: var(--color-text);
+}
+
+@media (max-width: 900px) {
+  .TK4R2-hint { display: none; }
+  .TK4R2-masthead { padding-top: 16px; }
+}

@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TVS-Suzuki Profits</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            /* ── Moodboard literals ── */
+            --oxblood:   #770101;
+            --crimson:   #c1111e;
+            --green:     #1e8259;   /* growth up */
+            --cream:     #ffeed4;
+            --navy:      #023048;
+            --steel:     #659aba;
+
+            /* ── Semantic ── */
+            --paper:     #faf2e3;
+            --bg:        var(--paper);
+            --surface:   #fffaf0;
+            --text:      var(--navy);
+            --ink:       var(--navy);
+            --muted:     #4f5f6b;
+            --rule:      #e6d8bf;
+            --grid:      #eadfca;
+            --primary:   var(--crimson);
+
+            /* ── Series ── */
+            --s-pat:     var(--crimson);
+            --s-growth:  var(--navy);
+
+            /* ── Type scale (pc) ── */
+            --type-heading:    36px;
+            --type-body:       18px;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Archivo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 72px 32px 120px;
+        }
+
+        /* ── Frame / card ── */
+        .frame {
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-radius: 4px;
+            padding: 36px 36px 28px;
+        }
+
+        .chart-head {
+            border-bottom: 1px solid var(--ink);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .eyebrow {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .title {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: var(--type-heading);
+            font-weight: 400;
+            line-height: 1.1;
+            letter-spacing: -0.01em;
+            max-width: 24ch;
+        }
+
+        .title em { font-style: normal; color: var(--primary); }
+
+        .sub {
+            margin-top: 12px;
+            font-size: var(--type-body);
+            line-height: 1.55;
+            color: var(--muted);
+            max-width: 56ch;
+        }
+
+        /* ── Plot ── */
+        .plot { position: relative; }
+
+        .plot svg { display: block; width: 100%; overflow: visible; }
+
+        .plot text { font-family: 'IBM Plex Mono', monospace; fill: var(--text); }
+
+        .tick   { font-size: 10.5px; fill: var(--muted) !important; }
+        .g-val  { font-size: 12.5px; font-weight: 500; font-variant-numeric: tabular-nums; paint-order: stroke; stroke: var(--surface); stroke-width: 4px; }
+        .g-val.up   { fill: var(--green) !important; }
+        .g-val.down { fill: var(--crimson) !important; }
+        .year   { font-size: 13px; font-weight: 500; letter-spacing: 0.04em; }
+        .val    { font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; fill: var(--cream) !important; }
+
+        .bar    { fill: var(--s-pat); }
+        .dot    { fill: var(--s-growth); stroke: var(--surface); stroke-width: 2; }
+        .dot.up   { fill: var(--green); }
+        .dot.down { fill: var(--crimson); }
+
+        /* ── Key: two measures share one plot, so each mark is named ── */
+        .key {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 26px;
+            margin-bottom: 18px;
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        .key span { display: inline-flex; align-items: center; gap: 8px; }
+        .key i { display: inline-block; width: 12px; height: 12px; background: var(--s-pat); }
+        .key svg { width: 30px; height: 10px; }
+
+        /* ── iPad ── */
+        @media (max-width: 1023px) {
+            :root {
+                --type-heading: 32px;
+                --type-body: 16px;
+            }
+            .page { padding: 56px 24px 90px; }
+        }
+
+        /* ── Mobile ── */
+        @media (max-width: 768px) {
+            :root {
+                --type-heading: 28px;
+                --type-body: 14px;
+            }
+            .page { padding: 32px 16px 72px; }
+            .frame { padding: 20px 12px 18px; }
+            .tick { font-size: 9.5px; }
+            .g-val { font-size: 10.5px; }
+            .year { font-size: 10.5px; }
+            .val  { font-size: 11px; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <figure class="frame">
+        <header class="chart-head">
+            <div class="eyebrow">TVS-Suzuki · Profit after tax</div>
+            <h1 class="title"><em>TVS-Suzuki</em>'s profits rose for six straight years, then fell</h1>
+            <p class="sub">
+                Profit after tax grew almost five-fold, from Rs 18 crore in 1994 to Rs 87 crore
+                in 2000, before dropping 28% in 2001.
+            </p>
+        </header>
+
+        <div class="key" aria-hidden="true">
+            <span><i></i>Profit after tax, Rs crore</span>
+            <span><svg viewBox="0 0 30 10"><line x1="2" y1="5" x2="15" y2="5" stroke="var(--green)" stroke-width="2.5" stroke-dasharray="0.1 6" stroke-linecap="round"/><line x1="15" y1="5" x2="28" y2="5" stroke="var(--crimson)" stroke-width="2.5" stroke-dasharray="0.1 6" stroke-linecap="round"/><circle cx="8" cy="5" r="3.5" fill="var(--green)"/><circle cx="22" cy="5" r="3.5" fill="var(--crimson)"/></svg>Year-on-year growth</span>
+        </div>
+
+        <div class="plot" id="plot">
+            <svg id="chart" role="img"
+                 aria-label="Bar chart of TVS-Suzuki profit after tax, 1994 to 2001, in Rs crore: 18, 33, 35, 55, 69, 82, 87, 63. Dotted line joining the bar tops is labelled with year-on-year growth: 83, 6, 57, 25, 19, 6 and minus 28 percent."></svg>
+        </div>
+    </figure>
+</div>
+
+<script>
+    const years  = [1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001];
+    const pat    = [18, 33, 35, 55, 69, 82, 87, 63];
+    const growth = [null, 83, 6, 57, 25, 19, 6, -28];
+
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.getElementById('chart');
+    const plot = document.getElementById('plot');
+
+    const el = (tag, attrs, text) => {
+        const n = document.createElementNS(NS, tag);
+        for (const k in attrs) n.setAttribute(k, attrs[k]);
+        if (text != null) n.textContent = text;
+        return n;
+    };
+
+    // The dotted line joins the bar tops; each joint carries that year's growth.
+    function render() {
+        const W = plot.clientWidth;
+        const mobile = W < 560;
+        const ml = mobile ? 34 : 46, mr = 6;
+
+        const bH = mobile ? 340 : 420;
+        const H = bH + 30;
+
+        const step = (W - ml - mr) / years.length;
+        const cx = i => ml + step * (i + .5);
+        const bw = step * (mobile ? .62 : .54);
+
+        const bMax = 100;
+        const by = v => bH - v / bMax * bH;
+
+        svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+        svg.setAttribute('height', H);
+        svg.innerHTML = '';
+
+        // ── Bars, PAT value inside each top ──
+        [0, 25, 50, 75, 100].forEach(t =>
+            svg.append(el('text', { x: ml - 10, y: by(t) + 3.5, 'text-anchor': 'end', class: 'tick' }, t)));
+
+        pat.forEach((v, i) => {
+            svg.append(el('rect', { x: cx(i) - bw / 2, y: by(v), width: bw, height: by(0) - by(v), class: 'bar' }));
+            svg.append(el('text', { x: cx(i), y: by(v) + 22, 'text-anchor': 'middle', class: 'val' }, v));
+            svg.append(el('text', { x: cx(i), y: by(0) + 21, 'text-anchor': 'middle', class: 'year' }, years[i]));
+        });
+
+        svg.append(el('line', { x1: ml, x2: W - mr, y1: by(0) + .5, y2: by(0) + .5, stroke: 'var(--ink)', 'stroke-width': 1 }));
+
+        // ── Growth line along the bar tops: each segment green for a rise, red for a fall ──
+        const tone = g => g == null ? '' : g < 0 ? 'down' : 'up';
+        pat.forEach((v, i) => {
+            if (i === 0) return;
+            svg.append(el('line', {
+                x1: cx(i - 1), y1: by(pat[i - 1]), x2: cx(i), y2: by(v),
+                stroke: growth[i] < 0 ? 'var(--crimson)' : 'var(--green)', 'stroke-width': 2.5,
+                'stroke-dasharray': '0.1 6', 'stroke-linecap': 'round'
+            }));
+        });
+
+        const fmt = g => (g > 0 ? '+' : g < 0 ? '−' : '') + Math.abs(g) + '%';
+        pat.forEach((v, i) => svg.append(el('circle', { cx: cx(i), cy: by(v), r: 4.5, class: `dot ${tone(growth[i])}` })));
+        growth.forEach((g, i) => {
+            if (g == null) return;
+            svg.append(el('text', { x: cx(i), y: by(pat[i]) - 14, 'text-anchor': 'middle', class: `g-val ${tone(g)}` }, fmt(g)));
+        });
+    }
+
+    let lastW = 0;
+    new ResizeObserver(() => {
+        if (plot.clientWidth === lastW) return;
+        lastW = plot.clientWidth;
+        render();
+    }).observe(plot);
+</script>
+</body>
+</html>

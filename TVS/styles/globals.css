@@ -1,0 +1,356 @@
+/* styles/globals.css — TVS design tokens. Single source of truth.
+   Colours sampled from "TVS Mood Board (1).png"; see PROMPT_GUIDE.md + design.html. */
+
+@font-face {
+  font-family: "Reckless";
+  src: url("../fonts/Reckless-Medium.woff2") format("woff2"),
+       url("../fonts/Reckless-Medium.woff") format("woff");
+  font-weight: 400 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Reckless";
+  src: url("../fonts/Reckless-MediumItalic.woff2") format("woff2"),
+       url("../fonts/Reckless-MediumItalic.woff") format("woff");
+  font-weight: 400 500;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Reckless";
+  src: url("../fonts/Reckless-Bold.woff2") format("woff2"),
+       url("../fonts/Reckless-Bold.woff") format("woff");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Reckless";
+  src: url("../fonts/Reckless-BoldItalic.woff2") format("woff2"),
+       url("../fonts/Reckless-BoldItalic.woff") format("woff");
+  font-weight: 600 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  /* ── Type scale — pc / desktop (≥1024px) ── */
+  --type-stat:       72px;   /* hero figure — the moodboard's big number */
+  --type-heading:    36px;
+  --type-subheading: 22px;
+  --type-body:       18px;
+  --type-legend:     14px;
+  --type-eyebrow:    11px;   /* tracked uppercase kicker */
+
+  --font-display: "Reckless", Georgia, "Times New Roman", serif;
+  --font-body:    "Archivo", sans-serif;
+  --font-mono:    "IBM Plex Mono", ui-monospace, monospace;  /* years, tabular figures */
+
+  /* ── Section spacing — pc / desktop (≥1024px) ── */
+  --spacing: 120px;
+
+  /* ── Surfaces & ink — sampled from TVS Mood Board.png ── */
+  --color-bg:           #faf2e3;  /* Paper — page ground, never stark white */
+  --color-bg-warm:      #ffeed4;  /* Cream (board swatch) — secondary ground, zebra, inactive */
+  --color-surface:      #fffaf0;  /* card face lifted off the paper — warm, not #fff */
+  --color-bg-dark:      #023048;  /* Deep Navy (board swatch) — chapter panel */
+
+  --color-text:         #023048;  /* 12.43:1 on Paper */
+  --color-muted:        #4f5f6b;  /* Slate — 5.93:1 on Paper */
+  --color-text-invert:  #ffeed4;  /* Cream on the navy panel — 12.14:1 */
+  --color-muted-invert: #a9c3d6;  /* 7.55:1 on navy */
+  --color-rule:         #e6d8bf;  /* hairline borders & dividers */
+  --color-grid:         #eadfca;  /* graph-paper & chart gridlines — warm, recessive */
+
+  /* ── Brand / accent ── */
+  --color-primary:   #c1111e;  /* Crimson — hero figures, year markers, links. 5.61:1 on Paper */
+  --color-secondary: #023048;  /* Deep Navy */
+  --color-oxblood:   #770101;  /* Oxblood — deep rules, sticker outlines, red panel. 10.55:1 */
+  --color-accent:    #659aba;  /* Steel Blue — FILL ONLY on Paper (2.74:1); type on navy (4.53:1) */
+  --color-royal:     #1f4fd1;  /* the board's chart blue — the cool pole */
+  --color-signal:    #e8452c;  /* Vermilion — the one hot chart accent, emphasis only. 3.55:1 */
+  --color-mustard:   #d4982a;
+  --color-cream:     #ffeed4;  /* board swatch, theme-invariant — sticker tiles behind printed illustrations */
+  --color-black:     #0b0d0e;  /* theme-invariant near-black — "black background, white text" beats */
+  --color-blueprint: #0b3a63;  /* theme-invariant blueprint ground */
+  --color-grey:      #a7a9a6;  /* neutral grey — "Others" / not-one-company groups */
+
+  /* ── Chart: categorical, light. FIXED ORDER — assign 1..6, never cycle ── */
+  --cat-1: #1f4fd1;  /* Royal    */
+  --cat-2: #c1111e;  /* Crimson  */
+  --cat-3: #3d8fc6;  /* Steel    */
+  --cat-4: #d4982a;  /* Mustard — <3:1, must be direct-labelled */
+  --cat-5: #7a2e8f;  /* Mulberry */
+  --cat-6: #1e8259;  /* Green    */
+
+  /* ── Chart: categorical, dark (on --color-bg-dark). Same slot order ── */
+  --cat-dark-1: #5580ff;
+  --cat-dark-2: #ee4046;
+  --cat-dark-3: #3a9fd8;
+  --cat-dark-4: #c0861a;
+  --cat-dark-5: #ad62cc;
+  --cat-dark-6: #2a9a68;
+
+  /* ── Chart: sequential (magnitude), single hue (blue), light → dark ── */
+  --seq-100: #88afe2;
+  --seq-200: #6497d3;
+  --seq-300: #3f7fc0;
+  --seq-400: #1468ab;
+  --seq-500: #00518c;
+  --seq-600: #003c69;
+
+  /* dark mode flips the anchor: low → high runs dark → light */
+  --seq-dark-100: #215da5;
+  --seq-dark-200: #4379bc;
+  --seq-dark-300: #6295d4;
+  --seq-dark-400: #87b1e6;
+  --seq-dark-500: #b1cdf2;
+  --seq-dark-600: #d5e6fc;
+
+  /* ── Chart: diverging — Royal ↔ Crimson, NEUTRAL midpoint ── */
+  --div-neg-3: #2b51aa;
+  --div-neg-2: #5978bb;
+  --div-neg-1: #8ba2ce;
+  --div-mid:   #e4dccd;
+  --div-pos-1: #ca918a;
+  --div-pos-2: #c25e55;
+  --div-pos-3: #b32322;
+
+  /* ── Map ground — sea is a steel-blue tint, land is the board's cream ── */
+  --map-sea:        #c4d8e4;
+  --map-land:       #ffeed4;
+  --map-land-focus: #f4d6a6;  /* districts / home country the story is about */
+  --map-land-away:  #f6d3cc;  /* the destination country — a crimson tint */
+  --map-border:     #d2b98f;
+
+  /* ── Texture — remainders, "not counted", the print hatch ── */
+  --texture-ink:  rgba(2, 48, 72, 0.32);  /* Deep Navy at 32% — hatch / stipple stroke */
+
+  /* ── Status — reserved meaning, never a series color ── */
+  --status-good:     #456b00;
+  --status-warning:  #9a6a00;
+  --status-serious:  #c75400;
+  --status-critical: #770101;
+}
+
+/* iPad (769px–1023px) */
+@media (max-width: 1023px) {
+  :root {
+    --type-stat:       56px;
+    --type-heading:    32px;
+    --type-subheading: 20px;
+    --type-body:       16px;
+    --type-legend:     12px;
+    --type-eyebrow:    11px;
+    --spacing: 110px;
+  }
+}
+
+/* Mobile (≤768px) */
+@media (max-width: 768px) {
+  :root {
+    --type-stat:       44px;
+    --type-heading:    28px;
+    --type-subheading: 17px;
+    --type-body:       14px;
+    --type-legend:     11px;
+    --type-eyebrow:    10px;
+    --spacing: 100px;
+  }
+}
+
+/* ── Dark theme — set data-theme="dark" on <html> for a dark page, or add class="TK4R-theme-dark"
+   to a section for a navy chapter panel inside the light page. Same tokens either way.
+   Only semantic tokens flip; modules keep reading the same names, so no module code changes.
+   Chart slots --cat-* / --seq-* take the separately-validated dark steps, not computed ones. ── */
+:root[data-theme="dark"],
+.TK4R-theme-dark {
+  color-scheme: dark;
+
+  --color-bg:           #01202f;  /* deeper than the navy panel, so navy cards lift off it */
+  --color-bg-warm:      #0a3a54;
+  --color-surface:      #023048;  /* Deep Navy (board swatch) — card face */
+  --color-bg-dark:      #001521;
+
+  --color-text:         #ffeed4;  /* Cream */
+  --color-muted:        #a9c3d6;
+  --color-grey:         #c3c9cc;  /* light neutral — "Others" reads as the rest, lighter than every rival */
+  --color-text-invert:  #023048;
+  --color-muted-invert: #4f5f6b;
+  --color-rule:         #1f4b63;
+  --color-grid:         #123f57;
+
+  --color-primary:   #ee4046;  /* Crimson lifted for the dark ground */
+  --color-mustard:   #e0a93c;
+
+  --cat-1: #5580ff;
+  --cat-2: #ee4046;
+  --cat-3: #3a9fd8;
+  --cat-4: #c0861a;
+  --cat-5: #ad62cc;
+  --cat-6: #2a9a68;
+
+  --seq-100: #215da5;
+  --seq-200: #4379bc;
+  --seq-300: #6295d4;
+  --seq-400: #87b1e6;
+  --seq-500: #b1cdf2;
+  --seq-600: #d5e6fc;
+
+  --map-sea:        #011824;
+  --map-land:       #0b3247;
+  --map-land-focus: #18485f;
+  --map-land-away:  #4a2333;
+  --map-border:     #2b5872;
+
+  --texture-ink:  rgba(255, 238, 212, 0.32);  /* Cream hatch on navy */
+}
+
+.TK4R-theme-dark { background: var(--color-bg); color: var(--color-text); }
+
+/* ── Light island — any section can opt back into the Paper palette inside the dark page
+   (add class="TK4R-theme-light" to the section). Mirrors the light :root values above;
+   module JS must read tokens from the section, not documentElement, to pick these up. ── */
+.TK4R-theme-light {
+  color-scheme: light;
+
+  --color-bg:           #faf2e3;
+  --color-bg-warm:      #ffeed4;
+  --color-surface:      #fffaf0;
+  --color-bg-dark:      #023048;
+
+  --color-text:         #023048;
+  --color-muted:        #4f5f6b;
+  --color-text-invert:  #ffeed4;
+  --color-muted-invert: #a9c3d6;
+  --color-rule:         #e6d8bf;
+  --color-grid:         #eadfca;
+
+  --color-primary:   #c1111e;
+  --color-mustard:   #d4982a;
+  --color-grey:      #a7a9a6;
+
+  --cat-1: #1f4fd1;
+  --cat-2: #c1111e;
+  --cat-3: #3d8fc6;
+  --cat-4: #d4982a;
+  --cat-5: #7a2e8f;
+  --cat-6: #1e8259;
+
+  --seq-100: #88afe2;
+  --seq-200: #6497d3;
+  --seq-300: #3f7fc0;
+  --seq-400: #1468ab;
+  --seq-500: #00518c;
+  --seq-600: #003c69;
+
+  --map-sea:        #c4d8e4;
+  --map-land:       #ffeed4;
+  --map-land-focus: #f4d6a6;
+  --map-land-away:  #f6d3cc;
+  --map-border:     #d2b98f;
+
+  --texture-ink:  rgba(2, 48, 72, 0.32);
+
+  color: var(--color-text);
+}
+
+/* ── Print grain — a faint noise layer over a stage (add class="TK4R-grain" to a positioned box).
+   Children that must sit above the grain need z-index ≥ 2. ── */
+.TK4R-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.01  0 0 0 0 0.19  0 0 0 0 0.28  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 240px 240px;
+  mix-blend-mode: multiply;
+  opacity: 0.22;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* overflow-x lives on html, not body — a body-level overflow creates a second
+   scroll context that breaks position:sticky for every descendant. */
+html {
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Shared layout (TK4R-) ── */
+.TK4R-spacer {
+  height: var(--spacing);
+}
+
+.TK4R-intro {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 160px 24px 0;
+  text-align: center;
+}
+
+.TK4R-eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin: 0 0 18px;
+}
+
+.TK4R-title {
+  font-family: var(--font-display);
+  font-size: var(--type-stat);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  margin: 0 0 20px;
+  color: var(--color-text);
+}
+
+.TK4R-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--type-subheading);
+  line-height: 1.5;
+  color: var(--color-muted);
+  max-width: 60ch;
+  margin: 0 auto;
+}
+
+/* The board's swatch strip, used as a printed rule under the intro */
+.TK4R-swatches {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 40px 0 0;
+}
+.TK4R-swatches span { width: 28px; height: 10px; }
+.TK4R-swatches span:nth-child(1) { background: var(--color-oxblood); }
+.TK4R-swatches span:nth-child(2) { background: var(--color-primary); }
+.TK4R-swatches span:nth-child(3) { background: var(--color-bg-warm); outline: 1px solid var(--color-rule); }
+.TK4R-swatches span:nth-child(4) { background: var(--color-bg-dark); }
+.TK4R-swatches span:nth-child(5) { background: var(--color-accent); }
+
+.TK4R-footer {
+  border-top: 1px solid var(--color-rule);
+  padding: 40px 24px 80px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}

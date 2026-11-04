@@ -1,0 +1,129 @@
+/* styles/TK4R10-busservice.css — TK4R10 · The TVS bus service (illustration scrolly)
+   Transparent section: the page ground shows through. The bus arrives first, then the four
+   practices appear one by one as you scroll. */
+
+.TK4R10-chart-section {
+  position: relative;
+  background: transparent;
+}
+
+.TK4R10-scroll-wrapper {
+  position: relative;
+  height: 420vh;   /* scroll length: one beat for the bus + one per practice + a short hold */
+}
+
+.TK4R10-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 72px);
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  align-items: center;
+  gap: clamp(24px, 4vw, 64px);
+  background: transparent;
+}
+
+/* ── The four practices ── */
+.TK4R10-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 3vh, 28px);
+}
+.TK4R10-item {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+  opacity: 0;
+  transform: translateX(-24px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.TK4R10-item.is-in { opacity: 1; transform: none; }
+
+/* icon on a cream sticker tile — the slate illustrations need a light ground on the dark page */
+.TK4R10-icon {
+  width: 88px;
+  height: 88px;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  background: var(--color-cream);
+  border-radius: 4px;
+}
+.TK4R10-icon img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.TK4R10-box {
+  margin: 0;
+  padding: 22px 26px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: var(--type-subheading);
+  line-height: 1.35;
+  color: var(--color-text);
+}
+
+/* ── The bus ── */
+.TK4R10-bus {
+  margin: 0;
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.7s ease, transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.TK4R10-bus.is-in { opacity: 1; transform: none; }
+.TK4R10-bus img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ── iPad: tighter columns ── */
+@media (max-width: 1023px) {
+  .TK4R10-stage { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .TK4R10-item { grid-template-columns: 64px minmax(0, 1fr); gap: 16px; }
+  .TK4R10-icon { width: 64px; height: 64px; padding: 8px; }
+  .TK4R10-box { padding: 16px 18px; }
+}
+
+/* ── Mobile: bus on top, practices as a zig-zag of boxes with the icon inside (per mobile ref) ── */
+@media (max-width: 768px) {
+  .TK4R10-stage {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: center;
+    gap: 20px;
+    padding: 0 16px;
+  }
+  .TK4R10-bus { order: -1; }
+  .TK4R10-list { gap: 12px; }
+  .TK4R10-item {
+    width: 84%;
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 12px;
+    padding: 10px 14px 10px 10px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-rule);
+    border-radius: 4px;
+  }
+  .TK4R10-item:nth-child(even) { margin-left: auto; transform: translateX(24px); }
+  .TK4R10-item.is-in { transform: none; }
+  .TK4R10-icon { width: 52px; height: 52px; padding: 6px; }
+  .TK4R10-box { padding: 0; background: none; border: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .TK4R10-item,
+  .TK4R10-bus { transform: none; transition: opacity 0.3s ease; }
+}

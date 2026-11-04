@@ -1,0 +1,150 @@
+/* styles/TK4R7-tqm.css — TK4R7 · Four principles of TQM (pinned gauge) */
+
+.TK4R7-chart-section {
+  position: relative;
+}
+
+.TK4R7-stage {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 50%, var(--color-surface) 0%, var(--color-bg) 58%);
+}
+
+/* ── Decorative field: far / near parallax layers ── */
+.TK4R7-deco {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.TK4R7-d-arc        { fill: none; stroke: var(--color-rule); stroke-width: 1; }
+.TK4R7-d-arc--thin  { stroke: var(--color-accent); stroke-width: 1.4; stroke-linecap: round; opacity: 0.5; }
+.TK4R7-d-line       { stroke: var(--color-rule); stroke-width: 1; }
+.TK4R7-d-dots       { stroke: var(--color-accent); stroke-width: 1.6; stroke-dasharray: 1 8; stroke-linecap: round; opacity: 0.5; }
+.TK4R7-d-plus path,
+.TK4R7-d-hatch path { fill: none; stroke: var(--color-muted); stroke-width: 1.2; stroke-linecap: round; opacity: 0.45; }
+.TK4R7-d-dot        { fill: var(--color-primary); opacity: 0.65; }
+.TK4R7-d-ring       { fill: none; stroke: var(--color-primary); stroke-width: 1.2; opacity: 0.55; }
+.TK4R7-d-sq         { fill: none; stroke: var(--color-rule); stroke-width: 1.2; }
+
+/* ── The gauge ── */
+.TK4R7-gauge {
+  position: relative;
+  width: min(86svh, 92vw, 700px);
+  aspect-ratio: 1;
+  container-type: inline-size;
+}
+.TK4R7-gauge > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.TK4R7-orbit      { fill: none; stroke: var(--color-accent); stroke-width: 1.2; stroke-dasharray: 1.5 9; stroke-linecap: round; opacity: 0.6; }
+.TK4R7-inner      { fill: none; stroke: var(--color-grid); stroke-width: 1; }
+.TK4R7-track      { fill: none; stroke: var(--color-grid); stroke-width: 14; }
+.TK4R7-seg        { fill: none; stroke: var(--color-primary); stroke-width: 14; }   /* flat, square ends */
+.TK4R7-tick       { stroke: var(--color-rule); stroke-width: 1.2; stroke-linecap: round; }
+.TK4R7-tick--major { stroke-width: 2; }
+.TK4R7-tick--lit  { stroke: var(--color-primary); }
+.TK4R7-badge-bg   { fill: var(--color-bg); stroke: var(--color-grid); stroke-width: 1.5; }
+.TK4R7-badge-lit  { fill: var(--color-bg); stroke: var(--color-primary); stroke-width: 1.5; }
+.TK4R7-ic path    { fill: none; stroke: var(--color-muted); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.TK4R7-ic--lit path { stroke: var(--color-primary); }
+.TK4R7-needle     { fill: var(--color-primary); }
+.TK4R7-needle-line { stroke: var(--color-text); stroke-width: 1; opacity: 0.3; }
+.TK4R7-readout {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  fill: var(--color-text);
+}
+.TK4R7-readout-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  fill: var(--color-muted);
+}
+
+/* ── Centre copy — sizes track the gauge (container units), capped by the type tokens ── */
+.TK4R7-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 58%;
+  height: 58%;
+  transform: translate(-50%, -50%);
+}
+.TK4R7-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  visibility: hidden;
+}
+.TK4R7-mask { overflow: hidden; padding: 0.08em 0; }
+.TK4R7-ln   { display: block; will-change: transform; }
+.TK4R7-num {
+  font-family: var(--font-mono);
+  font-size: clamp(10px, 1.9cqw, var(--type-legend));
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary);
+}
+.TK4R7-title {
+  margin: 0.25em 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 6.8cqw, var(--type-stat));
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+.TK4R7-bar {
+  display: block;
+  width: max(26px, 4.5cqw);
+  height: 2px;
+  margin: max(10px, 2cqw) auto;
+  background: var(--color-primary);
+  transform-origin: 50% 50%;
+}
+.TK4R7-desc {
+  margin: 0;
+  max-width: 41cqw;
+  font-family: var(--font-body);
+  font-size: clamp(12px, 2.6cqw, var(--type-body));
+  line-height: 1.5;
+  color: var(--color-muted);
+  text-wrap: balance;
+}
+.TK4R7-hint {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: clamp(11px, 1.9cqw, var(--type-legend));
+  color: var(--color-muted);
+}
+.TK4R7-hint svg {
+  width: 16px;
+  height: 16px;
+  color: var(--color-primary);
+  animation: TK4R7-nudge 1.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes TK4R7-nudge { 50% { transform: translateY(5px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .TK4R7-hint svg { animation: none; }
+}

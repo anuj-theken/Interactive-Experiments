@@ -1,0 +1,301 @@
+/* styles/TK4R1-nails.css — TK4R1 · Nails on the road (Madurai–Thanjavur–Pudukkottai) */
+
+.TK4R1-chart-section {
+  position: relative;
+}
+
+/* The map sits in a sticky stage; the story cards scroll over it. */
+.TK4R1-scroll-wrapper {
+  position: relative;
+}
+
+.TK4R1-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--map-sea);
+}
+
+.TK4R1-chart,
+.TK4R1-layer {
+  position: absolute;
+  inset: 0;
+}
+.TK4R1-layer { pointer-events: none; }
+
+/* ── Route ── */
+.TK4R1-route {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.TK4R1-road-under {
+  fill: none;
+  stroke: var(--color-surface);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.8;
+}
+.TK4R1-road {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1 0;
+}
+.TK4R1-service {
+  fill: none;
+  stroke: var(--color-mustard);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+}
+
+/* ── Sprites ── */
+.TK4R1-sprite {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+  opacity: 0;
+}
+.TK4R1-flip,
+.TK4R1-inner { transform-origin: 50% 100%; }
+.TK4R1-sprite svg { display: block; overflow: visible; }
+.TK4R1-cart svg { width: 66px; height: 39px; }
+.TK4R1-bus svg  { width: 74px; height: 50px; }
+.TK4R1-boy svg  { width: 25px; height: 39px; }
+
+.TK4R1-nail,
+.TK4R1-bottle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  opacity: 0;
+}
+.TK4R1-nail svg,
+.TK4R1-bottle svg { width: 12px; height: 12px; display: block; overflow: visible; }
+
+.TK4R1-leg { transform-box: fill-box; transform-origin: 50% 0; }
+.TK4R1-magnet,
+.TK4R1-field { opacity: 0; }
+
+.TK4R1-burst {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  transform-origin: 0 0;
+}
+.TK4R1-burst svg { width: 120px; height: 90px; display: block; margin: -45px 0 0 -60px; }
+.TK4R1-burst text {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--color-bg);  /* dark ink on the mustard burst in either theme */
+}
+
+/* ── HUD tallies — flat printed tags, no shadow ── */
+.TK4R1-hud {
+  position: absolute;
+  right: max(20px, 3vw);
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+  pointer-events: none;
+}
+.TK4R1-tally {
+  position: relative;
+  min-width: 190px;
+  padding: 10px 14px 8px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-rule);
+  border-left: 4px solid var(--color-primary);
+  opacity: 0;
+}
+.TK4R1-tally--ledger { border-left-color: var(--color-mustard); }
+.TK4R1-tally-num {
+  font-family: var(--font-display);
+  font-size: var(--type-heading);
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.TK4R1-tally--ledger .TK4R1-tally-num { font-variant-numeric: normal; }  /* static figure — proportional reads tighter */
+.TK4R1-tally-what {
+  font-family: var(--font-body);
+  font-size: var(--type-legend);
+  line-height: 1.3;
+  color: var(--color-muted);
+  margin-top: 4px;
+}
+.TK4R1-stamp {
+  position: absolute;
+  right: -12px;
+  bottom: -16px;
+  padding: 0 8px;
+  font-family: var(--font-mono);
+  font-size: var(--type-legend);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+  background: var(--color-surface);
+  border: 2.5px solid var(--color-primary);
+  transform: rotate(8deg) scale(1.6);
+  opacity: 0;
+}
+
+/* ── Story cards ── */
+.TK4R1-story {
+  position: relative;
+  z-index: 2;
+  margin-top: -100vh;
+  margin-top: -100svh;
+  pointer-events: none;
+}
+.TK4R1-step {
+  display: block;
+  min-height: 150vh;   /* scroll length per beat — shorter = things happen sooner */
+  padding: 0 max(24px, 5vw);
+}
+.TK4R1-step:last-child { min-height: 200vh; }
+.TK4R1-step--hero { min-height: 130vh; }
+
+.TK4R1-card {
+  position: sticky;
+  max-width: 400px;
+  padding: 26px 28px 24px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-rule);
+  border-top: 5px solid var(--color-primary);
+  border-radius: 0 0 4px 4px;
+  pointer-events: auto;
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: 1.55;
+}
+.TK4R1-card p { margin: 0 0 0.8em; }
+.TK4R1-card p:last-child { margin-bottom: 0; }
+
+.TK4R1-note {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--color-muted);
+}
+
+.TK4R1-step--hero .TK4R1-card {
+  max-width: 500px;
+  padding: 30px 32px;
+  border-top: 1px solid var(--color-rule);
+  border-left: 8px solid var(--color-primary);
+  border-radius: 0 4px 4px 0;
+}
+.TK4R1-eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin: 0 0 12px;
+}
+.TK4R1-title {
+  font-family: var(--font-display);
+  font-size: var(--type-stat);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  margin: 0 0 14px;
+}
+.TK4R1-dek {
+  font-size: var(--type-subheading);
+  line-height: 1.4;
+  color: var(--color-text);
+}
+.TK4R1-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--type-legend);
+  color: var(--color-muted);
+}
+.TK4R1-hint svg { width: 14px; height: 20px; }
+
+/* Photo placeholder — the board's 45° print hatch */
+.TK4R1-photo {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  margin: 18px 0 0;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid var(--color-text);
+  background: repeating-linear-gradient(45deg, var(--texture-ink) 0 1px, transparent 1px 6px);
+}
+.TK4R1-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.TK4R1-photo-ph {
+  position: absolute;
+  inset: 38% 0 auto;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--type-subheading);
+  color: var(--color-muted);
+}
+.TK4R1-photo figcaption {
+  position: relative;
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-text);
+  font-size: var(--type-legend);
+  line-height: 1.35;
+}
+.TK4R1-photo figcaption b {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--color-primary);
+  margin-right: 6px;
+}
+
+.TK4R1-credits {
+  font-size: 13px;
+  color: var(--color-muted);
+  margin-top: 14px;
+}
+
+/* ── Layout below the mobile breakpoint ── */
+@media (max-width: 768px) {
+  .TK4R1-step { padding: 0 14px; }
+  .TK4R1-card { max-width: none; width: 100%; padding: 18px 20px; }
+  .TK4R1-step--hero .TK4R1-card { padding: 22px 22px; }
+  .TK4R1-photo { aspect-ratio: 16 / 7; }
+  .TK4R1-hud { right: 12px; top: 12px; }
+  .TK4R1-tally { min-width: 0; max-width: 200px; padding: 6px 10px 5px; }
+  .TK4R1-cart svg { width: 44px; height: 26px; }
+  .TK4R1-bus svg  { width: 50px; height: 34px; }
+  .TK4R1-boy svg  { width: 18px; height: 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .TK4R1-hint svg { animation: none; }
+}
