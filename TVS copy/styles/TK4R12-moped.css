@@ -1,0 +1,291 @@
+/* styles/TK4R12-moped.css — TK4R12 · "Designing" Srinivasan's moped (story V3.3)
+   One sticky stage. The blueprint is real line-work traced from the reference photo by edge detection
+   (imgs/TK4R12-bp-*.png, 4× resolution), split into layers so the frame can stretch without a seam.
+   A thin SVG on top carries the engineering annotations. Viewbox = the photo: 476 × 268. */
+
+.TK4R12-chart-section { position: relative; }
+.TK4R12-scroll-wrapper { position: relative; }   /* height set from the beat count in JS */
+
+.TK4R12-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px clamp(16px, 5vw, 72px);
+  overflow: hidden;
+  transition: background-color 0.7s ease;
+}
+.TK4R12-stage.is-black { background: var(--color-black); }
+
+.TK4R12-eyebrow {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  transition: opacity 0.5s ease;
+}
+
+/* ── The frame every beat plays in ── */
+.TK4R12-box {
+  position: relative;
+  width: min(960px, 100%, calc((100svh - 290px) * 1.776));
+  aspect-ratio: 476 / 268;
+  transition: opacity 0.6s ease;
+}
+.TK4R12-stage.is-black .TK4R12-box,
+.TK4R12-stage.is-black .TK4R12-eyebrow { opacity: 0; }
+
+/* the canvas holds the drawing / photos; in the comparison beats it steps left and shrinks */
+.TK4R12-canvas {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  transform-origin: 0 50%;
+  transition: transform 1s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.TK4R12-box.is-compare .TK4R12-canvas { transform: scale(0.64); }
+
+.TK4R12-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.TK4R12-layer.is-on { opacity: 1; }
+
+/* blueprint ground: deep blue, fine cream grid, heavier every fifth line */
+.TK4R12-bp {
+  background-color: var(--color-blueprint);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--color-cream) 13%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-cream) 13%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--color-cream) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-cream) 5%, transparent) 1px, transparent 1px);
+  background-size: 10% 17.76%, 10% 17.76%, 2% 3.552%, 2% 3.552%;
+}
+
+/* the line-work, as a plotter would draw it: a left-to-right wipe on first reveal */
+.TK4R12-drawing {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 2.2s cubic-bezier(0.45, 0, 0.2, 1);
+}
+.TK4R12-drawing.is-drawn { clip-path: inset(0 0 0 0); }
+.TK4R12-drawing img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+}
+/* the stretch: the rear end slides back 60 of 476 units; seat-and-carrier appear only once it has */
+/* Soft-edged masks (not hard clips) hide the overlap while the frame is short; their edge positions
+   are registered properties so they animate with the stretch. Masks only read alpha — "black" = shown. */
+@property --TK4R12-fe { syntax: "<percentage>"; inherits: false; initial-value: 100%; }
+@property --TK4R12-re { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
+.TK4R12-bp-front {
+  --TK4R12-fe: 52%;
+  -webkit-mask-image: linear-gradient(90deg, black var(--TK4R12-fe), transparent calc(var(--TK4R12-fe) + 7%));
+          mask-image: linear-gradient(90deg, black var(--TK4R12-fe), transparent calc(var(--TK4R12-fe) + 7%));
+  transition: --TK4R12-fe 1.4s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.TK4R12-bp-rear {
+  --TK4R12-re: 62%;
+  transform: translateX(-12.605%);
+  -webkit-mask-image: linear-gradient(90deg, transparent var(--TK4R12-re), black calc(var(--TK4R12-re) + 7%));
+          mask-image: linear-gradient(90deg, transparent var(--TK4R12-re), black calc(var(--TK4R12-re) + 7%));
+  transition: transform 1.4s cubic-bezier(0.65, 0, 0.35, 1), --TK4R12-re 1.4s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.TK4R12-drawing.is-long .TK4R12-bp-front { --TK4R12-fe: 100%; }
+.TK4R12-drawing.is-long .TK4R12-bp-rear  { --TK4R12-re: 0%; transform: none; }
+.TK4R12-bp-extras {
+  opacity: 0;
+  clip-path: inset(0 100% 0 0);
+  transition: opacity 0.4s ease 0.9s, clip-path 1.2s ease 0.9s;
+}
+.TK4R12-drawing.is-long .TK4R12-bp-extras { opacity: 1; clip-path: inset(0 0 0 0); }
+
+/* ── Annotation layer (SVG, same viewBox as the drawing) ── */
+.TK4R12-ann {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.TK4R12-ln {
+  fill: none;
+  stroke: var(--color-cream);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.TK4R12-ln--faint { stroke: color-mix(in srgb, var(--color-cream) 45%, transparent); stroke-dasharray: 3 3; }
+.TK4R12-dot { fill: var(--color-cream); }
+.TK4R12-t {
+  font-family: var(--font-mono);
+  font-size: 6.4px;
+  letter-spacing: 0.1em;
+  fill: var(--color-cream);
+  paint-order: stroke;
+  stroke: var(--color-blueprint);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.TK4R12-t--muted { fill: color-mix(in srgb, var(--color-cream) 62%, transparent); }
+.TK4R12-tb { fill: color-mix(in srgb, var(--color-blueprint) 80%, transparent); stroke: color-mix(in srgb, var(--color-cream) 55%, transparent); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.TK4R12-status { transition: fill 0.4s ease; }
+.TK4R12-status.is-alert { fill: var(--color-signal); }
+.TK4R12-alert-bar { fill: var(--color-signal); opacity: 0; transition: opacity 0.4s ease; }
+.TK4R12-alert-bar.is-on { opacity: 1; }
+.TK4R12-pin circle { fill: var(--color-blueprint); stroke: var(--color-cream); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.TK4R12-pin text { font-family: var(--font-mono); font-size: 7px; font-weight: 600; fill: var(--color-cream); }
+
+/* groups that come and go per beat */
+.TK4R12-g { opacity: 0; transition: opacity 0.6s ease; }
+.TK4R12-g.is-on { opacity: 1; }
+.TK4R12-g--late { transition-delay: 0s; }
+.TK4R12-g--late.is-on { transition-delay: 1.1s; }   /* wait for the stretch to land */
+
+/* ── Photo beats ── */
+.TK4R12-photo { background: var(--color-surface); }
+.TK4R12-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.TK4R12-photo--real img { object-fit: fill; mix-blend-mode: multiply; }   /* studio white → the card */
+.TK4R12-photo--ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: repeating-linear-gradient(45deg, var(--texture-ink) 0 1px, transparent 1px 6px), var(--color-bg-warm);
+}
+.TK4R12-photo--ph span {
+  padding: 6px 10px;
+  background: var(--color-surface);
+  font-family: var(--font-mono);
+  font-size: var(--type-eyebrow);
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+}
+.TK4R12-credit {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-muted);
+}
+
+/* ── Comparison cards: stack on the right; the second joins, it doesn't replace ── */
+.TK4R12-cards {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 33.5%;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5%;
+  pointer-events: none;
+}
+.TK4R12-card {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 4px;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(24px);
+  transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.TK4R12-card.is-on { opacity: 1; transform: none; transition-delay: 0.35s; }
+.TK4R12-card-img { flex: 1 1 auto; min-height: 0; }
+.TK4R12-card-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.TK4R12-card-body { padding: 8px 10px 9px; }
+.TK4R12-card-name {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: clamp(12px, 1.5vw, 16px);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--color-text);
+}
+.TK4R12-card-name span { font-family: var(--font-mono); font-size: 0.72em; font-weight: 400; color: var(--color-muted); }
+.TK4R12-mpg { display: flex; align-items: center; gap: 8px; }
+.TK4R12-mpg-track { position: relative; flex: 1; height: 7px; background: var(--color-grid); }
+.TK4R12-mpg-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; transition: width 0.9s ease 0.8s; }
+.TK4R12-mpg-range {
+  position: absolute; top: 0; bottom: 0; width: 0;
+  background: repeating-linear-gradient(45deg, var(--color-text) 0 1.5px, transparent 1.5px 4px);
+  transition: width 0.6s ease 1.6s;
+}
+.TK4R12-mpg b {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.TK4R12-mpg b small { font-weight: 400; color: var(--color-muted); }
+
+/* ── Copy: one line at a time, fading between beats ── */
+.TK4R12-copy {
+  max-width: 42rem;
+  min-height: 4.4em;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--type-subheading);
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--color-text);
+  transition: color 0.6s ease;
+}
+.TK4R12-copy span { display: inline-block; }
+.TK4R12-stage.is-black .TK4R12-copy {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(40rem, calc(100% - 48px));
+  transform: translate(-50%, -50%);
+  font-size: var(--type-heading);
+  color: var(--color-cream);
+}
+
+.TK4R12-ticks { display: flex; gap: 6px; }
+.TK4R12-ticks span { width: 14px; height: 2px; background: var(--color-rule); transition: background 0.3s ease; }
+.TK4R12-ticks span.is-on { background: var(--color-text); }
+.TK4R12-stage.is-black .TK4R12-ticks span { background: color-mix(in srgb, var(--color-cream) 25%, transparent); }
+.TK4R12-stage.is-black .TK4R12-ticks span.is-on { background: var(--color-cream); }
+
+@media (max-width: 768px) {
+  .TK4R12-stage { gap: 14px; padding: 16px; }
+  .TK4R12-box { width: 100%; }
+  .TK4R12-t, .TK4R12-tbk, .TK4R12-call { display: none; }   /* annotation type is unreadable at phone scale */
+  /* comparison: the drawing keeps full width; the cards sit side by side underneath it */
+  .TK4R12-box.is-compare .TK4R12-canvas { transform: none; }
+  .TK4R12-cards { top: calc(100% + 10px); bottom: auto; left: 0; right: 0; width: 100%; height: 90%; flex-direction: row; gap: 8px; }
+  .TK4R12-box { transition: opacity 0.6s ease, margin-bottom 0.6s ease; }
+  .TK4R12-box.is-compare { margin-bottom: calc(50% + 10px); }
+  .TK4R12-card { transform: translateY(16px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .TK4R12-drawing, .TK4R12-bp-rear, .TK4R12-bp-extras, .TK4R12-layer, .TK4R12-g, .TK4R12-canvas, .TK4R12-card { transition: none; }
+}

@@ -145,13 +145,21 @@ document.addEventListener("DOMContentLoaded", function () {
       <rect x="31" y="11" width="9" height="8" fill="${PAPER}" stroke="${INK}" stroke-width="1.2"/>
       <rect x="43" y="11" width="7" height="12" fill="${PAPER}" stroke="${INK}" stroke-width="1.2"/>
       <line x1="5" y1="23" x2="41" y2="23" stroke="${RED}" stroke-width="2.4"/>
-      <g class="TK4R1-magnet">
-        <path d="M22 31 L22 35 Q22 39 28 39 Q34 39 34 35 L34 31" fill="none" stroke="${RED}" stroke-width="4"/>
-        <path d="M22 33 L22 35M34 33 L34 35" stroke="${STEEL}" stroke-width="4.2"/>
-        <path class="TK4R1-field" d="M18 42 Q28 48 38 42M14 45 Q28 54 42 45" fill="none" stroke="${RED}" stroke-width="1.2" stroke-dasharray="2 3"/>
-      </g>
       <g><circle cx="13" cy="31" r="6" fill="${INK}"/><circle cx="13" cy="31" r="2.2" fill="${PAPER}"/></g>
       <g><circle cx="49" cy="31" r="6" fill="${INK}"/><circle cx="49" cy="31" r="2.2" fill="${PAPER}"/></g>
+      <defs>
+        <filter id="TK4R1-magGlow" x="-80%" y="-80%" width="260%" height="260%">
+          <feMorphology in="SourceGraphic" operator="dilate" radius="1" result="fat"/>
+          <feGaussianBlur in="fat" stdDeviation="2.4" result="blur"/>
+          <feComponentTransfer in="blur" result="glow"><feFuncA type="linear" slope=".75"/></feComponentTransfer>
+          <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <g class="TK4R1-magnet">
+        <path d="M23.5 25 L23.5 35 Q23.5 42 31 42 Q38.5 42 38.5 35 L38.5 25" fill="none" stroke="${RED}" stroke-width="5" filter="url(#TK4R1-magGlow)"/>
+        <path d="M23.5 25 L23.5 29M38.5 25 L38.5 29" stroke="${STEEL}" stroke-width="5.2"/>
+        <path class="TK4R1-field" d="M17 47 Q31 55 45 47M12 51 Q31 61 50 51" fill="none" stroke="${RED}" stroke-width="1.3" stroke-dasharray="2 3"/>
+      </g>
     </svg>`,
     boy: `<svg viewBox="0 0 22 34">
       <circle cx="10" cy="5" r="4" fill="${INK}"/>

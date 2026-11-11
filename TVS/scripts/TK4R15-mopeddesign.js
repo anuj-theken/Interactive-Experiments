@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const P = s => s.replace(/#(?=[A-Za-z])/g, '#TK4R15-').replace(/\.(?=[a-z])/g, '.TK4R15-');
   const $ = s => section.querySelector(P(s)), $$ = s => Array.from(section.querySelectorAll(P(s)));
-  function prep(els){ els.forEach(el=>{ let L=300; try{ L=Math.ceil(el.getTotalLength())+2 }catch(e){} el.style.strokeDasharray=L; el.style.strokeDashoffset=L }); return els }
   const show = { autoAlpha:1, y:0, duration:.7, ease:'power2.out' };
   const hide = { autoAlpha:0, y:'-38vh', duration:.7, ease:'power2.in' };
   gsap.registerPlugin(ScrollTrigger);
@@ -19,36 +18,22 @@ document.addEventListener("DOMContentLoaded", function () {
   gsap.set($$('.copy .b'), { autoAlpha:0, y:'38vh' });
   if (matchMedia('(min-width:821px)').matches) gsap.set($$('#s1 .copy .b, #s4 .copy .b'), { yPercent:-50 });
 
-  /* 01 — the idea */
-  $$('#s1 .fig-line').forEach(p=>{ const h=p.cloneNode(); h.setAttribute('class','TK4R15-fig-halo'); p.parentNode.insertBefore(h,p) });
-  const loadP = prep($$('#loadLn > *'));
-  gsap.set($$('#loadFill path'), { autoAlpha:0 });
-  const ppl = prep($$('#people .figs-ln path'));
-  gsap.set($$('#people .fig-fill:not(#loadFill) path'), { autoAlpha:0 });
+  /* 01 — the idea: bike outline is drawn on (back wheel → front), then the family, then their colour */
+  const bikeWipe = $('#bikeWipe'), mLine = [$('#mBack'), $('#mLine')], mColor = $('#mColor');   // silhouette arrives with the lines
   gsap.set($('#paper1'), { yPercent:-104, rotation:-.8 });
-  gsap.set($('#sketch'), { yPercent:-104, rotation:-1.2 });
-  gsap.set($$('#s1 .pl'), { autoAlpha:0 });
-  const labelBoxes = () => $$('#s1 .pl text').forEach(t=>{
-    let r = t.previousElementSibling;
-    if (!r || r.tagName !== 'rect') { r = document.createElementNS('http://www.w3.org/2000/svg','rect'); r.setAttribute('class','TK4R15-lb'); t.parentNode.insertBefore(r,t) }
-    try { const b=t.getBBox(); r.setAttribute('x',b.x-8); r.setAttribute('y',b.y-4); r.setAttribute('width',b.width+16); r.setAttribute('height',b.height+8) } catch(e) {}
-  });
-  labelBoxes();
-  document.fonts && document.fonts.ready.then(labelBoxes);
+  gsap.set(bikeWipe, { attr:{ width:0 } });
+  gsap.set(mLine, { autoAlpha:0, y:-14 });
+  gsap.set(mColor, { autoAlpha:0 });
   const tl1 = gsap.timeline({ defaults:{ease:'none'}, scrollTrigger:st('#s1','+=640%') });
   tl1.to({}, {duration:.6})
     .to($('#paper1'), {yPercent:0, rotation:0, duration:1.1, ease:'power2.out'})
     .to($('#c1a'), show, '-=.3')
-    .to(ppl, {strokeDashoffset:0, duration:2, stagger:.06}, '<.2')
-    .to($$('#people .fig-fill:not(#loadFill) path'), {autoAlpha:1, duration:.6, stagger:.1}, '-=.8')
-    .to($$('.pl'), {autoAlpha:1, duration:.4}, '-=.5')
-    .to(loadP, {strokeDashoffset:0, duration:.9, stagger:.08})
-    .to($$('#loadFill path'), {autoAlpha:1, duration:.4}, '-=.3')
+    .to(bikeWipe, {attr:{width:540}, duration:2, ease:'power1.inOut'}, '<.2')
+    .to(mLine, {autoAlpha:1, y:0, duration:.9, ease:'power2.out'})
     .to({}, {duration:.7})
     .to($('#c1a'), hide)
-    .to($('#sketch'), {yPercent:0, rotation:0, duration:1.1, ease:'power2.out'}, '<')
     .to($('#c1b'), show, '<.3')
-    .to($('#extRect'), {attr:{x:0, width:640}, duration:1.3})
+    .to(mColor, {autoAlpha:1, duration:1.1}, '<.2')
     .to({}, {duration:.7})
     .to($('#c1b'), hide)
     .to($('#c1c'), show, '<.2')

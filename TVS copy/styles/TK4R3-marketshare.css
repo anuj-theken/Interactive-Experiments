@@ -1,0 +1,238 @@
+/* styles/TK4R3-marketshare.css — TK4R3 · Two-wheeler market share, FY23–FY27 (Q1) (story V0)
+   Shared card-chart system (header, legend, axes, annotations, interaction, tooltip) + module plot. */
+
+.TK4R3-chart-section { position: relative; }
+
+.TK4R3-chart-frame {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.TK4R3-chart-container {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 36px 36px 30px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 4px;
+}
+
+/* ── Header: eyebrow / title / subtitle on the left, legend lined up with the subtitle ── */
+.TK4R3-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--color-text);
+}
+.TK4R3-eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin: 0 0 12px;
+}
+.TK4R3-chart-title {
+  font-family: var(--font-display);
+  font-size: var(--type-heading);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  max-width: 24ch;
+  margin: 0;
+}
+.TK4R3-chart-title em { font-style: normal; color: var(--color-text); }
+.TK4R3-chart-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: 1.55;
+  color: var(--color-muted);
+  max-width: 56ch;
+  margin: 12px 0 0;
+}
+
+/* ── Legend: HTML chips, hover focuses that series ── */
+.TK4R3-legend {
+  list-style: none;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, auto);
+  gap: 9px 22px;
+  align-self: flex-end;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0 0 4px;
+  font-family: var(--font-body);
+  font-size: var(--type-legend);
+  color: var(--color-text);
+}
+.TK4R3-legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  cursor: default;
+  transition: opacity 0.15s;
+}
+.TK4R3-legend li.is-tvs { font-weight: 600; }
+.TK4R3-legend.is-focus li:not(.is-on) { opacity: 0.35; }
+.TK4R3-sw { width: 12px; height: 12px; flex-shrink: 0; }
+.TK4R3-sw-line { width: 30px; height: 10px; flex-shrink: 0; }
+
+/* ── Axes: unit line above the plot, mono ticks, mono period labels, 1px ink baseline ── */
+.TK4R3-unit {
+  margin: 0 0 14px;
+  font-family: var(--font-mono);
+  font-size: var(--type-eyebrow);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.TK4R3-tick {
+  font-family: var(--font-mono);
+  font-size: var(--type-eyebrow);
+  color: var(--color-muted);
+  fill: var(--color-muted);
+}
+.TK4R3-xlabel {
+  font-family: var(--font-mono);
+  font-size: var(--type-legend);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--color-text);
+  fill: var(--color-text);
+}
+
+/* ── Annotations: values inside marks, figures above marks ── */
+.TK4R3-v {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
+  pointer-events: none;
+}
+.TK4R3-v small { font-size: 0.75em; }
+.TK4R3-ann {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
+  color: var(--color-text);
+  fill: var(--color-text);
+  paint-order: stroke;
+  stroke: var(--color-surface);
+  stroke-width: 4px;
+  pointer-events: none;
+}
+.TK4R3-ann--muted { font-weight: 500; color: var(--color-muted); fill: var(--color-muted); }
+
+/* ── Interaction: hovered/focused thing stays, everything else steps back to 30% ── */
+.TK4R3-plot { position: relative; }
+.TK4R3-plot [data-series],
+.TK4R3-plot [data-col] { transition: opacity 0.15s; }
+.TK4R3-plot .is-dim { opacity: 0.3; }
+.TK4R3-hit { fill: transparent; outline: none; cursor: default; }
+.TK4R3-hit:focus-visible { stroke: var(--color-text); stroke-width: 1; stroke-dasharray: 3 3; }
+
+/* ── Tooltip: same card for every chart ── */
+.TK4R3-tip {
+  position: absolute;
+  z-index: 5;
+  min-width: 170px;
+  padding: 10px 14px 11px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-rule);
+  border-radius: 3px;
+  font-family: var(--font-body);
+  font-size: var(--type-legend);
+  color: var(--color-text);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.12s, transform 0.12s;
+}
+.TK4R3-tip.is-show { opacity: 1; transform: none; }
+.TK4R3-tip-h {
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--type-eyebrow);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.TK4R3-tip-row { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; }
+.TK4R3-tip-row + .TK4R3-tip-row { margin-top: 2px; }
+.TK4R3-tip-row b {
+  font-family: var(--font-display);
+  font-size: var(--type-subheading);
+  font-weight: 500;
+  font-variant-numeric: lining-nums;
+}
+.TK4R3-tip-row b small { font-size: 0.55em; }
+
+/* ── Plot: HTML stacked columns ── */
+.TK4R3-plotgrid {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+}
+.TK4R3-yaxis { position: relative; height: 300px; }
+.TK4R3-yaxis span { position: absolute; right: 12px; transform: translateY(50%); }
+.TK4R3-cols {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: clamp(14px, 4vw, 56px);
+  padding: 0 clamp(4px, 2vw, 24px);
+  border-bottom: 1px solid var(--color-text);
+}
+.TK4R3-col {
+  height: 300px;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 2px;   /* the card shows through between stacked segments */
+}
+.TK4R3-seg {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  outline: none;
+}
+.TK4R3-seg:hover,
+.TK4R3-seg:focus-visible { outline: 2px solid var(--color-text); outline-offset: -2px; z-index: 1; }
+/* thin segments keep their number at a smaller size; only slivers drop it (the tooltip carries it) */
+.TK4R3-seg.is-tight .TK4R3-v { font-size: 9px; }
+.TK4R3-seg.is-tiny .TK4R3-v { display: none; }
+.TK4R3-seg--tvs .TK4R3-v { font-size: 13px; }
+.TK4R3-xaxis {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: clamp(14px, 4vw, 56px);
+  padding: 10px clamp(4px, 2vw, 24px) 0;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .TK4R3-plotgrid { grid-template-columns: 32px minmax(0, 1fr); }
+  .TK4R3-yaxis, .TK4R3-col { height: 260px; }
+  .TK4R3-yaxis span { right: 6px; }
+  .TK4R3-seg--tvs .TK4R3-v { font-size: 11px; }
+}
+
+@media (max-width: 768px) {
+  .TK4R3-chart-frame { padding: 20px 12px; }
+  .TK4R3-chart-container { padding: 20px 14px 18px; }
+  .TK4R3-chart-header { flex-direction: column; gap: 16px; }
+  .TK4R3-legend { align-self: flex-start; grid-template-rows: repeat(2, auto); }
+  .TK4R3-v, .TK4R3-ann { font-size: 10px; }
+}

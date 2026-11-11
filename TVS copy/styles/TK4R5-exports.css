@@ -1,0 +1,199 @@
+/* styles/TK4R5-exports.css — TK4R5 · TVS two-wheeler volume with exports, FY14–FY26 (story V11)
+   Shared card-chart system + module plot (SVG 100% stacked bars). */
+
+.TK4R5-chart-section { position: relative; }
+
+.TK4R5-chart-frame {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.TK4R5-chart-container {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 36px 36px 30px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 4px;
+}
+
+/* ── Header: eyebrow / title / subtitle on the left, legend lined up with the subtitle ── */
+.TK4R5-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--color-text);
+}
+.TK4R5-eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin: 0 0 12px;
+}
+.TK4R5-chart-title {
+  font-family: var(--font-display);
+  font-size: var(--type-heading);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  max-width: 24ch;
+  margin: 0;
+}
+.TK4R5-chart-title em { font-style: normal; color: var(--color-text); }
+.TK4R5-chart-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: 1.55;
+  color: var(--color-muted);
+  max-width: 56ch;
+  margin: 12px 0 0;
+}
+
+/* ── Legend: HTML chips, hover focuses that series ── */
+.TK4R5-legend {
+  list-style: none;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(2, auto);
+  gap: 9px 22px;
+  align-self: flex-end;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0 0 4px;
+  font-family: var(--font-body);
+  font-size: var(--type-legend);
+  color: var(--color-text);
+}
+.TK4R5-legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  cursor: default;
+  transition: opacity 0.15s;
+}
+.TK4R5-legend li.is-tvs { font-weight: 600; }
+.TK4R5-legend.is-focus li:not(.is-on) { opacity: 0.35; }
+.TK4R5-sw { width: 12px; height: 12px; flex-shrink: 0; }
+.TK4R5-sw-line { width: 30px; height: 10px; flex-shrink: 0; }
+
+/* ── Axes: unit line above the plot, mono ticks, mono period labels, 1px ink baseline ── */
+.TK4R5-unit {
+  margin: 0 0 14px;
+  font-family: var(--font-mono);
+  font-size: var(--type-eyebrow);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.TK4R5-tick {
+  font-family: var(--font-mono);
+  font-size: var(--type-eyebrow);
+  color: var(--color-muted);
+  fill: var(--color-muted);
+}
+.TK4R5-xlabel {
+  font-family: var(--font-mono);
+  font-size: var(--type-legend);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--color-text);
+  fill: var(--color-text);
+}
+
+/* ── Annotations: values inside marks, figures above marks ── */
+.TK4R5-v {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
+  pointer-events: none;
+}
+.TK4R5-v small { font-size: 0.75em; }
+.TK4R5-ann {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
+  color: var(--color-text);
+  fill: var(--color-text);
+  paint-order: stroke;
+  stroke: var(--color-surface);
+  stroke-width: 4px;
+  pointer-events: none;
+}
+.TK4R5-ann--muted { font-weight: 500; color: var(--color-muted); fill: var(--color-muted); }
+
+/* ── Interaction: hovered/focused thing stays, everything else steps back to 30% ── */
+.TK4R5-plot { position: relative; }
+.TK4R5-plot [data-series],
+.TK4R5-plot [data-col] { transition: opacity 0.15s; }
+.TK4R5-plot .is-dim { opacity: 0.3; }
+.TK4R5-hit { fill: transparent; outline: none; cursor: default; }
+.TK4R5-hit:focus-visible { stroke: var(--color-text); stroke-width: 1; stroke-dasharray: 3 3; }
+
+/* ── Tooltip: same card for every chart ── */
+.TK4R5-tip {
+  position: absolute;
+  z-index: 5;
+  min-width: 170px;
+  padding: 10px 14px 11px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-rule);
+  border-radius: 3px;
+  font-family: var(--font-body);
+  font-size: var(--type-legend);
+  color: var(--color-text);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.12s, transform 0.12s;
+}
+.TK4R5-tip.is-show { opacity: 1; transform: none; }
+.TK4R5-tip-h {
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--type-eyebrow);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.TK4R5-tip-row { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; }
+.TK4R5-tip-row + .TK4R5-tip-row { margin-top: 2px; }
+.TK4R5-tip-row b {
+  font-family: var(--font-display);
+  font-size: var(--type-subheading);
+  font-weight: 500;
+  font-variant-numeric: lining-nums;
+}
+.TK4R5-tip-row b small { font-size: 0.55em; }
+
+/* Runs as a light island (TK4R-theme-light) to sit in the paper article. */
+.TK4R5-chart-section { --TK4R5-domestic: color-mix(in srgb, var(--color-muted) 26%, var(--color-surface)); }
+
+.TK4R5-plot svg { display: block; width: 100%; overflow: visible; }
+/* Stacked to absolute volume: total sets the bar height, exports sit on the baseline, domestic on top */
+.TK4R5-domestic { fill: var(--TK4R5-domestic); }
+.TK4R5-exports  { fill: var(--color-primary); }
+.TK4R5-exports-v { fill: var(--color-cream); }
+/* absolute export volume, in crimson, just above the crimson block */
+.TK4R5-ann--red { fill: var(--color-primary); color: var(--color-primary); stroke: var(--TK4R5-domestic); }
+
+@media (max-width: 768px) {
+  .TK4R5-chart-frame { padding: 20px 12px; }
+  .TK4R5-chart-container { padding: 20px 14px 18px; }
+  .TK4R5-chart-header { flex-direction: column; gap: 16px; }
+  .TK4R5-legend { align-self: flex-start; grid-template-rows: repeat(1, auto); }
+  .TK4R5-v, .TK4R5-ann { font-size: 10px; }
+}

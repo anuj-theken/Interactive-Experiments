@@ -113,25 +113,24 @@
 .TK4R15-key i.TK4R15-d { background: var(--TK4R15-fill-b); }
 
 /* ---------- 1. idea ---------- */
-#TK4R15-s1 .TK4R15-cover-box { left: auto; top: auto; right: clamp(20px, 4vw, 64px); bottom: clamp(28px, 7vh, 72px); transform: none; width: min(50vw, calc((100svh - var(--TK4R15-hdr) - 26vh) * 640 / 429)); }
+#TK4R15-s1 {
+  --s1w: min(50vw, calc((100svh - var(--TK4R15-hdr) - 26vh) * 640 / 429));   /* photo box width */
+  --s1r: clamp(20px, 4vw, 64px);
+  --s1b: clamp(28px, 7vh, 72px);
+}
+#TK4R15-s1 .TK4R15-cover-box { left: auto; top: auto; right: var(--s1r); bottom: var(--s1b); transform: none; width: var(--s1w); }
 #TK4R15-s1 > .TK4R15-cover-box { outline: 12px solid var(--color-surface); box-shadow: 0 0 0 13px var(--color-rule); }
 #TK4R15-paper1 { background-color: color-mix(in srgb, var(--color-surface) 32%, transparent); backdrop-filter: blur(.5px) saturate(1.05); -webkit-backdrop-filter: blur(.5px) saturate(1.05); }
 #TK4R15-paper1::before { opacity: .6; }
-#TK4R15-s1 .TK4R15-sheet.TK4R15-thin { backdrop-filter: none; -webkit-backdrop-filter: none; background-color: color-mix(in srgb, var(--color-surface) 10%, transparent); }
 #TK4R15-s1 .TK4R15-mast { position: absolute; z-index: 6; left: clamp(24px, 3.2vw, 44px); top: calc(var(--TK4R15-hdr) + 4vh); font-size: clamp(48px, 7.2vw, 132px); }
 #TK4R15-s1 .TK4R15-copy { left: clamp(24px, 3.2vw, 44px); top: calc(50% + var(--TK4R15-hdr) / 2); height: 1px; width: min(620px, calc(42vw - clamp(24px, 3.2vw, 44px))); }
 #TK4R15-s1 .TK4R15-copy .TK4R15-b, #TK4R15-s4 .TK4R15-copy .TK4R15-b { bottom: auto; top: 0; }
-#TK4R15-sketch { z-index: 7; }
-#TK4R15-s1 svg text { font-family: var(--font-body); font-size: 14px; font-weight: 600; fill: var(--color-surface); letter-spacing: .02em; }
-#TK4R15-s1 .TK4R15-lb { fill: var(--TK4R15-ink); stroke: none; }
-.TK4R15-fig-line { fill: none; stroke: var(--TK4R15-ink); stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
-.TK4R15-fig-halo { fill: none; stroke: var(--color-surface); stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; opacity: .75; }
-.TK4R15-fig-fill { mix-blend-mode: multiply; }
-.TK4R15-fill-a { fill: var(--TK4R15-fill-a); opacity: .9; }
-.TK4R15-fill-b { fill: var(--TK4R15-fill-b); opacity: .9; }
-.TK4R15-lead { fill: none; stroke: var(--TK4R15-ink); stroke-width: 1.2; }
+/* Moped drawing: the three registered PNG layers (bike outline / newcolor / newline, 1344×751)
+   placed as <image>s in the photo's own 640×429 space, scaled (.935) and offset so the sketch
+   bike sits on the TVS 50 in the photo under the tracing paper. */
 #TK4R15-people { z-index: 3; }
-.TK4R15-guide { fill: none; stroke: var(--TK4R15-ink); stroke-width: 2; stroke-dasharray: 3 5; stroke-linecap: round; opacity: .9; }
+.TK4R15-mcol { mix-blend-mode: multiply; }
+.TK4R15-solid-fill { flood-color: var(--color-surface); }       /* opaque family silhouette over the bike */
 
 /* ---------- 2. Hosur ---------- */
 #TK4R15-s2 .TK4R15-full-photo { inset: auto; right: clamp(20px, 4vw, 64px); top: calc(var(--TK4R15-hdr) + 12vh); width: min(44vw, calc((100svh - var(--TK4R15-hdr) - 12vh - 11vw - 70px) * 4 / 3)); aspect-ratio: 4/3; outline: 12px solid var(--color-surface); box-shadow: 0 0 0 13px var(--color-rule); }
@@ -208,7 +207,7 @@
 
 @media (max-width: 820px) {
   .TK4R15-cover-box { width: 128vw; top: 52%; }
-  #TK4R15-s1 .TK4R15-cover-box { width: 88vw; right: 6vw; bottom: 24vh; }
+  #TK4R15-s1 { --s1w: 88vw; --s1r: 6vw; --s1b: 24vh; }
   #TK4R15-s1 .TK4R15-mast { top: auto; bottom: 4vh; }
   .TK4R15-s2col { width: auto; right: 16px; left: 16px; top: calc(var(--TK4R15-hdr) + 2vh); }
   #TK4R15-s2 .TK4R15-place { display: none; }

@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TVS Two-Wheeler Exports</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            /* ── Moodboard literals ── */
+            --oxblood:   #770101;
+            --crimson:   #c1111e;
+            --cream:     #ffeed4;
+            --navy:      #023048;
+            --steel:     #659aba;
+
+            /* ── Semantic ── */
+            --paper:     #faf2e3;
+            --bg:        var(--paper);
+            --surface:   #fffaf0;
+            --text:      var(--navy);
+            --ink:       var(--navy);
+            --muted:     #4f5f6b;
+            --rule:      #e6d8bf;
+            --grid:      #796135;
+            --primary:   var(--crimson);
+
+            /* ── Series: exports in Crimson, the rest of total volume in slate grey ── */
+            --s-exports: var(--crimson);
+            --s-total:   #c6d3d4;   /* light slate, so the crimson % labels on it stay readable */
+
+            /* ── Type scale (pc) ── */
+            --type-heading:    36px;
+            --type-body:       18px;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Archivo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 72px 32px 120px;
+        }
+
+        /* ── Frame / card ── */
+        .frame {
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-radius: 4px;
+            padding: 36px 36px 28px;
+        }
+
+        .chart-head {
+            border-bottom: 1px solid var(--ink);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .eyebrow {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .title {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: var(--type-heading);
+            font-weight: 400;
+            line-height: 1.1;
+            letter-spacing: -0.01em;
+            max-width: 24ch;
+        }
+
+        .title em { font-style: normal; color: var(--primary); }
+
+        .sub {
+            margin-top: 12px;
+            font-size: var(--type-body);
+            line-height: 1.55;
+            color: var(--muted);
+            max-width: 58ch;
+        }
+
+        /* ── Key: names the two fills ── */
+        .key {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 26px;
+            margin-bottom: 18px;
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        .key span { display: inline-flex; align-items: center; gap: 8px; }
+        .key i { display: inline-block; width: 12px; height: 12px; }
+
+        /* ── Plot ── */
+        .plot { position: relative; }
+
+        .plot svg { display: block; width: 100%; overflow: visible; }
+
+        .plot text { font-family: 'IBM Plex Mono', monospace; fill: var(--text); }
+
+        .tick   { font-size: 10.5px; fill: var(--muted) !important; }
+        .unit   { font-size: 10.5px; letter-spacing: 0.08em; fill: var(--muted) !important; }
+        .year   { font-size: 12px; font-weight: 500; letter-spacing: 0.04em; }
+        .share  { font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; fill: var(--primary) !important; }
+        .tot    { font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+        .seg.exports { fill: var(--s-exports); }
+        .seg.total   { fill: var(--s-total); }
+
+        /* ── iPad ── */
+        @media (max-width: 1023px) {
+            :root {
+                --type-heading: 32px;
+                --type-body: 16px;
+            }
+            .page { padding: 56px 24px 90px; }
+        }
+
+        /* ── Mobile ── */
+        @media (max-width: 768px) {
+            :root {
+                --type-heading: 28px;
+                --type-body: 14px;
+            }
+            .page { padding: 32px 16px 72px; }
+            .frame { padding: 20px 12px 18px; }
+            .tick, .unit { font-size: 9.5px; }
+            .year  { font-size: 10px; }
+            .share { font-size: 9px; }
+            .tot   { font-size: 9px; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <figure class="frame">
+        <header class="chart-head">
+            <div class="eyebrow">TVS Motor · Two-wheeler volume</div>
+            <h1 class="title"><em>Exports</em> now make up a quarter of TVS's two-wheeler volume</h1>
+            <p class="sub">
+                Exports rose from 15% of volume in FY14 to a peak of 35% in FY22, and stood at
+                25% in FY26 as total volume nearly tripled to 5.67 million units.
+            </p>
+        </header>
+
+        <div class="key" aria-hidden="true">
+           <span><i style="background:var(--s-total)"></i>Total volume</span>
+            <span><i style="background:var(--s-exports)"></i>Exports</span>  
+        </div>
+
+        <div class="plot" id="plot">
+            <svg id="chart" role="img"
+                 aria-label="Bar chart of TVS two-wheeler total volume, FY14 to FY26, in million units: 2.07, 2.51, 2.66, 2.87, 3.38, 3.77, 3.10, 2.94, 3.15, 3.51, 4.04, 4.61 and 5.67, with exports shown inside each bar. Export share: 15, 16, 17, 13, 15, 16, 22, 26, 35, 26, 22, 24 and 25 percent."></svg>
+        </div>
+    </figure>
+</div>
+
+<script>
+    const years   = ['FY14', 'FY15', 'FY16', 'FY17', 'FY18', 'FY19', 'FY20', 'FY21', 'FY22', 'FY23', 'FY24', 'FY25', 'FY26'];
+    const exports = [315019, 413964, 453800, 364112, 491960, 622019, 678841, 764039, 1090139, 915018, 887774, 1090900, 1426550];
+    const total   = [2067592, 2514785, 2663166, 2869517, 3384799, 3773608, 3103340, 2936580, 3147949, 3512954, 4044824, 4610125, 5670074];
+    const share   = [15, 16, 17, 13, 15, 16, 22, 26, 35, 26, 22, 24, 25];
+
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.getElementById('chart');
+    const plot = document.getElementById('plot');
+
+    const el = (tag, attrs, text) => {
+        const n = document.createElementNS(NS, tag);
+        for (const k in attrs) n.setAttribute(k, attrs[k]);
+        if (text != null) n.textContent = text;
+        return n;
+    };
+
+    // Exports sit on the baseline inside each total bar, so the share reads as a part of the whole.
+    function render() {
+        const W = plot.clientWidth;
+        const mobile = W < 560;
+        const ml = mobile ? 24 : 34, mr = 4;
+
+        const top = 26;
+        const bH = mobile ? 320 : 400;
+        const H = top + bH + 30;
+
+        const step = (W - ml - mr) / years.length;
+        const cx = i => ml + step * (i + .5);
+        const bw = step * (mobile ? .5 : .42);                // exports
+        const tw = step * (mobile ? .82 : .74);               // total, wider so exports sits inside it
+
+        const max = 6e6;
+        const by = v => top + bH - v / max * bH;
+
+        svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+        svg.setAttribute('height', H);
+        svg.innerHTML = '';
+
+        // ── Axis: tick labels only, in millions ──
+        svg.append(el('text', { x: 0, y: 4, class: 'unit' }, 'UNITS, MILLION'));
+        [0, 1, 2, 3, 4, 5, 6].forEach(t =>
+            svg.append(el('text', { x: ml - 10, y: by(t * 1e6) + 3.5, 'text-anchor': 'end', class: 'tick' }, t)));
+
+        // ── Bars: wide solid total, narrower Crimson exports bar inside it ──
+        years.forEach((y, i) => {
+            svg.append(
+                el('rect', { x: cx(i) - tw / 2, y: by(total[i]), width: tw, height: by(0) - by(total[i]), class: 'seg total' }),
+                el('rect', { x: cx(i) - bw / 2, y: by(exports[i]), width: bw, height: by(0) - by(exports[i]), class: 'seg exports' }),
+                // Export share sits on top of the red block
+                el('text', { x: cx(i), y: by(exports[i]) - 8, 'text-anchor': 'middle', class: 'share' }, share[i] + '%'),
+                // Total volume, in millions to match the axis
+                el('text', { x: cx(i), y: by(total[i]) - 8, 'text-anchor': 'middle', class: 'tot' }, (total[i] / 1e6).toFixed(2))
+            );
+            if (!mobile || i % 2 === 0)
+                svg.append(el('text', { x: cx(i), y: by(0) + 20, 'text-anchor': 'middle', class: 'year' }, y));
+        });
+
+        svg.append(el('line', { x1: ml, x2: W - mr, y1: by(0) + .5, y2: by(0) + .5, stroke: 'var(--ink)', 'stroke-width': 1 }));
+    }
+
+    let lastW = 0;
+    new ResizeObserver(() => {
+        if (plot.clientWidth === lastW) return;
+        lastW = plot.clientWidth;
+        render();
+    }).observe(plot);
+</script>
+</body>
+</html>

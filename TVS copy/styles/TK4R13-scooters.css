@@ -1,0 +1,330 @@
+/* styles/TK4R13-scooters.css — TK4R13 · Scooters and motorcycles of the 1990s (story V6.1)
+   One sticky stage. A procedural 3D bike (Three.js) stands on a horizontal timeline spine; scrolling
+   slides the timeline left, the bike turns one full revolution per entry and swaps between a scooter
+   and a motorcycle body, and each entry's photo card slides in beside it.
+   Geometry (spine height, node spacing, card offsets) is computed in JS and handed over as
+   CSS variables on the stage, so this file only owns the look. */
+
+.TK4R13-chart-section { position: relative; }
+
+.TK4R13-scroll-wrapper { position: relative; }   /* height set from the entry count in JS */
+
+.TK4R13-stage {
+  --TK4R13-spine-y: 80vh;     /* all four overwritten by JS on layout */
+  --TK4R13-card-w: 480px;
+  --TK4R13-photo-h: 300px;
+  --TK4R13-anchor-x: 30vw;
+
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background-color: var(--color-bg);
+  /* graph-paper ground, standing in for gridlines */
+  background-image:
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-position: -1px -1px;
+}
+
+/* ── Maker colours: TVS crimson, TVS-Suzuki joint venture royal, rivals grey ── */
+.TK4R13-item[data-maker="tvs"],        .TK4R13-legend .is-tvs   { --TK4R13-maker: var(--cat-2); --TK4R13-maker-ink: var(--color-text-invert); }
+.TK4R13-item[data-maker="tvs-suzuki"], .TK4R13-legend .is-jv    { --TK4R13-maker: var(--cat-1); --TK4R13-maker-ink: var(--color-text-invert); }
+.TK4R13-item[data-maker="rival"],      .TK4R13-legend .is-rival { --TK4R13-maker: var(--color-grey); --TK4R13-maker-ink: var(--color-text); }
+
+/* ── Masthead ── */
+.TK4R13-masthead {
+  position: absolute;
+  z-index: 4;
+  top: clamp(20px, 5svh, 56px);
+  left: clamp(16px, 5vw, 72px);
+  right: clamp(16px, 5vw, 72px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  pointer-events: none;
+}
+.TK4R13-eyebrow {
+  margin: 0 0 8px;
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+.TK4R13-title {
+  margin: 0;
+  max-width: 15em;
+  font-family: var(--font-display);
+  font-size: var(--type-heading);
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--color-text);
+}
+.TK4R13-legend {
+  display: flex;
+  gap: 16px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.TK4R13-legend li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-body);
+  font-size: var(--type-legend);
+  color: var(--color-text);
+}
+.TK4R13-legend i {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--TK4R13-maker);
+}
+.TK4R13-legend span { color: var(--color-muted); }
+
+.TK4R13-counter {
+  flex: none;
+  margin: 2px 0 0;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-muted);
+}
+.TK4R13-counter b { color: var(--color-text); font-weight: 500; }
+
+/* ── The 3D bike: a transparent canvas over the whole stage ── */
+.TK4R13-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 3;            /* the bike rides over the cards and node labels */
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+.TK4R13-stage.is-no3d .TK4R13-canvas { display: none; }
+
+/* ── Spine: travelled (solid) to the left of the bike, still to come (dashed) to the right ── */
+.TK4R13-spine {
+  position: absolute;
+  z-index: 1;
+  top: var(--TK4R13-spine-y);
+  left: 0;
+  right: 0;
+  height: 0;
+}
+.TK4R13-spine::before,
+.TK4R13-spine::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  height: 2px;
+}
+.TK4R13-spine::before {
+  left: 0;
+  width: var(--TK4R13-anchor-x);
+  background: var(--color-text);
+}
+.TK4R13-spine::after {
+  left: var(--TK4R13-anchor-x);
+  right: 0;
+  background: repeating-linear-gradient(90deg, var(--color-text) 0 6px, transparent 6px 12px);
+  opacity: 0.55;
+}
+
+/* ── Track: nodes + cards, translated as one strip ── */
+.TK4R13-track {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  will-change: transform;
+}
+.TK4R13-item { position: absolute; top: 0; left: 0; height: 100%; }
+
+/* node on the spine, year + name below it */
+.TK4R13-node {
+  position: absolute;
+  top: var(--TK4R13-spine-y);
+  left: 0;
+  width: 0;
+}
+.TK4R13-dot {
+  position: absolute;
+  top: -7px;
+  left: -7px;
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  border: 3px solid var(--TK4R13-maker);
+  border-radius: 50%;
+  background: var(--color-bg);
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+.TK4R13-item.is-past .TK4R13-dot { background: var(--TK4R13-maker); }
+.TK4R13-item.is-active .TK4R13-dot {
+  background: var(--TK4R13-maker);
+  box-shadow: 0 0 0 3px var(--color-bg), 0 0 0 4px var(--TK4R13-maker);
+  transform: scale(1.25);
+}
+.TK4R13-node-label {
+  position: absolute;
+  top: 18px;
+  left: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  text-align: center;
+}
+.TK4R13-node-year {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+.TK4R13-item.is-active .TK4R13-node-year { color: var(--color-primary); }
+.TK4R13-node-name {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-body);
+  font-size: var(--type-legend);
+  color: var(--color-muted);
+}
+.TK4R13-node-maker {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 3px;
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+.TK4R13-node-maker::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  background: var(--TK4R13-maker);
+}
+
+/* the card: photo, then type · year, name, line of copy */
+.TK4R13-card {
+  position: absolute;
+  left: var(--TK4R13-card-dx, 0px);
+  top: var(--TK4R13-card-top, auto);
+  bottom: var(--TK4R13-card-bottom, auto);
+  width: var(--TK4R13-card-w);
+  margin: 0;
+  box-sizing: border-box;
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 4px;
+  overflow: hidden;
+  will-change: opacity, transform;
+}
+.TK4R13-photo {
+  position: relative;
+  height: var(--TK4R13-photo-h);
+  background: var(--color-bg-warm);
+}
+.TK4R13-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.TK4R13-body { padding: 16px 20px 20px; }
+.TK4R13-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 6px;
+}
+.TK4R13-maker {
+  padding: 4px 9px 3px;
+  border-radius: 2px;
+  background: var(--TK4R13-maker);
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--TK4R13-maker-ink);
+}
+.TK4R13-type {
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.TK4R13-year {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary);
+}
+.TK4R13-name {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: var(--type-subheading);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+.TK4R13-text {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: 1.45;
+  color: var(--color-text);
+}
+
+/* ── Scroll hint ── */
+.TK4R13-hint {
+  position: absolute;
+  z-index: 4;
+  right: clamp(16px, 5vw, 72px);
+  bottom: clamp(16px, 4svh, 40px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: var(--type-eyebrow);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  transition: opacity 0.4s ease;
+}
+.TK4R13-hint svg { width: 12px; height: 19px; }
+.TK4R13-stage.is-moving .TK4R13-hint { opacity: 0; }
+
+/* ── Stacked layout (phones and portrait tablets): bike on top, card under the spine ── */
+.TK4R13-stage.is-stacked .TK4R13-legend { margin-top: 8px; }
+.TK4R13-stage.is-stacked .TK4R13-node-name { display: none; }
+.TK4R13-stage.is-stacked .TK4R13-legend { flex-wrap: wrap; gap: 6px 14px; }
+.TK4R13-stage.is-stacked .TK4R13-body { padding: 12px 14px 14px; }
+.TK4R13-stage.is-stacked .TK4R13-hint { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .TK4R13-dot { transition: none; }
+}

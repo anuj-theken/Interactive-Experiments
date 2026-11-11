@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TVS Timeline</title>
+    <!-- Include ECharts library for the desktop version if not already included in your project -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        /* Namespace: -btl */
+        :root {
+          --brand-blue-btl: #d41616;
+          --bg-cream-btl: #f5f2e8;
+          --text-grey-btl: #666;
+          --light-grey-btl: #999;
+        }
+
+        .QW4K-bajaj-timeline-btl {
+          width: 100%;
+          padding: 60px 0;
+          background-color: var(--bg-cream-btl);
+          overflow: hidden;
+        }
+
+        .QW4K-timeline-header-btl {
+          padding: 0 60px 40px 60px;
+        }
+
+        .QW4K-timeline-title-btl {
+          margin: 0;
+          font-size: 32px;
+          font-weight: 800;
+          color: #222 !important; /* Overriding potential global styles */
+          font-family: "Reckless", serif;
+        }
+
+        .QW4K-timeline-subtitle-btl {
+          color: var(--text-grey-btl) !important;
+          font-size: 18px;
+          margin: 10px 0 0 0;
+        }
+
+        /* Desktop Scroll Logic */
+        .QW4K-timeline-scroll-wrapper-btl {
+          width: 100%;
+          overflow-x: auto;
+          padding-top: 20px;
+          cursor: grab;
+        }
+
+        /* --- SCROLLBAR UPDATES --- */
+        .QW4K-timeline-scroll-wrapper-btl::-webkit-scrollbar {
+          height: 12px; /* Increased height to allow for internal border padding */
+        }
+
+        .QW4K-timeline-scroll-wrapper-btl::-webkit-scrollbar-track {
+          background: #e6e2d3;
+          margin: 0 60px; /* Aligns the scrollbar ends precisely with your header layout margins */
+          border-radius: 10px;
+        }
+
+        .QW4K-timeline-scroll-wrapper-btl::-webkit-scrollbar-thumb {
+          background-color: var(--brand-blue-btl);
+          border-radius: 10px;
+          /* Uses a thick border matching the background to simulate clean top/bottom padding */
+          border: 3px solid var(--bg-cream-btl);
+        }
+
+        #QW4K-main-btl {
+          width: 6800px; /* Optimized total width for the TVS nodes + extra terminal tail room */
+          height: 500px;
+          background: transparent;
+        }
+
+        /* Toggle Views */
+        .QW4K-desktop-only-btl {
+          display: block;
+        }
+        .QW4K-mobile-only-btl {
+          display: none;
+        }
+
+        /* Mobile Timeline Style */
+        @media (max-width: 768px) {
+          .QW4K-desktop-only-btl {
+            display: none !important;
+          }
+          .QW4K-mobile-only-btl {
+            display: block !important;
+            padding: 20px 40px;
+          }
+
+          .QW4K-vertical-timeline-btl {
+            border-left: 2px solid var(--brand-blue-btl);
+            margin-left: 10px;
+            padding-left: 30px;
+            position: relative;
+            height: auto; /* Changed to auto to dynamically fit the TVS nodes safely */
+          }
+
+          .QW4K-timeline-item-btl {
+            position: relative;
+            margin-bottom: 40px;
+          }
+
+          /* FIX: Adds an intentional safe zone space below the last text block on mobile viewports */
+          .QW4K-timeline-item-btl:last-child {
+            margin-bottom: 0;
+            padding-bottom: 80px;
+          }
+
+          .QW4K-timeline-item-btl::before {
+            content: "";
+            position: absolute;
+            left: -41px;
+            top: 25px;
+            width: 15px;
+            height: 15px;
+            background: var(--brand-blue-btl);
+            border: 3px solid var(--bg-cream-btl);
+            border-radius: 50%;
+          }
+
+          .QW4K-m-date-btl {
+            color: var(--light-grey-btl);
+            font-weight: bold;
+            font-size: 14px;
+          }
+          .QW4K-m-title-btl {
+            color: var(--brand-blue-btl);
+            font-weight: bold;
+            font-size: 20px;
+            margin: 8px 0;
+          }
+          .QW4K-m-desc-btl {
+            color: var(--text-grey-btl);
+            font-size: 15px;
+            line-height: 1.6;
+          }
+        }
+    </style>
+</head>
+<body>
+
+    <!--Timeline-->
+    <section class="QW4K-bajaj-timeline-btl">
+        <header class="QW4K-timeline-header-btl">
+            <div class="QW4K-timeline-header-left-btl">
+                <h1 class="QW4K-timeline-title-btl">
+                    The Timeline of TVS
+                </h1>
+                <p class="QW4K-timeline-subtitle-btl">
+                    From a single bus route to the world’s third-largest two-wheeler maker.
+                </p>
+            </div>
+        </header>
+
+        <div class="QW4K-desktop-only-btl">
+            <div class="QW4K-timeline-scroll-wrapper-btl">
+                <div id="QW4K-main-btl"></div>
+            </div>
+        </div>
+
+        <div class="QW4K-mobile-only-btl">
+            <div class="QW4K-vertical-timeline-btl" id="QW4K-mobile-list-btl"></div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          const data = [
+            {
+              date: "1912",
+              title: "The First Bus",
+              desc: "TV Sundaram Iyengar wins a bid to operate a bus service",
+            },
+            {
+              date: "1919",
+              title: "Sales and Service",
+              desc: "Sundaram sets up an automobile sales and service unit in Madurai",
+            },
+            {
+              date: "1929",
+              title: "The GM Deal",
+              desc: "Sundaram becomes a distributor of General Motors vehicles",
+            },
+            {
+              date: "1954",
+              title: "GM Exit",
+              desc: "Much of TVS business is built around General Motors dealership, but GM leaves India",
+            },
+            {
+              date: "1960",
+              title: "Move Into Manufacturing",
+              desc: "TVS group sets up four JVs with British companies, including Sundaram Clayton",
+            },
+            {
+              date: "1979",
+              title: "Venu Takes Charge",
+              desc: "TS Srinivasan dies before his moped dream becomes a reality. His son Venu becomes managing director of Sundaram Clayton",
+            },
+            {
+              date: "1980",
+              title: "TVS 50",
+              desc: "TVS launches its first consumer product: the TVS 50, a two-seater moped",
+            },
+            {
+              date: "1982",
+              title: "The Suzuki Marriage",
+              desc: "Sundaram Clayton sets up a JV with Suzuki to make motorcycles",
+            },
+            {
+              date: "1990",
+              title: "The Lockout",
+              desc: "Venu has to shut the TVS Suzuki factory in Hosur because of violent protests",
+            },
+            {
+              date: "1998",
+              title: "Quality Accolades",
+              desc: "Sundaram Clayton becomes the first Indian company and the fourth non-Japanese company to win the Deming Prize",
+            },
+            {
+              date: "2001",
+              title: "The Suzuki Split",
+              desc: "The JV with Suzuki ends after 19 years",
+            },
+            {
+              date: "2005",
+              title: "Apache",
+              desc: "TVS launches the Apache to get hold of the 150cc segment",
+            },
+            {
+              date: "2008",
+              title: "KNR Becomes CEO",
+              desc: "KN Radhakrishnan becomes president and CEO",
+            },
+            {
+              date: "2010",
+              title: "Next Generation",
+              desc: "Venu’s daughter Lakshmi joins Sundaram Clayton, and his son Sudarshan joins TVS Motor in the next year",
+            },
+            {
+              date: "2013",
+              title: "BMW Partnership",
+              desc: "TVS enters into a partnership with BMW Motorrad to build motorcycles under 500cc",
+            },
+            {
+              date: "2020",
+              title: "International Acquisition",
+              desc: "TVS acquires Norton, a British motorcycle brand for Rs 153 crore",
+            },
+            {
+              date: "2020",
+              title: "Move Into Electric Vehicles",
+              desc: "TVS launches an electric scooter under the brand iQube",
+            },
+            {
+              date: "2025",
+              title: "Global Ranking",
+              desc: "TVS overtakes Yamaha to become the world’s third-largest two-wheeler maker",
+            },
+            {
+              date: "2025",
+              title: "Sudarshan Gets the Top Job",
+              desc: "Sudarshan becomes chairman & managing director. Venu also makes him the beneficiary of the trust that controls TVS Motor",
+            },
+            {
+              date: "2026",
+              title: "Ownership Dispute",
+              desc: "Venu’s wife and daughter argue that Sudarshan’s running TVS Motor does not entitle him to inherit it",
+            }
+          ];
+
+          function forceWordWrap(text, maxCharsPerLine) {
+            const words = text.split(" ");
+            let lines = [];
+            let currentLine = "";
+            words.forEach((word) => {
+              if (currentLine.length + word.length > maxCharsPerLine) {
+                lines.push(currentLine.trim());
+                currentLine = word + " ";
+              } else {
+                currentLine += word + " ";
+              }
+            });
+            lines.push(currentLine.trim());
+            return lines.join("\n");
+          }
+
+          // 1. MOBILE INITIALIZATION
+          const mobileList = document.getElementById("QW4K-mobile-list-btl");
+          if (mobileList) {
+            mobileList.innerHTML = "";
+            data.forEach((item) => {
+              const div = document.createElement("div");
+              div.className = "QW4K-timeline-item-btl";
+              div.innerHTML = `
+                        <div class="QW4K-m-date-btl">${item.date}</div>
+                        <div class="QW4K-m-title-btl">${item.title}</div>
+                        <div class="QW4K-m-desc-btl">${item.desc}</div>
+                    `;
+              mobileList.appendChild(div);
+            });
+          }
+
+          // 2. DESKTOP (ECHARTS) INITIALIZATION
+          const chartDom = document.getElementById("QW4K-main-btl");
+          if (chartDom) {
+            const myChart = echarts.init(chartDom);
+            const horizontalSpacing = 320;
+
+            const option = {
+              silent: true,
+              grid: { left: 100, right: 250, top: 0, bottom: 0 }, // FIX: Expanded right grid pad inside ECharts workspace
+              xAxis: {
+                type: "value",
+                show: false,
+                min: 0,
+                // FIX: Generates an artificial terminal margin beyond the index of the final entry block
+                max: (data.length - 1) * horizontalSpacing + 150,
+              },
+              yAxis: {
+                type: "value",
+                show: false,
+                min: 0,
+                max: 100,
+              },
+              series: [
+                {
+                  type: "line",
+                  data: data.map((_, i) => [i * horizontalSpacing, 80]),
+                  lineStyle: { color: "#d41616", width: 4 },
+                  symbol: "circle",
+                  symbolSize: 20,
+                  showSymbol: true,
+                  itemStyle: {
+                    color: "#d41616",
+                    borderWidth: 4,
+                    borderColor: "#F5F2E8",
+                  },
+                  label: {
+                    show: true,
+                    position: "bottom",
+                    offset: [0, 30],
+                    align: "left",
+                    formatter: (p) => {
+                      const item = data[p.dataIndex];
+                      const wrappedDesc = forceWordWrap(item.desc, 35);
+                      return `{d|${item.date}}\n{t|${item.title}}\n{desc|${wrappedDesc}}`;
+                    },
+                    rich: {
+                      d: {
+                        color: "#999",
+                        fontWeight: "bold",
+                        fontSize: 14,
+                        padding: [0, 0, 8, 0],
+                      },
+                      t: {
+                        color: "#d41616",
+                        fontWeight: "bold",
+                        fontSize: 18,
+                        padding: [0, 0, 12, 0],
+                      },
+                      desc: { color: "#444", fontSize: 14, lineHeight: 22 },
+                    },
+                  },
+                },
+              ],
+            };
+
+            myChart.setOption(option);
+
+            window.addEventListener("resize", () => {
+              myChart.resize();
+            });
+          }
+        });
+    </script>
+</body>
+</html>

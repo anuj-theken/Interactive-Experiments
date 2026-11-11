@@ -1,0 +1,622 @@
+/* styles/TK4R19-features.css — TK4R19 · The Jupiter scooter + other new features (story V10.2, V10.3)
+   Scrollytelling, same build as TK4R18: a sticky stage holds the graphic in the left column, the
+   story cards scroll past on the right. JS only sets data-beat="0…10" on the scrolly; everything
+   below is a CSS transition keyed on it.
+     0–4   the 2013 Jupiter, one feature callout per beat (pins + leader lines, as on the moped)
+     5     the bike steps back; 1 million units in 2.5 years, TVS takes No. 3 from Bajaj
+     6     bridge: the four later models in a row, with their years
+     7–10  one model at a time — XL 100, NTorq, Raider, Jupiter 125 — each with its callout
+   Bike cutouts sit straight on the paper. On phones the graphic fills the top of the stage and
+   the cards scroll over the bottom. */
+
+.TK4R19-chart-section {
+  position: relative;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* ── Title — scrolls away before the stage sticks ── */
+.TK4R19-header {
+  position: relative;
+  z-index: 2;               /* above the section's TK4R-grain layer */
+  max-width: 900px;
+  margin: 0 auto;
+  padding: clamp(48px, 10vh, 120px) 24px clamp(24px, 4vh, 48px);
+  text-align: center;
+}
+.TK4R19-eyebrow {
+  margin: 0 0 14px;
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+.TK4R19-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(34px, 4.6vw, 68px);
+  font-weight: 500;
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+.TK4R19-title em { font-style: italic; color: var(--color-primary); }
+.TK4R19-rule {
+  display: block;
+  width: 64px;
+  height: 3px;
+  margin: clamp(18px, 3vh, 28px) auto 0;
+  background: var(--color-primary);
+}
+
+/* ── Scrolly ── */
+.TK4R19-scrolly {
+  --TK4R19-split: 58%;                 /* graphic column width (desktop) */
+  --TK4R19-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  position: relative;
+  z-index: 2;
+}
+
+.TK4R19-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.TK4R19-graphic {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--TK4R19-split);
+}
+
+/* ── A bike: cutout image + callouts, positioned in % of the image box ── */
+.TK4R19-bike {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(84%, calc(68svh * var(--TK4R19-ar)), 760px);
+  margin: 0;
+  opacity: 0;
+  transform: translate(10%, -50%);
+  transition: opacity 0.6s ease, transform 0.9s var(--TK4R19-ease);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.TK4R19-bike-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  filter: drop-shadow(0 14px 12px rgba(2, 48, 72, 0.16));
+}
+/* the 2013 bike is a photo cut-out, not a studio render — warm it into the paper like the prints */
+.TK4R19-bike--j13 .TK4R19-bike-img {
+  filter: sepia(0.12) saturate(0.92) contrast(1.04) drop-shadow(0 14px 12px rgba(2, 48, 72, 0.16));
+}
+
+/* the caption tag under each bike — the same mono tag as the engines */
+.TK4R19-tag {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  margin-top: 10px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 4px 9px;
+  font-family: var(--font-mono);
+  font-size: var(--type-legend);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 2px;
+}
+.TK4R19-tag b { color: var(--color-primary); font-weight: 500; }
+
+/* ── Callouts: crimson pin on the part, 1px ink leader, a small printed label ── */
+.TK4R19-call {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 0;
+  height: 0;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.TK4R19-pin {
+  position: absolute;
+  left: -7px;
+  top: -7px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: 2px solid var(--color-surface);
+  box-shadow: 0 0 0 1px var(--color-primary);
+  transform: scale(0);
+  transition: transform 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.TK4R19-pin::after {                   /* slow ring, so the eye finds the part */
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-primary);
+  opacity: 0;
+}
+.TK4R19-lead {
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: var(--len, 64px);
+  background: var(--color-text);
+  transform-origin: 50% 100%;
+  transform: scaleY(0);
+  transition: transform 0.45s var(--TK4R19-ease) 0.15s;
+  bottom: 0;
+}
+.TK4R19-label {
+  position: absolute;
+  bottom: var(--len, 64px);
+  left: 0;
+  transform: translate(-50%, -6px);
+  width: max-content;
+  max-width: 200px;
+  padding: 6px 10px 7px;
+  font-family: var(--font-body);
+  font-size: var(--type-legend);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 2px;
+  box-shadow: var(--shadow-card);
+  opacity: 0;
+  transition: opacity 0.35s ease 0.4s, transform 0.5s var(--TK4R19-ease) 0.4s;
+}
+.TK4R19-label small {
+  display: block;
+  margin-bottom: 2px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--color-primary);
+}
+/* label hangs below the pin instead of above it */
+.TK4R19-call--down .TK4R19-lead { bottom: auto; top: 0; transform-origin: 50% 0; }
+.TK4R19-call--down .TK4R19-label { bottom: auto; top: var(--len, 64px); transform: translate(-50%, 6px); }
+/* label pulled to one side of its leader */
+.TK4R19-call--l .TK4R19-label { transform: translate(calc(-100% + 18px), -6px); }
+.TK4R19-call--r .TK4R19-label { transform: translate(-18px, -6px); }
+.TK4R19-call--down.TK4R19-call--l .TK4R19-label { transform: translate(calc(-100% + 18px), 6px); }
+.TK4R19-call--down.TK4R19-call--r .TK4R19-label { transform: translate(-18px, 6px); }
+
+/* lit: JS adds .is-on to a callout (its own beat) or .is-past (an earlier beat — stays, quieter) */
+.TK4R19-call.is-on,
+.TK4R19-call.is-past { opacity: 1; }
+.TK4R19-call.is-on .TK4R19-pin,
+.TK4R19-call.is-past .TK4R19-pin { transform: scale(1); }
+.TK4R19-call.is-on .TK4R19-pin::after { animation: TK4R19-ring 1.8s ease-out 0.5s infinite; }
+.TK4R19-call.is-on .TK4R19-lead { transform: scaleY(1); }
+.TK4R19-call.is-on .TK4R19-label { opacity: 1; }
+.TK4R19-call.is-on.TK4R19-call--down .TK4R19-label,
+.TK4R19-call.is-on .TK4R19-label { transform: translate(-50%, 0); }
+.TK4R19-call.is-on.TK4R19-call--l .TK4R19-label { transform: translate(calc(-100% + 18px), 0); }
+.TK4R19-call.is-on.TK4R19-call--r .TK4R19-label { transform: translate(-18px, 0); }
+/* earlier features: pin only, numbered, so the bike fills up with what it offers */
+.TK4R19-call.is-past .TK4R19-pin { background: var(--color-text); box-shadow: 0 0 0 1px var(--color-text); }
+.TK4R19-call.is-past .TK4R19-lead,
+.TK4R19-call.is-past .TK4R19-label { opacity: 0; transform: scaleY(0); }
+
+@keyframes TK4R19-ring {
+  0%   { opacity: 0.7; transform: scale(0.6); }
+  100% { opacity: 0;   transform: scale(1.5); }
+}
+
+/* ── Beats: which bike is on stage ── */
+/* 2013 Jupiter: beats 0–4 centre stage, beat 5 steps back to make room for the figure */
+.TK4R19-scrolly:is([data-beat="0"], [data-beat="1"], [data-beat="2"], [data-beat="3"], [data-beat="4"]) .TK4R19-bike--j13 {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+.TK4R19-scrolly[data-beat="5"] .TK4R19-bike--j13 {
+  opacity: 0.22;
+  filter: grayscale(0.6);
+  transform: translate(-50%, -38%) scale(0.86);
+}
+.TK4R19-scrolly:is([data-beat="6"], [data-beat="7"], [data-beat="8"], [data-beat="9"], [data-beat="10"]) .TK4R19-bike--j13 {
+  opacity: 0;
+  transform: translate(-150%, -50%);
+}
+
+/* the four later models: the active one rides in from the right, the previous one rides out left */
+.TK4R19-scrolly[data-beat="7"]  .TK4R19-bike--xl,
+.TK4R19-scrolly[data-beat="8"]  .TK4R19-bike--ntorq,
+.TK4R19-scrolly[data-beat="9"]  .TK4R19-bike--raider,
+.TK4R19-scrolly[data-beat="10"] .TK4R19-bike--j125 {
+  opacity: 1;
+  transform: translate(-50%, -54%);
+}
+.TK4R19-scrolly:is([data-beat="8"], [data-beat="9"], [data-beat="10"]) .TK4R19-bike--xl,
+.TK4R19-scrolly:is([data-beat="9"], [data-beat="10"]) .TK4R19-bike--ntorq,
+.TK4R19-scrolly[data-beat="10"] .TK4R19-bike--raider {
+  opacity: 0;
+  transform: translate(-150%, -54%);
+}
+
+/* ── Beat 5: the figure ── */
+.TK4R19-stat {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(86%, 560px);
+  margin: 0;
+  padding: clamp(20px, 2.4vw, 32px);
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 4px;
+  box-shadow: var(--shadow-card);
+  opacity: 0;
+  transform: translate(-50%, -44%);
+  transition: opacity 0.6s ease, transform 0.8s var(--TK4R19-ease);
+  pointer-events: none;
+}
+/* figure and caption share the top row; the rank swap spans below */
+.TK4R19-stat {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: clamp(14px, 1.6vw, 22px);
+  align-items: end;
+}
+.TK4R19-stat .TK4R19-stat-cap { margin: 0 0 0.3em; text-align: right; justify-self: end; }
+.TK4R19-stat .TK4R19-rank { grid-column: 1 / -1; }
+.TK4R19-scrolly[data-beat="5"] .TK4R19-stat {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+  transition-delay: 0.2s;
+}
+.TK4R19-stat-fig {
+  display: flex;
+  align-items: baseline;
+  gap: 0.18em;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: calc(var(--type-stat) * 1.25);
+  font-weight: 500;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--color-primary);
+}
+.TK4R19-stat-fig span { font-size: 0.55em; }
+.TK4R19-stat-cap {
+  margin: 12px 0 0;
+  max-width: 30ch;
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: 1.4;
+  color: var(--color-muted);
+}
+.TK4R19-stat-cap b { color: var(--color-text); }
+
+/* the rank swap — TVS climbs into No. 3, Bajaj drops out of it */
+.TK4R19-rank {
+  margin: clamp(18px, 2.4vh, 26px) 0 0;
+  padding: clamp(14px, 2vh, 20px) 0 0;
+  border-top: 1px solid var(--color-rule);
+}
+.TK4R19-rank-head {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 10px;
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.TK4R19-rank-head span:last-child { font-family: var(--font-mono); letter-spacing: 0.04em; }
+.TK4R19-rank-list {
+  position: relative;
+  height: 92px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* the slots stay put; the maker rows slide past them */
+.TK4R19-rank-slot {
+  position: absolute;
+  left: 0;
+  width: 56px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: var(--type-legend);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-muted);
+}
+.TK4R19-rank-slot--2 { top: 48px; }
+.TK4R19-rank-row {
+  position: absolute;
+  left: 60px;
+  right: 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  font-weight: 600;
+  border-radius: 2px;
+  transition: transform 0.9s var(--TK4R19-ease) 0.9s, background-color 0.5s ease 0.9s, color 0.5s ease 0.9s;
+}
+.TK4R19-rank-row em {
+  margin-left: auto;
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: var(--type-legend);
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.4s ease 1.6s;
+}
+/* before: Bajaj No. 3 (top slot), TVS below it */
+.TK4R19-rank-row--bajaj { top: 0;    background: color-mix(in srgb, var(--color-muted) 12%, transparent); color: var(--color-muted); }
+.TK4R19-rank-row--tvs   { top: 48px; background: transparent; color: var(--color-text); outline: 1px dashed var(--color-rule); }
+/* after: they swap */
+.TK4R19-scrolly[data-beat="5"] .TK4R19-rank-row--tvs   { transform: translateY(-48px); background: var(--color-primary); color: var(--color-text-invert); outline-color: transparent; }
+.TK4R19-scrolly[data-beat="5"] .TK4R19-rank-row--bajaj { transform: translateY(48px); }
+.TK4R19-scrolly[data-beat="5"] .TK4R19-rank-row em { opacity: 1; }
+
+/* ── Beat 6: the line-up ── */
+.TK4R19-lineup {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(92%, 780px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(22px, 4vh, 40px) clamp(18px, 2.4vw, 36px);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.TK4R19-lineup li {
+  margin: 0;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.5s ease, transform 0.7s var(--TK4R19-ease);
+}
+.TK4R19-lineup img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: contain;
+  object-position: 50% 100%;
+  filter: drop-shadow(0 10px 9px rgba(2, 48, 72, 0.14));
+}
+.TK4R19-lineup p {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 10px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--type-legend);
+  font-weight: 600;
+}
+.TK4R19-lineup p b {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary);
+}
+.TK4R19-scrolly[data-beat="6"] .TK4R19-lineup li { opacity: 1; transform: none; }
+.TK4R19-scrolly[data-beat="6"] .TK4R19-lineup li:nth-child(2) { transition-delay: 0.12s; }
+.TK4R19-scrolly[data-beat="6"] .TK4R19-lineup li:nth-child(3) { transition-delay: 0.24s; }
+.TK4R19-scrolly[data-beat="6"] .TK4R19-lineup li:nth-child(4) { transition-delay: 0.36s; }
+
+/* ── Beats 7–10: year spine under the bike ── */
+.TK4R19-years {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(20px, 6vh, 64px);
+  width: min(84%, 620px);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.TK4R19-years::before {                 /* the spine */
+  content: "";
+  position: absolute;
+  left: 12.5%;
+  right: 12.5%;
+  top: 6px;
+  height: 1px;
+  background: var(--color-text);
+}
+.TK4R19-years li {
+  position: relative;
+  padding-top: 20px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: var(--type-legend);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-muted);
+  transition: color 0.3s ease;
+}
+.TK4R19-years li::before {              /* node */
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 13px;
+  height: 13px;
+  margin-left: -6.5px;
+  border-radius: 50%;
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-text);
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+.TK4R19-years b {
+  display: block;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.TK4R19-scrolly:is([data-beat="7"], [data-beat="8"], [data-beat="9"], [data-beat="10"]) .TK4R19-years { opacity: 1; }
+.TK4R19-years li.is-on { color: var(--color-text); }
+.TK4R19-years li.is-on b { color: var(--color-primary); }
+.TK4R19-years li.is-on::before { background: var(--color-primary); border-color: var(--color-primary); transform: scale(1.25); }
+.TK4R19-years li.is-past::before { background: var(--color-text); }
+
+/* ── Story steps — scroll past in the right column ── */
+.TK4R19-steps {
+  position: relative;
+  z-index: 3;
+  margin-top: -100vh;
+  margin-top: -100svh;
+  margin-left: var(--TK4R19-split);
+  padding: 0 clamp(24px, 5vw, 80px) 0 clamp(8px, 1vw, 16px);
+  pointer-events: none;
+}
+.TK4R19-step {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+}
+.TK4R19-step:first-child { min-height: 85vh; align-items: flex-start; padding-top: 34vh; box-sizing: border-box; }
+.TK4R19-step:last-child  { min-height: 130vh; align-items: flex-start; padding-top: 33vh; box-sizing: border-box; }
+.TK4R19-step--bridge     { min-height: 110vh; min-height: 110svh; }
+
+.TK4R19-card {
+  max-width: 460px;
+  padding: clamp(20px, 2vw, 30px) clamp(22px, 2.2vw, 32px);
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 2px;
+  box-shadow: var(--shadow-card);
+  opacity: 0.32;
+  transition: opacity 0.4s ease;
+  pointer-events: auto;
+}
+.TK4R19-step.is-active .TK4R19-card { opacity: 1; }
+.TK4R19-card-kicker {
+  display: flex;
+  gap: 10px;
+  margin: 0 0 10px;
+  font-family: var(--font-mono);
+  font-size: var(--type-legend);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary);
+}
+.TK4R19-card-kicker span { color: var(--color-muted); }
+.TK4R19-text {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(19px, 1.7vw, 28px);
+  font-weight: 500;
+  line-height: 1.38;
+  text-wrap: pretty;
+}
+.TK4R19-text strong { color: var(--color-primary); font-weight: 600; }
+.TK4R19-text i { font-style: italic; }
+.TK4R19-hl {
+  font-weight: 600;
+  background: color-mix(in srgb, var(--color-mustard) 38%, transparent);
+  padding: 0.04em 0.14em;
+  margin: 0 -0.1em;
+  border-radius: 2px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+/* the bridge line reads as narration, not a card */
+.TK4R19-step--bridge .TK4R19-card {
+  background: none;
+  border: 0;
+  box-shadow: none;
+  padding-left: 0;
+}
+.TK4R19-step--bridge .TK4R19-text { font-size: clamp(24px, 2.4vw, 38px); line-height: 1.2; }
+
+
+/* ── iPad ── */
+@media (max-width: 1023px) {
+  .TK4R19-scrolly { --TK4R19-split: 54%; }
+  .TK4R19-label { max-width: 160px; }
+}
+
+/* ── Phones: graphic on top, text cards scroll over the bottom ── */
+@media (max-width: 768px) {
+  .TK4R19-graphic { width: 100%; bottom: 38%; }
+  .TK4R19-bike { width: min(88%, calc(40svh * var(--TK4R19-ar))); top: 56%; }
+  .TK4R19-tag { font-size: 10px; padding: 3px 7px; margin-top: 6px; }
+  .TK4R19-label { max-width: 132px; padding: 5px 8px 6px; font-size: 11px; }
+  .TK4R19-label small { font-size: 10px; }
+  .TK4R19-call { --len: 34px !important; }
+  .TK4R19-stat { top: 54%; width: calc(100% - 32px); padding: 16px 16px 14px; }
+  .TK4R19-stat-fig { font-size: var(--type-stat); }
+  .TK4R19-stat-cap { font-size: 14px; margin-top: 8px; }
+  .TK4R19-rank-list { height: 80px; }
+  .TK4R19-rank-row { height: 34px; font-size: 14px; left: 52px; }
+  .TK4R19-rank-slot { height: 34px; }
+  .TK4R19-rank-row--tvs,
+  .TK4R19-rank-slot--2 { top: 42px; }
+  .TK4R19-scrolly[data-beat="5"] .TK4R19-rank-row--tvs   { transform: translateY(-42px); }
+  .TK4R19-scrolly[data-beat="5"] .TK4R19-rank-row--bajaj { transform: translateY(42px); }
+  .TK4R19-lineup { width: calc(100% - 32px); top: 50%; gap: 10px 16px; }
+  .TK4R19-lineup p { margin-top: 6px; padding-top: 5px; gap: 6px; font-size: 11px; }
+  /* the spine moves to the top of the stage, clear of the cards riding in along the bottom */
+  .TK4R19-years { top: 34px; bottom: auto; width: calc(100% - 24px); }
+  .TK4R19-years li { font-size: 10px; padding-top: 18px; }
+  .TK4R19-years li span { display: none; }
+
+  .TK4R19-steps { margin-left: 0; padding: 0 16px; }
+  .TK4R19-step,
+  .TK4R19-step:first-child,
+  .TK4R19-step:last-child,
+  .TK4R19-step--bridge { align-items: flex-end; padding: 0 0 5svh; }
+  .TK4R19-step:first-child { min-height: 100svh; }
+  .TK4R19-step:last-child  { min-height: 120svh; padding-bottom: 25svh; }
+  .TK4R19-card { max-width: none; width: 100%; opacity: 1; box-sizing: border-box; }
+  .TK4R19-step--bridge .TK4R19-card { background: var(--color-surface); border: 1px solid var(--color-rule); box-shadow: var(--shadow-card); padding: 18px 20px; }
+  .TK4R19-text { font-size: 17px; }
+  .TK4R19-step--bridge .TK4R19-text { font-size: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .TK4R19-bike,
+  .TK4R19-stat,
+  .TK4R19-lineup li,
+  .TK4R19-rank-row,
+  .TK4R19-card { transition-duration: 0.01s; transition-delay: 0s; }
+  .TK4R19-call *,
+  .TK4R19-call { transition: none !important; }
+  .TK4R19-pin::after { animation: none !important; }
+}

@@ -1,0 +1,99 @@
+/* styles/TK4R11-timeline.css — TK4R11 · The timeline of TVS, 1912–2026
+   The original design, on design-system tokens: a thick Crimson line with Crimson nodes, grey dates,
+   Crimson titles, grey descriptions. Transparent — the page shows through.
+   Desktop: a wide ECharts strip that scrolls sideways. Phones: a vertical list. */
+
+.TK4R11-chart-section {
+  width: 100%;
+  padding: 60px 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+.TK4R11-header { padding: 0 60px 40px; }
+.TK4R11-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--type-heading);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--color-text);
+}
+.TK4R11-subtitle {
+  margin: 10px 0 0;
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  color: var(--color-muted);
+}
+
+/* ── Desktop: horizontal scroll ── */
+.TK4R11-scroll {
+  width: 100%;
+  overflow-x: auto;
+  padding-top: 20px;
+}
+.TK4R11-scroll::-webkit-scrollbar { height: 12px; }
+.TK4R11-scroll::-webkit-scrollbar-track {
+  margin: 0 60px;
+  background: var(--color-rule);
+  border-radius: 10px;
+}
+.TK4R11-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--color-primary);
+  border: 3px solid var(--color-bg);
+  border-radius: 10px;
+}
+.TK4R11-chart {
+  width: 6800px;
+  height: 500px;
+  background: transparent;
+}
+
+.TK4R11-desktop { display: block; }
+.TK4R11-mobile  { display: none; }
+
+/* ── Phones: vertical list ── */
+@media (max-width: 768px) {
+  .TK4R11-header { padding: 0 24px 28px; }
+  .TK4R11-desktop { display: none !important; }
+  .TK4R11-mobile  { display: block !important; padding: 20px 40px; }
+
+  .TK4R11-vlist {
+    position: relative;
+    margin-left: 10px;
+    padding-left: 30px;
+    border-left: 2px solid var(--color-primary);
+  }
+  .TK4R11-item { position: relative; margin-bottom: 40px; }
+  .TK4R11-item:last-child { margin-bottom: 0; padding-bottom: 80px; }
+  .TK4R11-item::before {
+    content: "";
+    position: absolute;
+    left: -41px;
+    top: 25px;
+    width: 15px;
+    height: 15px;
+    background: var(--color-primary);
+    border: 3px solid var(--color-bg);
+    border-radius: 50%;
+  }
+  .TK4R11-m-date {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-muted);
+  }
+  .TK4R11-m-title {
+    margin: 8px 0;
+    font-family: var(--font-body);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+  .TK4R11-m-desc {
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+}

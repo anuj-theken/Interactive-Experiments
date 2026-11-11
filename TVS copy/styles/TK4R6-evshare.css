@@ -1,0 +1,345 @@
+/* styles/TK4R6-evshare.css — TK4R6 · Electric two-wheeler market share, FY22 → FY24 → CY26 (story V12)
+   Scrollytelling: text steps scroll on the left; one sleek battery stays on the right and re-stacks
+   its cells per period. Companies are labelled directly beside their cells (no legend).
+   TVS Crimson, annotated on the left; rivals one smooth blue ramp up the stack; Others deep steel blue. */
+
+.TK4R6-chart-section { position: relative; }
+
+.TK4R6-chart-frame {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.TK4R6-chart-container {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 36px 36px 30px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 4px;
+}
+
+/* ── Header: eyebrow / title / subtitle on the left, legend lined up with the subtitle ── */
+.TK4R6-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--color-text);
+}
+.TK4R6-eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin: 0 0 12px;
+}
+.TK4R6-chart-title {
+  font-family: var(--font-display);
+  font-size: var(--type-heading);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  max-width: 24ch;
+  margin: 0;
+}
+.TK4R6-chart-title em { font-style: normal; color: var(--color-text); }
+.TK4R6-chart-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: 1.55;
+  color: var(--color-muted);
+  max-width: 56ch;
+  margin: 12px 0 0;
+}
+
+/* ── Axes: unit line above the plot, mono ticks, mono period labels, 1px ink baseline ── */
+.TK4R6-unit {
+  margin: 0 0 14px;
+  font-family: var(--font-mono);
+  font-size: var(--type-eyebrow);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.TK4R6-tick {
+  font-family: var(--font-mono);
+  font-size: var(--type-eyebrow);
+  color: var(--color-muted);
+  fill: var(--color-muted);
+}
+.TK4R6-xlabel {
+  font-family: var(--font-mono);
+  font-size: var(--type-legend);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--color-text);
+  fill: var(--color-text);
+}
+
+/* ── Annotations: values inside marks, figures above marks ── */
+.TK4R6-v {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
+  pointer-events: none;
+}
+.TK4R6-v small { font-size: 0.75em; }
+.TK4R6-ann {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
+  color: var(--color-text);
+  fill: var(--color-text);
+  paint-order: stroke;
+  stroke: var(--color-surface);
+  stroke-width: 4px;
+  pointer-events: none;
+}
+.TK4R6-ann--muted { font-weight: 500; color: var(--color-muted); fill: var(--color-muted); }
+
+/* ── Interaction: hovered/focused thing stays, everything else steps back to 30% ── */
+.TK4R6-plot { position: relative; }
+.TK4R6-plot [data-series],
+.TK4R6-plot [data-col] { transition: opacity 0.15s; }
+.TK4R6-plot .is-dim { opacity: 0.3; }
+.TK4R6-hit { fill: transparent; outline: none; cursor: default; }
+.TK4R6-hit:focus-visible { stroke: var(--color-text); stroke-width: 1; stroke-dasharray: 3 3; }
+
+/* ── Tooltip: same card for every chart ── */
+.TK4R6-tip {
+  position: absolute;
+  z-index: 5;
+  min-width: 170px;
+  padding: 10px 14px 11px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-rule);
+  border-radius: 3px;
+  font-family: var(--font-body);
+  font-size: var(--type-legend);
+  color: var(--color-text);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.12s, transform 0.12s;
+}
+.TK4R6-tip.is-show { opacity: 1; transform: none; }
+.TK4R6-tip-h {
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--type-eyebrow);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.TK4R6-tip-row { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; }
+.TK4R6-tip-row + .TK4R6-tip-row { margin-top: 2px; }
+.TK4R6-tip-row b {
+  font-family: var(--font-display);
+  font-size: var(--type-subheading);
+  font-weight: 500;
+  font-variant-numeric: lining-nums;
+}
+.TK4R6-tip-row b small { font-size: 0.55em; }
+
+
+/* ── Scrolly layout ── */
+.TK4R6-scrolly {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: clamp(24px, 4vw, 64px);
+}
+.TK4R6-step {
+  display: flex;
+  align-items: center;
+  min-height: 72vh;
+}
+.TK4R6-step:first-child { min-height: 56vh; }
+.TK4R6-step:last-child  { min-height: 84vh; }
+.TK4R6-step-card {
+  max-width: 30rem;
+  padding: 2px 0 2px 18px;
+  border-left: 2px solid var(--color-rule);
+  opacity: 0.35;
+  transition: opacity 0.35s ease, border-color 0.35s ease;
+}
+.TK4R6-step.is-active .TK4R6-step-card { opacity: 1; border-left-color: var(--color-primary); }
+.TK4R6-step-year {
+  margin: 0 0 8px;
+  font-family: var(--font-mono);
+  font-size: var(--type-legend);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+}
+.TK4R6-step-title {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: var(--type-subheading);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+.TK4R6-step-text {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: 1.55;
+  color: var(--color-muted);
+}
+
+/* ── Sticky stage ── */
+.TK4R6-stage {
+  position: sticky;
+  top: 8vh;
+  align-self: start;
+  height: 84vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.TK4R6-viz {
+  display: grid;
+  grid-template-columns: minmax(130px, auto) auto minmax(170px, 1fr);
+  column-gap: 0;
+  align-items: stretch;
+}
+.TK4R6-period { grid-column: 1 / -1; margin-bottom: 18px; text-align: center; }
+
+/* ── TVS annotation: big share on the left, pinned to the crimson cell with a leader ── */
+.TK4R6-tvs { position: relative; }
+.TK4R6-tvs-ann {
+  position: absolute;
+  right: 0;
+  display: grid;
+  grid-template-columns: auto 34px;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  align-items: center;
+  transform: translateY(-50%);
+  transition: top 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.TK4R6-tvs-name {
+  grid-column: 1;
+  justify-self: end;
+  font-family: var(--font-body);
+  font-size: var(--type-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+.TK4R6-tvs-num {
+  grid-column: 1;
+  justify-self: end;
+  font-family: var(--font-display);
+  font-size: var(--type-stat);
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: lining-nums;
+  color: var(--color-text);
+}
+.TK4R6-tvs-num small { margin-left: 2px; font-size: 0.42em; color: var(--color-muted); }
+/* leader from the number to the cell */
+.TK4R6-tvs-ann i {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  height: 1px;
+  background: var(--color-primary);
+}
+
+/* ── The battery: hairline casing, small cap, thin gaps ── */
+.TK4R6-battery {
+  position: relative;
+  width: 128px;
+  height: min(54vh, 420px);
+  padding: 4px;
+  border: 1.5px solid var(--color-muted);
+  border-radius: 10px;
+}
+.TK4R6-battery::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -7px;
+  width: 36px;
+  height: 5px;
+  transform: translateX(-50%);
+  background: var(--color-muted);
+  border-radius: 2px 2px 0 0;
+}
+.TK4R6-cells { position: absolute; inset: 4px; }
+.TK4R6-cell {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-radius: 3px;
+  transition: top 0.8s cubic-bezier(0.65, 0, 0.35, 1), height 0.8s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.4s ease;
+}
+
+/* ── Direct labels beside the cells ── */
+.TK4R6-labels { position: relative; margin-left: 30px; }
+.TK4R6-label {
+  position: absolute;
+  left: -30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  transform: translateY(-50%);
+  font-family: var(--font-body);
+  font-size: var(--type-legend);
+  color: var(--color-text);
+  transition: top 0.8s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.4s ease;
+}
+.TK4R6-label i { width: 20px; height: 1px; background: var(--color-muted); flex-shrink: 0; }
+.TK4R6-label .TK4R6-sw { width: 10px; height: 10px; flex-shrink: 0; }
+.TK4R6-label b {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
+}
+.TK4R6-label--tvs { font-weight: 600; }
+.TK4R6-label.is-hidden { opacity: 0; }
+
+@media (max-width: 768px) {
+  .TK4R6-chart-frame { padding: 20px 12px; }
+  .TK4R6-chart-container { padding: 20px 14px 18px; }
+  .TK4R6-chart-header { flex-direction: column; gap: 16px; }
+  .TK4R6-scrolly { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  /* battery pins to the top of the screen; the steps scroll underneath it */
+  .TK4R6-stage {
+    order: -1;
+    top: 0;
+    z-index: 2;
+    height: auto;
+    padding: 14px 0 12px;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .TK4R6-viz { width: 100%; grid-template-columns: 78px auto minmax(0, 1fr); }
+  .TK4R6-period { margin-bottom: 12px; }
+  .TK4R6-tvs-ann { grid-template-columns: auto 18px; column-gap: 6px; }
+  .TK4R6-tvs-num { font-size: var(--type-heading); }
+  .TK4R6-labels { margin-left: 18px; }
+  .TK4R6-label { left: -18px; gap: 6px; }
+  .TK4R6-label i { width: 10px; }
+  .TK4R6-battery { width: 64px; height: 34vh; }
+  .TK4R6-step { min-height: 62vh; align-items: flex-start; padding-top: 6vh; }
+  .TK4R6-step:first-child { min-height: 50vh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .TK4R6-cell, .TK4R6-label, .TK4R6-step-card, .TK4R6-tvs-ann { transition: none; }
+}
