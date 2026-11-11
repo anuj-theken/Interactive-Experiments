@@ -21,9 +21,14 @@
       TK4R9   TVS, Ather and Ola Electric — factory map (ECharts + scroll), placed between V11 and V12
       TK4R10  The TVS bus service — illustration scrolly, transparent bg (placed between TK4R1 and TK4R2)
       TK4R11  The timeline of TVS, 1912–2026 — original ECharts strip, vertical list on phones, transparent (page end)
-      TK4R12  “Designing” Srinivasan’s moped — blueprint → bike scrollytelling (story V3.3), between the wheel and the flight map
+      TK4R12  [REPLACED by TK4R15, commented out] “Designing” Srinivasan’s moped — blueprint → bike scrollytelling (story V3.3), between the wheel and the flight map
       TK4R13  Scooters and motorcycles of the 1990s — procedural 3D bike (Three.js) on a horizontal timeline (story V6.1), between the flight map and V8
-      TK4R14  (next viz)
+      TK4R14  Four families, one table — TVS & Sons board, Three.js boardroom scrollytelling (1982–1992), between the moped and the flight map
+      TK4R15  Designing the moped — four pinned scenes: idea, Hosur 1976, 1979, after (story V3.3); REPLACES TK4R12, same spot
+      TK4R16  On India’s roads — centred sentence, four bike prints stack left/right on scroll (story V3.2), between the wheel and TK4R15
+      TK4R17  Doraiswamy’s salesmanship + TVS service — 3-scene stacked-illustration scrolly (story V2.3), between TK4R10 and TK4R2
+      TK4R18  Two-stroke vs four-stroke, TVS Suzuki — engine swap + terrain scrolly into a market-share chart (story V7.2), between TK4R13 and V8
+      TK4R19  (next viz)
   -->
 
   <!-- Fonts (Reckless is self-hosted via globals.css) -->
@@ -46,8 +51,13 @@
   <link rel="stylesheet" href="/TVS/styles/TK4R9-factories.css" />
   <link rel="stylesheet" href="/TVS/styles/TK4R10-busservice.css" />
   <link rel="stylesheet" href="/TVS/styles/TK4R11-timeline.css" />
-  <link rel="stylesheet" href="/TVS/styles/TK4R12-moped.css" />
+  <!--<link rel="stylesheet" href="/TVS/styles/TK4R12-moped.css" />  TK4R12 replaced by TK4R15-->
   <link rel="stylesheet" href="/TVS/styles/TK4R13-scooters.css" />
+  <link rel="stylesheet" href="/TVS/styles/TK4R14-boardroom.css" />
+  <link rel="stylesheet" href="/TVS/styles/TK4R15-mopeddesign.css" />
+  <link rel="stylesheet" href="/TVS/styles/TK4R16-roads.css" />
+  <link rel="stylesheet" href="/TVS/styles/TK4R17-salesmanship.css" />
+  <link rel="stylesheet" href="/TVS/styles/TK4R18-engines.css" />
 </head>
 <body>
   <ruttl-poetry id="RUTTL_ID_HERE"></ruttl-poetry>
@@ -108,44 +118,28 @@
             <svg viewBox="0 0 120 90"><polygon points="60,4 70,26 96,12 86,36 116,40 88,52 104,78 74,64 62,88 52,64 22,80 36,54 4,46 34,36 20,12 48,26" fill="var(--color-mustard)" stroke="var(--color-text)" stroke-width="2.5" stroke-linejoin="round"/><text x="60" y="51" text-anchor="middle">PUNCTURE!</text></svg>
           </div>
         </div>
-        <div class="TK4R1-hud">
-          <div class="TK4R1-tally TK4R1-tally--ledger" id="TK4R1-ledger">
-            <div class="TK4R1-tally-num">₹50,000</div>
-            <div class="TK4R1-tally-what">invested, almost all of it his savings</div>
-            <div class="TK4R1-stamp">AT RISK</div>
-          </div>
-          <div class="TK4R1-tally" id="TK4R1-tally-boys">
-            <div class="TK4R1-tally-num" id="TK4R1-n-boys">0</div>
-            <div class="TK4R1-tally-what">nails and bottles picked up by hand</div>
-          </div>
-          <div class="TK4R1-tally" id="TK4R1-tally-magnet">
-            <div class="TK4R1-tally-num" id="TK4R1-n-magnet">0</div>
-            <div class="TK4R1-tally-what">nails pulled up by the magnet</div>
-          </div>
-        </div>
       </div>
 
       <div class="TK4R1-story">
         <div class="TK4R1-step TK4R1-step--hero" data-step="0">
           <div class="TK4R1-card">
-            <p class="TK4R1-eyebrow">Chapter 01</p>
-            <h2 class="TK4R1-title">Nails on the road</h2>
-            <p class="TK4R1-dek">How a bus service between Madurai, Thanjavur and Pudukkottai fought a problem nobody else saw.</p>
+            <h2 class="TK4R1-title">Nails on the Road</h2>
+            <p class="TK4R1-dek">A novel solution to a common problem</p>
             <div class="TK4R1-hint"><svg viewBox="0 0 14 20" aria-hidden="true"><rect x="1" y="1" width="12" height="18" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="7" cy="6" r="1.8" fill="currentColor"/></svg>Scroll to follow the route</div>
           </div>
         </div>
 
         <div class="TK4R1-step" data-step="1">
-          <div class="TK4R1-card">
-            <p>Horse-drawn and bullock carts were still common on the mostly unpaved roads of India, and nails loosened and fell out of the animals’ hooves.</p>
-            <figure class="TK4R1-photo"><img src="/TVS/imgs/bullockviz/TK4R1-cart.jpg" alt="A pair of white bullocks yoked to a wooden cart crowded with people, in front of a tiled-roof house" loading="lazy" /><figcaption><b>V0.1</b>Horse and bullock carts in India, early 1900s</figcaption></figure>
+          <div class="TK4R1-card TK4R1-card--wide">
+            <p>Horse-drawn and bullock carts were still common on the mostly unpaved roads of India, and <mark class="TK4R-hl">nails loosened and fell out</mark> of the animals’ hooves.</p>
+            <div class="TK4R1-photos"><figure class="TK4R1-photo"><img src="/TVS/imgs/bullockviz/TK4R1-cart.jpg" alt="A pair of white bullocks yoked to a wooden cart crowded with people, in front of a tiled-roof house" loading="lazy" /><figcaption>Bullock carts were common sights in India at the start of the 20th century. Photo: Internet Archive Book Images, sourced via Wikimedia Commons</figcaption></figure><figure class="TK4R1-photo"><img src="/TVS/imgs/bullockviz/TK4R1-branches.jpg" alt="A man leads a bullock cart loaded high with tree branches" loading="lazy" /><figcaption>A bullock cart carries tree branches in India in the early 1900s. Photo: Unknown author, sourced via Wikimedia Commons</figcaption></figure></div>
           </div>
         </div>
 
         <div class="TK4R1-step" data-step="2">
           <div class="TK4R1-card">
             <p>These nails, left on the road, punctured tyres and regularly caused automobile breakdowns.</p>
-            <figure class="TK4R1-photo"><img src="/TVS/imgs/bullockviz/TK4R1-bus.jpg" alt="An early single-deck motor bus with a petrol advertisement on its roof" loading="lazy" /><figcaption><b>V0.2</b>Bus in India, early 1900s</figcaption></figure>
+            <figure class="TK4R1-photo"><img src="/TVS/imgs/bullockviz/TK4R1-bus.jpg" alt="An early single-deck motor bus with a petrol advertisement on its roof" loading="lazy" /><figcaption>Buses saved travellers many hours, but the rides were still bumpy. Photo: BEST, sourced via Wikimedia Commons</figcaption></figure>
           </div>
         </div>
 
@@ -157,13 +151,13 @@
 
         <div class="TK4R1-step" data-step="4">
           <div class="TK4R1-card">
-            <p>He had invested Rs 50,000, basically all his savings and profits from the previous venture, into this business. Busted buses could ruin him.</p>
+            <p>He had invested <mark class="TK4R-hl">Rs 50,000</mark>, basically all his savings and profits from a previous venture, into this business. Busted buses could ruin him.</p>
           </div>
         </div>
 
         <div class="TK4R1-step" data-step="5">
           <div class="TK4R1-card">
-            <p>To solve his nail problem, Sundaram paid boys to walk his routes and collect nails and glass bottles.</p>
+            <p>To solve his nail problem, Sundaram <mark class="TK4R-hl">paid boys to walk his routes</mark> and collect nails and glass bottles.</p>
           </div>
         </div>
 
@@ -175,8 +169,8 @@
 
         <div class="TK4R1-step" data-step="7">
           <div class="TK4R1-card">
-            <p>Years later, he fitted magnets under the buses to pick up stray nails.</p>
-            <p class="TK4R1-credits">Route drawn approximately along period roads; carts, bus and figures are illustrative.</p>
+            <p>Years later, he <mark class="TK4R-hl">fitted magnets under the buses</mark> to pick up stray nails.</p>
+            <p class="TK4R1-credits">Route drawn approximately along period roads; carts, bus, and figures are illustrative.</p>
           </div>
         </div>
       </div>
@@ -196,7 +190,7 @@
         <ol class="TK4R10-list">
           <li class="TK4R10-item">
             <span class="TK4R10-icon"><img src="/TVS/imgs/TK4R10-icon-1.png" alt="" /></span>
-            <p class="TK4R10-box">… ran according to schedules…</p>
+            <p class="TK4R10-box">… ran according to schedule…</p>
           </li>
           <li class="TK4R10-item">
             <span class="TK4R10-icon"><img src="/TVS/imgs/TK4R10-icon-2.png" alt="" /></span>
@@ -220,16 +214,78 @@
 
   <div class="TK4R-spacer"></div>
 
+  <!-- ═══════════════ TK4R17 — Doraiswamy’s salesmanship + TVS customer service (story V2.3) ═══════════════ -->
+  <div class="TK4R-spacer"></div>
+
+  <!--v1.2 storybook: title, full-screen illustration, highlighted text in each picture's open space-->
+  <section class="TK4R17-chart-section TK4R-theme-light TK4R-grain" aria-label="How Doraiswamy sold cars, and how TVS looked after its customers">
+    <header class="TK4R17-header">
+      <h2 class="TK4R17-title">The salesman who <em>left the car behind</em></h2>
+      <span class="TK4R17-rule" aria-hidden="true"></span>
+    </header>
+
+    <div class="TK4R17-scroll-wrapper" id="TK4R17-wrapper">
+      <div class="TK4R17-stage">
+        <div class="TK4R17-book">
+
+          <figure class="TK4R17-canvas">
+            <!-- one shared 2684×1440 canvas; DOM order = stacking order -->
+            <img class="TK4R17-layer" data-layer="car"       src="/TVS/imgs/TK4R17/TK4R17-car.webp"       alt="A blue 1940s sedan" />
+            <img class="TK4R17-layer" data-layer="phone"     src="/TVS/imgs/TK4R17/TK4R17-phone.webp"     alt="Doraiswamy at his desk, on the telephone" />
+            <img class="TK4R17-layer" data-layer="customer"  src="/TVS/imgs/TK4R17/TK4R17-customer.webp"  alt="A smiling customer gesturing towards the car" />
+            <img class="TK4R17-layer" data-layer="dorai"     src="/TVS/imgs/TK4R17/TK4R17-dorai.webp"     alt="Doraiswamy in a grey suit and blue tie" />
+            <img class="TK4R17-layer" data-layer="handshake" src="/TVS/imgs/TK4R17/TK4R17-handshake.webp" alt="Doraiswamy shaking hands with a customer" />
+            <img class="TK4R17-layer" data-layer="mechanic"  src="/TVS/imgs/TK4R17/TK4R17-mechanic.webp"  alt="A TVS service salesman in a blue uniform" />
+            <img class="TK4R17-layer" data-layer="cart"      src="/TVS/imgs/TK4R17/TK4R17-cart.webp"      alt="Doraiswamy riding home in a horse carriage" />
+            <img class="TK4R17-layer TK4R17-layer--postcard" data-layer="postcard" src="/TVS/imgs/TK4R17/TK4R17-postcard.webp" alt="A prepaid reply postcard from TVS asking a customer for the three biggest problems with their new car" />
+            <img class="TK4R17-layer TK4R17-layer--parts"    data-layer="parts"    src="/TVS/imgs/TK4R17/TK4R17-parts.webp"    alt="Pencil drawing of spare parts: a wheel, tyres, a headlamp, a spring, pipe fittings, nuts and bolts" />
+          </figure>
+
+          <div aria-live="polite">
+            <p class="TK4R17-text TK4R17-text--open" data-beats="0">
+              <span class="TK4R17-line" data-beat="0">Doraiswamy wanted his customers to <mark class="TK4R17-hl">experience vehicles firsthand</mark>.</span>
+            </p>
+            <p class="TK4R17-text" data-beats="1">
+              <span class="TK4R17-line" data-beat="1">He would take a brand-new car to them, chat, then leave the vehicle so that they could <mark class="TK4R17-hl">try it out for a week</mark>.</span>
+            </p>
+            <p class="TK4R17-text" data-beats="2">
+              <span class="TK4R17-line" data-beat="2">He would then head home in whatever mode of transport the customer had been using until then. This was often a <mark class="TK4R17-hl">horse carriage or bullock cart</mark>.</span>
+            </p>
+            <p class="TK4R17-text" data-beats="3,4">
+              <span class="TK4R17-line" data-beat="3">The customer would usually <mark class="TK4R17-hl">fall in love</mark> with the car.</span>
+              <span class="TK4R17-line" data-beat="4">Doraiswamy would then call them and seal the deal.</span>
+            </p>
+            <p class="TK4R17-text" data-beats="5">
+              <span class="TK4R17-line" data-beat="5">By the time the customer had spent a month with their new car, TVS would send them a prepaid postcard and ask for the <mark class="TK4R17-hl">three biggest problems</mark> that they had faced.</span>
+            </p>
+            <p class="TK4R17-text" data-beats="6">
+              <span class="TK4R17-line" data-beat="6">If the car had not been brought in for servicing, TVS would dispatch a <mark class="TK4R17-hl">“service salesman”</mark> to collect the vehicle, get it serviced, and return it to the customer.</span>
+            </p>
+            <p class="TK4R17-text" data-beats="7,8">
+              <span class="TK4R17-line" data-beat="7">During the Second World War, many dealers hoarded spare parts and inflated prices, but TVS sold them <mark class="TK4R17-hl">without those hikes</mark>.</span>
+              <span class="TK4R17-line" data-beat="8">This gave the letters of TVS a new meaning in the public mind: “<strong>T</strong>rust, <strong>V</strong>alue, and <strong>S</strong>ervice”.</span>
+            </p>
+          </div>
+
+          <p class="TK4R17-tvs" aria-hidden="true">
+            <span class="TK4R17-word"><span class="TK4R17-letter">T</span><span class="TK4R17-rest">rust</span></span>
+            <span class="TK4R17-word"><span class="TK4R17-letter">V</span><span class="TK4R17-rest">alue</span></span>
+            <span class="TK4R17-word"><span class="TK4R17-letter">S</span><span class="TK4R17-rest">ervice</span></span>
+          </p>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="TK4R-spacer"></div>
+
   <!-- ═══════════════ TK4R2 — Wheel timeline, 1946–1961 ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
   <!--v1.0-->
   <section class="TK4R2-chart-section TK4R-theme-dark" data-img-base="/TVS/" aria-label="TVS group timeline, 1946 to 1961">
     <div class="TK4R2-stage" id="TK4R2-stage">
-      <header class="TK4R2-masthead">
-        <p class="TK4R2-eyebrow">Chapter 02 · 1946–1961</p>
-        <p class="TK4R2-masthead-title">From roads to factories</p>
-      </header>
 
       <div class="TK4R2-disc" id="TK4R2-disc" aria-hidden="true"></div>
       <div class="TK4R2-tire" id="TK4R2-tire"><img src="/TVS/imgs/tire_web.webp" alt="" /></div>
@@ -243,11 +299,47 @@
 
   <div class="TK4R-spacer"></div>
 
-  <!-- ═══════════════ TK4R12 — "Designing" Srinivasan's moped (story V3.3) ═══════════════ -->
+  <!-- ═══════════════ TK4R16 — On India’s roads (story V3.2) ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
   <!--v1.0-->
-  <section class="TK4R12-chart-section" aria-label="Designing Srinivasan’s moped">
+  <section class="TK4R16-chart-section TK4R-theme-light" aria-label="Popular motorcycles on India’s roads: Rajdoot, Jawa, Yezdi and Enfield">
+    <div class="TK4R16-scroll-wrapper" id="TK4R16-wrapper">
+      <div class="TK4R16-stage TK4R-grain">
+        <div class="TK4R16-pile TK4R16-pile--left">
+          <figure class="TK4R16-print" data-bike="rajdoot">
+            <div class="TK4R16-pic"><img src="/TVS/imgs/TK4R16/TK4R16-rajdoot.jpg" alt="A dark blue Rajdoot motorcycle parked in a courtyard with green arches" loading="lazy" /></div>
+            <figcaption class="TK4R16-cap">Rajdoot</figcaption>
+          </figure>
+          <figure class="TK4R16-print" data-bike="yezdi">
+            <div class="TK4R16-pic"><img src="/TVS/imgs/TK4R16/TK4R16-yezdi.jpg" alt="A black Yezdi two-wheeler parked on a street" loading="lazy" /></div>
+            <figcaption class="TK4R16-cap">Yezdi</figcaption>
+          </figure>
+        </div>
+
+        <p class="TK4R16-text">On India’s roads, <span class="TK4R16-name" data-bike="rajdoot">Rajdoot</span>, <span class="TK4R16-name" data-bike="jawa">Jawa</span>, <span class="TK4R16-name" data-bike="yezdi">Yezdi</span>, and <span class="TK4R16-name" data-bike="enfield">Enfield</span> were all popular.</p>
+
+        <div class="TK4R16-pile TK4R16-pile--right">
+          <figure class="TK4R16-print" data-bike="jawa">
+            <div class="TK4R16-pic"><img src="/TVS/imgs/TK4R16/TK4R16-jawa.jpg" alt="An orange Jawa motorcycle parked beside other bikes" loading="lazy" /></div>
+            <figcaption class="TK4R16-cap">Jawa</figcaption>
+          </figure>
+          <figure class="TK4R16-print" data-bike="enfield">
+            <div class="TK4R16-pic"><img src="/TVS/imgs/TK4R16/TK4R16-enfield.jpg" alt="A black Royal Enfield motorcycle in front of a stone wall" loading="lazy" /></div>
+            <figcaption class="TK4R16-cap">Enfield</figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="TK4R-spacer"></div>
+
+  <!-- ═══════════════ TK4R15 — Designing the moped (story V3.3) — replaces TK4R12 ═══════════════ -->
+  <div class="TK4R-spacer"></div>
+
+  <!--v1.0 REPLACED by TK4R15 (inner comments neutralised as <!~~ ~~>)-->
+  <!--<section class="TK4R12-chart-section" aria-label="Designing Srinivasan’s moped">
     <div class="TK4R12-scroll-wrapper" id="TK4R12-wrapper">
       <div class="TK4R12-stage" id="TK4R12-stage">
         <p class="TK4R12-eyebrow">“Designing” Srinivasan’s moped</p>
@@ -266,7 +358,7 @@
                     </marker>
                   </defs>
 
-                  <!-- title block -->
+                  <!~~ title block ~~>
                   <g class="TK4R12-tbk">
                     <rect class="TK4R12-tb" x="10" y="10" width="160" height="44"/>
                     <line class="TK4R12-tb" x1="10" y1="22" x2="170" y2="22"/>
@@ -282,7 +374,7 @@
                     <text class="TK4R12-t TK4R12-status" x="60" y="51.5" id="TK4R12-status">CONCEPT</text>
                   </g>
 
-                  <!-- REV A: standard wheelbase, single seat -->
+                  <!~~ REV A: standard wheelbase, single seat ~~>
                   <g class="TK4R12-g" id="TK4R12-a">
                     <path class="TK4R12-ln TK4R12-ln--faint" d="M107 198 V262 M293 198 V262"/>
                     <path class="TK4R12-ln" d="M110 257 H290" marker-start="url(#TK4R12-arw)" marker-end="url(#TK4R12-arw)"/>
@@ -292,7 +384,7 @@
                     <text class="TK4R12-t" x="320" y="52">SINGLE SEAT · ONE RIDER</text>
                   </g>
 
-                  <!-- REV B: extended wheelbase, two-up seat, carrier -->
+                  <!~~ REV B: extended wheelbase, two-up seat, carrier ~~>
                   <g class="TK4R12-g TK4R12-g--late" id="TK4R12-b">
                     <path class="TK4R12-ln TK4R12-ln--faint" d="M107 198 V262 M353 198 V262"/>
                     <path class="TK4R12-ln" d="M110 257 H350" marker-start="url(#TK4R12-arw)" marker-end="url(#TK4R12-arw)"/>
@@ -306,7 +398,7 @@
                     <text class="TK4R12-t" x="448" y="147" text-anchor="middle">CARRIER</text>
                   </g>
 
-                  <!-- the family: numbered positions -->
+                  <!~~ the family: numbered positions ~~>
                   <g class="TK4R12-g" id="TK4R12-fam">
                     <g class="TK4R12-pin"><circle cx="296" cy="64" r="7"/><text x="296" y="66.5" text-anchor="middle">1</text></g>
                     <g class="TK4R12-pin"><circle cx="366" cy="62" r="7"/><text x="366" y="64.5" text-anchor="middle">2</text></g>
@@ -349,6 +441,315 @@
         <div class="TK4R12-ticks" id="TK4R12-ticks" aria-hidden="true"></div>
       </div>
     </div>
+  </section>-->
+
+  <!--v1.0-->
+  <section class="TK4R15-chart-section TK4R-theme-light" aria-label="Designing the moped">
+    <div class="TK4R15-prog" aria-hidden="true"><i></i></div>
+    <div class="TK4R15-scenes">
+      <!-- 01 · IDEA -->
+      <div class="TK4R15-scene TK4R15-grain" id="TK4R15-s1" aria-label="01 Idea">
+        <div class="TK4R15-cover-box"><img class="TK4R15-photo" src="/TVS/imgs/TK4R15/TK4R15-field.webp" alt="A small moped parked by a field"></div>
+
+        <div class="TK4R15-sheet TK4R15-grain" id="TK4R15-paper1">
+          <div class="TK4R15-grid"></div>
+          <div class="TK4R15-rh TK4R15-bar" style="top:calc(var(--TK4R15-hdr) + 1.4vh)"></div>
+          <div class="TK4R15-rh" style="top:62.5%"></div>
+          <div class="TK4R15-rh TK4R15-bar" style="bottom:2.2vh"></div>
+          <div class="TK4R15-rv TK4R15-bar" style="left:1.2vw;top:calc(var(--TK4R15-hdr) + 1.4vh);bottom:2.2vh"></div>
+          <div class="TK4R15-rv" style="right:12.5%"></div>
+          <div class="TK4R15-cover-box" id="TK4R15-people">
+            <svg viewBox="0 0 640 429" aria-hidden="true">
+              <g class="TK4R15-fig-fill">
+                <path class="TK4R15-fill-a" d="M138 92 C152 84 172 90 178 112 L186 180 C198 190 202 204 198 216 L218 286 C192 294 160 292 144 288 L150 210 C134 200 128 180 130 150 C130 118 132 100 138 92 Z" transform="translate(7 4)"/>
+                <path class="TK4R15-fill-b" d="M254 80 C272 78 288 92 288 114 L284 168 C278 186 254 192 230 188 C216 178 220 140 232 110 C238 94 246 84 254 80 Z" transform="translate(7 4)"/>
+                <path class="TK4R15-fill-a" d="M346 126 C358 124 364 134 364 152 L362 202 L342 206 C336 182 336 142 346 126 Z" transform="translate(5 3)"/>
+              </g>
+              <g class="TK4R15-fig-fill" id="TK4R15-loadFill">
+                <path class="TK4R15-fill-a" d="M46 180 C40 160 44 140 58 132 C66 126 76 128 80 132 C86 124 98 126 100 134 C112 142 114 164 110 180 Z" transform="translate(7 4)"/>
+              </g>
+              <g id="TK4R15-loadLn">
+                <path class="TK4R15-fig-line" d="M36 182 L116 182 M46 182 L58 224 M108 182 L100 222"/>
+                <path class="TK4R15-fig-line" d="M46 180 C40 160 44 140 58 132 C66 126 76 128 80 132 C86 124 98 126 100 134 C112 142 114 164 110 180 Z"/>
+                <path class="TK4R15-fig-line" d="M74 132 C72 122 78 116 86 120 M54 160 C70 168 92 168 106 158 M78 134 C74 148 76 166 80 180"/>
+              </g>
+              <g class="TK4R15-figs-ln">
+                <path class="TK4R15-fig-line" d="M228 150 C214 146 198 144 186 142 C176 128 170 108 166 94 C176 104 180 130 180 178 C184 184 190 190 192 198 C198 206 196 212 190 214 L196 274 C200 282 212 280 212 287 L184 288 L178 216 C164 214 150 212 142 206 C134 194 130 170 130 140 C130 112 134 96 144 86 C138 82 140 72 144 68 C140 52 150 46 158 46 C172 46 176 62 170 72 C168 78 164 80 160 80 C156 82 152 84 146 86"/>
+                <path class="TK4R15-fig-line" d="M144 68 C138 64 134 70 136 76 C138 80 142 78 144 76"/>
+                <path class="TK4R15-fig-line" d="M380 152 C362 140 336 130 318 128 C304 118 292 104 284 92 C286 116 286 146 280 166 C276 176 270 182 266 184 L318 186 C328 188 328 198 322 202 L326 276 C330 284 344 280 348 288 L318 290 L312 206 L238 198 C222 198 214 188 218 170 C222 140 238 102 250 82 C244 78 240 70 242 60 C240 40 252 30 264 30 C280 30 286 44 282 58 C280 66 276 72 270 76 C266 80 262 82 258 82"/>
+                <path class="TK4R15-fig-line" d="M244 52 C250 40 270 36 282 46"/>
+                <path class="TK4R15-fig-line" d="M372 154 C366 148 360 140 352 132 C346 128 342 124 344 120 C336 112 338 96 350 94 C362 92 366 108 360 116 C358 120 354 122 350 122 M352 132 C362 140 364 170 360 206 L362 282 C366 286 374 284 374 290 L344 290 L342 208 C336 190 336 150 344 126"/>
+              </g>
+              <g class="TK4R15-pl">
+                <path class="TK4R15-lead" d="M150 46 L150 34"/><text x="150" y="28" text-anchor="middle">Wife on the back</text>
+                <path class="TK4R15-lead" d="M282 44 L294 38"/><text x="298" y="41">Husband drives</text>
+                <path class="TK4R15-lead" d="M362 100 L392 86"/><text x="396" y="88">Kid in front</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <div class="TK4R15-mast" aria-hidden="true">Designing<br>the moped</div>
+
+        <div class="TK4R15-sheet TK4R15-thin TK4R15-grain" id="TK4R15-sketch">
+          <div class="TK4R15-cover-box">
+            <svg viewBox="0 0 640 429" aria-hidden="true">
+              <defs><clipPath id="TK4R15-extClip"><rect id="TK4R15-extRect" x="640" y="-60" width="0" height="560"/></clipPath></defs>
+              <g clip-path="url(#TK4R15-extClip)" class="TK4R15-ext">
+                <g class="TK4R15-fig-fill">
+                  <path class="TK4R15-fill-b" d="M98 178 L92 178 C60 176 40 176 38 182 C32 192 36 222 48 226 L98 225 Z" transform="translate(6 4)"/>
+                  <path class="TK4R15-fill-a" d="M30 318 C36 268 84 244 134 252 L150 262 C100 256 52 276 44 322 Z" transform="translate(5 3)"/>
+                </g>
+                <g class="TK4R15-ext-ln">
+                  <path class="TK4R15-fig-line" d="M98 178 L92 178 C60 176 40 176 38 182 C32 192 36 222 48 226 L98 225"/>
+                  <path class="TK4R15-fig-line" d="M30 318 C36 268 84 244 134 252 L150 262"/>
+                  <circle class="TK4R15-fig-line" cx="104" cy="330" r="71"/>
+                  <circle class="TK4R15-fig-line" cx="104" cy="330" r="58"/>
+                  <circle class="TK4R15-fig-line" cx="104" cy="330" r="7"/>
+                  <path class="TK4R15-fig-line" d="M104 272 L104 388 M46 330 L162 330 M63 289 L145 371 M145 289 L63 371"/>
+                  <path class="TK4R15-fig-line" d="M104 326 L168 322 M104 334 L168 331"/>
+                  <path class="TK4R15-fig-line" d="M72 226 L108 324 M84 226 L114 318"/>
+                </g>
+                <path class="TK4R15-guide" d="M104 338 L104 401 M162 338 L162 401 M513 338 L513 401"/>
+                <rect x="104" y="401" width="409" height="22" style="fill:var(--color-surface);stroke:var(--color-text)" stroke-width="2.5"/>
+                <rect x="104" y="401" width="58" height="22" style="fill:var(--color-mustard);stroke:var(--color-text)" stroke-width="2.5"/>
+                <path style="fill:none;stroke:var(--color-text)" stroke-width="2" d="M104.0 403 V413 M124.5 403 V409 M144.9 403 V409 M165.3 403 V409 M185.8 403 V409 M206.2 403 V413 M226.7 403 V409 M247.2 403 V409 M267.6 403 V409 M288.1 403 V409 M308.5 403 V413 M328.9 403 V409 M349.4 403 V409 M369.9 403 V409 M390.3 403 V409 M410.8 403 V413 M431.2 403 V409 M451.6 403 V409 M472.1 403 V409 M492.6 403 V409 M513.0 403 V413"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <div class="TK4R15-copy">
+          <p class="TK4R15-b" id="TK4R15-c1a"><span>What Srinivasan had in mind was a two-wheeler that could carry <mark class="TK4R-hl">two parents and a child</mark>, and was capable of hauling heavy loads.<span class="TK4R15-key"><span><i></i>Heavy loads: a carrier over the back wheel</span></span></span></p>
+          <p class="TK4R15-b" id="TK4R15-c1b"><span>It required a complete change in the design mindset behind a moped.<span class="TK4R15-key"><span><i class="TK4R15-d"></i>Extend it: a longer body and seat</span></span></span></p>
+          <p class="TK4R15-b" id="TK4R15-c1c"><span>Engineers told him that it was <mark class="TK4R-hl">impossible</mark>. But Srinivasan was determined to make it work.</span></p>
+        </div>
+      </div>
+
+      <!-- 02 · HOSUR -->
+      <div class="TK4R15-scene TK4R15-grain" id="TK4R15-s2" aria-label="02 Hosur">
+        <div class="TK4R15-full-photo"><img src="/TVS/imgs/TK4R15/TK4R15-hosur.webp" alt="The Hosur facility"></div>
+        <div class="TK4R15-sheet TK4R15-grain" id="TK4R15-paper2">
+          <div class="TK4R15-grid"></div>
+          <div class="TK4R15-rh TK4R15-bar" style="top:calc(var(--TK4R15-hdr) + 1.4vh)"></div>
+          <div class="TK4R15-rh" style="top:75%"></div>
+          <div class="TK4R15-rv" style="left:50%"></div>
+          <div class="TK4R15-rv TK4R15-bar" style="right:1.2vw;top:calc(var(--TK4R15-hdr) + 1.4vh);bottom:0"></div>
+        </div>
+        <div class="TK4R15-place">Hosur, Tamil Nadu<br>Plant set up 1976</div>
+        <div class="TK4R15-mast" aria-hidden="true">Hosur 1976</div>
+
+        <div class="TK4R15-s2col">
+        <div class="TK4R15-copy">
+          <div class="TK4R15-b" id="TK4R15-c2a"><span>He bought 200 acres in Hosur and invested four years of Sundaram Clayton’s cash flow into his project.</span>
+            <div class="TK4R15-figs">
+              <div class="TK4R15-fig"><b class="TK4R15-dot">200</b><span>Acres in Hosur</span></div>
+              <div class="TK4R15-fig"><b class="TK4R15-dot">4</b><span>Years of Sundaram Clayton’s cash flow</span></div>
+            </div>
+          </div>
+          <div class="TK4R15-b" id="TK4R15-c2b"><span>Srinivasan began to set up the plant in 1976. It could make 60,000 vehicles a year, when the total sales of mopeds across India were only 40,000 per annum.</span>
+            <div class="TK4R15-stats">
+              <div class="TK4R15-stat TK4R15-hi">
+                <div class="TK4R15-row"><b class="TK4R15-dot" id="TK4R15-n1">0</b><span><strong>Hosur capacity</strong>vehicles a year</span></div>
+                <div class="TK4R15-track"><div class="TK4R15-fill" id="TK4R15-f1"></div></div>
+              </div>
+              <div class="TK4R15-stat">
+                <div class="TK4R15-row"><b class="TK4R15-dot" id="TK4R15-n2">0</b><span><strong>All-India sales</strong>mopeds a year</span></div>
+                <div class="TK4R15-track"><div class="TK4R15-fill" id="TK4R15-f2"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <!-- 03 · 1979 -->
+      <div class="TK4R15-scene TK4R15-grain" id="TK4R15-s3" aria-label="03 1979">
+        <div class="TK4R15-fac" aria-hidden="true">
+          <i style="left:2%;width:18%;height:52%;background:var(--TK4R15-green);clip-path:polygon(0 18%,100% 0,100% 100%,0 100%)"></i>
+          <i style="left:19%;width:24%;height:74%;background:var(--TK4R15-red);clip-path:polygon(0 30%,50% 6%,100% 30%,100% 100%,0 100%)"></i>
+          <i style="left:44%;width:26%;height:86%;background:var(--TK4R15-amber);clip-path:polygon(0 22%,15% 6%,15% 22%,30% 6%,30% 22%,45% 6%,45% 22%,60% 6%,60% 22%,75% 6%,75% 22%,90% 6%,90% 22%,100% 22%,100% 100%,0 100%)"></i>
+          <i style="left:71%;width:4%;height:96%;background:var(--TK4R15-pink)"></i>
+          <i style="left:77%;width:4%;height:80%;background:var(--TK4R15-pink)"></i>
+          <i style="left:72%;width:20%;height:62%;background:var(--TK4R15-blue)"></i>
+          <i style="left:92%;width:8%;height:40%;background:var(--TK4R15-green)"></i>
+        </div>
+        <div class="TK4R15-sheet">
+          <div class="TK4R15-grid"></div>
+          <div class="TK4R15-rh TK4R15-bar" style="top:calc(var(--TK4R15-hdr) + 1.4vh)"></div>
+          <div class="TK4R15-rv" style="left:12.5%"></div>
+          <div class="TK4R15-rh" style="top:62.5%"></div>
+        </div>
+        <div class="TK4R15-mast" id="TK4R15-y1979" aria-hidden="true">1979</div>
+        <div class="TK4R15-copy">
+          <p class="TK4R15-b" id="TK4R15-c3a"><span>The factory walls went up one day in 1979, the same day Srinivasan died.</span></p>
+          <p class="TK4R15-b" id="TK4R15-c3b"><span>He didn’t get to see his vision become reality.</span></p>
+        </div>
+      </div>
+
+      <!-- 04 · AFTER -->
+      <div class="TK4R15-scene TK4R15-grain" id="TK4R15-s4" aria-label="04 After">
+        <div class="TK4R15-sheet TK4R15-grain">
+          <div class="TK4R15-grid"></div>
+          <div class="TK4R15-rh TK4R15-bar" style="top:calc(var(--TK4R15-hdr) + 1.4vh)"></div>
+          <div class="TK4R15-rv TK4R15-bar" style="left:1.2vw;top:calc(var(--TK4R15-hdr) + 1.4vh);bottom:0"></div>
+        </div>
+        <div class="TK4R15-mast TK4R15-yrs" aria-hidden="true">1980–85</div>
+
+        <div class="TK4R15-frames">
+          <figure class="TK4R15-print TK4R15-frame" id="TK4R15-fr1">
+            <div class="TK4R15-pic"><img src="/TVS/imgs/TK4R15/TK4R15-tvsundaram.webp" alt="Portrait"></div>
+            <figcaption class="TK4R15-cap"><span>T.V. Sundaram Iyengar</span></figcaption>
+          </figure>
+          <figure class="TK4R15-print TK4R15-frame" id="TK4R15-fr2">
+            <div class="TK4R15-pic"><img src="/TVS/imgs/TK4R15/TK4R15-venu.webp" alt="Venu Srinivasan"></div>
+            <figcaption class="TK4R15-cap"><span>Venu Srinivasan</span></figcaption>
+          </figure>
+        </div>
+
+        <div class="TK4R15-stack">
+          <figure class="TK4R15-print" id="TK4R15-p1"><div class="TK4R15-pic"><img src="/TVS/imgs/TK4R15/TK4R15-field.webp" alt="The TVS 50"></div><figcaption class="TK4R15-cap"><span>TVS 50</span><em>1980</em></figcaption></figure>
+          <figure class="TK4R15-print" id="TK4R15-p2"><div class="TK4R15-pic"><img src="/TVS/imgs/TK4R15/TK4R15-ax100.webp" alt="The Suzuki AX100"></div><figcaption class="TK4R15-cap"><span>AX100 / 45 km/L</span><em>1982</em></figcaption></figure>
+          <figure class="TK4R15-print" id="TK4R15-p3"><div class="TK4R15-pic"><img src="/TVS/imgs/TK4R15/TK4R15-cd100.webp" alt="The Hero Honda CD 100"></div><figcaption class="TK4R15-cap"><span>CD 100 / 70–80 km/L</span><em>1985</em></figcaption></figure>
+        </div>
+
+        <div class="TK4R15-copy">
+          <p class="TK4R15-b" id="TK4R15-c4a"><span>Srinivasan’s son Venu became managing director of Sundaram Clayton.</span></p>
+          <p class="TK4R15-b" id="TK4R15-c4b"><span>The TVS 50 launched in 1980 and became a staple of rural India, even a <mark class="TK4R-hl">wedding gift</mark>.</span></p>
+          <p class="TK4R15-b" id="TK4R15-c4c"><span>In 1982, TVS partnered with Suzuki on motorcycles, and the AX100 delivered 45 km/L.</span></p>
+          <p class="TK4R15-b" id="TK4R15-c4d"><span>But Hero Honda’s four-stroke CD 100 arrived three years later with <mark class="TK4R-hl">70–80 km/L</mark> and upended the market.</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="TK4R-spacer"></div>
+
+  <!-- ═══════════════ TK4R14 — Four families, one table (TVS & Sons board) ═══════════════ -->
+  <div class="TK4R-spacer"></div>
+
+  <!--v1.0-->
+  <section class="TK4R14-chart-section TK4R-theme-light" aria-label="Four families, one table: power on the TVS &amp; Sons board">
+    <div class="TK4R14-scroll-wrapper">
+      <div class="TK4R14-stage" aria-hidden="true">
+        <canvas class="TK4R14-gl" id="TK4R14-gl"></canvas>
+        <div class="TK4R14-tension" id="TK4R14-tension"></div>
+        <svg class="TK4R14-links" id="TK4R14-links"><defs id="TK4R14-defs"></defs></svg>
+        <div class="TK4R14-overlay" id="TK4R14-overlay"></div>
+        <div class="TK4R14-progress"><i id="TK4R14-bar"></i></div>
+        <div class="TK4R14-legend" aria-label="Family colours">
+          <span style="--c:var(--TK4R14-santhanam)">Santhanam</span>
+          <span style="--c:var(--TK4R14-rajam)">Rajam</span>
+          <span style="--c:var(--TK4R14-krishna)">Krishna</span>
+          <span style="--c:var(--TK4R14-srinivasan)">Srinivasan</span>
+        </div>
+      </div>
+
+      <div class="TK4R14-story">
+        <div class="TK4R14-hero" data-scene="0">
+          <h2>Four families, one table.</h2>
+          <p class="TK4R14-sub">TVS &amp; Sons was split four ways on paper. At the board table, power never sat evenly.</p>
+          <div class="TK4R14-cue">Scroll to take your seat</div>
+        </div>
+
+        <div class="TK4R14-step" data-scene="1">
+          <article class="TK4R14-card">
+            <p>On the surface, the four families that operate TVS &amp; Sons have <mark class="TK4R-hl">equal influence</mark>. Each held a 25% stake in the company and three seats on the 12-member board.</p>
+            <div class="TK4R14-chart" id="TK4R14-chartStake"></div>
+            <div class="TK4R14-seats" aria-label="12 board seats, three per family">
+              <i style="--c:var(--TK4R14-santhanam)"></i><i style="--c:var(--TK4R14-santhanam)"></i><i style="--c:var(--TK4R14-santhanam)"></i>
+              <i style="--c:var(--TK4R14-rajam)"></i><i style="--c:var(--TK4R14-rajam)"></i><i style="--c:var(--TK4R14-rajam)"></i>
+              <i style="--c:var(--TK4R14-krishna)"></i><i style="--c:var(--TK4R14-krishna)"></i><i style="--c:var(--TK4R14-krishna)"></i>
+              <i style="--c:var(--TK4R14-srinivasan)"></i><i style="--c:var(--TK4R14-srinivasan)"></i><i style="--c:var(--TK4R14-srinivasan)"></i>
+            </div>
+            <div class="TK4R14-seats-cap"><span>12 board seats</span><span>3 per family</span></div>
+          </article>
+        </div>
+
+        <div class="TK4R14-step" data-scene="2">
+          <article class="TK4R14-card" style="--accent:var(--TK4R14-santhanam)">
+            <p>But the chairman and managing director positions always went to the Santhanam and Rajam families.</p>
+            <div class="TK4R14-who"><span class="TK4R14-mini" data-person="tss"></span><span class="TK4R14-mini" data-person="tsr"></span><span>The two heads of the table</span></div>
+          </article>
+        </div>
+
+        <div class="TK4R14-step" data-scene="3">
+          <article class="TK4R14-card" style="--accent:var(--TK4R14-krishna)">
+            <p>The Krishna and Srinivasan families formed an <mark class="TK4R-hl">alliance</mark> against them.</p>
+            <div class="TK4R14-who"><span class="TK4R14-mini" data-person="suresh"></span><span class="TK4R14-mini" data-person="venu"></span><span>Six of twelve seats, voting together</span></div>
+          </article>
+        </div>
+
+        <div class="TK4R14-step" data-scene="4">
+          <article class="TK4R14-card" style="--accent:var(--TK4R14-rajam)">
+            <div class="TK4R14-when"><span class="TK4R14-yr">1982</span><span>A seat changes hands</span></div>
+            <p>In 1982, TS Rajam died. His grandson Ramachandran Haresh became executive director.</p>
+            <div class="TK4R14-who"><span class="TK4R14-mini" data-person="haresh"></span><span>Ramachandran Haresh</span></div>
+          </article>
+        </div>
+
+        <div class="TK4R14-step" data-scene="5">
+          <article class="TK4R14-card" style="--accent:var(--TK4R14-conflict)">
+            <p>TS Krishna’s eldest son, Suresh Krishna, sued to challenge the appointment.</p>
+            <p>He eventually withdrew the case.</p>
+            <div class="TK4R14-who"><span class="TK4R14-mini" data-person="suresh"></span><span>Suresh Krishna</span></div>
+          </article>
+        </div>
+
+        <div class="TK4R14-step" data-scene="6">
+          <article class="TK4R14-card" style="--accent:var(--TK4R14-consensus)">
+            <p>Eventually, TVS &amp; Sons reorganised its structure so no decision could be made without the board’s <mark class="TK4R-hl">unanimous agreement</mark>.</p>
+            <div class="TK4R14-chart" id="TK4R14-chartGauge"></div>
+          </article>
+        </div>
+
+        <div class="TK4R14-inter" data-scene="7">
+          <h2>That wasn’t where the dispute ended.</h2>
+        </div>
+
+        <div class="TK4R14-step" data-scene="8">
+          <article class="TK4R14-card" style="--accent:var(--TK4R14-conflict)">
+            <div class="TK4R14-when"><span class="TK4R14-yr">1992</span><span>Cousins in court</span></div>
+            <p>In 1992, Venu and his cousin Suresh Krishna went to court against a company owned by the Santhanam family, over plans to compete with a Krishna-owned family business in brake linings.</p>
+            <div class="TK4R14-who"><span class="TK4R14-mini" data-person="venu"></span><span class="TK4R14-mini" data-person="suresh"></span><span>Venu Srinivasan and Suresh Krishna</span></div>
+          </article>
+        </div>
+
+        <div class="TK4R14-step TK4R14-quote" data-scene="9">
+          <article class="TK4R14-card" style="--accent:var(--TK4R14-srinivasan)">
+            <blockquote>My uncle [Santhanam], the eldest member of the family, instead of protecting the interests of the TVS Group, is protecting the interests of his son and his son-in-law.</blockquote>
+            <cite><span class="TK4R14-mini" data-person="venu"></span>Venu Srinivasan</cite>
+          </article>
+        </div>
+
+        <div class="TK4R14-step" data-scene="10">
+          <article class="TK4R14-card" style="--accent:var(--color-muted)">
+            <p>Ongoing discord within TVS &amp; Sons kept the group from pursuing opportunities in IT and telecommunications.</p>
+          </article>
+        </div>
+
+        <div class="TK4R14-step" data-scene="11">
+          <article class="TK4R14-card" style="--accent:var(--color-muted)">
+            <p>None of the group companies had enough resources on their own to make big moves.</p>
+            <p>When they came together, they <mark class="TK4R-hl">couldn’t reach agreements</mark>.</p>
+          </article>
+        </div>
+
+        <div class="TK4R14-step TK4R14-outro" data-scene="12">
+          <article class="TK4R14-card">
+            <h3>Four families, four directions.</h3>
+            <p>The table that was built to share power ended up pulling it apart. The next generation inherited the pieces.</p>
+            <div class="TK4R14-gen">
+              <div><span class="TK4R14-mini" data-person="harsha"></span><span>Harsha Viji<small>Santhanam</small></span></div>
+              <div><span class="TK4R14-mini" data-person="dinesh"></span><span>R. Dinesh<small>Rajam</small></span></div>
+              <div><span class="TK4R14-mini" data-person="arathi"></span><span>Arathi Krishna<small>Krishna</small></span></div>
+              <div><span class="TK4R14-mini" data-person="sudarshan"></span><span>Sudarshan Venu<small>Srinivasan</small></span></div>
+            </div>
+          </article>
+        </div>
+        <div class="TK4R14-tail"></div>
+      </div>
+    </div>
   </section>
 
   <div class="TK4R-spacer"></div>
@@ -383,7 +784,6 @@
     <div class="TK4R8-steps">
       <div class="TK4R8-step TK4R8-step--hero" data-step="0">
         <div class="TK4R8-hero-inner">
-          <p class="TK4R8-year">1992</p>
           <h2 class="TK4R8-hero-title"><span>Chennai</span><span class="TK4R8-to">to</span><span>Hamamatsu</span></h2>
           <p class="TK4R8-lede">Seventy-five TVS employees flew to Suzuki’s headquarters in Japan to learn — then brought what they learned home to Tamil Nadu.</p>
           <p class="TK4R8-hint"><i></i>Scroll to follow the journey</p>
@@ -394,7 +794,7 @@
         <div class="TK4R8-card">
           <p class="TK4R8-when">Chennai, Tamil Nadu</p>
           <h3 class="TK4R8-card-title">Most had never left Tamil Nadu</h3>
-          <p>In 1992, TVS employees were set to train at Suzuki in Hamamatsu, Japan. For many of them it would be the first journey beyond their home state.</p>
+          <p>In 1992, TVS employees were set to train at Suzuki in Hamamatsu, Japan. For many of them it would be the <mark class="TK4R-hl">first journey beyond their home state</mark>.</p>
         </div>
       </div>
 
@@ -419,7 +819,7 @@
         <div class="TK4R8-card">
           <p class="TK4R8-when">Hamamatsu, Shizuoka · Suzuki HQ</p>
           <h3 class="TK4R8-card-title">Three to four months at Suzuki</h3>
-          <p>Each batch trained at Suzuki’s headquarters for three to four months, far from home and in a new working culture.</p>
+          <p>Each batch trained at Suzuki’s headquarters for three to four months, far from home and in a <mark class="TK4R-hl">new working culture</mark>.</p>
         </div>
       </div>
 
@@ -435,22 +835,10 @@
         <div class="TK4R8-card">
           <p class="TK4R8-when">Back at TVS</p>
           <h3 class="TK4R8-card-title">Then they taught their colleagues</h3>
-          <p>The returning employees shared their knowledge of Japanese practices with colleagues who had never made the trip, so the training reached far beyond the 75 who went.</p>
+          <p>The returning employees shared their knowledge of Japanese practices with colleagues who had never made the trip, so the training reached <mark class="TK4R-hl">far beyond the 75 who went</mark>.</p>
         </div>
       </div>
 
-      <div class="TK4R8-step" data-step="7">
-        <div class="TK4R8-card">
-          <p class="TK4R8-when">1992, in summary</p>
-          <h3 class="TK4R8-card-title">One journey, carried forward</h3>
-          <div class="TK4R8-recap">
-            <div><b>3</b><span>batches</span></div>
-            <div><b>25</b><span>employees each</span></div>
-            <div><b>3–4</b><span>months of training</span></div>
-            <div><b id="TK4R8-km-final">6,400</b><span>km each way</span></div>
-          </div>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -465,13 +853,7 @@
       <div class="TK4R13-stage" id="TK4R13-stage">
         <header class="TK4R13-masthead">
           <div>
-            <p class="TK4R13-eyebrow">The 1990s · Two-wheelers</p>
             <h2 class="TK4R13-title">Scooters and motorcycles of the 1990s</h2>
-            <ul class="TK4R13-legend" aria-label="Who made it">
-              <li class="is-tvs"><i></i>TVS</li>
-              <li class="is-jv"><i></i>TVS-Suzuki <span>(joint venture)</span></li>
-              <li class="is-rival"><i></i>Rivals</li>
-            </ul>
           </div>
           <p class="TK4R13-counter" aria-hidden="true"><b id="TK4R13-counter-now">01</b> / <span id="TK4R13-counter-total">07</span></p>
         </header>
@@ -494,7 +876,7 @@
           <li class="TK4R13-item" data-type="motorcycle" data-maker="tvs-suzuki" data-color="#c22a1e" data-seat="#1e1f21">
             <div class="TK4R13-node" aria-hidden="true"><span class="TK4R13-dot"></span><span class="TK4R13-node-label"><span class="TK4R13-node-year">1994</span><span class="TK4R13-node-name">Suzuki Samurai</span><span class="TK4R13-node-maker">TVS-Suzuki</span></span></div>
             <article class="TK4R13-card">
-              <div class="TK4R13-photo"><img src="/TVS/imgs/TK4R13/TK4R13-samurai.jpg" alt="A red Suzuki Samurai motorcycle parked by a stone wall" loading="lazy" style="object-position: 50% 72%" /></div>
+              <div class="TK4R13-photo"><img src="/TVS/imgs/TK4R13/TK4R13-samurai.jpg" alt="A red Suzuki Samurai motorcycle parked by a stone wall" loading="lazy" /></div>
               <div class="TK4R13-body">
                 <p class="TK4R13-meta"><span class="TK4R13-maker">TVS-Suzuki</span><span class="TK4R13-type">Motorcycle</span><span class="TK4R13-year">1994</span></p>
                 <h3 class="TK4R13-name">Suzuki Samurai</h3>
@@ -505,7 +887,7 @@
           <li class="TK4R13-item" data-type="motorcycle" data-model="underbone" data-maker="tvs-suzuki" data-color="#1f62cf" data-seat="#33363a">
             <div class="TK4R13-node" aria-hidden="true"><span class="TK4R13-dot"></span><span class="TK4R13-node-label"><span class="TK4R13-node-year">Mid-1990s</span><span class="TK4R13-node-name">Suzuki Shogun</span><span class="TK4R13-node-maker">TVS-Suzuki</span></span></div>
             <article class="TK4R13-card">
-              <div class="TK4R13-photo"><img src="/TVS/imgs/TK4R13/TK4R13-shogun.jpg" alt="A blue Suzuki Shogun motorcycle" loading="lazy" style="object-position: 50% 55%" /></div>
+              <div class="TK4R13-photo"><img src="/TVS/imgs/TK4R13/TK4R13-shogun.jpg" alt="A blue Suzuki Shogun motorcycle" loading="lazy" /></div>
               <div class="TK4R13-body">
                 <p class="TK4R13-meta"><span class="TK4R13-maker">TVS-Suzuki</span><span class="TK4R13-type">Motorcycle</span><span class="TK4R13-year">Mid-1990s</span></p>
                 <h3 class="TK4R13-name">Suzuki Shogun</h3>
@@ -538,7 +920,7 @@
           <li class="TK4R13-item" data-type="scooter" data-maker="tvs" data-color="#202327" data-seat="#1e1f21">
             <div class="TK4R13-node" aria-hidden="true"><span class="TK4R13-dot"></span><span class="TK4R13-node-label"><span class="TK4R13-node-year">1995</span><span class="TK4R13-node-name">TVS Scooty (electric start)</span><span class="TK4R13-node-maker">TVS</span></span></div>
             <article class="TK4R13-card">
-              <div class="TK4R13-photo"><img src="/TVS/imgs/TK4R13/TK4R13-scooty-es.jpg" alt="Two women riding a TVS Scooty ES" loading="lazy" style="object-position: 50% 40%" /></div>
+              <div class="TK4R13-photo"><img src="/TVS/imgs/TK4R13/TK4R13-scooty-es.jpg" alt="Two women riding a TVS Scooty ES" loading="lazy" /></div>
               <div class="TK4R13-body">
                 <p class="TK4R13-meta"><span class="TK4R13-maker">TVS</span><span class="TK4R13-type">Scooter</span><span class="TK4R13-year">1995</span></p>
                 <h3 class="TK4R13-name">TVS Scooty (electric start)</h3>
@@ -549,7 +931,7 @@
           <li class="TK4R13-item" data-type="motorcycle" data-maker="tvs-suzuki" data-color="#202327" data-seat="#1e1f21">
             <div class="TK4R13-node" aria-hidden="true"><span class="TK4R13-dot"></span><span class="TK4R13-node-label"><span class="TK4R13-node-year">1998</span><span class="TK4R13-node-name">TVS Suzuki Max 100</span><span class="TK4R13-node-maker">TVS-Suzuki</span></span></div>
             <article class="TK4R13-card">
-              <div class="TK4R13-photo"><img src="/TVS/imgs/TK4R13/TK4R13-max100.jpg" alt="A black TVS Suzuki Max 100 motorcycle" loading="lazy" style="object-position: 50% 60%" /></div>
+              <div class="TK4R13-photo"><img src="/TVS/imgs/TK4R13/TK4R13-max100.jpg" alt="A black TVS Suzuki Max 100 motorcycle" loading="lazy" /></div>
               <div class="TK4R13-body">
                 <p class="TK4R13-meta"><span class="TK4R13-maker">TVS-Suzuki</span><span class="TK4R13-type">Motorcycle</span><span class="TK4R13-year">1998</span></p>
                 <h3 class="TK4R13-name">TVS Suzuki Max 100</h3>
@@ -566,6 +948,80 @@
 
   <div class="TK4R-spacer"></div>
 
+  <!-- ═══════════════ TK4R18 — Two-stroke vs four-stroke, TVS-Suzuki (story V7.2) ═══════════════ -->
+  <div class="TK4R-spacer"></div>
+
+  <!--v1.0-->
+  <section class="TK4R18-chart-section TK4R-theme-light TK4R-grain" aria-label="Two-stroke against four-stroke: how TVS Suzuki lost the motorcycle market to Hero Honda">
+    <header class="TK4R18-header">
+      <p class="TK4R18-eyebrow">TVS Suzuki · The engine question</p>
+      <h2 class="TK4R18-title">Suzuki bet on the <em>two-stroke</em></h2>
+      <span class="TK4R18-rule" aria-hidden="true"></span>
+    </header>
+
+    <div class="TK4R18-scrolly" id="TK4R18-scrolly" data-beat="0">
+      <div class="TK4R18-stage">
+        <div class="TK4R18-terrain" aria-hidden="true"></div>
+
+        <div class="TK4R18-graphic">
+          <figure class="TK4R18-engine TK4R18-engine--two">
+            <img class="TK4R18-engine-img" src="/TVS/imgs/TK4R18/TK4R18-2stroke.png" alt="Cutaway illustration of a two-stroke engine: one piston, a spark plug and no valves" />
+            <figcaption class="TK4R18-engine-cap"><b>Two-stroke</b> · Suzuki</figcaption>
+          </figure>
+          <figure class="TK4R18-engine TK4R18-engine--four">
+            <img class="TK4R18-engine-img" src="/TVS/imgs/TK4R18/TK4R18-4stroke.png" alt="Cutaway illustration of a four-stroke engine: a piston, a spark plug and two valves at the top" />
+            <figcaption class="TK4R18-engine-cap"><b>Four-stroke</b> · Honda</figcaption>
+          </figure>
+
+          <figure class="TK4R18-chart" id="TK4R18-chart">
+            <div class="TK4R18-chart-head">
+              <h3 class="TK4R18-chart-title">Hero Honda pulled away</h3>
+              <ul class="TK4R18-legend" aria-label="Legend">
+                <li><span class="TK4R18-sw-line"></span>Hero Honda</li>
+                <li><span class="TK4R18-sw-band"></span>TVS Suzuki</li>
+              </ul>
+            </div>
+            <p class="TK4R18-unit">Market share, %</p>
+            <svg class="TK4R18-svg" id="TK4R18-svg" role="img"
+                 aria-label="Hero Honda's market share rose from 28% in 1996 to 42% in 2000, while TVS Suzuki's stayed between 15% and 19%"></svg>
+            <p class="TK4R18-source">Source: [placeholder]</p>
+          </figure>
+        </div>
+      </div>
+
+      <div class="TK4R18-steps">
+        <div class="TK4R18-step">
+          <div class="TK4R18-card"><p class="TK4R18-text">Suzuki believed <span class="TK4R18-hl">two-stroke</span> motorcycles fit the market.</p></div>
+        </div>
+        <div class="TK4R18-step">
+          <div class="TK4R18-card">
+            <p class="TK4R18-text">TVS’s Japanese partner wanted to optimise for <strong>ruggedness, rough use, and pulling ability</strong> rather than mileage.</p>
+            <ul class="TK4R18-chips" aria-label="What Suzuki optimised for">
+              <li class="TK4R18-chip">Ruggedness</li>
+              <li class="TK4R18-chip">Rough use</li>
+              <li class="TK4R18-chip">Pulling ability</li>
+              <li class="TK4R18-chip TK4R18-chip--no">Mileage</li>
+            </ul>
+          </div>
+        </div>
+        <div class="TK4R18-step">
+          <div class="TK4R18-card"><p class="TK4R18-text">Honda opted for a <span class="TK4R18-hl">four-stroke</span> engine, which burned fuel more completely and hence could go further on a litre of fuel.</p></div>
+        </div>
+        <div class="TK4R18-step">
+          <div class="TK4R18-card"><p class="TK4R18-text">TVS Suzuki lost out on the demand for <strong>four-stroke motorcycles</strong>.</p></div>
+        </div>
+        <div class="TK4R18-step">
+          <div class="TK4R18-card"><p class="TK4R18-text">Meanwhile, Hero Honda’s market share went from <span class="TK4R18-num TK4R18-num--hero">28%</span> in 1996 to <span class="TK4R18-num TK4R18-num--hero">42%</span> in 2000…</p></div>
+        </div>
+        <div class="TK4R18-step">
+          <div class="TK4R18-card"><p class="TK4R18-text">…when TVS Suzuki’s share was stuck at <span class="TK4R18-num TK4R18-num--tvs">15–19%</span>.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="TK4R-spacer"></div>
+
   <!-- ═══════════════ TK4R4 — TVS-Suzuki profit after tax (story V8) ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
@@ -575,9 +1031,8 @@
       <div class="TK4R4-chart-container">
         <div class="TK4R4-chart-header">
           <div class="TK4R4-chart-header-text">
-            <p class="TK4R4-eyebrow">TVS-Suzuki · Profit after tax</p>
-            <h2 class="TK4R4-chart-title"><em>TVS-Suzuki</em>’s profits rose for six straight years, then fell</h2>
-            <p class="TK4R4-chart-subtitle">Profit after tax grew almost five-fold, from Rs 18 crore in 1994 to Rs 87 crore in 2000, before dropping 28% in 2001.</p>
+            <h2 class="TK4R4-chart-title"><em>TVS-Suzuki</em>’s profits surged in the 1990s</h2>
+            <p class="TK4R4-chart-subtitle">In September 2001, the TVS group and Suzuki Motor Corporation ended their 15-year-old joint venture</p>
           </div>
           <ul class="TK4R4-legend" id="TK4R4-legend" aria-label="Legend">
             <li data-key="pat"><span class="TK4R4-sw" style="background:var(--color-primary)"></span>Profit after tax</li>
@@ -652,9 +1107,7 @@
       <div class="TK4R5-chart-container">
         <div class="TK4R5-chart-header">
           <div class="TK4R5-chart-header-text">
-            <p class="TK4R5-eyebrow">TVS Motor · Two-wheeler volume</p>
             <h2 class="TK4R5-chart-title"><em>Exports</em> now make up a quarter of TVS’s two-wheeler volume</h2>
-            <p class="TK4R5-chart-subtitle">Exports rose from 15% of volume in FY14 to a peak of 35% in FY22, and stood at 25% in FY26 as total volume nearly tripled to 5.67 million units.</p>
           </div>
           <ul class="TK4R5-legend" id="TK4R5-legend" aria-label="Legend">
             <li data-key="domestic"><span class="TK4R5-sw" style="background:var(--TK4R5-domestic)"></span>Domestic</li>
@@ -662,7 +1115,7 @@
           </ul>
         </div>
         <div class="TK4R5-plot" id="TK4R5-plot">
-          <p class="TK4R5-unit" id="TK4R5-unit">Units, million · exports: share inside, volume above</p>
+          <p class="TK4R5-unit" id="TK4R5-unit">Export volume in millions</p>
           <svg id="TK4R5-chart" role="img"
                aria-label="Stacked bars of TVS two-wheeler volume, FY14 to FY26, in million units, split into exports and domestic. Export share: 15, 16, 17, 13, 15, 16, 22, 26, 35, 26, 22, 24 and 25 percent. Total volume in million units: 2.07, 2.51, 2.66, 2.87, 3.38, 3.77, 3.10, 2.94, 3.15, 3.51, 4.04, 4.61 and 5.67."></svg>
           <div class="TK4R5-tip" id="TK4R5-tip" role="status" aria-live="polite"></div>
@@ -695,26 +1148,22 @@
     <div class="TK4R9-steps">
       <div class="TK4R9-step" data-step="0">
         <div class="TK4R9-card" style="--c:var(--TK4R9-tvs)">
-          <p class="TK4R9-when">Hosur, Krishnagiri district, Tamil Nadu</p>
-          <h2 class="TK4R9-card-title">TVS Motor’s factory</h2>
-          <p>TVS’s plant in Hosur, where the first TVS 50 was built. The company’s office is in Chennai, on the coast to the east.</p>
-          <p class="TK4R9-hint"><i></i>Scroll to add the challengers</p>
+          <h2 class="TK4R9-card-title">TVS Motor’s Factory</h2>
+          <p>TVS’s plant in Hosur, where the <mark class="TK4R-hl">first TVS 50</mark> was built. The company’s office is in Chennai, on the coast to the east.</p>
         </div>
       </div>
 
       <div class="TK4R9-step" data-step="1">
         <div class="TK4R9-card" style="--c:var(--TK4R9-ather)">
-          <p class="TK4R9-when">2013 · Chennai</p>
           <h2 class="TK4R9-card-title">Ather Energy</h2>
-          <p>Ather Energy was founded in 2013 by IIT Madras alumni Tarun Mehta and Swapnil Jain. It was set up 30 minutes from TVS’s Chennai office.</p>
+          <p>Ather Energy was founded in 2013 by IIT Madras alumni Tarun Mehta and Swapnil Jain. It was set up <mark class="TK4R-hl">30 minutes</mark> from TVS’s Chennai office.</p>
         </div>
       </div>
 
       <div class="TK4R9-step" data-step="2">
         <div class="TK4R9-card" style="--c:var(--TK4R9-ola)">
-          <p class="TK4R9-when">2017 · Krishnagiri district</p>
           <h2 class="TK4R9-card-title">Ola Electric</h2>
-          <p>Ola Electric followed in 2017 and raised $800 million over a few years. Its founder, Bhavish Aggarwal, announced the world’s largest two-wheeler factory, with a capacity of 10 million scooters per year, in the same district where the first TVS 50 was built.</p>
+          <p>Ola Electric followed in 2017 and raised $800 million over a few years. Its founder, Bhavish Aggarwal, announced the <mark class="TK4R-hl">world’s largest two-wheeler factory</mark>, with a capacity of 10 million scooters per year, in the same district where the first TVS 50 was built.</p>
           <p class="TK4R9-note">Shaded: Krishnagiri district, home to both TVS’s Hosur plant and Ola’s factory at Pochampalli. Locations are approximate.</p>
         </div>
       </div>
@@ -732,9 +1181,7 @@
       <div class="TK4R6-chart-container">
         <div class="TK4R6-chart-header">
           <div class="TK4R6-chart-header-text">
-            <p class="TK4R6-eyebrow">Market share · Electric two-wheelers</p>
-            <h2 class="TK4R6-chart-title"><em>TVS</em> now leads India’s electric two-wheeler market</h2>
-            <p class="TK4R6-chart-subtitle">TVS Motor’s share rose from 4% in FY22 to 26% in CY26, as Ola Electric fell from 35% at its FY24 peak to under 7%.</p>
+            <h2 class="TK4R6-chart-title">India’s Electric Two-wheeler Market</h2>
           </div>
         </div>
 
@@ -743,22 +1190,19 @@
             <div class="TK4R6-step" data-step="0">
               <div class="TK4R6-step-card">
                 <p class="TK4R6-step-year">FY22</p>
-                <h3 class="TK4R6-step-title">Hero Electric led; TVS had 4%</h3>
-                <p class="TK4R6-step-text">India’s electric two-wheeler market was led by Hero Electric with 27% and Okinawa with 19%. TVS Motor had 4%.</p>
+                <p class="TK4R6-step-text">Hero Electric is the segment leader, followed by Okinawa.</p>
               </div>
             </div>
             <div class="TK4R6-step" data-step="1">
               <div class="TK4R6-step-card">
                 <p class="TK4R6-step-year">FY24</p>
-                <h3 class="TK4R6-step-title">Ola Electric surged to 35%</h3>
-                <p class="TK4R6-step-text">Ola Electric took the largest share of any company. TVS Motor had climbed to 19%, while Hero Electric was down to 1%.</p>
+                <p class="TK4R6-step-text">In just two years, Ola Electric comes to control more than one-third of the market. TVS Motor also gains significant share.</p>
               </div>
             </div>
             <div class="TK4R6-step" data-step="2">
               <div class="TK4R6-step-card">
                 <p class="TK4R6-step-year">CY26</p>
-                <h3 class="TK4R6-step-title">TVS leads with 26%</h3>
-                <p class="TK4R6-step-text">TVS Motor is the market leader, ahead of Bajaj Auto at 22%. Ola Electric has fallen to under 7%.</p>
+                <p class="TK4R6-step-text">Ola Electric loses its advantage and TVS Motor is the market leader.</p>
               </div>
             </div>
           </div>
@@ -839,9 +1283,19 @@
 
   <script src="/TVS/scripts/TK4R11-timeline.js"></script>
 
-  <script src="/TVS/scripts/TK4R12-moped.js"></script>
+  <!--<script src="/TVS/scripts/TK4R12-moped.js"></script>  TK4R12 replaced by TK4R15-->
 
   <script src="/TVS/scripts/TK4R13-scooters.js"></script>
+
+  <script src="/TVS/scripts/TK4R14-boardroom.js"></script>
+
+  <script src="/TVS/scripts/TK4R15-mopeddesign.js"></script>
+
+  <script src="/TVS/scripts/TK4R16-roads.js"></script>
+
+  <script src="/TVS/scripts/TK4R17-salesmanship.js"></script>
+
+  <script src="/TVS/scripts/TK4R18-engines.js"></script>
 
 </body>
 </html>

@@ -14,30 +14,6 @@
   background: var(--color-bg);
 }
 
-/* ── Masthead: chapter eyebrow, top-left ── */
-.TK4R2-masthead {
-  position: absolute;
-  inset: 0 auto auto 0;
-  z-index: 30;
-  padding: 24px clamp(20px, 5vw, 72px) 0;
-  pointer-events: none;
-}
-.TK4R2-eyebrow {
-  font-family: var(--font-body);
-  font-size: var(--type-eyebrow);
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-primary);
-  margin: 0;
-}
-.TK4R2-masthead-title {
-  font-family: var(--font-display);
-  font-size: var(--type-subheading);
-  color: var(--color-text);
-  margin: 6px 0 0;
-}
-
 /* ── Scroll hint: mouse icon, bottom-left ── */
 .TK4R2-hint {
   position: absolute;
@@ -154,14 +130,76 @@
 }
 .TK4R2-map-label {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px;
   fill: var(--color-text);
 }
 .TK4R2-map-label--key {
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
 }
+
+/* ── Padi locator map (last card) — geometry from OpenStreetMap, token colours only ── */
+.TK4R2-m-land { fill: var(--map-land); }
+.TK4R2-m-sea,
+.TK4R2-m-lake { fill: var(--map-sea); }
+.TK4R2-m-river,
+.TK4R2-m-canal,
+.TK4R2-m-road,
+.TK4R2-m-art,
+.TK4R2-m-rail,
+.TK4R2-m-link,
+.TK4R2-m-scale path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.TK4R2-m-river { stroke: var(--map-sea); stroke-width: 2.2; }
+.TK4R2-m-canal { stroke: var(--map-sea); stroke-width: 1; }
+.TK4R2-m-road  { stroke: var(--map-border); stroke-width: .45; opacity: .55; }
+.TK4R2-m-art   { stroke: var(--map-border); stroke-width: 1.3; }
+.TK4R2-m-rail  { stroke: var(--color-muted); stroke-width: .6; stroke-dasharray: 2.4 1.2; opacity: .75; }
+.TK4R2-m-fort  { fill: var(--map-land-focus); stroke: var(--color-text); stroke-width: .4; }
+.TK4R2-m-city  { fill: none; stroke: var(--color-text); stroke-width: 1; }
+.TK4R2-m-halo  { fill: var(--color-primary); opacity: .16; }
+.TK4R2-m-camp  { fill: var(--color-primary); stroke: var(--color-text); stroke-width: .5; }
+.TK4R2-m-link  { stroke: var(--color-primary); stroke-width: .8; stroke-dasharray: 2 2; }
+.TK4R2-m-pt    { fill: var(--color-muted); }
+.TK4R2-m-place,
+.TK4R2-m-sub,
+.TK4R2-m-road-lbl {
+  font-family: var(--font-body);
+  font-size: 8px;
+  fill: var(--color-muted);
+}
+.TK4R2-m-sub { font-size: 7.5px; fill: var(--color-text); opacity: .85; }
+.TK4R2-m-road-lbl { font-size: 6.5px; }
+.TK4R2-m-water {
+  font-family: var(--font-body);
+  font-size: 7px;
+  font-style: italic;
+  fill: var(--color-muted);
+  opacity: .85;
+}
+.TK4R2-m-sealabel {
+  font-family: var(--font-mono);
+  font-size: 6.5px;
+  letter-spacing: .25em;
+  fill: var(--color-muted);
+}
+.TK4R2-m-dist {
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  fill: var(--color-primary);
+}
+.TK4R2-m-scale path { stroke: var(--color-muted); stroke-width: .7; }
+.TK4R2-m-scale text,
+.TK4R2-m-north text {
+  font-family: var(--font-mono);
+  font-size: 6px;
+  fill: var(--color-muted);
+}
+.TK4R2-m-north path { fill: var(--color-muted); }
 
 /* ── Copy: each piece is placed by the JS around the card ── */
 .TK4R2-copy {
@@ -174,7 +212,8 @@
 .TK4R2-title,
 .TK4R2-statement,
 .TK4R2-num,
-.TK4R2-body {
+.TK4R2-body,
+.TK4R2-cap {
   position: absolute;
   left: 0;
   top: 0;
@@ -234,8 +273,14 @@
   line-height: 1.55;
   color: var(--color-text);
 }
+/* photo caption and credit, under the body copy */
+.TK4R2-cap {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--color-muted);
+}
 
 @media (max-width: 900px) {
   .TK4R2-hint { display: none; }
-  .TK4R2-masthead { padding-top: 16px; }
 }

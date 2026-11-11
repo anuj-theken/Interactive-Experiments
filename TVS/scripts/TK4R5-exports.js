@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const ml = mobile ? 26 : 40, mr = 4;
     const top = 26, bH = mobile ? 260 : 300;
     const H = top + bH + 30;
-    unit.textContent = mobile ? "Units, m · exports: share inside, volume above" : "Units, million · exports: share inside, volume above";
+    unit.textContent = "Export volume in millions";
 
     const step = (W - ml - mr) / years.length;
     const cx = i => ml + step * (i + .5);
@@ -104,10 +104,11 @@ document.addEventListener("DOMContentLoaded", function () {
     tip.style.top = Math.max(0, Math.min(y - pr.top - th / 2, pr.height - th)) + "px";
     tip.classList.add("is-show");
   }
+  // one font, one size; only the figures are bold
   const tipFor = i => `<div class="TK4R5-tip-h">${years[i]}</div>
-    <div class="TK4R5-tip-row"><span>Exports</span><b>${share[i]}<small>% · ${mil(exports[i])}m</small></b></div>
-    <div class="TK4R5-tip-row"><span>Domestic</span><b>${100 - share[i]}<small>% · ${mil(total[i] - exports[i])}m</small></b></div>
-    <div class="TK4R5-tip-row"><span>Total</span><b>${mil(total[i])}<small>m units</small></b></div>`;
+    <div class="TK4R5-tip-row"><span>Exports</span><span><b>${share[i]}%</b> · ${mil(exports[i])}m</span></div>
+    <div class="TK4R5-tip-row"><span>Domestic</span><span><b>${100 - share[i]}%</b> · ${mil(total[i] - exports[i])}m</span></div>
+    <div class="TK4R5-tip-row"><span>Total</span><span><b>${mil(total[i])}m</b> units</span></div>`;
   function clear() { setYear(null); tip.classList.remove("is-show"); }
 
   svg.addEventListener("pointermove", e => {

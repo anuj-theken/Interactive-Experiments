@@ -238,16 +238,29 @@
   overflow: hidden;
   will-change: opacity, transform;
 }
+/* The whole photo, never cropped: every print sits centred on the same warm mat,
+   with a hairline round the picture, so mixed shapes read as one set */
 .TK4R13-photo {
   position: relative;
   height: var(--TK4R13-photo-h);
+  box-sizing: border-box;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: var(--color-bg-warm);
+  border-bottom: 1px solid var(--color-rule);
 }
 .TK4R13-photo img {
   display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  object-position: 50% 50% !important;   /* overrides the old per-photo crop offsets */
+  border: 1px solid var(--color-rule);
+  box-shadow: 0 1px 0 var(--color-rule);
 }
 .TK4R13-body { padding: 16px 20px 20px; }
 .TK4R13-meta {

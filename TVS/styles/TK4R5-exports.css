@@ -162,22 +162,11 @@
 }
 .TK4R5-tip.is-show { opacity: 1; transform: none; }
 .TK4R5-tip-h {
-  margin-bottom: 6px;
-  font-family: var(--font-mono);
-  font-size: var(--type-eyebrow);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-muted);
+  margin-bottom: 4px;
+  font-weight: 700;
 }
-.TK4R5-tip-row { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; }
-.TK4R5-tip-row + .TK4R5-tip-row { margin-top: 2px; }
-.TK4R5-tip-row b {
-  font-family: var(--font-display);
-  font-size: var(--type-subheading);
-  font-weight: 500;
-  font-variant-numeric: lining-nums;
-}
-.TK4R5-tip-row b small { font-size: 0.55em; }
+.TK4R5-tip-row { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; line-height: 1.5; }
+.TK4R5-tip-row b { font-weight: 700; font-variant-numeric: lining-nums; }
 
 /* Runs as a light island (TK4R-theme-light) to sit in the paper article. */
 .TK4R5-chart-section { --TK4R5-domestic: color-mix(in srgb, var(--color-muted) 26%, var(--color-surface)); }

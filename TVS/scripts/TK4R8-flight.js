@@ -31,13 +31,27 @@ document.addEventListener("DOMContentLoaded", async function () {
   const outArcs = [arc(1.6), arc(4.2), arc(6.8)];
   const retArcs = [arc(-1.6), arc(-4.2), arc(-6.8)].map(a => a.slice().reverse());
 
-  // colleagues around Tamil Nadu (seeded, deterministic)
+  // colleagues around Tamil Nadu (seeded, deterministic) — only points on India's land,
+  // kept a little in from the coast so no dot spills into the sea
+  const india = TK4R8_GEO.features.find(f => f.properties.name === "India");
+  const rings = india ? (india.geometry.type === "Polygon" ? [india.geometry.coordinates] : india.geometry.coordinates) : [];
+  function inRing(x, y, ring) {
+    let inside = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const [xi, yi] = ring[i], [xj, yj] = ring[j];
+      if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  }
+  const onLand = (x, y) => rings.some(poly => inRing(x, y, poly[0]) && !poly.slice(1).some(h => inRing(x, y, h)));
+  const M = 0.15;   // degrees of margin from the coast
+  const inland = (x, y) => [[0, 0], [M, 0], [-M, 0], [0, M], [0, -M]].every(([dx, dy]) => onLand(x + dx, y + dy));
   let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   const colleagues = [];
-  while (colleagues.length < 240) {
+  for (let tries = 0; colleagues.length < 240 && tries < 20000; tries++) {
     const lat = 8.6 + rnd() * 4.6, lng = 76.8 + rnd() * 3.5;
     const east = 79.05 + (lat - 9) * 0.3, west = 76.9 + (lat - 9) * 0.28;
-    if (lng < east && lng > west) colleagues.push([lng, lat]);
+    if (lng < east && lng > west && (!rings.length || inland(lng, lat))) colleagues.push([lng, lat]);
   }
   colleagues.sort((p, q) => Math.hypot(p[0] - CHENNAI[0], p[1] - CHENNAI[1]) - Math.hypot(q[0] - CHENNAI[0], q[1] - CHENNAI[1]));
 
@@ -49,8 +63,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     { lng: 104, lat: 23, zoom: .78 },    // 3 flight
     { lng: 137.2, lat: 35, zoom: 6 },    // 4 japan
     { lng: 104, lat: 23, zoom: .78 },    // 5 return
-    { lng: 79.2, lat: 11.4, zoom: 4.8 }, // 6 share
-    { lng: 103, lat: 23, zoom: .74 }     // 7 outro
+    { lng: 79.2, lat: 11.4, zoom: 4.8 }  // 6 share
   ];
   const isMobile = () => el.clientWidth <= 768;
   // on phones the card sits below the map, so wide shots centre on the route midpoint
@@ -163,7 +176,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   for (let i = 0; i < 16; i++) { const w = document.createElement("div"); w.className = "TK4R8-wk" + (i >= 12 ? " TK4R8-wk--maybe" : ""); wkGrid.appendChild(w); wkEls.push(w); }
   const seatCount = document.getElementById("TK4R8-seat-count"), kmEl = document.getElementById("TK4R8-km"), distLabel = document.getElementById("TK4R8-dist-label");
   const fmt = n => Math.round(n).toLocaleString("en-IN");
-  document.getElementById("TK4R8-km-final").textContent = fmt(KM);
+  const kmFinal = document.getElementById("TK4R8-km-final");
+  if (kmFinal) kmFinal.textContent = fmt(KM);
   function hud() {
     const n = Math.round(S.seats);
     seatCount.textContent = n;
@@ -177,7 +191,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   chart.setOption(baseOption());
 
   /* ---------------- 5. Scroll ---------------- */
-  const HUD = { 0: "", 1: "", 2: "seats", 3: "dist", 4: "weeks", 5: "dist", 6: "", 7: "" };
+  const HUD = { 0: "", 1: "", 2: "seats", 3: "dist", 4: "weeks", 5: "dist", 6: "" };
   const ACTION = { 2: { seats: 75 }, 3: { out: 1 }, 4: { weeks: 16 }, 5: { ret: 1 }, 6: { share: 1 } };
   section.dataset.step = "0";
   section.querySelectorAll(".TK4R8-step").forEach(sec => {

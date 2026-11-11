@@ -298,16 +298,12 @@ document.addEventListener("DOMContentLoaded", function () {
   /* ---------------- 7. HUD & fixed elements ---------------- */
   const road = document.getElementById("TK4R1-road"), service = document.getElementById("TK4R1-service");
   const burst = document.getElementById("TK4R1-burst");
-  const ledger = document.getElementById("TK4R1-ledger"), stamp = ledger.querySelector(".TK4R1-stamp");
-  const tallyBoys = document.getElementById("TK4R1-tally-boys"), tallyMag = document.getElementById("TK4R1-tally-magnet");
-  const nBoys = document.getElementById("TK4R1-n-boys"), nMag = document.getElementById("TK4R1-n-magnet");
-  function hud(el, o) { el.style.opacity = o; }
   function dash(el, f) { el.style.strokeDasharray = `${path.len * f} ${path.len}`; }
 
   /* ---------------- 8. The frame: everything is a function of (step, progress) ---------------- */
   function frame(step, p) {
     allActors.forEach(a => a.used = false);
-    let roadF = 1, serviceF = 0, serviceO = 0, ledgerO = 0, stampF = 0, boysO = 0, magO = 0;
+    let roadF = 1, serviceF = 0, serviceO = 0;
     let burstO = 0, dMode = "none", clock = 0, magnet = 0;
 
     switch (step) {
@@ -334,14 +330,13 @@ document.addEventListener("DOMContentLoaded", function () {
         setActor(bus, PUNCTURE_T * easeIn(drive), 1, 1, `rotate(${-4 * q}deg)`);
         serviceF = 1; serviceO = .85 * (1 - clamp(p / .2));
         burstO = q * (1 - clamp((p - .88) / .1));
-        ledgerO = clamp(p / .12); stampF = clamp((p - .6) / .08);
         dMode = "all";
         break;
       }
       case 5:
         setActor(bus, PUNCTURE_T, 1, 1 - clamp(p / .12), "translate(0,2px) rotate(-5deg)");
         boys.forEach((b, i) => setActor(b, boyT(i, p), 1, clamp(p / .06)));
-        dMode = "B"; clock = p; boysO = 1;
+        dMode = "B"; clock = p;
         break;
       case 6:
         boys.forEach((b, i) => setActor(b, boyT(i, 1), 1, 1 - clamp(p / .12)));
@@ -351,7 +346,7 @@ document.addEventListener("DOMContentLoaded", function () {
       case 7:
         carts.forEach((c, i) => setActor(c, cartT(i, 1 + p), CART[i].dir, 1));
         setActor(bus, p, 1, clamp(p / .05));
-        magnet = 1; magO = 1;
+        magnet = 1;
         dMode = "C"; clock = 1 + p;
         break;
     }
@@ -363,14 +358,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const mode = dMode === "C" && d.kind === "bottle" ? "none" : dMode;
       picks += drawDebris(d, mode, clock);
     });
-    nBoys.textContent = step === 5 ? picks : 0;
-    nMag.textContent = step === 7 ? picks : 0;
 
     // route, service line, HUD, burst
     dash(road, roadF);
     dash(service, serviceF); service.style.opacity = serviceO;
-    hud(ledger, ledgerO); hud(tallyBoys, boysO); hud(tallyMag, magO);
-    stamp.style.opacity = stampF;
     if (burstO > 0) {
       burst.style.left = (bus.x + 30) + "px"; burst.style.top = (bus.y - 70) + "px";
       burst.style.opacity = burstO;

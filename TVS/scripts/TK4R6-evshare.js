@@ -32,18 +32,17 @@ document.addEventListener("DOMContentLoaded", function () {
     { key: "greaves",  name: "Greaves Electric", values: [10, 6, 4],    fill: RAMP(4 / 6) },
     { key: "okinawa",  name: "Okinawa",          values: [19, 2, 0.1],  fill: RAMP(5 / 6) },
     { key: "heroel",   name: "Hero Electric",    values: [27, 1, 0.0],  fill: RAMP(6 / 6) },
-    { key: "others",   name: "Others",           values: [24, 12, 12],  fill: "color-mix(in srgb, var(--color-accent) 40%, var(--color-surface))" }
+    { key: "others",   name: "Others",           values: [23, 12, 13.3], fill: "color-mix(in srgb, var(--color-accent) 40%, var(--color-surface))" }
   ];
   const MIN_CELL = 0.5;    // thinner shares aren't drawn as a cell
-  const MIN_LABEL = 2;     // shares below this aren't labelled (they'd collide)
+  // every non-zero share is labelled (labels relax apart), so each period's labels add up to 100%
   const LABEL_GAP = 19;    // minimum vertical spacing between labels, px
   const GAP = 2;           // card shows through between cells
 
   /* ---------------- 2. Build cells + labels once; periods only move them ---------------- */
   series.forEach(s => {
     s.cell = document.createElement("div");
-    if (s.key === "tvs") s.cell.classList.add("TK4R6-cell--tvs");
-    s.cell.className = "TK4R6-cell";
+    s.cell.className = "TK4R6-cell" + (s.key === "tvs" ? " TK4R6-cell--tvs" : "");
     s.cell.style.background = s.fill;
     cellsEl.appendChild(s.cell);
     if (s.key === "tvs") return;   // TVS is annotated on the left of the battery
@@ -70,7 +69,11 @@ document.addEventListener("DOMContentLoaded", function () {
       if (v < MIN_CELL) {
         s.cell.style.height = "0px";
         s.cell.style.opacity = 0;
-        if (s.label) s.label.classList.add("is-hidden");
+        if (!s.label) return;
+        if (v > 0) {   // too thin to draw, but still labelled where it sits in the stack
+          s.label.querySelector("b").textContent = v + "%";
+          centres.push({ s, c: y }); s.label.classList.remove("is-hidden");
+        } else s.label.classList.add("is-hidden");
         return;
       }
       const h = avail * v / sum, top = y - h;
@@ -79,14 +82,12 @@ document.addEventListener("DOMContentLoaded", function () {
       s.cell.style.opacity = 1;
       y = top - GAP;
       if (s.key === "tvs") {
-        // pinned to the crimson cell, but kept within the battery's height when the cell is tiny
-        const half = tvsAnn.offsetHeight / 2;
-        tvsAnn.style.top = (Math.min(Math.max(top + h / 2, half - 4), H - half + 4) + 4) + "px";   // +4: casing pad
+        // the leader sits on the number's row and always lands on the middle of the crimson cell
+        tvsAnn.style.top = (top + h / 2 + 4) + "px";   // +4: casing pad
         return;
       }
       s.label.querySelector("b").textContent = v + "%";
-      if (v >= MIN_LABEL) { centres.push({ s, c: top + h / 2 }); s.label.classList.remove("is-hidden"); }
-      else s.label.classList.add("is-hidden");
+      centres.push({ s, c: top + h / 2 }); s.label.classList.remove("is-hidden");
     });
 
     // labels: keep each beside its cell, but never closer than LABEL_GAP (relax top-down, then fit)

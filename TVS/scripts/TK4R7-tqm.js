@@ -7,10 +7,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /* ---------------- 1. Data ---------------- */
   const ICONS = {
-    kaizen:   ["M3 21h5v-4h5v-4h5V9h3", "M15 3h6v6", "M21 3l-6 6"],
-    atarimae: ["M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z", "M8.5 12l2.5 2.5 4.5-5"],
-    kansei:   ["M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z", "M7.5 11.5h2.5l1-2 2 4 1-2h2.5"],
-    miryoku:  ["M6 4h12l3 5-9 11L3 9z", "M3 9h18", "M9.5 4L8 9l4 11", "M14.5 4L16 9l-4 11"]
+    kaizen:   ["M3 17l6-6 4 4 8-8", "M15 7h6v6"],                                   // rising trend
+    atarimae: ["M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z", "M8.5 12l2.5 2.5 4.5-5"],   // shield + check
+    kansei:   ["M12 20s-8-4.6-8-10.4A4.4 4.4 0 0 1 12 7a4.4 4.4 0 0 1 8 2.6C20 15.4 12 20 12 20z"],   // heart
+    miryoku:  ["M11 5c.5 5 3 7.5 8 8-5 .5-7.5 3-8 8-.5-5-3-7.5-8-8 5-.5 7.5-3 8-8z", "M19 3v4", "M17 5h4"]   // sparkle
   };
   const DATA = [
     { key: "kaizen",   term: "Kaizen",                desc: "Make small and systematic improvements to processes every day." },
@@ -21,15 +21,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /* ---------------- 2. Centre slides ---------------- */
   const core = document.getElementById("TK4R7-core");
-  const slide = (cls, num, title, body) => `
+  const slide = (cls, title, body) => `
     <div class="TK4R7-slide ${cls}">
-      <div class="TK4R7-mask"><span class="TK4R7-ln TK4R7-num">${num}</span></div>
       <div class="TK4R7-mask"><h2 class="TK4R7-ln TK4R7-title">${title}</h2></div>
       <span class="TK4R7-bar"></span>
       <div class="TK4R7-mask"><p class="TK4R7-ln TK4R7-desc">${body}</p></div>
     </div>`;
-  DATA.forEach((d, i) => core.insertAdjacentHTML("beforeend", slide("TK4R7-slide--step", `${String(i + 1).padStart(2, "0")} / 04`, d.term, d.desc)));
-  core.insertAdjacentHTML("beforeend", slide("TK4R7-slide--outro", "04 / 04", "Total quality",
+  DATA.forEach((d, i) => core.insertAdjacentHTML("beforeend", slide("TK4R7-slide--step", d.term, d.desc)));
+  core.insertAdjacentHTML("beforeend", slide("TK4R7-slide--outro", "Total quality",
     "Improve daily, work reliably, design for feeling, delight beyond function."));
 
   /* ---------------- 3. Gauge ---------------- */
@@ -84,7 +83,7 @@ document.addEventListener("DOMContentLoaded", function () {
   el("line", { x1: C, y1: C - 150, x2: C, y2: C - 186, class: "TK4R7-needle-line" }, needle);
   el("polygon", { points: `${C - 5},${C - 186} ${C + 5},${C - 186} ${C},${C - 206}`, class: "TK4R7-needle" }, needle);
 
-  const ro = el("text", { x: C, y: 506, "text-anchor": "middle", class: "TK4R7-readout" }); ro.textContent = "000";
+  const ro = el("text", { x: C, y: 506, "text-anchor": "middle", class: "TK4R7-readout" }); ro.textContent = "00";
   const roL = el("text", { x: C, y: 532, "text-anchor": "middle", class: "TK4R7-readout-label" }); roL.textContent = "quality %";
 
   /* ---------------- 4. Initial state ---------------- */
@@ -132,7 +131,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /* ---------------- 6. Scroll story ---------------- */
   const counter = { v: 0 };
-  const paint = () => { ro.textContent = String(Math.round(counter.v)).padStart(3, "0"); };
+  const paint = () => { const n = Math.round(counter.v); ro.textContent = n >= 100 ? "100" : String(n).padStart(2, "0"); };   // two digits, three only at 100
 
   const tl = gsap.timeline({ defaults: { ease: "power2.inOut" } });
   tl.to({}, { duration: 1.2 });

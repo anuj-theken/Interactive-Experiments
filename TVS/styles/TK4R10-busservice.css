@@ -5,6 +5,7 @@
 .TK4R10-chart-section {
   position: relative;
   background: transparent;
+  overflow-x: clip;   /* the bus starts off-screen right; clip (not hidden) keeps the sticky stage working */
 }
 
 .TK4R10-scroll-wrapper {
@@ -75,18 +76,67 @@
   color: var(--color-text);
 }
 
-/* ── The bus ── */
+/* ── The bus: drives in from the right, eases to a stop, and puffs exhaust from the rear ── */
 .TK4R10-bus {
+  position: relative;
   margin: 0;
   opacity: 0;
-  transform: translateX(40px);
-  transition: opacity 0.7s ease, transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transform: translateX(85vw);
+  transition: opacity 0.35s ease, transform 1.8s cubic-bezier(0.22, 0.61, 0.2, 1);
 }
 .TK4R10-bus.is-in { opacity: 1; transform: none; }
 .TK4R10-bus img {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   height: auto;
+  transform-origin: 50% 100%;
+}
+/* engine rumble while driving, tapering off as the bus rolls to a stop */
+.TK4R10-bus.is-in img {
+  animation: TK4R10-rumble 1.8s ease-out 0s 1;
+}
+@keyframes TK4R10-rumble {
+  0%, 10%, 20%, 30%, 40%, 50%, 60%, 70%, 100% { transform: translateY(0); }
+  5%  { transform: translateY(-1.5px); }
+  15% { transform: translateY(-1.4px); }
+  25% { transform: translateY(-1.2px); }
+  35% { transform: translateY(-1px); }
+  45% { transform: translateY(-0.8px); }
+  55% { transform: translateY(-0.5px); }
+  65% { transform: translateY(-0.3px); }
+}
+
+/* exhaust: anchored at the rear-bottom of the bus; puffs trail right and up, then fade */
+.TK4R10-smoke {
+  position: absolute;
+  left: 91%;
+  top: 72%;
+  width: 0;
+  height: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.TK4R10-puff {
+  position: absolute;
+  left: -45px;
+  top: -45px;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(226, 220, 208, 0.95) 0%, rgba(205, 199, 187, 0.6) 40%, rgba(190, 184, 172, 0) 70%);
+  filter: blur(3px);
+  opacity: 0;
+}
+.TK4R10-bus.is-in .TK4R10-puff {
+  animation: TK4R10-puff var(--dur, 1.4s) ease-out var(--d, 0s) 1 both;
+}
+@keyframes TK4R10-puff {
+  0%   { opacity: 0;   transform: translate(0, 0) scale(0.3); }
+  12%  { opacity: 1; }
+  55%  { opacity: 0.75; }
+  100% { opacity: 0;   transform: translate(var(--dx, 120px), var(--dy, -50px)) scale(var(--s, 2.4)); }
 }
 
 /* ── iPad: tighter columns ── */
@@ -107,6 +157,7 @@
     padding: 0 16px;
   }
   .TK4R10-bus { order: -1; }
+  .TK4R10-puff { left: -28px; top: -28px; width: 56px; height: 56px; }
   .TK4R10-list { gap: 12px; }
   .TK4R10-item {
     width: 84%;
@@ -126,4 +177,6 @@
 @media (prefers-reduced-motion: reduce) {
   .TK4R10-item,
   .TK4R10-bus { transform: none; transition: opacity 0.3s ease; }
+  .TK4R10-bus.is-in img { animation: none; }
+  .TK4R10-smoke { display: none; }
 }

@@ -102,15 +102,15 @@ document.addEventListener("DOMContentLoaded", async function () {
   const BUBBLES = [
     { id: "hosur",   at: P.hosur,      dir: "up-right",   c: "--TK4R9-tvs",   title: "TVS Motor", text: "Hosur plant. The first TVS 50 was built here." },
     { id: "chennai", at: P.tvsChennai, dir: "left-up",    c: "--TK4R9-tvs",   title: "TVS Motor", text: "Office, Chennai." },
-    { id: "ather",   at: P.iitm,       dir: "left-down",  c: "--TK4R9-ather", title: "Ather Energy, 2013", text: "Founded by IIT Madras alumni Tarun Mehta and Swapnil Jain, 30 minutes from TVS’s office." },
-    { id: "ola",     at: P.ola,        dir: "down-right", c: "--TK4R9-ola",   title: "Ola Electric, 2017", text: "Planned the world’s largest two-wheeler factory: 10 million scooters a year. Same district as TVS’s Hosur plant." }
+    { id: "ather",   at: P.iitm,       dir: "left-down",  c: "--TK4R9-ather", title: "Ather Energy, 2013", text: "" },   // name and year only; the card carries the story
+    { id: "ola",     at: P.ola,        dir: "down-right", c: "--TK4R9-ola",   title: "Ola Electric, 2017", text: "" }
   ];
   const layer = document.getElementById("TK4R9-bubbles");
   BUBBLES.forEach(b => {
     const d = document.createElement("div");
     d.className = "TK4R9-bubble TK4R9-bubble--" + b.dir;
     d.style.setProperty("--c", "var(" + b.c + ")");
-    d.innerHTML = "<b>" + b.title + "</b><span>" + b.text + "</span>";
+    d.innerHTML = "<b>" + b.title + "</b>" + (b.text ? "<span>" + b.text + "</span>" : "");
     layer.appendChild(d); b.el = d;
   });
   function bubbleOps() { return { hosur: Math.max(1 - S.c, S.o), chennai: S.c * (1 - S.o), ather: S.a * (1 - S.o), ola: S.o }; }

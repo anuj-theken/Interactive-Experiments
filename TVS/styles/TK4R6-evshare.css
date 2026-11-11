@@ -194,9 +194,9 @@
 .TK4R6-step-text {
   margin: 0;
   font-family: var(--font-body);
-  font-size: var(--type-body);
-  line-height: 1.55;
-  color: var(--color-muted);
+  font-size: var(--type-subheading);
+  line-height: 1.45;
+  color: var(--color-text);
 }
 
 /* ── Sticky stage ── */
@@ -227,7 +227,9 @@
   grid-template-rows: auto auto;
   column-gap: 10px;
   align-items: center;
-  transform: translateY(-50%);
+  /* name above, number + leader on the row that is centred on the cell */
+  --TK4R6-num-half: calc(var(--type-stat) / 2);
+  transform: translateY(calc(-100% + var(--TK4R6-num-half)));
   transition: top 0.8s cubic-bezier(0.65, 0, 0.35, 1);
 }
 .TK4R6-tvs-name {
@@ -254,7 +256,7 @@
 /* leader from the number to the cell */
 .TK4R6-tvs-ann i {
   grid-column: 2;
-  grid-row: 1 / span 2;
+  grid-row: 2;
   height: 1px;
   background: var(--color-primary);
 }
@@ -330,7 +332,7 @@
   }
   .TK4R6-viz { width: 100%; grid-template-columns: 78px auto minmax(0, 1fr); }
   .TK4R6-period { margin-bottom: 12px; }
-  .TK4R6-tvs-ann { grid-template-columns: auto 18px; column-gap: 6px; }
+  .TK4R6-tvs-ann { grid-template-columns: auto 18px; column-gap: 6px; --TK4R6-num-half: calc(var(--type-heading) / 2); }
   .TK4R6-tvs-num { font-size: var(--type-heading); }
   .TK4R6-labels { margin-left: 18px; }
   .TK4R6-label { left: -18px; gap: 6px; }
