@@ -147,19 +147,12 @@ document.addEventListener("DOMContentLoaded", function () {
       <line x1="5" y1="23" x2="41" y2="23" stroke="${RED}" stroke-width="2.4"/>
       <g><circle cx="13" cy="31" r="6" fill="${INK}"/><circle cx="13" cy="31" r="2.2" fill="${PAPER}"/></g>
       <g><circle cx="49" cy="31" r="6" fill="${INK}"/><circle cx="49" cy="31" r="2.2" fill="${PAPER}"/></g>
-      <defs>
-        <filter id="TK4R1-magGlow" x="-80%" y="-80%" width="260%" height="260%">
-          <feMorphology in="SourceGraphic" operator="dilate" radius="1" result="fat"/>
-          <feGaussianBlur in="fat" stdDeviation="2.4" result="blur"/>
-          <feComponentTransfer in="blur" result="glow"><feFuncA type="linear" slope=".75"/></feComponentTransfer>
-          <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
       <g class="TK4R1-magnet">
         <!-- mounted on the front bumper, poles pointing forward (direction of travel) -->
         <path d="M60 27 L63.5 27" stroke="${INK}" stroke-width="1.8"/>
-        <path d="M72 22 L67 22 Q62.5 22 62.5 27 Q62.5 32 67 32 L72 32" fill="none" stroke="${RED}" stroke-width="4.2" filter="url(#TK4R1-magGlow)"/>
-        <path d="M69 22 L72.5 22M69 32 L72.5 32" stroke="${STEEL}" stroke-width="4.4"/>
+        <path d="M72 22 L67 22 Q62.5 22 62.5 27 Q62.5 32 67 32 L72 32" fill="none" stroke="${INK}" stroke-width="6"/>
+        <path d="M72 22 L67 22 Q62.5 22 62.5 27 Q62.5 32 67 32 L72 32" fill="none" stroke="${RED}" stroke-width="3.8"/>
+        <path d="M69 22 L72 22M69 32 L72 32" stroke="${STEEL}" stroke-width="3.8"/>
         <path class="TK4R1-field" d="M76 21 Q80 27 76 33M79 17.5 Q86 27 79 36.5" fill="none" stroke="${RED}" stroke-width="1.3" stroke-dasharray="2 3"/>
       </g>
     </svg>`,

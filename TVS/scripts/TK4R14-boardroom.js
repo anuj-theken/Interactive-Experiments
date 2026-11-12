@@ -464,12 +464,12 @@ document.addEventListener("DOMContentLoaded", function () {
     return [ (v3.x+1)/2*W, (1-v3.y)/2*H, v3.z ];
   }
 
-  /* Label collision pass — no tag, name, chip or story card may overlap another box.
-     Faces, scene chips, the legend and any story card on screen are fixed obstacles; each tag/name
+  /* Label collision pass — no tag, name or chip may overlap another annotation.
+     Faces, scene chips and the legend are fixed obstacles (the scrolling story cards are not:
+     they pass over the board and may cover names); each tag/name
      tries a short list of spots around its face (default first) and takes the first clear one.
      Focused people are placed first; a dimmed person's label with no clear spot is hidden. */
   const stageEl = stage, legendEl = section.querySelector('.TK4R14-legend');
-  const cardEls = [...section.querySelectorAll('.TK4R14-card, .TK4R14-hero h2, .TK4R14-cue, .TK4R14-inter h2')];
   const GAP = 4;
   let LM = null;   // cached metrics (unscaled px): face size, name/tag offsets, label sizes
   function measureLabels(){
@@ -494,10 +494,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if(labelsDirty || !LM) measureLabels();
     const sr = stageEl.getBoundingClientRect();
     const fixed = [], rel = r => [r.left-sr.left-GAP, r.top-sr.top-GAP, r.right-sr.left+GAP, r.bottom-sr.top+GAP];
-    cardEls.forEach(el=>{
-      const r = el.getBoundingClientRect();
-      if(r.bottom > sr.top && r.top < sr.bottom && r.width && getComputedStyle(el).opacity > .05) fixed.push(rel(r));
-    });
     if(legendEl && legendEl.offsetWidth) fixed.push(rel(legendEl.getBoundingClientRect()));
     for(const k in markers){
       const m = markers[k], c = m.inner.firstElementChild;
