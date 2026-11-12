@@ -10,25 +10,25 @@
     Page order follows the story (V-numbers), not the prefix number.
     Files: styles/TK4RN-name.css · scripts/TK4RN-name.js · scripts/TK4RN-name_data.js (large data only)
       TK4R-   shared layout (spacers, intro, footer)          → styles/globals.css
-      TK4R1   Nails on the road — Madurai/Thanjavur/Pudukkottai bus route (ECharts map + scroll)
-      TK4R2   Wheel timeline, 1946–1961 — tire rolls the photo cards (GSAP pin)
-      TK4R3   Two-wheeler market share, FY23–FY27 (Q1) — stacked bars (story V0, page opener)
-      TK4R4   TVS-Suzuki profit after tax, 1994–2001 — bars + growth line (story V8)
-      TK4R5   Exports share of volume, FY14–FY26 — exports inside total (story V11)
-      TK4R6   EV two-wheeler market share, FY22 → FY24 → CY26 — battery scrollytelling (story V12)
-      TK4R7   Four principles of TQM — scroll-scrubbed gauge (placed between V8 and V11)
-      TK4R8   Chennai to Hamamatsu, 1992 — flight map (ECharts + scroll), placed between the wheel and V8
-      TK4R9   TVS, Ather and Ola Electric — factory map (ECharts + scroll), placed between V11 and V12
-      TK4R10  The TVS bus service — illustration scrolly, transparent bg (placed between TK4R1 and TK4R2)
-      TK4R11  The timeline of TVS, 1912–2026 — original ECharts strip, vertical list on phones, transparent (page end)
-      TK4R12  [REPLACED by TK4R15, commented out] “Designing” Srinivasan’s moped — blueprint → bike scrollytelling (story V3.3), between the wheel and the flight map
-      TK4R13  Scooters and motorcycles of the 1990s — procedural 3D bike (Three.js) on a horizontal timeline (story V6.1), between the flight map and V8
-      TK4R14  Four families, one table — TVS & Sons board, Three.js boardroom scrollytelling (1982–1992), between the moped and the flight map
-      TK4R15  Designing the moped — four pinned scenes: idea, Hosur 1976, 1979, after (story V3.3); REPLACES TK4R12, same spot
-      TK4R16  On India’s roads — centred sentence, four bike prints stack left/right on scroll (story V3.2), between the wheel and TK4R15
-      TK4R17  Doraiswamy’s salesmanship + TVS service — 3-scene stacked-illustration scrolly (story V2.3), between TK4R10 and TK4R2
-      TK4R18  Two-stroke vs four-stroke, TVS Suzuki — engine swap + terrain scrolly into a market-share chart (story V7.2), between TK4R13 and V8
-      TK4R19  The Jupiter scooter + other new features — bike cutouts with pinned callouts, scrolly (story V10.2, V10.3), between TK4R7 and V11
+      v0.3 - TK4R1   Nails on the road — Madurai/Thanjavur/Pudukkottai bus route (ECharts map + scroll)
+      v2.4 - TK4R2   Wheel timeline, 1946–1961 — tire rolls the photo cards (GSAP pin)
+      v0.4 - TK4R3   Two-wheeler market share, FY23–FY27 (Q1) — stacked bars (story V0, page opener)
+      v8.1 - TK4R4   TVS-Suzuki profit after tax, 1994–2001 — bars + growth line (story V8)
+      v11.1 TK4R5   Exports share of volume, FY14–FY26 — exports inside total (story V11)
+      v12.2 - TK4R6   EV two-wheeler market share, FY22 → FY24 → CY26 — battery scrollytelling (story V12)
+      v5.1 - TK4R7   Four principles of TQM — scroll-scrubbed gauge (placed between V8 and V11)
+      v5.2 - TK4R8   Chennai to Hamamatsu, 1992 — flight map (ECharts + scroll), placed between the wheel and V8
+      v12.1 - TK4R9   TVS, Ather and Ola Electric — factory map (ECharts + scroll), placed between V11 and V12
+      v1.4 - TK4R10  The TVS bus service — illustration scrolly, transparent bg (placed between TK4R1 and TK4R2)
+      timeline - TK4R11  The timeline of TVS, 1912–2026 — original ECharts strip, vertical list on phones, transparent (page end)
+      v3.3(old) - TK4R12  [REPLACED by TK4R15, commented out] “Designing” Srinivasan’s moped — blueprint → bike scrollytelling (story V3.3), between the wheel and the flight map
+      v6.1 - TK4R13  Scooters and motorcycles of the 1990s — procedural 3D bike (Three.js) on a horizontal timeline (story V6.1), between the flight map and V8
+      v7.1 - TK4R14  Four families, one table — TVS & Sons board, Three.js boardroom scrollytelling (1982–1992), between the moped and the flight map
+      v3.3 - TK4R15  Designing the moped — four pinned scenes: idea, Hosur 1976, 1979, after (story V3.3); REPLACES TK4R12, same spot
+      v3.2 - TK4R16  On India’s roads — centred sentence, four bike prints stack left/right on scroll (story V3.2), between the wheel and TK4R15
+      v2.3 - TK4R17  Doraiswamy’s salesmanship + TVS service — 3-scene stacked-illustration scrolly (story V2.3), between TK4R10 and TK4R2
+      v7.2 - TK4R18  Two-stroke vs four-stroke, TVS Suzuki — engine swap + terrain scrolly into a market-share chart (story V7.2), between TK4R13 and V8
+      v10.2 v10.3 -TK4R19  The Jupiter scooter + other new features — bike cutouts with pinned callouts, scrolly (story V10.2, V10.3), between TK4R7 and V11
       TK4R20  (next viz)
   -->
 
@@ -73,7 +73,7 @@
   <!-- ═══════════════ TK4R3 — Two-wheeler market share (story V0) ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.0-->
+  <!--v0.4-->
   <section class="TK4R3-chart-section TK4R-theme-dark">
     <div class="TK4R3-chart-frame">
       <div class="TK4R3-chart-container">
@@ -104,7 +104,7 @@
   <!-- ═══════════════ TK4R1 — Nails on the road ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.0-->
+  <!--v0.3-->
   <section class="TK4R1-chart-section TK4R-theme-dark" aria-label="Nails on the road: the Madurai, Thanjavur and Pudukkottai bus route">
     <div class="TK4R1-scroll-wrapper" id="TK4R1-wrapper">
 
@@ -183,7 +183,7 @@
   <!-- ═══════════════ TK4R10 — The TVS bus service (illustration scrolly) ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.0-->
+  <!--v1.4-->
   <section class="TK4R10-chart-section TK4R-theme-dark" aria-label="How the TVS bus service ran">
     <div class="TK4R10-scroll-wrapper" id="TK4R10-wrapper">
       <div class="TK4R10-stage">
@@ -217,7 +217,7 @@
   <!-- ═══════════════ TK4R17 — Doraiswamy’s salesmanship + TVS customer service (story V2.3) ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.2 storybook: title, full-screen illustration, highlighted text in each picture's open space-->
+  <!--v2.3 — storybook: title, full-screen illustration, highlighted text in each picture's open space-->
   <section class="TK4R17-chart-section TK4R-theme-light TK4R-grain" aria-label="How Doraiswamy sold cars, and how TVS looked after its customers">
     <header class="TK4R17-header">
       <h2 class="TK4R17-title">The salesman who <em>left the car behind</em></h2>
@@ -283,7 +283,7 @@
   <!-- ═══════════════ TK4R2 — Wheel timeline, 1946–1961 ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.0-->
+  <!--v2.4-->
   <section class="TK4R2-chart-section TK4R-theme-dark" data-img-base="" aria-label="TVS group timeline, 1946 to 1961">
     <div class="TK4R2-stage" id="TK4R2-stage">
 
@@ -302,7 +302,7 @@
   <!-- ═══════════════ TK4R16 — On India’s roads (story V3.2) ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.0-->
+  <!--v3.2-->
   <section class="TK4R16-chart-section TK4R-theme-light" aria-label="Popular motorcycles on India’s roads: Rajdoot, Jawa, Yezdi and Enfield">
     <div class="TK4R16-scroll-wrapper" id="TK4R16-wrapper">
       <div class="TK4R16-stage TK4R-grain">
@@ -338,7 +338,7 @@
   <!-- ═══════════════ TK4R15 — Designing the moped (story V3.3) — replaces TK4R12 ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.0 REPLACED by TK4R15 (inner comments neutralised as <!~~ ~~>)-->
+  <!--v3.3(old) — REPLACED by TK4R15 (inner comments neutralised as <!~~ ~~>)-->
   <!--<section class="TK4R12-chart-section" aria-label="Designing Srinivasan’s moped">
     <div class="TK4R12-scroll-wrapper" id="TK4R12-wrapper">
       <div class="TK4R12-stage" id="TK4R12-stage">
@@ -443,7 +443,7 @@
     </div>
   </section>-->
 
-  <!--v1.0-->
+  <!--v3.3-->
   <section class="TK4R15-chart-section TK4R-theme-light" aria-label="Designing the moped">
     <div class="TK4R15-prog" aria-hidden="true"><i></i></div>
     <div class="TK4R15-scenes">
@@ -589,7 +589,7 @@
   <!-- ═══════════════ TK4R14 — Power Struggles Within TVS & Sons ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.0-->
+  <!--v7.1-->
   <section class="TK4R14-chart-section TK4R-theme-light" aria-label="Power struggles within TVS &amp; Sons">
     <div class="TK4R14-scroll-wrapper">
       <div class="TK4R14-stage" aria-hidden="true">
@@ -710,7 +710,7 @@
   <!-- ═══════════════ TK4R8 — Chennai to Hamamatsu, 1992 (flight map) ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.0-->
+  <!--v5.2-->
   <section class="TK4R8-chart-section TK4R-theme-light" id="TK4R8-section" data-hud="" aria-label="Chennai to Hamamatsu, 1992: the TVS training journey to Suzuki">
     <div class="TK4R8-stage TK4R-grain" aria-hidden="true">
       <div class="TK4R8-map" id="TK4R8-map"></div>
@@ -794,7 +794,7 @@
   <!-- ═══════════════ TK4R13 — Scooters and motorcycles of the 1990s (story V6.1) ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.0-->
+  <!--v6.1-->
   <section class="TK4R13-chart-section TK4R-theme-light" aria-label="Scooters and motorcycles of the 1990s">
     <div class="TK4R13-scroll-wrapper" id="TK4R13-wrapper">
       <div class="TK4R13-stage" id="TK4R13-stage">
@@ -905,7 +905,7 @@
   <!-- ═══════════════ TK4R18 — Two-stroke vs four-stroke, TVS-Suzuki (story V7.2) ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.0-->
+  <!--v7.2-->
   <section class="TK4R18-chart-section TK4R-theme-light TK4R-grain" aria-label="Two-stroke against four-stroke: how TVS Suzuki lost the motorcycle market to Hero Honda">
     <div class="TK4R18-scrolly" id="TK4R18-scrolly" data-beat="0">
       <div class="TK4R18-stage">
@@ -971,7 +971,7 @@
   <!-- ═══════════════ TK4R4 — TVS-Suzuki profit after tax (story V8) ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.0-->
+  <!--v8.1-->
   <section class="TK4R4-chart-section TK4R-theme-dark">
     <div class="TK4R4-chart-frame">
       <div class="TK4R4-chart-container">
@@ -1000,7 +1000,7 @@
   <!-- ═══════════════ TK4R7 — Four principles of TQM ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.0-->
+  <!--v5.1-->
   <section class="TK4R7-chart-section" aria-label="Four principles of Total Quality Management">
     <div class="TK4R7-stage" id="TK4R7-stage">
       <svg class="TK4R7-deco" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -1047,7 +1047,7 @@
   <!-- ═══════════════ TK4R19 — The Jupiter scooter + other new features (story V10.2, V10.3) ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.0-->
+  <!--v10.2 v10.3-->
   <section class="TK4R19-chart-section TK4R-theme-light TK4R-grain" aria-label="The TVS Jupiter scooter and the features TVS added to later models">
     <header class="TK4R19-header">
       <h2 class="TK4R19-title">The <em>Jupiter</em> scooter</h2>
@@ -1167,7 +1167,7 @@
   <!-- ═══════════════ TK4R5 — Exports share of volume (story V11) ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.0-->
+  <!--v11.1-->
   <section class="TK4R5-chart-section TK4R-theme-light">
     <div class="TK4R5-chart-frame">
       <div class="TK4R5-chart-container">
@@ -1195,7 +1195,7 @@
   <!-- ═══════════════ TK4R9 — TVS, Ather and Ola Electric: factory map ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.0-->
+  <!--v12.1-->
   <section class="TK4R9-chart-section TK4R-theme-dark" id="TK4R9-section" data-step="0" aria-label="TVS, Ather Energy and Ola Electric in Tamil Nadu: factory map">
     <div class="TK4R9-stage" aria-hidden="true">
       <div class="TK4R9-map" id="TK4R9-map"></div>
@@ -1241,7 +1241,7 @@
   <!-- ═══════════════ TK4R6 — EV two-wheeler market share (story V12) ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.0-->
+  <!--v12.2-->
   <section class="TK4R6-chart-section TK4R-theme-dark">
     <div class="TK4R6-chart-frame">
       <div class="TK4R6-chart-container">
@@ -1297,7 +1297,7 @@
   <!-- ═══════════════ TK4R11 — The timeline of TVS, 1912–2026 ═══════════════ -->
   <div class="TK4R-spacer"></div>
 
-  <!--v1.0-->
+  <!--timeline-->
   <section class="TK4R11-chart-section">
     <header class="TK4R11-header">
       <h2 class="TK4R11-title">The timeline of TVS</h2>
