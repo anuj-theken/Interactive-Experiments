@@ -341,3 +341,12 @@
 @media (prefers-reduced-motion: reduce) {
   .TK4R13-dot { transition: none; }
 }
+
+/* photo credit at the foot of each card */
+.TK4R13-credit {
+  margin: 10px 0 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--color-muted);
+}

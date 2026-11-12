@@ -71,6 +71,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   const S = { ...cam(0), seats: 0, out: 0, weeks: 0, ret: 0, share: 0 };
 
   /* ---------------- 3. Chart ---------------- */
+  // Russia's outline crosses the date line (Chukotka jumps from +180° to −180°), which echarts
+  // draws as a sea-coloured strip across the whole map at 65–69°N — visible on phones, where the
+  // map is zoomed out. Shift western-hemisphere points east by 360° so the outline stays continuous.
+  const unwrap = a => { if (typeof a[0] === "number") { if (a[0] < 0) a[0] += 360; } else a.forEach(unwrap); };
+  TK4R8_GEO.features.forEach(f => unwrap(f.geometry.coordinates));
   echarts.registerMap("TK4R8-asia", TK4R8_GEO);
   // wait until the map box has a real size
   await new Promise(r => {

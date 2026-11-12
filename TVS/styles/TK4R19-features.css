@@ -620,3 +620,16 @@
   .TK4R19-call { transition: none !important; }
   .TK4R19-pin::after { animation: none !important; }
 }
+
+/* photo credit for the 2013 Jupiter, under its caption tag */
+.TK4R19-credit {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  margin: 46px 0 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--color-muted);
+}
