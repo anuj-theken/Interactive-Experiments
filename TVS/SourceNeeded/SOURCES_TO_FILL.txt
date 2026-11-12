@@ -1,7 +1,9 @@
 SOURCES NEEDED: TVS story
 =========================
 
-Every image in this folder appears in TVS/index.html without a real source or credit.
+Every image in this folder appears in TVS/index.html without a real source or credit,
+and was NOT found in "Intermission _ Ep 6 _ TVS Motor Company _ Site Copy.docx".
+(Images that the doc covered have been credited on the page and removed from here.)
 These are copies. The originals stay in TVS/imgs/ and the filenames match.
 
 For each entry, fill in:
@@ -14,109 +16,10 @@ For each entry, fill in:
 The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
 
 ##############################################################################
-# PHOTOS: credit line on the page is a placeholder
+# PHOTOS: credit line on the page still says [source to be added]
 ##############################################################################
 
-[01] TK4R16-rajdoot.jpg
-     Used in:        TK4R16 · Rajdoot
-     Currently says: Photo: [credit], sourced via [source]
-     Credit:
-     Source:
-     Link:
-     Licence:
-     Notes:
-
-[02] TK4R16-yezdi.jpg
-     Used in:        TK4R16 · Yezdi
-     Currently says: Photo: [credit], sourced via [source]
-     Credit:
-     Source:
-     Link:
-     Licence:
-     Notes:
-
-[03] TK4R16-jawa.jpg
-     Used in:        TK4R16 · Jawa
-     Currently says: Photo: [credit], sourced via [source]
-     Credit:
-     Source:
-     Link:
-     Licence:
-     Notes:
-
-[04] TK4R16-enfield.jpg
-     Used in:        TK4R16 · Enfield
-     Currently says: Photo: [credit], sourced via [source]
-     Credit:
-     Source:
-     Link:
-     Licence:
-     Notes:
-
-[05] TK4R13-sunny.jpg
-     Used in:        TK4R13 · Sunny
-     Currently says: Photo: [credit], sourced via [source]
-     Credit:
-     Source:
-     Link:
-     Licence:
-     Notes:
-
-[06] TK4R13-samurai.jpg
-     Used in:        TK4R13 · Samurai
-     Currently says: Photo: [credit], sourced via [source]
-     Credit:
-     Source:
-     Link:
-     Licence:
-     Notes:
-
-[07] TK4R13-shogun.jpg
-     Used in:        TK4R13 · Shogun
-     Currently says: Photo: [credit], sourced via [source]
-     Credit:
-     Source:
-     Link:
-     Licence:
-     Notes:
-
-[08] TK4R13-splendor.jpg
-     Used in:        TK4R13 · Splendor
-     Currently says: Photo: [credit], sourced via [source]
-     Credit:
-     Source:
-     Link:
-     Licence:
-     Notes:
-
-[09] TK4R13-scooty.jpg
-     Used in:        TK4R13 · Scooty
-     Currently says: Photo: [credit], sourced via [source]
-     Credit:
-     Source:
-     Link:
-     Licence:
-     Notes:
-
-[10] TK4R13-scooty-es.jpg
-     Used in:        TK4R13 · Scooty ES
-     Currently says: Photo: [credit], sourced via [source]
-     Credit:
-     Source:
-     Link:
-     Licence:
-     Notes:
-
-[11] TK4R13-max100.jpg
-     Used in:        TK4R13 · Max 100
-     Currently says: Photo: [credit], sourced via [source]
-     Credit:
-     Source:
-     Link:
-     Licence:
-     Notes:
-
-[12] TK4R15-field.webp
+[01] TK4R15-field.webp
      Used in:        TK4R15 · TVS 50 (1980) print; also used as a full-width photo
      Currently says: Photo: [source to be added]
      Credit:
@@ -125,7 +28,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[13] TK4R15-tvsundaram.webp
+[02] TK4R15-tvsundaram.webp
      Used in:        TK4R15 · T.V. Sundaram portrait
      Currently says: Photo: [source to be added]
      Credit:
@@ -134,18 +37,9 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[14] TK4R15-venu.webp
+[03] TK4R15-venu.webp
      Used in:        TK4R15 · Venu Srinivasan portrait
-     Currently says: Photo: [source to be added]
-     Credit:
-     Source:
-     Link:
-     Licence:
-     Notes:
-
-[15] TK4R12-moped.webp
-     Used in:        TK4R12 · family moped
-     Currently says: "Reference image — swap for a TVS 50 photo"
+     Currently says: Photo: [source to be added]  |  Site Copy doc (V5.4a/b) gives two candidate articles, unconfirmed: carandbike.com/news/venu-srinivasan-awarded-with-deming-distinguished-service-award-2128410  and  aninews.in/news/business/tvs-motor-chairman-srinivasan-conferred-with-deming-award20191106164128/
      Credit:
      Source:
      Link:
@@ -156,7 +50,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
 # PHOTOS: no credit line on the page at all
 ##############################################################################
 
-[16] TK4R15-hosur.webp
+[04] TK4R15-hosur.webp
      Used in:        TK4R15 · Hosur facility (full-width photo)
      Currently says: none
      Credit:
@@ -165,7 +59,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[17] TK4R19-xl100.webp
+[05] TK4R19-xl100.webp
      Used in:        TK4R19 · TVS XL 100 (2016)
      Currently says: none
      Credit:
@@ -174,7 +68,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[18] TK4R19-ntorq.webp
+[06] TK4R19-ntorq.webp
      Used in:        TK4R19 · TVS NTorq
      Currently says: none
      Credit:
@@ -183,7 +77,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[19] TK4R19-raider.webp
+[07] TK4R19-raider.webp
      Used in:        TK4R19 · TVS Raider
      Currently says: none
      Credit:
@@ -192,7 +86,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[20] TK4R19-jupiter125.webp
+[08] TK4R19-jupiter125.webp
      Used in:        TK4R19 · TVS Jupiter 125
      Currently says: none
      Credit:
@@ -201,7 +95,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[21] tire_web.webp
+[09] tire_web.webp
      Used in:        TK4R2 · tyre graphic
      Currently says: none
      Credit:
@@ -214,7 +108,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
 # ILLUSTRATIONS / ICONS: no credit (write 'In-house illustration' if our team drew it, otherwise give the source)
 ##############################################################################
 
-[22] TK4R10-bus.webp
+[10] TK4R10-bus.webp
      Used in:        TK4R10 · TVS bus illustration (route 6, Devakottai)
      Currently says: none
      Credit:
@@ -223,7 +117,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[23] TK4R10-icon-1.png
+[11] TK4R10-icon-1.png
      Used in:        TK4R10 · icon 1
      Currently says: none
      Credit:
@@ -232,7 +126,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[24] TK4R10-icon-2.png
+[12] TK4R10-icon-2.png
      Used in:        TK4R10 · icon 2
      Currently says: none
      Credit:
@@ -241,7 +135,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[25] TK4R10-icon-3.png
+[13] TK4R10-icon-3.png
      Used in:        TK4R10 · icon 3
      Currently says: none
      Credit:
@@ -250,7 +144,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[26] TK4R10-icon-4.png
+[14] TK4R10-icon-4.png
      Used in:        TK4R10 · icon 4
      Currently says: none
      Credit:
@@ -259,43 +153,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[27] TK4R12-bp-front.png
-     Used in:        TK4R12 · blueprint, front
-     Currently says: none
-     Credit:
-     Source:
-     Link:
-     Licence:
-     Notes:
-
-[28] TK4R12-bp-rear.png
-     Used in:        TK4R12 · blueprint, rear
-     Currently says: none
-     Credit:
-     Source:
-     Link:
-     Licence:
-     Notes:
-
-[29] TK4R12-bp-seat.png
-     Used in:        TK4R12 · blueprint, seat
-     Currently says: none
-     Credit:
-     Source:
-     Link:
-     Licence:
-     Notes:
-
-[30] TK4R12-bp-extras.png
-     Used in:        TK4R12 · blueprint, extras
-     Currently says: none
-     Credit:
-     Source:
-     Link:
-     Licence:
-     Notes:
-
-[31] bike outline.png
+[15] bike outline.png
      Used in:        Moped scene · bike outline
      Currently says: none
      Credit:
@@ -304,7 +162,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[32] newcolor.png
+[16] newcolor.png
      Used in:        Moped scene · colour layer
      Currently says: none
      Credit:
@@ -313,7 +171,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[33] newline.png
+[17] newline.png
      Used in:        Moped scene · line layer
      Currently says: none
      Credit:
@@ -322,7 +180,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[34] TK4R17-car.webp
+[18] TK4R17-car.webp
      Used in:        TK4R17 · 1940s sedan layer
      Currently says: none
      Credit:
@@ -331,7 +189,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[35] TK4R17-cart.webp
+[19] TK4R17-cart.webp
      Used in:        TK4R17 · horse carriage layer
      Currently says: none
      Credit:
@@ -340,7 +198,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[36] TK4R17-customer.webp
+[20] TK4R17-customer.webp
      Used in:        TK4R17 · customer layer
      Currently says: none
      Credit:
@@ -349,7 +207,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[37] TK4R17-dorai.webp
+[21] TK4R17-dorai.webp
      Used in:        TK4R17 · Doraiswamy layer
      Currently says: none
      Credit:
@@ -358,7 +216,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[38] TK4R17-handshake.webp
+[22] TK4R17-handshake.webp
      Used in:        TK4R17 · handshake layer
      Currently says: none
      Credit:
@@ -367,7 +225,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[39] TK4R17-mechanic.webp
+[23] TK4R17-mechanic.webp
      Used in:        TK4R17 · mechanic layer
      Currently says: none
      Credit:
@@ -376,7 +234,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[40] TK4R17-parts.webp
+[24] TK4R17-parts.webp
      Used in:        TK4R17 · parts layer
      Currently says: none
      Credit:
@@ -385,7 +243,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[41] TK4R17-phone.webp
+[25] TK4R17-phone.webp
      Used in:        TK4R17 · phone layer
      Currently says: none
      Credit:
@@ -394,7 +252,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[42] TK4R17-postcard.webp
+[26] TK4R17-postcard.webp
      Used in:        TK4R17 · postcard layer
      Currently says: none
      Credit:
@@ -403,7 +261,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[43] TK4R18-2stroke.png
+[27] TK4R18-2stroke.png
      Used in:        TK4R18 · two-stroke engine cutaway
      Currently says: none (the 'Source: ICFAI case' line covers the chart data, not this drawing)
      Credit:
@@ -412,7 +270,7 @@ The page prints credits as:  Photo: <Credit>, sourced via <Source> (<Licence>)
      Licence:
      Notes:
 
-[44] TK4R18-4stroke.png
+[28] TK4R18-4stroke.png
      Used in:        TK4R18 · four-stroke engine cutaway
      Currently says: none (the 'Source: ICFAI case' line covers the chart data, not this drawing)
      Credit:
