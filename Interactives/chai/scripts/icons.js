@@ -1,0 +1,43 @@
+// Ingredient illustrations: flat fills with an ink outline, drawn on a 48×48 grid.
+// ICON(name) returns an <svg>; ICON.g(name) returns just the inner markup (for posters).
+(function () {
+  const K = '#1A1208';
+  const s = (w = 1.8) => `stroke="${K}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
+  const P = {
+    water: `<path d="M24 6 C30 16 37 23 37 31 a13 13 0 0 1 -26 0 C11 23 18 16 24 6Z" fill="#9CCFDC" ${s()}/><path d="M17 31 a7 7 0 0 0 6 7" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>`,
+    milk: `<path d="M13 14 L35 14 L38 40 Q24 44 10 40Z" fill="#fff" ${s()}/><path d="M13 14 L17 6 L31 6 L35 14" fill="#fff" ${s()}/><path d="M11.6 25 L36.4 25 L37.2 32 L10.8 32Z" fill="#3D6FB6" ${s(1.2)}/><circle cx="24" cy="28.5" r="2" fill="#fff"/>`,
+    ctc: [[16, 34], [22, 36], [28, 35], [34, 33], [19, 29], [25, 30], [31, 28], [22, 24], [28, 23], [25, 18]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.6" fill="#4A2412" ${s(1.3)}/>`).join('') + `<path d="M9 39 H39" ${s()}/>`,
+    leaf: `<path d="M10 38 C10 20 22 9 39 9 C39 26 28 38 10 38Z" fill="#4A7A5A" ${s()}/><path d="M10 38 L32 16 M18 30 L18 22 M24 24 L25 17 M18 30 L26 30 M24 24 L31 24" fill="none" stroke="#C9E0B4" stroke-width="1.4" stroke-linecap="round"/>`,
+    dust: `<path d="M8 38 Q24 14 40 38Z" fill="#6B3A1E" ${s()}/>` + [[18, 32], [24, 27], [29, 33], [22, 35], [31, 29], [26, 22]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.1" fill="#C9A27A"/>`).join(''),
+    bag: `<path d="M24 4 V14" ${s(1.4)} fill="none"/><path d="M14 14 H34 L33 38 H15Z" fill="#F1E3C8" ${s()}/><path d="M18 24 h12 M18 29 h12" stroke="#B88A5A" stroke-width="1.4" stroke-linecap="round"/><rect x="19" y="38" width="10" height="7" fill="#C8423A" ${s(1.4)}/>`,
+    darjeeling: `<path d="M24 42 V20" ${s(2)} fill="none"/><path d="M24 26 C14 26 9 18 10 10 C18 10 24 16 24 26Z" fill="#8DB26A" ${s()}/><path d="M24 30 C34 30 39 22 38 14 C30 14 24 20 24 30Z" fill="#8DB26A" ${s()}/><path d="M24 20 C21 16 22 9 24 5 C26 9 27 16 24 20Z" fill="#B9D38E" ${s()}/>`,
+    assam: `<path d="M8 36 C8 20 20 10 40 12 C38 28 26 38 8 36Z" fill="#7A2F22" ${s()}/><path d="M8 36 L34 16" stroke="#E2A08A" stroke-width="1.4" stroke-linecap="round"/>`,
+    sugar: `<path d="M14 20 L26 14 L38 20 L26 26Z" fill="#fff" ${s()}/><path d="M14 20 V33 L26 39 V26Z" fill="#EDE6DA" ${s()}/><path d="M38 20 V33 L26 39 V26Z" fill="#D9CFC0" ${s()}/>`,
+    jaggery: `<path d="M10 22 L20 12 L36 14 L40 28 L30 38 L14 36Z" fill="#B5702C" ${s()}/><path d="M20 12 L24 24 L40 28 M24 24 L14 36" fill="none" stroke="#7A4515" stroke-width="1.4" stroke-linejoin="round"/>`,
+    honey: `<path d="M14 18 H34 V38 a4 4 0 0 1 -4 4 H18 a4 4 0 0 1 -4 -4Z" fill="#E8A93A" ${s()}/><rect x="12" y="12" width="24" height="6" rx="1.5" fill="#C8423A" ${s()}/><path d="M18 26 h12" stroke="#FFE0A0" stroke-width="2" stroke-linecap="round"/>`,
+    free: `<rect x="8" y="17" width="32" height="14" rx="7" fill="#fff" ${s()}/><path d="M24 17 H33 a7 7 0 0 1 0 14 H24Z" fill="#9CC3A8" ${s()}/>`,
+    ginger: `<path d="M8 30 C8 24 14 22 18 24 C18 18 24 14 28 18 C30 12 38 12 39 18 C42 20 42 26 37 28 C38 34 32 38 27 35 C24 40 16 40 14 35 C9 36 8 33 8 30Z" fill="#D9B37A" ${s()}/><path d="M20 28 q3 -2 5 0 M30 24 q2 -2 4 0" fill="none" stroke="#9C7340" stroke-width="1.4" stroke-linecap="round"/>`,
+    cardamom: `<path d="M24 6 C33 14 33 34 24 42 C15 34 15 14 24 6Z" fill="#8AAE5C" ${s()}/><path d="M24 9 V39 M20 13 C17 22 17 28 20 36 M28 13 C31 22 31 28 28 36" fill="none" stroke="#5E8338" stroke-width="1.3" stroke-linecap="round"/>`,
+    clove: `<path d="M24 20 L22.5 43 Q24 45 25.5 43Z" fill="#5A2D18" ${s(1.5)}/><circle cx="24" cy="15" r="4" fill="#5A2D18" ${s(1.5)}/><path d="M24 11 L19 6 L24 8 L29 6Z M20 15 L14 13 M28 15 L34 13" fill="#5A2D18" ${s(1.5)}/>`,
+    cinnamon: `<rect x="7" y="17" width="32" height="14" rx="2" fill="#A8582E" ${s()}/><path d="M39 17 a5 7 0 0 1 0 14 a5 7 0 0 1 0 -14Z" fill="#C97A48" ${s()}/><path d="M39 21 a2 3 0 0 1 0 6" fill="none" stroke="${K}" stroke-width="1.3"/><path d="M12 22 h20 M12 26 h16" stroke="#7A3A18" stroke-width="1.3" stroke-linecap="round"/>`,
+    pepper: [[18, 18], [28, 16], [23, 26], [33, 25], [15, 30], [26, 35], [35, 34]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5" fill="#2E2A26" ${s(1.4)}/><circle cx="${x - 1.6}" cy="${y - 1.6}" r="1.2" fill="#777"/>`).join(''),
+    tulsi: `<path d="M24 44 V10" stroke="#6B3B6E" stroke-width="2.4" stroke-linecap="round"/>` + [[24, 12, 0], [24, 22, -1], [24, 22, 1], [24, 32, -1], [24, 32, 1]].map(([x, y, d]) => d === 0 ? `<path d="M24 14 C19 10 20 4 24 3 C28 4 29 10 24 14Z" fill="#5E9A4A" ${s(1.4)}/>` : `<path d="M${x} ${y} C${x + d * 6} ${y - 8} ${x + d * 16} ${y - 6} ${x + d * 15} ${y} C${x + d * 12} ${y + 5} ${x + d * 5} ${y + 4} ${x} ${y}Z" fill="#5E9A4A" ${s(1.4)}/>`).join(''),
+    mint: `<path d="M24 42 C10 36 8 20 16 8 C22 14 26 26 24 42Z" fill="#53B07A" ${s()}/><path d="M24 42 C38 36 40 20 32 8 C26 14 22 26 24 42Z" fill="#6CC892" ${s()}/><path d="M24 42 L17 14 M24 42 L31 14" fill="none" stroke="#2F7A4E" stroke-width="1.3" stroke-linecap="round"/>`,
+    masala: `<rect x="12" y="14" width="24" height="28" rx="3" fill="#C8423A" ${s()}/><rect x="10" y="8" width="28" height="7" rx="2" fill="#E8B04A" ${s()}/><rect x="16" y="22" width="16" height="12" fill="#F7E7C4" ${s(1.3)}/><path d="M19 26 h10 M19 30 h7" stroke="#C8423A" stroke-width="1.4" stroke-linecap="round"/>`,
+    lemongrass: `<path d="M18 44 C18 30 14 18 8 6 M24 44 C24 28 24 16 26 4 M30 44 C30 30 34 18 40 8" fill="none" stroke="#9BBF4A" stroke-width="4.5" stroke-linecap="round"/><path d="M18 44 C18 30 14 18 8 6 M24 44 C24 28 24 16 26 4 M30 44 C30 30 34 18 40 8" fill="none" stroke="${K}" stroke-width="1" stroke-linecap="round" opacity=".5"/><rect x="15" y="36" width="18" height="8" rx="2" fill="#E9E2B8" ${s(1.4)}/>`,
+    saunf: [[14, 18, 30], [24, 14, -20], [33, 20, 40], [18, 30, -40], [28, 28, 15], [22, 38, 60], [34, 35, -10]].map(([x, y, r]) => `<ellipse cx="${x}" cy="${y}" rx="2.8" ry="6" transform="rotate(${r} ${x} ${y})" fill="#A9B86A" ${s(1.2)}/>`).join(''),
+    saffron: [[12, 38, 20, 8], [20, 40, 26, 6], [28, 40, 30, 10], [36, 38, 34, 7]].map(([x1, y1, x2, y2]) => `<path d="M${x1} ${y1} Q${(x1 + x2) / 2 + 4} ${(y1 + y2) / 2} ${x2} ${y2}" fill="none" stroke="#D2361E" stroke-width="2.6" stroke-linecap="round"/><circle cx="${x2}" cy="${y2}" r="2.2" fill="#E0571C"/>`).join(''),
+    lemon: `<circle cx="24" cy="24" r="16" fill="#F2D34A" ${s()}/><circle cx="24" cy="24" r="12" fill="#FBEFA0"/>` + [0, 60, 120, 180, 240, 300].map(a => `<path d="M24 24 L${24 + 11 * Math.cos(a * Math.PI / 180)} ${24 + 11 * Math.sin(a * Math.PI / 180)}" stroke="#F2D34A" stroke-width="1.6"/>`).join(''),
+    green: `<path d="M10 36 C10 22 22 12 38 12 C38 28 26 38 10 36Z" fill="#9CC97A" ${s()}/><path d="M10 36 L32 18" stroke="#E6F2D2" stroke-width="1.4" stroke-linecap="round"/>`,
+    unsure: `<circle cx="24" cy="24" r="16" fill="#EFE5D8" ${s()}/><text x="24" y="31" text-anchor="middle" font-family="Georgia,serif" font-weight="bold" font-size="20" fill="${K}">?</text>`,
+    flame: `<path d="M24 4 C30 14 38 18 38 30 a14 14 0 0 1 -28 0 C10 22 16 18 18 10 C21 16 24 16 24 4Z" fill="#E8742A" ${s()}/><path d="M24 22 C27 27 31 29 31 34 a7 7 0 0 1 -14 0 C17 30 21 28 24 22Z" fill="#F7C64A"/>`
+  };
+  // Colours used for each ingredient in charts and posters
+  const COL = { water: '#9CCFDC', milk: '#F4F1EA', ctc: '#4A2412', leaf: '#4A7A5A', dust: '#6B3A1E', bag: '#F1E3C8', darjeeling: '#8DB26A', assam: '#7A2F22', green: '#9CC97A', unsure: '#B5A795', nilgiri: '#4A7A5A',
+    sugar: '#EDE6DA', jaggery: '#B5702C', honey: '#E8A93A', free: '#9CC3A8', ginger: '#D9A75A', cardamom: '#8AAE5C', clove: '#5A2D18', cinnamon: '#A8582E', pepper: '#2E2A26', tulsi: '#6B3B6E', mint: '#53B07A', masala: '#C8423A', lemongrass: '#9BBF4A', saunf: '#A9B86A', saffron: '#D2361E', lemon: '#E2C02E' };
+  P.nilgiri = P.leaf;
+  function ICON(name, cls) { return `<svg class="${cls || 'ic'}" viewBox="0 0 48 48" aria-hidden="true">${P[name] || P.unsure}</svg>`; }
+  ICON.g = name => P[name] || P.unsure;
+  ICON.col = name => COL[name] || '#B5A795';
+  window.ICON = ICON;
+})();
