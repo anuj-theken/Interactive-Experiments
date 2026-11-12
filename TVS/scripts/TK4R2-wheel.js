@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
     { statement: "The TVS group sets up four British-partnered ventures.", light: true, img: null },
     { kicker: "1961", title: "Wheels India", img: "Wheels India", src: "imgs/TK4R2/TK4R2-08-wheels-india.jpg", cap: "Photo: Wheels India",
       body: "Wheels India is formed with Dunlop in 1961 to make wheels for cars and trucks." },
-    { title: "Lucas TVS", img: "Lucas-TVS Genuine Spares sign", src: "imgs/TK4R2/TK4R2-09-lucas-tvs.jpg", cap: "Photo: heritagetransportmuseumindia, sourced via Instagram", pos: "center top",
+    { title: "Lucas TVS", img: "Lucas-TVS Genuine Spares sign", src: "imgs/TK4R2/TK4R2-09-lucas-tvs.jpg", cap: "Photo: heritagetransportmuseumindia, sourced via Instagram", fit: "contain", bg: "#507647",
       body: "Lucas TVS is established with Lucas to make electrical equipment for automobiles." },
     { title: "Brakes India", img: "Brakes India logo", src: "imgs/TK4R2/TK4R2-10-brakes-india.jpg", cap: "Photo: Auto Components India", fit: "contain",
       body: "Brakes India is formed with Lucas Girling to make hydraulic brake systems." },
@@ -67,11 +67,13 @@ document.addEventListener("DOMContentLoaded", function () {
         // src may be one path or an array (shown side by side); fit: "contain" for logos/ads, pos: object-position
         const srcs = [].concat(s.src);
         const style = s.pos ? ` style="object-position:${s.pos}"` : "";
+        // bg: fill behind a "contain" image (e.g. a portrait sign shown whole on a matching ground)
         inner = srcs.map((u, k) => `<img src="${IMG_BASE}${u}" alt="${k ? "" : s.img}" decoding="async"${style}>`).join("");
       }
       else inner = `<span>${s.img}</span>`;
       const mods = (s.src && [].concat(s.src).length > 1 ? " TK4R2-ph--pair" : "") + (s.fit === "contain" ? " TK4R2-ph--contain" : "");
-      f.innerHTML = `<div class="TK4R2-ph${mods}">${inner}</div>`;
+      const bg = s.bg ? ` style="background:${s.bg}"` : "";
+      f.innerHTML = `<div class="TK4R2-ph${mods}"${bg}>${inner}</div>`;
       f._i = i;
       orbitEl.appendChild(f); shots.push(f);
     }
@@ -265,7 +267,8 @@ document.addEventListener("DOMContentLoaded", function () {
     end: () => "+=" + (N - 1) * window.innerHeight * 0.9,
     pin: true,
     invalidateOnRefresh: true,
-    snap: { snapTo: 1 / (N - 1), duration: { min: .2, max: .45 }, delay: .25, ease: "power1.inOut", inertia: false },
+    // no snap: snapping auto-scrolled the page to the nearest step whenever the reader paused,
+    // moving the text out from under them. Steps are discrete anyway (goTo animates the wheel).
     onUpdate: self => {
       const f = self.progress * (N - 1);
       const i = Math.min(N - 1, Math.max(0, self.direction > 0 ? Math.floor(f + 0.7) : Math.ceil(f - 0.7)));

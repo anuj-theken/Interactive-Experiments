@@ -156,9 +156,11 @@ document.addEventListener("DOMContentLoaded", function () {
         </filter>
       </defs>
       <g class="TK4R1-magnet">
-        <path d="M23.5 25 L23.5 35 Q23.5 42 31 42 Q38.5 42 38.5 35 L38.5 25" fill="none" stroke="${RED}" stroke-width="5" filter="url(#TK4R1-magGlow)"/>
-        <path d="M23.5 25 L23.5 29M38.5 25 L38.5 29" stroke="${STEEL}" stroke-width="5.2"/>
-        <path class="TK4R1-field" d="M17 47 Q31 55 45 47M12 51 Q31 61 50 51" fill="none" stroke="${RED}" stroke-width="1.3" stroke-dasharray="2 3"/>
+        <!-- mounted on the front bumper, poles pointing forward (direction of travel) -->
+        <path d="M60 27 L63.5 27" stroke="${INK}" stroke-width="1.8"/>
+        <path d="M72 22 L67 22 Q62.5 22 62.5 27 Q62.5 32 67 32 L72 32" fill="none" stroke="${RED}" stroke-width="4.2" filter="url(#TK4R1-magGlow)"/>
+        <path d="M69 22 L72.5 22M69 32 L72.5 32" stroke="${STEEL}" stroke-width="4.4"/>
+        <path class="TK4R1-field" d="M76 21 Q80 27 76 33M79 17.5 Q86 27 79 36.5" fill="none" stroke="${RED}" stroke-width="1.3" stroke-dasharray="2 3"/>
       </g>
     </svg>`,
     boy: `<svg viewBox="0 0 22 34">

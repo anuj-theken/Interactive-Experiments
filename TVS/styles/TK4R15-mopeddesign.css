@@ -138,11 +138,6 @@
 #TK4R15-paper2 { background-color: color-mix(in srgb, var(--color-surface) 30%, transparent); backdrop-filter: blur(.5px) saturate(1.05); -webkit-backdrop-filter: blur(.5px) saturate(1.05); }
 #TK4R15-paper2::before { opacity: .6; }
 #TK4R15-s2 .TK4R15-mast { position: absolute; z-index: 4; right: clamp(16px, 2.8vw, 40px); bottom: clamp(12px, 2.4vh, 28px); font-size: clamp(54px, 8vw, 150px); text-align: right; }
-#TK4R15-s2 .TK4R15-place {
-  position: absolute; z-index: 6; right: clamp(16px, 2.8vw, 40px); top: calc(var(--TK4R15-hdr) + 3.4vh);
-  font-family: var(--font-body); font-size: var(--type-eyebrow); font-weight: 600; letter-spacing: .14em; text-transform: uppercase; line-height: 1.7; text-align: right;
-  background: var(--TK4R15-ink); color: var(--color-cream); padding: 6px 10px;
-}
 .TK4R15-s2col { position: absolute; z-index: 20; left: clamp(24px, 3.2vw, 44px); top: calc(var(--TK4R15-hdr) + 5.5vh); width: min(640px, 46vw); display: flex; flex-direction: column; gap: 12px; }
 #TK4R15-s2 .TK4R15-copy { position: relative; display: flex; flex-direction: column; gap: 14px; }
 #TK4R15-s2 .TK4R15-copy .TK4R15-b { position: relative; bottom: auto; font-size: clamp(17px, 1.4vw, 21px); }
@@ -196,6 +191,7 @@
 }
 .TK4R15-print .TK4R15-cap { display: flex; justify-content: space-between; gap: 8px; font-family: var(--font-body); font-size: var(--type-legend); font-weight: 600; padding: 8px 2px 9px; }
 .TK4R15-print .TK4R15-cap em { font-style: normal; font-family: var(--font-mono); font-weight: 500; color: var(--color-primary); font-variant-numeric: tabular-nums; }
+.TK4R15-print .TK4R15-credit { margin: -4px 0 0; padding: 0 2px 8px; font-family: var(--font-body); font-size: 11px; line-height: 1.35; color: var(--color-muted); }
 .TK4R15-frame { width: clamp(130px, min(13.5vw, 28vh), 240px); }
 .TK4R15-frame .TK4R15-pic { aspect-ratio: 180/220; }
 .TK4R15-frame:nth-child(2) { margin-top: 3vh; }
@@ -210,7 +206,6 @@
   #TK4R15-s1 { --s1w: 88vw; --s1r: 6vw; --s1b: 24vh; }
   #TK4R15-s1 .TK4R15-mast { top: auto; bottom: 4vh; }
   .TK4R15-s2col { width: auto; right: 16px; left: 16px; top: calc(var(--TK4R15-hdr) + 2vh); }
-  #TK4R15-s2 .TK4R15-place { display: none; }
   #TK4R15-s2 .TK4R15-full-photo { width: 88vw; right: 6vw; top: auto; bottom: 16vh; }
   .TK4R15-copy .TK4R15-b { font-size: 17px; }
   .TK4R15-frames { top: calc(var(--TK4R15-hdr) + 6vh); left: 16px; right: auto; }

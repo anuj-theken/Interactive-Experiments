@@ -26,8 +26,8 @@ document.addEventListener("DOMContentLoaded", function () {
     { key: "others", name: "Others",        values: [14, 11, 8, 13, 13],  fill: "color-mix(in srgb, var(--color-accent) 40%, var(--color-surface))", ink: ON_DARK }
   ];
 
-  // 2. Legend — top of stack first, so it reads in the same order as the bars
-  legend.innerHTML = [...series].reverse().map(s =>
+  // 2. Legend — TVS first, then Hero, Honda, Bajaj Auto, Royal Enfield, Others (series order)
+  legend.innerHTML = series.map(s =>
     `<li${s.key === "tvs" ? ' class="is-tvs"' : ""} data-key="${s.key}"><span class="TK4R3-sw" style="background:${s.fill}"></span>${s.name}</li>`
   ).join("");
 

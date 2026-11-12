@@ -245,7 +245,7 @@ document.addEventListener("DOMContentLoaded", function () {
     else face.textContent = initials(p.name);
     root.querySelector('.TK4R14-nm').textContent = p.name;
     overlay.appendChild(root);
-    tokens[p.id] = { root, inner:root.querySelector('.TK4R14-token-inner'), tag:root.querySelector('.TK4R14-tg'), anchor:anchors[p.seat] };
+    tokens[p.id] = { root, inner:root.querySelector('.TK4R14-token-inner'), tag:root.querySelector('.TK4R14-tg'), nm:root.querySelector('.TK4R14-nm'), anchor:anchors[p.seat] };
   });
 
   const markers = {};
@@ -336,7 +336,7 @@ document.addEventListener("DOMContentLoaded", function () {
   ];
 
   const world = { split:0, crack:.06, tension:0, opp:0 };
-  let current = -1, afterCall = null;
+  let current = -1, afterCall = null, labelsDirty = true;
 
   function setScene(i){
     if(i === current) return; current = i;
@@ -380,6 +380,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     setLinks(s.links);
+    labelsDirty = true;
 
     if(s.after === 'withdraw'){
       afterCall = gsap.delayedCall(reduce?.2:1.8, ()=>{
@@ -387,7 +388,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const m = markers.north; const html = '<div class="TK4R14-stamp">Case withdrawn</div>';
         m.inner.innerHTML = html; m.html = html;
         gsap.fromTo(m.inner,{autoAlpha:0,scale:1.6},{autoAlpha:1,scale:1,duration:.45,ease:'power4.in'});
-        tokens.suresh.tag.textContent = 'Withdrew';
+        tokens.suresh.tag.textContent = 'Withdrew'; labelsDirty = true;
         tokens.suresh.root.classList.remove('tag-conflict');
       });
     }
@@ -452,6 +453,7 @@ document.addEventListener("DOMContentLoaded", function () {
     else camera.setViewOffset(W,H,-Math.round(Math.min(W*.18, 240)),0,W,H);
     camera.updateProjectionMatrix();
     Object.values(charts).forEach(c=>c && c.resize());
+    labelsDirty = true;
   }
   addEventListener('resize', ()=>{ resize(); ScrollTrigger.refresh(); });
   resize();
@@ -460,6 +462,86 @@ document.addEventListener("DOMContentLoaded", function () {
   function toScreen(obj){
     obj.getWorldPosition(v3); v3.project(camera);
     return [ (v3.x+1)/2*W, (1-v3.y)/2*H, v3.z ];
+  }
+
+  /* Label collision pass — no tag, name, chip or story card may overlap another box.
+     Faces, scene chips, the legend and any story card on screen are fixed obstacles; each tag/name
+     tries a short list of spots around its face (default first) and takes the first clear one.
+     Focused people are placed first; a dimmed person's label with no clear spot is hidden. */
+  const stageEl = stage, legendEl = section.querySelector('.TK4R14-legend');
+  const cardEls = [...section.querySelectorAll('.TK4R14-card, .TK4R14-hero h2, .TK4R14-cue, .TK4R14-inter h2')];
+  const GAP = 4;
+  let LM = null;   // cached metrics (unscaled px): face size, name/tag offsets, label sizes
+  function measureLabels(){
+    const anyTok = Object.values(tokens)[0];
+    const face = anyTok.root.querySelector('.TK4R14-face');
+    const nmCS = getComputedStyle(anyTok.nm), tgCS = getComputedStyle(anyTok.tag);
+    LM = { face: face.offsetWidth || 50, nmTop: parseFloat(nmCS.top) || 31, tgBottom: parseFloat(tgCS.bottom) || 34, size:{} };
+    for(const id in tokens){
+      const t = tokens[id];
+      LM.size[id] = { nm:[t.nm.offsetWidth, t.nm.offsetHeight], tg:[t.tag.offsetWidth, t.tag.offsetHeight] };
+    }
+    labelsDirty = false;
+  }
+  const hit = (a, list) => list.some(b => a[0] < b[2] && b[0] < a[2] && a[1] < b[3] && b[1] < a[3]);
+  function setLabel(el, dx, dy, on){
+    const v = on ? `${dx.toFixed(1)}|${dy.toFixed(1)}` : 'off';
+    if(el._lbl === v) return; el._lbl = v;
+    el.classList.toggle('TK4R14-lbl-off', !on);
+    if(on){ el.style.setProperty('--lx', dx.toFixed(1)+'px'); el.style.setProperty('--ly', dy.toFixed(1)+'px'); }
+  }
+  function layoutLabels(ts){
+    if(labelsDirty || !LM) measureLabels();
+    const sr = stageEl.getBoundingClientRect();
+    const fixed = [], rel = r => [r.left-sr.left-GAP, r.top-sr.top-GAP, r.right-sr.left+GAP, r.bottom-sr.top+GAP];
+    cardEls.forEach(el=>{
+      const r = el.getBoundingClientRect();
+      if(r.bottom > sr.top && r.top < sr.bottom && r.width && getComputedStyle(el).opacity > .05) fixed.push(rel(r));
+    });
+    if(legendEl && legendEl.offsetWidth) fixed.push(rel(legendEl.getBoundingClientRect()));
+    for(const k in markers){
+      const m = markers[k], c = m.inner.firstElementChild;
+      if(!c || +gsap.getProperty(m.inner,'opacity') < .05) continue;
+      fixed.push(rel(c.getBoundingClientRect()));   // real rect: the stamp is rotated and scaled in
+    }
+    // visible tokens with their screen origin and effective scale
+    const live = [];
+    for(const id in tokens){
+      const t = tokens[id], a = +gsap.getProperty(t.inner,'opacity');
+      if(a < .05){ setLabel(t.nm,0,0,true); setLabel(t.tag,0,0,true); continue; }
+      const sc = ts * +gsap.getProperty(t.inner,'scale');
+      const [x,y] = screen[id], oy = y + ts * +gsap.getProperty(t.inner,'y');
+      const f = LM.face*sc/2;
+      fixed.push([x-f, oy-f, x+f, oy+f]);
+      live.push({ id, t, x, oy, sc, dim: a < .6, tag: t.root.classList.contains('has-tag'), nm: !!LM.size[id].nm[0] });
+    }
+    // placement order: tags then names, focused before dimmed
+    const jobs = [];
+    live.forEach(o=>{ if(o.tag) jobs.push({o, kind:'tg'}); if(o.nm) jobs.push({o, kind:'nm'}); });
+    jobs.sort((a,b)=> (a.o.dim-b.o.dim) || ((a.kind==='tg'?0:1)-(b.kind==='tg'?0:1)));
+    const placed = fixed.slice();
+    jobs.forEach(({o, kind})=>{
+      const el = kind==='tg' ? o.t.tag : o.t.nm, [w,h] = LM.size[o.id][kind], half = LM.face/2;
+      // default top edge in token-local px, then candidate (centre-x, top) spots
+      const top0 = kind==='tg' ? -LM.tgBottom - h : LM.nmTop;
+      const side = half + 8 + w/2;
+      const C = kind==='tg'
+        ? [[0,top0],[0,top0-14],[side,-half-h+2],[-side,-half-h+2],[0,top0-28],[side,-h/2],[-side,-h/2]]
+        : [[0,top0],[0,top0+14],[side,half-2],[-side,half-2],[0,top0+28],[side,-h/2],[-side,-h/2]];
+      // try last frame's spot first so labels don't flicker between spots, then the rest in order
+      const order = [...C.keys()];
+      if(el._cand != null){ order.splice(el._cand,1); order.unshift(el._cand); }
+      const boxAt = i => { const [cx,ty] = C[i], s = o.sc; return [o.x + s*(cx-w/2), o.oy + s*ty, o.x + s*(cx+w/2), o.oy + s*(ty+h)]; };
+      let pick = order.find(i => !hit(boxAt(i), placed));
+      if(pick == null){
+        // nothing clear: drop the label for dimmed people, otherwise keep the default spot
+        el._cand = null;
+        if(o.dim){ setLabel(el,0,0,false); return; }
+        pick = 0;
+      } else el._cand = pick;
+      setLabel(el, C[pick][0], C[pick][1] - top0, true);
+      placed.push(boxAt(pick));
+    });
   }
 
   // Only render while the section is on screen — the rest of the page keeps its frame budget
@@ -506,6 +588,7 @@ document.addEventListener("DOMContentLoaded", function () {
       m.root.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0)`;
       m.root.style.zIndex = 2000;
     }
+    layoutLabels(ts);
     linkMap.forEach(r=>{
       const A = screen[r.a], B = screen[r.b]; if(!A||!B) return;
       const dx = B[0]-A[0], dy = B[1]-A[1], bend = r.bend ?? .18;
