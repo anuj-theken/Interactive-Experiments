@@ -196,11 +196,35 @@
     text-align: left;
   }
   .TK4R17-text[data-beats="0"] { font-size: 21px; }
+
+  /* Close-up: at 100vw the full canvas leaves the car and people tiny, so the picture is shown
+     at 1.35× — full height, sides cropped by the stage — and pans on each beat to keep that
+     page's characters in frame. Pan = the visible window's left edge as % of the canvas width
+     (window = 100 / 1.35 ≈ 74%, so 0–26%), framed from each layer's artwork bounds. */
+  .TK4R17-book {
+    aspect-ratio: 2684 / (1440 * 1.35);
+    margin-bottom: 22svh;      /* lift picture + text block (text hangs below the book) */
+  }
+  .TK4R17-canvas {
+    right: auto;
+    width: 135%;
+    transform: translateX(-24%);
+    transition: transform 1s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .TK4R17-book[data-beat="1"] .TK4R17-canvas { transform: translateX(-14.5%); }  /* handshake, centred */
+  .TK4R17-book[data-beat="2"] .TK4R17-canvas { transform: translateX(-25%); }    /* carriage + horse */
+  .TK4R17-book[data-beat="3"] .TK4R17-canvas { transform: translateX(-6%); }     /* customer at the car */
+  .TK4R17-book[data-beat="4"] .TK4R17-canvas,
+  .TK4R17-book[data-beat="5"] .TK4R17-canvas { transform: translateX(-25.9%); }  /* phone call · postcard */
+  .TK4R17-book[data-beat="7"] .TK4R17-canvas,
+  .TK4R17-book[data-beat="8"] .TK4R17-canvas { transform: translateX(-13%); }    /* parts, centred */
+  .TK4R17-tvs { font-size: max(30px, 8.4cqw); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   /* JS keeps hidden layers where they appear, so only opacity moves; the car's zoom becomes a cut */
   .TK4R17-layer { transition: opacity 0.3s ease; }
+  .TK4R17-canvas { transition: none; }
   .TK4R17-text,
   .TK4R17-letter { transition: opacity 0.3s ease; transform: none !important; }
   .TK4R17-rest { transition: none; }

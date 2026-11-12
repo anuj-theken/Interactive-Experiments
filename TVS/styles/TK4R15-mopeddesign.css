@@ -203,7 +203,9 @@
 
 @media (max-width: 820px) {
   .TK4R15-cover-box { width: 128vw; top: 52%; }
-  #TK4R15-s1 { --s1w: 88vw; --s1r: 6vw; --s1b: 24vh; }
+  /* photo + drawing as wide as the gutters allow (12px outline each side), centred in the
+     band between the copy card and the masthead; the family drawing rises above the box */
+  #TK4R15-s1 { --s1w: calc(100vw - 56px); --s1r: 28px; --s1b: calc(44svh - var(--s1w) * 429 / 640 / 2); }
   #TK4R15-s1 .TK4R15-mast { top: auto; bottom: 4vh; }
   .TK4R15-s2col { width: auto; right: 16px; left: 16px; top: calc(var(--TK4R15-hdr) + 2vh); }
   #TK4R15-s2 .TK4R15-full-photo { width: 88vw; right: 6vw; top: auto; bottom: 16vh; }
@@ -211,7 +213,11 @@
   .TK4R15-frames { top: calc(var(--TK4R15-hdr) + 6vh); left: 16px; right: auto; }
   .TK4R15-frame { width: 30vw; }
   .TK4R15-stack { top: calc(var(--TK4R15-hdr) + 60vh); right: 6vw; width: 60vw; }
-  #TK4R15-s1 .TK4R15-copy { left: 16px; right: 16px; width: auto; top: calc(var(--TK4R15-hdr) + 2vh); }
+  /* card sits just above the drawing: its bottom edge is pinned ~28px over the family's heads
+     (photo top = 56svh − half the photo height; the figures rise ~10% of it above the frame),
+     so longer cards grow upward instead of leaving a gap over the moped */
+  #TK4R15-s1 .TK4R15-copy { left: 16px; right: 16px; width: auto; top: max(calc(var(--TK4R15-hdr) + 2vh), calc(56svh - var(--s1w) * 429 / 640 * .6 - 28px)); }
+  #TK4R15-s1 .TK4R15-copy .TK4R15-b { top: auto; bottom: 0; }
   #TK4R15-s4 .TK4R15-copy { width: auto; right: 16px; left: 16px; top: calc(var(--TK4R15-hdr) + 6vh + 30vw * 1.23 + 70px); }
   #TK4R15-s4 .TK4R15-yrs { display: none; }
 }

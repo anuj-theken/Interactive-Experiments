@@ -16,9 +16,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const text = section.querySelector(".TK4R16-text");
   // Sentence order: Rajdoot, Jawa, Yezdi, Enfield
   const ORDER = ["rajdoot", "jawa", "yezdi", "enfield"];
-  const REST = { rajdoot: -4, jawa: 3.5, yezdi: 2.5, enfield: -2 };  // resting tilt, degrees
   // stagger: top prints lean outward, bottom prints lean inward (desktop only; phones use a 2×2 grid)
   const wide = matchMedia("(min-width: 769px)").matches;
+  // resting tilt, degrees — gentler on phones so the grid still reads as lined up
+  const REST = wide ? { rajdoot: -4, jawa: 3.5, yezdi: 2.5, enfield: -2 }
+                    : { rajdoot: -2, jawa: 1.5, yezdi: 1.5, enfield: -1.5 };
   const SHIFT = wide ? { rajdoot: -24, jawa: 24, yezdi: 24, enfield: -24 }
                      : { rajdoot: 0, jawa: 0, yezdi: 0, enfield: 0 };
 

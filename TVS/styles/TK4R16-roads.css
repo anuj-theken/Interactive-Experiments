@@ -105,23 +105,35 @@
   color: var(--color-text);
 }
 
-/* ── Phones: sentence in the middle, two prints side by side above it and two below ── */
+/* ── Phones: a 2×2 contact sheet around the sentence, read in sentence order —
+   Rajdoot | Jawa above, Yezdi | Enfield below. The piles dissolve into the stage grid
+   (display: contents) so the prints can be placed by name; every photo gets the same
+   frame (cropped, not letterboxed) so the four line up edge to edge. ── */
 @media (max-width: 768px) {
-  .TK4R16-chart-section { --t16-text: calc(100vw - 48px); }
-  .TK4R16-text { font-size: clamp(24px, 6.6vw, 30px); }
-  .TK4R16-pile {
-    left: 0;
-    right: 0;
-    bottom: auto;
-    width: auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 3vw;
-    padding: 0 4vw;
+  .TK4R16-chart-section { --t16-text: auto; }
+  .TK4R16-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "rajdoot jawa"
+      "text    text"
+      "yezdi   enfield";
+    align-content: center;
+    column-gap: 14px;
+    row-gap: clamp(28px, 6vh, 64px);
+    padding: 0 18px;
   }
-  .TK4R16-pile--left  { top: 3vh; }
-  .TK4R16-pile--right { top: auto; bottom: 4vh; align-items: flex-end; }
+  .TK4R16-pile { display: contents; }
+  .TK4R16-text {
+    grid-area: text;
+    position: relative;
+    left: auto;
+    top: auto;
+    justify-self: center;
+    max-width: 340px;
+    transform: none;
+    font-size: clamp(26px, 7.4vw, 34px);
+  }
   .TK4R16-print,
   .TK4R16-print:nth-child(1),
   .TK4R16-print:nth-child(2) {
@@ -129,12 +141,16 @@
     top: auto;
     bottom: auto;
     left: auto;
-    flex: 1 1 0;
-    min-width: 0;
     width: auto;
-    max-width: 260px;
+    min-width: 0;
     margin: 0;
     padding: 5px 5px 0;
   }
-  .TK4R16-cap { padding: 5px 1px 6px; }
+  .TK4R16-print[data-bike="rajdoot"] { grid-area: rajdoot; }
+  .TK4R16-print[data-bike="jawa"]    { grid-area: jawa; }
+  .TK4R16-print[data-bike="yezdi"]   { grid-area: yezdi; }
+  .TK4R16-print[data-bike="enfield"] { grid-area: enfield; }
+  .TK4R16-pic { aspect-ratio: 8 / 5; }
+  .TK4R16-pic img { height: 100%; object-fit: cover; }
+  .TK4R16-cap { padding: 6px 1px 7px; }
 }

@@ -55,6 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
     lines: [...el.querySelectorAll(".TK4R17-line")]
   }));
   const tvs = wrapper.querySelector(".TK4R17-tvs");
+  const book = wrapper.querySelector(".TK4R17-book");   // carries the beat for the phone close-up pan (CSS)
 
   function stateFor(cfg, b) {
     const shown = cfg.at[b];
@@ -77,6 +78,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function show(b) {
     if (b === current) return;
     current = b;
+    if (book) book.dataset.beat = b;
 
     // illustration layers (b = −1, not reached yet, parks every layer at its `pre`)
     Object.entries(LAYERS).forEach(([key, cfg]) => {
