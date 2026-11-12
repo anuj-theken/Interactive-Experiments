@@ -63,8 +63,9 @@
 .TK4R3-legend {
   list-style: none;
   display: grid;
-  grid-auto-flow: column;
-  grid-template-rows: repeat(3, auto);
+  /* fills row by row so it reads left to right: TVS, Hero, Honda / Bajaj Auto, Royal Enfield, Others */
+  grid-auto-flow: row;
+  grid-template-columns: repeat(3, auto);
   gap: 9px 22px;
   align-self: flex-end;
   flex-shrink: 0;
@@ -233,6 +234,6 @@
   .TK4R3-chart-frame { padding: 20px 12px; }
   .TK4R3-chart-container { padding: 20px 14px 18px; }
   .TK4R3-chart-header { flex-direction: column; gap: 16px; }
-  .TK4R3-legend { align-self: flex-start; grid-template-rows: repeat(2, auto); }
+  .TK4R3-legend { align-self: flex-start; }
   .TK4R3-v, .TK4R3-ann { font-size: 10px; }
 }
