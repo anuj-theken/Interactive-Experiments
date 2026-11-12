@@ -192,8 +192,8 @@
 .TK4R15-print .TK4R15-cap { display: flex; justify-content: space-between; gap: 8px; font-family: var(--font-body); font-size: var(--type-legend); font-weight: 600; padding: 8px 2px 9px; }
 .TK4R15-print .TK4R15-cap em { font-style: normal; font-family: var(--font-mono); font-weight: 500; color: var(--color-primary); font-variant-numeric: tabular-nums; }
 .TK4R15-print .TK4R15-credit { margin: -4px 0 0; padding: 0 2px 8px; font-family: var(--font-body); font-size: 11px; line-height: 1.35; color: var(--color-muted); }
-/* credit under a framed full photo (scene 1 cover, Hosur): clears the 12px paper outline */
-.TK4R15-photo-credit { position: absolute; right: -12px; top: 100%; margin: 18px 0 0; font-family: var(--font-body); font-size: 11px; line-height: 1.35; color: var(--color-muted); white-space: nowrap; }
+/* credit above the top-right corner of a framed full photo (scene 1 cover, Hosur): clears the 12px paper outline */
+.TK4R15-photo-credit { position: absolute; right: -12px; bottom: 100%; margin: 0 0 18px; font-family: var(--font-body); font-size: 11px; line-height: 1.35; color: var(--color-muted); white-space: nowrap; }
 .TK4R15-frame { width: clamp(130px, min(13.5vw, 28vh), 240px); }
 .TK4R15-frame .TK4R15-pic { aspect-ratio: 180/220; }
 .TK4R15-frame:nth-child(2) { margin-top: 3vh; }
@@ -211,6 +211,8 @@
   #TK4R15-s1 .TK4R15-mast { top: auto; bottom: 4vh; }
   .TK4R15-s2col { width: auto; right: 16px; left: 16px; top: calc(var(--TK4R15-hdr) + 2vh); }
   #TK4R15-s2 .TK4R15-full-photo { width: 88vw; right: 6vw; top: auto; bottom: 16vh; }
+  /* on phones the copy cards cover the photo's top edge, so the credit stays under the photo */
+  #TK4R15-s2 .TK4R15-photo-credit { bottom: auto; top: 100%; margin: 18px 0 0; }
   .TK4R15-copy .TK4R15-b { font-size: 17px; }
   .TK4R15-frames { top: calc(var(--TK4R15-hdr) + 6vh); left: 16px; right: auto; }
   .TK4R15-frame { width: 30vw; }
