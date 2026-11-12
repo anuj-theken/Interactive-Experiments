@@ -518,23 +518,24 @@ document.addEventListener("DOMContentLoaded", function () {
     const placed = fixed.slice();
     jobs.forEach(({o, kind})=>{
       const el = kind==='tg' ? o.t.tag : o.t.nm, [w,h] = LM.size[o.id][kind], half = LM.face/2;
-      // default top edge in token-local px, then candidate (centre-x, top) spots
+      // default top edge in token-local px, then candidate (centre-x, top) spots, nearest first:
+      // pushed further out, beside the face at three heights, diagonals, then the far side of the face
       const top0 = kind==='tg' ? -LM.tgBottom - h : LM.nmTop;
-      const side = half + 8 + w/2;
-      const C = kind==='tg'
-        ? [[0,top0],[0,top0-14],[side,-half-h+2],[-side,-half-h+2],[0,top0-28],[side,-h/2],[-side,-h/2]]
-        : [[0,top0],[0,top0+14],[side,half-2],[-side,half-2],[0,top0+28],[side,-h/2],[-side,-h/2]];
+      const dir = kind==='tg' ? -1 : 1, side = half + 8 + w/2, diag = half*.7 + w/2;
+      const near = kind==='tg' ? -half-h+2 : half-2, mid = -h/2, far = kind==='tg' ? half-2 : -half-h+2;
+      const opp = kind==='tg' ? LM.nmTop : -LM.tgBottom - h;
+      const C = [[0,top0],[0,top0+dir*14],[side,near],[-side,near],[0,top0+dir*28],[side,mid],[-side,mid],
+                 [diag,top0+dir*20],[-diag,top0+dir*20],[0,top0+dir*42],[side,far],[-side,far],
+                 [diag,top0+dir*36],[-diag,top0+dir*36],[0,opp],[0,opp-dir*14],[0,top0+dir*56]];
       // try last frame's spot first so labels don't flicker between spots, then the rest in order
       const order = [...C.keys()];
       if(el._cand != null){ order.splice(el._cand,1); order.unshift(el._cand); }
       const boxAt = i => { const [cx,ty] = C[i], s = o.sc; return [o.x + s*(cx-w/2), o.oy + s*ty, o.x + s*(cx+w/2), o.oy + s*(ty+h)]; };
       let pick = order.find(i => !hit(boxAt(i), placed));
-      if(pick == null){
-        // nothing clear: drop the label for dimmed people, otherwise keep the default spot
-        el._cand = null;
-        if(o.dim){ setLabel(el,0,0,false); return; }
-        pick = 0;
-      } else el._cand = pick;
+      // nothing clear anywhere: hide the label rather than let it overlap (highlighted people were
+      // placed first, so this only happens to the least important labels in a crowded view)
+      if(pick == null){ el._cand = null; setLabel(el,0,0,false); return; }
+      el._cand = pick;
       setLabel(el, C[pick][0], C[pick][1] - top0, true);
       placed.push(boxAt(pick));
     });
