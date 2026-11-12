@@ -607,3 +607,17 @@ body.chai-2026 { background: var(--paper) var(--grain) fixed; }
 @keyframes penbob { 50% { transform: rotate(-4deg) translateY(-2px); } }
 .card-name:focus ~ .name-caret, .card-name:focus ~ .name-pen { display: none; }
 @media (prefers-reduced-motion: reduce) { .name-caret, .name-pen { animation: none; } }
+
+/* ===================== Scroll-driven paper gradient =====================
+   A tall, looping wash of warm tones sits behind everything and slides at half the scroll speed, so the page
+   visibly moves even while the sheet is pinned. It also deepens as the story goes on (milk to strong tea). */
+body.chai-2026 { background: var(--paper); }
+body.chai-2026::before {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    var(--grain),
+    linear-gradient(180deg, rgba(150, 95, 40, calc(var(--warm, 0) * .16)), rgba(150, 95, 40, calc(var(--warm, 0) * .22))),
+    repeating-linear-gradient(180deg, #F3ECDD 0, #EADBC0 60vh, #E2CDA9 105vh, #EADBC0 150vh, #F3ECDD 210vh);
+  background-size: auto, 100% 100%, 100% 210vh;
+  background-position: 0 0, 0 0, 0 var(--sy, 0px);
+}

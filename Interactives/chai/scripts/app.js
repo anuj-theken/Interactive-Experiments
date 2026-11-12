@@ -1016,3 +1016,15 @@
   onScroll();
   gsap.to('.progress', { scaleX: 1, ease: 'none', scrollTrigger: { start: 0, end: 'max', scrub: .3 } });
 })();
+
+// Paper gradient: slide it at half the scroll speed, and warm the page as the reader goes further.
+(() => {
+  const root = document.body; let raf = 0;
+  const upd = () => {
+    raf = 0; const y = window.scrollY, max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    root.style.setProperty('--sy', (-y * .5).toFixed(1) + 'px');
+    root.style.setProperty('--warm', Math.min(1, y / max).toFixed(3));
+  };
+  addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(upd); }, { passive: true });
+  addEventListener('resize', upd); upd();
+})();
