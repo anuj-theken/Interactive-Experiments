@@ -123,13 +123,13 @@
   const gText = (id, x, y, text, o = {}) => ({ type: 'text', id, x, y, silent: true, z: 5, style: { text, fill: o.fill || TXT, font: `${o.bold ? 700 : 400} ${o.size || 11}px ${o.serif ? FELL : o.bold ? "Poppins, Archivo, Arial" : FONT}`, textAlign: o.align || 'center', textVerticalAlign: o.v || 'middle', opacity: o.opacity == null ? 1 : o.opacity, lineHeight: (o.size || 11) * 1.15 } });
   const gRect = (id, x, y, w, h, o = {}) => ({ type: 'rect', id, silent: true, z: 0, shape: { x, y, width: w, height: h }, style: { fill: o.fill || 'none', stroke: o.stroke || GRID, lineWidth: o.lw || 1, lineDash: o.dash || null } });
   function baseScatter(W, H) {
-    return { animationDurationUpdate: 900, animationEasingUpdate: 'cubicInOut', animationDuration: 600,
+    return { animationDurationUpdate: 1800, animationEasingUpdate: 'cubicInOut', animationDuration: 600,
       grid: { left: 0, right: 0, top: 0, bottom: 0 }, xAxis: { type: 'value', min: 0, max: W, show: false }, yAxis: { type: 'value', min: 0, max: H, show: false, inverse: true },
       tooltip: { ...TT, trigger: 'item', confine: true, formatter: p => p.data && p.data.R ? ttReader(p.data.R) : '' } };
   }
   // Readers whose cards are on screen are drawn bigger, outlined, and named on the chart.
   let FEAT = new Set();
-  const featLabel = R => ({ show: true, position: 'top', distance: 3, formatter: (t => t.length > 14 ? t.slice(0, 13) + '…' : t)(R.reader.town || R.reader.city || 'a reader'), fontFamily: FELL, fontSize: 12.5, color: INK, backgroundColor: '#FBF6EA', borderColor: INK, borderWidth: .8, padding: [2, 5, 1] });
+  const featLabel = R => mode === 'm' ? { show: true, position: 'top', distance: 2, formatter: String([...FEAT].indexOf(R.id) + 1), fontFamily: 'Poppins, Arial', fontWeight: 700, fontSize: 10, color: '#FFF8EC', backgroundColor: RED, borderRadius: 9, padding: [2, 5, 1] } : ({ show: true, position: 'top', distance: 3, formatter: (t => t.length > 14 ? t.slice(0, 13) + '…' : t)(R.reader.town || R.reader.city || 'a reader'), fontFamily: FELL, fontSize: mode === 'm' ? 10.5 : 12.5, color: INK, backgroundColor: '#FBF6EA', borderColor: INK, borderWidth: .8, padding: mode === 'm' ? [1, 3, 0] : [2, 5, 1] });
   const cupPt = (R, x, y, d, o = {}) => { const f = !R.you && FEAT.has(R.id);
     return { name: R.you ? 'you' : R.id, value: [x, y], R, symbol: o.sym || GLASS, symbolSize: R.you || f ? [Math.max(d * .9, 12), Math.max(d * 1.17, 16)] : [d * .62, d * .82],
       itemStyle: { color: (R.you ? A.liquid(R) : R.shade && R.shade.hex) || '#CFC6BA', borderColor: R.you ? RED : f ? INK : 'rgba(36,26,17,.5)', borderWidth: R.you ? 2.4 : f ? 2 : .6, opacity: f ? 1 : o.op == null ? 1 : o.op },
@@ -177,7 +177,7 @@
       const groups = [0, 1, 2, 3, 4, 5].map(k => RS.filter(r => r.milk === k).sort((a, b) => (a.shade ? a.shade.t : 0) - (b.shade ? b.shade.t : 0)));
       if (you) groups[you.milk].push(you);
       const lk = st === 'you' && CH.pour.like(R);
-      return columns(ch, W, H, groups, L.milk, { dimCol: st === 'ends' ? k => k > 0 && k < 5 : null, dim: lk ? r => !lk(r) : null, focus: st === 'milk' ? [3] : st === 'ends' ? [0, 5] : st === 'you' && you ? [you.milk] : [] });
+      return columns(ch, W, H, groups, L.milk, { dimCol: st === 'ends' ? k => k > 0 && k < 5 : st === 'water' ? k => k > 2 : null, dim: lk ? r => !lk(r) : null, focus: st === 'milk' ? [3] : st === 'water' ? [0, 1, 2] : st === 'ends' ? [0, 5] : st === 'you' && you ? [you.milk] : [] });
     }
   };
 
@@ -269,13 +269,33 @@
       const lk = st === 'you' && CH.sequence.like(R);
       const hot = r => lk ? lk(r) : st === 'common' ? r.st.tea === 2 && r.st.milk === 2 : st === 'milkfirst' ? r.milk > 0 && r.st.milk != null && r.st.milk < r.st.tea : st === 'boils' ? r.milk > 0 && r.boils >= 3 : st === 'cup' ? r.st.milk === 4 || (r.st.sweet === 4 && r.sweet !== 'none') : true;
       const data = [], els = [];
-      if (st === 'boils') {
+      if (st === 'boils' || st === 'boils0' || st === 'once') {
         // one row: how many times it rises after the milk
         const groups = [0, 1, 2, 3, 4].map(k => RS.filter(r => r.milk > 0 && r.boils === k));
         if (R.milk > 0 && R.boils != null) groups[R.boils].push(R);
-        return columns(ch, W, H, groups, L.boils, { focus: [3, 4] });
+        return columns(ch, W, H, groups, L.boils, { focus: st === 'boils' ? [3, 4] : st === 'once' ? [1] : [], dimCol: st === 'once' ? k => k !== 1 : st === 'boils' ? k => k < 3 : null });
       }
-      const left = small ? 74 : 118, top = 30, right = 6, bottom = 6, cols = 5;
+      if (small) {
+        // Phones: turned sideways. The five moments run down the page (with their pan icons); leaf, milk and sweetener are the columns.
+        const left = 66, top = 46, right = 4, bottom = 4, cw = (W - left - right) / 3, rh = (H - top - bottom) / 5;
+        const cells = SEQ_ROWS.map(() => [[], [], [], [], []]);
+        RS.forEach(r => SEQ_ROWS.forEach((row, ci) => { const v = row.get(r); if (v != null) cells[ci][v].push(r); }));
+        SEQ_ROWS.forEach((row, ci) => { const v = row.get(R); if (v != null) cells[ci][v].push(R); });
+        const d = packD([].concat(...cells.map(c => c.map(l => l.length))), cw - 8, rh - 18, 18);
+        const img = (id, ic, x, y, sz) => ({ type: 'image', id, silent: true, style: { image: svgURI(ICON(ic)).slice(8), x: x - sz / 2, y: y - sz / 2, width: sz, height: sz } });
+        cells.forEach((col, ci) => col.forEach((list, ri) => {
+          const x0 = left + ci * cw + 4, y0 = top + ri * rh + 3;
+          list.sort((p, q) => (p.you ? 1 : 0) - (q.you ? 1 : 0));
+          list.forEach((r, i) => { const [x, y] = packAt(i, list.length, d, x0, y0, cw - 8, rh - 18, 'top'); data.push({ ...cupPt(r, x, y, d, { op: r.you || hot(r) ? 1 : .13 }), name: (r.you ? 'you' : r.id) + '-' + ci, ...(ci ? { label: { show: false } } : {}) }); });
+          const n = list.filter(r => !r.you).length, lit = list.filter(r => !r.you && hot(r)).length;
+          if (n) els.push(gText('mn' + ci + ri, left + (ci + 1) * cw - 5, top + (ri + 1) * rh - 7, st === 'all' ? String(n) : `${lit} of ${n}`, { align: 'right', bold: st === 'all' || lit > 0, fill: st !== 'all' && lit ? RED : TXT, size: 10.5 }));
+        }));
+        ['ctc', 'milk', 'sugar'].forEach((ic, ci) => { els.push(img('mhi' + ci, ic, left + (ci + .5) * cw, 14, 22)); els.push(gText('mh' + ci, left + (ci + .5) * cw, 35, SEQ_ROWS[ci].lab.replace('the ', ''), { serif: true, fill: INK, size: 12.5 })); });
+        L.stage.forEach((lab, ri) => { els.push(img('mri' + ri, STAGE_IC[ri], 32, top + (ri + .5) * rh - 9, 24)); els.push(gText('mr' + ri, 32, top + (ri + .5) * rh + 12, lab, { serif: true, fill: INK, size: 10.5 })); if (ri) els.push(gRect('mrl' + ri, 0, top + ri * rh, W, 0.5, { stroke: '#8D7B62' })); });
+        for (let i = 0; i < 3; i++) els.push(gRect('mcv' + i, left + i * cw, top, 0.5, H - top - bottom));
+        return { ...baseScatter(W, H), series: [{ type: 'scatter', data }], graphic: setGraphics(ch, els) };
+      }
+      const left = 118, top = 30, right = 6, bottom = 6, cols = 5;
       const cw = (W - left - right) / cols, rh = (H - top - bottom) / SEQ_ROWS.length;
       const cells = SEQ_ROWS.map(() => [[], [], [], [], []]);
       RS.forEach(r => SEQ_ROWS.forEach((row, ri) => { const v = row.get(r); if (v != null) cells[ri][v].push(r); }));
@@ -284,7 +304,7 @@
       cells.forEach((rw, ri) => rw.forEach((list, ci) => {
         const x0 = left + ci * cw + 4, y0 = top + ri * rh + 4;
         list.sort((p, q) => (p.you ? 1 : 0) - (q.you ? 1 : 0));
-        list.forEach((r, i) => { const [x, y] = packAt(i, list.length, d, x0, y0, cw - 8, rh - 22, 'top'); data.push({ ...cupPt(r, x, y, d, { op: r.you || hot(r) ? 1 : .13 }), name: (r.you ? 'you' : r.id) + '-' + ri }); });
+        list.forEach((r, i) => { const [x, y] = packAt(i, list.length, d, x0, y0, cw - 8, rh - 22, 'top'); data.push({ ...cupPt(r, x, y, d, { op: r.you || hot(r) ? 1 : .13 }), name: (r.you ? 'you' : r.id) + '-' + ri, ...(ri ? { label: { show: false } } : {}) }); });
         const n = list.filter(r => !r.you).length, lit = list.filter(r => !r.you && hot(r)).length;
         if (n) els.push(gText('n' + ri + ci, left + (ci + 1) * cw - 6, top + (ri + 1) * rh - 9, st === 'all' ? String(n) : `${lit} of ${n}`, { align: 'right', bold: st === 'all' || lit > 0, fill: st !== 'all' && lit ? RED : TXT, size: small ? 10 : 12 }));
       }));
@@ -349,7 +369,7 @@
       }
       const groups = SW_ORDER.map(s => RS.filter(r => r.sweet === s).sort((a, b) => (a.shade ? a.shade.t : 0) - (b.shade ? b.shade.t : 0)));
       if (R.sweet && R.milk != null) groups[SW_ORDER.indexOf(R.sweet)].push(R);
-      return columns(ch, W, H, groups, SW_LAB, { bottom: 54, dim: st === 'where' ? r => r.sweet === 'none' || r.st.sweet !== 4 : null, focus: st === 'sweet' ? [0] : [] });
+      return columns(ch, W, H, groups, SW_LAB, { bottom: 54, dim: st === 'where' ? r => r.sweet === 'none' || r.st.sweet !== 4 : null, focus: st === 'sweet' ? [0] : [], dimCol: st === 'sweet' ? k => k > 0 : null });
     }
   };
 
@@ -358,7 +378,11 @@
     const lv = LIVE[key]; if (!lv) return;
     const el = lv.chart.getDom(), W = el.clientWidth, H = el.clientHeight;
     if (!W || !H) return;
-    lv.chart.setOption(CH[key].draw(lv.chart, CH[key].steps[lv.step].st, W, H));
+    const opt = CH[key].draw(lv.chart, CH[key].steps[lv.step].st, W, H);
+    (opt.series || []).forEach(se => { if (se.type === 'scatter') se.labelLayout = p => { const r = p.labelRect; let dx = 0, dy = 0;
+      if (r.x < 2) dx = 2 - r.x; else if (r.x + r.width > W - 2) dx = W - 2 - r.x - r.width; if (r.y < 2) dy = 2 - r.y;
+      return { dx, dy, moveOverlap: 'shiftY' }; }; });
+    lv.chart.setOption(opt);
     // on phones your line sits under the chart (the text box above is too small for it)
     const yl = el.parentNode.querySelector('.c-yl'); if (yl) { const t = youLine(CH[key].you(meR())); if (yl.innerHTML !== t) { yl.innerHTML = t; if (mode === 'm') requestAnimationFrame(() => lv.chart.resize()); } }
   }
@@ -420,9 +444,9 @@
   const callsIt = r => [r.reader.age, r.name && r.name.length < 24 ? `calls it ${r.name.toLowerCase() === 'chai' ? 'chai' : r.name}` : ''].filter(Boolean).map(esc).join(' · ');
   const rcard = (r, extra = '') => `<div class="rel-top">${vesselFor(r, { type: r.vessel })}<div><div class="rel-n">${esc(trunc(placeOf(r), 22))}</div><div class="rel-w">${callsIt(r)}</div></div></div>
     <div class="rc-q">${quoteOf(r) ? `<q>${esc(trunc(quoteOf(r), 230))}</q>` : ''}<span class="rc-r">${esc(recipeLine(r))}</span></div>${extra}`;
-  const rcBack = r => `<div class="rc-bh"><span class="pz-k">How they make it</span><div class="rel-n">${esc(trunc(placeOf(r), 22))}</div></div>${A.strip(r)}<div class="rc-bl">${esc(recipeLine(r))}</div>`;
-  const RCARD = (r, why) => r ? { key: 'rc:' + r.id, cls: 'c-rc', pad0: true, attrs: () => ({ title: 'Tap to turn the card over' }),
-    render: () => `<div class="rc-in"><div class="rc-f">${why ? `<div class="rc-why">${why}</div>` : ''}${rcard(r, `<div class="rc-btns"><button class="rc-make" type="button" data-act="make" data-id="${r.id}">Make theirs <span aria-hidden="true">↗</span></button><span class="rc-turn" aria-hidden="true">↻ timeline</span></div>`)}</div>
+  const rcBack = r => `<div class="rc-bh"><span class="pz-k">How they make it</span><div class="rel-n">${esc(trunc(placeOf(r), 22))}</div></div>${A.strip(r)}`;
+  const RCARD = (r, why, no) => r ? { key: 'rc:' + r.id, cls: 'c-rc', pad0: true, attrs: () => ({ title: 'Tap to turn the card over' }),
+    render: () => `<div class="rc-in"><div class="rc-f">${why ? `<div class="rc-why">${no ? `<span class="rc-no">${no}</span>` : ''}${why}</div>` : ''}${rcard(r, `<div class="rc-btns"><button class="rc-make" type="button" data-act="make" data-id="${r.id}">Make theirs <span aria-hidden="true">↗</span></button><span class="rc-turn" aria-hidden="true">↻ timeline</span></div>`)}</div>
       <div class="rc-b">${why ? `<div class="rc-why">${why}</div>` : ''}${rcBack(r)}<div class="rc-btns"><button class="rc-make" type="button" data-act="make" data-id="${r.id}">Make theirs <span aria-hidden="true">↗</span></button><span class="rc-turn" aria-hidden="true">↻ quote</span></div></div></div>` }
     : { key: 'rc:none', render: () => '' };
 
@@ -444,6 +468,8 @@
     ? `<button type="button" class="cta-b" data-act="make"><span class="pour">Make your own</span><small>Build your cup. It will show up, in red, in every chart.</small></button>`
     : `<button type="button" class="cta-b" data-act="make"><span class="pour">Change your chai</span><small>Your cup is in every chart, in red.</small></button><button type="button" class="cta-s" data-act="pour">Pour my card ↗</button>` };
 
+  // At the start, making your own is the side door, not the main one
+  const CTA2 = { key: 'cta2', cls: 'c-cta c-cta2', render: () => `<div class="cta2-in"><span class="cta2-k">Already know how you make it?</span><button type="button" class="cta-s2" data-act="make"><span aria-hidden="true">✎</span> Make your own first</button><small>You can do this any time, from the button at the top.</small><span class="cta2-or">or</span><button type="button" class="go-on" data-act="next"><span>See what they told us</span><i aria-hidden="true">↓</i></button><small class="go-or">or just scroll</small></div>` };
   const TITLES = {
     who: { bg: '#22304F', k: 'Who we asked', h: 'The readers', hi: 'पाठक', q: `${N} kitchens, one survey.` },
     pour: { bg: '#7A2318', k: 'Chapter I', h: 'No two cups alike', hi: 'हर कप अलग', q: 'The colour of a glass is its recipe.' },
@@ -476,7 +502,7 @@
     steps: [{ st: 'city', k: () => kfig(N, 'readers of First Principles told us how they make chai'), h: () => `<b>${S.bigThree}</b> live in Bengaluru, Mumbai or Delhi; <b>${S.abroad}</b> make theirs abroad.`,
       why: ['Lives in Bengaluru, the biggest group', 'Makes their chai abroad'],
       picks: [r => r.reader.city === 'Bengaluru', r => r.reader.city === 'Abroad'] }],
-    draw(ch, st, W, H) { return columns(ch, W, H, CITY.map(([, f]) => byShade(RS.filter(r => f(r.reader.city)))), CITY.map(c => c[0]), { bottom: 54, focus: [0, 1, 2] }); }
+    draw(ch, st, W, H) { return columns(ch, W, H, CITY.map(([, f]) => byShade(RS.filter(r => f(r.reader.city)))), CITY.map(c => c[0]), { bottom: 54, focus: st === 'city' ? [0, 1, 2] : st === 'abroad' ? [5] : [], dimCol: st === 'city' ? k => k > 2 : st === 'abroad' ? k => k !== 5 : null }); }
   };
   // Women on the left, men on the right, one row per age band: a population pyramid made of glasses.
   CH.pyramid = {
@@ -492,8 +518,9 @@
       const data = [], els = [];
       all.forEach(([w, m], i) => {
         const y0 = top + i * rh + 3;
-        m.forEach((r, k) => { const [x, y] = packAt(k, m.length, d, mid + gap, y0, mid - gap - 6, rh - 6, 'left'); data.push(cupPt(r, x, y, d)); });
-        w.forEach((r, k) => { const [x, y] = packAt(k, w.length, d, mid + gap, y0, mid - gap - 6, rh - 6, 'left'); data.push(cupPt(r, 2 * mid - x, y, d)); });
+        const op = r => (st === 'age' && !['25–34', '35–44', '45–54'].includes(r.reader.age)) || (st === 'women' && r.reader.g !== 'w') ? .15 : 1;
+        m.forEach((r, k) => { const [x, y] = packAt(k, m.length, d, mid + gap, y0, mid - gap - 6, rh - 6, 'left'); data.push(cupPt(r, x, y, d, { op: op(r) })); });
+        w.forEach((r, k) => { const [x, y] = packAt(k, w.length, d, mid + gap, y0, mid - gap - 6, rh - 6, 'left'); data.push(cupPt(r, 2 * mid - x, y, d, { op: op(r) })); });
         els.push(gText('pa' + i, mid, top + (i + .5) * rh, rows[i], { serif: true, fill: INK, size: W < 420 ? 10 : 13 }));
         if (i) els.push(gRect('pr' + i, 0, top + i * rh, W, 0.5));
       });
@@ -517,8 +544,8 @@
       [0, 1, 2, 4].forEach(i => nodes.push({ name: 'M' + i, lab: 'milk · ' + L.stage[i], itemStyle: { color: '#F4ECDC', borderColor: INK }, label: { position: 'right' } }));
       Object.entries(FLOWK).forEach(([k, v]) => { const [t, m] = k.split('>').map(Number); if (t > 3) return;
         const mine = R.st && R.milk > 0 && R.st.tea === t && R.st.milk === m;
-        links.push({ source: 'L' + t, target: 'M' + m, value: v, t, m, lineStyle: { color: mine ? RED : m < t ? RED : t < m ? '#8A5A33' : '#9C9284', opacity: mine ? .85 : m < t ? .55 : .3, borderColor: mine ? INK : 'none' } }); });
-      return { animationDurationUpdate: 800, tooltip: { ...TT, trigger: 'item', formatter: p => p.dataType === 'edge' ? `<b>${p.data.value}</b> readers put the leaf in at <b>${L.stage[p.data.t]}</b> and the milk at <b>${L.stage[p.data.m]}</b>.` : `${p.data.lab}: <b>${p.value}</b>` },
+        links.push({ source: 'L' + t, target: 'M' + m, value: v, t, m, lineStyle: st === 'flow0' ? { color: mine ? RED : '#9C9284', opacity: mine ? .85 : .4 } : st === 'teafirst' ? { color: mine ? RED : t < m ? '#7A4416' : '#9C9284', opacity: mine ? .85 : t < m ? .7 : .12 } : { color: mine ? RED : m < t ? RED : '#9C9284', opacity: mine ? .85 : m < t ? .7 : .12 } }); });
+      return { animationDurationUpdate: 1600, tooltip: { ...TT, trigger: 'item', formatter: p => p.dataType === 'edge' ? `<b>${p.data.value}</b> readers put the leaf in at <b>${L.stage[p.data.t]}</b> and the milk at <b>${L.stage[p.data.m]}</b>.` : `${p.data.lab}: <b>${p.value}</b>` },
         series: [{ type: 'sankey', left: small ? 70 : 130, right: small ? 70 : 130, top: 12, bottom: 12, nodeWidth: small ? 10 : 16, nodeGap: small ? 10 : 16, draggable: false, layoutIterations: 0, emphasis: { focus: 'adjacency' },
           label: { fontFamily: FELL, fontSize: small ? 11 : 14, color: INK, formatter: p => p.data.lab.replace(' · ', small ? '\n' : ' · ') }, data: nodes, links }] };
     }
@@ -539,8 +566,9 @@
       const nodes = WEB.map(s => ({ name: s, value: S.sp[s], symbol: svgURI(ICON(s)), symbolSize: (small ? 22 : 30) + (base / 9) * Math.sqrt(S.sp[s] / mx),
         label: { show: true, formatter: `${L.spice[s].replace('chai masala', 'masala')} · ${S.sp[s]}`, position: 'bottom', distance: 2, fontFamily: FELL, fontSize: small ? 11 : 13.5, color: R.extras.includes(s) ? RED : INK } }));
       const links = Object.entries(PAIRS).map(([k, v]) => { const [a, b] = k.split('+'), mine = R.extras.includes(a) && R.extras.includes(b), top = k === S.pairTop[0];
-        return { source: a, target: b, value: v, lineStyle: { width: 1 + 13 * v / pm, color: mine ? RED : top ? '#7A2318' : '#8D7B62', opacity: mine || top ? .8 : .35, curveness: .18 } }; });
-      return { animationDurationUpdate: 800, tooltip: { ...TT, trigger: 'item', formatter: p => p.dataType === 'edge' ? `<b>${p.data.value}</b> kitchens use ${L.spice[p.data.source]} and ${L.spice[p.data.target]}` : `${L.spice[p.name]}: <b>${p.value}</b> readers` },
+        const herb = st === 'herb' && ['tulsi', 'mint', 'lemongrass'].some(x => x === a || x === b), lit = st === 'web' ? top : st === 'herb' ? herb : false, dimmed = st !== 'web0' && !lit && !mine;
+        return { source: a, target: b, value: v, lineStyle: { width: 1 + 13 * v / pm, color: mine ? RED : lit ? (herb ? '#3F6B4C' : '#7A2318') : '#8D7B62', opacity: mine || lit ? .85 : dimmed ? .1 : .35, curveness: .18 } }; });
+      return { animationDurationUpdate: 1600, tooltip: { ...TT, trigger: 'item', formatter: p => p.dataType === 'edge' ? `<b>${p.data.value}</b> kitchens use ${L.spice[p.data.source]} and ${L.spice[p.data.target]}` : `${L.spice[p.name]}: <b>${p.value}</b> readers` },
         series: [{ type: 'graph', layout: 'circular', circular: { rotateLabel: false }, top: small ? 30 : 46, bottom: small ? 40 : 56, left: small ? 40 : 90, right: small ? 40 : 90, roam: false, data: nodes, links, emphasis: { focus: 'adjacency' } }] };
     }
   };
@@ -559,7 +587,7 @@
       const data = [], els = [];
       rows.forEach((g, i) => {
         const list = R.vessel === order[i] && R.milk != null ? g.concat([R]) : g;
-        list.forEach((r, k) => { const [x, y] = packAt(k, list.length, d, left, 8 + i * rh + 5, W - left - 40, rh - 10, 'left'); data.push(cupPt(r, x, y, d * 1.15, { sym: VSYM[order[i]] })); });
+        list.forEach((r, k) => { const [x, y] = packAt(k, list.length, d, left, 8 + i * rh + 5, W - left - 40, rh - 10, 'left'); data.push(cupPt(r, x, y, d * 1.15, { sym: VSYM[order[i]], op: st === 'vessel' && i > 0 && !r.you ? .18 : 1 })); });
         els.push(gText('vl' + i, left - 12, 8 + (i + .5) * rh - 8, L.vessel[order[i]].replace('cup and saucer', small ? 'cup & saucer' : 'cup and saucer'), { align: 'right', serif: true, fill: INK, size: small ? 12 : 16 }));
         els.push(gText('vn' + i, left - 12, 8 + (i + .5) * rh + 10, String(g.length), { align: 'right', bold: true, fill: i === 0 ? RED : TXT, size: small ? 12 : 15 }));
         if (i) els.push(gRect('vr' + i, 0, 8 + i * rh, W, 0.5));
@@ -604,6 +632,91 @@
   const rscore = r => (QMAP[r.id] ? 4 : 0) + (goodQ(r) ? 2 : quoteOf(r) ? .5 : 0) + hash(r.i * 3.1);
   const pickReaders = fs => fs.map(f => { const pool = RS.filter(r => !usedR.has(r.id) && f(r)).sort((a, b) => rscore(b) - rscore(a)); if (pool[0]) usedR.add(pool[0].id); return pool[0]; });
 
+  // ---------- Every chart: first the whole picture, then one thing at a time ----------
+  const any = r => goodQ(r);
+  CH.who.steps = [
+    { st: 'city0', k: () => kfig(N, 'readers of First Principles told us how they make chai'), h: () => `Each glass is one reader, coloured by their chai and sorted by where they live.`,
+      why: ['One of 194 kitchens', 'One of 194 kitchens'], picks: [any, any] },
+    { st: 'city', k: () => kfig(S.bigThree, 'live in Bengaluru, Mumbai or Delhi'), h: () => `The three big metros make up most of the survey. Bengaluru edges out Mumbai by three.`,
+      why: ['Lives in Bengaluru, the biggest group', 'Lives in Mumbai'], picks: [r => r.reader.city === 'Bengaluru', r => r.reader.city === 'Mumbai'] },
+    { st: 'abroad', k: () => kfig(S.abroad, 'make their chai abroad'), h: () => `From Los Angeles to Singapore, still with the same arguments about milk and boils.`,
+      why: ['Makes their chai abroad', 'Makes their chai abroad'], picks: [r => r.reader.city === 'Abroad', r => r.reader.city === 'Abroad'] }
+  ];
+  CH.pyramid.steps = [
+    { st: 'age0', h: () => `The same readers again, now by age. Women are on the left, men on the right; the youngest are at the bottom.`,
+      why: ['One of 194 kitchens', 'One of 194 kitchens'], picks: [any, any] },
+    { st: 'age', k: () => kfig(S.midAge, 'are between 25 and 54'), h: () => `Most are mid-career: old enough to have a settled recipe, young enough to argue about it.`,
+      why: ['Aged 35–44', 'Aged 45–54'], picks: [r => r.reader.age === '35–44', r => r.reader.age === '45–54'] },
+    { st: 'women', k: () => kfig(S.women, 'are women'), h: () => `About one in three. The women who answered skew older than the men.`,
+      why: ['A woman, 55 or older', 'A woman aged 25–34'], picks: [r => r.reader.g === 'w' && ['55–64', '65+'].includes(r.reader.age), r => r.reader.g === 'w' && r.reader.age === '25–34'] }
+  ];
+  CH.pour.steps = [
+    { st: 'all', k: () => kfig(S.uniqueSeq, 'of the recipes are one of a kind'), h: () => `Each glass is coloured by its recipe, from milky cream to near-black. Nobody chose these shades: the milk, the leaf and the boiling did.` },
+    { st: 'milk0', h: () => `Now sort the same glasses by how much milk goes in, from black on the left to all milk on the right.`,
+      why: ['Half milk, the biggest group', 'A quarter milk'], picks: [r => r.milk === 3, r => r.milk === 2] },
+    { st: 'water', k: () => kfig(S.mostlyWater, 'make a cup that is mostly water'), h: () => `Black, a splash or a quarter: more than half of all readers make a cup that is mostly water.`,
+      why: ['Takes it black: no milk at all', 'Just a splash of milk'], picks: [r => r.milk === 0, r => r.milk === 1] },
+    { st: 'ends', k: () => kfig(S.milk[5], 'use only milk, no water'), h: () => `The tapri way is the rarest of all. Only <b>${S.milk[5]}</b> keep water out of the pan.`,
+      why: ['All milk: no water at all', 'Mostly milk'], picks: [r => r.milk === 5, r => r.milk === 4] }
+  ];
+  CH.sequence.steps = [
+    { st: 'all', h: () => `The leaf, the milk and the sweetener. Each glass is one reader, placed at the moment that ingredient goes into their pan.` },
+    { st: 'common', k: () => kfig(S.common, 'put the leaf and the milk in together, at the boil'), h: () => `The single most common method, lit up for both the leaf and the milk. It is still only one kitchen in five.`,
+      why: ['Leaf and milk in together, at the boil', 'Leaf and milk in together, at the boil'], picks: [r => r.st.tea === 2 && r.st.milk === 2, r => r.st.tea === 2 && r.st.milk === 2] },
+    { st: 'boils0', h: () => `Once the milk is in, how many times is the pan allowed to rise? Here is every reader who boils their milk.`,
+      why: ['Boils it twice', 'Never lets it boil'], picks: [r => r.milk > 0 && r.boils === 2, r => r.milk > 0 && r.boils === 0] },
+    { st: 'boils', k: () => kfig(S.multi, 'let it rise three times or more, or simmer'), h: () => `Some let it rise and fall again and again; some leave it to simmer for ten minutes.`,
+      why: ['Boils it three times or more', 'Lets it simmer'], picks: [r => r.milk > 0 && r.boils === 3, r => r.milk > 0 && r.boils === 4] },
+    { st: 'once', k: () => kfig(S.boil[1], 'stop at the very first boil'), h: () => `The other camp: the moment it rises, the flame goes off.`,
+      why: ['Stops at the first boil', 'Stops at the first boil'], picks: [r => r.milk > 0 && r.boils === 1, r => r.milk > 0 && r.boils === 1] }
+  ];
+  CH.flow.steps = [
+    { st: 'flow0', h: () => `On the left, when the leaf goes in; on the right, when the milk does. Each band is a group of readers who do it that way.`,
+      why: ['One of 194 kitchens', 'One of 194 kitchens'], picks: [r => r.milk > 0 && goodQ(r), r => r.milk > 0 && goodQ(r)] },
+    { st: 'flow', k: () => kfig(S.milkFirst, 'put the milk in before the leaf'), h: () => `In red: the milk-first kitchens. It is the smallest camp.`,
+      why: ['Puts the milk in first', 'Puts the milk in first'], picks: [r => r.milk > 0 && r.st.milk != null && r.st.milk < r.st.tea, r => r.milk > 0 && r.st.milk != null && r.st.milk < r.st.tea] },
+    { st: 'teafirst', k: () => kfig(S.teaFirst, 'put the leaf in before the milk'), h: () => `The biggest camp: the leaf colours the water first. Another <b>${S.together}</b> add both at once.`,
+      why: ['Puts the leaf in first', 'Puts the leaf in first'], picks: [r => r.milk > 0 && r.st.milk != null && r.st.tea < r.st.milk, r => r.milk > 0 && r.st.milk != null && r.st.tea < r.st.milk] }
+  ];
+  CH.leaf.steps = [
+    { st: 'all', h: () => `Across: how much tea per cup. Down: how long it stays in before straining. Each reader lands in one square.` },
+    { st: 'top', k: () => kfig(S.topCell[1], 'share the busiest square'), h: () => `<b>${L.amt[TA]}</b> for <b>${L.brew[TB]}</b>: the closest thing to a standard cup.`,
+      why: [`${L.amt[TA]}, strained after ${L.brew[TB]}`, `${L.amt[TA]}, strained after ${L.brew[TB]}`], picks: [r => r.amt === TA && r.brew === TB, r => r.amt === TA && r.brew === TB] },
+    { st: 'kadak', k: () => kfig(S.kadak, 'use 1½ tsp or more, for five minutes or more'), h: () => `Kadak, by any definition. A small, determined corner.`,
+      why: ['Kadak: lots of leaf, brewed long', 'Strong leaf, brewed long'], picks: [r => (r.amt === 3 || r.amt === 4) && (r.brew === 3 || r.brew === 4), r => (r.amt >= 3) && (r.brew >= 2)] },
+    { st: 'quick', k: () => kfig(S.quick, 'strain within a minute'), h: () => `At the other end, a quick dip. And <b>${S.colour}</b> strain only when the colour looks right.`,
+      why: ['Strains within a minute', 'Strains by colour'], picks: [r => r.brew === 0, r => r.brew === 5] }
+  ];
+  CH.larder.steps = [
+    { st: 'count', h: () => `Every dot is one reader’s spice. Each row is a spice, from the most used at the top.` },
+    { st: 'stage', k: () => kfig(S.sp.ginger, 'add ginger: two in three kitchens'), h: () => `Spread by when they go in, most spices go in early, before the leaf and the milk can mute them.`,
+      why: ['Puts ginger in the cold pan', 'Adds spices while it heats'], picks: [r => r.extras.includes('ginger') && r.st.ginger === 0, r => r.extras.length >= 2 && r.extras.every(s => r.st[s] === 1)] },
+    { st: 'late', k: () => kfig(S.cardOff, 'add cardamom only after the heat is off', S.sp.cardamom), h: () => `A few hold the cardamom back until the very end, for its fragrance.`,
+      why: ['Adds cardamom after the flame is off', 'Adds cardamom late'], picks: [r => r.extras.includes('cardamom') && r.st.cardamom === 3, r => r.extras.includes('cardamom') && r.st.cardamom >= 2] }
+  ];
+  CH.pairs.steps = [
+    { st: 'web0', h: () => `Each line joins two spices that go into the same pan. The thicker the line, the more kitchens use both.`,
+      why: ['Uses three spices or more', 'Uses three spices or more'], picks: [r => r.extras.length >= 3 && goodQ(r), r => r.extras.length >= 3] },
+    { st: 'web', k: () => kfig(S.pairTop[1], `put ${S.pairTop[0].split('+').map(s => L.spice[s]).join(' and ')} in together`), h: () => `The classic pair. Ginger is the hub that nearly everything else hangs off.`,
+      why: ['Uses ginger and cardamom together', 'Uses ginger and cardamom together'], picks: [r => r.extras.includes('ginger') && r.extras.includes('cardamom'), r => r.extras.includes('ginger') && r.extras.includes('cardamom')] },
+    { st: 'herb', k: () => kfig(S.herbal, 'add tulsi, mint or lemongrass'), h: () => `A little herbal corner of its own, mostly kept apart from the masala spices.`,
+      why: ['Adds tulsi or mint', 'Adds lemongrass'], picks: [r => r.extras.includes('tulsi') || r.extras.includes('mint'), r => r.extras.includes('lemongrass')] }
+  ];
+  S.herbal = cnt(r => ['tulsi', 'mint', 'lemongrass'].some(s => r.extras.includes(s)));
+  CH.cup.steps = [
+    { st: 'sweet0', h: () => `Every reader’s cup, sorted by what sweetens it, from none at all to honey.` },
+    { st: 'sweet', k: () => kfig(S.noSugar, 'take no sugar, the biggest group'), h: () => `More readers skip sugar than use any single sweetener.`,
+      why: ['Takes no sugar', 'Takes no sugar'], picks: [r => r.sweet === 'none', r => r.sweet === 'none'] },
+    { st: 'where', k: () => kfig(S.sweetCup, 'of those who sweeten wait until it’s in the cup', N - S.noSugar), h: () => `Lit up: the cup-stirrers. The rest let the sugar cook with the milk.`,
+      why: ['Sweetens it in the cup', 'Uses jaggery'], picks: [r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4, r => r.sweet === 'jaggery'] }
+  ];
+  CH.vessels.steps = [
+    { st: 'v0', h: () => `And finally, what it is poured into. One vessel per reader, each tinted by that reader’s chai.`,
+      why: ['Drinks from a steel tumbler', 'Drinks from a cutting glass'], picks: [r => r.vessel === 'tumbler', r => r.vessel === 'glass'] },
+    { st: 'vessel', k: () => kfig(S.vessel.mug, 'drink from a mug'), h: () => `The mug wins, comfortably. <b>${S.vessel.cup}</b> still hold out for a cup and saucer.`,
+      why: ['Drinks from a mug', 'Drinks from a cup and saucer'], picks: [r => r.vessel === 'mug', r => r.vessel === 'cup'] }
+  ];
+
   // A fact tile: an icon, a number, a few words
   const FACT = (key, icon, n, cap) => ({ key: 'fact:' + key, cls: 'c-fact', render: () => `<div class="fact"><span class="fi">${icon.startsWith('<') ? icon : ICON(icon)}</span><b>${typeof n === 'function' ? n() : n}</b><small>${cap}</small></div>` });
   // two icons with an arrow between them: "this, then that"
@@ -633,7 +746,7 @@
     let feat = [];
     if (L0.d.join(' ').includes('v')) { const rs = pickReaders(s.picks || []); cells.v = RCARD(rs[0], (s.why || [])[0]); cells.w = RCARD(rs[1], (s.why || [])[1]); feat = rs.filter(Boolean).map(r => r.id); }
     if (o.title) SC.push({ id: ch + '-' + i + '-in', h: 90, head: HEADS[ch], d: L0.d, m: L0.m, chart: { ch, step: i }, cells: { ...cells, x: CUE(ch) }, feat });
-    SC.push({ id: ch + '-' + i, h: 175, head: HEADS[ch], d: L0.d, m: L0.m, chart: { ch, step: i }, cells, feat });
+    SC.push({ id: ch + '-' + i, h: o.h || 160, head: HEADS[ch], d: L0.d, m: L0.m, chart: { ch, step: i }, cells, feat });
   }
 
   // 1 · a glass, and everything India puts in it
@@ -641,40 +754,48 @@
   SC.push({ id: 'hero', h: 160, head: 'What goes in', hero: 'empty',
     d: ['a b Y Y c d', 'e f Y Y g h', 'i j x x k l', 'm n x x o p'],
     m: ['a b c d', 'e Y Y f', 'g Y Y h', 'i x x j', 'k x x l', 'm n o p'],
-    cells: { Y: HERO, x: BIG('all', 'Indians put all kinds of things in their tea.', () => `These are the sixteen most common, from ${N} readers’ recipes.`), ...orbCells } });
+    cells: { Y: HERO, x: BIG('all', 'Indians put all kinds of things in their tea.', () => `These are the sixteen most common, from ${N} readers’ recipes.</p><p class="go-cue"><i aria-hidden="true">↓</i> Scroll to put them in`), ...orbCells } });
   // 2 · it all goes in
   SC.push({ id: 'hero-in', h: 150, head: 'What goes in', hero: 'full', flow: true,
     d: ['x x Y Y M M', 'x x Y Y M M', 'x x Y Y M M', 'x x Y Y M M'],
-    m: ['Y Y Y Y', 'Y Y Y Y', 'Y Y Y Y', 'x x x x', 'x x x x', 'M M M M'],
-    cells: { Y: HERO, x: BIG('yours', 'But maybe yours is different.', () => `Scroll on to see how ${N} readers make theirs. Or make your own first, and find the kitchens that make it like you.`), M: CTA } });
-  // 3 · the readers
-  scene('who', 0, 'wideL', { cells: { f: FACT('men', 'person', S.men, 'men'), g: FACT('women', 'woman', S.women, 'women') } });
-  scene('pyramid', 0, 'under', { cells: { f: FACT('abroad', 'globe', S.abroad, 'make it abroad'), g: FACT('over55', 'elder', S.over55, 'are 55 or older') } });
+    m: ['Y Y Y Y', 'Y Y Y Y', 'Y Y Y Y', 'x x x x', 'M M M M', 'M M M M'],
+    cells: { Y: HERO, x: BIG('yours', 'But maybe yours is different.', () => `We asked ${N} readers exactly how they make theirs.`), M: CTA2 } });
+  // 3 · the readers. Each chart: the plain picture first, then one highlight per step, in a layout that holds still.
+  function group(ch, lay, o = {}) {
+    CH[ch].steps.forEach((st, i) => scene(ch, i, i === 0 && o.titleLay ? o.titleLay : lay, { ...o, title: i === 0 ? o.title : null, h: i === 0 ? 160 : 125 }));
+  }
+  group('who', 'wideL', { cells: { f: FACT('men', 'person', S.men, 'men'), g: FACT('women', 'woman', S.women, 'women') } });
+  group('pyramid', 'under', { cells: { f: FACT('abroad', 'globe', S.abroad, 'make it abroad'), g: FACT('over55', 'elder', S.over55, 'are 55 or older') } });
   // I
-  scene('pour', 0, 'titleL', { title: 'pour' });
-  scene('pour', 1, 'sideR', { cells: { f: FACT('water', 'water', S.mostlyWater, 'mostly water'), g: FACT('allmilk', 'milk', S.milk[5], 'all milk, no water') } });
+  group('pour', 'sideR', { title: 'pour', titleLay: 'titleL', cells: { f: FACT('water', 'water', S.mostlyWater, 'mostly water'), g: FACT('allmilk', 'milk', S.milk[5], 'all milk, no water') } });
   // II
-  scene('sequence', 0, 'titleR', { title: 'sequence' });
-  scene('flow', 0, 'frame', { cells: { f: FACT('milkfirst', orderIc('milk', 'ctc'), S.milkFirst, 'milk first, then leaf'), g: FACT('teafirst', orderIc('ctc', 'milk'), S.teaFirst, 'leaf first, then milk') } });
-  scene('sequence', 1, 'sideL', { cells: { f: FACT('once', 'once', S.boil[1], 'boil it just once'), g: FACT('simmer', 'simmer', S.boil[4], 'let it simmer') } });
+  group('sequence', 'sideL', { title: 'sequence', titleLay: 'titleR', cells: { f: FACT('once', 'once', S.boil[1], 'boil it just once'), g: FACT('simmer', 'simmer', S.boil[4], 'let it simmer') } });
+  group('flow', 'frame', { cells: { f: FACT('milkfirst', orderIc('milk', 'ctc'), S.milkFirst, 'milk first, then leaf'), g: FACT('teafirst', orderIc('ctc', 'milk'), S.teaFirst, 'leaf first, then milk') } });
   // III
-  scene('leaf', 0, 'titleTop', { title: 'leaf' });
-  scene('leaf', 1, 'under', { cells: { f: FACT('kadak', 'strong', S.kadak, 'make it kadak'), g: FACT('quick', 'quick', S.quick, 'strain within a minute') } });
+  group('leaf', 'under', { title: 'leaf', titleLay: 'titleTop', cells: { f: FACT('kadak', 'strong', S.kadak, 'make it kadak'), g: FACT('quick', 'quick', S.quick, 'strain within a minute') } });
   // IV
-  scene('larder', 0, 'titleBL', { title: 'larder' });
-  scene('pairs', 0, 'frame', { cells: { f: FACT('ginger', 'ginger', S.sp.ginger, 'use ginger'), g: FACT('plain', 'nospice', S.plain, 'add no spice at all') } });
-  scene('larder', 1, 'sideR', { cells: { f: FACT('cardoff', orderIc('stage3', 'cardamom'), S.cardOff, 'cardamom after the flame'), g: FACT('cardamom', 'cardamom', S.sp.cardamom, 'use cardamom') } });
+  group('larder', 'sideR', { title: 'larder', titleLay: 'titleBL', cells: { f: FACT('cardoff', orderIc('stage3', 'cardamom'), S.cardOff, 'cardamom after the flame'), g: FACT('cardamom', 'cardamom', S.sp.cardamom, 'use cardamom') } });
+  group('pairs', 'frame', { cells: { f: FACT('ginger', 'ginger', S.sp.ginger, 'use ginger'), g: FACT('plain', 'nospice', S.plain, 'add no spice at all') } });
   // V
-  scene('cup', 0, 'titleR', { title: 'cup' });
-  scene('vessels', 0, 'wideL', { cells: { f: FACT('mug', vIcon('mug'), S.vessel.mug, 'mugs'), g: FACT('glass', vIcon('glass'), S.vessel.glass, 'cutting glasses') } });
+  group('cup', 'sideL', { title: 'cup', titleLay: 'titleR', cells: { f: FACT('nosugar', 'nosugar', S.noSugar, 'no sugar'), g: FACT('jaggery', 'jaggery', S.jaggery, 'use jaggery') } });
+  group('vessels', 'wideL', { cells: { f: FACT('mug', vIcon('mug'), S.vessel.mug, 'mugs'), g: FACT('glass', vIcon('glass'), S.vessel.glass, 'cutting glasses') } });
   // the end: yours, and more readers to steal from
-  const endR = Q.end1.concat(Q.end2).map(([id]) => byId(id)).filter(r => r && !usedR.has(r.id));
-  RS.filter(r => !usedR.has(r.id) && goodQ(r) && !endR.includes(r)).sort((a, b) => rscore(b) - rscore(a)).forEach(r => { if (endR.length < 6) endR.push(r); });
+  // The story's two-per-step picks use up most of the good quotes, so the end draws on everyone with something to say:
+  // readers not yet shown first, then the rest, curated quotes ahead of the others.
+  const withQ = RS.filter(r => quoteOf(r).length > 40);
+  const endPool = withQ.filter(r => !usedR.has(r.id)).sort((a, b) => rscore(b) - rscore(a))
+    .concat(withQ.filter(r => usedR.has(r.id)).sort((a, b) => rscore(b) - rscore(a)));
+  const endR = endPool.slice(0, 6), moreR = endPool.slice(6, 12);
   const endCells = {}; endR.forEach((r, i) => endCells[String(i + 1)] = RCARD(r, 'In their own words'));
+  const moreCells = {}; moreR.forEach((r, i) => moreCells['abcdef'[i]] = RCARD(r, 'In their own words'));
   SC.push({ id: 'end', h: 180, head: 'Your chai', hero: 'you',
     d: ['x x Y Y M M', 'x x Y Y M M', '1 2 3 4 5 6', '1 2 3 4 5 6'],
-    m: ['Y Y M M', 'Y Y M M', 'x x x x', '1 1 2 2', '1 1 2 2', '1 1 2 2'],
+    m: ['Y Y M M', 'Y Y M M', 'x x x x', '1 1 2 2', '1 1 2 2', '3 3 4 4'],
     cells: { Y: HERO, M: CTA, x: BIG('end', 'Every kitchen is quietly certain its tea is the correct one.', () => `Yours too. Make it, name it, and send the card to whoever at home makes it “wrong”.`), ...endCells } });
+  SC.push({ id: 'end-more', h: 180, head: 'Kitchen voices', hero: 'you',
+    d: ['a b c x x x', 'a b c x x x', 'd e f M M M', 'd e f M M M'],
+    m: ['x x x x', 'a a b b', 'a a b b', 'c c d d', 'c c d d', 'M M M M'],
+    cells: { M: CTA, x: BIG('more', 'And a few more kitchens to steal from.', () => `${withQ.length} readers told us something about their chai in their own words. Tap a card to see how they make it, or make theirs.`), ...moreCells } });
 
   // ---------- The sheet engine ----------
   const grid = $('shGrid'), svg = $('shLines'), wrap = $('sheetWrap');
@@ -682,9 +803,9 @@
   let mode = innerWidth < 700 ? 'm' : 'd';
   const cur = {};           // key -> { el, inner, rect, spec }
   let curLines = {};        // key -> <line>
-  let curIdx = -2, target = -3, busy = false;
+  let curIdx = -2;
   const INTRO = 6; // a breath after the sheet pins, before the grid draws // vh of scrolling for the opening: header lifts away, your pan and the running head appear // vh of scrolling over which the opening lifts away; the grid starts drawing at the end of it
-  const STARTS = []; { let acc = INTRO; SC.forEach(s => { STARTS.push(acc); acc += s.h; }); wrap.style.height = (acc + 100) + 'vh'; }
+  const STARTS = []; { let acc = INTRO; SC.forEach(s => { STARTS.push(acc); acc += s.h + 72; }); wrap.style.height = (acc + 100) + 'vh'; } // +72 (= BAND − 38): room for the long change at the top of each scene
 
   function parse(rows) {
     const R = {};
@@ -712,7 +833,7 @@
     return out;
   }
   const unit = () => ({ ux: grid.clientWidth / DIM[mode].cols, uy: grid.clientHeight / DIM[mode].rows });
-  const px = r => { const { ux, uy } = unit(); return { left: r.x * ux, top: r.y * uy, width: r.w * ux, height: r.h * uy }; };
+  const px = r => { const { ux, uy } = unit(), L = Math.round(r.x * ux), T = Math.round(r.y * uy); return { left: L, top: T, width: Math.round((r.x + r.w) * ux) - L, height: Math.round((r.y + r.h) * uy) - T }; };
   const sameRect = (a, b) => a && b && a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h;
   const NS = 'http://www.w3.org/2000/svg';
   function placeLine(el, seg) { const { ux, uy } = unit(); el.setAttribute('x1', seg[0] * ux); el.setAttribute('y1', seg[1] * uy); el.setAttribute('x2', seg[2] * ux); el.setAttribute('y2', seg[3] * uy); }
@@ -754,74 +875,148 @@
     const r = art.getBoundingClientRect(); let w = r.width, h = w * 9 / 16; if (h > r.height) { h = r.height; w = h * 16 / 9; }
     return { left: r.left + (r.width - w) / 2, top: r.top + (r.height - h) / 2, width: w, height: h };
   }
-  // Changing scenes: old cells fade, rules undraw and redraw, new cells are inked in from the left.
+  // ---------- Scene changes, driven by scroll ----------
+  // Each change from one scene to the next is a paused timeline, and the scroll position is its playhead: it plays
+  // across a short band at the top of each scene. Scroll a little and the change is a little done; stop and it holds;
+  // scroll back and it rewinds. Between bands, a scene sits still. Nothing is triggered, so nothing fires by accident.
+  const BAND = 110; // vh of scroll over which one scene turns into the next
   // The order things arrive in a scene: the chapter, then the data, then what it means, then the people.
   let nFact = 0, nCard = 0;
   const buildAt = (key, a) => { if (a === 0) nFact = nCard = 0;
     const t = key.split(':')[0];
-    return t === 'title' ? 0 : t === 'chart' ? .15 : t === 'fact' ? .75 + .15 * nFact++ : t === 'step' ? 1.05 : t === 'rc' ? 1.45 + .2 * nCard++ : a * .06; };
+    return t === 'title' ? 0 : t === 'chart' ? .05 : t === 'fact' ? .4 + .1 * nFact++ : t === 'step' ? .55 : t === 'rc' ? .8 + .15 * nCard++ : a * .05; };
   const INK_FROM = 'inset(0% 100% 0% 0%)', INK_TO = 'inset(0% 0% 0% 0%)';
-  function go(idx) {
-    busy = true;
-    const first = curIdx < 0;
+  let tr = null; // the change in progress, if any
+
+  function wantFor(idx) {
+    const sc = idx >= 0 ? SC[idx] : null, want = {};
+    if (idx === -1) { const l0 = parse(SC[0][mode]); want.hero = { rect: l0.Y, spec: HERO }; }
+    if (sc) Object.entries(parse(sc[mode])).forEach(([id, rect]) => { if (id[0] === '.') return; const spec = sc.cells[id]; if (!spec) { console.warn('no cell for', id, sc.id); return; } want[spec.key] = { rect, spec }; });
+    return want;
+  }
+  // The parts of a scene that can't be blended (the running head, which readers are marked, the chart's highlight,
+  // the big glass) switch over at one point in the change.
+  function applyState(idx, cells) {
     const sc = idx >= 0 ? SC[idx] : null;
-    const layout = sc ? parse(sc[mode]) : {};
-    const want = {};
     HERO_MODE = sc && sc.hero || 'empty';
-    FEAT = new Set(sc && sc.feat || []);
-    if (!sc) { const l0 = parse(SC[0][mode]); want.hero = { rect: l0.Y, spec: HERO }; }
-    if (sc) Object.entries(layout).forEach(([id, rect]) => { if (id[0] === '.') return; const spec = sc.cells[id]; if (!spec) { console.warn('no cell for', id, sc.id); return; } want[spec.key] = { rect, spec }; });
-    const tl = gsap.timeline({ onComplete: () => { busy = false; curIdx = idx; if (target !== idx) go(target); } });
+    $('sheet').classList.toggle('at-intro', !sc);
+    $('shPage').textContent = String(Math.max(0, idx) + 1).padStart(2, '0');
+    $('shLeft').textContent = sc ? sc.head : '';
+    if (sc && sc.chart && LIVE[sc.chart.ch]) LIVE[sc.chart.ch].step = sc.chart.step;
+    Object.values(cells).forEach(e => { if (e.spec.live && e.el.isConnected) paint(e); });
+    Object.keys(LIVE).forEach(drawChart);
+  }
+  function build(from, to) {
+    const tl = gsap.timeline({ paused: true });
+    const sc = to >= 0 ? SC[to] : null, layout = sc ? parse(sc[mode]) : {};
+    const first = from < 0, want = wantFor(to);
+    const T = { from, to, tl, next: {}, added: [], leaving: [], moved: [], addedLines: [], leavingLines: [], nextLines: {}, state: from };
+    // Going forward into a 'flow' scene, the ingredients around the glass travel into it.
+    const flowing = !!(sc && sc.flow && to > from && cur.hero && layout.Y), hy = flowing ? px(layout.Y) : null;
     let n = 0;
-    // Going forward into a 'flow' scene, the ingredients around the glass fly into it before their boxes go.
-    const flowing = !!(sc && sc.flow && curIdx >= 0 && curIdx < idx && cur.hero && layout.Y);
-    const gr = grid.getBoundingClientRect(), hy = flowing ? px(layout.Y) : null;
     Object.keys(cur).forEach(key => {
       if (want[key]) return;
-      const e = cur[key]; delete cur[key]; e.leaving = true;
-      const ic = flowing && key.startsWith('orb:') && e.inner.querySelector('.c-art .ic');
-      if (ic) {
-        const f = ic.getBoundingClientRect(), fly = ic.cloneNode(true);
-        fly.classList.add('fly'); Object.assign(fly.style, { left: f.left + 'px', top: f.top + 'px', width: f.width + 'px', height: f.height + 'px' });
-        document.body.appendChild(fly);
-        const dx = gr.left + hy.left + hy.width / 2 - (f.left + f.width / 2), dy = gr.top + hy.top + hy.height * .55 - (f.top + f.height / 2);
-        tl.to(fly, { x: dx, y: dy, scale: .2, rotation: (hash(n) - .5) * 300, duration: .75, ease: 'power2.in', onComplete: () => fly.remove() }, .02 + n * .035);
-        tl.to(e.inner, { autoAlpha: 0, duration: .2, onComplete: () => e.el.remove() }, (n++) * .01);
+      const e = cur[key]; T.leaving.push(e);
+      if (flowing && key.startsWith('orb:')) {
+        const r = px(e.rect), dx = hy.left + hy.width / 2 - (r.left + r.width / 2), dy = hy.top + hy.height * .55 - (r.top + r.height / 2);
+        const words = e.inner.querySelectorAll('.ing-name, .ing-hint');
+        if (words.length) tl.to(words, { autoAlpha: 0, duration: .12 }, 0);
+        tl.to(e.inner, { x: dx, y: dy, scale: .22, rotation: (hash(n) - .5) * 160, duration: .7, ease: 'power2.in' }, .02 + n * .03);
+        tl.to(e.inner, { autoAlpha: 0, duration: .12 }, .62 + n++ * .03);
         return;
       }
-      tl.to(e.inner, { autoAlpha: 0, y: -6, duration: .22, ease: 'power1.in', onComplete: () => { if (e.spec.unmount) e.spec.unmount(); e.el.remove(); } }, (n++) * .01);
+      tl.to(e.inner, { autoAlpha: 0, y: -6, duration: .45, ease: 'power1.inOut' }, .1 + (n++) * .02);
     });
     const nl = sc ? linesFor(layout) : {};
-    Object.keys(curLines).forEach(k => { if (nl[k]) return; const el = curLines[k]; delete curLines[k]; tl.to(el, { attr: { 'stroke-dashoffset': -1 }, duration: .3, ease: 'power1.in', onComplete: () => el.remove() }, 0); });
+    Object.keys(curLines).forEach(k => { if (nl[k]) { T.nextLines[k] = curLines[k]; return; } const el = curLines[k]; T.leavingLines.push(el); tl.to(el, { attr: { 'stroke-dashoffset': -1 }, duration: .3, ease: 'power1.in' }, 0); });
     let m = 0;
     Object.entries(nl).forEach(([k, seg]) => {
-      if (curLines[k]) { placeLine(curLines[k], seg); return; }
+      if (curLines[k]) return;
       const el = document.createElementNS(NS, 'line'); el.setAttribute('pathLength', '1'); el.setAttribute('stroke-dasharray', '1 1'); el.setAttribute('stroke-dashoffset', '1');
-      placeLine(el, seg); svg.appendChild(el); curLines[k] = el;
+      placeLine(el, seg); svg.appendChild(el); T.nextLines[k] = el; T.addedLines.push(el);
       tl.to(el, { attr: { 'stroke-dashoffset': 0 }, duration: first ? 1.1 : .7, ease: 'power2.inOut' }, (first ? .05 : .2) + (m++) * (first ? .05 : .02));
     });
     let a = 0;
+    
     Object.entries(want).forEach(([key, w]) => {
       const e = cur[key];
       if (e) {
-        e.spec = w.spec;
-        if (!sameRect(e.rect, w.rect)) { e.rect = w.rect; shapeCls(e); const ck = key.startsWith('chart:') ? key.slice(6) : null; tl.to(e.el, { ...px(w.rect), duration: .8, ease: 'power3.inOut', onUpdate: () => { if (ck && LIVE[ck]) LIVE[ck].chart.resize(); }, onComplete: () => { fit(e.inner); if (ck && LIVE[ck]) { LIVE[ck].chart.resize(); drawChart(ck); } } }, .1); }
-        if (w.spec.live && key === 'hero' && flowing) tl.call(() => { paint(e); const v = e.inner.querySelector('.vessel'); if (v) gsap.from(v, { scale: .94, transformOrigin: '50% 100%', duration: .6, ease: 'back.out(3)' }); }, null, .02 + n * .035 + .6);
-        else if (w.spec.live) paint(e);
+        T.next[key] = e;
+        if (!sameRect(e.rect, w.rect)) {
+          T.moved.push({ e, toR: w.rect });
+          const ck = key.startsWith('chart:') ? key.slice(6) : null;
+          tl.fromTo(e.el, px(e.rect), { ...px(w.rect), duration: .8, ease: 'power3.inOut', immediateRender: false, onUpdate: () => { if (ck && LIVE[ck]) LIVE[ck].chart.resize(); } }, .1);
+        }
         return;
       }
       const ne = makeCell(key, w.spec, w.rect);
-      cur[key] = ne;
-      if (!sc) { gsap.set(ne.inner, { autoAlpha: 1 }); return; }
-      const at = (first ? .5 : .3) + buildAt(key, a++);
-      if (key.startsWith('chart:')) { gsap.set(ne.inner, { clipPath: INK_FROM, autoAlpha: 1 }); tl.to(ne.inner, { clipPath: INK_TO, duration: .8, ease: 'power2.inOut', clearProps: 'clipPath' }, at); }
-      else { gsap.set(ne.inner, { autoAlpha: 0, y: 10 }); tl.to(ne.inner, { autoAlpha: 1, y: 0, duration: .7, ease: 'power2.out', clearProps: 'transform' }, at); }
+      T.next[key] = ne; T.added.push(ne);
+      if (key.startsWith('chart:') && sc && sc.chart) { const ck = key.slice(6); if (LIVE[ck]) { LIVE[ck].step = sc.chart.step; drawChart(ck); } }
+      if (to < 0) return; // the intro glass just sits there
+      const at = (first ? .5 : .35) + buildAt(key, a++);
+      if (key.startsWith('chart:')) { gsap.set(ne.inner, { clipPath: INK_FROM }); tl.fromTo(ne.inner, { clipPath: INK_FROM }, { clipPath: INK_TO, duration: .8, ease: 'power2.inOut', immediateRender: false }, at); }
+      else { gsap.set(ne.inner, { autoAlpha: 0, y: 10 }); tl.fromTo(ne.inner, { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: .55, ease: 'power1.out', immediateRender: false }, at); }
     });
-    $('sheet').classList.toggle('at-intro', !sc);
-    if (sc && sc.chart) { const lv = LIVE[sc.chart.ch]; if (lv) { lv.step = sc.chart.step; tl.call(() => drawChart(sc.chart.ch), null, .3); } }
-    $('shPage').textContent = String(Math.max(0, idx) + 1).padStart(2, '0');
-    $('shLeft').textContent = sc ? sc.head : '';
+    if (tl.duration() < .6) tl.set({}, {}, .6);
+    // where the unblendable parts switch: once the ingredients have landed; otherwise early, so the data leads and the words follow
+    T.sw = flowing ? Math.min(.95, .8 / tl.duration()) : .3;
+    return T;
   }
+  function setP(q) {
+    tr.tl.progress(q);
+    const s = q >= tr.sw ? tr.to : tr.from;
+    if (s !== tr.state) {
+      tr.state = s; applyState(s, s === tr.to ? tr.next : cur);
+      if (s === tr.to && tr.from >= 0 && cur.hero && tr.next.hero) { const v = cur.hero.inner.querySelector('.vessel'); if (v) gsap.fromTo(v, { scale: .94 }, { scale: 1, duration: .6, ease: 'back.out(3)', transformOrigin: '50% 100%' }); }
+    }
+  }
+  function finalize() {
+    const T = tr; tr = null;
+    T.tl.progress(1); if (T.state !== T.to) { T.state = T.to; applyState(T.to, T.next); }
+    T.tl.kill();
+    T.leaving.forEach(e => { if (e.spec.unmount) e.spec.unmount(); e.el.remove(); });
+    T.leavingLines.forEach(el => el.remove());
+    T.added.forEach(e => gsap.set(e.inner, { clearProps: 'transform,clipPath' }));
+    Object.keys(cur).forEach(k => delete cur[k]); Object.assign(cur, T.next);
+    curLines = T.nextLines; curIdx = T.to;
+    T.moved.forEach(({ e, toR }) => { e.rect = toR; gsap.set(e.el, px(toR)); shapeCls(e); fit(e.inner); });
+    Object.keys(LIVE).forEach(k => { LIVE[k].chart.resize(); drawChart(k); });
+  }
+  function revert() {
+    const T = tr; tr = null;
+    T.tl.progress(0); T.tl.kill();
+    T.added.forEach(e => { if (e.spec.unmount) e.spec.unmount(); e.el.remove(); });
+    T.addedLines.forEach(el => el.remove());
+    T.leaving.forEach(e => gsap.set(e.inner, { clearProps: 'transform,opacity,visibility' }));
+    T.moved.forEach(({ e }) => gsap.set(e.el, px(e.rect)));
+    if (T.state !== T.from) applyState(T.from, cur);
+    Object.keys(LIVE).forEach(k => LIVE[k].chart.resize());
+  }
+  // Bring the sheet to position g: an integer is a settled scene, a fraction is part-way through a change.
+  function seek(g) {
+    for (let guard = 0; guard < 100; guard++) {
+      if (tr) {
+        const lo = Math.min(tr.from, tr.to), hi = Math.max(tr.from, tr.to);
+        if (g >= lo && g <= hi) {
+          const q = Math.abs(g - tr.from);
+          if (q >= 1) { finalize(); continue; }
+          if (q <= 0) { revert(); continue; }
+          setP(q); return;
+        }
+        if ((g > hi && tr.to === hi) || (g < lo && tr.to === lo)) finalize(); else revert();
+        continue;
+      }
+      if (g === curIdx) return;
+      if (Math.abs(g - curIdx) > 1) { let to = g > curIdx ? Math.floor(g) : Math.ceil(g); if (to === curIdx) to += g > curIdx ? 1 : -1; tr = build(curIdx, to); finalize(); continue; }
+      tr = build(curIdx, g > curIdx ? curIdx + 1 : curIdx - 1);
+    }
+  }
+  const gAt = pos => {
+    if (pos < STARTS[0]) return -1;
+    let k = 0; for (let i = 0; i < SC.length; i++) if (STARTS[i] <= pos) k = i;
+    return k - 1 + Math.min(1, (pos - STARTS[k]) / BAND);
+  };
+  const sceneTop = i => wrap.offsetTop + (STARTS[i] + BAND + 2) * innerHeight / 100; // a scene, fully arrived
 
   // What's in the pan right now, as one stacked bar: liquids first, then the leaf, the sweetener and each spice.
   const MILKF = [0, .1, .25, .5, .75, 1], AMTF = [.035, .045, .06, .075, .09, .06, .055];
@@ -844,23 +1039,23 @@
   }
   function onScroll() {
     if (mkOpen) return;
-    const vh = innerHeight / 100;
-    const pos = (scrollY - wrap.offsetTop) / vh;
-    let idx = -1;
-    if (pos >= STARTS[0]) { idx = 0; for (let i = 0; i < SC.length; i++) if (STARTS[i] <= pos) idx = i; }
-    if (idx !== target) { target = idx; clearTimeout(settleT); settleT = setTimeout(() => { if (!busy && target !== curIdx) go(target); }, curIdx < 0 && idx <= 0 ? 0 : 420); }
+    seek(gAt((scrollY - wrap.offsetTop) / (innerHeight / 100)));
   }
-  let settleT;
   let ticking = false;
   addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; onScroll(); }); } }, { passive: true });
-  function scrollToScene(id) { const i = SC.findIndex(s => s.id === id); if (i >= 0) scrollTo({ top: wrap.offsetTop + STARTS[i] * innerHeight / 100 + 4, behavior: 'smooth' }); }
+  function scrollToScene(id) { const i = SC.findIndex(s => s.id === id); if (i >= 0) scrollTo({ top: sceneTop(i), behavior: 'smooth' }); }
 
   function relayout() {
+    if (tr) finalize();
     const nm = innerWidth < 700 ? 'm' : 'd';
-    if (nm !== mode) { mode = nm; Object.values(cur).forEach(e => { if (e.spec.unmount) e.spec.unmount(); e.el.remove(); }); Object.keys(cur).forEach(k => delete cur[k]); Object.values(curLines).forEach(l => l.remove()); curLines = {}; const i = curIdx; curIdx = -2; busy = false; target = i; if (i >= -1) go(i); return; }
+    if (nm !== mode) {
+      mode = nm; Object.values(cur).forEach(e => { if (e.spec.unmount) e.spec.unmount(); e.el.remove(); }); Object.keys(cur).forEach(k => delete cur[k]);
+      Object.values(curLines).forEach(l => l.remove()); curLines = {};
+      const i = curIdx; curIdx = -2; if (i >= -1) { tr = build(-2, i); finalize(); } onScroll(); return;
+    }
     const sc = SC[curIdx]; if (!sc) return;
     const layout = parse(sc[mode]);
-    Object.entries(layout).forEach(([id, rect]) => { const spec = sc.cells[id]; const e = spec && cur[spec.key]; if (e) { e.rect = rect; gsap.set(e.el, px(rect)); fit(e.inner); } });
+    Object.entries(layout).forEach(([id, rect]) => { const spec = sc.cells[id]; const e = spec && cur[spec.key]; if (e) { e.rect = rect; gsap.set(e.el, px(rect)); shapeCls(e); fit(e.inner); } });
     const nl = linesFor(layout); Object.entries(nl).forEach(([k, seg]) => curLines[k] && placeLine(curLines[k], seg));
     Object.keys(LIVE).forEach(k => { LIVE[k].chart.resize(); drawChart(k); });
   }
@@ -1181,25 +1376,35 @@
     mkRender();
     if (mkOpen) return;
     mkOpen = true; document.body.style.overflow = 'hidden';
-    $('sheet').classList.add('flipped'); $('maker').removeAttribute('inert'); $('shFront').setAttribute('inert', '');
-    gsap.timeline().to('#shCard', { rotateY: 180, duration: 1, ease: 'power3.inOut' }).to('#shCard', { scale: .96, duration: .5, ease: 'power2.out', yoyo: true, repeat: 1 }, 0);
+    $('sheet').classList.add('is-3d', 'flipped'); $('maker').removeAttribute('inert'); $('shFront').setAttribute('inert', '');
+    gsap.timeline({ onComplete: flat }).fromTo('#shCard', { rotateY: 0 }, { rotateY: 180, duration: 1, ease: 'power3.inOut' }).to('#shCard', { scale: .96, duration: .5, ease: 'power2.out', yoyo: true, repeat: 1 }, 0);
   }
+  // Once the turn is over, drop every 3D style: text inside a 3D context is drawn as a bitmap and goes soft on phones.
+  function flat() { gsap.set('#shCard', { clearProps: 'transform' }); $('sheet').classList.remove('is-3d'); }
   function closeMaker() {
     if (!mkOpen) return; mkOpen = false;
     refresh();
-    $('sheet').classList.remove('flipped'); $('maker').setAttribute('inert', ''); $('shFront').removeAttribute('inert');
-    gsap.timeline({ onComplete: () => { document.body.style.overflow = ''; } }).to('#shCard', { rotateY: 0, duration: 1, ease: 'power3.inOut' }).to('#shCard', { scale: .96, duration: .5, ease: 'power2.out', yoyo: true, repeat: 1 }, 0);
+    $('sheet').classList.add('is-3d'); $('sheet').classList.remove('flipped'); $('maker').setAttribute('inert', ''); $('shFront').removeAttribute('inert');
+    gsap.timeline({ onComplete: () => { flat(); document.body.style.overflow = ''; } }).fromTo('#shCard', { rotateY: 180 }, { rotateY: 0, duration: 1, ease: 'power3.inOut' }).to('#shCard', { scale: .96, duration: .5, ease: 'power2.out', yoyo: true, repeat: 1 }, 0);
   }
 
   // ---------- Events ----------
   let toastT;
   function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2200); }
+  // Cards are flat (crisp) at rest; they become 3D only for the length of the turn.
+  function turnCard(rc) {
+    clearTimeout(rc._t);
+    rc.classList.add('turning', 'no-tr'); void rc.offsetWidth; rc.classList.remove('no-tr');
+    rc.classList.toggle('on');
+    rc._t = setTimeout(() => rc.classList.remove('turning'), 800);
+  }
   document.addEventListener('click', e => {
     const rc = e.target.closest('.c-rc');
-    if (rc && !e.target.closest('[data-act]')) { rc.classList.toggle('on'); return; }
+    if (rc && !e.target.closest('[data-act]')) { turnCard(rc); return; }
     const el = e.target.closest('[data-act]'); if (!el) return;
     const a = el.dataset.act, k = el.dataset.k;
-    if (a === 'make') { openMaker(el.dataset.id); }
+    if (a === 'next') { const i = Math.max(0, Math.round(curIdx)) + 1; if (SC[i]) scrollTo({ top: sceneTop(i), behavior: 'smooth' }); }
+    else if (a === 'make') { openMaker(el.dataset.id); }
     else if (a === 'mk-close') { closeMaker(); }
     else if (a === 'mk-reset') { Object.assign(ME, { water: false, milkOn: false, milkShare: null, milkType: null, milkIn: null, teas: [], amt: null, teaIn: null, sweet: null, sugarAmt: 'sugar2', sweetIn: null, brew: null, extras: [], forms: {}, spiceSt: {}, boils: null, touched: {} });
       mkNow = 0; mkLast = null; mkPrev = []; $('mkFrom').textContent = 'From an empty pan'; mkRender(); toast('Empty pan. Add things as they go in.'); gsap.fromTo('#mkCup .mk-art', { rotate: -6 }, { rotate: 0, duration: .7, ease: 'elastic.out(1, .4)' }); }
@@ -1238,7 +1443,8 @@
   // ---------- Boot ----------
   SC.forEach(s => ['d', 'm'].forEach(md => s[md].forEach(row => { if (row.trim().split(/\s+/).length !== DIM[md].cols) console.error('bad row', s.id, md, row); })));
   window.__chaiScenes = SC.map(s => s.id); // test harness
-  window.__chaiScene = i => scrollTo(0, wrap.offsetTop + STARTS[i] * innerHeight / 100 + 4); // used by the test harness
+  window.__chaiScene = i => scrollTo(0, sceneTop(i));
+  window.__chaiStarts = STARTS; // test harness // used by the test harness
   renderLede();
   let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { relayout(); if (!$('modal').hidden) placeName(); }, 120); });
   (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => { onScroll(); ScrollTrigger.refresh(); Object.values(cur).forEach(e => fit(e.inner)); Object.keys(LIVE).forEach(drawChart); });

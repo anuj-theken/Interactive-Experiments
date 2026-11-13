@@ -989,3 +989,68 @@ body.chai-2026::before {
 }
 @media (max-width: 699px) { .st-p { line-height: 1.36; } .c-step .kfig { margin-bottom: 3px; padding-bottom: 3px; } }
 .mk-t { transition: background .15s, border-color .15s, box-shadow .15s; } .mk-t:hover { transform: none; }
+
+/* ===================== v11: a clear way on at the start ===================== */
+.go-on { display: inline-flex; align-items: center; gap: 12px; margin-top: 18px; font-family: var(--pop) !important; font-weight: 700; font-size: clamp(15px, 1.4vw, 18px) !important; color: #FFF8EC !important; background: var(--ink) !important; padding: 13px 20px 12px !important; border-radius: 999px !important; box-shadow: 0 4px 0 #000, 0 10px 20px -8px rgba(0, 0, 0, .5); transition: transform .12s, box-shadow .12s; align-self: flex-start; }
+.go-on i { font-style: normal; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--red); animation: cueBob 1.4s ease-in-out infinite; }
+.go-on:hover { transform: translateY(-1px); }
+.go-on:active { transform: translateY(3px); box-shadow: 0 1px 0 #000; }
+.c-big p.go-or { margin-top: 8px; font-family: var(--fell); font-style: italic; font-size: 14px; }
+.go-cue { display: flex; align-items: center; gap: 10px; margin-top: 14px !important; font-family: var(--pop) !important; font-weight: 700; font-size: 14px !important; letter-spacing: .06em; text-transform: uppercase; color: var(--red) !important; }
+.go-cue i { font-style: normal; font-size: 22px; animation: cueBob 1.4s ease-in-out infinite; }
+.c-cta2 { align-items: center; justify-content: center; }
+.cta2-in { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; max-width: 260px; }
+.cta2-k { font-family: var(--fd); font-weight: bold; font-style: italic; font-size: 18px; color: var(--ink); }
+.cta-s2 { display: inline-flex; align-items: center; gap: 8px; font-family: var(--pop) !important; font-weight: 700; font-size: 14px !important; color: var(--red) !important; border: 1.8px solid var(--red) !important; border-radius: 8px !important; padding: 9px 14px 8px !important; background: rgba(255, 250, 238, .5) !important; transition: background .15s; }
+.cta-s2:hover { background: #FFF3E2 !important; }
+.cta2-in small { font-family: var(--fell); font-style: italic; font-size: 13px; color: var(--text); }
+@media (max-width: 699px) { .go-on { margin-top: 10px; padding: 10px 16px 9px !important; } .cta2-k { font-size: 15px; } .cta2-in small { display: none; } }
+@media (prefers-reduced-motion: reduce) { .go-on i, .go-cue i { animation: none; } }
+
+/* ===================== v12: crisp text. 3D only while the sheet turns ===================== */
+.sheet { perspective: none; }
+.sh-card { transform-style: flat; }
+.sh-front, .sh-back { -webkit-backface-visibility: visible; backface-visibility: visible; }
+.sh-back { transform: none; visibility: hidden; }
+.sheet.flipped .sh-back { visibility: visible; }
+.sheet.flipped:not(.is-3d) .sh-front { visibility: hidden; }
+.sheet.is-3d { perspective: 2400px; }
+.sheet.is-3d .sh-card { transform-style: preserve-3d; }
+.sheet.is-3d .sh-front, .sheet.is-3d .sh-back { -webkit-backface-visibility: hidden; backface-visibility: hidden; visibility: visible; }
+.sheet.is-3d .sh-back { transform: rotateY(180deg); }
+.cell { perspective: none; }
+.cell-in { -webkit-backface-visibility: visible; backface-visibility: visible; }
+@media (max-width: 699px) { .rc-turn { font-size: 0; } .rc-turn::first-letter { font-size: 16px; } .rc-btns { gap: 4px; } }
+.wide-x .c-step:not(:has(.kfig)) { display: block; }
+
+/* ===================== v13: reader cards are flat at rest (crisp text), 3D only while turning or hovered ===================== */
+.c-rc { perspective: none; }
+.rc-in { transform-style: flat; transform: none; }
+.c-rc.on .rc-in { transform: none; }
+.rc-f, .rc-b { -webkit-backface-visibility: visible; backface-visibility: visible; }
+.rc-b { transform: none; visibility: hidden; }
+.c-rc.on .rc-b { visibility: visible; }
+.c-rc.on .rc-f { visibility: hidden; }
+.c-rc.turning { perspective: 1100px; }
+.c-rc.turning .rc-in { transform-style: preserve-3d; transform: rotateY(0deg); }
+.c-rc.turning.on .rc-in { transform: rotateY(180deg); }
+.c-rc.turning .rc-f, .c-rc.turning .rc-b { -webkit-backface-visibility: hidden; backface-visibility: hidden; visibility: visible; }
+.c-rc.turning .rc-b { transform: rotateY(180deg); }
+.c-rc.no-tr .rc-in { transition: none !important; }
+@media (hover: hover) {
+  .c-rc:hover { perspective: 1100px; }
+  .c-rc:hover .rc-in { transform-style: preserve-3d; transform: translateZ(30px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+  .c-rc.on:hover .rc-in { transform: translateZ(30px) rotateX(var(--rx, 0deg)) rotateY(calc(180deg + var(--ry, 0deg))); }
+  .c-rc:hover .rc-f, .c-rc:hover .rc-b { -webkit-backface-visibility: hidden; backface-visibility: hidden; visibility: visible; }
+  .c-rc:hover .rc-b { transform: rotateY(180deg); }
+}
+/* phones: featured glasses carry a number that matches their card */
+.rc-no { display: none; }
+@media (max-width: 699px) {
+  .rc-no { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-right: 5px; border-radius: 50%; background: var(--red); color: #FFF8EC; font-size: 9.5px; letter-spacing: 0; vertical-align: 1px; }
+}
+.cta2-or { font-family: var(--fell); font-style: italic; font-size: 14px; color: var(--text); margin-top: 6px; }
+.cta2-in .go-on { align-self: center; margin-top: 2px; }
+.cta2-in .go-or { margin-top: -2px; }
+.go-on span { white-space: nowrap; }
+@media (max-width: 699px) { .cta2-in { gap: 6px; } .cta2-in .cta2-or { margin-top: 0; } .cta2-in .go-or { display: none; } }
