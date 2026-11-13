@@ -38,20 +38,48 @@
 </header>
 <section class="nl nl-intro">
   <p>I know my tea recipe is arduous, and I’ve never met anyone who makes it exactly the way I do. Everyone at home has an opinion about it. Everyone at home is wrong, obviously.</p>
-  <p>So we asked. Readers of First Principles told us their milk, their leaf, their spices and, most importantly, their <i>sequence</i>: when each thing goes in, and how many times it’s allowed to boil. Of <b data-n="n">194</b> recipes, <b data-n="uniqueSeq">190</b> were one of a kind.</p>
-  <p>Now make yours. Tap an ingredient to put it in your pan, tap its icon to take it out, and keep scrolling: the clock moves, the pan heats, and every chart you meet will show where your cup sits. Your recipe stays in your browser; nothing is saved or sent.</p>
-  <p class="nl-cue">Here’s your pan.</p>
+  <p>So we asked. Readers of First Principles told us their milk, their leaf, their spices and when each one goes in. Of <b data-n="n">194</b> recipes, <b data-n="uniqueSeq">190</b> were one of a kind.</p>
+  <p>Scroll to meet them. Whenever you like, make your own, and every chart will show where your cup sits. Your recipe stays in your browser; nothing is saved or sent.</p>
+  <p class="nl-cue">Here’s a glass.</p>
 </section>
 
 <!-- ===== THE SHEET: one pinned specimen sheet. It opens on the article header; scrolling lifts the header away until
      only your pan and the sheet's running head remain, then the grid draws itself and the story begins. ===== -->
 <section class="sheet-wrap" id="sheetWrap" aria-label="Interactive: build your chai and compare it with readers">
   <div class="sheet" id="sheet">
-    <div class="sh-head" id="shHead"><span class="sh-left" id="shLeft">Chai elements</span><span class="sh-comp" id="shComp" aria-label="What is in your pan"></span><span class="sh-temp" id="shTemp" aria-label="Pan temperature"><svg viewBox="0 0 14 36" aria-hidden="true"><rect x="4" y="2" width="6" height="26" rx="3" fill="#FBF6EA" stroke="currentColor" stroke-width="1.4"/><rect id="shMerc" x="5.6" y="23" width="2.8" height="4" fill="currentColor"/><circle cx="7" cy="30" r="4.6" fill="currentColor" stroke="currentColor" stroke-width="1.4"/></svg><b id="shDeg">24</b>°C</span></div>
+   <div class="sh-card" id="shCard">
+   <div class="sh-front" id="shFront">
+    <div class="sh-head" id="shHead"><span class="sh-left" id="shLeft">Chai elements</span><button type="button" class="sh-make" data-act="make"><span class="mk-bi" aria-hidden="true">✎</span>Make your own</button></div>
     <div class="sh-grid" id="shGrid">
       <svg class="sh-lines" id="shLines" aria-hidden="true"></svg>
     </div>
     <div class="sh-foot" id="shFoot"><span>‹</span> <b id="shPage">00</b> <span>›</span></div>
+   </div>
+   <!-- Make your own: the back of the same sheet -->
+   <div class="sh-back" id="maker" role="region" aria-label="Make your own chai" inert>
+    <header class="mk-bar">
+      <button type="button" class="mk-back" data-act="mk-close"><span class="mk-bi" aria-hidden="true">↺</span> Back<span class="mk-hide"> to the story</span></button>
+      <h2 class="mk-title">Make your own <small id="mkFrom"></small></h2>
+      <button type="button" class="mk-reset" data-act="mk-reset" title="Undo every change since you opened this"><span aria-hidden="true">⟲</span> Reset</button>
+      <button type="button" class="mk-pour" data-act="pour">Pour my card <span aria-hidden="true">↗</span></button>
+    </header>
+    <div class="mk-body">
+      <div class="mk-cup" id="mkCup">
+        <label class="mk-name"><span class="mk-nk">Your chai is called</span><span class="mk-nrow"><input id="mkName" type="text" maxlength="28" spellcheck="false" autocomplete="off" aria-label="Name your chai"><span class="mk-pen" aria-hidden="true">✎</span></span></label>
+        <div class="mk-cupb" id="mkCupBody" aria-live="polite"></div>
+      </div>
+      <div class="mk-mid">
+        <div class="mk-tabs" id="mkTabs" role="tablist"></div>
+        <div class="mk-ctrl" id="mkCtrl"></div>
+      </div>
+      <section class="mk-like" aria-label="Someone like you">
+        <h3 class="mk-h"><mark>Someone like you</mark></h3>
+        <p class="mk-say" id="mkSay" aria-live="polite"></p>
+        <div class="mk-cards" id="mkCards"></div>
+      </section>
+    </div>
+   </div>
+   </div>
   </div>
 </section>
 
@@ -84,7 +112,7 @@
   </div>
 </footer>
 
-<!-- The card: newspaper crossword on the front, a stamp on the back -->
+<!-- The card -->
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
   <div class="modal-scrim" data-close></div>
   <div class="modal-box">

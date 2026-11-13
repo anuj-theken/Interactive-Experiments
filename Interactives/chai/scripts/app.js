@@ -127,13 +127,17 @@
       grid: { left: 0, right: 0, top: 0, bottom: 0 }, xAxis: { type: 'value', min: 0, max: W, show: false }, yAxis: { type: 'value', min: 0, max: H, show: false, inverse: true },
       tooltip: { ...TT, trigger: 'item', confine: true, formatter: p => p.data && p.data.R ? ttReader(p.data.R) : '' } };
   }
-  const cupPt = (R, x, y, d, o = {}) => ({ name: R.you ? 'you' : R.id, value: [x, y], R, symbol: o.sym || GLASS, symbolSize: R.you ? [Math.max(d * .9, 12), Math.max(d * 1.17, 16)] : [d * .62, d * .82],
-    itemStyle: { color: (R.you ? A.liquid(R) : R.shade && R.shade.hex) || '#CFC6BA', borderColor: R.you ? RED : 'rgba(36,26,17,.5)', borderWidth: R.you ? 2.4 : .6, opacity: o.op == null ? 1 : o.op },
-    z: R.you ? 10 : 2 });
+  // Readers whose cards are on screen are drawn bigger, outlined, and named on the chart.
+  let FEAT = new Set();
+  const featLabel = R => ({ show: true, position: 'top', distance: 3, formatter: (t => t.length > 14 ? t.slice(0, 13) + '…' : t)(R.reader.town || R.reader.city || 'a reader'), fontFamily: FELL, fontSize: 12.5, color: INK, backgroundColor: '#FBF6EA', borderColor: INK, borderWidth: .8, padding: [2, 5, 1] });
+  const cupPt = (R, x, y, d, o = {}) => { const f = !R.you && FEAT.has(R.id);
+    return { name: R.you ? 'you' : R.id, value: [x, y], R, symbol: o.sym || GLASS, symbolSize: R.you || f ? [Math.max(d * .9, 12), Math.max(d * 1.17, 16)] : [d * .62, d * .82],
+      itemStyle: { color: (R.you ? A.liquid(R) : R.shade && R.shade.hex) || '#CFC6BA', borderColor: R.you ? RED : f ? INK : 'rgba(36,26,17,.5)', borderWidth: R.you ? 2.4 : f ? 2 : .6, opacity: f ? 1 : o.op == null ? 1 : o.op },
+      label: f ? featLabel(R) : { show: false }, z: R.you ? 10 : f ? 9 : 2 }; };
   // stacked columns of glasses (used by the pour and the cup charts)
   function columns(ch, W, H, groups, labels, o = {}) {
     const data = [], els = [];
-    const padX = 4, top = 10, bottom = o.bottom || 44, gw = (W - padX * 2) / groups.length, h = H - top - bottom;
+    const padX = 4, top = 24, bottom = o.bottom || 44, gw = (W - padX * 2) / groups.length, h = H - top - bottom;
     const d = packD(groups.map(g => g.length), gw - 6, h, 30);
     groups.forEach((g, k) => {
       const x0 = padX + k * gw + 3, dimCol = o.dimCol && o.dimCol(k), foc = (o.focus || []).includes(k);
@@ -147,7 +151,11 @@
   }
 
   // Key figure shown at the top of every data step: a big number, what it counts, and its share of all readers.
-  const kfig = (n, cap, of = N) => `<div class="kfig"><span class="kn">${n}</span><span class="kc">${cap}</span><span class="kbar" title="${n} of ${of}"><i style="width:${Math.max(1.5, 100 * n / of)}%"></i></span><span class="kof">${n} of ${of}${of === N ? ' readers' : ''} · ${Math.round(100 * n / of)}%</span></div>`;
+  // Key figure: a big number, what it counts, and the share said the way people say it ("about 3 in 10"),
+  // drawn as ten little glasses.
+  const kfig = (n, cap, of = N) => { const f = n / of, k = Math.round(10 * f), who = of === N ? 'readers' : 'of them';
+    const say = f >= .95 ? `nearly all ${who}` : f < .1 ? `about 1 in ${Math.max(2, Math.round(1 / f))} ${who}` : f > .45 && f < .55 ? `about half of ${of === N ? 'all readers' : 'them'}` : `about ${k} in 10 ${who}`;
+    return `<div class="kfig"><span class="kn">${n}</span><span class="kc">${cap}</span><span class="kten" title="${n} of ${of}">${f >= .1 ? Array.from({ length: 10 }, (_, i) => `<i class="${i < k ? 'on' : ''}"></i>`).join('') : ''}<em>${say}</em></span></div>`; };
   const modeOf = vals => { const m = {}; vals.forEach(v => { if (v != null) m[v] = (m[v] || 0) + 1; }); const e = Object.entries(m).sort((a, b) => b[1] - a[1])[0]; return e ? [e[0], e[1]] : [null, 0]; };
   const youLine = html => html ? `<span class="you-line"><em>you</em>${html}</span>` : '';
   const CH = {};
@@ -155,17 +163,6 @@
     no: 'fig. i', label: 'every reader’s glass, tinted by their recipe',
     like: R => R.milk == null ? null : r => r.milk === R.milk,
     you: R => R.milk == null ? '' : `Your pour, <b>${L.milk[R.milk]}</b>, is shared by <b>${S.milk[R.milk]}</b> readers.`,
-    steps: [
-      { st: 'all', k: () => kfig(N, 'glasses, one for every reader'), h: () => `Nobody chose these colours. Each is computed from the recipe, the way a pan turns from cream to mahogany.` },
-      { st: 'milk', k: () => kfig(S.milk[3], 'pour half milk, the most common'), h: () => `Sort them by milk. Add up the splashes, quarters and black teas, though, and <b>${S.mostlyWater}</b> of ${N} make a cup that’s mostly water.<span class="hint">${S.toned} use toned or double-toned milk; ${S.full} use full-cream.</span>` },
-      { st: 'ends', k: () => kfig(S.milk[0], 'take it black, no milk at all'), h: () => `At the other end, <b>${S.milk[5]}</b> let no water near the pan, tapri-style. One of them, in Mumbai, uses condensed milk.` },
-      { st: 'you', you: true, k: () => { const R = meR(); return R.milk == null ? '' : kfig(S.milk[R.milk], `pour ${L.milk[R.milk]}, like you`); }, h: () => {
-        const R = meR();
-        if (R.milk == null) return `<span class="you-tag">You</span>Your pan is still empty. Scroll back up a little and add water, milk or both, and this page will filter to the readers who pour like you.`;
-        const g = RS.filter(r => r.milk === R.milk), [ms, mc] = modeOf(g.filter(r => r.milk > 0).map(r => r.st.milk)), gin = g.filter(r => r.extras.includes('ginger')).length, [fam, fc] = modeOf(g.map(r => r.fam));
-        return `<span class="you-tag">Readers like you</span>Highlighted: the <b>${g.length}</b> who pour like you. ${R.milk > 0 && ms != null ? `<b>${mc}</b> of them add the milk at <b>${L.stage[ms]}</b>; ` : ''}<b>${gin}</b> add ginger, and the most common family among them is <b>${C.FAM[fam].name}</b> (${fc}).`;
-      } }
-    ],
     draw(ch, st, W, H) {
       const R = meR(), you = R.milk != null ? R : null;
       if (st === 'all') {
@@ -189,19 +186,6 @@
     no: 'fig. ii', label: 'each dot is one reader’s spice',
     like: R => !R.extras.length ? (ME.touched.larder ? r => !r.extras.length : null) : r => r.extras.some(s => R.extras.includes(s)),
     you: R => R.extras.length ? `Your larder: <b>${R.extras.map(s => L.spice[s]).join(', ')}</b>. <b>${cnt(r => r.extras.some(s => R.extras.includes(s)))}</b> readers use at least one of these.` : ME.touched.larder ? `You add nothing else, like <b>${S.plain}</b> readers.` : '',
-    steps: [
-      { st: 'count', k: () => kfig(S.sp.ginger, 'add ginger: two in three kitchens'), h: () => `<b>Cardamom</b> is next (${S.sp.cardamom}). After that the larder thins out fast.<span class="hint">${S.plain} add nothing at all, and ${S.sp.lemongrass} wrote in lemongrass on their own.</span>` },
-      { st: 'stage', k: () => { const top = S.spStage.indexOf(Math.max(...S.spStage)); return kfig(S.spStage[top], `spice additions go in while ${L.stage[top]}`, S.spUses); }, h: () => `Most spices go in early, before the leaf and the milk can dull them.` },
-      { st: 'form', k: () => kfig(S.gCrushed, 'crush their ginger; ' + S.gGrated + ' grate it', S.sp.ginger), h: () => `Cardamom is almost always cracked open (<b>${S.cCrushed}</b>).<span class="hint">Red: crushed. Ochre: grated. Green: whole. Grey: powdered. Pale: didn’t say.</span>` },
-      { st: 'late', k: () => kfig(S.cardOff, 'add cardamom only after the heat is off', S.sp.cardamom), h: () => `<q>That way it leaves a stronger fragrance, which gets lost otherwise.</q><span class="hint">A reader in Bhopal</span>` },
-      { st: 'you', you: true, k: () => { const R = meR(), f = CH.larder.like(R); return f ? kfig(cnt(f), R.extras.length ? 'share a spice with you' : 'keep it plain, like you') : ''; }, h: () => {
-        const R = meR();
-        if (!R.extras.length) return `<span class="you-tag">You</span>${ME.touched.larder ? `You keep it plain. Highlighted: the <b>${S.plain}</b> readers who do too.` : 'Scroll back up and add your spices, and this page will filter to the readers who share them.'}`;
-        const g = RS.filter(CH.larder.like(R)), [other, oc] = modeOf([].concat(...g.map(r => r.extras.filter(s => !R.extras.includes(s)))));
-        const same = cnt(r => r.extras.length === R.extras.length && R.extras.every(s => r.extras.includes(s)));
-        return `<span class="you-tag">Readers like you</span>Highlighted: everyone who shares a spice with you. ${same ? `<b>${same}</b> use exactly your set.` : 'Nobody uses exactly your set.'}${other ? ` The one they add that you don’t: <b>${L.spice[other]}</b> (${oc}).` : ''}`;
-      } }
-    ],
     draw(ch, st, W, H) {
       const R = meR();
       const rowsK = S.spiceList.slice(0, W < 420 ? 9 : 11);
@@ -243,8 +227,9 @@
     }
   };
   function spPt(it, x, y, d, op, color) {
-    return { name: it.you ? 'you-' + it.s : it.r.id + '-' + it.s, value: [x, y], it, symbolSize: it.you ? Math.max(d * 1.3, 10) : d * 0.82, z: it.you ? 10 : 2,
-      itemStyle: { color, opacity: op, borderColor: it.you ? RED : 'rgba(36,26,17,.4)', borderWidth: it.you ? 2.5 : 0.6 } };
+    const f = !it.you && FEAT.has(it.r.id);
+    return { name: it.you ? 'you-' + it.s : it.r.id + '-' + it.s, value: [x, y], it, symbolSize: it.you || f ? Math.max(d * 1.3, 10) : d * 0.82, z: it.you ? 10 : f ? 9 : 2,
+      itemStyle: { color, opacity: f ? 1 : op, borderColor: it.you ? RED : f ? INK : 'rgba(36,26,17,.4)', borderWidth: it.you ? 2.5 : f ? 2 : 0.6 } };
   }
   function spTip(it) {
     if (it.you) return `<div style="font-family:${FELL};font-size:15px;color:${RED}">You · ${L.spice[it.s]}${it.form ? ', ' + L.form[it.form] : ''}</div><div>${it.stg != null ? 'goes in: ' + L.stage[it.stg] : 'not timed yet'}</div>`;
@@ -279,20 +264,6 @@
     no: 'fig. iii', label: 'each glass is one reader, placed at the moment that ingredient goes in',
     like: R => R.st.tea == null ? null : r => r.st.tea === R.st.tea,
     you: R => R.st.tea == null ? '' : `Your leaf goes in at <b>${L.stage[R.st.tea]}</b>, like <b>${cnt(r => r.st.tea === R.st.tea)}</b> readers${R.milk && R.boils != null ? `; it boils <b>${L.boils[R.boils]}</b>, like <b>${S.boil[R.boils]}</b>` : ''}.`,
-    steps: [
-      { st: 'all', k: () => kfig(S.teaAt[2], 'wait for the boil before the leaf goes in'), h: () => `Three rows: the leaf, the milk and the sweetener. Each glass is one reader, placed in the column for the moment that ingredient goes into their pan.<span class="hint">Readers who take no milk or no sugar simply don’t appear in that row.</span>` },
-      { st: 'common', k: () => kfig(S.common, 'put the leaf and the milk in together, at the boil'), h: () => `Lit up: the same readers in both rows. It’s the single most common method, and still only about one kitchen in five.` },
-      { st: 'milkfirst', k: () => kfig(S.milkFirst, 'put the milk in before the leaf'), h: () => `Lit up: their milk sits in an earlier column than their leaf. <b>${S.teaFirst}</b> do the opposite, and <b>${S.together}</b> add both at once.` },
-      { st: 'boils', k: () => kfig(S.multi, 'boil it 3+ times, or let it simmer'), h: () => `Now just the milk: once it’s in, how many times is the pan allowed to rise? <b>${S.boil[1]}</b> stop at once.<span class="hint"><q>Make it full flame and let it go up and down 2-3 times,</q> writes a reader in Mumbai.</span>` },
-      { st: 'cup', k: () => kfig(S.milkCup, 'add the milk only in the cup'), h: () => `Lit up: everyone who finishes at the table. <b>${S.sweetCup}</b> stir the sugar in there too.` },
-      { st: 'you', you: true, k: () => { const R = meR(); return R.st.tea == null ? '' : kfig(cnt(r => r.st.tea === R.st.tea), `add the leaf at ${L.stage[R.st.tea]}, like you`); }, h: () => {
-        const R = meR();
-        if (R.st.tea == null) return `<span class="you-tag">You</span>Add a leaf and circle when it goes in, a little further up, and your glasses will appear here in red.`;
-        const g = RS.filter(r => r.st.tea === R.st.tea), [b, bc] = modeOf(g.filter(r => r.milk > 0).map(r => r.boils)), [m, mc] = modeOf(g.filter(r => r.milk > 0).map(r => r.st.milk));
-        const same = cnt(r => r.st.tea === R.st.tea && (R.milk ? r.st.milk === R.st.milk && r.boils === R.boils : r.milk === 0));
-        return `<span class="you-tag">Readers like you</span>Lit up: readers whose leaf goes in when yours does. Most of them add the milk at <b>${m != null ? L.stage[m] : '?'}</b> (${mc}) and let it boil <b>${b != null ? L.boils[b] : '?'}</b> (${bc}). ${same ? `<b>${same}</b> match your whole order.` : '<b>Nobody</b> matches your whole order.'}`;
-      } }
-    ],
     draw(ch, st, W, H) {
       const R = meR(), small = W < 520;
       const lk = st === 'you' && CH.sequence.like(R);
@@ -333,18 +304,6 @@
     no: 'fig. iv', label: 'tea per cup, across · time before straining, down',
     like: R => R.amt == null ? null : r => r.amt === R.amt,
     you: R => R.amt == null ? '' : R.brew == null ? `You use <b>${L.amt[R.amt]}</b>, like <b>${cnt(r => r.amt === R.amt)}</b> readers.` : `Your square, <b>${L.amt[R.amt]}</b> for <b>${L.brew[R.brew]}</b>, holds <b>${S.leafCell[R.amt + '-' + R.brew] || 0}</b> readers.`,
-    steps: [
-      { st: 'all', k: () => kfig(S.ctc, 'use CTC, granules that colour a pan in seconds'), h: () => `Each reader lands in a square: how much tea they use, and how long it stays in before they strain.` },
-      { st: 'top', k: () => kfig(S.topCell[1], 'share the busiest square'), h: () => { const [a, b] = S.topCell[0].split('-').map(Number); return `<b>${L.amt[a]}</b>, strained after <b>${L.brew[b]}</b>.`; } },
-      { st: 'kadak', k: () => kfig(S.kadak, 'use 1½ tsp or more for 5 minutes or more'), h: () => `Kadak, by any definition.<span class="hint"><q>Tastes like dessert,</q> says one, who lets it simmer for ten minutes on weekend evenings.</span>` },
-      { st: 'quick', k: () => kfig(S.quick, 'strain within a minute'), h: () => `${S.quickSteep ? `${S.quickSteep} of them add the leaf only after the heat is off. ` : ''}And <b>${S.eyeball}</b> eyeball the tea; <b>${S.colour}</b> strain only when <q>the colour looks right</q>.` },
-      { st: 'you', you: true, k: () => { const R = meR(); return R.amt == null ? '' : kfig(cnt(r => r.amt === R.amt), `use ${L.amt[R.amt]}, like you`); }, h: () => {
-        const R = meR();
-        if (R.amt == null) return `<span class="you-tag">You</span>Circle how much tea you use (in chapter III) and how long it stays in (just above), and this page will filter to readers like you.`;
-        const g = RS.filter(r => r.amt === R.amt), [br, brc] = modeOf(g.map(r => r.brew)), [ti, tic] = modeOf(g.map(r => r.st.tea));
-        return `<span class="you-tag">Readers like you</span>Highlighted: everyone who uses <b>${L.amt[R.amt]}</b>. Most strain after <b>${L.brew[br]}</b> (${brc}) and add the leaf at <b>${L.stage[ti]}</b> (${tic}).${R.brew != null ? ` Your square holds <b>${S.leafCell[R.amt + '-' + R.brew] || 0}</b>.` : ''}`;
-      } }
-    ],
     draw(ch, st, W, H) {
       const R = meR(), you = R.amt != null && R.brew != null ? { ...R, milk: R.milk == null ? 3 : R.milk } : null;
       const left = W < 420 ? 54 : 74, top = 28, right = 6, bottom = 6;
@@ -380,17 +339,6 @@
     no: 'fig. v', label: 'every reader’s cup, by what sweetens it and what holds it',
     like: R => R.vessel ? r => r.vessel === R.vessel : R.sweet ? r => r.sweet === R.sweet : null,
     you: R => [R.sweet ? `<b>${L.sweet[R.sweet]}</b>, like <b>${cnt(r => r.sweet === R.sweet)}</b> readers` : '', R.vessel ? `a <b>${L.vessel[R.vessel]}</b>, like <b>${S.vessel[R.vessel]}</b>` : ''].filter(Boolean).join('; '),
-    steps: [
-      { st: 'sweet', k: () => kfig(S.noSugar, 'take no sugar at all, the biggest group'), h: () => `<b>${S.sugar}</b> use sugar, <b>${S.jaggery}</b> jaggery, <b>${S.free}</b> a sugar-free sweetener and <b>${S.honey}</b> honey.` },
-      { st: 'where', k: () => kfig(S.sweetCup, 'of those who sweeten wait until it’s in the cup', N - S.noSugar), h: () => `<b>${S.sweetPan}</b> put it in the pan, where it cooks with the milk.<span class="hint">Darkened: sweetened in the cup.</span>` },
-      { st: 'vessel', k: () => kfig(S.vessel.mug, 'drink from a mug'), h: () => `<b>${S.vessel.cup}</b> use a cup and saucer, <b>${S.vessel.tumbler}</b> a steel tumbler and <b>${S.vessel.glass}</b> a cutting glass.<span class="hint"><q>Tea in a mug is for bodybuilders,</q> says a reader in Lucknow.</span>` },
-      { st: 'you', you: true, k: () => { const R = meR(); return R.vessel ? kfig(S.vessel[R.vessel], `drink from a ${L.vessel[R.vessel]}, like you`) : ''; }, h: () => {
-        const R = meR();
-        if (!R.vessel) return `<span class="you-tag">You</span>Pick what you drink from, just above, and this page will filter to the readers who share your cup.`;
-        const g = RS.filter(r => r.vessel === R.vessel), ns = g.filter(r => r.sweet === 'none').length, [fam, fc] = modeOf(g.map(r => r.fam));
-        return `<span class="you-tag">Readers like you</span>Highlighted: the <b>${g.length}</b> who drink from a ${L.vessel[R.vessel]}. <b>${ns}</b> of them take no sugar, and their most common family is <b>${C.FAM[fam].name}</b> (${fc}).`;
-      } }
-    ],
     draw(ch, st, W, H) {
       const R = meR();
       if (st === 'vessel' || st === 'you') {
@@ -411,110 +359,17 @@
     const el = lv.chart.getDom(), W = el.clientWidth, H = el.clientHeight;
     if (!W || !H) return;
     lv.chart.setOption(CH[key].draw(lv.chart, CH[key].steps[lv.step].st, W, H));
+    // on phones your line sits under the chart (the text box above is too small for it)
+    const yl = el.parentNode.querySelector('.c-yl'); if (yl) { const t = youLine(CH[key].you(meR())); if (yl.innerHTML !== t) { yl.innerHTML = t; if (mode === 'm') requestAnimationFrame(() => lv.chart.resize()); } }
   }
 
   // ---------- Cell specs ----------
-  let NOW_T = 0;
-  const CLOCK = ['0:00', '0:45', '2:00', '3:30', '5:00'], MINS = [0, .75, 2, 3.5, 5];
+  // The story is about the teas, not the making: a glass, the things people put in it, then the readers themselves.
+  let NOW_T = 2; // new leaves and spices default to going in at the boil / while heating
   const who = rr => [rr.age, rr.town].filter(Boolean).map(esc).join(' · ') || 'A reader';
   const vesselFor = (R, o) => A.vessel(R, { still: true, ...o });
-  const clock = t => { const a = MINS[t] / 6 * 360; return `<span class="clock"><svg viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13" fill="#FBF6EA" stroke="#241A11" stroke-width="1.6"/>${[0, 1, 2, 3, 4, 5].map(i => `<line x1="15" y1="3.5" x2="15" y2="6" stroke="#241A11" transform="rotate(${i * 60} 15 15)"/>`).join('')}<path d="M15 15 L15 3 A12 12 0 ${a > 180 ? 1 : 0} 1 ${15 + 12 * Math.sin(a * Math.PI / 180)} ${15 - 12 * Math.cos(a * Math.PI / 180)}Z" fill="#A8321F" opacity=".25"/><line x1="15" y1="15" x2="15" y2="5" stroke="#A8321F" stroke-width="2" stroke-linecap="round" transform="rotate(${a} 15 15)"/></svg>${CLOCK[t]}</span>`; };
+  const trunc = (s, n) => s.length > n ? s.slice(0, n - 1).trim() + '…' : s;
 
-  const LEDE = { key: 'lede', render: () => `<div class="c-no">fig. 0 · the shade chart</div><div class="c-art lede-art">${ledeSVG()}</div><div class="c-lab"><b>Every shade of chai, A1 to F6</b><small>stronger going down, less milky going right. Yours will land on it.</small></div>` };
-  const HEAD_UNUSED = { key: 'head', render: () => `<div class="hd"><div class="hd-k">First Principles · Special edition · 15 Nov 2026</div><h2 class="hd-t">How do you make your chai?</h2><p class="hd-by">by <a href="https://the-ken.com/writers/rohin/" target="_blank" rel="noopener">Rohin Dharmakumar</a> and <a href="https://the-ken.com/writers/anuj_269/" target="_blank" rel="noopener">Anuj Debnath</a></p></div>` };
-  const TEA = { key: 'tea', live: true, cls: 'c-tea', render: () => {
-    const R = meR(), t = NOW_T, sh = C.shade(R);
-    const inCup = t >= 4;
-    const float = ME.extras.filter(s => ME.spiceSt[s] == null || ME.spiceSt[s] <= t);
-    const art = inCup ? A.vessel(R, { float: !ME.vessel || ME.vessel === 'glass' ? ME.extras : [] }) : A.pan(A.liquidAt(R, t), t, { float });
-    const fam = meEmpty() ? '' : C.FAM[C.family(R)].name;
-    return `<div class="tea-top"><span class="c-no">${inCup ? 'your chai' : 'your pan'} · <i>${L.stage[Math.min(t, 4)]}</i></span>${clock(t)}</div>
-      <div class="c-art">${art}</div>
-      ${A.strip(R, { you: true, remove: true, now: t })}
-`;
-  } };
-  const badge = on => `<span class="addb${on ? ' on' : ''}" aria-hidden="true">${on ? '✓' : '+'}</span>`;
-  const ING = k => ({ key: 'ing:' + k, live: true, tag: 'button', cls: 'c-ing', attrs: () => ({ 'data-act': 'tile', 'data-k': k, 'aria-pressed': String(inPot(k)), 'aria-label': `${LAB[k]}: ${inPot(k) ? 'in your pan, tap to remove' : 'tap to add'}. ${countFor(k)} readers use it.` }),
-    render: () => `<div class="ing-top"><span class="c-no">${countFor(k)} readers</span>${badge(inPot(k))}</div><div class="c-art">${ICON(k)}</div><div class="ing-name">${LAB[k]}</div><div class="ing-hint">${inPot(k) ? 'in your pan' : 'tap to add'}</div>` });
-  const VES_LAB = { glass: 'Cutting glass', cup: 'Cup & saucer', mug: 'Mug', tumbler: 'Steel tumbler' };
-  const VES = t => ({ key: 'ves:' + t, live: true, tag: 'button', cls: 'c-ing', attrs: () => ({ 'data-act': 'vessel', 'data-v': t, 'aria-pressed': String(ME.vessel === t), 'aria-label': `${VES_LAB[t]}: ${ME.vessel === t ? 'yours' : 'tap to pour into it'}` }),
-    render: () => `<div class="ing-top"><span class="c-no">${S.vessel[t]} readers</span>${badge(ME.vessel === t)}</div><div class="c-art">${vesselFor({ ...meR(), vessel: t }, { type: t, emptyLabel: false })}</div><div class="ing-name">${VES_LAB[t]}</div><div class="ing-hint">${ME.vessel === t ? 'poured' : 'tap to pour'}</div>` });
-  // Notebook cells: everything you can change is written on ruled paper, with readers' counts pencilled in.
-  const OC = {
-    milkShare: v => S.milk[v], milkType: v => cnt(r => r.milkType === v), milkIn: v => cnt(r => r.milk > 0 && r.st.milk === +v),
-    amt: v => cnt(r => r.amt === +v), teaIn: v => cnt(r => r.st.tea === +v),
-    boils: v => S.boil[v], brew: v => cnt(r => r.brew === +v), sugarAmt: v => cnt(r => r.sweet === v), sweetIn: v => cnt(r => r.sweet !== 'none' && r.st.sweet === +v),
-    name: v => cnt(r => r.name.toLowerCase() === v.toLowerCase())
-  };
-  const NOTE = (field, q, opts, cond, off) => ({ key: 'opt:' + field, live: true, cls: 'c-notebook', render: () => {
-    const on = !cond || cond(), cur = ME[field];
-    return `<div class="nq">${q}</div><div class="nopts${on ? '' : ' c-off'}">${opts().map(([v, lab]) => `<button class="nopt" type="button" data-act="opt" data-f="${field}" data-v="${v}" aria-pressed="${String(cur) === String(v)}">${lab}${OC[field] ? `<sup>${OC[field](v)}</sup>` : ''}</button>`).join('')}</div><div class="nhint">${on ? (cur == null ? 'circle one · small numbers are readers' : 'tap another to change') : off}</div>`;
-  } });
-  // One notebook line per spice: tap its name to change how it's prepared, circle when it goes in.
-  const SPICEBOOK = { key: 'spicebook', live: true, cls: 'c-notebook', render: () => ME.extras.length
-    ? `<div class="nq">When does each spice go in?</div><div class="srows" data-fit>${ME.extras.map(k => `<div class="srow"><button class="nopt sname" type="button" data-act="form" data-k="${k}" title="tap to change how it’s prepared">${LAB[k].toLowerCase()}, <i>${L.form[ME.forms[k]] || ''}</i></button><span class="sopts">${['cold pan', 'heating', 'boiling', 'heat off'].map((l, v) => `<button class="nopt" type="button" data-act="sst" data-k="${k}" data-v="${v}" aria-pressed="${ME.spiceSt[k] === v}">${l}</button>`).join('')}</span></div>`).join('')}</div><div class="nhint">circle a moment for each · tap a name to change how it’s prepared</div>`
-    : `<div class="nq">When does each spice go in?</div><div class="nopts c-off"><span class="nopt">add a spice first</span></div><div class="nhint">nothing else? ${S.plain} readers keep it plain too</div>` };
-  const PREP = { key: 'prep', live: true, cls: 'c-notebook', render: () => ME.extras.length
-    ? `<div class="nq">How do you prepare them?</div><div class="nopts">${ME.extras.map(k => `<button class="nopt" type="button" data-act="form" data-k="${k}">${LAB[k].toLowerCase()}: <u>${L.form[ME.forms[k]] || ''}</u></button>`).join('')}</div><div class="nhint">tap a spice to change how it’s prepared</div>`
-    : `<div class="nq">How do you prepare them?</div><div class="nopts c-off"><span class="nopt">add a spice first</span></div><div class="nhint">nothing else? ${S.plain} readers keep it plain too</div>` };
-
-  const TITLES = {
-    cover: { bg: '#1F3A2B', k: 'Nº 01 · a kitchen ledger', time: '', h: 'How India makes chai', hi: 'चाय कैसे बनती है', q: `${N} recipes, set down like specimens.`, cue: 'Scroll ↓' },
-    cold: { bg: '#7A2318', k: 'Chapter I', time: '0:00', h: 'The cold pan', hi: 'ठंडा पतीला', q: 'Before the flame is lit: what goes in the pan?', cue: 'Scroll ↓' },
-    heat: { bg: '#22304F', k: 'Chapter II', time: '0:45', h: 'Heating up', hi: 'आँच पर', q: 'The water warms and the larder opens.', cue: 'Scroll ↓' },
-    boil: { bg: '#1F3A2B', k: 'Chapter III', time: '2:00', h: 'The boil', hi: 'उबाल', q: 'The leaf, the milk, and how many times it rises.', cue: 'Scroll ↓' },
-    off: { bg: '#7A4416', k: 'Chapter IV', time: '3:30', h: 'Off the flame', hi: 'आँच बंद', q: 'The flame is off. The leaf keeps working.', cue: 'Scroll ↓' },
-    cup: { bg: '#6B4A12', k: 'Chapter V', time: '5:00', h: 'In the cup', hi: 'कप में', q: 'Sweetened, poured and named.', cue: 'Scroll ↓' },
-    voices: { bg: '#1F3A2B', k: 'In their own words', time: '', h: 'Kitchen voices', hi: 'रसोई की बातें', q: 'Tap a cup to read how it’s made.', cue: '' }
-  };
-  const TITLE = id => { const t = TITLES[id]; return { key: 'title:' + id, cls: 'c-title', render: () => `<div class="blk" style="background:${t.bg}"><div class="blk-top"><div class="blk-dots"><i></i><i></i><i></i></div>${t.time ? `<div class="blk-t">${t.time}</div>` : ''}</div><div class="blk-k">${t.k}</div><div class="blk-h">${t.h}</div><div class="blk-hi">${t.hi}</div><div class="blk-q">${t.q}${t.cue ? `<span class="cue">${t.cue}</span>` : ''}</div></div>` }; };
-  const TEXT = (key, no, h, live) => ({ key: 'text:' + key, live: !!live, render: () => `<div class="c-text" data-fit>${h()}</div>` });
-  const STEP = (ch, i) => ({ key: 'step:' + ch + i, live: true, render: () => { const s = CH[ch].steps[i], R = meR(); return `<div class="c-text" data-fit>${s.k ? s.k() : ''}${s.h()}${s.you || mode === 'd' ? '' : youLine(CH[ch].you(R))}</div>`; } });
-  // Your side of the comparison, opposite the survey's
-  const YOU = (ch, i) => ({ key: 'you:' + ch + i, live: true, cls: 'c-you', render: () => { const s = CH[ch].steps[i], R = meR(), y = s.you ? '' : CH[ch].you(R);
-    return `<div class="c-text" data-fit><div class="pz-k you-k">You</div>${s.you ? `<span class="yc-big">Readers like you are highlighted on the chart below.</span>` : y ? `<span class="yc-big">${y}</span>` : `<span class="yc-empty">Your answer will show here once you’ve added it to your pan.</span>`}</div>`; } });
-  // A plate of the chapter's ingredients, drawn large
-  const ILLUS = id => ({ key: 'illus:' + id, render: () => `<div class="illus">${PZ[id].ic.map(k => `<figure><span>${ICON(k)}</span><figcaption>${(LAB[k] || (k === 'flame' ? 'the flame' : k)).toLowerCase()}</figcaption></figure>`).join('')}</div>` });
-  const PZ = {
-    intro: { k: 'Nº 01 · why we asked', h: 'Everyone at home is wrong, obviously', d: `Why we asked ${N} readers exactly how they make their tea.`, ic: ['leaf', 'ginger', 'milk', 'sugar'], you: false },
-    cold: { k: 'Chapter I · 0:00', h: 'Before the flame is lit', d: 'Water first, or milk first? Most kitchens start with water.', ic: ['water', 'milk'], you: false },
-    heat: { k: 'Chapter II · 0:45', h: 'The larder opens', d: 'Spices bloom in hot water, so most go in early.', ic: ['ginger', 'cardamom', 'clove', 'cinnamon'], you: true },
-    boil: { k: 'Chapter III · 2:00', h: 'The moment that divides households', d: 'The leaf goes in, the milk rises, and someone counts the boils.', ic: ['ctc', 'assam', 'darjeeling', 'flame'], you: true },
-    off: { k: 'Chapter IV · 3:30', h: 'The leaf keeps working', d: 'Colour, then body, then (eventually) bitterness.', ic: ['leaf', 'bag', 'dust'], you: true },
-    cup: { k: 'Chapter V · 5:00', h: 'Sweetened, poured and named', d: 'The last decisions happen at the table.', ic: ['sugar', 'jaggery', 'honey', 'free'], you: true }
-  };
-  const PROSE = (key, h) => ({ key: 'prose:' + key, live: true, render: () => { const z = PZ[key];
-    return `<div class="pz">${z.you ? panSoFar() : ''}<div class="pz-top"><div class="pz-text"><div class="pz-k">${z.k}</div><h3 class="pz-h">${z.h}</h3><p class="pz-d">${z.d}</p></div></div><div class="pz-body" data-fit>${h()}</div></div>`; } });
-  const CHART = ch => ({ key: 'chart:' + ch, render: () => `<div class="c-chart"></div><div class="c-lab"><small>${CH[ch].label}</small></div>`,
-    mount: el => { const chart = echarts.init(el.querySelector('.c-chart'), null, { renderer: 'canvas' }); LIVE[ch] = { chart, step: LIVE[ch] ? LIVE[ch].step : 0 }; },
-    unmount: () => { if (LIVE[ch]) { LIVE[ch].chart.dispose(); delete LIVE[ch]; } } });
-  const SPEC = (id, no, k, w) => { const r = byId(id); return { key: 'spec:' + id, cls: 'c-spec', render: () => `<div class="c-art">${vesselFor(r, { type: r.vessel })}</div>${A.strip(r)}<div class="c-lab"><b>${k}</b><small>${w} · ${C.FAM[r.fam].name} · shade ${r.shade ? r.shade.code : ''}</small></div>` }; };
-  const QUOTE = (id, q) => { const r = byId(id); return { key: 'quote:' + id, cls: 'c-quote', render: () => `<div class="qt" data-fit><q>${esc(q)}</q></div><div class="rel-top">${vesselFor(r, { type: r.vessel })}<div><div class="rel-n">${esc(r.name)}</div><div class="rel-w">${who(r.reader)}</div></div></div>${A.strip(r)}` }; };
-  const HINT = (key, h) => ({ key: 'hint:' + key, render: () => `<div class="c-text" data-fit>${h}</div>` });
-  const FAM_RULE = { steeper: 'Black, or just a splash of milk.', doodh: 'Mostly or all milk.', spicebox: 'Three spices or more.', kadak: 'Boiled three times or more, simmered, or brewed five minutes plus.', adrak: 'Ginger, with at most one other spice.', everyday: 'None of the above: the classic.' };
-  const FAMBLK = { key: 'fam', live: true, cls: 'c-title', render: () => {
-    if (meEmpty()) return `<div class="blk" style="background:#3A2C1F"><div class="blk-dots"><i></i><i></i><i></i></div><div class="blk-k">Your family</div><div class="blk-h">Not yet poured</div><div class="blk-q">Scroll back up and make a cup: even water and a tea bag counts.<span class="cue"><button type="button" data-act="goto" data-to="cold-ask" style="text-decoration:underline">Back to the cold pan ↑</button></span></div></div>`;
-    const fk = C.family(meR()), F = C.FAM[fk];
-    return `<div class="blk" style="background:${A.FAMX[fk].block}"><div class="blk-dots"><i></i><i></i><i></i></div><div class="blk-k">Your family · ${S.fam[fk]} of ${N} readers</div><div class="blk-h">${F.name}</div><div class="blk-hi">${A.FAMX[fk].hi}</div><div class="blk-q">${F.blurb}</div></div>`;
-  } };
-  const SHADE = { key: 'shade', live: true, render: () => {
-    const sh = C.shade(meR());
-    const cells = []; for (let r = -1; r < 6; r++) for (let c = -1; c < 6; c++) cells.push(r < 0 && c < 0 ? '<span></span>' : r < 0 ? `<span>${c + 1}</span>` : c < 0 ? `<span>${'ABCDEF'[r]}</span>` : `<i class="${sh && ME.teas.length && sh.row === r && sh.col === c ? 'me' : ''}" style="background:${C.cellColour(r, c)}"></i>`);
-    return `<div class="shgrid">${cells.join('')}</div><div class="c-lab">${sh && ME.teas.length ? `yours is <b>${sh.code}</b>` : 'add leaf to find yours'}<small>stronger going down, less milky going right</small></div>`;
-  } };
-  const FORMULA = { key: 'formula', live: true, render: () => {
-    const R = meR(), f = C.formula(R), fk = C.family(R), fams = Object.keys(C.FAM);
-    return `${A.strip(R, { you: true })}<div class="formula">${esc(f.head)}<span class="seq">${esc(f.seq)}</span></div>
-      <div class="famrow">${fams.map(k => `<div title="${C.FAM[k].name}: ${S.fam[k]}" style="flex:${S.fam[k]};background:${A.FAMX[k].block};opacity:${k === fk && !meEmpty() ? 1 : .3}"></div>`).join('')}</div>
-      <div class="c-note">${meEmpty() ? 'Six families, sorted by simple rules.' : 'How we sort: ' + FAM_RULE[fk]}</div>`;
-  } };
-  const REL = i => ({ key: 'rel:' + i, live: true, cls: 'c-rel', render: () => {
-    if (meEmpty()) return `<div class="c-note" style="margin:auto">appears once you’ve made a cup</div>`;
-    const R = meR(), r = RS.map(x => ({ x, d: C.distance(R, x) })).sort((a, b) => a.d - b.d)[i].x;
-    const q = r.reader.quote || r.reader.special;
-    return `<div class="rel-top">${vesselFor(r, { type: r.vessel })}<div><div class="rel-n">${esc(r.name.length > 20 ? r.name.slice(0, 20) + '…' : r.name)}</div><div class="rel-w">${who(r.reader)}</div></div></div>${A.strip(r)}${q ? `<q>${esc(q)}</q>` : ''}`;
-  } });
-  const POUR = { key: 'pour', tag: 'button', cls: 'c-pourcell', attrs: () => ({ 'data-act': 'pour', 'aria-label': 'Pour my card' }), render: () => `<div class="c-btn"><span class="pour">Pour my card</span><small>your chai, illustrated, with its timeline</small></div>` };
   const Q = {
     cold: [['odmp7b', 'Until the boiling water becomes dark, do not add milk.'],
       ['ukuktg', 'After the tea is added, boil for another 30 seconds and switch off, let it settle, then strain. In the cup, a splash of milk first, then the strained tea.'],
@@ -545,122 +400,281 @@
       ['w3k9md', 'If the tea bag is in too long, it becomes bitter.'],
       ['h7uhyh', 'Lemongrass is the new addition. It goes in with the rest of the ingredients.']]
   };
-  const VOICE = (id, q) => { const r = byId(id);
-    return { key: 'voice:' + id, cls: 'c-voice', tag: 'button', attrs: () => ({ 'data-act': 'voice', 'aria-label': `${r.name}, ${r.reader.town || 'a reader'}: ${q}` }), pad0: true,
-      render: () => `<div class="v-in"><div class="vf"><div class="c-art">${vesselFor(r, { type: r.vessel })}</div><div class="ing-name">${esc(r.name.length > 18 ? r.name.slice(0, 18) + '…' : r.name)}</div><div class="ing-hint">${who(r.reader)}</div>${A.strip(r)}</div>
-        <div class="vf vb"><div class="qt" data-fit="grow" data-max="24" data-mmax="16"><q>${esc(q)}</q></div><div class="v-who">${esc(r.name)} · ${who(r.reader)}</div>${A.strip(r)}</div></div>` }; };
-  const RTITLE = (key, h, d) => ({ key: 'rtitle:' + key, render: () => `<div class="rt"><div class="pz-k">From readers’ kitchens</div><h3 class="pz-h">${h}</h3><p class="pz-d">${d}</p></div>` });
-  const RESP = { cold: ['Who puts what in first', 'Four readers on water, milk and the cold pan.'], heat: ['The spice obsessives', 'Four readers on their larders.'], boil: ['Counting the boils', 'Four readers on the moment it rises.'],
-    off: ['After the flame', 'Four readers on how long the leaf stays.'], cup: ['At the table', 'Four readers on cups, sugar and company.'], end1: ['Kitchen voices', 'More from readers, in their own words.'], end2: ['Kitchen voices', 'And four more, to try tomorrow morning.'] };
-  // ---------- Paragraphs between the chapters ----------
-  function panSoFar() {
-    if (meEmpty()) return `<p class="pan-so-far"><em>your pan</em>Still empty. You can scroll back and fill it at any point; everything below will follow.</p>`;
-    const R = meR(), bits = [];
-    if (R.milk != null) bits.push(R.milk === 0 ? 'water, no milk' : R.milk === 5 ? 'milk, no water' : `water and ${L.milk[R.milk]} milk`);
-    if (R.extras.length) bits.push(R.extras.map(s => L.spice[s]).join(', '));
-    if (R.teas.length) bits.push(R.teas.map(t => L.tea[t]).join(' and ') + (R.st.tea != null ? ` (in at ${L.stage[R.st.tea]})` : ''));
-    if (R.sweet && R.sweet !== 'none') bits.push(L.sweet[R.sweet]);
-    const sh = C.shade(R);
-    return `<p class="pan-so-far"><em>your pan</em>So far: ${bits.join('; ')}.${sh && R.teas.length ? ` Shade <b>${sh.code}</b>, ${C.FAM[C.family(R)].name}.` : ''}</p>`;
+  // Curated quotes win; otherwise a reader's own free-text answer.
+  const QMAP = {}; Object.values(Q).forEach(l => l.forEach(([id, q]) => { const r = byId(id); if (r) QMAP[r.id] = q; }));
+  const quoteOf = r => QMAP[r.id] || (r.reader.quote || '').trim();
+  const sweetLab = s => s === 'none' ? 'no sugar' : L.sweet[s];
+  function recipeLine(r) {
+    const b = [];
+    if (r.milk != null) b.push(r.milk === 0 ? 'black' : r.milk === 5 ? 'all milk' : `${L.milk[r.milk]} milk`);
+    if (r.teas.length) b.push(r.teas.map(t => L.tea[t]).join(' + ') + (r.amt != null && r.amt < 5 ? `, ${L.amt[r.amt]}` : ''));
+    if (r.milk > 0 && r.boils != null) b.push(r.boils === 4 ? 'simmered' : r.boils === 0 ? 'never boiled' : `boiled ${L.boils[r.boils]}`);
+    if (r.extras.length) b.push(r.extras.map(s => L.spice[s]).join(', '));
+    if (r.sweet) b.push(sweetLab(r.sweet));
+    return b.join(' · ');
   }
-  const P = {
-    intro: () => `<p>I know my tea recipe is arduous, and I’ve never met anyone who makes it exactly the way I do. Everyone at home has an opinion about it. Everyone at home is wrong, obviously.</p><p>So we asked. Readers of First Principles told us their milk, their leaf, their spices and, most importantly, their <i>sequence</i>: when each thing goes in, and how many times it’s allowed to boil. Of <b>${N}</b> recipes, <b>${S.uniqueSeq}</b> were one of a kind.</p><p>You’ll make yours as you read: tap an ingredient to put it in your pan, tap its icon to take it out. The clock moves as you scroll. Your recipe stays in your browser; nothing is saved or sent.</p>`,
-    cold: () => `<p>Every cup starts the same way: a pan, a flame not yet lit, and a decision about what goes in before the heat. Most readers start with water and treat milk as a guest. <b>${S.mostlyWater}</b> of ${N} make a cup that is mostly water, and <b>${S.milkStart}</b> put milk in the cold pan right at the start.</p><p>Chai is also rarely made for one. <b>${S.cups2}</b> readers usually make two cups at a time; <b>${S.cups3p}</b> make three or more. Only <b>${S.cups1}</b> make a single cup.</p><p>So begin as you begin at home. The pan in the middle is yours, and it will cook as you scroll.</p>`,
-    heat: () => `<p>As the pan warms, the larder opens. Whole and crushed spices give up their flavour slowly in hot water, which is why most readers add them early, before the leaf and the milk can mute them.</p><p>Ginger dominates: <b>${S.sp.ginger}</b> readers use it, usually crushed or grated. But this is also where the obsessives show themselves, with spices dry-roasted, pounded, timed to the second or held back until the very end.</p><p>Add yours, and say when they go in.</p>`,
-    boil: () => `<p>Now the pan is boiling, and this is the moment that divides households. <b>${S.teaBoil}</b> readers wait for the boil before the leaf goes in; <b>${S.teaStart}</b> put it in the cold pan with everything else.</p><p>Most of them use CTC (<b>${S.ctc}</b> readers). The name stands for crush, tear, curl: the leaf is rolled into small granules that colour a pan in seconds. Then comes the milk, and the old argument about how many times it should be allowed to rise.</p>`,
-    off: () => `<p>The flame goes off, but the leaf keeps working. The longer tea sits, the more colour and body it gives, and eventually the more bitterness.</p><p>Some readers strain within a minute. <b>${S.longBrew}</b> leave it for five minutes or more. And <b>${S.colour}</b> don’t use a clock at all: they strain when <q>the colour looks right</q>.</p>`,
-    cup: () => `<p>The last decisions happen at the table: whether it’s sweetened in the pan or in the cup, and what it’s poured into.</p><p><b>${S.noSugar}</b> readers take no sugar at all, more than any single sweetener. <b>${S.jaggery}</b> use jaggery. And the vessel matters more than you’d think: <b>${S.vessel.mug}</b> drink from a mug, <b>${S.vessel.cup}</b> from a cup and saucer, and at least one of them has strong views about the other.</p>`
+
+  // A reader's tea, as a card: their glass, who they are, what they said, and a way into their recipe.
+  // Readers are known by town and age; "name" is what they call the drink.
+  const placeOf = r => r.reader.town || (r.reader.city && r.reader.city !== 'Elsewhere in India' ? r.reader.city : 'A reader');
+  const callsIt = r => [r.reader.age, r.name && r.name.length < 24 ? `calls it ${r.name.toLowerCase() === 'chai' ? 'chai' : r.name}` : ''].filter(Boolean).map(esc).join(' · ');
+  const rcard = (r, extra = '') => `<div class="rel-top">${vesselFor(r, { type: r.vessel })}<div><div class="rel-n">${esc(trunc(placeOf(r), 22))}</div><div class="rel-w">${callsIt(r)}</div></div></div>
+    <div class="rc-q">${quoteOf(r) ? `<q>${esc(trunc(quoteOf(r), 230))}</q>` : ''}<span class="rc-r">${esc(recipeLine(r))}</span></div>${extra}`;
+  const rcBack = r => `<div class="rc-bh"><span class="pz-k">How they make it</span><div class="rel-n">${esc(trunc(placeOf(r), 22))}</div></div>${A.strip(r)}<div class="rc-bl">${esc(recipeLine(r))}</div>`;
+  const RCARD = (r, why) => r ? { key: 'rc:' + r.id, cls: 'c-rc', pad0: true, attrs: () => ({ title: 'Tap to turn the card over' }),
+    render: () => `<div class="rc-in"><div class="rc-f">${why ? `<div class="rc-why">${why}</div>` : ''}${rcard(r, `<div class="rc-btns"><button class="rc-make" type="button" data-act="make" data-id="${r.id}">Make theirs <span aria-hidden="true">↗</span></button><span class="rc-turn" aria-hidden="true">↻ timeline</span></div>`)}</div>
+      <div class="rc-b">${why ? `<div class="rc-why">${why}</div>` : ''}${rcBack(r)}<div class="rc-btns"><button class="rc-make" type="button" data-act="make" data-id="${r.id}">Make theirs <span aria-hidden="true">↗</span></button><span class="rc-turn" aria-hidden="true">↻ quote</span></div></div></div>` }
+    : { key: 'rc:none', render: () => '' };
+
+  // The big glass in the middle of the opening (and, at the end, yours)
+  let HERO_MODE = 'empty';
+  const HERO_R = { milk: 3, teas: ['ctc'], amt: 2, brew: 2, st: {}, extras: [], boils: 2, forms: {} };
+  const HERO = { key: 'hero', live: true, cls: 'c-hero', render: () => {
+    if (HERO_MODE === 'you' && !meEmpty()) {
+      const R = meR(), sh = C.shade(R);
+      return `<div class="c-art">${A.vessel(R, { type: R.vessel || 'glass', float: R.extras })}</div><div class="c-lab"><b>${esc(R.name)}</b><small>${C.FAM[C.family(R)].name}${sh ? ' · shade ' + sh.code : ''}</small></div>`;
+    }
+    const full = HERO_MODE !== 'empty';
+    return `<div class="c-art">${A.vessel(HERO_R, { type: 'glass', colour: full ? C.cellColour(2, 2) : null, emptyLabel: false, float: full ? ['ginger', 'cardamom', 'tulsi'] : [] })}</div>${HERO_MODE === 'you' ? '<div class="c-lab"><small>yours goes here</small></div>' : ''}`;
+  } };
+  const ORBS = ['water', 'milk', 'ctc', 'leaf', 'sugar', 'jaggery', 'ginger', 'cardamom', 'clove', 'cinnamon', 'pepper', 'tulsi', 'mint', 'masala', 'lemongrass', 'saffron'];
+  const ORB = k => ({ key: 'orb:' + k, cls: 'c-orb', render: () => `<div class="c-art">${ICON(k)}</div><div class="ing-name">${LAB[k]}</div><div class="ing-hint">${countFor(k)} readers</div>` });
+  const BIG = (key, h, p) => ({ key: 'big:' + key, render: () => `<div class="c-text c-big" data-fit><div class="hero-t">${h}</div>${p ? `<p>${p()}</p>` : ''}</div>` });
+  const CTA = { key: 'cta', live: true, cls: 'c-cta', render: () => meEmpty()
+    ? `<button type="button" class="cta-b" data-act="make"><span class="pour">Make your own</span><small>Build your cup. It will show up, in red, in every chart.</small></button>`
+    : `<button type="button" class="cta-b" data-act="make"><span class="pour">Change your chai</span><small>Your cup is in every chart, in red.</small></button><button type="button" class="cta-s" data-act="pour">Pour my card ↗</button>` };
+
+  const TITLES = {
+    who: { bg: '#22304F', k: 'Who we asked', h: 'The readers', hi: 'पाठक', q: `${N} kitchens, one survey.` },
+    pour: { bg: '#7A2318', k: 'Chapter I', h: 'No two cups alike', hi: 'हर कप अलग', q: 'The colour of a glass is its recipe.' },
+    sequence: { bg: '#1F3A2B', k: 'Chapter II', h: 'The boil debate', hi: 'उबाल की बहस', q: 'What goes in when, and how many times it rises.' },
+    leaf: { bg: '#7A4416', k: 'Chapter III', h: 'How strong is strong', hi: 'कड़क', q: 'How much leaf, and how long it stays.' },
+    larder: { bg: '#22231F', k: 'Chapter IV', h: 'The spice box', hi: 'मसाला डिब्बा', q: 'Ginger first, then everything else.' },
+    cup: { bg: '#6B4A12', k: 'Chapter V', h: 'At the table', hi: 'मेज़ पर', q: 'Sugar, and what it’s poured into.' }
   };
+  const TITLE = id => { const t = TITLES[id]; return { key: 'title:' + id, cls: 'c-title', render: () => `<div class="blk" style="background:${t.bg}"><div class="blk-top"><div class="blk-dots"><i></i><i></i><i></i></div></div><div class="blk-k">${t.k}</div><div class="blk-h">${t.h}</div><div class="blk-hi">${t.hi}</div><div class="blk-q">${t.q}</div></div>` }; };
+  // Two or three sentences per step, never more. If you've made a cup, a line about it is added.
+  const STEP = (ch, i) => ({ key: 'step:' + ch + i, live: true, render: () => { const s = CH[ch].steps[i]; return `<div class="c-text c-step">${s.k ? s.k() : ''}<p class="st-p">${s.h()}</p>${youLine(CH[ch].you(meR()))}</div>`; } });
+  const CHART = ch => ({ key: 'chart:' + ch, render: () => `<div class="c-chart"></div><div class="c-yl"></div><div class="c-lab"><small>${CH[ch].label}</small></div>`,
+    mount: el => { const chart = echarts.init(el.querySelector('.c-chart'), null, { renderer: 'canvas' }); LIVE[ch] = { chart, step: LIVE[ch] ? LIVE[ch].step : 0 }; },
+    unmount: () => { if (LIVE[ch]) { LIVE[ch].chart.dispose(); delete LIVE[ch]; } } });
+
+  // ---------- Who answered ----------
+  const CITY = [['Bengaluru', c => c === 'Bengaluru'], ['Mumbai', c => c === 'Mumbai'], ['Delhi NCR', c => c === 'Delhi NCR'], ['other\nmetros', c => ['Chennai', 'Hyderabad', 'Pune', 'Kolkata'].includes(c)],
+    ['elsewhere\nin India', c => c === 'Elsewhere in India'], ['abroad', c => c === 'Abroad'], ['didn’t\nsay', c => !c]];
+  const AGES = ['18–24', '25–34', '35–44', '45–54', '55–64', '65+'];
+  S.men = cnt(r => r.reader.g === 'm'); S.women = cnt(r => r.reader.g === 'w');
+  S.bigThree = cnt(r => ['Bengaluru', 'Mumbai', 'Delhi NCR'].includes(r.reader.city));
+  S.midAge = cnt(r => ['25–34', '35–44', '45–54'].includes(r.reader.age));
+  S.abroad = cnt(r => r.reader.city === 'Abroad'); S.over55 = cnt(r => ['55–64', '65+'].includes(r.reader.age));
+  const byShade = g => g.sort((a, b) => (a.shade ? a.shade.t : 0) - (b.shade ? b.shade.t : 0));
+  const svgURI = svg => 'image://data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"'));
+  const noYou = () => '';
+
+  CH.who = {
+    label: 'one glass per reader, tinted by their recipe', you: noYou,
+    steps: [{ st: 'city', k: () => kfig(N, 'readers of First Principles told us how they make chai'), h: () => `<b>${S.bigThree}</b> live in Bengaluru, Mumbai or Delhi; <b>${S.abroad}</b> make theirs abroad.`,
+      why: ['Lives in Bengaluru, the biggest group', 'Makes their chai abroad'],
+      picks: [r => r.reader.city === 'Bengaluru', r => r.reader.city === 'Abroad'] }],
+    draw(ch, st, W, H) { return columns(ch, W, H, CITY.map(([, f]) => byShade(RS.filter(r => f(r.reader.city)))), CITY.map(c => c[0]), { bottom: 54, focus: [0, 1, 2] }); }
+  };
+  // Women on the left, men on the right, one row per age band: a population pyramid made of glasses.
+  CH.pyramid = {
+    label: 'one glass per reader · women left, men right', you: noYou,
+    steps: [{ st: 'age', k: () => kfig(S.midAge, 'are between 25 and 54'), h: () => `Two in three are men. The women who answered skew older: tap a glass to read its recipe.`,
+      why: ['One of the oldest readers, 65+', 'A woman aged 25–34'],
+      picks: [r => r.reader.age === '65+', r => r.reader.g === 'w' && r.reader.age === '25–34'] }],
+    draw(ch, st, W, H) {
+      const top = 30, bottom = 8, mid = W / 2, gap = W < 420 ? 26 : 40, rows = AGES.slice().reverse(), rh = (H - top - bottom) / rows.length;
+      const side = (g, a) => byShade(RS.filter(r => r.reader.g === g && r.reader.age === a));
+      const all = rows.map(a => [side('w', a), side('m', a)]);
+      const d = packD([].concat(...all.map(p => p.map(x => x.length))), mid - gap - 6, rh - 6, 22);
+      const data = [], els = [];
+      all.forEach(([w, m], i) => {
+        const y0 = top + i * rh + 3;
+        m.forEach((r, k) => { const [x, y] = packAt(k, m.length, d, mid + gap, y0, mid - gap - 6, rh - 6, 'left'); data.push(cupPt(r, x, y, d)); });
+        w.forEach((r, k) => { const [x, y] = packAt(k, w.length, d, mid + gap, y0, mid - gap - 6, rh - 6, 'left'); data.push(cupPt(r, 2 * mid - x, y, d)); });
+        els.push(gText('pa' + i, mid, top + (i + .5) * rh, rows[i], { serif: true, fill: INK, size: W < 420 ? 10 : 13 }));
+        if (i) els.push(gRect('pr' + i, 0, top + i * rh, W, 0.5));
+      });
+      els.push(gText('pw', mid - gap, 12, `women · ${S.women}`, { align: 'right', bold: true, fill: '#1F3A2B', size: W < 420 ? 11 : 13 }));
+      els.push(gText('pm', mid + gap, 12, `men · ${S.men}`, { align: 'left', bold: true, fill: RED, size: W < 420 ? 11 : 13 }));
+      return { ...baseScatter(W, H), series: [{ type: 'scatter', data }], graphic: setGraphics(ch, els) };
+    }
+  };
+
+  // When the leaf goes in → when the milk goes in, as a flow
+  const FLOWK = {}; RS.forEach(r => { if (r.milk > 0 && r.st.milk != null && r.st.tea != null) { const k = r.st.tea + '>' + r.st.milk; FLOWK[k] = (FLOWK[k] || 0) + 1; } });
+  CH.flow = {
+    label: 'left: when the leaf goes in · right: when the milk goes in · width = readers',
+    you: R => R.milk > 0 && R.st.milk != null && R.st.tea != null ? `Your path, leaf at <b>${L.stage[R.st.tea]}</b> and milk at <b>${L.stage[R.st.milk]}</b>, is shared by <b>${FLOWK[R.st.tea + '>' + R.st.milk] || 0}</b> readers.` : '',
+    steps: [{ st: 'flow', k: () => kfig(S.milkFirst, 'put the milk in before the leaf'), h: () => `Follow the red: milk first. The brown bands are leaf first (<b>${S.teaFirst}</b>), and grey is both at once (<b>${S.together}</b>).`,
+      why: ['Puts the milk in first', 'Puts the leaf in first'],
+      picks: [r => r.milk > 0 && r.st.milk != null && r.st.milk < r.st.tea, r => r.milk > 0 && r.st.milk != null && r.st.tea < r.st.milk] }],
+    draw(ch, st, W, H) {
+      const nodes = [], links = [], R = meR(), small = W < 420;
+      [0, 1, 2, 3].forEach(i => nodes.push({ name: 'L' + i, lab: 'leaf · ' + L.stage[i], itemStyle: { color: '#6B3A1E', borderColor: INK }, label: { position: 'left' } }));
+      [0, 1, 2, 4].forEach(i => nodes.push({ name: 'M' + i, lab: 'milk · ' + L.stage[i], itemStyle: { color: '#F4ECDC', borderColor: INK }, label: { position: 'right' } }));
+      Object.entries(FLOWK).forEach(([k, v]) => { const [t, m] = k.split('>').map(Number); if (t > 3) return;
+        const mine = R.st && R.milk > 0 && R.st.tea === t && R.st.milk === m;
+        links.push({ source: 'L' + t, target: 'M' + m, value: v, t, m, lineStyle: { color: mine ? RED : m < t ? RED : t < m ? '#8A5A33' : '#9C9284', opacity: mine ? .85 : m < t ? .55 : .3, borderColor: mine ? INK : 'none' } }); });
+      return { animationDurationUpdate: 800, tooltip: { ...TT, trigger: 'item', formatter: p => p.dataType === 'edge' ? `<b>${p.data.value}</b> readers put the leaf in at <b>${L.stage[p.data.t]}</b> and the milk at <b>${L.stage[p.data.m]}</b>.` : `${p.data.lab}: <b>${p.value}</b>` },
+        series: [{ type: 'sankey', left: small ? 70 : 130, right: small ? 70 : 130, top: 12, bottom: 12, nodeWidth: small ? 10 : 16, nodeGap: small ? 10 : 16, draggable: false, layoutIterations: 0, emphasis: { focus: 'adjacency' },
+          label: { fontFamily: FELL, fontSize: small ? 11 : 14, color: INK, formatter: p => p.data.lab.replace(' · ', small ? '\n' : ' · ') }, data: nodes, links }] };
+    }
+  };
+
+  // Which spices share a pan: a web of icons, line width = readers who use both
+  const WEB = S.spiceList.slice(0, 10), PAIRS = {};
+  RS.forEach(r => { const e = r.extras.filter(s => WEB.includes(s)); e.forEach((a, i) => e.slice(i + 1).forEach(b => { const k = [a, b].sort().join('+'); PAIRS[k] = (PAIRS[k] || 0) + 1; })); });
+  S.pairTop = Object.entries(PAIRS).sort((a, b) => b[1] - a[1])[0];
+  CH.pairs = {
+    label: 'each line joins two spices used together · thicker = more kitchens',
+    you: R => R.extras.length >= 2 ? (k => `Your pair, <b>${k.split('+').map(s => L.spice[s]).join(' + ')}</b>, shares <b>${PAIRS[k] || 0}</b> pans.`)([R.extras[0], R.extras[1]].sort().join('+')) : '',
+    steps: [{ st: 'web', k: () => kfig(S.pairTop[1], `put ${S.pairTop[0].split('+').map(s => L.spice[s]).join(' and ')} in together`), h: () => `Ginger is the hub nearly everything else hangs off. Tulsi, mint and lemongrass make a little herbal corner of their own.`,
+      why: ['Uses ginger and cardamom together', 'Adds tulsi or lemongrass'],
+      picks: [r => r.extras.includes('ginger') && r.extras.includes('cardamom'), r => r.extras.includes('tulsi') || r.extras.includes('lemongrass')] }],
+    draw(ch, st, W, H) {
+      const R = meR(), mx = Math.max(...WEB.map(s => S.sp[s])), pm = Math.max(...Object.values(PAIRS)), small = W < 420, base = Math.min(W, H);
+      const nodes = WEB.map(s => ({ name: s, value: S.sp[s], symbol: svgURI(ICON(s)), symbolSize: (small ? 22 : 30) + (base / 9) * Math.sqrt(S.sp[s] / mx),
+        label: { show: true, formatter: `${L.spice[s].replace('chai masala', 'masala')} · ${S.sp[s]}`, position: 'bottom', distance: 2, fontFamily: FELL, fontSize: small ? 11 : 13.5, color: R.extras.includes(s) ? RED : INK } }));
+      const links = Object.entries(PAIRS).map(([k, v]) => { const [a, b] = k.split('+'), mine = R.extras.includes(a) && R.extras.includes(b), top = k === S.pairTop[0];
+        return { source: a, target: b, value: v, lineStyle: { width: 1 + 13 * v / pm, color: mine ? RED : top ? '#7A2318' : '#8D7B62', opacity: mine || top ? .8 : .35, curveness: .18 } }; });
+      return { animationDurationUpdate: 800, tooltip: { ...TT, trigger: 'item', formatter: p => p.dataType === 'edge' ? `<b>${p.data.value}</b> kitchens use ${L.spice[p.data.source]} and ${L.spice[p.data.target]}` : `${L.spice[p.name]}: <b>${p.value}</b> readers` },
+        series: [{ type: 'graph', layout: 'circular', circular: { rotateLabel: false }, top: small ? 30 : 46, bottom: small ? 40 : 56, left: small ? 40 : 90, right: small ? 40 : 90, roam: false, data: nodes, links, emphasis: { focus: 'adjacency' } }] };
+    }
+  };
+
+  // What it's poured into: a bar made of the vessels themselves
+  CH.vessels = {
+    label: 'one vessel per reader · each tinted by that reader’s chai',
+    you: R => R.vessel ? `You drink from a <b>${L.vessel[R.vessel]}</b>, like <b>${S.vessel[R.vessel]}</b> readers.` : '',
+    steps: [{ st: 'vessel', k: () => kfig(S.vessel.mug, 'drink from a mug'), h: () => `<b>${S.vessel.cup}</b> hold out for a cup and saucer, <b>${S.vessel.tumbler}</b> a steel tumbler and just <b>${S.vessel.glass}</b> a cutting glass.`,
+      why: ['Drinks from a cup and saucer', 'Drinks from a glass or steel tumbler'],
+      picks: [r => r.vessel === 'cup', r => r.vessel === 'glass' || r.vessel === 'tumbler'] }],
+    draw(ch, st, W, H) {
+      const order = ['mug', 'cup', 'tumbler', 'glass'], R = meR(), left = W < 420 ? 74 : 130, small = W < 420;
+      const rows = order.map(v => byShade(RS.filter(r => r.vessel === v)).reverse());
+      const rh = (H - 16) / order.length, d = packD(rows.map(g => g.length), W - left - 40, rh - 10, 34);
+      const data = [], els = [];
+      rows.forEach((g, i) => {
+        const list = R.vessel === order[i] && R.milk != null ? g.concat([R]) : g;
+        list.forEach((r, k) => { const [x, y] = packAt(k, list.length, d, left, 8 + i * rh + 5, W - left - 40, rh - 10, 'left'); data.push(cupPt(r, x, y, d * 1.15, { sym: VSYM[order[i]] })); });
+        els.push(gText('vl' + i, left - 12, 8 + (i + .5) * rh - 8, L.vessel[order[i]].replace('cup and saucer', small ? 'cup & saucer' : 'cup and saucer'), { align: 'right', serif: true, fill: INK, size: small ? 12 : 16 }));
+        els.push(gText('vn' + i, left - 12, 8 + (i + .5) * rh + 10, String(g.length), { align: 'right', bold: true, fill: i === 0 ? RED : TXT, size: small ? 12 : 15 }));
+        if (i) els.push(gRect('vr' + i, 0, 8 + i * rh, W, 0.5));
+      });
+      return { ...baseScatter(W, H), series: [{ type: 'scatter', data }], graphic: setGraphics(ch, els) };
+    }
+  };
+
+  // ---------- The chapters, re-cut around the most interesting findings ----------
+  const [TA, TB] = S.topCell[0].split('-').map(Number);
+  CH.pour.steps = [
+    { st: 'all', k: () => kfig(S.uniqueSeq, 'of the recipes are one of a kind'), h: () => `Each glass is coloured by its recipe, from milky cream to near-black. Nobody chose these shades: the milk, the leaf and the boiling did.` },
+    { st: 'milk', k: () => kfig(S.mostlyWater, 'make a cup that is mostly water'), h: () => `Half milk is the biggest single group. Only <b>${S.milk[5]}</b> keep water out of the pan altogether, tapri-style.`,
+      why: ['Takes it black: no milk at all', 'All milk: no water at all'],
+      picks: [r => r.milk === 0, r => r.milk === 5] }
+  ];
+  CH.sequence.steps = [
+    { st: 'common', k: () => kfig(S.common, 'put the leaf and the milk in together, at the boil'), h: () => `Each row is an ingredient; each column is the moment it goes in. The most common method is still only one kitchen in five.` },
+    { st: 'boils', k: () => kfig(S.multi, 'let it rise three times or more, or simmer'), h: () => `Once the milk is in, <b>${S.boil[1]}</b> stop at the first boil. The rest let the pan rise and fall, some for ten minutes.`,
+      why: ['Boils it three times or more', 'Stops at the first boil'],
+      picks: [r => r.milk > 0 && r.boils >= 3, r => r.milk > 0 && r.boils === 1] }
+  ];
+  CH.leaf.steps = [
+    { st: 'top', k: () => kfig(S.topCell[1], 'share the busiest square'), h: () => `Across: tea per cup. Down: how long it stays in. The busiest square is <b>${L.amt[TA]}</b> for <b>${L.brew[TB]}</b>.` },
+    { st: 'kadak', k: () => kfig(S.kadak, 'use 1½ tsp or more, for five minutes or more'), h: () => `Kadak, by any definition. At the other end, <b>${S.quick}</b> strain within a minute.`,
+      why: ['Kadak: lots of leaf, brewed long', 'Strains within a minute'],
+      picks: [r => (r.amt === 3 || r.amt === 4) && (r.brew === 3 || r.brew === 4), r => r.brew === 0] }
+  ];
+  CH.larder.steps = [
+    { st: 'count', k: () => kfig(S.sp.ginger, 'add ginger: two in three kitchens'), h: () => `Cardamom comes next (<b>${S.sp.cardamom}</b>), and then the spice box thins out fast. <b>${S.plain}</b> add nothing at all.` },
+    { st: 'late', k: () => kfig(S.cardOff, 'add cardamom only after the heat is off', S.sp.cardamom), h: () => `Most spices go in early, before the leaf and milk can mute them. A few hold the cardamom back for its fragrance.`,
+      why: ['Adds cardamom after the flame is off', 'Puts ginger in the cold pan'],
+      picks: [r => r.extras.includes('cardamom') && r.st.cardamom === 3, r => r.extras.includes('ginger') && r.st.ginger === 0] }
+  ];
+  CH.cup.steps = [
+    { st: 'sweet', k: () => kfig(S.noSugar, 'take no sugar, the biggest group'), h: () => `<b>${S.sugar}</b> use sugar and <b>${S.jaggery}</b> jaggery. Most who sweeten wait until it’s in the cup.` }
+  ];
+
+  // Each step brings two readers whose glasses are marked on the chart; nobody appears twice.
+  const usedR = new Set();
+  const goodQ = r => { const q = quoteOf(r); return q.length > 30 && q.length < 240; };
+  const rscore = r => (QMAP[r.id] ? 4 : 0) + (goodQ(r) ? 2 : quoteOf(r) ? .5 : 0) + hash(r.i * 3.1);
+  const pickReaders = fs => fs.map(f => { const pool = RS.filter(r => !usedR.has(r.id) && f(r)).sort((a, b) => rscore(b) - rscore(a)); if (pool[0]) usedR.add(pool[0].id); return pool[0]; });
+
+  // A fact tile: an icon, a number, a few words
+  const FACT = (key, icon, n, cap) => ({ key: 'fact:' + key, cls: 'c-fact', render: () => `<div class="fact"><span class="fi">${icon.startsWith('<') ? icon : ICON(icon)}</span><b>${typeof n === 'function' ? n() : n}</b><small>${cap}</small></div>` });
+  // two icons with an arrow between them: "this, then that"
+  const orderIc = (a, b) => `<svg class="ic" viewBox="0 0 104 48" aria-hidden="true"><g>${ICON.g(a)}</g><path d="M50 24 h10 m-4 -5 l5 5 l-5 5" fill="none" stroke="#A8321F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(56 0)">${ICON.g(b)}</g></svg>`;
+  const vIcon = (t, milk = 3) => A.vessel({ milk, teas: ['ctc'], amt: 2, brew: 2, boils: 2, st: {}, extras: [], forms: {} }, { type: t, still: true, emptyLabel: false });
 
   // ---------- Scenes ----------
   // d: 6 columns × 4 rows (tablet and up) · m: 4 columns × 6 rows (phones). Same letter = one cell; '.' = an empty box.
-  // t is the time on the stove for that scene.
-  // Your pan is always in the centre: columns 3–4 of the top half on wide screens, columns 2–3 on phones.
-  const CD = ['x x Y Y k k', 'x x Y Y k k', 'c c c c c c', 'c c c c c c'];
-  const CM = ['. Y Y .', 'x x x x', 'x x x x', 'c c c c', 'c c c c', 'c c c c'];
-  const PD = ['T T Y Y I I', 'T T Y Y I I', 'P P P P P P', 'P P P P P P'];
-  const PM = ['. Y Y .', '. Y Y .', 'T T T T', 'P P P P', 'P P P P', 'P P P P'];
+  // Every scene gets its own arrangement, so the sheet keeps rearranging itself as you read.
   const SC = [];
-  const dataScenes = (ch, t, head) => CH[ch].steps.forEach((s, i) => SC.push({ id: ch + '-' + i, t, h: 80, head, d: CD, m: CM, chart: { ch, step: i }, cells: { Y: TEA, c: CHART(ch), x: STEP(ch, i), k: YOU(ch, i) } }));
-  const RD = ['1 1 Y Y 2 2', '1 1 Y Y 2 2', '3 3 x x 4 4', '3 3 x x 4 4'], RM = ['. Y Y .', 'x x x x', '1 1 2 2', '1 1 2 2', '3 3 4 4', '3 3 4 4'];
-  const responses = (key, t, head) => { const cells = { Y: TEA, x: RTITLE(key, ...RESP[key]) }; Q[key].forEach(([id, q], i) => cells[String(i + 1)] = VOICE(id, q));
-    SC.push({ id: 'resp-' + key, t, h: 70, head, d: RD, m: RM, cells }); SC.push({ id: 'resp-' + key + '-b', t, h: 100, head, d: RD, m: RM, cells, flip: true }); };
-  const chapter = (id, t, head) => SC.push({ id, t, h: 110, head, d: PD, m: PM, cells: { Y: TEA, T: TITLE(id), I: ILLUS(id), P: PROSE(id, P[id]) } });
+  const LAY = {
+    titleL: { d: ['T T c c c c', 'T T c c c c', 'x x c c c c', 'x x c c c c'], m: ['T T T T', 'x x x x', 'c c c c', 'c c c c', 'c c c c', 'c c c c'] },
+    titleR: { d: ['c c c c T T', 'c c c c T T', 'c c c c x x', 'c c c c x x'], m: ['T T T T', 'x x x x', 'c c c c', 'c c c c', 'c c c c', 'c c c c'] },
+    titleTop: { d: ['T T T x x x', 'c c c c c c', 'c c c c c c', 'c c c c c c'], m: ['T T T T', 'x x x x', 'c c c c', 'c c c c', 'c c c c', 'c c c c'] },
+    titleBL: { d: ['x x c c c c', 'x x c c c c', 'T T c c c c', 'T T c c c c'], m: ['x x x x', 'c c c c', 'c c c c', 'c c c c', 'c c c c', 'T T T T'] },
+    sideL: { d: ['x x f c c c', 'x x f c c c', 'v w g c c c', 'v w g c c c'], m: ['x x x x', 'c c c c', 'c c c c', 'c c c c', 'v v w w', 'v v w w'] },
+    sideR: { d: ['c c c c x x', 'c c c c x x', 'c c c c f v', 'c c c c g v'], m: ['c c c c', 'c c c c', 'c c c c', 'x x x x', 'v v w w', 'v v w w'] },
+    under: { d: ['c c c c c c', 'c c c c c c', 'x x f g v w', 'x x f g v w'], m: ['x x x x', 'c c c c', 'c c c c', 'c c c c', 'v v w w', 'v v w w'] },
+    frame: { d: ['v x x x x w', 'v c c c c w', 'v c c c c w', 'f c c c c g'], m: ['x x x x', 'c c c c', 'c c c c', 'c c c c', 'v v w w', 'v v w w'] },
+    wideL: { d: ['c c c x x x', 'c c c x x x', 'c c c v w f', 'c c c v w g'], m: ['x x x x', 'x x x x', 'c c c c', 'c c c c', 'v v w w', 'v v w w'] }
+  };
+  const HEADS = { who: 'Who we asked', pyramid: 'Who we asked', pour: 'I · No two cups alike', sequence: 'II · The boil debate', flow: 'II · The boil debate', leaf: 'III · How strong is strong', larder: 'IV · The spice box', pairs: 'IV · The spice box', cup: 'V · At the table', vessels: 'V · At the table' };
+  const CUE = ch => ({ key: 'cue:' + ch, cls: 'c-cue', render: () => `<div class="cue-in"><span class="cue-arrow" aria-hidden="true">↓</span><span>Look at the chart first.<br>Keep scrolling for what it says.</span></div>` });
+  function scene(ch, i, lay, o = {}) {
+    const s = CH[ch].steps[i], L0 = LAY[lay], cells = { c: CHART(ch), x: STEP(ch, i), ...(o.cells || {}) };
+    if (o.title) cells.T = TITLE(o.title);
+    let feat = [];
+    if (L0.d.join(' ').includes('v')) { const rs = pickReaders(s.picks || []); cells.v = RCARD(rs[0], (s.why || [])[0]); cells.w = RCARD(rs[1], (s.why || [])[1]); feat = rs.filter(Boolean).map(r => r.id); }
+    if (o.title) SC.push({ id: ch + '-' + i + '-in', h: 90, head: HEADS[ch], d: L0.d, m: L0.m, chart: { ch, step: i }, cells: { ...cells, x: CUE(ch) }, feat });
+    SC.push({ id: ch + '-' + i, h: 175, head: HEADS[ch], d: L0.d, m: L0.m, chart: { ch, step: i }, cells, feat });
+  }
 
-  SC.push({ id: 'specimens', t: 0, h: 120, head: 'Three specimens',
-    d: ['A A Y Y B B', 'A A Y Y B B', 'x x x C C C', 'x x x C C C'],
-    m: ['. Y Y .', '. Y Y .', 'A A B B', 'A A B B', 'C C x x', 'C C x x'],
-    cells: { Y: TEA, A: SPEC('khi044', '01', 'the standard', 'New Delhi'), B: SPEC('vnskyu', '02', 'the tapri', 'Mumbai'), C: SPEC('j0mha9', '03', 'the obsessive', 'Bengaluru'),
-      x: TEXT('cover', '', () => `<div class="pz-k">How to read a recipe</div>Three of ${N} recipes. Each icon sits at the moment it goes in, from the cold pan to the cup. Flames count the boils.<span class="hint">Yours is the empty pan in the middle. Scroll, and we’ll cook it the way you do.</span>`) } });
-
-  const H1 = 'I · The cold pan';
-  chapter('cold', 0, H1);
-  SC.push({ id: 'cold-ask', t: 0, h: 160, head: H1,
-    d: ['w w Y Y k k', 'w w Y Y k k', 's s s q q q', 't t t q q q'],
-    m: ['w Y Y k', 'w Y Y k', 's s s s', 't t t t', 'q q q q', 'q q q q'],
-    cells: { Y: TEA, w: ING('water'), k: ING('milk'),
-      s: NOTE('milkShare', 'How much of the cup is milk?', () => [[1, 'a splash'], [2, 'a quarter'], [3, 'half'], [4, 'mostly'], [5, 'all milk']], () => ME.milkOn, 'add milk first'),
-      t: NOTE('milkType', 'Which milk?', () => [['toned', 'toned'], ['full', 'full-cream'], ['skim', 'double-toned'], ['plant', 'plant'], ['condensed', 'condensed']], () => ME.milkOn, 'add milk first'),
-      q: NOTE('milkIn', 'When does the milk go in?', () => [[0, 'cold pan'], [1, 'heating'], [2, 'boiling'], [4, 'in the cup']], () => ME.milkOn, 'add milk first') } });
-  dataScenes('pour', 0, H1);
-  responses('cold', 0, H1);
-
-  const H2 = 'II · Heating up';
-  chapter('heat', 1, H2);
-  SC.push({ id: 'heat-ask', t: 1, h: 160, head: H2,
-    d: ['1 2 Y Y 3 4', '5 6 Y Y 7 8', '9 0 a b w w', 'e e e e w w'],
-    m: ['1 Y Y 2', '3 Y Y 4', '5 6 7 8', '9 0 a b', 'w w w w', 'w w w w'],
-    cells: { Y: TEA, w: SPICEBOOK, e: TEXT('spicetime', '', () => `${kfig(S.sepTimed, 'readers add their spices at different moments', S.spiced)}<span class="hint">Out of ${S.spiced} who use two or more. Like the reader who adds cardamom only once the heat is off.</span>`), ...Object.fromEntries(SPICE_SHELF.map((k, i) => ['1234567890ab'[i], ING(k)])) } });
-  dataScenes('larder', 1, H2);
-  responses('heat', 1, H2);
-
-  const H3 = 'III · The boil';
-  chapter('boil', 2, H3);
-  SC.push({ id: 'boil-ask', t: 2, h: 170, head: H3,
-    d: ['1 2 Y Y 3 4', '5 6 Y Y 7 h', 'a a i i b b', 'a a i i b b'],
-    m: ['1 Y Y 2', '3 Y Y 4', '5 6 7 h', 'a a a a', 'i i i i', 'b b b b'],
-    cells: { Y: TEA, 1: ING('ctc'), 2: ING('leaf'), 3: ING('dust'), 4: ING('bag'), 5: ING('darjeeling'), 6: ING('assam'), 7: ING('green'),
-      h: HINT('boil', 'Tap a leaf to add it. Then circle how much, and when it goes in.'),
-      a: NOTE('amt', 'How much tea per cup?', () => [[0, '<½ tsp'], [1, '½ tsp'], [2, '1 tsp'], [3, '1½ tsp'], [4, '2+ tsp'], [5, 'eyeballed']].concat(ME.teas.includes('bag') ? [[6, 'one bag']] : []), () => ME.teas.length, 'add a leaf first'),
-      i: NOTE('teaIn', 'When does the leaf go in?', () => [[0, 'cold pan'], [1, 'heating'], [2, 'boiling'], [3, 'heat off']], () => ME.teas.length, 'add a leaf first'),
-      b: NOTE('boils', 'After the milk, how many times does it boil up?', () => L.boils.map((l, i) => [i, l]), () => ME.milkOn && ME.milkIn !== 4, 'only if milk goes in the pan') } });
-  dataScenes('sequence', 2, H3);
-  responses('boil', 2, H3);
-
-  const H4 = 'IV · Off the flame';
-  chapter('off', 3, H4);
-  SC.push({ id: 'off-ask', t: 3, h: 130, head: H4,
-    d: ['x x Y Y q q', 'x x Y Y q q', 'r r r r r r', 'r r r r r r'],
-    m: ['. Y Y .', '. Y Y .', 'r r r r', 'r r r r', 'x x q q', 'x x q q'],
-    cells: { Y: TEA, r: NOTE('brew', 'Once the leaf is in, how long until you strain?', () => L.brew.map((l, i) => [i, l]), () => ME.teas.length, 'add a leaf first (chapter III)'),
-      x: TEXT('offnote', '', () => `${kfig(S.quick, 'readers are done in under a minute')}<b>${S.longBrew}</b> wait five minutes or more.`),
-      q: QUOTE('8etsq8', 'Once it boils, add a teaspoon of Darjeeling long leaf for each cup and steep for 2.5 minutes. Strain and drink it.') } });
-  dataScenes('leaf', 3, H4);
-  responses('off', 3, H4);
-
-  const H5 = 'V · In the cup';
-  chapter('cup', 3, H5);
-  SC.push({ id: 'cup-ask', t: 4, h: 170, head: H5,
-    d: ['p q Y Y r z', 'u u Y Y o o', 'a b c d n n', 'a b c d n n'],
-    m: ['p Y Y q', 'r Y Y z', 'u u o o', 'a b c d', 'n n n n', 'n n n n'],
-    cells: { Y: TEA, p: ING('sugar'), q: ING('jaggery'), r: ING('honey'), z: ING('free'),
-      u: NOTE('sugarAmt', 'How much sugar?', () => [['sugar1', 'under a spoon'], ['sugar2', 'one spoon'], ['sugar3', 'two or more']], () => ME.sweet === 'sugar', 'only if you add sugar'),
-      o: NOTE('sweetIn', 'When is it sweetened?', () => [[0, 'cold pan'], [2, 'boiling'], [3, 'heat off'], [4, 'in the cup']], () => ME.sweet, 'add a sweetener first'),
-      n: NOTE('name', 'And what do you call it?', () => [['Chai', 'chai'], ['Cha', 'cha'], ['Chaya', 'chaya'], ['Chaha', 'chaha'], ['Tea', 'tea']]),
-      a: VES('glass'), b: VES('cup'), c: VES('mug'), d: VES('tumbler') } });
-  dataScenes('cup', 4, H5);
-  responses('cup', 4, H5);
-
-  SC.push({ id: 'yours', t: 4, h: 160, head: 'Your chai',
-    d: ['F F Y Y S S', 'F F Y Y S S', 'f f 1 2 3 P', 'f f 1 2 3 P'],
-    m: ['. Y Y .', 'F F S S', 'F F S S', 'f f f f', '1 1 2 2', '3 3 P P'],
-    cells: { Y: TEA, F: FAMBLK, S: SHADE, f: FORMULA, 1: REL(0), 2: REL(1), 3: REL(2), P: POUR } });
-  responses('end1', 4, 'Kitchen voices');
-  responses('end2', 4, 'Kitchen voices');
-  SC.push({ id: 'outro', t: 4, h: 130, head: 'Fin',
-    d: ['x x Y Y P P', 'x x Y Y P P', 'S S S f f f', 'S S S f f f'],
-    m: ['. Y Y .', '. Y Y .', 'x x x x', 'x x x x', 'P P P P', 'P P P P'],
-    cells: { Y: TEA, P: POUR, S: SHADE, f: FORMULA, x: TEXT('outro', '', () => `<div class="pz-k">Postscript</div>Your tea is yours. It turns out it has relatives you didn’t know about, and ${N} kitchens’ worth of ideas to steal.<span class="hint">Try someone else’s recipe tomorrow morning. Then send your card to whoever at home makes it “wrong”.</span>`) } });
+  // 1 · a glass, and everything India puts in it
+  const orbCells = {}; ORBS.forEach((k, i) => orbCells['abcdefghijklmnop'[i]] = ORB(k));
+  SC.push({ id: 'hero', h: 160, head: 'What goes in', hero: 'empty',
+    d: ['a b Y Y c d', 'e f Y Y g h', 'i j x x k l', 'm n x x o p'],
+    m: ['a b c d', 'e Y Y f', 'g Y Y h', 'i x x j', 'k x x l', 'm n o p'],
+    cells: { Y: HERO, x: BIG('all', 'Indians put all kinds of things in their tea.', () => `These are the sixteen most common, from ${N} readers’ recipes.`), ...orbCells } });
+  // 2 · it all goes in
+  SC.push({ id: 'hero-in', h: 150, head: 'What goes in', hero: 'full', flow: true,
+    d: ['x x Y Y M M', 'x x Y Y M M', 'x x Y Y M M', 'x x Y Y M M'],
+    m: ['Y Y Y Y', 'Y Y Y Y', 'Y Y Y Y', 'x x x x', 'x x x x', 'M M M M'],
+    cells: { Y: HERO, x: BIG('yours', 'But maybe yours is different.', () => `Scroll on to see how ${N} readers make theirs. Or make your own first, and find the kitchens that make it like you.`), M: CTA } });
+  // 3 · the readers
+  scene('who', 0, 'wideL', { cells: { f: FACT('men', 'person', S.men, 'men'), g: FACT('women', 'woman', S.women, 'women') } });
+  scene('pyramid', 0, 'under', { cells: { f: FACT('abroad', 'globe', S.abroad, 'make it abroad'), g: FACT('over55', 'elder', S.over55, 'are 55 or older') } });
+  // I
+  scene('pour', 0, 'titleL', { title: 'pour' });
+  scene('pour', 1, 'sideR', { cells: { f: FACT('water', 'water', S.mostlyWater, 'mostly water'), g: FACT('allmilk', 'milk', S.milk[5], 'all milk, no water') } });
+  // II
+  scene('sequence', 0, 'titleR', { title: 'sequence' });
+  scene('flow', 0, 'frame', { cells: { f: FACT('milkfirst', orderIc('milk', 'ctc'), S.milkFirst, 'milk first, then leaf'), g: FACT('teafirst', orderIc('ctc', 'milk'), S.teaFirst, 'leaf first, then milk') } });
+  scene('sequence', 1, 'sideL', { cells: { f: FACT('once', 'once', S.boil[1], 'boil it just once'), g: FACT('simmer', 'simmer', S.boil[4], 'let it simmer') } });
+  // III
+  scene('leaf', 0, 'titleTop', { title: 'leaf' });
+  scene('leaf', 1, 'under', { cells: { f: FACT('kadak', 'strong', S.kadak, 'make it kadak'), g: FACT('quick', 'quick', S.quick, 'strain within a minute') } });
+  // IV
+  scene('larder', 0, 'titleBL', { title: 'larder' });
+  scene('pairs', 0, 'frame', { cells: { f: FACT('ginger', 'ginger', S.sp.ginger, 'use ginger'), g: FACT('plain', 'nospice', S.plain, 'add no spice at all') } });
+  scene('larder', 1, 'sideR', { cells: { f: FACT('cardoff', orderIc('stage3', 'cardamom'), S.cardOff, 'cardamom after the flame'), g: FACT('cardamom', 'cardamom', S.sp.cardamom, 'use cardamom') } });
+  // V
+  scene('cup', 0, 'titleR', { title: 'cup' });
+  scene('vessels', 0, 'wideL', { cells: { f: FACT('mug', vIcon('mug'), S.vessel.mug, 'mugs'), g: FACT('glass', vIcon('glass'), S.vessel.glass, 'cutting glasses') } });
+  // the end: yours, and more readers to steal from
+  const endR = Q.end1.concat(Q.end2).map(([id]) => byId(id)).filter(r => r && !usedR.has(r.id));
+  RS.filter(r => !usedR.has(r.id) && goodQ(r) && !endR.includes(r)).sort((a, b) => rscore(b) - rscore(a)).forEach(r => { if (endR.length < 6) endR.push(r); });
+  const endCells = {}; endR.forEach((r, i) => endCells[String(i + 1)] = RCARD(r, 'In their own words'));
+  SC.push({ id: 'end', h: 180, head: 'Your chai', hero: 'you',
+    d: ['x x Y Y M M', 'x x Y Y M M', '1 2 3 4 5 6', '1 2 3 4 5 6'],
+    m: ['Y Y M M', 'Y Y M M', 'x x x x', '1 1 2 2', '1 1 2 2', '1 1 2 2'],
+    cells: { Y: HERO, M: CTA, x: BIG('end', 'Every kitchen is quietly certain its tea is the correct one.', () => `Yours too. Make it, name it, and send the card to whoever at home makes it “wrong”.`), ...endCells } });
 
   // ---------- The sheet engine ----------
   const grid = $('shGrid'), svg = $('shLines'), wrap = $('sheetWrap');
@@ -717,6 +731,7 @@
     Object.entries(a).forEach(([k, v]) => entry.inner.setAttribute(k, v));
   }
   function paint(entry) { entry.inner.innerHTML = entry.spec.render(); applyAttrs(entry); fit(entry.inner); }
+  const shapeCls = e => { const r = px(e.rect); e.inner.classList.toggle('wide-x', mode === 'd' && r.width > r.height * 2.6); };
   function makeCell(key, spec, rect) {
     const el = document.createElement('div');
     el.className = 'cell';
@@ -728,6 +743,7 @@
     el.appendChild(inner);
     grid.appendChild(el);
     const entry = { el, inner, rect, spec };
+    shapeCls(entry);
     paint(entry);
     if (spec.mount) spec.mount(el);
     return entry;
@@ -739,22 +755,40 @@
     return { left: r.left + (r.width - w) / 2, top: r.top + (r.height - h) / 2, width: w, height: h };
   }
   // Changing scenes: old cells fade, rules undraw and redraw, new cells are inked in from the left.
+  // The order things arrive in a scene: the chapter, then the data, then what it means, then the people.
+  let nFact = 0, nCard = 0;
+  const buildAt = (key, a) => { if (a === 0) nFact = nCard = 0;
+    const t = key.split(':')[0];
+    return t === 'title' ? 0 : t === 'chart' ? .15 : t === 'fact' ? .75 + .15 * nFact++ : t === 'step' ? 1.05 : t === 'rc' ? 1.45 + .2 * nCard++ : a * .06; };
   const INK_FROM = 'inset(0% 100% 0% 0%)', INK_TO = 'inset(0% 0% 0% 0%)';
   function go(idx) {
     busy = true;
     const first = curIdx < 0;
     const sc = idx >= 0 ? SC[idx] : null;
-    const prevT = NOW_T;
-    if (sc) NOW_T = sc.t;
     const layout = sc ? parse(sc[mode]) : {};
     const want = {};
-    if (!sc) { const l0 = parse(SC[0][mode]); want.tea = { rect: l0.Y, spec: TEA }; NOW_T = 0; }
+    HERO_MODE = sc && sc.hero || 'empty';
+    FEAT = new Set(sc && sc.feat || []);
+    if (!sc) { const l0 = parse(SC[0][mode]); want.hero = { rect: l0.Y, spec: HERO }; }
     if (sc) Object.entries(layout).forEach(([id, rect]) => { if (id[0] === '.') return; const spec = sc.cells[id]; if (!spec) { console.warn('no cell for', id, sc.id); return; } want[spec.key] = { rect, spec }; });
     const tl = gsap.timeline({ onComplete: () => { busy = false; curIdx = idx; if (target !== idx) go(target); } });
     let n = 0;
+    // Going forward into a 'flow' scene, the ingredients around the glass fly into it before their boxes go.
+    const flowing = !!(sc && sc.flow && curIdx >= 0 && curIdx < idx && cur.hero && layout.Y);
+    const gr = grid.getBoundingClientRect(), hy = flowing ? px(layout.Y) : null;
     Object.keys(cur).forEach(key => {
       if (want[key]) return;
       const e = cur[key]; delete cur[key]; e.leaving = true;
+      const ic = flowing && key.startsWith('orb:') && e.inner.querySelector('.c-art .ic');
+      if (ic) {
+        const f = ic.getBoundingClientRect(), fly = ic.cloneNode(true);
+        fly.classList.add('fly'); Object.assign(fly.style, { left: f.left + 'px', top: f.top + 'px', width: f.width + 'px', height: f.height + 'px' });
+        document.body.appendChild(fly);
+        const dx = gr.left + hy.left + hy.width / 2 - (f.left + f.width / 2), dy = gr.top + hy.top + hy.height * .55 - (f.top + f.height / 2);
+        tl.to(fly, { x: dx, y: dy, scale: .2, rotation: (hash(n) - .5) * 300, duration: .75, ease: 'power2.in', onComplete: () => fly.remove() }, .02 + n * .035);
+        tl.to(e.inner, { autoAlpha: 0, duration: .2, onComplete: () => e.el.remove() }, (n++) * .01);
+        return;
+      }
       tl.to(e.inner, { autoAlpha: 0, y: -6, duration: .22, ease: 'power1.in', onComplete: () => { if (e.spec.unmount) e.spec.unmount(); e.el.remove(); } }, (n++) * .01);
     });
     const nl = sc ? linesFor(layout) : {};
@@ -764,36 +798,31 @@
       if (curLines[k]) { placeLine(curLines[k], seg); return; }
       const el = document.createElementNS(NS, 'line'); el.setAttribute('pathLength', '1'); el.setAttribute('stroke-dasharray', '1 1'); el.setAttribute('stroke-dashoffset', '1');
       placeLine(el, seg); svg.appendChild(el); curLines[k] = el;
-      tl.to(el, { attr: { 'stroke-dashoffset': 0 }, duration: first ? 1.1 : .5, ease: 'power2.inOut' }, (first ? .05 : .18) + (m++) * (first ? .05 : .012));
+      tl.to(el, { attr: { 'stroke-dashoffset': 0 }, duration: first ? 1.1 : .7, ease: 'power2.inOut' }, (first ? .05 : .2) + (m++) * (first ? .05 : .02));
     });
     let a = 0;
     Object.entries(want).forEach(([key, w]) => {
       const e = cur[key];
       if (e) {
         e.spec = w.spec;
-        if (!sameRect(e.rect, w.rect)) { e.rect = w.rect; const ck = key.startsWith('chart:') ? key.slice(6) : null; tl.to(e.el, { ...px(w.rect), duration: .6, ease: 'power3.inOut', onUpdate: () => { if (ck && LIVE[ck]) LIVE[ck].chart.resize(); }, onComplete: () => fit(e.inner) }, .1); }
-        if (w.spec.live) paint(e);
-        if (key === 'tea' && prevT < 4 && NOW_T >= 4) { const v = e.inner.querySelector('.vessel'); if (v) tl.from(v, { y: -40, autoAlpha: 0, duration: .7, ease: 'bounce.out' }, .2); }
+        if (!sameRect(e.rect, w.rect)) { e.rect = w.rect; shapeCls(e); const ck = key.startsWith('chart:') ? key.slice(6) : null; tl.to(e.el, { ...px(w.rect), duration: .8, ease: 'power3.inOut', onUpdate: () => { if (ck && LIVE[ck]) LIVE[ck].chart.resize(); }, onComplete: () => { fit(e.inner); if (ck && LIVE[ck]) { LIVE[ck].chart.resize(); drawChart(ck); } } }, .1); }
+        if (w.spec.live && key === 'hero' && flowing) tl.call(() => { paint(e); const v = e.inner.querySelector('.vessel'); if (v) gsap.from(v, { scale: .94, transformOrigin: '50% 100%', duration: .6, ease: 'back.out(3)' }); }, null, .02 + n * .035 + .6);
+        else if (w.spec.live) paint(e);
         return;
       }
       const ne = makeCell(key, w.spec, w.rect);
       cur[key] = ne;
       if (!sc) { gsap.set(ne.inner, { autoAlpha: 1 }); return; }
-      gsap.set(ne.inner, { clipPath: INK_FROM, autoAlpha: 1 });
-      tl.to(ne.inner, { clipPath: INK_TO, duration: .6, ease: 'power2.inOut', clearProps: 'clipPath' }, (first ? .5 : .24) + (a++) * .04);
+      const at = (first ? .5 : .3) + buildAt(key, a++);
+      if (key.startsWith('chart:')) { gsap.set(ne.inner, { clipPath: INK_FROM, autoAlpha: 1 }); tl.to(ne.inner, { clipPath: INK_TO, duration: .8, ease: 'power2.inOut', clearProps: 'clipPath' }, at); }
+      else { gsap.set(ne.inner, { autoAlpha: 0, y: 10 }); tl.to(ne.inner, { autoAlpha: 1, y: 0, duration: .7, ease: 'power2.out', clearProps: 'transform' }, at); }
     });
     $('sheet').classList.toggle('at-intro', !sc);
-    let fv = 0;
-    Object.entries(cur).forEach(([k, e]) => { if (!k.startsWith('voice:')) return; const on = !!(sc && sc.flip); if (e.inner.classList.contains('on') !== on) tl.call(() => e.inner.classList.toggle('on', on), null, .35 + (fv++) * .14); });
     if (sc && sc.chart) { const lv = LIVE[sc.chart.ch]; if (lv) { lv.step = sc.chart.step; tl.call(() => drawChart(sc.chart.ch), null, .3); } }
     $('shPage').textContent = String(Math.max(0, idx) + 1).padStart(2, '0');
-    setHead(sc ? sc.head : 'Chai elements', sc ? sc.t : 0);
+    $('shLeft').textContent = sc ? sc.head : '';
   }
 
-  function updateIntro() {}
-  // Running head: where you are on the left, the pan's temperature on the right.
-  const TEMP = [24, 68, 100, 94, 78];
-  const temp = { v: 24 };
   // What's in the pan right now, as one stacked bar: liquids first, then the leaf, the sweetener and each spice.
   const MILKF = [0, .1, .25, .5, .75, 1], AMTF = [.035, .045, .06, .075, .09, .06, .055];
   function compSegs(t) {
@@ -813,30 +842,15 @@
     const total = segs.reduce((a, b) => a + b[1], 0);
     return total ? segs.map(([l, v, c]) => [l, v / total, c]) : [];
   }
-  function compBar() {
-    const el = $('shComp'); if (!el) return;
-    const segs = compSegs(NOW_T), total = segs.length ? 1 : 0;
-    el.innerHTML = total ? `<span class="cb">${segs.map(([l, v, c]) => { const p = v / total; return `<i style="flex:${p};background:${c}" title="${l} · ${Math.max(1, Math.round(p * 100))}%">${p > .17 ? `<em>${l} ${Math.round(p * 100)}%</em>` : ''}</i>`; }).join('')}</span>`
-      : `<span class="cb cb-empty"><em>empty</em></span>`;
-  }
-  function setHead(label, t) {
-    $('shLeft').textContent = label;
-    compBar();
-    gsap.to(temp, { v: TEMP[Math.min(4, t)], duration: .9, ease: 'power2.out', overwrite: true, onUpdate: () => {
-      const v = Math.round(temp.v), f = (v - 20) / 80;
-      $('shDeg').textContent = v;
-      $('shMerc').setAttribute('height', (4 + 20 * f).toFixed(1)); $('shMerc').setAttribute('y', (27 - 20 * f).toFixed(1));
-      $('shTemp').style.color = v >= 95 ? '#A8321F' : v >= 60 ? '#8A4A1E' : '#3D6FB6';
-    } });
-  }
   function onScroll() {
+    if (mkOpen) return;
     const vh = innerHeight / 100;
     const pos = (scrollY - wrap.offsetTop) / vh;
     let idx = -1;
-    updateIntro(pos);
     if (pos >= STARTS[0]) { idx = 0; for (let i = 0; i < SC.length; i++) if (STARTS[i] <= pos) idx = i; }
-    if (idx !== target) { target = idx; if (!busy && target !== curIdx) go(target); }
+    if (idx !== target) { target = idx; clearTimeout(settleT); settleT = setTimeout(() => { if (!busy && target !== curIdx) go(target); }, curIdx < 0 && idx <= 0 ? 0 : 420); }
   }
+  let settleT;
   let ticking = false;
   addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; onScroll(); }); } }, { passive: true });
   function scrollToScene(id) { const i = SC.findIndex(s => s.id === id); if (i >= 0) scrollTo({ top: wrap.offsetTop + STARTS[i] * innerHeight / 100 + 4, behavior: 'smooth' }); }
@@ -852,19 +866,14 @@
   }
 
   // ---------- State changes ----------
-  function refresh(added) {
+  function refresh() {
     Object.values(cur).forEach(e => {
       if (!e.spec.live || e.leaving) return;
       const ae = document.activeElement, sel = ae && e.inner.contains(ae) && ae !== e.inner ? ['act', 'k', 'f', 'v'].map(a => ae.dataset[a] != null ? `[data-${a}="${ae.dataset[a]}"]` : '').join('') : null;
       paint(e);
       if (sel) { const f = e.inner.querySelector(sel); if (f) f.focus({ preventScroll: true }); }
     });
-    if (cur.tea) {
-      if (added) { const it = cur.tea.inner.querySelector(`.strip .si[data-k="${added}"]`); if (it) gsap.from(it, { scale: 0, y: -30, rotation: -40, duration: .5, ease: 'back.out(2)' }); }
-      const v = cur.tea.inner.querySelector('.vessel'); if (v) gsap.fromTo(v, { rotate: -1.5 }, { rotate: 0, duration: .6, ease: 'elastic.out(1, .4)', transformOrigin: '50% 100%' });
-    }
     Object.keys(LIVE).forEach(drawChart);
-    compBar();
   }
 
   // ---------- Lede (header, unchanged look) ----------
@@ -881,8 +890,8 @@
     [['cinnamon', 115, 785, 2.8, -8], ['ginger', 265, 762, 3.4, 12], ['cardamom', 375, 800, 1.8, 70], ['cardamom', 410, 782, 1.7, 20], ['cardamom', 345, 812, 1.6, -30], ['clove', 440, 795, 1.7, 35],
      ['leaf', 175, 655, 2.6, -25], ['tulsi', 80, 620, 2.6, -10], ['ctc', 315, 665, 2.2, 0], ['sugar', 425, 690, 2, 8], ['pepper', 210, 800, 1.2, 0], ['saunf', 95, 720, 1.3, 15]]
       .forEach(([n, x, y, sc, r]) => g += `<g class="ls" transform="translate(${x} ${y}) rotate(${r}) scale(${sc}) translate(-24 -24)">${ICON.g(n)}</g>`);
-    // your pan, on the boil
-    g += nest(A.pan(C.cellColour(2, 2), 2, { float: ['ginger', 'cardamom'] }), 455, ground - 540 * 1.15 + 18, 540, 'lp');
+    // a big glass of chai
+    g += nest(A.vessel({ ...base, vessel: 'glass' }, { type: 'glass', colour: C.cellColour(2, 2), float: ['ginger', 'cardamom', 'tulsi'] }), 470, ground - 500 * 1.15 + 6, 500, 'lp');
     // four vessels, lightest to darkest
     [['glass', C.cellColour(1, 1)], ['cup', C.cellColour(2, 3)], ['mug', C.cellColour(3, 4)], ['tumbler', C.cellColour(4, 5)]]
       .forEach(([t, col], i) => g += nest(A.vessel({ ...base, vessel: t }, { type: t, colour: col }), 975 + i * 148, ground - 182 * 1.15 + 6, 182, 'lv'));
@@ -899,7 +908,7 @@
 
   // ---------- The printed card ----------
   function openCard() {
-    if (meEmpty()) { toast('Make a cup first: add something to your pan.'); scrollToScene('cold-ask'); return; }
+    if (meEmpty()) { openMaker(); return; }
     $('nameIn').value = ME.name || '';
     $('nameIn').placeholder = meR().name || 'Chai';
     drawCard();
@@ -971,30 +980,250 @@
     try { await navigator.clipboard.writeText(text + '\n' + location.href); $('modalMsg').textContent = 'Your formula and the link are copied.'; } catch (e) { $('modalMsg').textContent = 'Copy failed. Download the image instead.'; }
   }
 
+  // ---------- Make your own: the back of the sheet ----------
+  // The whole sheet flips over. It opens already filled: with a reader's recipe (from their card), with what you
+  // made before, or with the most common answer to every question. One frame, a few tabs, every option an icon.
+  const MODE = f => +modeOf(RS.map(f))[0];
+  function defaultMe() {
+    Object.assign(ME, { water: true, milkOn: true, milkShare: MODE(r => r.milk > 0 && r.milk < 5 ? r.milk : null), milkType: 'toned', milkIn: MODE(r => r.milk > 0 ? r.st.milk : null),
+      teas: ['ctc'], amt: MODE(r => r.amt < 5 ? r.amt : null), teaIn: MODE(r => r.st.tea), brew: MODE(r => r.brew), boils: MODE(r => r.milk > 0 ? r.boils : null),
+      sweet: 'sugar', sugarAmt: 'sugar2', sweetIn: MODE(r => r.sweet && r.sweet !== 'none' ? r.st.sweet : null), extras: ['ginger'], forms: { ginger: 'crushed' }, spiceSt: { ginger: 1 }, vessel: 'cup', touched: { sweet: true } });
+  }
+  function loadReader(r) {
+    const sw = r.sweet || null;
+    Object.assign(ME, { water: r.milk == null || r.milk < 5, milkOn: r.milk > 0, milkShare: r.milk > 0 ? r.milk : null, milkType: r.milkType || null, milkIn: r.milk > 0 ? r.st.milk : null,
+      teas: r.teas.filter(t => TEAS.includes(t)), amt: r.amt, teaIn: r.st.tea, brew: r.brew, boils: r.boils,
+      sweet: sw && sw.startsWith('sugar') ? 'sugar' : sw && sw !== 'none' ? sw : null, sugarAmt: sw && sw.startsWith('sugar') ? sw : 'sugar2', sweetIn: r.st.sweet,
+      extras: r.extras.filter(s => SPICE_SHELF.includes(s)), forms: { ...r.forms }, spiceSt: {}, vessel: r.vessel && r.vessel !== 'other' ? r.vessel : 'glass', touched: { sweet: true } });
+    if (!ME.teas.length && r.amt != null) ME.teas = ['ctc'];
+    ME.extras.forEach(s => ME.spiceSt[s] = r.st[s] == null ? 1 : r.st[s]);
+  }
+  let mkOpen = false, mkLast = null, mkPrev = [], mkTab = 'pour', mkStart = null;
+  const milkV = () => ME.milkOn ? (ME.water ? ME.milkShare : 5) : 0;
+  const SWEET_OPTS = ['none', 'sugar1', 'sugar2', 'sugar3', 'jaggery', 'honey', 'free'];
+  const curSweet = () => ME.sweet === 'sugar' ? ME.sugarAmt : ME.sweet || 'none';
+
+  // Little pictures for every option
+  const sv = (inner, vb = '0 0 48 48') => `<svg class="ic" viewBox="${vb}" aria-hidden="true">${inner}</svg>`;
+  const spoons = a => { const n = [[.55], [.75], [1], [1, .6], [1, 1]][a] || [1];
+    return sv(n.map((k, i) => `<g transform="translate(${(n.length > 1 ? (i ? 22 : 2) : 12) + 24 * (1 - k) / 2} ${24 * (1 - k) / 2 + (i ? 8 : 0)}) scale(${k * (n.length > 1 ? .62 : 1)})">${ICON.g('spoon')}</g>`).join('')); };
+  const clockAt = b => { if (b === 5) return sv(`<circle cx="24" cy="24" r="17" fill="${C.cellColour(3, 2)}" stroke="#1A1208" stroke-width="1.8"/><path d="M14 30 q10 -14 20 0" fill="none" stroke="#FBF6EA" stroke-width="2.4" stroke-linecap="round"/><circle cx="24" cy="24" r="3" fill="#FBF6EA"/>`);
+    const f = [1, 2, 4, 7.5, 12][b] / 12, a = f * 2 * Math.PI, x = 24 + 15 * Math.sin(a), y = 24 - 15 * Math.cos(a);
+    return sv(`<circle cx="24" cy="24" r="17" fill="#FBF6EA" stroke="#1A1208" stroke-width="1.8"/>${f >= 1 ? `<circle cx="24" cy="24" r="15" fill="#A8321F" opacity=".35"/>` : `<path d="M24 24 L24 9 A15 15 0 ${f > .5 ? 1 : 0} 1 ${x.toFixed(1)} ${y.toFixed(1)}Z" fill="#A8321F" opacity=".35"/>`}<path d="M24 24 L${x.toFixed(1)} ${y.toFixed(1)}" stroke="#A8321F" stroke-width="2.2" stroke-linecap="round"/><circle cx="24" cy="24" r="2" fill="#1A1208"/>`); };
+  const flames = b => b === 0 ? ICON('flameoff') : b === 4 ? ICON('simmer') : sv(Array.from({ length: b }, (_, i) => `<g transform="translate(${(48 - b * 17) / 2 + i * 17 - 4} 10) scale(.52)">${ICON.g('flame')}</g>`).join(''));
+  const STAGE_IC = ['stage0', 'stage1', 'stage2', 'stage3', 'cup'];
+  const cubes = n => sv(Array.from({ length: n }, (_, i) => `<g transform="translate(${(48 - n * 20) / 2 + i * 20 - 4} ${n > 1 ? 8 : 4}) scale(${n > 1 ? .6 : .8})">${ICON.g('sugar')}</g>`).join(''));
+  const SWEET_IC = { none: ICON('nosugar'), sugar1: cubes(1).replace('scale(.8)', 'scale(.55)').replace('translate(10', 'translate(15'), sugar2: cubes(1), sugar3: cubes(2), jaggery: ICON('jaggery'), honey: ICON('honey'), free: ICON('free') };
+  const milkGlass = v => A.vessel({ milk: v, teas: ['ctc'], amt: ME.amt == null ? 2 : ME.amt, brew: ME.brew == null ? 2 : ME.brew, boils: ME.boils == null ? 2 : ME.boils, st: {}, extras: [], forms: {} }, { type: 'glass', still: true, emptyLabel: false });
+
+  const tile = (f, v, pic, lab, on, n) => `<button type="button" class="mk-t" data-act="mk-opt" data-f="${f}" data-v="${v}" aria-pressed="${on}"><span class="mk-ti">${pic}</span><span class="mk-tl">${lab}</span>${n != null ? `<sup>${n}</sup>` : ''}</button>`;
+  const tog = k => `<button type="button" class="mk-t" data-act="mk-tog" data-k="${k}" aria-pressed="${inPot(k)}"><span class="mk-ti">${ICON(k)}</span><span class="mk-tl">${LAB[k]}</span><sup>${countFor(k)}</sup></button>`;
+  const sect = (q, body, off) => `<div class="mk-q${off ? ' off' : ''}"><h4>${q}${off ? ` <i>· ${off}</i>` : ''}</h4><div class="mk-tiles">${body}</div></div>`;
+  const TABS = [
+    { id: 'pour', ic: 'milk', lab: 'Pour', body: () => sect('How much of it is milk?', [0, 1, 2, 3, 4, 5].map(v => tile('milk', v, milkGlass(v), L.milk[v], milkV() === v, S.milk[v])).join(''))
+      + sect('When does the milk go in?', [0, 1, 2, 4].map(v => tile('milkIn', v, ICON(STAGE_IC[v]), L.stage[v], ME.milkOn && ME.milkIn === v, cnt(r => r.milk > 0 && r.st.milk === v))).join(''), ME.milkOn ? '' : 'no milk') },
+    { id: 'leaf', ic: 'leaf', lab: 'Leaf', body: () => sect('Which tea? (pick any)', TEAS.map(tog).join(''))
+      + sect('How much per cup?', [0, 1, 2, 3, 4].map(v => tile('amt', v, spoons(v), L.amt[v], ME.amt === v, cnt(r => r.amt === v))).join('')) },
+    { id: 'boil', ic: 'flame', lab: 'Boil', body: () => sect('When does the leaf go in?', [0, 1, 2, 3].map(v => tile('teaIn', v, ICON(STAGE_IC[v]), L.stage[v], ME.teaIn === v, cnt(r => r.st.tea === v))).join(''))
+      + sect('After the milk, how many boils?', [0, 1, 2, 3, 4].map(v => tile('boils', v, flames(v), L.boils[v], ME.milkOn && ME.boils === v, S.boil[v])).join(''), ME.milkOn ? '' : 'no milk') },
+    { id: 'brew', ic: 'clock', lab: 'Brew', body: () => sect('How long before you strain?', [0, 1, 2, 3, 4, 5].map(v => tile('brew', v, clockAt(v), L.brew[v], ME.brew === v, cnt(r => r.brew === v))).join('')) },
+    { id: 'spice', ic: 'ginger', lab: 'Spices', body: () => sect('What else goes in? (pick any)', SPICE_SHELF.map(tog).join('')) },
+    { id: 'table', ic: 'cup', lab: 'Table', body: () => sect('Sweetened with', SWEET_OPTS.map(s => tile('sweet', s, SWEET_IC[s], sweetLab(s), curSweet() === s, cnt(r => r.sweet === s))).join(''))
+      + sect('Drunk from', V_ORDER.map(v => tile('vessel', v, A.vessel({ ...meR(), vessel: v }, { type: v, still: true, emptyLabel: false }), L.vessel[v].replace('cup and saucer', 'cup & saucer'), ME.vessel === v, S.vessel[v])).join('')) }
+  ];
+  // Replace only the nodes whose markup changed, so untouched tiles never move or flicker.
+  function patch(old, neu) {
+    const a = [...old.children], b = [...neu.children];
+    if (a.length !== b.length) { old.innerHTML = neu.innerHTML; return; }
+    a.forEach((o, i) => { const n = b[i]; if (o.outerHTML === n.outerHTML || o.id === 'mkAt') return;
+      if (o.tagName === n.tagName && o.className === n.className && o.children.length && !o.matches('.mk-t')) { patch(o, n); [...n.attributes].forEach(at => { if (o.getAttribute(at.name) !== at.value) o.setAttribute(at.name, at.value); }); }
+      else o.replaceWith(n.cloneNode(true)); });
+  }
+  function mkControls() {
+    $('mkTabs').innerHTML = TABS.map(t => `<button type="button" role="tab" class="mk-tab" data-act="mk-tab" data-tab="${t.id}" aria-selected="${t.id === mkTab}">${ICON(t.ic)}<span>${t.lab}</span></button>`).join('');
+    const html = `<div class="mk-at" id="mkAt"></div>` + TABS.find(t => t.id === mkTab).body(), box = $('mkCtrl');
+    if (box.dataset.tab !== mkTab) { box.innerHTML = html; box.dataset.tab = mkTab; }
+    else { const tmp = document.createElement('div'); tmp.innerHTML = html; patch(box, tmp); }
+    mkAtLine();
+  }
+  function mkCup() {
+    const R = meR(), sh = C.shade(R), fk = C.family(R);
+    $('mkCupBody').innerHTML = `<div class="mk-art" id="mkArt"></div><hr class="mk-sep">${mkTimeline()}`;
+    const nm = $('mkName'); if (document.activeElement !== nm) nm.value = ME.name || ''; nm.placeholder = 'Name your chai';
+    mkTime();
+  }
+  // The moment slider: the pan (or the cup, at the end) as it is at that moment; what's still to come is dimmed.
+  let mkNow = 4;
+  function mkAtLine() { const el = $('mkAt'); if (el) el.innerHTML = mkNow < 4 ? `${ICON(STAGE_IC[mkNow])}<span>Anything you add now goes in at <b>${L.stage[mkNow]}</b></span>` : `${ICON('cup')}<span>Slide the timeline to a moment, and whatever you add goes in then</span>`; }
+  function mkTime() {
+    mkAtLine();
+    const R = meR(), t = mkNow;
+    const inBy = x => x.st <= t;
+    const float = ME.extras.filter(k => (ME.spiceSt[k] == null ? 1 : ME.spiceSt[k]) <= t);
+    $('mkArt').innerHTML = t >= 4 ? A.vessel(R, { type: R.vessel || 'glass', float: R.extras }) : A.pan(A.liquidAt(R, t), t, { float });
+    $('mkTl').querySelectorAll('.tl-c').forEach(c => { const i = +c.dataset.st; c.classList.toggle('now', i === t); c.classList.toggle('later', i > t); });
+    $('mkTl').querySelectorAll('.tl-i').forEach(el => { const x = tlItems().find(y => y.k === el.dataset.k); el.classList.toggle('in', !!x && inBy(x)); });
+  }
+  // The cooking timeline, editable: drag an ingredient to the moment it goes in, or tap it to move it one step on.
+  const tlItems = () => {
+    const it = [];
+    if (ME.water) it.push({ k: 'water', ic: 'water', lab: 'Water', st: 0, fixed: true });
+    if (ME.milkOn) it.push({ k: 'milk', ic: 'milk', lab: 'Milk', st: ME.milkIn == null ? 2 : ME.milkIn });
+    ME.teas.forEach(t => it.push({ k: 'tea', t, ic: t, lab: L.tea[t] || 'Tea', st: ME.teaIn == null ? 2 : ME.teaIn }));
+    if (ME.sweet) it.push({ k: 'sweet', ic: ME.sweet, lab: LAB[ME.sweet], st: ME.sweetIn == null ? 4 : ME.sweetIn });
+    ME.extras.forEach(x => it.push({ k: x, ic: x, lab: LAB[x], st: ME.spiceSt[x] == null ? 1 : ME.spiceSt[x] }));
+    return it;
+  };
+  function mkTimeline() {
+    const it = tlItems(), nb = ME.milkOn && ME.boils ? (ME.boils === 4 ? 3 : ME.boils) : 0;
+    return `<div class="tl-slide"><input type="range" class="tl-range" id="mkRange" min="0" max="4" step="1" value="${mkNow}" aria-label="Moment in the cooking" aria-valuetext="${L.stage[mkNow]}"></div>
+      <div class="tl" id="mkTl">${L.stage.map((lab, i) => `<div class="tl-c" data-st="${i}"><button type="button" class="tl-h" data-act="tl-at" data-st="${i}">${ICON(STAGE_IC[i])}<span>${lab}</span></button><div class="tl-d">${it.filter(x => x.st === i).map(x => `<span class="tl-i${x.fixed ? ' fixed' : ''}" data-k="${x.k}"${x.t ? ` data-t="${x.t}"` : ''} title="${x.lab}${x.fixed ? '' : ' · drag to move'}" ${x.fixed ? '' : 'tabindex="0" role="button"'}>${ICON(x.ic)}</span>`).join('')}${i === 2 && nb ? `<span class="tl-fl">${'<i></i>'.repeat(nb)}</span>` : ''}</div></div>`).join('')}</div>
+`;
+  }
+  function setStage(k, st) {
+    if (k === 'milk') ME.milkIn = st; else if (k === 'tea') ME.teaIn = st; else if (k === 'sweet') ME.sweetIn = st; else ME.spiceSt[k] = st;
+    mkLast = { f: 'stage', k, v: st };
+    mkRender();
+    const ch = $('mkTl').querySelector(`.tl-i[data-k="${k}"]`); if (ch) gsap.from(ch, { scale: .3, y: -14, duration: .45, ease: 'back.out(2.4)' });
+  }
+  const TL_KEY = { milk: 'milk', milkIn: 'milk', amt: 'tea', teaIn: 'tea', sweet: 'sweet' };
+  // take the tapped tile's picture and position before the panel re-renders
+  const grab = el => { const pic = el && el.querySelector('.mk-ti svg, svg'); return pic ? { pic: pic.cloneNode(true), a: pic.getBoundingClientRect() } : null; };
+  function flyIn(src, key, tea) {
+    if (!src || !src.a.width) return;
+    const to = (key && $('mkTl').querySelector(`.tl-i[data-k="${key}"]${tea ? `[data-t="${tea}"]` : ''}`)) || $('mkArt');
+    const a = src.a, b = to.getBoundingClientRect();
+    const fly = src.pic; fly.classList.add('fly'); Object.assign(fly.style, { left: a.left + 'px', top: a.top + 'px', width: a.width + 'px', height: a.height + 'px' });
+    document.body.appendChild(fly);
+    const tx = b.left + b.width / 2 - (a.left + a.width / 2), ty = b.top + b.height / 2 - (a.top + a.height / 2), arc = Math.min(-60, ty * .3);
+    gsap.timeline({ onComplete: () => fly.remove() })
+      .to(fly, { x: tx * .5, y: arc, scale: .8, rotation: tx > 0 ? 12 : -12, duration: .32, ease: 'power1.out' })
+      .to(fly, { x: tx, y: ty, scale: to === $('mkArt') ? .35 : .55, rotation: 0, duration: .38, ease: 'power2.in' })
+      .add(() => {
+        if (to === $('mkArt')) gsap.fromTo('#mkArt .vessel', { scale: .95 }, { scale: 1, duration: .5, ease: 'back.out(3)', transformOrigin: '50% 100%' });
+        else { gsap.fromTo(to, { scale: 1.45 }, { scale: 1, duration: .5, ease: 'back.out(3)' }); const col = to.closest('.tl-c'); if (col) { col.classList.add('flash'); setTimeout(() => col.classList.remove('flash'), 700); } }
+      });
+    gsap.set(to, { autoAlpha: 0 }); gsap.set(to, { autoAlpha: 1, delay: .68 });
+  }
+  const stageOf = k => (tlItems().find(x => x.k === k) || {}).st;
+  $('mkCup').addEventListener('input', e => { if (!e.target.classList.contains('tl-range')) return; mkNow = +e.target.value; e.target.setAttribute('aria-valuetext', L.stage[mkNow]); mkTime(); });
+  $('mkName').addEventListener('input', e => { ME.name = e.target.value.trim() || null; });
+  $('mkName').addEventListener('keydown', e => { if (e.key === 'Enter') e.target.blur(); });
+  let drag = null;
+  document.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const rc = e.target.closest && e.target.closest('.c-rc'); if (!rc) return;
+    const r = rc.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width - .5, fy = (e.clientY - r.top) / r.height - .5;
+    rc.style.setProperty('--ry', (fx * 44).toFixed(1) + 'deg'); rc.style.setProperty('--rx', (-fy * 18).toFixed(1) + 'deg'); });
+  document.addEventListener('pointerout', e => { const rc = e.target.closest && e.target.closest('.c-rc'); if (rc && !rc.contains(e.relatedTarget)) { rc.style.setProperty('--ry', '0deg'); rc.style.setProperty('--rx', '0deg'); } });
+  $('mkCup').addEventListener('pointerdown', e => {
+    const el = e.target.closest('.tl-i'); if (!el || el.classList.contains('fixed')) return;
+    e.preventDefault(); el.setPointerCapture(e.pointerId);
+    drag = { el, k: el.dataset.k, x: e.clientX, y: e.clientY, moved: false };
+  });
+  $('mkCup').addEventListener('pointermove', e => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) < 5) return;
+    drag.moved = true; drag.el.classList.add('dragging');
+    gsap.set(drag.el, { x: dx, y: dy });
+    const over = colAt(e.clientX, e.clientY);
+    $('mkTl').querySelectorAll('.tl-c').forEach(c => c.classList.toggle('over', c === over));
+  });
+  const colAt = (x, y) => [...$('mkTl').querySelectorAll('.tl-c')].find(c => { const r = c.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top - 40 && y <= r.bottom + 40; });
+  $('mkCup').addEventListener('pointerup', e => {
+    if (!drag) return; const d = drag; drag = null;
+    if (!d.moved) { setStage(d.k, (stageOf(d.k) + 1) % 5); return; }
+    const c = colAt(e.clientX, e.clientY);
+    if (c) setStage(d.k, +c.dataset.st); else gsap.to(d.el, { x: 0, y: 0, duration: .3, ease: 'power2.out', onComplete: () => d.el.classList.remove('dragging') });
+  });
+  $('mkCup').addEventListener('pointercancel', () => { if (drag) { gsap.set(drag.el, { x: 0, y: 0 }); drag.el.classList.remove('dragging'); drag = null; } });
+  $('mkCup').addEventListener('keydown', e => { const el = e.target.closest('.tl-i'); if (!el || el.classList.contains('fixed')) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const d = e.key === 'ArrowLeft' ? 4 : 1, k = el.dataset.k; setStage(k, (stageOf(k) + d) % 5); const n = $('mkTl').querySelector(`.tl-i[data-k="${k}"]`); if (n) n.focus(); } });
+  // What the last change means, in readers
+  function mkSay(top) {
+    const R = meR(), l = mkLast;
+    let s = '';
+    if (l) {
+      if (l.f === 'milk') s = `<b>${S.milk[l.v]}</b> pour ${L.milk[l.v]}.`;
+      else if (l.f === 'amt') s = `<b>${cnt(r => r.amt === l.v)}</b> use ${L.amt[l.v]}.`;
+      else if (l.f === 'brew') s = `<b>${cnt(r => r.brew === l.v)}</b> strain after ${L.brew[l.v]}.`;
+      else if (l.f === 'boils') s = `<b>${S.boil[l.v]}</b> boil it ${L.boils[l.v]}.`;
+      else if (l.f === 'teaIn') s = `<b>${cnt(r => r.st.tea === l.v)}</b> add leaf at ${L.stage[l.v]}.`;
+      else if (l.f === 'milkIn') s = `<b>${cnt(r => r.milk > 0 && r.st.milk === l.v)}</b> add milk at ${L.stage[l.v]}.`;
+      else if (l.f === 'sweet') s = `<b>${cnt(r => r.sweet === l.v)}</b> take ${sweetLab(l.v)}.`;
+      else if (l.f === 'vessel') s = `<b>${S.vessel[l.v]}</b> use a ${L.vessel[l.v]}.`;
+      else if (l.f === 'stage') { const v = l.v, k = l.k, n = k === 'milk' ? cnt(r => r.milk > 0 && r.st.milk === v) : k === 'tea' ? cnt(r => r.st.tea === v) : k === 'sweet' ? cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === v) : cnt(r => r.extras.includes(k) && r.st[k] === v);
+        s = `<b>${n}</b> add ${k === 'tea' ? 'the leaf' : k === 'sweet' ? 'the sweetener' : k === 'milk' ? 'the milk' : L.spice[k]} at ${L.stage[v]}.`; }
+      else if (l.f === 'tog') s = `<b>${countFor(l.v)}</b> use ${LAB[l.v].toLowerCase()}.`;
+    }
+    const near = RS.filter(r => C.distance(R, r) < 1.6).length;
+    return `${s ? `<span class="mk-now">${s}</span> ` : ''}${meEmpty() ? 'Your pan is empty: add what goes in, as it goes in.' : near ? `<b>${near}</b> kitchens make it almost like you.` : 'Keep adding, and the closest kitchens will show up here.'}`;
+  }
+  function mkCards() {
+    const R = meR(), top = RS.map(r => ({ r, d: C.distance(R, r) })).sort((a, b) => a.d - b.d).slice(0, 3);
+    $('mkSay').innerHTML = mkSay(top);
+    $('mkCards').innerHTML = top.map(({ r, d }) => `<div class="mk-card" data-id="${r.id}"><div class="rel-top">${vesselFor(r, { type: r.vessel })}<div><div class="rel-n">${esc(trunc(placeOf(r), 18))}</div><div class="rel-w">${callsIt(r)}</div></div><span class="mk-match">${Math.max(5, Math.round(100 * (1 - d / 7)))}%</span></div>
+      <div class="mk-cq">${quoteOf(r) ? `<q>${esc(trunc(quoteOf(r), 110))}</q>` : `<span>${esc(recipeLine(r))}</span>`}</div><button class="rc-make" type="button" data-act="make" data-id="${r.id}">Try theirs ↺</button></div>`).join('');
+    const fresh = [...$('mkCards').children].filter(el => !mkPrev.includes(el.dataset.id));
+    if (fresh.length && fresh.length < 3) gsap.from(fresh, { x: 18, autoAlpha: 0, duration: .4, stagger: .06, ease: 'power2.out' });
+    mkPrev = top.map(t => t.r.id);
+  }
+  function mkRender() {
+    mkControls(); mkCup(); mkCards();
+    const v = $('mkCup').querySelector('.vessel'); if (v) gsap.fromTo(v, { rotate: -2 }, { rotate: 0, duration: .6, ease: 'elastic.out(1, .4)', transformOrigin: '50% 100%' });
+  }
+  function openMaker(id) {
+    const r = id && RS.find(x => x.id === id);
+    if (r) $('mkFrom').innerHTML = (loadReader(r), `From a reader in <b>${esc(placeOf(r))}</b>`);
+    else if (meEmpty()) { defaultMe(); $('mkFrom').innerHTML = 'From the most common answers'; }
+    else $('mkFrom').innerHTML = 'Your chai, as you left it';
+    mkLast = null; mkPrev = []; mkNow = 4;
+    mkStart = JSON.stringify(ME);
+    mkRender();
+    if (mkOpen) return;
+    mkOpen = true; document.body.style.overflow = 'hidden';
+    $('sheet').classList.add('flipped'); $('maker').removeAttribute('inert'); $('shFront').setAttribute('inert', '');
+    gsap.timeline().to('#shCard', { rotateY: 180, duration: 1, ease: 'power3.inOut' }).to('#shCard', { scale: .96, duration: .5, ease: 'power2.out', yoyo: true, repeat: 1 }, 0);
+  }
+  function closeMaker() {
+    if (!mkOpen) return; mkOpen = false;
+    refresh();
+    $('sheet').classList.remove('flipped'); $('maker').setAttribute('inert', ''); $('shFront').removeAttribute('inert');
+    gsap.timeline({ onComplete: () => { document.body.style.overflow = ''; } }).to('#shCard', { rotateY: 0, duration: 1, ease: 'power3.inOut' }).to('#shCard', { scale: .96, duration: .5, ease: 'power2.out', yoyo: true, repeat: 1 }, 0);
+  }
+
   // ---------- Events ----------
   let toastT;
   function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2200); }
   document.addEventListener('click', e => {
+    const rc = e.target.closest('.c-rc');
+    if (rc && !e.target.closest('[data-act]')) { rc.classList.toggle('on'); return; }
     const el = e.target.closest('[data-act]'); if (!el) return;
     const a = el.dataset.act, k = el.dataset.k;
-    if (a === 'tile') { const was = inPot(k); toggle(k); refresh(was ? null : k); }
-    else if (a === 'out') { gsap.to(el, { scale: 0, rotation: 30, opacity: 0, duration: .2, onComplete: () => { toggle(k); refresh(); } }); }
-    else if (a === 'vessel') { ME.vessel = ME.vessel === el.dataset.v ? null : el.dataset.v; refresh(); }
-    else if (a === 'opt') {
-      const f = el.dataset.f, v = el.dataset.v, num = ['milkShare', 'amt', 'brew', 'boils', 'milkIn', 'teaIn', 'sweetIn'].includes(f);
-      const keep = f === 'milkShare' || f === 'sugarAmt';
-      ME[f] = String(ME[f]) === v && !keep ? null : (num ? +v : v);
-      if (f === 'milkShare') ME.water = ME.milkShare !== 5;
-      if (f === 'brew') ME.touched.brew = true;
-      refresh();
+    if (a === 'make') { openMaker(el.dataset.id); }
+    else if (a === 'mk-close') { closeMaker(); }
+    else if (a === 'mk-reset') { Object.assign(ME, { water: false, milkOn: false, milkShare: null, milkType: null, milkIn: null, teas: [], amt: null, teaIn: null, sweet: null, sugarAmt: 'sugar2', sweetIn: null, brew: null, extras: [], forms: {}, spiceSt: {}, boils: null, touched: {} });
+      mkNow = 0; mkLast = null; mkPrev = []; $('mkFrom').textContent = 'From an empty pan'; mkRender(); toast('Empty pan. Add things as they go in.'); gsap.fromTo('#mkCup .mk-art', { rotate: -6 }, { rotate: 0, duration: .7, ease: 'elastic.out(1, .4)' }); }
+    else if (a === 'tl-at') { mkNow = +el.dataset.st; $('mkRange').value = mkNow; mkTime(); }
+    else if (a === 'tl-pick') { setStage(el.dataset.k, mkNow); }
+    else if (a === 'mk-tab') { mkTab = el.dataset.tab; mkControls(); gsap.fromTo('#mkCtrl', { autoAlpha: 0 }, { autoAlpha: 1, duration: .3, ease: 'power1.out' }); }
+    else if (a === 'mk-tog') { const was = inPot(k), src = grab(el); toggle(k); if (!was && mkNow < 4) { if (TEAS.includes(k)) ME.teaIn = mkNow; else ME.spiceSt[k] = mkNow; }
+      mkLast = !was && mkNow < 4 ? { f: 'stage', k: TEAS.includes(k) ? 'tea' : k, v: mkNow } : { f: 'tog', v: k }; mkRender();
+      if (!was) flyIn(src, TEAS.includes(k) ? 'tea' : k, TEAS.includes(k) ? k : null); }
+    else if (a === 'mk-opt') {
+      const f = el.dataset.f, v = el.dataset.v, hadMilk = ME.milkOn, hadSweet = !!ME.sweet, src = grab(el);
+      if (f === 'sweet') { ME.touched.sweet = true; if (v === 'none') ME.sweet = null; else if (v.startsWith('sugar')) { ME.sweet = 'sugar'; ME.sugarAmt = v; } else ME.sweet = v; if (ME.sweet && ME.sweetIn == null) ME.sweetIn = 4; }
+      else if (f === 'vessel') ME.vessel = v;
+      else if (f === 'milk') { const m = +v; ME.water = m < 5; ME.milkOn = m > 0; ME.milkShare = m > 0 ? m : null; if (m > 0 && ME.milkIn == null) ME.milkIn = 2; if (m > 0 && ME.boils == null) ME.boils = 2; }
+      else { ME[f] = +v; if (f === 'amt' && !ME.teas.length) ME.teas = ['ctc']; }
+      mkLast = { f, v: f === 'sweet' || f === 'vessel' ? v : +v };
+      if (mkNow < 4 && f === 'milk' && !hadMilk && ME.milkOn) { ME.milkIn = mkNow; mkLast = { f: 'stage', k: 'milk', v: mkNow }; }
+      if (mkNow < 4 && f === 'sweet' && !hadSweet && ME.sweet) { ME.sweetIn = mkNow; mkLast = { f: 'stage', k: 'sweet', v: mkNow }; }
+      mkRender();
+      flyIn(src, TL_KEY[f]);
     }
-    else if (a === 'sst') { const v = +el.dataset.v; ME.spiceSt[k] = ME.spiceSt[k] === v ? null : v; refresh(); }
-    else if (a === 'form') { const list = FORMS[k]; ME.forms[k] = list[(list.indexOf(ME.forms[k]) + 1) % list.length]; refresh(); }
-    else if (a === 'voice') { el.classList.toggle('on'); }
     else if (a === 'pour') { openCard(); }
-    else if (a === 'goto') { scrollToScene(el.dataset.to); }
   });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('modal').hidden) closeCard(); });
+  document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (!$('modal').hidden) closeCard(); else if (mkOpen) closeMaker(); });
   $('modal').addEventListener('click', e => { if (e.target.closest('[data-close]')) closeCard(); });
   $('dlBtn').addEventListener('click', download);
   $('nameIn').addEventListener('input', e => { ME.name = e.target.value.trim() || null; placeName(); });
