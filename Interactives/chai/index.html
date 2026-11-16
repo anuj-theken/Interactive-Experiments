@@ -19,6 +19,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="data/chai.js"></script>
+<script src="data/india.js"></script>
 <script src="scripts/icons.js"></script>
 <script src="scripts/chai-core.js"></script>
 <script src="scripts/chai-art.js"></script>
@@ -49,11 +50,11 @@
   <div class="sheet" id="sheet">
    <div class="sh-card" id="shCard">
    <div class="sh-front" id="shFront">
-    <div class="sh-head" id="shHead"><span class="sh-left" id="shLeft">Chai elements</span><button type="button" class="sh-make" data-act="make"><span class="mk-bi" aria-hidden="true">✎</span>Make your own</button></div>
+    <div class="sh-head" id="shHead"><span class="sh-left" id="shLeft">Chai elements</span><span class="sh-crowd" id="shCrowd" aria-live="polite"></span><button type="button" class="sh-make" data-act="make"><span class="mk-bi" aria-hidden="true">✎</span>Make your own</button></div>
     <div class="sh-grid" id="shGrid">
       <svg class="sh-lines" id="shLines" aria-hidden="true"></svg>
     </div>
-    <div class="sh-foot" id="shFoot"><span>‹</span> <b id="shPage">00</b> <span>›</span></div>
+    <div class="sh-foot" id="shFoot"><button type="button" class="st-btn" id="stPrev" data-act="step" data-d="-1"><span aria-hidden="true">←</span> Back</button><span class="st-count" id="shPage"></span><button type="button" class="st-btn st-next" id="stNext" data-act="step" data-d="1">Next <span aria-hidden="true">→</span></button></div>
    </div>
    <!-- Make your own: the back of the same sheet -->
    <div class="sh-back" id="maker" role="region" aria-label="Make your own chai" inert>
@@ -72,8 +73,8 @@
         <div class="mk-tabs" id="mkTabs" role="tablist"></div>
         <div class="mk-ctrl" id="mkCtrl"></div>
       </div>
-      <section class="mk-like" aria-label="Someone like you">
-        <h3 class="mk-h"><mark>Someone like you</mark></h3>
+      <section class="mk-like" aria-label="Kitchens closest to yours">
+        <h3 class="mk-h">Kitchens closest to yours</h3>
         <p class="mk-say" id="mkSay" aria-live="polite"></p>
         <div class="mk-cards" id="mkCards"></div>
       </section>
@@ -103,6 +104,7 @@
       <h2 class="sf-h">About the data</h2>
       <p><b data-n="n">194</b> readers of First Principles answered the survey between 25 October and 3 November 2026. It is not a representative sample of India; most respondents live in Bengaluru, Mumbai or Delhi NCR, and about two in three are men. The survey is still open, and this page will grow as more cups come in.</p>
       <p>Shades are computed from each reader’s answers (milk share, amount of tea, brewing time and number of boils), never chosen. Where a reader didn’t say when a spice goes in, we used the time they gave for all their spices. Families are simple rules, not a clustering model. Readers are identified only by age band and town; some quotes are lightly trimmed.</p>
+      <p>Map outline adapted from <a href="https://github.com/datameet/maps" target="_blank" rel="noopener">DataMeet</a> (CC BY 2.5 India), simplified.</p>
     </div>
     <div class="sf-bottom">
       <div class="sf-legal"><a href="https://the-ken.com/terms-and-conditions/" target="_blank" rel="noopener">Terms &amp; Conditions</a><span aria-hidden="true">•</span><a href="https://the-ken.com/privacy-policy/" target="_blank" rel="noopener">Privacy</a></div>
