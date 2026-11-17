@@ -1477,3 +1477,10 @@ body:has(.sheet.flipped) .fshare { opacity: 0; pointer-events: none; }
 /* a researched fact inside a card: a small tag, the sentence otherwise plain */
 .fct-k { display: inline-block; font: 700 9.5px/1 var(--pop); letter-spacing: .14em; text-transform: uppercase; color: #FBF2E4; background: var(--chai); border-radius: 3px; padding: 4px 5px 2px; margin: 0 6px 0 2px; vertical-align: 2px; }
 .fct { color: var(--body); }
+
+/* the fact sits on its own line, in a slightly deeper band of the card */
+.scard .fct { display: block; margin: 12px -22px -0.9em; padding: 11px 22px 12px; background: rgba(141, 123, 98, .13); border-top: 1px solid rgba(141, 123, 98, .25); font-size: 15.5px; line-height: 1.5; color: var(--body); }
+.scard .fct-k { display: block; width: max-content; margin: 0 0 6px; }
+@media (max-width: 699px) { .scard .fct { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; font-size: 14.5px; } }
+.scard .fct { margin-bottom: 0; }
+.scard .st-p:has(.fct) { margin-bottom: 14px !important; }
