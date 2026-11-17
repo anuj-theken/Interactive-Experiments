@@ -140,6 +140,7 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
     const padX = 4, top = 24, bottom = o.bottom || 44, gw = (W - padX * 2) / groups.length, h = H - top - bottom;
     const d = packD(groups.map(g => g.length), gw - 6, h, 30);
     groups.forEach((g, k) => {
+      g = g.filter(r => r.you).concat(g.filter(r => !r.you));
       const x0 = padX + k * gw + 3, dimCol = o.dimCol && o.dimCol(k), foc = (o.focus || []).includes(k);
       if (foc) { const rows = Math.ceil(g.length / Math.max(1, Math.floor((gw - 6) / d))); els.push(gRect('cf' + k, x0 - 2, H - bottom - rows * d - 6, gw - 2, rows * d + 6, { stroke: RED, lw: 1.5, dash: [4, 3], fill: 'rgba(168,50,31,.06)' })); }
       g.forEach((r, i) => { const [x, y] = packAt(i, g.length, d, x0, top, gw - 6, h, 'bottom'); data.push(cupPt(r, x, y, d, { op: !r.you && (dimCol || (o.dim && o.dim(r))) ? .15 : 1, sym: o.sym ? o.sym(r) : null })); });
@@ -374,7 +375,7 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
         return columns(ch, W, H, g, ['cooked in the pan', 'stirred into the cup', 'no sugar'], { focus: [1], dimCol: k => k === 2 });
       }
       const groups = SW_ORDER.map(s => RS.filter(r => r.sweet === s).sort((a, b) => (a.shade ? a.shade.t : 0) - (b.shade ? b.shade.t : 0)));
-      if (R.sweet && R.milk != null) groups[SW_ORDER.indexOf(R.sweet)].push(R);
+      if (R.sweet && SW_ORDER.includes(R.sweet)) groups[SW_ORDER.indexOf(R.sweet)].push(R.milk != null ? R : { ...R, milk: 3 });
       return columns(ch, W, H, groups, SW_LAB, { bottom: 54, dim: st === 'where' ? r => r.sweet === 'none' || r.st.sweet !== 4 : null, focus: st === 'sweet' ? [0] : [], dimCol: st === 'sweet' ? k => k > 0 : null });
     }
   };
@@ -384,8 +385,15 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
     const lv = LIVE[key]; if (!lv) return;
     const el = lv.chart.getDom(), W = el.clientWidth, H = el.clientHeight; lv.W = W; lv.H = H;
     if (!W || !H) return;
-    const opt = CH[key].draw(lv.chart, CH[key].steps[lv.step].st, W, H);
-    if (lv.step === 0 && key !== 'pour' && CH[key].steps[0].st !== 'crowd') (opt.series || []).forEach(se => {
+    const opt = chartOpt(key, lv.chart, lv.step, W, H);
+    lv.chart.setOption(opt, { replaceMerge: ['geo'] });
+    // on phones your line sits under the chart (the text box above is too small for it)
+    const yl = el.parentNode.querySelector('.c-yl'); if (yl) { const t = youLine(CH[key].you(meR())); if (yl.innerHTML !== t) { yl.innerHTML = t; if (mode === 'm') requestAnimationFrame(() => lv.chart.resize()); } }
+  }
+  // one chart state as an ECharts option: used by the live boxes and by the share images
+  function chartOpt(key, chart, step, W, H) {
+    const opt = CH[key].draw(chart, CH[key].steps[step].st, W, H);
+    if (step === 0 && key !== 'pour' && !CH[key].noDim && CH[key].steps[0].st !== 'crowd') (opt.series || []).forEach(se => {
       const dim = o => ({ ...(o || {}), opacity: ((o && o.opacity) == null ? 1 : o.opacity) * .3 });
       (se.data || []).forEach(d => { if (d && typeof d === 'object') d.itemStyle = dim(d.itemStyle); });
       (se.links || []).forEach(l => { l.lineStyle = dim(l.lineStyle); });
@@ -394,9 +402,15 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
       if (r.x < 2) dx = 2 - r.x; else if (r.x + r.width > W - 2) dx = W - 2 - r.x - r.width; if (r.y < 2) dy = 2 - r.y;
       return { dx, dy, moveOverlap: 'shiftY' }; }; });
     if (!opt.geo) opt.geo = [];
-    lv.chart.setOption(opt, { replaceMerge: ['geo'] });
-    // on phones your line sits under the chart (the text box above is too small for it)
-    const yl = el.parentNode.querySelector('.c-yl'); if (yl) { const t = youLine(CH[key].you(meR())); if (yl.innerHTML !== t) { yl.innerHTML = t; if (mode === 'm') requestAnimationFrame(() => lv.chart.resize()); } }
+    // your own glass: labelled and pulsing, so it is the first thing you see after answering a question
+    if ((opt.series || []).some(se => se.type === 'scatter')) {
+      const mine = [];
+      opt.series.forEach(se => { if (se.type !== 'scatter') return; (se.data || []).forEach(d => { if (d && typeof d === 'object' && /^you/.test(String(d.name))) {
+        d.z = 12; d.label = { show: !mine.length, position: 'top', distance: 6, formatter: 'YOU', color: '#FBF2E4', backgroundColor: RED, padding: [4, 6, 2], borderRadius: 3, fontFamily: 'Poppins, Arial', fontWeight: 700, fontSize: 11 };
+        mine.push({ value: d.value, symbol: d.symbol || GLASS, symbolSize: d.symbolSize }); } }); });
+      opt.series.push({ id: 'youfx', type: 'effectScatter', silent: true, z: 11, data: mine, rippleEffect: { brushType: 'stroke', scale: 2.4, period: 2.2, color: RED }, itemStyle: { color: 'rgba(0,0,0,0)' }, animation: false });
+    }
+    return opt;
   }
 
   // ---------- Cell specs ----------
@@ -454,7 +468,10 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
   // Readers are known by town and age; "name" is what they call the drink.
   const placeOf = r => r.reader.town || (r.reader.city && r.reader.city !== 'Elsewhere in India' ? r.reader.city : 'A reader');
   const callsIt = r => [r.reader.age, r.name && r.name.length < 24 ? `calls it ${r.name.toLowerCase() === 'chai' ? 'chai' : r.name}` : ''].filter(Boolean).map(esc).join(' · ');
-  const rcard = (r, extra = '') => `<div class="rel-top">${vesselFor(r, { type: r.vessel })}<div><div class="rel-n">${esc(trunc(placeOf(r), 22))}</div><div class="rel-w">${callsIt(r)}</div></div></div>
+  // the survey asked no names, so a card is titled by what its reader calls their chai
+  const chaiName = r => { const n = (r.name || '').trim(); return n && n.length < 26 ? n.replace(/^\w/, c => c.toUpperCase()) : 'Chai'; };
+  const whoLine = r => [placeOf(r), r.reader.age].filter(Boolean).map(esc).join(' · ');
+  const rcard = (r, extra = '') => `<div class="rel-top">${vesselFor(r, { type: r.vessel })}<div><div class="rel-n">“${esc(chaiName(r))}”</div><div class="rel-w">${whoLine(r)}</div></div></div>
     <div class="rc-q">${quoteOf(r).length > 25 ? `<q>${esc(trunc(quoteOf(r), 180))}</q>` : ''}</div>${seqStrip(r)}${extra}`;
   // the timeline, with each ingredient numbered so they can drop in one after another
   const seqStrip = r => { let n = 0; return `<div class="rc-tl">${A.strip(r).replace(/<span class="si">/g, () => `<span class="si" style="--n:${n++}">`)}</div>`; };
@@ -468,7 +485,7 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
     const lines = at.map((a, i) => a.length ? `<li><b>${L.stage[i]}</b>${a.join(', ')}${i === 2 && r.milk > 0 && r.boils != null ? `; ${r.boils === 4 ? 'simmered' : r.boils === 0 ? 'not boiled' : 'boiled ' + L.boils[r.boils]}` : ''}</li>` : '').join('');
     return `<ol class="rw">${lines}${r.brew != null ? `<li><b>strained</b>after ${L.brew[r.brew]}</li>` : ''}</ol>`;
   }
-  const rcBack = r => `<div class="rc-bh"><span class="pz-k">How they make it</span><div class="rel-n">${esc(trunc(placeOf(r), 22))}</div></div>${recipeWords(r)}${A.strip(r)}`;
+  const rcBack = r => `<div class="rc-bh"><span class="pz-k">How they make it</span><div class="rel-n">“${esc(chaiName(r))}”, ${esc(trunc(placeOf(r), 18))}</div></div>${recipeWords(r)}${A.strip(r)}`;
   const RCARD = (r, why, no) => r ? { key: 'rc:' + r.id, cls: 'c-rc', pad0: true, attrs: () => ({ title: 'Tap to turn the card over' }),
     render: () => `<div class="rc-in"><div class="rc-f">${why ? `<div class="rc-why">${no ? `<span class="rc-no">${no}</span>` : ''}${why}</div>` : ''}${rcard(r, `<div class="rc-btns"><button class="rc-make" type="button" data-act="make" data-id="${r.id}">Make theirs <span aria-hidden="true">↗</span></button><span class="rc-turn" aria-hidden="true">↻ timeline</span></div>`)}</div>
       <div class="rc-b">${why ? `<div class="rc-why">${why}</div>` : ''}${rcBack(r)}<div class="rc-btns"><button class="rc-make" type="button" data-act="make" data-id="${r.id}">Make theirs <span aria-hidden="true">↗</span></button><span class="rc-turn" aria-hidden="true">↻ quote</span></div></div></div>` }
@@ -634,6 +651,9 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
         els.push(gText('vl' + i, cx, base + (small ? 16 : 20), L.vessel[v].replace('cup and saucer', 'cup & saucer'), { serif: true, fill: dim ? TXT : INK, size: small ? 11 : 15 }));
         els.push(gText('vn' + i, cx, base + (small ? 32 : 40), String(n[i]), { bold: true, fill: i === 0 && st !== 'v0' ? RED : TXT, size: small ? 12 : 15 }));
         els.push(gText('vp' + i, cx, y0 - 12, fill ? `${VM[v].pct}% black or a splash` : '', { fill: i === 0 ? RED : TXT, size: small ? 9 : 11.5, bold: i === 0 }));
+        const myV = meR().vessel === v && !NOYOU;
+        els.push({ type: 'text', id: 'vy' + i, silent: true, z: 6, x: cx, y: base - 12, style: { text: myV ? 'YOU' : '', fill: '#FBF2E4', backgroundColor: myV ? RED : 'transparent', padding: [4, 6, 2], borderRadius: 3, font: '700 11px Poppins, Arial', textAlign: 'center', textVerticalAlign: 'bottom' } });
+        if (myV) els.push({ type: 'polygon', id: 'vyo' + i, silent: true, z: 3, shape: { points: [[xAt(base, -1) - 5, base + 3], [xAt(base, 1) + 5, base + 3], [xAt(y0, 1) + 5, y0 - 4], [xAt(y0, -1) - 5, y0 - 4]] }, style: { fill: 'rgba(168,50,31,.08)', stroke: RED, lineWidth: 2, lineDash: [5, 4] } });
       });
       // a key for the bands
       if (fill) MCOL.forEach((c, k) => { els.push({ type: 'rect', id: 'vk' + k, silent: true, z: 5, shape: { x: 10 + k * (small ? 52 : 88), y: 4, width: 12, height: 12 }, style: { fill: c, stroke: INK, lineWidth: .5, opacity: 1 } }); els.push(gText('vkt' + k, 26 + k * (small ? 52 : 88), 10, MLAB[k], { align: 'left', fill: TXT, size: small ? 9 : 11.5 })); });
@@ -814,6 +834,7 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
   // on the chart's flat x/y plane, placed at their city's pixel position, so they glide straight from the crowd onto the map.
   if (window.INDIA_GEO) echarts.registerMap('india', window.INDIA_GEO);
   const CITYXY = { Bengaluru: [76.9, 12.6], Mumbai: [72.6, 19.3], 'Delhi NCR': [77.2, 28.6], Chennai: [81.6, 13.4], Hyderabad: [78.6, 17.0], Pune: [75.6, 19.6], Kolkata: [88.4, 22.6], 'Elsewhere in India': [79.6, 22.4], abroad: [97.8, 17.5], nosay: [97.8, 10.5] };
+  let NOYOU = false; // share images are drawn as a stranger would see them
   function mapOpt(ch, st, W, H) {
     const small = W < 420, pad = 10;
     const geo = { map: 'india', roam: false, silent: true, z: 0, aspectScale: .93, boundingCoords: [[66, 37.5], [101, 6.5]], layoutCenter: ['50%', '48%'], layoutSize: '96%',
@@ -828,7 +849,9 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
       const [cx, cy] = P(CITYXY[k]), cols = Math.ceil(Math.sqrt(list.length * 1.2)), rows = Math.ceil(list.length / cols);
       list.forEach((r, i) => data.push(cupPt(r, cx + (i % cols - (cols - 1) / 2) * d, cy + (Math.floor(i / cols) - (rows - 1) / 2) * d, d, { op: lit(k) ? 1 : .22 })));
       const lab = k === 'abroad' ? 'abroad' : k === 'nosay' ? 'didn’t say' : k === 'Elsewhere in India' ? 'elsewhere' : k;
-      els.push(gText('ml' + k.replace(/\W/g, ''), cx, cy + rows * d / 2 + 9, `${lab} ${list.length}`, { serif: true, fill: lit(k) && st !== 'map0' ? RED : INK, size: small ? 9.5 : 12.5 }));
+      const mineC = !NOYOU && typeof POLLV !== 'undefined' && POLLV.map != null && (CITYP[POLLV.map] === 'Abroad' ? k === 'abroad' : CITYP[POLLV.map] === k);
+      els.push(gText('ml' + k.replace(/\W/g, ''), cx, cy + rows * d / 2 + 9, `${mineC ? 'you · ' : ''}${lab} ${list.length}`, { serif: !mineC, bold: mineC, fill: mineC || (lit(k) && st !== 'map0') ? RED : INK, size: small ? 9.5 : 12.5 }));
+      if (mineC) els.push(gRect('mymap', cx - cols * d / 2 - 4, cy - rows * d / 2 - 4, cols * d + 8, rows * d + 8, { stroke: RED, lw: 2, dash: [4, 3], fill: 'rgba(168,50,31,.08)' }));
     });
     return { ...baseScatter(W, H), geo, series: [{ type: 'scatter', data }], graphic: setGraphics(ch, els) };
   }
@@ -925,7 +948,7 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
   const STEPLAY = { d: ['i c c c c c', 'i c c c c c', 'r c c c c c', 'r c c c c c'], m: ['c c c c', 'c c c c', 'c c c c', 'c c c c', 'i i r r', 'i i r r'] };
   const INTROLAY = { d: ['. t t t t .', '. t t t t .', '. t t t t .', '. t t t t .'], m: ['t t t t', 't t t t', 't t t t', 't t t t', 't t t t', 't t t t'] };
   const TCELL = (id, text, intro) => ({ key: 't:' + id, live: true, cls: intro ? 'c-intro' : 'c-tstep', render: () => `<div class="c-text ${intro ? 'c-introt' : 'c-step'}">${text()}</div>` });
-  const introHTML = o => `<div class="il-k"><span>${o.kicker}</span></div><h3 class="il-h">${o.head}</h3>${o.paras.map(t => /^\s*<(figure|ol)/.test(t) ? t : `<p>${t}</p>`).join('')}`;
+  const introHTML = o => `<div class="il-k"><span>${o.kicker}</span></div><h3 class="il-h">${o.head}</h3>${o.paras.map(t => /^\s*<(figure|ol|p|div)/.test(t) ? t : `<p>${t}</p>`).join('')}`;
   const quoteHTML = (r, why) => r && quoteOf(r) ? `<figure class="sq"><blockquote>“${esc(trunc(quoteOf(r), 140))}”</blockquote><figcaption>${why ? `<b>${why}.</b> ` : ''}A reader in ${esc(placeOf(r))}${r.reader.age ? ', ' + esc(r.reader.age) : ''}. <button type="button" class="sq-make" data-act="make" data-id="${r.id}">Make theirs ↗</button></figcaption></figure>` : '';
   // the first look at a chart: one sentence, nothing else
   const firstHTML = ch => () => `<p class="st-p st-one">${CH[ch].steps[0].h().split(/(?<=[.:!?])\s+(?=[A-Z<])/)[0]}</p>`;
@@ -950,17 +973,18 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
   S.jagGinger = cnt(r => r.sweet === 'jaggery' && r.extras.includes('ginger'));
   // Each card: under 25 words, numbers from the survey, no guessing at motives. Highlight only where it helps read the chart.
   const pc = n => Math.round(100 * n / N) + '%';
+  const FACT_ = t => `<span class="fct"><span class="fct-k">Fact</span>${t}</span>`; // a researched fact, marked as such
   const NARR = {
     'who:crowd': () => `Each glass is one reader, coloured by the chai they make, and no two are quite the same.`,
     'who:map0': () => `Place each glass in its city: <mark>every city spans pale to dark</mark>. Where you live doesn’t predict your cup.`,
-    'who:map': () => `That’s ${pc(S.bigThree)} of readers, yet each city’s pile still runs from milky to near-black.`,
+    'who:map': () => `That’s ${pc(S.bigThree)} of readers, yet each city’s pile runs from milky to near-black. ${FACT_('India drinks about 80% of the tea it grows.')}`,
     'who:abroad': () => `About ${pc(S.abroad)} of readers, scattered from Los Angeles to Singapore.`,
     'pyramid:age0': () => `The same readers by age, with women on the left and men on the right.`,
     'pyramid:age': () => `That’s ${pc(S.midAge)} of readers. <mark>The thick middle rows</mark> show it.`,
     'pour:all': () => `Each glass is coloured by its recipe, so milk, leaf and time decide the shade, not the cook.`,
-    'pour:milk0': () => `Sorted by milk, <mark>black on the left, all milk on the right</mark>. Half milk is the biggest single pile.`,
+    'pour:milk0': () => `Sorted by milk, <mark>black on the left, all milk on the right</mark>. ${FACT_('Milk does more than colour: its casein binds tea’s tannins, softening the bitterness.')}`,
     'pour:water': () => `That’s ${pc(S.mostlyWater)}. <mark>The thick, milky cup we imagine is the minority</mark> at home.`,
-    'pour:ends': () => `Just ${pc(S.milk[5])}. The tapri recipe rarely makes it into home kitchens.`,
+    'pour:ends': () => `Just ${pc(S.milk[5])}. ${FACT_('Milky, sweet chai was spread by railway vendors in the early 1900s, stretching each cup with less leaf.')}`,
     'sequence:all': () => `Each glass sits at the moment that ingredient goes into the pan. Watch the moments one by one.`,
     'sequence:t0': () => `${pc(S.teaAt[0])} start everything cold and let the heat do the work.`,
     'sequence:t1': () => `Another ${pc(S.teaAt[1])}, and most spices join them here.`,
@@ -968,19 +992,19 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
     'sequence:t3': () => `Only ${pc(S.teaAt[3])}. This is closer to how tea is brewed in a pot.`,
     'sequence:t4': () => `A small group finishes at the table, where everyone can adjust their own cup.`,
     'sequence:boils0': () => `Once the milk is in, how many times does the pan rise? Kitchens split sharply here.`,
-    'sequence:boils': () => `More than a third. <mark>Every extra boil darkens and thickens the cup</mark>.`,
+    'sequence:boils': () => `More than a third. ${FACT_('Every boil evaporates water and concentrates the tea, so the cup turns darker and thicker.')}`,
     'sequence:once': () => `Almost as many as the long boilers. Two opposite habits, nearly evenly split.`,
     'flow:flow0': () => `Each band links when the leaf goes in (left) to when the milk does (right).`,
     'flow:flow': () => `<mark>In red</mark>: barely one kitchen in seven brews its leaf in milk.`,
     'flow:teafirst': () => `Colour the water first, then add milk. It only just beats adding both at once (${S.together}).`,
     'leaf:crowd': () => `Everyone together again, before sorting by how strong they make it.`,
     'leaf:all': () => `Across: tea per cup. Down: how long it stays in. <mark>Strength is two decisions, not one</mark>.`,
-    'leaf:top': () => `Just ${pc(S.topCell[1])} of readers. <mark>Even the “standard” cup is a minority</mark>.`,
+    'leaf:top': () => `Just ${pc(S.topCell[1])} of readers. ${FACT_(`${pc(S.ctc)} use CTC, a leaf first machine-made in Assam in 1930 to brew strong in a minute or two.`)}`,
     'leaf:kadak': () => `Under ${pc(S.kadak + 1)}. Truly kadak chai is rarer than its reputation.`,
     'leaf:quick': () => `About one in seven, and <b>${S.colour}</b> more go purely by the colour.`,
     'larder:count': () => `Every dot is one reader’s spice, with one row for each spice.`,
-    'larder:stage': () => `Like most spices, <mark>ginger goes in early</mark>, giving it time to steep.`,
-    'larder:late': () => `Out of ${S.sp.cardamom} cardamom users. A habit rare enough to be a signature.`,
+    'larder:stage': () => `Like most spices, <mark>ginger goes in early</mark>. ${FACT_('Long heat turns its sharp gingerol into milder zingerone: early ginger is rounder, late ginger bites.')}`,
+    'larder:late': () => `Out of ${S.sp.cardamom} cardamom users. ${FACT_('Heat breaks down cardamom’s main aroma compound, so adding it last keeps the fragrance.')}`,
     'pairs:web0': () => `Each line joins two ingredients used in the same pan; thicker lines mean more kitchens.`,
     'pairs:web': () => `<mark>Every thick line runs to ginger</mark>. Most spice blends are built around it.`,
     'pairs:herb': () => `Herbs don’t replace spice: <mark>${S.herbGinger} of them add ginger too</mark>, averaging ${S.herbAvg} spices per pan.`,
@@ -989,10 +1013,203 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
     'cup:sweet': () => `Almost a third. <mark>No sugar beats every single sweetener</mark>.`,
     'cup:where': () => `The other ${S.sweetPan} cook it into the pan, so everyone gets the same cup.`,
     'vessels:v0': () => `What it’s poured into, with each vessel sized by how many drink from it.`,
-    'vessels:vessel': () => `That’s ${pc(S.vessel.mug)}, just ahead of the cup and saucer at ${pc(S.vessel.cup)}.`,
+    'vessels:vessel': () => `That’s ${pc(S.vessel.mug)}, just ahead of the cup and saucer. Only ${S.vessel.glass} use a cutting glass. ${FACT_('It’s named for Mumbai’s half serving, a cup “cut” in two.')}`,
     'vessels:vmilk': () => `<mark>The mug holds the lightest tea</mark>. Steel tumblers almost always hold milky chai.`
   };
   Object.entries(NARR).forEach(([k, f]) => { const [ch, st] = k.split(':'); const s = CH[ch] && CH[ch].steps.find(x => x.st === st); if (s) s.h = f; });
+  // ---------- The spice box, told from the top down: four pillars, then the long tail, then what goes together ----------
+  const PIL = ['ginger', 'cardamom', 'clove', 'cinnamon'], TAIL = ['pepper', 'tulsi', 'masala', 'mint', 'lemongrass'], RARE = ['saunf', 'lemon', 'saffron'];
+  const setOf = r => r.extras.slice().sort().join('+') || 'none';
+  const COMBOS = Object.entries(RS.reduce((m, r) => (m[setOf(r)] = (m[setOf(r)] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 5).map(e => e[0]);
+  const comboLab = k => { if (k === 'none') return 'no spice'; const p = k.split('+'); if (p.length === 1) return `${L.spice[p[0]]}\nalone`;
+    if (PIL.every(s => p.includes(s))) { const x = p.filter(s => !PIL.includes(s)); return `all four${x.length ? '\n+ ' + x.map(s => L.spice[s].replace('black ', '')).join(', ') : ''}`; }
+    const g = p.includes('ginger') ? ['ginger'].concat(p.filter(s => s !== 'ginger')) : p; return g.length === 2 ? `${L.spice[g[0]]}\n+ ${L.spice[g[1]]}` : `${g.slice(0, -1).map(s => L.spice[s]).join(', ')}\n+ ${L.spice[g[g.length - 1]]}`; };
+  S.combo = COMBOS.map(k => [k, cnt(r => setOf(r) === k)]);
+  const SPICON = {}, SPIC = s => SPICON[s] || (SPICON[s] = svgURI(ICON(s)));
+  CH.pillars = {
+    noDim: true, label: 'one piece of spice for every reader who uses it',
+    you: R => R.extras.length ? `Your spices: <b>${R.extras.map(s => L.spice[s]).join(', ')}</b>.` : '',
+    steps: [
+      { st: 'pillars', h: () => `<mark>Ginger, cardamom, clove and cinnamon</mark> are the four pillars that hold up most pans of chai.`,
+        why: ['Uses all four pillars'], picks: [r => PIL.every(s => r.extras.includes(s))] },
+      { st: 'ginger', k: () => kfig(S.sp.ginger, 'add ginger'), h: () => `That’s ${pc(S.sp.ginger)}. <mark>Ginger is the one spice most kitchens share</mark>; cardamom follows at ${pc(S.sp.cardamom)}.`,
+        why: ['Ginger, and nothing else'], picks: [r => r.extras.length === 1 && r.extras[0] === 'ginger' && goodQ(r)] },
+      { st: 'tail', h: () => `Below the pillars runs a long tail: <mark>pepper, tulsi, masala, mint</mark>, down to saffron in just ${S.sp.saffron} pans.`,
+        why: ['Adds tulsi or chai masala'], picks: [r => r.extras.includes('tulsi') || r.extras.includes('masala')] },
+      { st: 'combo', k: () => kfig(S.combo.find(c => c[0] === 'ginger') ? S.combo.find(c => c[0] === 'ginger')[1] : 0, 'use ginger alone'), h: () => `The most common spiced pan. Next comes <mark>ginger with cardamom</mark>, and ${S.plain} readers add no spice at all.`,
+        why: ['Ginger and cardamom, nothing more'], picks: [r => setOf(r) === 'cardamom+ginger'] }
+    ],
+    draw(ch, st, W, H) {
+      const R = meR(), byS = s => RS.filter(r => r.extras.includes(s)).map(r => ({ ...r, id: r.id + ':' + s, _sp: s })).sort((a, b) => (a.shade ? a.shade.t : 0) - (b.shade ? b.shade.t : 0));
+      const withYou = (g, has) => has ? g.concat([{ ...R, id: 'you', milk: R.milk == null ? 3 : R.milk }]) : g;
+      if (st === 'combo') {
+        const g = COMBOS.map(k => withYou(RS.filter(r => setOf(r) === k).map(r => ({ ...r, id: r.id + ':c' })), R.extras.length && setOf(R) === k));
+        return columns(ch, W, H, g, COMBOS.map(comboLab), { focus: [COMBOS.indexOf('ginger'), COMBOS.indexOf('cardamom+ginger')].filter(i => i >= 0), dimCol: k => COMBOS[k] === 'none', bottom: 56 });
+      }
+      const cols = st === 'tail' ? PIL.concat(TAIL, ['rare']) : PIL;
+      const g = cols.map(s => s === 'rare' ? withYou(RS.filter(r => RARE.some(x => r.extras.includes(x))).map(r => ({ ...r, id: r.id + ':rare', _sp: RARE.find(x => r.extras.includes(x)) })), RARE.some(x => R.extras.includes(x))) : withYou(byS(s), R.extras.includes(s)));
+      const lab = W < 520 && st === 'tail' ? cols.map((s, k) => (k % 2 ? '\n' : '') + (s === 'rare' ? 'others' : L.spice[s].replace('black ', '').replace('chai ', ''))) : cols.map(s => s === 'rare' ? 'saunf, lemon,\nsaffron' : L.spice[s]);
+      const opt = columns(ch, W, H, g, lab, { focus: st === 'ginger' ? [0] : st === 'tail' ? [4, 5, 6, 7] : [], dimCol: st === 'ginger' ? k => k > 0 : st === 'tail' ? k => k < 4 : null, bottom: st === 'tail' ? 56 : 44 });
+      // each mark is the spice itself, not a glass: one piece of ginger per ginger kitchen
+      opt.series[0].data.forEach(d => { const sp = d.R && d.R._sp; if (!sp) return; const z = Math.max(...[].concat(d.symbolSize)) * .95;
+        d.symbol = SPIC(sp); d.symbolSize = [z, z]; d.itemStyle = { ...d.itemStyle, borderWidth: 0 }; });
+      return opt;
+    }
+  };
+  HEADS.pillars = HEADS.larder;
+  SIDE.pillars = [['ginger', 'ginger', S.sp.ginger, 'use ginger'], ['plain', 'nospice', S.plain, 'add no spice at all']];
+  Object.assign(SIM, {
+    'pillars:pillars': () => panArt(mk({ extras: PIL, st: { ginger: 1, cardamom: 1, clove: 1, cinnamon: 1 } }), 1, 'The four pillars: ginger, cardamom, clove, cinnamon'),
+    'pillars:ginger': () => panArt(mk({ extras: ['ginger'], st: { ginger: 0 } }), 1, 'Ginger, in two kitchens out of three'),
+    'pillars:tail': () => panArt(mk({ extras: ['tulsi', 'pepper', 'mint'], st: { tulsi: 1, pepper: 1, mint: 1 } }), 1, 'The long tail: tulsi, pepper, mint'),
+    'pillars:combo': () => panArt(mk({ extras: ['ginger', 'cardamom'], st: { ginger: 1, cardamom: 1 } }), 2, 'Ginger with cardamom')
+  });
+  // Shorter chapters: the order of leaf and milk is gone, and strength and timing keep only their clearest steps.
+  CH.sequence.steps = CH.sequence.steps.filter(s => ['all', 't2', 'boils0', 'boils', 'once'].includes(s.st));
+  CH.leaf.steps = CH.leaf.steps.filter(s => ['all', 'top', 'kadak'].includes(s.st));
+  CH.larder.steps = CH.larder.steps.filter(s => ['stage', 'late'].includes(s.st)); CH.larder.noDim = true;
+
+  // ---------- The ending, as one chart: every ingredient at every moment, read top to bottom like a recipe ----------
+  const RROWS = [
+    ['water', 'water', (r, t) => t === 0 && r.milk < 5],
+    ['ginger', 'ginger', (r, t) => r.extras.includes('ginger') && r.st.ginger === t],
+    ['leaf', 'tea leaf', (r, t) => r.st.tea === t],
+    ['milk', 'milk', (r, t) => r.milk > 0 && r.st.milk === t],
+    ['cardamom', 'cardamom', (r, t) => r.extras.includes('cardamom') && r.st.cardamom === t],
+    ['sugar', 'sugar', (r, t) => (r.sweet || '').startsWith('sugar') && r.st.sweet === t]
+  ];
+  const RC = RROWS.map(([, , f]) => [0, 1, 2, 3, 4].map(t => cnt(r => f(r, t))));
+  const RTOP = RC.map(row => row.indexOf(Math.max(...row)));
+  const rshare = i => Math.round(100 * RC[i][RTOP[i]] / Math.max(1, RC[i].reduce((a, b) => a + b, 0)));
+  S.leafBoil = rshare(2);
+  CH.recipe = {
+    noDim: true, label: 'circles sized by how many kitchens add that ingredient at that moment',
+    you: () => '',
+    steps: [
+      { st: 'map', h: () => `Every ingredient, at every moment. <mark>The bigger the circle, the more kitchens</mark> add it then.`,
+        why: ['Writes their recipe moment by moment'], picks: [r => goodQ(r) && r.extras.length >= 2] },
+      { st: 'common', h: () => `Follow the biggest circles down and you have <mark>the most common chai</mark>: water in a cold pan, ginger and cardamom as it heats, leaf and milk at the boil, sugar in the cup.`,
+        why: ['Makes the most common chai'], picks: [r => r.st.tea === 2 && r.st.milk === 2 && r.extras.includes('ginger')] },
+      { st: 'split', h: () => `But no moment wins outright. Even <mark>the boil gets only ${S.leafBoil}% of leaf kitchens</mark>. Every row is a choice your pan makes differently.`,
+        why: ['Adds the leaf in a cold pan'], picks: [r => r.st.tea === 0 && goodQ(r)] }
+    ],
+    draw(ch, st, W, H) {
+      const small = W < 520, left = small ? 64 : 120, top = 40, bottom = 14, cw = (W - left - 8) / 5, rh = (H - top - bottom) / RROWS.length;
+      const mx = Math.max(...RC.slice(1).flat()), maxD = Math.min(cw, rh) * .92, data = [], els = [];
+      L.stage.forEach((s, t) => els.push(gText('rcol' + t, left + cw * (t + .5), 16, s, { serif: true, fill: INK, size: small ? 10.5 : 14 })));
+      RROWS.forEach(([k, lab], i) => {
+        const y = top + rh * (i + .5);
+        els.push(gText('rrow' + i, left - 10, y, lab, { serif: true, fill: INK, size: small ? 11 : 15, align: 'right' }));
+        els.push(gRect('rline' + i, left, y, W - left - 8, .5, { stroke: GRID }));
+        RC[i].forEach((n, t) => {
+          if (!n) return;
+          const tot = RC[i].reduce((a, b) => a + b, 0), isTop = t === RTOP[i], hot = st === 'map' || isTop, d = Math.max(6, maxD * Math.sqrt(Math.min(n, mx) / mx));
+          const txt = st === 'split' ? `${Math.round(100 * n / tot)}%` : String(n), inside = d > (small ? 30 : 38);
+          data.push({ name: `r${i}-${t}`, value: [left + cw * (t + .5), y], symbol: 'circle', symbolSize: d,
+            itemStyle: { color: isTop && st !== 'map' ? RED : '#8A4D27', opacity: hot ? (st === 'map' ? .75 : .95) : st === 'split' ? .32 : .18, borderColor: INK, borderWidth: .6 },
+            label: { show: hot || st === 'split', position: inside ? 'inside' : 'right', distance: 4, formatter: txt, color: inside ? '#FBF2E4' : (isTop && st !== 'map' ? RED : TXT), fontFamily: 'Poppins, Arial', fontWeight: 700, fontSize: small ? 10 : 12 } });
+        });
+      });
+      // the path of the most common chai, drawn through the winning moment of each row
+      const pts = RTOP.map((t, i) => [left + cw * (t + .5), top + rh * (i + .5)]);
+      els.push({ type: 'polyline', id: 'rpath', silent: true, z: 1, shape: { points: pts }, style: { stroke: RED, lineWidth: 2, lineDash: [6, 5], fill: null, opacity: st === 'map' ? 0 : .7 }, transition: ['style'] });
+      // your own pan, if you've made one
+      const R = meR(), mine = [['water', R.milk != null && R.milk < 5 ? 0 : null], ['ginger', R.extras.includes('ginger') ? R.st.ginger : null], ['leaf', R.teas.length ? R.st.tea : null], ['milk', R.milk > 0 ? R.st.milk : null], ['cardamom', R.extras.includes('cardamom') ? R.st.cardamom : null], ['sugar', (R.sweet || '').startsWith('sugar') ? R.st.sweet : null]];
+      mine.forEach(([k, t], i) => { if (t != null) data.push({ name: 'you-' + k, value: [left + cw * (t + .5), top + rh * (i + .5)], symbol: 'circle', symbolSize: 14, itemStyle: { color: 'rgba(0,0,0,0)', borderColor: RED, borderWidth: 2.5 }, z: 12 }); });
+      return { ...baseScatter(W, H), series: [{ type: 'scatter', data }], graphic: setGraphics(ch, els) };
+    }
+  };
+  HEADS.recipe = 'VI · Put it together';
+  SIDE.recipe = [['ginger', 'ginger', S.sp.ginger, 'use ginger'], ['plain', 'nospice', S.plain, 'add no spice at all']];
+  Object.assign(SIM, {
+    'recipe:map': () => panArt(mk({ extras: ['ginger'], st: { ginger: 1 } }), 1, 'Every moment of the pan, from cold to cup'),
+    'recipe:common': () => panArt(mk({ extras: ['ginger'], st: { ginger: 1, tea: 2, milk: 2 } }), 2, 'The most common chai, at the boil'),
+    'recipe:split': () => glassArt(mk({ extras: ['ginger', 'cardamom'], st: { ginger: 0, cardamom: 3 } }), 'Same ingredients, different moments')
+  });
+
+  // ---------- Shareable findings: one claim per chart, each with its own link and image ----------
+  // `sc` is the chapter and step the link opens at; `claim` is the headline printed on the image and sent as the message.
+  const stepIx = (ch, st) => CH[ch].steps.findIndex(x => x.st === st);
+  const pairName = () => S.pairTop[0].split('+').map(s => L.spice[s]).join(' and ');
+  const SHARES = {
+    unique: { ch: 'pour', st: 'all', claim: () => `${S.uniqueSeq} of ${N} chai recipes are one of a kind`, hook: 'Think yours is the normal way? Almost nobody makes it like you.' },
+    map: { ch: 'who', st: 'map', claim: () => `Every city makes every shade of chai`, hook: 'Where you live doesn’t predict your cup. How does your city make it?' },
+    milk: { ch: 'pour', st: 'water', claim: () => `${pc(S.mostlyWater)} of readers make a chai that is mostly water`, hook: 'The thick, milky cup is the minority at home. Where does yours sit?' },
+    boils: { ch: 'sequence', st: 'boils', claim: () => `${pc(S.multi)} of readers boil their chai three times or more, or simmer it`, hook: `Another ${pc(S.boil[1])} stop at the first rise. Where do you fall?` },
+    strength: { ch: 'leaf', st: 'top', claim: () => `Only ${pc(S.topCell[1])} of readers make the “standard” cup`, hook: 'Strength is two decisions: how much leaf, and how long. What are yours?' },
+    ginger: { ch: 'larder', st: 'stage', claim: () => `${pc(S.sp.ginger)} of readers put ginger in their chai`, hook: 'And most of them add it early. Is yours in the ginger camp?' },
+    pillars: { ch: 'pillars', st: 'pillars', claim: () => `Four spices hold up India’s chai: ginger, cardamom, clove and cinnamon`, hook: `Ginger alone is in ${pc(S.sp.ginger)} of pans. What goes in yours?` },
+    sugar: { ch: 'cup', st: 'sweet', claim: () => `${pc(S.noSugar)} of readers take no sugar, more than any single sweetener`, hook: 'Is yours sweet?' },
+    vessel: { ch: 'vessels', st: 'vessel', claim: () => `The mug (${pc(S.vessel.mug)}) only just beats the cup and saucer (${pc(S.vessel.cup)})`, hook: 'What do you drink yours from?' }
+  };
+  // The strangest kitchens: stat cards that work on their own.
+  const mostSp = RS.reduce((a, r) => r.extras.length > a.extras.length ? r : a, RS[0]);
+  const ODD = {
+    'odd-spices': { big: () => mostSp.extras.length, claim: () => `One reader puts ${mostSp.extras.length} spices in a single pan`, line: () => `spices in one reader’s pan: ${mostSp.extras.map(s => L.spice[s]).join(', ')}.`, hook: 'How many go into yours?' },
+    'odd-noboil': { big: () => S.boil[0], claim: () => `${S.boil[0]} readers add milk but never let it boil`, line: () => `readers add milk but never let it boil. Not even once.`, hook: 'How many times does yours rise?' },
+    'odd-saffron': { big: () => S.sp.saffron, claim: () => `Only ${S.sp.saffron} of ${N} readers put saffron in their chai`, line: () => `readers add saffron. One steeps it in lukewarm water before the tea is even on.`, hook: 'What’s the odd thing in yours?' },
+    'odd-salt': { big: () => window.CHAI.filter(x => /salt/i.test(x.other || '')).length, claim: () => `One reader adds a pinch of salt to their chai`, line: () => `reader adds a pinch of salt. Others wrote in bay leaf and licorice.`, hook: 'What’s the odd thing in yours?' }
+  };
+  Object.assign(SHARES, ODD);
+  const oddHTML = () => `<div class="odd"><div class="odd-k">The odd ones out</div><div class="odd-g">${Object.entries(ODD).map(([id, o]) =>
+    `<figure class="odd-c"><div class="odd-n">${o.big()}</div><p>${o.line()}</p>${shBtn(id, 'Share this')}</figure>`).join('')}</div></div>`;
+  const SHARE_IC = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5M5 12v7.5h14V12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const shBtn = (id, lab = 'Share this chart') => `<button type="button" class="sc-sh" data-act="share" data-s="${id}" aria-label="${lab}" title="${lab}">${SHARE_IC}</button>`;
+  const nudge = (text, id, act) => `<p class="nudge">${text} <button type="button" class="nudge-b" data-act="share" data-s="${id}">${act} ${SHARE_IC}</button></p>`;
+
+  // ---------- One-tap polls: answer one question, see where you sit among the readers ----------
+  const POLLV = {}; let pollFresh = null;
+  const CITYP = ['Bengaluru', 'Mumbai', 'Delhi NCR', 'Chennai', 'Hyderabad', 'Elsewhere in India', 'Abroad'];
+  const setMilk = m => { ME.water = m < 5; ME.milkOn = m > 0; ME.milkShare = m > 0 ? m : null; if (m > 0 && ME.milkIn == null) ME.milkIn = 2; ME.touched.milk = true; };
+  const setSweet = v => { ME.touched.sweet = true; if (v === 'none') ME.sweet = null; else if (v === 'sugar') { ME.sweet = 'sugar'; } else ME.sweet = v; if (ME.sweet && ME.sweetIn == null) ME.sweetIn = 4; };
+  const PO = (l, f, who, set) => ({ l, f, who, set });
+  // a poll that needs milk or a leaf to place you on the chart quietly assumes one; the builder still asks
+  const needMilk = () => { if (!ME.milkOn) { ME.water = true; ME.milkOn = true; ME.milkShare = 3; if (ME.milkIn == null) ME.milkIn = 2; } };
+  const needLeaf = () => { if (!ME.teas.length) ME.teas = ['ctc']; if (ME.teaIn == null) ME.teaIn = 2; };
+  const POLLS = {
+    'who:map': { id: 'map', q: 'Where do you make yours?', base: r => !!r.reader.city, opts: CITYP.map(c => PO(c === 'Elsewhere in India' ? 'Elsewhere' : c, r => r.reader.city === c, `make it ${c === 'Abroad' ? 'abroad' : c === 'Elsewhere in India' ? 'elsewhere in India' : 'in ' + c}`)) },
+    'pour:water': { id: 'milk', q: 'How much milk goes into yours?', base: r => r.milk != null,
+      opts: [['Black', 'take it black'], ['A splash', 'add just a splash'], ['A quarter', 'make it a quarter milk'], ['Half', 'go half and half'], ['Mostly milk', 'make it mostly milk'], ['All milk', 'use only milk']].map(([l, w], v) => PO(l, r => r.milk === v, w, () => setMilk(v))) },
+    'sequence:boils': { id: 'boils', q: 'Once the milk is in, how many times does it rise?', of: 'readers who add milk', base: r => r.milk > 0 && r.boils != null,
+      opts: [['Never', 'never let it boil'], ['Once', 'stop at the first boil'], ['Twice', 'let it rise twice'], ['3 or more', 'let it rise three times or more'], ['I simmer it', 'let it simmer']].map(([l, w], v) => PO(l, r => r.boils === v, w, () => { needMilk(); ME.boils = v; ME.touched.boils = true; })) },
+    'flow:flow': { id: 'order', q: 'Which goes in first at yours?', of: 'readers who add milk', base: r => r.milk > 0 && r.st.milk != null && r.st.tea != null,
+      opts: [PO('The leaf', r => r.st.tea < r.st.milk, 'put the leaf in first', () => { needMilk(); needLeaf(); ME.teaIn = 1; ME.milkIn = 2; }), PO('The milk', r => r.st.milk < r.st.tea, 'put the milk in first', () => { needMilk(); needLeaf(); ME.milkIn = 1; ME.teaIn = 2; }), PO('Both together', r => r.st.milk === r.st.tea, 'add both at once', () => { needMilk(); needLeaf(); ME.milkIn = 2; ME.teaIn = 2; })] },
+    'leaf:amt': { id: 'amt', share: 'strength', q: 'How much tea goes in, per cup?', base: r => r.amt != null && r.amt < 5,
+      opts: [0, 1, 2, 3, 4].map(v => PO(L.amt[v], r => r.amt === v, `use ${L.amt[v]} a cup`, () => { needLeaf(); ME.amt = v; ME.touched.amt = true; })) },
+    'leaf:brew': { id: 'brew', share: 'strength', q: 'And how long before you strain it?', base: r => r.brew != null,
+      opts: [0, 1, 2, 3, 4, 5].map(v => PO(L.brew[v], r => r.brew === v, v === 5 ? 'strain it by the colour' : `strain it after ${L.brew[v]}`, () => { needLeaf(); ME.brew = v; ME.touched.brew = true; })) },
+    'larder:stage': { id: 'ginger', q: 'Does ginger go in yours?', base: () => true,
+      opts: [PO('Yes', r => r.extras.includes('ginger'), 'put ginger in', () => { if (!ME.extras.includes('ginger')) toggle('ginger'); ME.touched.spice = true; }), PO('No', r => !r.extras.includes('ginger'), 'leave ginger out', () => { if (ME.extras.includes('ginger')) toggle('ginger'); ME.touched.spice = true; })] },
+    'cup:sweet': { id: 'sugar', q: 'What sweetens yours?', base: r => !!r.sweet,
+      opts: [PO('Nothing', r => r.sweet === 'none', 'take no sugar', () => setSweet('none')), PO('Sugar', r => r.sweet.startsWith('sugar'), 'use sugar', () => setSweet('sugar')), PO('Jaggery', r => r.sweet === 'jaggery', 'use jaggery', () => setSweet('jaggery')), PO('Honey', r => r.sweet === 'honey', 'use honey', () => setSweet('honey')), PO('Sugar-free', r => r.sweet === 'free', 'use a sugar-free sweetener', () => setSweet('free'))] },
+    'vessels:vessel': { id: 'vessel', q: 'What do you drink it from?', base: r => !!r.vessel,
+      opts: V_ORDER.map(v => PO(L.vessel[v].replace(/^\w/, c => c.toUpperCase()).replace('Cup and saucer', 'Cup & saucer'), r => r.vessel === v, v === 'mug' ? 'drink from a mug' : v === 'cup' ? 'use a cup and saucer' : v === 'glass' ? 'drink from a glass' : 'use a steel tumbler', () => { ME.vessel = v; ME.touched.vessel = true; })) }
+  };
+  const pollPct = (P, k) => { const b = RS.filter(P.base); return Math.round(100 * b.filter(P.opts[k].f).length / Math.max(1, b.length)); };
+  // a city's own portrait, for the map poll
+  function cityLine(c) {
+    const g = RS.filter(r => r.reader.city === c), n = g.length; if (!n) return '';
+    const p = f => Math.round(100 * g.filter(f).length / n), m = +modeOf(g.map(r => r.milk))[0];
+    return `${n} readers, most often ${m === 5 ? 'all milk' : m === 0 ? 'black' : L.milk[m] + ' milk'}. ${p(r => r.extras.includes('ginger'))}% add ginger, ${p(r => r.sweet === 'none')}% skip sugar, and ${g.filter(r => sigs[sig(r)] === 1).length} of ${n} recipes are one of a kind.`;
+  }
+  const pollResult = P => { const k = POLLV[P.id]; if (k == null) return null; const op = P.opts[k], n = pollPct(P, k);
+    if (P.id === 'map') { const c = CITYP[k]; return { html: `<span class="pr-h">How ${c === 'Elsewhere in India' ? 'the rest of India' : c === 'Abroad' ? 'readers abroad' : c} make${c === 'Abroad' ? '' : 's'} chai:</span> ${cityLine(c)}`, claim: `How ${c === 'Elsewhere in India' ? 'the rest of India' : c === 'Abroad' ? 'Indians abroad' : c} make${c === 'Abroad' || c === 'Elsewhere in India' ? '' : 's'} chai` }; }
+    return { html: n ? `You’re with the <span class="pr-n">${n}%</span> of ${P.of || 'readers'} who ${op.who}.` : `Nobody else here does that. That’s one of a kind.`,
+      claim: n ? `I’m in the ${n}% of ${P.of || 'readers'} who ${op.who}` : `Not one of ${N} readers ${op.who.replace(/^(\w+)/, '$1s')} like I do` }; };
+  function pollHTML(P) {
+    const k = POLLV[P.id], voted = k != null, res = pollResult(P);
+    return `<div class="poll${voted ? ' voted' : ''}${pollFresh === P.id ? ' fresh' : ''}" data-p="${P.id}"><div class="pq">${P.q}</div><div class="po">${P.opts.map((op, i) => { const n = pollPct(P, i);
+      return `<button type="button" class="pb${k === i ? ' on' : ''}" data-act="poll" data-p="${P.id}" data-k="${i}" aria-pressed="${k === i}">${voted ? `<span class="pf" style="width:${n}%"></span>` : ''}<span class="pl">${op.l}</span>${voted ? `<span class="pp">${n}%</span>` : ''}</button>`; }).join('')}</div>
+      ${res ? `<p class="pr">${res.html}${P.id === 'map' ? '' : ` <span class="pr-hint">Scroll on to find your glass, marked “you”, in the chart.</span>`}<span class="pr-a"><button type="button" class="sh-b" data-act="share" data-s="${P.share || P.id}" data-poll="${P.id}">${SHARE_IC}Share yours</button><button type="button" class="lnk" data-act="make">Build your whole cup →</button></span></p>` : ''}</div>`;
+  }
+  const pollById = id => Object.values(POLLS).find(P => P.id === id);
+  // polls sit in the chapter intros, as the chapter's own question; answer, then scroll on to find yourself in the chart
+  const pollSlot = id => `<div class="poll-slot" data-p="${id}">${pollHTML(pollById(id))}</div>`;
+  const paintPolls = () => document.querySelectorAll('.poll-slot').forEach(el => { el.innerHTML = pollHTML(pollById(el.dataset.p)); });
+  // a step card: its words, its poll if it has one, and a quiet share button if the step has a claim
+  const shareOf = i => { const c = SC[i].chart; if (!c) return null; const st = CH[c.ch].steps[c.step].st; return Object.keys(SHARES).find(id => SHARES[id].ch === c.ch && SHARES[id].st === st) || null; };
+  const pollOf = i => { const c = SC[i].chart; return c ? POLLS[c.ch + ':' + CH[c.ch].steps[c.step].st] : null; };
+  const cardHTML = i => { const sh = shareOf(i); return SC[i].text() + (sh ? `<div class="sc-foot"><button type="button" class="sh-b" data-act="share" data-s="${sh}">${SHARE_IC}Share this finding</button></div>` : ''); };
 
   function group(ch, intro) {
     const [a, b] = SIDE[ch], facts = { f: FACT(a[0], a[1], a[2], a[3]), g: FACT(b[0], b[1], b[2], b[3]) };
@@ -1052,38 +1269,45 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
   group('who', { id: 'who', kicker: 'The question', head: 'Does anyone make chai like you?', paras: [
     `Every kitchen thinks its chai is just chai: the normal way, the way everyone makes it. Everyone at home has an opinion, and everyone at home is wrong, obviously.`,
     `So we asked <b>${N}</b> readers of First Principles exactly how they make theirs, and then put one simple question to their answers: <i>how many people make it the same way?</i>`,
-    `We’ll find out one question at a time. First, who they are.`] });
+    `We’ll find out one question at a time. First, who they are.`,
+    pollSlot('map')] });
   group('pyramid');
   group('pour', { id: 'pour', kicker: 'Question 1', head: 'How much milk?', paras: [
     `Here is everyone, in one crowd. Each glass is a reader, coloured by the chai they make. Start sorting, and the crowd will split.`,
     crowdHTML(0),
-    `The first question sounds harmless. But milk sets the colour of the cup, and it is the first place kitchens part ways.`] });
+    `The first question sounds harmless. But milk sets the colour of the cup, and it is the first place kitchens part ways.`,
+    pollSlot('milk')] });
   group('sequence', { id: 'boil', kicker: 'Questions 2 to 4', head: 'When does everything go in?', paras: [
     `One question in, the crowd has split into piles of people who pour the same. Nobody is alone yet.`,
     crowdHTML(1),
-    `Now the order of things: when the leaf goes in, when the milk does, and how many times it is allowed to rise. These are the questions that start fights at home.`,
-    askHTML(1, 4)] });
-  group('flow');
+    `Now the boil: when the leaf goes in, and how many times the pan is allowed to rise. This is the question that starts fights at home.`,
+    pollSlot('boils'), nudge('Who at home would disagree?', 'boils', 'Send them this')] });
   group('leaf', { id: 'leaf', kicker: 'Questions 5 and 6', head: 'How strong?', paras: [
     `Four questions in, and the piles have shattered. The biggest group that makes chai the same way is now <b>${CROWD[4].biggest}</b> people.`,
     crowdHTML(4),
     `Next: how much tea, and how long it brews. A heaped spoon for a minute and a level one for five can end up in the same place, or nowhere near it.`,
-    askHTML(4, 6)] });
-  group('larder', { id: 'spice', kicker: 'Question 7', head: 'Which spices?', paras: [
+    pollSlot('amt'), pollSlot('brew')] });
+  group('pillars', { id: 'spice', kicker: 'Question 7', head: 'Which spices?', paras: [
     `After six questions, <b>${CROWD[6].alone}</b> of ${N} readers are already alone. Their chai matches nobody else’s.`,
     crowdHTML(6),
-    `The spice box is where the last few crowds break up: ginger pounded rather than grated, cardamom held back until the flame is off, tulsi from the balcony.`] });
-  group('pairs');
+    `The spice box is where the last few crowds break up: ginger pounded rather than grated, cardamom held back until the flame is off, tulsi from the balcony.`,
+    pollSlot('ginger')] });
+  group('larder');
   group('cup', { id: 'table', kicker: 'Questions 8 and 9', head: 'And at the table?', paras: [
     `Seven questions. Only <b>${CROWD[7].piles.length}</b> piles are left, none bigger than <b>${CROWD[7].biggest}</b>.`,
     crowdHTML(7),
     `Two small questions remain: what sweetens it, and what it’s poured into.`,
-    askHTML(7, 9)] });
+    pollSlot('sugar'), pollSlot('vessel')] });
   group('vessels');
+  group('recipe', { id: 'recipe', kicker: 'Putting it together', head: 'The most common chai, moment by moment', paras: [
+    `We took the pan apart one question at a time. Now put it back together: six ingredients, and the moment each one goes in.`,
+    `Read it top to bottom, like a recipe. It is the closest thing to a chai everyone agrees on, and it shows how little they do.`] });
   { const C = CROWD[QS.length], html = introHTML({ id: 'end', kicker: 'The answer', head: 'Almost nobody makes chai like you', paras: [
     `After nine questions, <b>${C.alone}</b> of ${N} kitchens are one of a kind. The few left in pairs differ on things we didn’t think to ask.`,
     crowdHTML(QS.length),
-    `So whatever your kitchen does, it is probably right in exactly one house in India: yours.`] }); ENDGAP = html; }
+    `So whatever your kitchen does, it is probably right in exactly one house in India: yours.`,
+    nudge('Think your family’s is the odd one?', 'unique', 'Send this to them'),
+    oddHTML()] }); ENDGAP = html; }
   // The story's two-per-step picks use up most of the good quotes, so the end draws on everyone with something to say:
   // readers not yet shown first, then the rest, curated quotes ahead of the others.
   const withQ = RS.filter(r => quoteOf(r).length > 40);
@@ -1116,7 +1340,7 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
   { let acc = INTRO; SC.forEach((s, i) => {
       if (s.gapBefore) {
         const el = document.createElement('div'); el.className = 'gap-text'; el.innerHTML = `<div class="gt-in">${s.gapBefore}</div>`; wrap.appendChild(el);
-        const th = Math.max(100, el.offsetHeight / innerHeight * 100 + 10);
+        const th = Math.max(100, (el.offsetHeight + el.querySelectorAll('.poll-slot').length * 170) / innerHeight * 100 + 10);
         el.style.top = (acc + 100) + 'vh'; el.style.minHeight = th + 'vh';
         GAPS.push({ a: acc, th, i, el }); acc += 100 + th; s.afterGap = true;
       }
@@ -1125,7 +1349,7 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
   // The text passages live in the page itself and scroll normally. Each is placed so it reaches the middle of the
   // screen (the lower third, on phones) just as its chart state switches in.
   const PASS = [];
-  SC.forEach((sc, i) => { if (!sc.text) return; const el = document.createElement('div'); el.className = 'stext scard' + (sc.intro ? ' is-intro' : ''); el.innerHTML = `<div class="st-in">${sc.text()}</div>`; wrap.appendChild(el); PASS.push({ el, i }); });
+  SC.forEach((sc, i) => { if (!sc.text) return; const el = document.createElement('div'); el.className = 'stext scard' + (sc.intro ? ' is-intro' : ''); el.innerHTML = `<div class="st-in">${cardHTML(i)}</div>`; wrap.appendChild(el); PASS.push({ el, i }); });
   function placeText() {
     const g = grid.getBoundingClientRect(), w = wrap.getBoundingClientRect(), u = g.width / DIM[mode].cols;
     const cw = mode === 'd' ? Math.min(480, 4 * u - 60) : g.width - 28;
@@ -1133,7 +1357,7 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
     // each card is mid-screen once its step has fully arrived, and rises into view while the chart is changing
     PASS.forEach(({ el, i }) => { el.style.top = (STARTS[i] + SC[i].band + 40) + 'vh'; });
   }
-  const paintText = () => PASS.forEach(({ el, i }) => { el.firstChild.innerHTML = SC[i].text(); });
+  const paintText = () => PASS.forEach(({ el, i }) => { el.firstChild.innerHTML = cardHTML(i); });
 
   function parse(rows) {
     const R = {};
@@ -1383,7 +1607,7 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
   // ---------- Where you are: a chapter rail across the top ----------
   const CHAP = [['hero', 'Start'], ['who', 'The readers'], ['pour', 'I · Colour'], ['boil', 'II · Order'], ['leaf', 'III · Strength'], ['spice', 'IV · Spices'], ['table', 'V · Table'], ['end', 'Your chai']];
   const chapOf = id => { const b = id.replace(/^p-/, '').split('-')[0];
-    return { hero: 0, who: 1, pyramid: 1, pour: 2, sequence: 3, flow: 3, boil: 3, leaf: 4, larder: 5, pairs: 5, spice: 5, cup: 6, vessels: 6, table: 6, end: 7 }[b]; };
+    return { hero: 0, who: 1, pyramid: 1, pour: 2, sequence: 3, flow: 3, boil: 3, leaf: 4, larder: 5, pairs: 5, pillars: 5, spice: 5, recipe: 6, cup: 6, vessels: 6, table: 6, end: 7 }[b]; };
   const RAIL = CHAP.map(() => ({ a: Infinity, b: -Infinity }));
   SC.forEach((sc, i) => { const c = chapOf(sc.id); RAIL[c].a = Math.min(RAIL[c].a, STARTS[i]); RAIL[c].b = Math.max(RAIL[c].b, STARTS[i] + sc.h + 72); });
   const railEl = document.createElement('nav'); railEl.className = 'rail'; railEl.setAttribute('aria-label', 'Chapters');
@@ -1420,7 +1644,7 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
   function onScroll() {
     if (mkOpen) return;
     const pos = (scrollY - wrap.offsetTop) / (innerHeight / 100);
-    railUpdate(pos); seek(gAt(pos));
+    railUpdate(pos); seek(gAt(pos)); fshUpdate(pos);
     const sh = `0 ${boxShift(pos)}vh`; $('shGrid').style.translate = sh; $('shHead').style.translate = sh; // the Back / Next bar and the rail stay put
     // passages fade out as they slide up under the running head, instead of running through it
     const top = 8, bot = innerHeight - 8;
@@ -1448,7 +1672,7 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
 
   // ---------- State changes ----------
   function refresh() {
-    paintText(); paintCrowds(); crowdMeter();
+    paintText(); paintCrowds(); paintPolls(); crowdMeter();
     Object.values(cur).forEach(e => {
       if (!e.spec.live || e.leaving) return;
       const ae = document.activeElement, sel = ae && e.inner.contains(ae) && ae !== e.inner ? ['act', 'k', 'f', 'v'].map(a => ae.dataset[a] != null ? `[data-${a}="${ae.dataset[a]}"]` : '').join('') : null;
@@ -1624,23 +1848,54 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
   // ---------- A guided walk: one question at a time, with a nudge to the next ----------
   let mkStep = 0, mkLoaded = false;
   const done = f => mkLoaded || !!ME.touched[f];
+  // The walk follows the cooking, moment by moment: at each one you add whatever goes into your pan then.
+  const SW_K = ['sugar', 'jaggery', 'honey', 'free'];
+  const sweetKey = r => !r.sweet || r.sweet === 'none' ? null : r.sweet.startsWith('sugar') ? 'sugar' : r.sweet;
+  const inStage = k => k === 'water' ? (ME.water ? 0 : null) : k === 'milk' ? (ME.milkOn ? (ME.milkIn == null ? 2 : ME.milkIn) : null)
+    : k === 'tea' ? (ME.teas.length ? (ME.teaIn == null ? 2 : ME.teaIn) : null) : SW_K.includes(k) ? (ME.sweet === k ? (ME.sweetIn == null ? 4 : ME.sweetIn) : null)
+    : ME.extras.includes(k) ? (ME.spiceSt[k] == null ? 1 : ME.spiceSt[k]) : null;
+  const countAt = (k, t) => k === 'water' ? cnt(r => r.milk < 5) : k === 'milk' ? cnt(r => r.milk > 0 && r.st.milk === t) : k === 'tea' ? cnt(r => r.st.tea === t)
+    : SW_K.includes(k) ? cnt(r => sweetKey(r) === k && r.st.sweet === t) : cnt(r => r.extras.includes(k) && r.st[k] === t);
+  function stageTog(k, t) {
+    const at = inStage(k), off = at === t;
+    if (k === 'water') ME.water = !off;
+    else if (k === 'milk') { ME.milkOn = !off; ME.milkIn = off ? null : t; ME.touched.milk = ME.touched.milkIn = true; }
+    else if (k === 'tea') { if (off) { ME.teas = []; ME.teaIn = null; } else { if (!ME.teas.length) ME.teas = ['ctc']; ME.teaIn = t; } ME.touched.tea = ME.touched.teaIn = true; }
+    else if (SW_K.includes(k)) { ME.sweet = off ? null : k; ME.sweetIn = off ? null : t; ME.touched.sweet = true; }
+    else { if (off) { ME.extras = ME.extras.filter(x => x !== k); delete ME.spiceSt[k]; } else { if (!ME.extras.includes(k)) ME.extras.push(k); ME.spiceSt[k] = t; } ME.touched.spice = true; }
+    return !off;
+  }
+  const STAGE_ITEMS = t => ({ base: (t === 0 ? ['water'] : []).concat(['milk'], t < 4 ? ['tea'] : []), spice: t < 4 ? SPICE_SHELF : [], sweet: t === 4 ? SW_K : ['sugar', 'jaggery'] });
+  const stile = (k, t) => { const at = inStage(k), here = at === t, n = countAt(k, t), lab = k === 'tea' ? 'Tea leaf' : LAB[k];
+    return `<button type="button" class="mk-t${at != null && !here ? ' else' : ''}" data-act="mk-st" data-k="${k}" aria-pressed="${here}" title="${at != null && !here ? `In at ${L.stage[at]}: tap to move it here` : ''}"><span class="mk-ti">${ICON(k === 'tea' ? 'ctc' : k)}</span><span class="mk-tl">${lab}</span>${at != null && !here ? `<span class="mk-at">at ${L.stage[at]}</span>` : n ? `<sup>${n}</sup>` : ''}</button>`; };
+  const chip = (f, v, lab, on, pic) => `<button type="button" class="wz-c${pic ? ' has-pic' : ''}" data-act="mk-opt" data-f="${f}" data-v="${v}" aria-pressed="${on}">${pic ? `<span class="wz-ci">${pic}</span>` : ''}<span class="wz-cl">${lab}</span></button>`;
+  const subQ = (q, body) => `<div class="wz-sub"><div class="wz-sq">${q}</div><div class="wz-cs">${body}</div></div>`;
+  function stageBody(t) {
+    const it = STAGE_ITEMS(t), row = (h, ks) => ks.length ? `<div class="wz-g"><div class="wz-gh">${h}</div><div class="mk-tiles">${ks.map(k => stile(k, t)).join('')}</div></div>` : '';
+    let sub = '';
+    if (inStage('milk') === t && ME.water) sub += subQ('How much of the cup is milk?', [1, 2, 3, 4].map(v => chip('mshare', v, L.milk[v], ME.milkShare === v, milkGlass(v))).join(''));
+    if (inStage('tea') === t) sub += subQ('Which tea, and how much per cup?', TEAS.slice(0, 5).map(k => `<button type="button" class="wz-c has-pic" data-act="mk-tog" data-k="${k}" aria-pressed="${ME.teas.includes(k)}"><span class="wz-ci">${ICON(k)}</span><span class="wz-cl">${L.tea[k] || LAB[k]}</span></button>`).join('') + '<i class="wz-sep"></i>' + [0, 1, 2, 3, 4].map(v => chip('amt', v, L.amt[v], ME.amt === v, spoons(v))).join(''));
+    if (inStage('sugar') === t) sub += subQ('How much sugar?', ['sugar1', 'sugar2', 'sugar3'].map(v => chip('sweet', v, L.sweet[v], ME.sugarAmt === v, SWEET_IC[v])).join(''));
+    if (t === 2 && ME.milkOn && inStage('milk') <= 2) sub += subQ('Once the milk is in, how many times does it rise?', [0, 1, 2, 3, 4].map(v => chip('boils', v, L.boils[v], ME.boils === v && !!ME.touched.boils, flames(v))).join(''));
+    if (t === 3 && ME.teas.length) sub += subQ('How long is the leaf in before you strain it?', [0, 1, 2, 3, 4, 5].map(v => chip('brew', v, L.brew[v], ME.brew === v, clockAt(v))).join(''));
+    if (t === 4) sub += subQ('And what do you drink it from?', V_ORDER.map(v => chip('vessel', v, L.vessel[v].replace('cup and saucer', 'cup & saucer'), ME.vessel === v, A.vessel({ ...meR(), vessel: v }, { type: v, still: true, emptyLabel: false }))).join(''));
+    return row(t === 0 ? 'Water, milk and leaf' : t === 4 ? 'Milk' : 'Milk and leaf', it.base) + sub + row('Spices', it.spice) + row(t === 4 ? 'Sweetener' : 'Sweetener, if it cooks in', it.sweet);
+  }
+  const stageSay = t => { const here = ['water', 'milk', 'tea', ...SPICE_SHELF, ...SW_K].filter(k => inStage(k) === t).map(k => k === 'tea' ? 'the leaf' : LAB[k].toLowerCase());
+    return here.length ? `In ${t === 4 ? 'the cup' : 'the pan'} now: ${here.join(', ')}.` : t === 0 ? 'Most kitchens start with water.' : 'Nothing at this moment? Just go on.'; };
   const QSTEPS = [
-    { f: 'milk', ic: 'milk', q: 'How much of your cup is milk?', hint: 'Pick the glass that looks most like yours.', body: () => [0, 1, 2, 3, 4, 5].map(v => tile('milk', v, milkGlass(v), L.milk[v], done('milk') && milkV() === v, S.milk[v])).join('') },
-    { f: 'milkIn', ic: 'stage0', q: 'When does the milk go in?', hint: 'From a cold pan to the very end.', skip: () => !ME.milkOn, body: () => [0, 1, 2, 4].map(v => tile('milkIn', v, ICON(STAGE_IC[v]), L.stage[v], done('milkIn') && ME.milkIn === v, cnt(r => r.milk > 0 && r.st.milk === v))).join('') },
-    { f: 'tea', ic: 'leaf', q: 'Which tea do you use?', hint: 'Pick one, or more if you blend.', multi: true, body: () => TEAS.map(tog).join('') },
-    { f: 'amt', ic: 'spoon', q: 'How much tea, per cup?', hint: 'Roughly is fine.', body: () => [0, 1, 2, 3, 4].map(v => tile('amt', v, spoons(v), L.amt[v], done('amt') && ME.amt === v, cnt(r => r.amt === v))).join('') },
-    { f: 'teaIn', ic: 'stage1', q: 'When does the tea go in?', hint: 'This is where kitchens start to disagree.', body: () => [0, 1, 2, 3].map(v => tile('teaIn', v, ICON(STAGE_IC[v]), L.stage[v], done('teaIn') && ME.teaIn === v, cnt(r => r.st.tea === v))).join('') },
-    { f: 'boils', ic: 'flame', q: 'Once the milk is in, how many times does it boil?', hint: 'Each boil makes it darker.', skip: () => !ME.milkOn || ME.milkIn === 4, body: () => [0, 1, 2, 3, 4].map(v => tile('boils', v, flames(v), L.boils[v], done('boils') && ME.boils === v, S.boil[v])).join('') },
-    { f: 'brew', ic: 'clock', q: 'How long before you strain it?', hint: 'Or do you go by colour?', body: () => [0, 1, 2, 3, 4, 5].map(v => tile('brew', v, clockAt(v), L.brew[v], done('brew') && ME.brew === v, cnt(r => r.brew === v))).join('') },
-    { f: 'spice', ic: 'ginger', q: 'Anything else in the pan?', hint: 'Pick as many as you like, or none at all.', multi: true, optional: true, body: () => SPICE_SHELF.map(tog).join('') },
-    { f: 'sweet', ic: 'sugar', q: 'What sweetens it?', hint: '', body: () => SWEET_OPTS.map(x => tile('sweet', x, SWEET_IC[x], sweetLab(x), done('sweet') && curSweet() === x, cnt(r => r.sweet === x))).join('') },
-    { f: 'vessel', ic: 'cup', q: 'And what do you drink it from?', hint: '', body: () => V_ORDER.map(v => tile('vessel', v, A.vessel({ ...meR(), vessel: v }, { type: v, still: true, emptyLabel: false }), L.vessel[v].replace('cup and saucer', 'cup & saucer'), done('vessel') && ME.vessel === v, S.vessel[v])).join('') },
-    { f: 'end', ic: 'bubbles', q: 'That’s your chai.', hint: '', body: () => '' }
-  ];
+    { q: 'Cold pan. What goes in first?', hint: 'Before the flame is lit.' },
+    { q: 'The flame is on. Anything while it heats?', hint: 'This is where most spice boxes open.' },
+    { q: 'It’s boiling. What goes in now?', hint: 'The busiest moment in most kitchens.' },
+    { q: 'Flame off. Anything now?', hint: 'Some leaves and spices steep in the heat that’s left.' },
+    { q: 'Poured. Anything in the cup?', hint: 'Milk, sugar or honey, at the table.' }
+  ].map((x, t) => ({ ...x, f: 'stage' + t, stage: t, ic: STAGE_IC[t], optional: true, body: () => stageBody(t) }))
+    .concat([{ f: 'end', ic: 'bubbles', q: 'That’s your chai.', hint: '', body: () => '' }]);
   const answered = st => st.optional || st.f === 'end' ? true : st.f === 'tea' ? (done('tea') && ME.teas.length > 0) : done(st.f);
   const nextStep = i => { let j = i + 1; while (QSTEPS[j] && QSTEPS[j].skip && QSTEPS[j].skip()) j++; return Math.min(j, QSTEPS.length - 1); };
   const prevStep = i => { let j = i - 1; while (j > 0 && QSTEPS[j].skip && QSTEPS[j].skip()) j--; return Math.max(0, j); };
   function mkControls() {
+    { const t = QSTEPS[mkStep].stage; const nt = t == null ? 4 : t; if (nt !== mkNow) { mkNow = nt; if ($('mkArt')) mkTime(); } }
     const live = QSTEPS.map((st, i) => ({ st, i })).filter(x => !(x.st.skip && x.st.skip()));
     $('mkTabs').innerHTML = `<div class="wz-dots">${live.map(({ st, i }) => `<button type="button" class="wz-dot${i === mkStep ? ' now' : ''}${answered(st) && st.f !== 'end' && i !== mkStep ? ' ok' : ''}" data-act="mk-goto" data-i="${i}" aria-label="${st.q}">${ICON(st.ic)}</button>`).join('')}</div>`;
     const st = QSTEPS[mkStep], n = live.findIndex(x => x.i === mkStep) + 1, ok = answered(st);
@@ -1650,12 +1905,12 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
         <button type="button" class="wz-prev" data-act="mk-goto" data-i="0">← Start again from the top</button></div>`;
       return;
     }
-    const nq = QSTEPS[nextStep(mkStep)], say = mkLast ? mkSayNow() : '';
-    $('mkCtrl').innerHTML = `<div class="wz"><div class="wz-k">Question ${n} of ${live.length - 1}</div><h4 class="wz-q">${st.q}</h4>${st.hint ? `<p class="wz-h">${st.hint}</p>` : ''}
-      <div class="mk-tiles">${st.body()}</div>
+    const nq = QSTEPS[nextStep(mkStep)], say = st.stage != null ? stageSay(st.stage) : mkLast ? mkSayNow() : '';
+    $('mkCtrl').innerHTML = `<div class="wz"><div class="wz-k">${st.stage != null ? `Moment ${st.stage + 1} of 5 · ${L.stage[st.stage]}` : `Question ${n} of ${live.length - 1}`}</div><h4 class="wz-q">${st.q}</h4>${st.hint ? `<p class="wz-h">${st.hint}</p>` : ''}
+      ${st.stage != null ? `<div class="wz-body">${st.body()}</div>` : `<div class="mk-tiles">${st.body()}</div>`}
       <div class="wz-foot${ok ? ' ready' : ''}">${mkStep ? `<button type="button" class="wz-prev" data-act="mk-prev">← Back</button>` : '<span></span>'}
-        <span class="wz-say">${ok ? (say || (st.optional ? `No spices? ${S.plain} readers keep it plain too.` : '')) : 'Tap one to choose'}</span>
-        <button type="button" class="wz-next" data-act="mk-next" ${ok ? '' : 'disabled'}>${nq.f === 'end' ? 'Finish' : 'Next'} <span aria-hidden="true">→</span></button></div></div>`;
+        <span class="wz-say">${say}</span>
+        <button type="button" class="wz-next" data-act="mk-next" ${ok ? '' : 'disabled'}>${nq.f === 'end' ? 'Finish' : nq.stage != null ? 'Next: ' + L.stage[nq.stage] : 'Next'} <span aria-hidden="true">→</span></button></div></div>`;
   }
   function mkCup() {
     const R = meR(), sh = C.shade(R), fk = C.family(R);
@@ -1667,7 +1922,11 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
   let mkNow = 4;
   function mkAtLine() { const el = $('mkAt'); if (el) el.innerHTML = mkNow < 4 ? `${ICON(STAGE_IC[mkNow])}<span>Anything you add now goes in at <b>${L.stage[mkNow]}</b></span>` : `${ICON('cup')}<span>Slide the timeline to a moment, and whatever you add goes in then</span>`; }
   function mkTime() {
-    if (!$('mkRange')) { const R = meR(); $('mkArt').innerHTML = R.milk == null && !R.teas.length ? A.vessel(R, { type: R.vessel || 'glass', emptyLabel: true }) : A.vessel(R, { type: R.vessel || 'glass', float: R.extras }); return; }
+    if (!$('mkRange')) { const R = meR(), t = mkNow;
+      // during the walk the picture is the pan at this moment; poured, it's the cup
+      if (t < 4 && (ME.water || ME.milkOn || ME.teas.length || ME.extras.length)) $('mkArt').innerHTML = A.pan(A.liquidAt(R, t), t, { float: ME.extras.filter(k => (ME.spiceSt[k] == null ? 1 : ME.spiceSt[k]) <= t) });
+      else $('mkArt').innerHTML = R.milk == null && !R.teas.length ? A.vessel(R, { type: R.vessel || 'glass', emptyLabel: true }) : A.vessel(R, { type: R.vessel || 'glass', float: R.extras });
+      return; }
     mkAtLine();
     const R = meR(), t = mkNow;
     const inBy = x => x.st <= t;
@@ -1772,11 +2031,12 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
     return `${s ? `<span class="mk-now">${s}</span> ` : ''}${meEmpty() ? 'Your pan is empty: add what goes in, as it goes in.' : near ? `<b>${near}</b> kitchens make it almost like you.` : 'Keep adding, and the closest kitchens will show up here.'}`;
   }
   function mkCards() {
-    const answeredN = QSTEPS.filter(st => !st.optional && st.f !== 'end' && done(st.f)).length;
-    if (answeredN < 3) { $('mkSay').innerHTML = 'Answer a few questions and the kitchens closest to yours will appear here.'; $('mkCards').innerHTML = ''; mkPrev = []; return; }
+    // the walk is moment by moment, so count what's in the pan rather than questions answered
+    const inPan = (ME.water ? 1 : 0) + (ME.milkOn ? 1 : 0) + (ME.teas.length ? 1 : 0) + ME.extras.length + (ME.sweet ? 1 : 0);
+    if (inPan < 2) { $('mkSay').innerHTML = 'Add a couple of things to your pan and the kitchens closest to yours will appear here.'; $('mkCards').innerHTML = ''; mkPrev = []; return; }
     const R = meR(), top = RS.map(r => ({ r, d: C.distance(R, r) })).sort((a, b) => a.d - b.d).slice(0, 3);
     $('mkSay').innerHTML = mkSay(top);
-    $('mkCards').innerHTML = top.map(({ r, d }) => `<div class="mk-card" data-id="${r.id}"><div class="rel-top">${vesselFor(r, { type: r.vessel })}<div><div class="rel-n">${esc(trunc(placeOf(r), 18))}</div><div class="rel-w">${callsIt(r)}</div></div><span class="mk-match">${Math.max(5, Math.round(100 * (1 - d / 7)))}%</span></div>
+    $('mkCards').innerHTML = top.map(({ r, d }) => `<div class="mk-card" data-id="${r.id}"><div class="rel-top">${vesselFor(r, { type: r.vessel })}<div><div class="rel-n">“${esc(chaiName(r))}”</div><div class="rel-w">${whoLine(r)}</div></div><span class="mk-match">${Math.max(5, Math.round(100 * (1 - d / 7)))}%</span></div>
       <div class="mk-cq">${quoteOf(r) ? `<q>${esc(trunc(quoteOf(r), 110))}</q>` : `<span>${esc(recipeLine(r))}</span>`}</div><button class="rc-make" type="button" data-act="make" data-id="${r.id}">Try theirs ↺</button></div>`).join('');
     const fresh = [...$('mkCards').children].filter(el => !mkPrev.includes(el.dataset.id));
     if (fresh.length && fresh.length < 3) gsap.from(fresh, { x: 18, autoAlpha: 0, duration: .4, stagger: .06, ease: 'power2.out' });
@@ -1791,7 +2051,9 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
     if (r) $('mkFrom').innerHTML = (loadReader(r), `From a reader in <b>${esc(placeOf(r))}</b>`);
     else if (meEmpty()) $('mkFrom').innerHTML = 'Start with an empty glass';
     else $('mkFrom').innerHTML = 'Your chai, as you left it';
-    mkLoaded = !meEmpty(); mkStep = mkLoaded && !r ? QSTEPS.length - 1 : 0;
+    mkLoaded = !!r || (!meEmpty() && !ME.poll); mkStep = mkLoaded && !r ? QSTEPS.length - 1 : 0;
+    if (r) ME.poll = false;
+    if (r || (!mkLoaded && ME.poll)) mkStep = 0;
     mkLast = null; mkPrev = []; mkNow = 4;
     mkStart = JSON.stringify(ME);
     mkRender();
@@ -1809,6 +2071,137 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
     gsap.timeline({ onComplete: () => { flat(); document.body.style.overflow = ''; } }).fromTo('#shCard', { rotateY: 180 }, { rotateY: 0, duration: 1, ease: 'power3.inOut' }).to('#shCard', { scale: .96, duration: .5, ease: 'power2.out', yoyo: true, repeat: 1 }, 0);
   }
 
+  // ---------- Share images: the chart (or the stat), its claim, and the link, drawn onto one canvas ----------
+  const PAGE = location.href.split('#')[0].split('?')[0].replace(/index\.html$/, '');
+  const shareURL = id => PAGE + 'share/' + id + '.html';
+  let PUBLIC = null; window.__chaiSetPublic = u => { PUBLIC = u; Object.keys(IMGS).forEach(k => delete IMGS[k]); }; // the build script prints the public address on preview images
+  const shortURL = id => ((PUBLIC || PAGE).replace(/^https?:\/\/(www\.)?/, '') + 'share/' + id);
+  // draw a chart state offscreen, as a stranger would see it (your own glass left out)
+  async function chartImg(ch, st, W, H) {
+    const el = document.createElement('div'); el.style.cssText = `position:fixed;left:-${W + 50}px;top:0;width:${W}px;height:${H}px;pointer-events:none`; document.body.appendChild(el);
+    const chart = echarts.init(el, null, { renderer: 'canvas' });
+    const saved = JSON.parse(JSON.stringify(ME)); Object.assign(ME, { water: false, milkOn: false, milkShare: null, teas: [], extras: [], sweet: null, vessel: null, boils: null, amt: null, brew: null, touched: {} });
+    const fs = new Set(FEAT); FEAT = new Set(); NOYOU = true;
+    try { const opt = chartOpt(ch, chart, stepIx(ch, st), W, H); opt.animation = false; chart.setOption(opt, { replaceMerge: ['geo'] }); }
+    finally { Object.assign(ME, saved); FEAT = fs; NOYOU = false; }
+    await new Promise(r => setTimeout(r, 450)); // image symbols load asynchronously
+    const url = chart.getDataURL({ pixelRatio: 2, backgroundColor: 'rgba(0,0,0,0)' });
+    chart.dispose(); el.remove(); return url;
+  }
+  const loadImg = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+  function wrapText(cx, text, maxW) { const words = text.split(' '), lines = []; let l = '';
+    words.forEach(w => { const t = l ? l + ' ' + w : w; if (cx.measureText(t).width > maxW && l) { lines.push(l); l = w; } else l = t; }); if (l) lines.push(l); return lines; }
+  const IMGS = {};
+  // fmt 'post' is 1080×1350 for chats and stories; 'og' is 1200×630 for link previews
+  function shareImage(id, claim, fmt = 'post') {
+    const key = id + '|' + (claim || '') + '|' + fmt; if (IMGS[key]) return IMGS[key];
+    return IMGS[key] = (async () => {
+      await Promise.all(['700 64px Reckless', '700 20px Poppins', '500 30px Hind', '400 30px "IM Fell English"'].map(f => document.fonts.load(f).catch(() => 0)));
+      const s = SHARES[id], og = fmt === 'og', W = og ? 1200 : 1080, H = og ? 630 : 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+      const cx = cv.getContext('2d'), pad = og ? 56 : 72, head = claim || s.claim();
+      cx.fillStyle = '#F3EBDB'; cx.fillRect(0, 0, W, H);
+      cx.strokeStyle = '#CDBFA6'; cx.lineWidth = 2; cx.strokeRect(18, 18, W - 36, H - 36);
+      if (!s.ch) return statImage(cv, cx, id, s, og, W, H, pad);
+      cx.fillStyle = '#A8321F'; cx.font = '700 20px Poppins, Arial'; cx.letterSpacing = '3px';
+      cx.fillText('HOW DO YOU MAKE YOUR CHAI?', pad, pad + 14); cx.letterSpacing = '0px';
+      const textW = og ? 470 : W - pad * 2;
+      cx.fillStyle = '#241A11'; let fsz = og ? 50 : 66; cx.font = `700 ${fsz}px Reckless, Georgia, serif`;
+      let lines = wrapText(cx, head + '.', textW); while (lines.length > (og ? 5 : 4) && fsz > 34) { fsz -= 4; cx.font = `700 ${fsz}px Reckless, Georgia, serif`; lines = wrapText(cx, head + '.', textW); }
+      let y = pad + 40 + fsz; lines.forEach(l => { cx.fillText(l, pad, y); y += fsz * 1.12; });
+      cx.fillStyle = '#5A4A38'; cx.font = `500 ${og ? 24 : 30}px Hind, Arial`; const hl = wrapText(cx, s.hook, textW); y += 4;
+      hl.forEach(l => { cx.fillText(l, pad, y + 6); y += (og ? 24 : 30) * 1.35; });
+      // the picture: the chart, drawn as a stranger would see it
+      const box = og ? { x: 560, y: 40, w: W - 560 - 40, h: H - 120 } : { x: pad - 10, y: y + 24, w: W - pad * 2 + 20, h: H - y - 24 - 120 };
+      { const img = await loadImg(await chartImg(s.ch, s.st, Math.round(box.w / (og ? 1.1 : 1.4)), Math.round(box.h / (og ? 1.1 : 1.4)))); cx.drawImage(img, box.x, box.y, box.w, box.h); }
+      return footImage(cv, cx, id, W, H, pad);
+    })();
+  }
+  // the odd ones out: the number is the picture
+  function statImage(cv, cx, id, s, og, W, H, pad) {
+    cx.fillStyle = '#A8321F'; cx.font = '700 20px Poppins, Arial'; cx.letterSpacing = '3px';
+    cx.fillText('HOW DO YOU MAKE YOUR CHAI? · THE ODD ONES OUT', pad, pad + 14); cx.letterSpacing = '0px';
+    const big = og ? 230 : 380, n = String(s.big()), fsz = og ? 34 : 44, hs = og ? 24 : 30;
+    cx.font = `700 ${big}px Reckless, Georgia, serif`; const nw = cx.measureText(n).width;
+    const x = og ? pad + nw + 40 : pad, w = og ? W - x - pad : W - pad * 2;
+    cx.font = `700 ${fsz}px Reckless, Georgia, serif`; const ll = wrapText(cx, s.line(), w);
+    cx.font = `500 ${hs}px Hind, Arial`; const hl = wrapText(cx, s.hook, w);
+    const textH = ll.length * fsz * 1.2 + 18 + hl.length * hs * 1.35, top = pad + 40, bot = H - 100;
+    // centre the block in the space between the kicker and the footer
+    const blockH = og ? Math.max(big * .74, textH) : big * .74 + 50 + textH, y0 = top + (bot - top - blockH) / 2;
+    cx.fillStyle = '#A8321F'; cx.font = `700 ${big}px Reckless, Georgia, serif`; cx.fillText(n, pad - 8, y0 + big * .74);
+    let y = og ? y0 + (blockH - textH) / 2 + fsz : y0 + big * .74 + 50 + fsz;
+    cx.fillStyle = '#241A11'; cx.font = `700 ${fsz}px Reckless, Georgia, serif`; ll.forEach(l => { cx.fillText(l, x, y); y += fsz * 1.2; });
+    cx.fillStyle = '#5A4A38'; cx.font = `500 ${hs}px Hind, Arial`; y += 18 - fsz * .2; hl.forEach(l => { cx.fillText(l, x, y); y += hs * 1.35; });
+    return footImage(cv, cx, id, W, H, pad);
+  }
+  function footImage(cv, cx, id, W, H, pad) {
+      cx.strokeStyle = '#CDBFA6'; cx.beginPath(); cx.moveTo(pad, H - 84); cx.lineTo(W - pad, H - 84); cx.stroke();
+      const src = `First Principles reader survey · ${N} kitchens`; cx.font = '500 22px Hind, Arial'; const sw = cx.measureText(src).width;
+      cx.fillStyle = '#5A4A38'; cx.fillText(src, pad, H - 46);
+      let uf = 22; cx.font = `700 ${uf}px Poppins, Arial`; while (uf > 13 && cx.measureText(shortURL(id) + '  →').width > W - pad * 2 - sw - 30) cx.font = `700 ${--uf}px Poppins, Arial`;
+      cx.fillStyle = '#A8321F'; cx.textAlign = 'right'; cx.fillText(shortURL(id) + '  →', W - pad, H - 46); cx.textAlign = 'left';
+      return new Promise(res => cv.toBlob(res, 'image/png'));
+  }
+  window.__chaiShareImage = async (id, fmt) => { const b = await shareImage(id, null, fmt); return await new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(b); }); };
+  window.__chaiShares = () => Object.fromEntries(Object.entries(SHARES).map(([id, s]) => [id, { claim: s.claim(), hook: s.hook }]));
+
+  // ---------- The share sheet: a small popover with a preview, next to whatever was tapped ----------
+  const pop = document.createElement('div'); pop.className = 'shpop'; pop.hidden = true; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Share');
+  document.body.appendChild(pop);
+  let popFor = null;
+  function openShare(id, anchor, claim) {
+    const s = SHARES[id]; if (!s) return;
+    const head = claim || s.claim(), msg = `${head}. ${s.hook}`, url = shareURL(id), file = `chai-${id}.png`;
+    popFor = { id, claim, msg, url, file };
+    const enc = encodeURIComponent, native = !!navigator.share && matchMedia('(pointer: coarse)').matches;
+    pop.innerHTML = `<button type="button" class="sp-x" data-act="sp-close" aria-label="Close">×</button><div class="sp-prev"><span>Making the image…</span></div>
+      <p class="sp-msg">${esc(head)}.</p>
+      <div class="sp-row">${native ? `<button type="button" class="sp-b sp-main" data-act="sp-native">Share…</button>` : ''}
+        <a class="sp-b" href="https://wa.me/?text=${enc(msg + '\n' + url)}" target="_blank" rel="noopener">WhatsApp</a>
+        <a class="sp-b" href="https://twitter.com/intent/tweet?text=${enc(msg)}&url=${enc(url)}" target="_blank" rel="noopener">X</a>
+        <button type="button" class="sp-b" data-act="sp-copy">Copy link</button>
+        <button type="button" class="sp-b" data-act="sp-save">Save image</button></div>`;
+    pop.hidden = false;
+    const r = anchor.getBoundingClientRect(), pw = Math.min(340, innerWidth - 24);
+    Object.assign(pop.style, { width: pw + 'px', left: Math.max(12, Math.min(innerWidth - pw - 12, r.right - pw)) + 'px', top: '0px' });
+    const ph = pop.offsetHeight + 150, below = r.bottom + 8 + ph < innerHeight;
+    pop.style.top = (below ? r.bottom + 8 : Math.max(12, r.top - 8 - ph)) + 'px';
+    gsap.fromTo(pop, { autoAlpha: 0, y: below ? -6 : 6 }, { autoAlpha: 1, y: 0, duration: .25, ease: 'power2.out' });
+    shareImage(id, claim).then(b => { if (popFor && popFor.id === id && !pop.hidden) { popFor.blob = b; const u = URL.createObjectURL(b); pop.querySelector('.sp-prev').innerHTML = `<img src="${u}" alt="">`; } }).catch(() => { pop.querySelector('.sp-prev').innerHTML = '<span>The link still works.</span>'; });
+  }
+  const closeShare = () => { pop.hidden = true; popFor = null; };
+  async function shareAct(a) {
+    const f = popFor; if (!f) return;
+    if (a === 'sp-close') closeShare();
+    else if (a === 'sp-copy') { try { await navigator.clipboard.writeText(f.msg + '\n' + f.url); toast('Link copied, with the line to go with it'); } catch (e) { toast('Couldn’t copy'); } }
+    else if (a === 'sp-save') { const b = f.blob || await shareImage(f.id, f.claim); const l = document.createElement('a'); l.href = URL.createObjectURL(b); l.download = f.file; l.click(); setTimeout(() => URL.revokeObjectURL(l.href), 2000); }
+    else if (a === 'sp-native') {
+      try { const b = f.blob; const file = b && new File([b], f.file, { type: 'image/png' });
+        if (file && navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], text: f.msg + '\n' + f.url });
+        else await navigator.share({ text: f.msg, url: f.url }); } catch (e) { /* cancelled */ }
+    }
+  }
+  document.addEventListener('pointerdown', e => { if (!pop.hidden && !pop.contains(e.target) && !e.target.closest('[data-act="share"],.fshare')) closeShare(); });
+  addEventListener('scroll', () => { if (!pop.hidden && popFor && !popFor.fixed) closeShare(); }, { passive: true });
+
+  // a quiet share button that stays on screen: shares the finding you're looking at
+  const fsh = document.createElement('button'); fsh.type = 'button'; fsh.className = 'fshare'; fsh.setAttribute('aria-label', 'Share what you’re looking at'); fsh.title = 'Share this';
+  fsh.innerHTML = SHARE_IC; document.body.appendChild(fsh);
+  const shareHere = () => { let best = 'unique', bi = -1; Object.entries(SHARES).forEach(([id, s]) => { if (!s.ch) return; const i = SC.findIndex(x => x.id === s.ch + '-' + stepIx(s.ch, s.st)); if (i >= 0 && i <= curIdx && i > bi) { bi = i; best = id; } }); return best; };
+  fsh.addEventListener('click', () => { openShare(shareHere(), fsh); if (popFor) popFor.fixed = true; });
+  function fshUpdate(pos) { const on = !mkOpen && pos > STARTS[0] && $('s-about').getBoundingClientRect().top > innerHeight - 40; fsh.classList.toggle('on', on); }
+
+  // deep links: #boils, #map, #make … open the page at that finding
+  function openHash() {
+    const h = decodeURIComponent(location.hash.slice(1)); if (!h) return;
+    if (h === 'make') { scrollTo(0, sceneTop(Math.max(0, SC.findIndex(x => x.id === 'pour-0')))); onScroll(); openMaker(); return; }
+    const s = SHARES[h]; let i = -1;
+    if (s && s.ch) i = SC.findIndex(x => x.id === s.ch + '-' + stepIx(s.ch, s.st));
+    else if (s) i = SC.findIndex(x => x.id === 'end');
+    else i = SC.findIndex(x => x.id === h);
+    if (i >= 0) scrollTo(0, s && !s.ch ? wrap.offsetTop + GAPS.find(g => g.i === i).a * innerHeight / 100 + innerHeight * 1.2 : sceneTop(i));
+  }
+
   // ---------- Events ----------
   let toastT;
   function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2200); }
@@ -1824,18 +2217,24 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
     if (rc && !e.target.closest('[data-act]')) { turnCard(rc); return; }
     const el = e.target.closest('[data-act]'); if (!el) return;
     const a = el.dataset.act, k = el.dataset.k;
+    if (a === 'share') { const P = el.dataset.poll && pollById(el.dataset.poll), r = P && pollResult(P); openShare(el.dataset.s, el, r ? r.claim : null); return; }
+    if (a.startsWith('sp-')) { shareAct(a); return; }
+    if (a === 'poll') { const P = pollById(el.dataset.p), k = +el.dataset.k; POLLV[P.id] = k; ME.poll = true; if (P.opts[k].set) P.opts[k].set(); pollFresh = P.id; refresh(); pollFresh = null; return; }
     if (a === 'step') { stepTo(+el.dataset.d); }
     else if (a === 'chap') { const c = +el.dataset.c, i = SC.findIndex(sc => chapOf(sc.id) === c); if (i >= 0) scrollTo({ top: c === 0 ? wrap.offsetTop + STARTS[0] * innerHeight / 100 : sceneTop(i), behavior: 'smooth' }); }
     else if (a === 'next') { const i = Math.max(0, Math.round(curIdx)) + 1; if (SC[i]) scrollTo({ top: sceneTop(i), behavior: 'smooth' }); }
     else if (a === 'make') { openMaker(el.dataset.id); }
     else if (a === 'mk-close') { closeMaker(); }
-    else if (a === 'mk-reset') { Object.assign(ME, { water: false, milkOn: false, milkShare: null, milkType: null, milkIn: null, teas: [], amt: null, teaIn: null, sweet: null, sugarAmt: 'sugar2', sweetIn: null, brew: null, extras: [], forms: {}, spiceSt: {}, boils: null, touched: {} });
+    else if (a === 'mk-reset') { ME.poll = false; Object.assign(ME, { water: false, milkOn: false, milkShare: null, milkType: null, milkIn: null, teas: [], amt: null, teaIn: null, sweet: null, sugarAmt: 'sugar2', sweetIn: null, brew: null, extras: [], forms: {}, spiceSt: {}, boils: null, touched: {} });
       mkNow = 4; mkLoaded = false; mkStep = 0; mkLast = null; mkPrev = []; $('mkFrom').textContent = 'Start with an empty glass'; mkRender(); toast('Empty glass. Start from the first question.'); gsap.fromTo('#mkCup .mk-art', { rotate: -6 }, { rotate: 0, duration: .7, ease: 'elastic.out(1, .4)' }); }
     else if (a === 'tl-at') { mkNow = +el.dataset.st; $('mkRange').value = mkNow; mkTime(); }
     else if (a === 'tl-pick') { setStage(el.dataset.k, mkNow); }
     else if (a === 'mk-next' || a === 'mk-prev' || a === 'mk-goto') { mkStep = a === 'mk-next' ? nextStep(mkStep) : a === 'mk-prev' ? prevStep(mkStep) : +el.dataset.i; mkLast = null; mkControls(); mkCards();
       gsap.fromTo('#mkCtrl .wz', { autoAlpha: 0, x: a === 'mk-prev' ? -24 : 24 }, { autoAlpha: 1, x: 0, duration: .35, ease: 'power2.out' }); }
     else if (a === 'mk-tab') { mkTab = el.dataset.tab; mkControls(); gsap.fromTo('#mkCtrl', { autoAlpha: 0 }, { autoAlpha: 1, duration: .3, ease: 'power1.out' }); }
+    else if (a === 'mk-st') { const src = grab(el), t = QSTEPS[mkStep].stage, added = stageTog(k, t); mkLast = { f: 'stage', k: k === 'tea' || k === 'milk' || SW_K.includes(k) ? (SW_K.includes(k) ? 'sweet' : k) : k, v: t }; mkRender();
+      if (added) flyIn(src, k === 'tea' ? 'tea' : SW_K.includes(k) ? 'sweet' : k, k === 'tea' ? ME.teas[0] : null); }
+    else if (a === 'mk-opt' && el.dataset.f === 'mshare') { ME.milkShare = +el.dataset.v; ME.touched.milk = true; mkLast = null; mkRender(); }
     else if (a === 'mk-tog') { const was = inPot(k), src = grab(el); toggle(k); ME.touched[TEAS.includes(k) ? 'tea' : 'spice'] = true; if (!was && TEAS.includes(k) && ME.teaIn == null) ME.teaIn = 2; if (!was && mkNow < 4) { if (TEAS.includes(k)) ME.teaIn = mkNow; else ME.spiceSt[k] = mkNow; }
       mkLast = !was && mkNow < 4 ? { f: 'stage', k: TEAS.includes(k) ? 'tea' : k, v: mkNow } : { f: 'tog', v: k }; mkRender();
       if (!was) flyIn(src, TEAS.includes(k) ? 'tea' : k, TEAS.includes(k) ? k : null); }
@@ -1863,6 +2262,12 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
   $('sfWa').href = `https://wa.me/?text=${shareText}%20${pageUrl}`;
   $('sfX').href = `https://twitter.com/intent/tweet?text=${shareText}&url=${pageUrl}`;
   $('sfLi').href = `https://www.linkedin.com/sharing/share-offsite/?url=${pageUrl}`;
+  // the short version: every claim, forwardable whole
+  const SUM = ['unique', 'milk', 'boils', 'strength', 'pillars', 'sugar', 'vessel'].map(id => SHARES[id].claim() + '.');
+  $('sfSum').innerHTML = SUM.map(t => `<li>${esc(t)}</li>`).join('');
+  $('sfSumCopy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(`How do you make your chai? What ${N} readers of First Principles told us:\n` + SUM.map(t => '• ' + t).join('\n') + '\n' + PAGE); toast('Summary copied'); } catch (e) { toast('Couldn’t copy'); } });
+  $('sfEmbed').value = `<iframe src="${PAGE}" title="How do you make your chai?" width="100%" height="800" style="border:0" loading="lazy"></iframe>`;
+  $('sfEmbedCopy').addEventListener('click', async () => { try { await navigator.clipboard.writeText($('sfEmbed').value); toast('Embed code copied'); } catch (e) { toast('Couldn’t copy'); } });
   $('sfCopy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(location.href.split('#')[0]); toast('Link copied'); } catch (e) { toast('Couldn’t copy'); } });
 
   // ---------- Boot ----------
@@ -1872,7 +2277,7 @@ S.sweetCup = cnt(r => r.sweet && r.sweet !== 'none' && r.st.sweet === 4); S.swee
   window.__chaiStarts = STARTS; // test harness // used by the test harness
   renderLede();
   let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { relayout(); if (!$('modal').hidden) placeName(); }, 120); });
-  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => { onScroll(); ScrollTrigger.refresh(); Object.values(cur).forEach(e => fit(e.inner)); Object.keys(LIVE).forEach(drawChart); });
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => { openHash(); onScroll(); ScrollTrigger.refresh(); Object.values(cur).forEach(e => fit(e.inner)); Object.keys(LIVE).forEach(drawChart); });
   placeText();
   onScroll();
   gsap.to('.progress', { scaleX: 1, ease: 'none', scrollTrigger: { start: 0, end: 'max', scrub: .3 } });
